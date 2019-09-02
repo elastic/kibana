@@ -19,11 +19,36 @@
 
 import _ from 'lodash';
 // @ts-ignore
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { KIBANA_CONTEXT_NAME } from 'src/plugins/data/common/expressions/types';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { TimeRange } from 'src/plugins/data/public';
+import { VisParams } from 'ui/vis';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+
+interface Stats {
+  cacheCount: number;
+  invokeTime: number;
+  queryCount: number;
+  queryTime: number;
+  sheetTime: number;
+}
+
+interface Sheet {
+  list: Array<Record<string, unknown>>;
+  render: Record<string, unknown>;
+  type: string;
+}
+
+export interface TimelionSuccessResponse {
+  sheet: Sheet[];
+  stats: Stats;
+  visType: string;
+  type: KIBANA_CONTEXT_NAME;
+}
 
 const TimelionRequestHandlerProvider = function(Private: any, $http: any, config: any) {
   const timezone = Private(timezoneProvider)();
@@ -36,10 +61,11 @@ const TimelionRequestHandlerProvider = function(Private: any, $http: any, config
       query,
       visParams,
     }: {
-      timeRange: any;
-      filters: any;
-      query: any;
-      visParams: any;
+      timeRange: TimeRange;
+      filters: Filter[];
+      query: Query;
+      visParams: VisParams;
+      forceFetch?: boolean;
     }) {
       return new Promise((resolve, reject) => {
         const expression = visParams.expression;
@@ -64,7 +90,7 @@ const TimelionRequestHandlerProvider = function(Private: any, $http: any, config
           });
 
         httpResult
-          .then(function(resp: any) {
+          .then(function(resp: TimelionSuccessResponse) {
             resolve(resp);
           })
           .catch(function(resp: any) {
