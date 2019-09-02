@@ -22,6 +22,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { IPrivate } from 'ui/private';
 // we also need to load the controller and directive used by the template
 import './timelion_vis_controller';
 import '../directives/timelion_expression_input';
@@ -29,8 +30,13 @@ import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
-export function TimelionVisProvider(Private: any) {
-  const VisFactory = Private(VisFactoryProvider);
+interface VisFactory {
+  createAngularVisualization: Function;
+  createVislibVisualization: Function;
+}
+
+export function TimelionVisProvider(Private: IPrivate) {
+  const VisFactory = Private(VisFactoryProvider) as VisFactory;
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
   // return the visType object, which kibana will use to display and configure new

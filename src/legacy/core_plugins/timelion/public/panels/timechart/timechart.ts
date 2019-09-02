@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { IPrivate } from 'ui/private';
 import { Panel } from '../panel';
 
-export function timeChartProvider(Private: any) {
+export function timeChartProvider(Private: IPrivate) {
   // Schema is broken out so that it may be extended for use in other plugins
   // Its also easier to test.
-  return new Panel('timechart', Private(require('./schema'))());
+  return new Panel('timechart', (Private(require('./schema')) as Function)());
 }

@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { IPrivate } from 'ui/private';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/data/common/expressions/types';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -50,8 +51,8 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-const TimelionRequestHandlerProvider = function(Private: any, $http: any, config: any) {
-  const timezone = Private(timezoneProvider)();
+const TimelionRequestHandlerProvider = function(Private: IPrivate, $http: any, config: any) {
+  const timezone = (Private(timezoneProvider) as Function)();
 
   return {
     name: 'timelion',
