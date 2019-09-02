@@ -6,10 +6,11 @@
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { WorkpadManager } from '../../components/workpad_manager';
-import { setDocTitle } from '../../lib/doc_title';
+import { WorkpadManager } from '../../../components/workpad_manager';
+import { setDocTitle } from '../../../lib/doc_title';
 
-export const HomeApp = () => {
+export const HomeApp = ({ onLoad = () => {} }) => {
+  onLoad();
   setDocTitle('Canvas');
   return (
     <EuiPage className="canvasHomeApp" restrictWidth>
