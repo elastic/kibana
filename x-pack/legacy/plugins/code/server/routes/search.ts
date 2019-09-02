@@ -11,12 +11,14 @@ import {
   CommitSearchRequest,
   DocumentSearchRequest,
   RepositorySearchRequest,
+  ResolveSnippetsIntegrationRequest,
   SymbolSearchRequest,
 } from '../../model';
 import { Logger } from '../log';
 import {
   CommitSearchClient,
   DocumentSearchClient,
+  IntegrationsSearchClient,
   RepositorySearchClient,
   SymbolSearchClient,
 } from '../search';
@@ -146,6 +148,36 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         return res;
       } catch (error) {
         return Boom.internal(`Search Exception`);
+      }
+    },
+  });
+
+  // Resolve source code snippets base on APM's stacktrace item data including:
+  // * repoUri: ID of the repository
+  // * revision: Optional. Revision of the file.
+  // * filePath: the path of the file.
+  // * lineNumStart: the start line number of the snippet.
+  // * lineNumEnd: Optional. The end line number of the snippet.
+  router.route({
+    path: '/api/code/integration/snippets',
+    method: 'GET',
+    async handler(req: RequestFacade) {
+      const { repoUri, revision, filePath, lineNum, lineNumEnd } = req.query as RequestQueryFacade;
+
+      try {
+        const integRequest: ResolveSnippetsIntegrationRequest = {
+          repoUri: repoUri as string,
+          revision: revision ? (revision as string) : undefined,
+          filePath: filePath as string,
+          lineNumStart: lineNum ? parseInt(lineNum as string, 10) : 0,
+          lineNumEnd: lineNumEnd ? parseInt(lineNumEnd as string, 10) : undefined,
+        };
+
+        const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
+        const res = await integClient.resolveSnippets(integRequest);
+        return res;
+      } catch (error) {
+        return Boom.internal(`Invalid request for resovling snippets.`);
       }
     },
   });

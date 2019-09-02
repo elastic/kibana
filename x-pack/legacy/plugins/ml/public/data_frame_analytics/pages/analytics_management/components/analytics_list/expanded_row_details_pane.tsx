@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, ReactElement } from 'react';
 
 import {
   EuiDescriptionList,
@@ -17,7 +17,7 @@ import {
 
 export interface SectionItem {
   title: string;
-  description: string;
+  description: string | ReactElement;
 }
 export interface SectionConfig {
   title: string;
