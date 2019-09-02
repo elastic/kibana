@@ -7,8 +7,7 @@
 import React from 'react';
 
 import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
+import { timefilter, timeHistory } from 'ui/timefilter';
 
 // This provides ui/* based imports via React Context.
 // Because these dependencies can use regular imports,

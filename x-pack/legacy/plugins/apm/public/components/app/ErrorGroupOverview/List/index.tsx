@@ -19,11 +19,11 @@ import {
   truncate,
   unit
 } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 
-const GroupIdLink = styled(APMLink)`
+const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -31,7 +31,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(APMLink)`
+const MessageLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -51,6 +51,10 @@ const ErrorGroupList: React.FC<Props> = props => {
     urlParams: { serviceName }
   } = useUrlParams();
 
+  if (!serviceName) {
+    throw new Error('Service name is required');
+  }
+
   const columns = useMemo(
     () => [
       {
@@ -62,7 +66,7 @@ const ErrorGroupList: React.FC<Props> = props => {
         width: px(unit * 6),
         render: (groupId: string) => {
           return (
-            <GroupIdLink path={`/services/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -86,7 +90,8 @@ const ErrorGroupList: React.FC<Props> = props => {
                 content={message || NOT_AVAILABLE_LABEL}
               >
                 <MessageLink
-                  path={`/services/${serviceName}/errors/${item.groupId}`}
+                  serviceName={serviceName}
+                  errorGroupId={item.groupId}
                 >
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>

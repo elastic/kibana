@@ -3,10 +3,10 @@
 exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 <span
   class="dscField--noResults"
-  title="test.test.test"
+  title="Geo point field"
 >
   <span
-    aria-label="Geo Point"
+    aria-label="Geo point field"
     class="dscField__icon kuiIcon fa-globe"
   />
   <span
@@ -20,7 +20,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 exports[`FieldName renders a number field by providing a field record, useShortDots is set to false 1`] = `
 <span
   class=""
-  title="test.test.test"
+  title="Number field"
 >
   <span
     aria-label="Number field"
@@ -43,7 +43,7 @@ exports[`FieldName renders a number field by providing a field record, useShortD
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
 <span
   class=""
-  title="test"
+  title="String field"
 >
   <span
     aria-label="String field"
