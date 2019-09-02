@@ -6,14 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
-import {
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiTabs,
-  EuiFlyoutBody,
-  EuiTab,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlacklistForm } from './blacklist_form';
@@ -54,10 +47,7 @@ interface AsObservable<P> {
   observable: Readonly<Rx.Observable<P>>;
 }
 
-export function GraphSettings({
-  observable,
-  onLeave,
-}: AsObservable<GraphSettingsProps> & { onLeave: () => void }) {
+export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) {
   const [currentProps, setCurrentProps] = useState<GraphSettingsProps | undefined>(undefined);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -69,28 +59,26 @@ export function GraphSettings({
 
   const ActiveTabContent = tabs[activeTab].component;
   return (
-    <EuiOutsideClickDetector onOutsideClick={onLeave}>
-      <div className="gphSettingsWrapper">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>{i18n.translate('xpack.grah.settings.title', { defaultMessage: 'Settings' })}</h2>
-          </EuiTitle>
-          <EuiTabs style={{ marginBottom: '-25px' }}>
-            {tabs.map(({ title }, index) => (
-              <EuiTab
-                key={title}
-                isSelected={activeTab === index}
-                onClick={() => setActiveTab(index)}
-              >
-                {title}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ActiveTabContent {...currentProps} />
-        </EuiFlyoutBody>
-      </div>
-    </EuiOutsideClickDetector>
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>{i18n.translate('xpack.grah.settings.title', { defaultMessage: 'Settings' })}</h2>
+        </EuiTitle>
+        <EuiTabs style={{ marginBottom: '-25px' }}>
+          {tabs.map(({ title }, index) => (
+            <EuiTab
+              key={title}
+              isSelected={activeTab === index}
+              onClick={() => setActiveTab(index)}
+            >
+              {title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <ActiveTabContent {...currentProps} />
+      </EuiFlyoutBody>
+    </>
   );
 }

@@ -60,13 +60,14 @@ import {
 } from './services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { save } from  './services/save';
+import { drillDownRegex } from  './services/drilldown';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
 
-import settingsTemplate from './angular/templates/settings.html';
+import inspectTemplate from './angular/templates/inspect.html';
 
-import './angular/directives/graph_settings';
+import './angular/directives/graph_inspect';
 
 const app = uiModules.get('app/graph');
 
@@ -572,51 +573,6 @@ app.controller('graphuiPlugin', function (
     });
   };
 
-  //== Drill-down functionality ==
-  const defaultKibanaQuery = ',query:(query_string:(analyze_wildcard:!t,query:\'*\'))';
-  const drillDownRegex = /\{\{gquery\}\}/g;
-
-  $scope.checkForKibanaUrl = function () {
-    $scope.suggestTemplateFix = $scope.newUrlTemplate.url === $scope.lastPastedURL  &&
-                                $scope.newUrlTemplate.url.indexOf(defaultKibanaQuery) > 0;
-  };
-
-  $scope.replaceKibanaUrlParam = function () {
-    $scope.newUrlTemplate.url = $scope.newUrlTemplate.url.replace(defaultKibanaQuery, ',query:{{gquery}}');
-    $scope.lastPastedURL = null;
-    $scope.checkForKibanaUrl();
-  };
-
-  $scope.rejectKibanaUrlSuggestion = function () {
-    $scope.lastPastedURL = null;
-    $scope.checkForKibanaUrl();
-  };
-
-  function detectKibanaUrlPaste(url) {
-    $scope.lastPastedURL = url;
-    $scope.checkForKibanaUrl();
-  }
-
-  $scope.handleUrlTemplatePaste = function ($event) {
-    window.setTimeout(function () {
-      detectKibanaUrlPaste(angular.element($event.currentTarget).val());
-      $scope.$digest();
-    }, 0);
-  };
-
-
-  $scope.resetNewUrlTemplate = function () {
-    $scope.newUrlTemplate = {
-      url: null,
-      description: null,
-      encoder: $scope.outlinkEncoders[0]
-    };
-  };
-
-  $scope.editUrlTemplate = function (urlTemplate) {
-    Object.assign($scope.newUrlTemplate, urlTemplate, { templateBeingEdited: urlTemplate });
-  };
-
   $scope.saveUrlTemplate = function (index, urlTemplate) {
     if (index !== -1) {
       $scope.urlTemplates[index] = urlTemplate;
@@ -627,20 +583,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.removeUrlTemplate = function (urlTemplate) {
     const i = $scope.urlTemplates.indexOf(urlTemplate);
-    if (i != -1) {
-      confirmModal(
-        i18n.translate('xpack.graph.settings.drillDowns.removeConfirmText', {
-          defaultMessage: 'Remove "{urlTemplateDesciption}" drill-down?',
-          values: { urlTemplateDesciption: urlTemplate.description },
-        }),
-        {
-          onConfirm: () => $scope.urlTemplates.splice(i, 1),
-          confirmButtonText: i18n.translate('xpack.graph.settings.drillDowns.removeConfirmButtonLabel', {
-            defaultMessage: 'Remove drill-down',
-          }),
-        },
-      );
-    }
+    $scope.urlTemplates.splice(i, 1);
   };
 
   $scope.openUrlTemplate = function (template) {
@@ -668,7 +611,6 @@ app.controller('graphuiPlugin', function (
     $scope.filteredFields = [];
 
     $scope.selectedFields = [];
-    $scope.configPanel = 'settings';
     $scope.liveResponseFields = [];
 
     $scope.exploreControls = {
@@ -888,6 +830,25 @@ app.controller('graphuiPlugin', function (
     });
   }
   $scope.topNavMenu.push({
+    key: 'inspect',
+    disableButton: function () { return $scope.selectedIndex === null; },
+    label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
+      defaultMessage: 'Inspect',
+    }),
+    description: i18n.translate('xpack.graph.topNavMenu.inspectAriaLabel', {
+      defaultMessage: 'Inspect',
+    }),
+    run: () => {
+      $scope.$evalAsync(() => {
+        const curState = $scope.menus.showInspect;
+        $scope.closeMenus();
+        $scope.menus.showInspect = !curState;
+      });
+    },
+  });
+
+  let currentSettingsFlyout;
+  $scope.topNavMenu.push({
     key: 'settings',
     disableButton: function () { return $scope.selectedIndex === null; },
     label: i18n.translate('xpack.graph.topNavMenu.settingsLabel', {
@@ -897,6 +858,10 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Settings',
     }),
     run: () => {
+      if (currentSettingsFlyout) {
+        currentSettingsFlyout.close();
+        return;
+      }
       const settingsObservable = asAngularSyncedObservable(() => ({
         advancedSettings: { ...$scope.exploreControls },
         updateAdvancedSettings: (updatedSettings) => {
@@ -909,19 +874,15 @@ app.controller('graphuiPlugin', function (
         saveUrlTemplate: $scope.saveUrlTemplate,
         allFields: [...$scope.allFields]
       }), $scope.$digest.bind($scope));
-      const flyoutRef = npStart.core.overlays.openFlyout(<GraphSettings
+      currentSettingsFlyout = npStart.core.overlays.openFlyout(<GraphSettings
         observable={settingsObservable}
-        onLeave={() => { flyoutRef.close(); }}
       />, {
         size: 'm',
         closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
-        'data-test-subj': 'graphSettingsFlyout'
+        'data-test-subj': 'graphSettingsFlyout',
+        ownFocus: true
       });
-      $scope.$evalAsync(() => {
-        const curState = $scope.menus.showSettings;
-        $scope.closeMenus();
-        $scope.menus.showSettings = !curState;
-      });
+      currentSettingsFlyout.onClose.then(() => { currentSettingsFlyout = null; });
     },
   });
 
