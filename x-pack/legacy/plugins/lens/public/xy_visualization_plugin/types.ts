@@ -177,13 +177,14 @@ export const layerConfig: ExpressionFunction<
 
 export type SeriesType = 'bar' | 'line' | 'area' | 'bar_stacked' | 'area_stacked';
 
-export type LayerConfig = AxisConfig & {
+export interface LayerConfig {
+  hide?: boolean;
   layerId: string;
   xAccessor: string;
   accessors: string[];
   seriesType: SeriesType;
   splitAccessor: string;
-};
+}
 
 export type LayerArgs = LayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair

@@ -7,16 +7,16 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
-import { toExpression } from '@kbn/interpreter/common';
+import { toExpression, Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { prependDatasourceExpression } from './expression_helpers';
+import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
-const MAX_SUGGESTIONS_DISPLAYED = 3;
+const MAX_SUGGESTIONS_DISPLAYED = 5;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -122,7 +122,9 @@ function InnerSuggestionPanel({
     visualizationMap,
     activeVisualizationId,
     visualizationState,
-  }).slice(0, MAX_SUGGESTIONS_DISPLAYED);
+  })
+    .filter(suggestion => !suggestion.hide)
+    .slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
   if (suggestions.length === 0) {
     return null;
@@ -139,26 +141,63 @@ function InnerSuggestionPanel({
         </h3>
       </EuiTitle>
       <div className="lnsSuggestionsPanel__suggestions">
-        {suggestions.map(suggestion => {
-          const previewExpression = suggestion.previewExpression
-            ? prependDatasourceExpression(
-                suggestion.previewExpression,
-                datasourceMap,
-                datasourceStates
-              )
-            : null;
-          return (
-            <SuggestionPreview
-              suggestion={suggestion}
-              dispatch={dispatch}
-              frame={frame}
-              ExpressionRenderer={ExpressionRendererComponent}
-              previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
-              key={`${suggestion.visualizationId}-${suggestion.title}`}
-            />
-          );
-        })}
+        {suggestions.map((suggestion: Suggestion) => (
+          <SuggestionPreview
+            suggestion={suggestion}
+            dispatch={dispatch}
+            frame={frame}
+            ExpressionRenderer={ExpressionRendererComponent}
+            previewExpression={
+              suggestion.previewExpression
+                ? preparePreviewExpression(
+                    suggestion.previewExpression,
+                    datasourceMap,
+                    datasourceStates,
+                    frame,
+                    suggestion.datasourceId,
+                    suggestion.datasourceState
+                  )
+                : undefined
+            }
+            key={`${suggestion.visualizationId}-${suggestion.title}`}
+          />
+        ))}
       </div>
     </div>
   );
+}
+
+function preparePreviewExpression(
+  expression: string | Ast,
+  datasourceMap: Record<string, Datasource<unknown, unknown>>,
+  datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
+  framePublicAPI: FramePublicAPI,
+  suggestionDatasourceId?: string,
+  suggestionDatasourceState?: unknown
+) {
+  const expressionWithDatasource = prependDatasourceExpression(
+    expression,
+    datasourceMap,
+    suggestionDatasourceId
+      ? {
+          ...datasourceStates,
+          [suggestionDatasourceId]: {
+            isLoading: false,
+            state: suggestionDatasourceState,
+          },
+        }
+      : datasourceStates
+  );
+
+  const expressionContext = {
+    query: framePublicAPI.query,
+    timeRange: {
+      from: framePublicAPI.dateRange.fromDate,
+      to: framePublicAPI.dateRange.toDate,
+    },
+  };
+
+  return expressionWithDatasource
+    ? toExpression(prependKibanaContext(expressionWithDatasource, expressionContext))
+    : undefined;
 }

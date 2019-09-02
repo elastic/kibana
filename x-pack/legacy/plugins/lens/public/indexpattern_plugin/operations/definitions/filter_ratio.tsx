@@ -30,6 +30,7 @@ export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
     defaultMessage: 'Filter Ratio',
   }),
@@ -37,7 +38,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     return {
       dataType: 'number',
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
     };
   },
@@ -48,7 +48,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       operationType: 'filter_ratio',
       suggestedPriority,
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
       params: {
         numerator: { language: 'kuery', query: '' },

@@ -18,7 +18,7 @@ import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
-import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -106,13 +106,7 @@ export function ChartSwitch(props: Props) {
       ([_layerId, datasource]) => datasource.getTableSpec().length > 0
     );
 
-    const topSuggestion = getSuggestions({
-      datasourceMap: props.datasourceMap,
-      datasourceStates: props.datasourceStates,
-      visualizationMap: { [visualizationId]: newVisualization },
-      activeVisualizationId: props.visualizationId,
-      visualizationState: props.visualizationState,
-    })[0];
+    const topSuggestion = getTopSuggestion(props, visualizationId, newVisualization);
 
     let dataLoss: VisualizationSelection['dataLoss'];
 
@@ -241,4 +235,21 @@ export function ChartSwitch(props: Props) {
       </EuiTitle>
     </div>
   );
+}
+function getTopSuggestion(
+  props: Props,
+  visualizationId: string,
+  newVisualization: Visualization<unknown, unknown>
+): Suggestion | undefined {
+  return getSuggestions({
+    datasourceMap: props.datasourceMap,
+    datasourceStates: props.datasourceStates,
+    visualizationMap: { [visualizationId]: newVisualization },
+    activeVisualizationId: props.visualizationId,
+    visualizationState: props.visualizationState,
+  }).filter(suggestion => {
+    // don't use extended versions of current data table on switching between visualizations
+    // to avoid confusing the user.
+    return suggestion.changeType !== 'extended';
+  })[0];
 }

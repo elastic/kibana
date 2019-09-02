@@ -15,22 +15,26 @@ import { State } from './types';
 export function getSuggestions(
   opts: SuggestionRequest<State>
 ): Array<VisualizationSuggestion<State>> {
-  return opts.tables
-    .filter(
-      ({ isMultiRow, columns }) =>
-        // We only render metric charts for single-row queries. We require a single, numeric column.
-        !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
-    )
-    .map(table => getSuggestion(table));
+  return (
+    opts.tables
+      .filter(
+        ({ isMultiRow, columns }) =>
+          // We only render metric charts for single-row queries. We require a single, numeric column.
+          !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
+      )
+      // don't suggest current table if visualization is active
+      .filter(({ changeType }) => !opts.state || changeType !== 'unchanged')
+      .map(table => getSuggestion(table))
+  );
 }
 
 function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   const col = table.columns[0];
-  const title = col.operation.label;
+  const title = table.label || col.operation.label;
 
   return {
     title,
-    score: 1,
+    score: 0.5,
     datasourceSuggestionId: table.datasourceSuggestionId,
     previewIcon: 'visMetric',
     previewExpression: {

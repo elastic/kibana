@@ -65,7 +65,6 @@ describe('metric_visualization', () => {
             id: 'a',
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
             label: 'shazm',
           };
         },

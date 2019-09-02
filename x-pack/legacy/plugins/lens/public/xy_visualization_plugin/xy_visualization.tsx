@@ -86,7 +86,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
             seriesType: defaultSeriesType,
             showGridlines: false,
             splitAccessor: generateId(),
-            title: '',
             xAccessor: generateId(),
           },
         ],

@@ -94,6 +94,7 @@ describe('chart_switch', () => {
           datasourceSuggestionId: 0,
           isMultiRow: true,
           layerId: 'a',
+          changeType: 'unchanged',
         },
       },
     ]);
@@ -205,7 +206,6 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
               },
             },
             {
@@ -214,13 +214,13 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
               },
             },
           ],
           datasourceSuggestionId: 0,
           layerId: 'first',
           isMultiRow: true,
+          changeType: 'unchanged',
         },
       },
     ]);
@@ -435,7 +435,6 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
               },
             },
             {
@@ -444,13 +443,13 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
               },
             },
           ],
           datasourceSuggestionId: 0,
           layerId: 'a',
           isMultiRow: true,
+          changeType: 'unchanged',
         },
       },
     ]);

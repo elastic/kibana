@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI } from '../../types';
+import { Visualization, Datasource, FramePublicAPI, TableChangeType } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -20,6 +20,8 @@ export interface Suggestion {
   visualizationState: unknown;
   previewExpression?: Ast | string;
   previewIcon: string;
+  hide?: boolean;
+  changeType: TableChangeType;
 }
 
 /**
@@ -100,6 +102,7 @@ export function getSuggestions({
             datasourceState: datasourceSuggestion.state,
             datasourceId: datasourceSuggestion.datasourceId,
             columns: datasourceSuggestion.table.columns.length,
+            changeType: datasourceSuggestion.table.changeType,
           };
         });
     })

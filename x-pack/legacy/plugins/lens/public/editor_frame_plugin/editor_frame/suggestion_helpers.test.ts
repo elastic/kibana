@@ -14,7 +14,13 @@ const generateSuggestion = (
   layerId: string = 'first'
 ): DatasourceSuggestion => ({
   state,
-  table: { datasourceSuggestionId, columns: [], isMultiRow: false, layerId },
+  table: {
+    datasourceSuggestionId,
+    columns: [],
+    isMultiRow: false,
+    layerId,
+    changeType: 'unchanged',
+  },
 });
 
 let datasourceMap: Record<string, DatasourceMock>;
@@ -233,12 +239,14 @@ describe('suggestion helpers', () => {
       columns: [],
       isMultiRow: true,
       layerId: 'first',
+      changeType: 'unchanged',
     };
     const table2: TableSuggestion = {
       datasourceSuggestionId: 1,
       columns: [],
       isMultiRow: true,
       layerId: 'first',
+      changeType: 'unchanged',
     };
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       { state: {}, table: table1 },

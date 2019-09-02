@@ -41,7 +41,6 @@ describe('filter_ratio', () => {
               label: 'Filter Ratio',
               dataType: 'number',
               isBucketed: false,
-              isMetric: true,
 
               // Private
               operationType: 'filter_ratio',

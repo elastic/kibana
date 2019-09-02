@@ -153,7 +153,6 @@ describe('IndexPattern Data Source suggestions', () => {
               label: 'My Op',
               dataType: 'string',
               isBucketed: true,
-              isMetric: false,
 
               // Private
               operationType: 'terms',
@@ -175,11 +174,14 @@ describe('IndexPattern Data Source suggestions', () => {
       let initialState: IndexPatternPrivateState;
 
       beforeEach(async () => {
+        jest.resetAllMocks();
         initialState = await indexPatternDatasource.initialize({
           currentIndexPatternId: '1',
           layers: {},
         });
         (generateId as jest.Mock).mockReturnValueOnce('suggestedLayer');
+        (generateId as jest.Mock).mockReturnValueOnce('col1');
+        (generateId as jest.Mock).mockReturnValueOnce('col2');
       });
 
       it('should apply a bucketed aggregation for a string field', () => {
@@ -187,7 +189,6 @@ describe('IndexPattern Data Source suggestions', () => {
           field: { name: 'source', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
-
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
@@ -208,6 +209,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -248,6 +251,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -280,7 +285,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     sourceField: 'timestamp',
                   }),
                   col2: expect.objectContaining({
-                    operationType: 'min',
+                    operationType: 'avg',
                     sourceField: 'bytes',
                   }),
                 },
@@ -289,6 +294,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -342,6 +349,7 @@ describe('IndexPattern Data Source suggestions', () => {
       let initialState: IndexPatternPrivateState;
 
       beforeEach(async () => {
+        jest.resetAllMocks();
         initialState = await indexPatternDatasource.initialize({
           currentIndexPatternId: '1',
           layers: {
@@ -352,6 +360,8 @@ describe('IndexPattern Data Source suggestions', () => {
             },
           },
         });
+        (generateId as jest.Mock).mockReturnValueOnce('col1');
+        (generateId as jest.Mock).mockReturnValueOnce('col2');
       });
 
       it('should apply a bucketed aggregation for a string field', () => {
@@ -380,6 +390,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -420,6 +432,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -452,7 +466,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     sourceField: 'timestamp',
                   }),
                   col2: expect.objectContaining({
-                    operationType: 'min',
+                    operationType: 'avg',
                     sourceField: 'bytes',
                   }),
                 },
@@ -461,6 +475,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -530,7 +546,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 col1: {
                   dataType: 'string',
                   isBucketed: true,
-                  isMetric: false,
                   sourceField: 'source',
                   label: 'values of source',
                   operationType: 'terms',
@@ -543,10 +558,9 @@ describe('IndexPattern Data Source suggestions', () => {
                 col2: {
                   dataType: 'number',
                   isBucketed: false,
-                  isMetric: true,
                   sourceField: 'bytes',
-                  label: 'Min of bytes',
-                  operationType: 'min',
+                  label: 'Avg of bytes',
+                  operationType: 'avg',
                 },
               },
               columnOrder: ['col1', 'col2'],
@@ -567,7 +581,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   col1: {
                     dataType: 'date',
                     isBucketed: true,
-                    isMetric: false,
                     sourceField: 'timestamp',
                     label: 'date histogram of timestamp',
                     operationType: 'date_histogram',
@@ -578,10 +591,9 @@ describe('IndexPattern Data Source suggestions', () => {
                   col2: {
                     dataType: 'number',
                     isBucketed: false,
-                    isMetric: true,
                     sourceField: 'bytes',
-                    label: 'Min of bytes',
-                    operationType: 'min',
+                    label: 'Avg of bytes',
+                    operationType: 'avg',
                   },
                 },
               },
@@ -638,6 +650,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'extended',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -664,7 +678,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions).toHaveLength(0);
       });
 
-      it('prepends a terms column on string field', () => {
+      it('appends a terms column after the last existing bucket column on string field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
           field: { name: 'dest', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
@@ -676,7 +690,7 @@ describe('IndexPattern Data Source suggestions', () => {
             layers: {
               previousLayer: initialState.layers.previousLayer,
               currentLayer: expect.objectContaining({
-                columnOrder: ['newId', 'col1', 'col2'],
+                columnOrder: ['col1', 'newId', 'col2'],
                 columns: {
                   ...initialState.layers.currentLayer.columns,
                   newId: expect.objectContaining({
@@ -706,7 +720,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   ...initialState.layers.currentLayer.columns,
                   newId: expect.objectContaining({
-                    operationType: 'min',
+                    operationType: 'avg',
                     sourceField: 'memory',
                   }),
                 },
@@ -732,7 +746,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   ...initialState.layers.currentLayer.columns,
                   newId: expect.objectContaining({
-                    operationType: 'max',
+                    operationType: 'sum',
                     sourceField: 'bytes',
                   }),
                 },
@@ -747,6 +761,7 @@ describe('IndexPattern Data Source suggestions', () => {
       let initialState: IndexPatternPrivateState;
 
       beforeEach(async () => {
+        jest.resetAllMocks();
         initialState = await indexPatternDatasource.initialize({
           currentIndexPatternId: '1',
           layers: {
@@ -762,6 +777,8 @@ describe('IndexPattern Data Source suggestions', () => {
             },
           },
         });
+        (generateId as jest.Mock).mockReturnValueOnce('col1');
+        (generateId as jest.Mock).mockReturnValueOnce('col2');
       });
 
       it('suggests on the layer that matches by indexPatternId', () => {
@@ -804,6 +821,8 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
         expect(suggestions[0].table).toEqual({
+          changeType: 'initial',
+          label: undefined,
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
@@ -887,9 +906,8 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               col1: {
                 label: 'My Op 2',
-                dataType: 'number',
+                dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
 
                 // Private
                 operationType: 'terms',
@@ -909,6 +927,8 @@ describe('IndexPattern Data Source suggestions', () => {
           table: {
             datasourceSuggestionId: 0,
             isMultiRow: true,
+            changeType: 'unchanged',
+            label: undefined,
             columns: [
               {
                 columnId: 'col1',
@@ -916,7 +936,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   dataType: 'string',
                   isBucketed: true,
-                  isMetric: false,
+                  scale: undefined,
                 },
               },
             ],
@@ -927,14 +947,16 @@ describe('IndexPattern Data Source suggestions', () => {
           table: {
             datasourceSuggestionId: 1,
             isMultiRow: true,
+            changeType: 'unchanged',
+            label: undefined,
             columns: [
               {
                 columnId: 'col1',
                 operation: {
                   label: 'My Op 2',
-                  dataType: 'number',
+                  dataType: 'string',
                   isBucketed: true,
-                  isMetric: false,
+                  scale: undefined,
                 },
               },
             ],
@@ -944,9 +966,208 @@ describe('IndexPattern Data Source suggestions', () => {
       ]);
     });
 
-    it('returns simplified versions of table with more than 2 columns', async () => {
+    it('returns a metric over time for single metric tables', async () => {
+      jest.resetAllMocks();
+      (generateId as jest.Mock).mockReturnValueOnce('col2');
       const state = await indexPatternDatasource.initialize({
         ...persistedState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'avg',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)[0]).toEqual(
+        expect.objectContaining({
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            changeType: 'extended',
+            label: 'Over time',
+            columns: [
+              {
+                columnId: 'col2',
+                operation: {
+                  label: 'Date Histogram of timestamp',
+                  dataType: 'date',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'col1',
+                operation: {
+                  label: 'My Op',
+                  dataType: 'number',
+                  isBucketed: false,
+                  scale: 'ratio',
+                },
+              },
+            ],
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('adds date histogram over default time field for tables without time dimension', async () => {
+      jest.resetAllMocks();
+      (generateId as jest.Mock).mockReturnValueOnce('newCol');
+      const state = await indexPatternDatasource.initialize({
+        ...persistedState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'My Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'source',
+                scale: 'ordinal',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 5,
+                },
+              },
+              col2: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'avg',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)[2]).toEqual(
+        expect.objectContaining({
+          table: {
+            datasourceSuggestionId: 2,
+            isMultiRow: true,
+            changeType: 'extended',
+            label: 'Over time',
+            columns: [
+              {
+                columnId: 'col1',
+                operation: {
+                  label: 'My Terms',
+                  dataType: 'string',
+                  isBucketed: true,
+                  scale: 'ordinal',
+                },
+              },
+              {
+                columnId: 'newCol',
+                operation: {
+                  label: 'Date Histogram of timestamp',
+                  dataType: 'date',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'col2',
+                operation: {
+                  label: 'My Op',
+                  dataType: 'number',
+                  isBucketed: false,
+                  scale: 'ratio',
+                },
+              },
+            ],
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('does not create an over time suggestion if there is no default time field', async () => {
+      jest.resetAllMocks();
+      (generateId as jest.Mock).mockReturnValueOnce('newCol');
+      const state = await indexPatternDatasource.initialize({
+        ...persistedState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'avg',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
+      const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
+        ...state,
+        indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
+      });
+      suggestions.forEach(suggestion => expect(suggestion.table.columns.length).toBe(1));
+    });
+
+    it('returns simplified versions of table with more than 2 columns', () => {
+      const state: IndexPatternPrivateState = {
+        currentIndexPatternId: '1',
+        indexPatterns: {
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            fields: [
+              {
+                name: 'field1',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field2',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field3',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field4',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field5',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          },
+        },
         layers: {
           first: {
             ...persistedState.layers.first,
@@ -955,7 +1176,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field1',
@@ -969,7 +1189,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field2',
@@ -983,7 +1202,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
-                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field3',
@@ -997,7 +1215,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 operationType: 'avg',
                 sourceField: 'field4',
@@ -1006,7 +1223,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 operationType: 'min',
                 sourceField: 'field5',
@@ -1015,31 +1231,135 @@ describe('IndexPattern Data Source suggestions', () => {
             columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5'],
           },
         },
-      });
+      };
 
       const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state);
       // 1 bucket col, 2 metric cols
-      validateTable(suggestions[0], ['col1', 'col4', 'col5'], 1);
+      isTableWithBucketColumns(suggestions[0], ['col1', 'col4', 'col5'], 1);
 
       // 1 bucket col, 1 metric col
-      validateTable(suggestions[1], ['col1', 'col4'], 1);
+      isTableWithBucketColumns(suggestions[1], ['col1', 'col4'], 1);
 
       // 2 bucket cols, 2 metric cols
-      validateTable(suggestions[2], ['col1', 'col2', 'col4', 'col5'], 2);
+      isTableWithBucketColumns(suggestions[2], ['col1', 'col2', 'col4', 'col5'], 2);
 
       // 2 bucket cols, 1 metric col
-      validateTable(suggestions[3], ['col1', 'col2', 'col4'], 2);
+      isTableWithBucketColumns(suggestions[3], ['col1', 'col2', 'col4'], 2);
 
       // 3 bucket cols, 2 metric cols
-      validateTable(suggestions[4], ['col1', 'col2', 'col3', 'col4', 'col5'], 3);
+      isTableWithBucketColumns(suggestions[4], ['col1', 'col2', 'col3', 'col4', 'col5'], 3);
 
       // 3 bucket cols, 1 metric col
-      validateTable(suggestions[5], ['col1', 'col2', 'col3', 'col4'], 3);
+      isTableWithBucketColumns(suggestions[5], ['col1', 'col2', 'col3', 'col4'], 3);
+
+      // first metric col
+      isTableWithMetricColumns(suggestions[6], ['col4']);
+
+      // second metric col
+      isTableWithMetricColumns(suggestions[7], ['col5']);
+
+      expect(suggestions.length).toBe(8);
+    });
+
+    it('returns an only metric version of a given table', () => {
+      const state: IndexPatternPrivateState = {
+        currentIndexPatternId: '1',
+        indexPatterns: {
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            fields: [
+              {
+                name: 'field1',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field2',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          },
+        },
+        layers: {
+          first: {
+            ...persistedState.layers.first,
+            columns: {
+              col1: {
+                label: 'Date histogram',
+                dataType: 'date',
+                isBucketed: true,
+
+                operationType: 'date_histogram',
+                sourceField: 'field2',
+                params: {
+                  interval: 'd',
+                },
+              },
+              col2: {
+                label: 'Average of field1',
+                dataType: 'number',
+                isBucketed: false,
+
+                operationType: 'avg',
+                sourceField: 'field1',
+              },
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+        },
+      };
+
+      const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions[1].table.columns[0].operation.label).toBe('Average of field1');
+    });
+
+    it('returns an alternative metric for an only-metric table', () => {
+      const state: IndexPatternPrivateState = {
+        currentIndexPatternId: '1',
+        indexPatterns: {
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            fields: [
+              {
+                name: 'field1',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          },
+        },
+        layers: {
+          first: {
+            ...persistedState.layers.first,
+            columns: {
+              col1: {
+                label: 'Average of field1',
+                dataType: 'number',
+                isBucketed: false,
+
+                operationType: 'avg',
+                sourceField: 'field1',
+              },
+            },
+            columnOrder: ['col1'],
+          },
+        },
+      };
+
+      const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions[0].table.columns.length).toBe(1);
+      expect(suggestions[0].table.columns[0].operation.label).toBe('Sum of field1');
     });
   });
 });
 
-function validateTable(
+function isTableWithBucketColumns(
   suggestion: DatasourceSuggestion<IndexPatternPrivateState>,
   columnIds: string[],
   numBuckets: number
@@ -1048,4 +1368,13 @@ function validateTable(
   expect(
     suggestion.table.columns.slice(0, numBuckets).every(column => column.operation.isBucketed)
   ).toBeTruthy();
+}
+
+function isTableWithMetricColumns(
+  suggestion: DatasourceSuggestion<IndexPatternPrivateState>,
+  columnIds: string[]
+) {
+  expect(suggestion.table.isMultiRow).toEqual(false);
+  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.every(column => !column.operation.isBucketed)).toBeTruthy();
 }

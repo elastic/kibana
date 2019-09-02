@@ -11,7 +11,7 @@ import { State } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
-const isMetric = (op: OperationMetadata) => op.isMetric;
+const isMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 
 export function MetricConfigPanel(props: VisualizationProps<State>) {
   const { state, frame } = props;

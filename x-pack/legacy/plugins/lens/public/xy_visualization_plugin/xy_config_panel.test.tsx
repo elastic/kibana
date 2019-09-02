@@ -35,7 +35,6 @@ describe('XYConfigPanel', () => {
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
-          title: 'X',
           accessors: ['bar'],
         },
       ],
@@ -148,7 +147,6 @@ describe('XYConfigPanel', () => {
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
-      isMetric: true,
       label: 'bar',
     };
     const bucketedOps: Operation[] = [
@@ -187,7 +185,6 @@ describe('XYConfigPanel', () => {
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
-      isMetric: true,
       label: 'bar',
     };
     const ops: Operation[] = [
@@ -312,7 +309,6 @@ describe('XYConfigPanel', () => {
             layerId: 'first',
             splitAccessor: 'baz',
             xAccessor: 'foo',
-            title: 'X',
             accessors: ['bar'],
           },
           {
@@ -320,7 +316,6 @@ describe('XYConfigPanel', () => {
             layerId: 'second',
             splitAccessor: 'baz',
             xAccessor: 'foo',
-            title: 'Y',
             accessors: ['bar'],
           },
         ],
@@ -363,7 +358,6 @@ describe('XYConfigPanel', () => {
             layerId: 'first',
             splitAccessor: 'baz',
             xAccessor: 'foo',
-            title: 'X',
             accessors: ['bar'],
           },
           {
@@ -371,7 +365,6 @@ describe('XYConfigPanel', () => {
             layerId: 'second',
             splitAccessor: 'baz',
             xAccessor: 'foo',
-            title: 'Y',
             accessors: ['bar'],
           },
         ],
