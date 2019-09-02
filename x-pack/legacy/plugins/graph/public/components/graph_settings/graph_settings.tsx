@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiFlyoutHeader,
   EuiTitle,
-  EuiSpacer,
   EuiTabs,
   EuiFlyoutBody,
   EuiTab,
@@ -71,10 +70,10 @@ export function GraphSettings({
   const ActiveTabContent = tabs[activeTab].component;
   return (
     <EuiOutsideClickDetector onOutsideClick={onLeave}>
-      <div>
+      <div className="gphSettingsWrapper">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutComplicatedTitle">Settings</h2>
+            <h2>{i18n.translate('xpack.grah.settings.title', { defaultMessage: 'Settings' })}</h2>
           </EuiTitle>
           <EuiTabs style={{ marginBottom: '-25px' }}>
             {tabs.map(({ title }, index) => (
@@ -89,7 +88,6 @@ export function GraphSettings({
           </EuiTabs>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSpacer size="m" />
           <ActiveTabContent {...currentProps} />
         </EuiFlyoutBody>
       </div>

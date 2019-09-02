@@ -1,0 +1,13 @@
+// This wrapper is necessary to use the outside click detector, because it needs a single container element
+// to register some event listeners on, but in case of the settings flyout there is the flyout header and
+// flyout body.
+.gphSettingsWrapper {
+  // Makes the wrapper invisible for CSS layouting, but allows registering event listeners
+  display: contents;
+
+  // fallback for browsers not supporting display: contents
+  display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+}
