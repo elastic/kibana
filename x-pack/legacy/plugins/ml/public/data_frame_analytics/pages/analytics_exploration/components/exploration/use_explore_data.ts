@@ -8,6 +8,8 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
+import { SortDirection, SORT_DIRECTION } from '../../../../../../common/types/eui/in_memory_table';
+
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
 
@@ -18,7 +20,7 @@ import {
   EsFieldName,
 } from '../../../../common';
 
-import { SortDirection, SORT_DIRECTION } from '../../../../../../common/types/eui/in_memory_table';
+import { getOutlierScoreFieldName } from './common';
 
 const SEARCH_SIZE = 1000;
 
@@ -32,8 +34,8 @@ export enum INDEX_STATUS {
 type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
-  field?: string;
-  direction?: SortDirection;
+  field: string;
+  direction: SortDirection;
 }
 export interface UseExploreDataReturnType {
   errorMessage: string;
@@ -55,10 +57,7 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({
-    field = '',
-    direction = SORT_DIRECTION.ASC,
-  }: LoadExploreDataArg) => {
+  const loadExploreData = async ({ field, direction }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -68,19 +67,16 @@ export const useExploreData = (
 
         const resp: SearchResponse<any> = await ml.esSearch({
           index: jobConfig.dest.index,
-          size: field !== '' ? SEARCH_SIZE : 1,
+          size: SEARCH_SIZE,
           body: {
             query: { match_all: {} },
-            sort:
-              field !== ''
-                ? [
-                    {
-                      [field]: {
-                        order: direction,
-                      },
-                    },
-                  ]
-                : undefined,
+            sort: [
+              {
+                [field]: {
+                  order: direction,
+                },
+              },
+            ],
           },
         });
 
@@ -142,7 +138,12 @@ export const useExploreData = (
   };
 
   useEffect(() => {
-    loadExploreData({});
+    if (jobConfig !== undefined) {
+      loadExploreData({
+        field: getOutlierScoreFieldName(jobConfig),
+        direction: SORT_DIRECTION.DESC,
+      });
+    }
   }, [jobConfig && jobConfig.id]);
 
   return { errorMessage, loadExploreData, sortField, sortDirection, status, tableItems };

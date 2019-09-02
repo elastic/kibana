@@ -52,6 +52,7 @@ import {
   MAX_COLUMNS,
 } from '../../../../common';
 
+import { getOutlierScoreFieldName } from './common';
 import { INDEX_STATUS, useExploreData } from './use_explore_data';
 
 const customColorScaleFactory = (n: number) => (t: number) => {
@@ -65,7 +66,6 @@ const customColorScaleFactory = (n: number) => (t: number) => {
 };
 
 const FEATURE_INFLUENCE = 'feature_influence';
-const OUTLIER_SCORE = 'outlier_score';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -310,7 +310,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     // if that's not available sort ascending on the first column.
     // also check if the current sorting field is still available.
     if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
-      const outlierScoreFieldName = `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
+      const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
 
       const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
