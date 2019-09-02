@@ -1,6 +1,9 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 #consoleRoot {
   height: 100%;
+  // Make sure the editor actions don't create scrollbars on this container
+  // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
+  overflow: hidden;
 }
 
 .consoleContainer {
@@ -10,9 +13,6 @@
 .conApp {
   display: flex;
   flex: 1 1 auto;
-  // Make sure the editor actions don't create scrollbars on this container
-  // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
-  // overflow: hidden;
 }
 
 .conApp__editor {
