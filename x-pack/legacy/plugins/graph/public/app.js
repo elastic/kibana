@@ -43,6 +43,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
+import { GraphBar } from './components/graph_bar';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -94,6 +95,10 @@ app.directive('focusOn', function () {
 
 app.directive('graphListing', function (reactDirective) {
   return reactDirective(GraphListing);
+});
+
+app.directive('graphBar', function (reactDirective) {
+  return reactDirective(GraphBar);
 });
 
 if (uiRoutes.enable) {
@@ -605,7 +610,6 @@ app.controller('graphuiPlugin', function (
     $scope.description = null;
     $scope.allFields = [];
     $scope.urlTemplates = [];
-    $scope.resetNewUrlTemplate();
 
     $scope.fieldNamesFilterString = null;
     $scope.filteredFields = [];
