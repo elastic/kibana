@@ -38,7 +38,7 @@ export {
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
-  EmbeddableChildPanelUiProps,
+  EmbeddableChildPanelProps,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
