@@ -249,7 +249,9 @@ export default () => Joi.object({
   }).default(),
 
   i18n: Joi.object({
-    locale: Joi.string().default('en'),
+    locale: Joi.string().optional().notes(`Deprecated use "i18n.defaultLocale" instead`),
+    defaultLocale: Joi.string().default('en'),
+    locales: Joi.array().items(Joi.string()).default([]),
   }).default(),
 
   savedObjects: Joi.object({

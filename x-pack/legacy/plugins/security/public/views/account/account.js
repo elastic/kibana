@@ -13,11 +13,13 @@ import { AccountManagementPage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-const renderReact = (elem, user) => {
+const renderReact = (elem, { user, userLocale, serverRegisteredLocales }) => {
   render(
     <I18nContext>
       <AccountManagementPage
         user={user}
+        userLocale={userLocale}
+        serverRegisteredLocales={serverRegisteredLocales}
       />
     </I18nContext>,
     elem
@@ -39,7 +41,7 @@ routes.when('/account', {
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route) {
+  controller($scope, $route, $injector) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('userProfileReactRoot');
       if (elem) {
@@ -48,7 +50,12 @@ routes.when('/account', {
     });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('userProfileReactRoot');
-      renderReact(elem, $route.current.locals.user);
+      renderReact(elem, {
+        user: $route.current.locals.user,
+        // TODO: [i18n] save it on es and get it from user instead?
+        userLocale: $injector.get('userLocale'),
+        serverRegisteredLocales: $injector.get('serverRegisteredLocales'),
+      });
     });
   }
 });

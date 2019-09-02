@@ -118,6 +118,7 @@ export function registerTranslationFiles(arrayOfPaths: string[] = []) {
  * @returns registeredTranslations
  */
 export function getRegisteredLocales() {
+  console.log('getRegisteredLocales called!', Object.keys(translationsRegistry))
   return Object.keys(translationsRegistry);
 }
 

@@ -913,6 +913,18 @@ export function getUiSettingDefaults() {
         },
       }),
     },
+    'locale': {
+      name: i18n.translate('kbn.advancedSettings.localeTitle', {
+        defaultMessage: 'Locale',
+      }),
+      value: i18n.getDefaultLocale(),
+      options: i18n.getRegisteredLocales(),
+      type: 'select',
+      description: i18n.translate('kbn.advancedSettings.localeText', {
+        defaultMessage: `Set language locale for the Kibana UI. A page refresh is required for the setting to be applied.`,
+      }),
+      requiresPageReload: true,
+    },
     'theme:darkMode': {
       name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
         defaultMessage: 'Dark mode',

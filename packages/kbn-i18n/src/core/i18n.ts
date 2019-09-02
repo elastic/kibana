@@ -22,11 +22,13 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
-import { getUserLanguage } from './language_detector';
+import { headerDetector } from './detectors';
+// import { getUserLanguage } from './language_detector';
 import { Formats, formats as EN_FORMATS } from './formats';
-import { hasValues, isObject, isString, mergeAll } from './helper';
+import { hasValues, isObject, isString, mergeAll,  } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
+export const LOCALE_COOKIE = 'locale';
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
 
@@ -50,6 +52,12 @@ function getMessageById(id: string): string | undefined {
   return translation.messages ? translation.messages[id] : undefined;
 }
 
+function getLanguagePartFromCode(localeCode: string | undefined) {
+  if (!localeCode || localeCode.indexOf('-') < 0) return localeCode;
+
+  return normalizeLocale(localeCode.split('-')[0]);
+}
+
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
@@ -58,12 +66,19 @@ function normalizeLocale(locale: string) {
   return locale.toLowerCase();
 }
 
+
+export function addTranslations(translationsRecord: Record<string, Translation>) {
+  Object.entries(translationsRecord).forEach(([locale, translation]) => {
+    addTranslation(translation, locale);
+  })
+}
 /**
  * Provides a way to register translations with the engine
  * @param newTranslation
  * @param [locale = messages.locale]
  */
 export function addTranslation(newTranslation: Translation, locale = newTranslation.locale) {
+  console.log('addTranslation called!')
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
@@ -90,8 +105,9 @@ export function addTranslation(newTranslation: Translation, locale = newTranslat
 /**
  * Returns messages for the current language
  */
-export function getTranslation(): Translation {
-  return translationsForLocale[currentLocale] || { messages: {} };
+export function getTranslation(locale?: string): Translation {
+  const translations = locale? translationsForLocale[locale] : translationsForLocale[currentLocale];
+  return translations || { messages: {} };
 }
 
 /**
@@ -99,6 +115,8 @@ export function getTranslation(): Translation {
  * @param locale
  */
 export function setLocale(locale: string) {
+  console.log('setLocale called!!');
+
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
@@ -113,11 +131,51 @@ export function getLocale() {
   return currentLocale;
 }
 
+export function isLocaleRegistered(locale: string) {
+  const registeredLocales = getRegisteredLocales();
+  return registeredLocales.some(registeredLocale => registeredLocale === locale);
+}
+
+function matchLanguage(code: string | string[]) {
+  const codes = Array.isArray(code)? code : [ code ];
+  const registeredLocales = getRegisteredLocales();
+
+  for (const registeredLocale of registeredLocales) {
+    const exactMatch = codes.some(code => registeredLocale === code);
+    if (exactMatch) return registeredLocale;
+    const languageInRegisteredLocale = getLanguagePartFromCode(registeredLocale);
+    const languageMatch = codes.some(code => getLanguagePartFromCode(code) === languageInRegisteredLocale);
+    if (languageMatch) return registeredLocale
+  }
+}
+
+export function getLocaleFromRequest(h: any) {
+  console.log('get locale from request!')
+  const detectors = [
+    // 1. Check cookies
+    () => h.request.server.states.cookies[LOCALE_COOKIE],
+    // 2. Check header
+    () => headerDetector(h.request),
+    // 3. Default server locale
+    () => currentLocale,
+  ];
+
+  for (const detector of detectors) {
+    const detectorLocales = detector();
+    console.log('detectorLocales:', detectorLocales)
+    const matchingLocale = matchLanguage(detectorLocales);
+    console.log('matchingLocale::', matchingLocale)
+
+    if (matchingLocale) return matchingLocale;
+  }
+}
+
 /**
  * Tells the library which language to fallback when missing translations
  * @param locale
  */
 export function setDefaultLocale(locale: string) {
+  console.log('setDefaultLocale called!!')
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
@@ -142,6 +200,7 @@ export function getDefaultLocale() {
  * @param [newFormats.date]
  * @param [newFormats.time]
  */
+// TODO: [i18n] remove formats singleton on server
 export function setFormats(newFormats: Formats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
@@ -153,6 +212,7 @@ export function setFormats(newFormats: Formats) {
 /**
  * Returns current formats
  */
+// TODO: [i18n] remove formats singleton on server
 export function getFormats() {
   return formats;
 }
@@ -220,7 +280,9 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
  * Initializes the engine
  * @param newTranslation
  */
+// TODO: [i18n] remove init from server, move it to browser.ts file
 export function init(newTranslation?: Translation) {
+  console.log('init called!!')
   if (!newTranslation) {
     return;
   }
@@ -241,8 +303,7 @@ export function init(newTranslation?: Translation) {
  * @param translationsUrl URL pointing to the JSON bundle with translations.
  */
 export async function load(translationsUrl: string) {
-  console.log('loading!!')
-  getUserLanguage();
+  console.log('load called!!', translationsUrl)
   // Once this package is integrated into core Kibana we should switch to an abstraction
   // around `fetch` provided by the platform, e.g. `kfetch`.
   const response = await fetch(translationsUrl, {

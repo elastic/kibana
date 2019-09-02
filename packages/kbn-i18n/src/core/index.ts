@@ -18,5 +18,4 @@
  */
 
 export { formats } from './formats';
-export { getUserLanguage } from './language_detector'
 export * from './i18n';

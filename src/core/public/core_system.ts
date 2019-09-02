@@ -91,6 +91,7 @@ export class CoreSystem {
     this.rootDomElement = rootDomElement;
 
     this.i18n = new I18nService();
+    console.log('this.i18n::', this.i18n)
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,

@@ -57,4 +57,16 @@ export class UserAPIClient {
       body: JSON.stringify(data),
     });
   }
+
+  // TODO: [i18n] set on es user metadata
+  public async changeLocale(user: User, locale: string) {
+    const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
+    const data = {
+      username: user.username,
+      roles: user.roles,
+      metadata: { locale },
+    }
+
+    await kfetch({ pathname: url, body: JSON.stringify(data), method: 'POST' });
+  }
 }

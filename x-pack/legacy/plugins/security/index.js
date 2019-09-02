@@ -18,6 +18,7 @@ import { initLoggedOutView } from './server/routes/views/logged_out';
 import { checkLicense } from './server/lib/check_license';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
+import { i18n } from '@kbn/i18n';
 import {
   createAuthorizationService,
   disableUICapabilitesFactory,
@@ -101,6 +102,9 @@ export const security = (kibana) => new kibana.Plugin({
       }
 
       return {
+        serverRegisteredLocales: i18n.getRegisteredLocales(),
+        // TODO: [i18n] get it from request
+        userLocale: 'en',
         secureCookies: securityPlugin.config.secureCookies,
         sessionTimeout: securityPlugin.config.sessionTimeout,
         enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),

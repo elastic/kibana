@@ -58,32 +58,37 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
   server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
 
-  const translationsCache = { translations: null, hash: null };
+
+  const translationsCache = [];
+
   server.route({
     path: '/translations/{locale}.json',
     method: 'GET',
     config: { auth: false },
     handler(request, h) {
-      // Kibana server loads translations only for a single locale
-      // that is specified in `i18n.locale` config value.
       const { locale } = request.params;
-      if (i18n.getLocale() !== locale.toLowerCase()) {
+      if (!i18n.isLocaleRegistered(locale)) {
         throw Boom.notFound(`Unknown locale: ${locale}`);
       }
 
+
       // Stringifying thousands of labels and calculating hash on the resulting
       // string can be expensive so it makes sense to do it once and cache.
-      if (translationsCache.translations == null) {
-        translationsCache.translations = JSON.stringify(i18n.getTranslation());
-        translationsCache.hash = createHash('sha1')
-          .update(translationsCache.translations)
-          .digest('hex');
+      if (!translationsCache.some(cache => cache.locale === locale)) {
+        const stringifiedTranslations = JSON.stringify(i18n.getTranslation(locale));
+        translationsCache.push({
+          locale,
+          translations: stringifiedTranslations,
+          hash: createHash('sha1').update(stringifiedTranslations).digest('hex'),
+        });
       }
 
-      return h.response(translationsCache.translations)
+      const cachedTranslation = translationsCache.find(cache => cache.locale === locale);
+
+      return h.response(cachedTranslation.translations)
         .header('cache-control', 'must-revalidate')
         .header('content-type', 'application/json')
-        .etag(translationsCache.hash);
+        .etag(cachedTranslation.hash);
     }
   });
 
@@ -209,6 +214,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     const request = h.request;
     const basePath = request.getBasePath();
 
+
     const legacyMetadata = await getLegacyKibanaPayload({
       app,
       request,
@@ -222,21 +228,28 @@ export function uiRenderMixin(kbnServer, server, config) {
       ...kbnServer.newPlatform.setup.core.plugins.uiPlugins.public.entries()
     ].map(([id, plugin]) => ({ id, plugin }));
 
+    const requestLocale = i18n.getLocaleFromRequest(h);
+
+    console.log('requestLocale::', requestLocale);
+    console.log('yser:::', legacyMetadata.uiSettings.user);
+
     const response = h.view('ui_app', {
       strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
-      i18n: (id, options) => i18n.translate(id, options),
-      locale: i18n.getLocale(),
+      i18n: (id, options) => {
+        console.log('translate being called!!');
+        return i18n.translate(id, options)
+      },
+      locale: requestLocale,
       darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
-
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
         branch: config.get('pkg.branch'),
         basePath,
         i18n: {
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${basePath}/translations/${requestLocale}.json`,
         },
         csp: {
           warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
@@ -260,6 +273,15 @@ export function uiRenderMixin(kbnServer, server, config) {
 
     const csp = createCSPRuleString(config.get('csp.rules'));
     response.header('content-security-policy', csp);
+    response.state(i18n.LOCALE_COOKIE, requestLocale, {
+      ttl: 24 * 60 * 60 * 1000,
+      encoding: 'base64json',
+      strictHeader: true,
+      // TODO: [i18n] https only cookie?
+      isSecure: false,
+      isHttpOnly: true,
+      clearInvalid: false,
+    })
 
     return response;
   }

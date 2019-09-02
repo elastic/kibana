@@ -10,9 +10,12 @@ export interface User {
   full_name: string;
   roles: string[];
   enabled: boolean;
-  metadata?: {
-    _reserved: boolean;
-  };
+  metadata?: UserMetadata
+}
+
+export interface UserMetadata {
+  locale: string;
+  _reserved: boolean;
 }
 
 export interface EditUser extends User {

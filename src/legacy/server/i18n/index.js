@@ -23,8 +23,38 @@ import { fromRoot } from '../../utils';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
 
+export function getLocalesToRegister(config) {
+  const configLocales = config.get('i18n.locales');
+  console.log('configLocales:', configLocales)
+  if (configLocales.length) {
+    return configLocales;
+  }
+
+  const configLocale = config.get('i18n.locale');
+  if (configLocale) {
+    return [configLocale];
+  }
+
+  const configDefaultLocale = config.get('i18n.defaultLocale');
+
+  return [configDefaultLocale];
+}
+
+function getDefaultLocale(config) {
+  const configLocales = config.get('i18n.locales');
+  const defaultLocale = config.get('i18n.defaultLocale') || config.get('i18n.locale');
+  if (defaultLocale) {
+    if (!configLocales.includes(defaultLocale)) {
+      throw Error(`Default Locale "${defaultLocale}" must be included in the i18n.locales config.`)
+    }
+    return defaultLocale;
+  }
+  return configLocales[0];
+}
+
 export async function i18nMixin(kbnServer, server, config) {
-  const locale = config.get('i18n.locale');
+  const locales = getLocalesToRegister(config);
+  const defaultLocale = getDefaultLocale(config);
 
   const translationPaths = await Promise.all([
     getTranslationPaths({
@@ -39,14 +69,24 @@ export async function i18nMixin(kbnServer, server, config) {
     }),
   ]);
 
-  const currentTranslationPaths = [].concat(...translationPaths).filter(translationPath => basename(translationPath, '.json') === locale);
-  i18nLoader.registerTranslationFiles(currentTranslationPaths);
+  const currentTranslationPaths = [].concat(...translationPaths)
+    .filter(translationPath => locales.includes(basename(translationPath, '.json')));
 
-  const translations = await i18nLoader.getTranslationsByLocale(locale);
+  console.log('currentTranslationPaths::', currentTranslationPaths)
+  i18nLoader.registerTranslationFiles(currentTranslationPaths);
+  const loadedTranslations = await i18nLoader.getAllTranslationsFromPaths();
+  i18n.addTranslations(loadedTranslations);
+
+  console.log('reg::', i18n.getRegisteredLocales());
+  i18n.setDefaultLocale(defaultLocale);
+  server.decorate('server', 'getTranslationsFilePaths', () => currentTranslationPaths);
+
+  // legacy should be removed once server side i18n issue is figured out.
+  // i18n will be initialized per request and never globally.
+
+  const translations = await i18nLoader.getTranslationsByLocale(defaultLocale);
   i18n.init(Object.freeze({
-    locale,
+    locale: defaultLocale,
     ...translations,
   }));
-
-  server.decorate('server', 'getTranslationsFilePaths', () => currentTranslationPaths);
 }
