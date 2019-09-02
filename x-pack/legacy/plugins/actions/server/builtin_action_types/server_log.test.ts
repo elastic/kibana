@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { asOk } from './lib/result_type';
 import { ActionType, Services } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -16,7 +17,9 @@ import { registerBuiltInActionTypes } from './index';
 
 const ACTION_TYPE_ID = '.server-log';
 const NO_OP_FN = () => {};
-const MOCK_KIBANA_CONFIG = { isWhitelistedHostname: () => true } as ActionsConfigurationUtilities;
+const MOCK_KIBANA_CONFIG = {
+  isWhitelistedHostname: uri => asOk(uri),
+} as ActionsConfigurationUtilities;
 
 const services: Services = {
   log: NO_OP_FN,
