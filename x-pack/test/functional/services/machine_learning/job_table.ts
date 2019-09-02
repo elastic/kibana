@@ -154,5 +154,25 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         }
       });
     }
+
+    public async waitForJobsToLoad() {
+      await retry.waitFor(
+        'jobs table to exist',
+        async () => await testSubjects.exists('mlJobListTable')
+      );
+
+      await retry.waitFor(
+        'jobs table to be done loading',
+        async () => await testSubjects.exists('mlJobListTable&loaded')
+      );
+    }
+
+    public async filterWithSearchString(filter: string) {
+      await this.waitForJobsToLoad();
+      const searchBar = await testSubjects.find('mlJobListSearchBar');
+      const searchBarInput = await searchBar.findByTagName('input');
+      await searchBarInput.clearValueWithKeyboard();
+      await searchBarInput.type(filter);
+    }
   })();
 }
