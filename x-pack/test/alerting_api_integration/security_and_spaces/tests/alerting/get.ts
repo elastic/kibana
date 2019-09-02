@@ -59,6 +59,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 createdBy: 'elastic',
                 scheduledTaskId: response.body.scheduledTaskId,
                 updatedBy: 'elastic',
+                apiKeyOwner: 'elastic',
               });
               break;
             default:

@@ -18,12 +18,7 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import {
-  getAvailableOperationsByMetadata,
-  buildColumn,
-  operationDefinitionMap,
-  OperationDefinition,
-} from '../operations';
+import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
@@ -130,9 +125,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           // If only the field has changed use the onFieldChange method on the operation to get the
           // new column, otherwise use the regular buildColumn to get a new column.
           const newColumn = hasFieldChanged
-            ? (operationDefinitionMap[selectedColumn.operationType] as OperationDefinition<
-                IndexPatternColumn
-              >).onFieldChange(selectedColumn, currentIndexPattern, droppedItem.field)
+            ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
             : buildColumn({
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,

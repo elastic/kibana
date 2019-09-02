@@ -135,6 +135,7 @@
         groupName: 'graphql related packages',
         packagePatterns: [
           '(\\b|_)graphql(\\b|_)',
+          '(\\b|_)apollo(\\b|_)',
         ],
       },
       {
@@ -232,6 +233,13 @@
           '@types/jsts',
         ],
         allowedVersions: '^1.6.2',
+      },
+      {
+        groupSlug: 'storybook',
+        groupName: 'storybook related packages',
+        packagePatterns: [
+          '(\\b|_)storybook(\\b|_)',
+        ],
       },
       {
         groupSlug: 'json-stable-stringify',
@@ -727,30 +735,6 @@
         packageNames: [
           'reduce-reducers',
           '@types/reduce-reducers',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-actions',
-        groupName: '@storybook/addon-actions related packages',
-        packageNames: [
-          '@storybook/addon-actions',
-          '@types/storybook__addon-actions',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-info',
-        groupName: '@storybook/addon-info related packages',
-        packageNames: [
-          '@storybook/addon-info',
-          '@types/storybook__addon-info',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-knobs',
-        groupName: '@storybook/addon-knobs related packages',
-        packageNames: [
-          '@storybook/addon-knobs',
-          '@types/storybook__addon-knobs',
         ],
       },
       {
