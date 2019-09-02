@@ -43,9 +43,10 @@ import { PopulationJobServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 uiRoutes
-  .when('/jobs/new_job/simple/population', {
+  .when('/jobs/new_job_old/population', {
     template,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
     resolve: {
@@ -737,10 +738,13 @@ module
       preLoadJob($scope, appState);
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: $scope.loadVis
+    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
+      fetchSub.unsubscribe();
     });
   });

@@ -87,7 +87,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       help: '',
     },
   },
-  async fn(context, args, handlers) {
+  async fn(context, args, { inspectorAdapters, abortSignal }) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
     const indexPatterns = Private(IndexPatternsProvider);
@@ -112,8 +112,9 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters: handlers.inspectorAdapters,
+      inspectorAdapters,
       queryFilter,
+      abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
     const table: KibanaDatatable = {

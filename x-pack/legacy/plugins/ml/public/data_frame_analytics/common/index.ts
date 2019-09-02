@@ -5,13 +5,13 @@
  */
 
 export {
+  getAnalysisType,
   isAnalyticsIdValid,
-  moveToAnalyticsWizard,
+  isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-  CreateRequestBody,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,

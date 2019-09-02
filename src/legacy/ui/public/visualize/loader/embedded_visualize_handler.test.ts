@@ -87,7 +87,7 @@ describe('EmbeddedVisualizeHandler', () => {
   describe('autoFetch', () => {
     it('should trigger a reload when autoFetch=true and auto refresh happens', () => {
       const spy = jest.spyOn(handler, 'fetchAndRender');
-      timefilter.emit('autoRefreshFetch');
+      timefilter._triggerAutoRefresh();
       jest.runAllTimers();
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(true);
@@ -111,7 +111,7 @@ describe('EmbeddedVisualizeHandler', () => {
         }
       );
       const spy = jest.spyOn(handler, 'fetchAndRender');
-      timefilter.emit('autoRefreshFetch');
+      timefilter._triggerAutoRefresh();
       jest.runAllTimers();
       expect(spy).not.toHaveBeenCalled();
     });
@@ -154,21 +154,30 @@ describe('EmbeddedVisualizeHandler', () => {
       const params = { timeRange: { foo: 'bar' } };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
 
     it('should call dataLoader.render with updated filters', () => {
       const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
 
     it('should call dataLoader.render with updated query', () => {
       const params = { query: { foo: 'bar' } };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
   });
 
@@ -197,6 +206,13 @@ describe('EmbeddedVisualizeHandler', () => {
       const spy = jest.spyOn(handler.debouncedFetchAndRender, 'cancel');
       handler.destroy();
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call abort on controller', () => {
+      handler.abortController = new AbortController();
+      const spy = jest.spyOn(handler.abortController, 'abort');
+      handler.destroy();
+      expect(spy).toHaveBeenCalled();
     });
   });
 
