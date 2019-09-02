@@ -41,7 +41,9 @@ export interface TimelionPluginStartDependencies {
 }
 
 /** @internal */
-export class TimelionPlugin implements Plugin<Promise<void>, void> {
+export class TimelionPlugin
+  implements
+    Plugin<Promise<void>, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
