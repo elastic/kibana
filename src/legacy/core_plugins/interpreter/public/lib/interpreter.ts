@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
 import { interpreterProvider } from '../../common';
 import { createHandlers } from './create_handlers';
+import { registries } from '../registries';
 
 export async function initializeInterpreter() {
-  await npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
-    .legacyServerSideFnRegistration;
-
   const interpretAst = async (ast: any, context: any, handlers: any) => {
     const interpretFn = await interpreterProvider({
-      types: npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.types.toJS(),
+      types: registries.types.toJS(),
       handlers: { ...handlers, ...createHandlers() },
-      functions: npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.functions.toJS(),
+      functions: registries.browserFunctions.toJS(),
     });
     return interpretFn(ast, context);
   };

@@ -60,16 +60,19 @@ export function serializeProvider(types: any) {
   }
 }
 
-const wrapServerSideFunctions = () => {
-  const KIBANA_VERSION = npSetup.core.injectedMetadata.getKibanaVersion();
-  const KIBANA_BASE_PATH = npSetup.core.injectedMetadata.getBasePath();
-  npSetup.core.http
-    .get(FUNCTIONS_URL)
-    .then(serverFunctionList => {
+let cached: Promise<void> | null = null;
+
+export const loadLegacyServerFunctionWrappers = async () => {
+  if (!cached) {
+    cached = (async () => {
+      const serverFunctionList = await npSetup.core.http.get(FUNCTIONS_URL);
       const types = npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.types.toJS();
       const { serialize } = serializeProvider(types);
       const batch = batchedFetch({
-        ajaxStream: ajaxStream(KIBANA_VERSION, KIBANA_BASE_PATH),
+        ajaxStream: ajaxStream(
+          npSetup.core.injectedMetadata.getKibanaVersion(),
+          npSetup.core.injectedMetadata.getBasePath()
+        ),
         serialize,
       });
 
@@ -83,11 +86,8 @@ const wrapServerSideFunctions = () => {
         });
         npSetup.plugins.data.expressions.registerFunction(fn);
       });
+    })();
+  }
 
-      npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.legacyServerSideFnRegistrationResolver();
-    })
-    // eslint-disable-next-line no-console
-    .catch(error => console.error(error));
+  return cached;
 };
-
-wrapServerSideFunctions();

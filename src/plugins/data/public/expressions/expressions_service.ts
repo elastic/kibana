@@ -25,19 +25,8 @@ export class ExpressionsService {
   private readonly renderers = new RenderFunctionsRegistry();
   private readonly types = new TypesRegistry();
 
-  private legacyServerSideFnRegistrationResolver!: () => void;
-  private readonly legacyServerSideFnRegistration = new Promise(resolve => {
-    this.legacyServerSideFnRegistrationResolver = resolve;
-  });
-
   public setup() {
-    const {
-      functions,
-      renderers,
-      types,
-      legacyServerSideFnRegistration,
-      legacyServerSideFnRegistrationResolver,
-    } = this;
+    const { functions, renderers, types } = this;
 
     return {
       registerFunction: (fn: any) => {
@@ -53,8 +42,6 @@ export class ExpressionsService {
         functions,
         renderers,
         types,
-        legacyServerSideFnRegistration,
-        legacyServerSideFnRegistrationResolver,
       },
     };
   }
