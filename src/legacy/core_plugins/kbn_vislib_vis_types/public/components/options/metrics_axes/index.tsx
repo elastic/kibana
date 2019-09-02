@@ -261,6 +261,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
       const label = agg.makeLabel();
 
+      // update labels for existing params or create new one
       if (params) {
         return {
           ...params,
