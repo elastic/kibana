@@ -13,14 +13,16 @@ import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../com
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
-import { useChartSettings } from '../../../charts/common/settings';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader } = useContext(JobCreatorContext);
+  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
+    JobCreatorContext
+  );
 
   if (isPopulationJobCreator(jc) === false) {
     return null;
@@ -34,7 +36,7 @@ export const PopulationDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
-  const { chartSettings, getChartSettings } = useChartSettings();
+  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
 
   function setResultsWrapper(results: Results) {
@@ -71,7 +73,8 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings();
+        const cs = getChartSettings(jobCreator, chartInterval);
+        setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
           jobCreator.end,

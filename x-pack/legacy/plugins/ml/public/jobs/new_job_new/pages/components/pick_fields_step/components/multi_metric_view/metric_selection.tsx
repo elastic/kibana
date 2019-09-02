@@ -12,7 +12,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
-import { useChartSettings } from '../../../charts/common/settings';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
@@ -22,9 +22,13 @@ interface Props {
 }
 
 export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated, chartLoader } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    chartLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   if (isMultiMetricJobCreator(jc) === false) {
     return null;
@@ -40,7 +44,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const { chartSettings, getChartSettings } = useChartSettings();
+  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
   const [pageReady, setPageReady] = useState(false);
@@ -120,7 +124,8 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings();
+        const cs = getChartSettings(jobCreator, chartInterval);
+        setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,

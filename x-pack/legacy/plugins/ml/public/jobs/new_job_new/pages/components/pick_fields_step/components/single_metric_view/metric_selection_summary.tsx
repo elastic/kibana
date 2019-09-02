@@ -13,13 +13,15 @@ import {
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
-import { useChartSettings } from '../../../charts/common/settings';
+import { getChartSettings } from '../../../charts/common/settings';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 const DTR_IDX = 0;
 
 export const SingleMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader } = useContext(JobCreatorContext);
+  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
+    JobCreatorContext
+  );
 
   if (isSingleMetricJobCreator(jc) === false) {
     return null;
@@ -30,7 +32,6 @@ export const SingleMetricDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
-  const { getChartSettings } = useChartSettings();
 
   function setResultsWrapper(results: Results) {
     const model = results.model[DTR_IDX];
@@ -56,7 +57,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     if (jobCreator.aggFieldPair !== null) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings();
+        const cs = getChartSettings(jobCreator, chartInterval);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,

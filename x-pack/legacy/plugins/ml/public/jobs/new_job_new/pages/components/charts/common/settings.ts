@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useState } from 'react';
 import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { JobCreatorContext } from '../../job_creator_context';
-import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import {
+  SingleMetricJobCreator,
+  MultiMetricJobCreator,
+  PopulationJobCreator,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+} from '../../../../common/job_creator';
 import { MlTimeBuckets } from '../../../../../../util/ml_time_buckets';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
@@ -55,42 +59,37 @@ export const seriesStyle = {
   },
 };
 
-export function useChartSettings() {
-  const { jobCreator, chartInterval } = useContext(JobCreatorContext);
-
+export function getChartSettings(
+  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator,
+  chartInterval: MlTimeBuckets
+) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
   };
 
-  const [chartSettings, setChartSettings] = useState(cs);
-
-  function getChartSettings(): ChartSettings {
-    if (isPopulationJobCreator(jobCreator)) {
-      // for population charts, use a larger interval based on
-      // the calculation from MlTimeBuckets, but without the
-      // bar target and max bars which have been set for the
-      // general chartInterval
-      const interval = new MlTimeBuckets();
-      interval.setInterval('auto');
-      interval.setBounds(chartInterval.getBounds());
-      cs.intervalMs = interval.getInterval().asMilliseconds();
-    }
-
-    if (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {
-      if (jobCreator.aggFieldPairs.length > 2 && isMultiMetricJobCreator(jobCreator)) {
-        cs.cols = 3;
-        cs.height = '150px';
-        cs.intervalMs = cs.intervalMs * 3;
-      } else if (jobCreator.aggFieldPairs.length > 1) {
-        cs.cols = 2;
-        cs.height = '200px';
-        cs.intervalMs = cs.intervalMs * 2;
-      }
-    }
-    setChartSettings(cs);
-    return cs;
+  if (isPopulationJobCreator(jobCreator)) {
+    // for population charts, use a larger interval based on
+    // the calculation from MlTimeBuckets, but without the
+    // bar target and max bars which have been set for the
+    // general chartInterval
+    const interval = new MlTimeBuckets();
+    interval.setInterval('auto');
+    interval.setBounds(chartInterval.getBounds());
+    cs.intervalMs = interval.getInterval().asMilliseconds();
   }
 
-  return { chartSettings, getChartSettings };
+  if (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {
+    if (jobCreator.aggFieldPairs.length > 2 && isMultiMetricJobCreator(jobCreator)) {
+      cs.cols = 3;
+      cs.height = '150px';
+      cs.intervalMs = cs.intervalMs * 3;
+    } else if (jobCreator.aggFieldPairs.length > 1) {
+      cs.cols = 2;
+      cs.height = '200px';
+      cs.intervalMs = cs.intervalMs * 2;
+    }
+  }
+
+  return cs;
 }

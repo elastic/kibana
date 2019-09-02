@@ -15,7 +15,7 @@ import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_sel
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
-import { useChartSettings } from '../../../charts/common/settings';
+import { getChartSettings } from '../../../charts/common/settings';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 interface Props {
@@ -25,9 +25,13 @@ interface Props {
 const DTR_IDX = 0;
 
 export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated, chartLoader } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    chartLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   if (isSingleMetricJobCreator(jc) === false) {
     return null;
@@ -43,7 +47,6 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const { getChartSettings } = useChartSettings();
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
@@ -78,7 +81,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (aggFieldPair !== null) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings();
+        const cs = getChartSettings(jobCreator, chartInterval);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,

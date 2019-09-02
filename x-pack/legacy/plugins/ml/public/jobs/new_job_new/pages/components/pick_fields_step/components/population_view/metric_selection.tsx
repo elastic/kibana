@@ -13,7 +13,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
-import { useChartSettings } from '../../../charts/common/settings';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
 import { ChartGrid } from './chart_grid';
@@ -26,9 +26,13 @@ interface Props {
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated, chartLoader } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    chartLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
     return null;
@@ -44,7 +48,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const { chartSettings, getChartSettings } = useChartSettings();
+  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
@@ -137,7 +141,8 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings();
+        const cs = getChartSettings(jobCreator, chartInterval);
+        setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
           jobCreator.end,
