@@ -12,6 +12,7 @@ export interface UrlTemplate {
   description: string;
   icon: FontawesomeIcon | null;
   encoder: OutlinkEncoder;
+  isDefault?: boolean;
 }
 
 export interface Field {

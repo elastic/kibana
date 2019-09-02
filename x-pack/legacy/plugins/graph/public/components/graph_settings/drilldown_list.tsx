@@ -57,7 +57,7 @@ export function DrilldownList({
               icon={template.icon ? <LegacyIcon icon={template.icon} asListIcon /> : undefined}
               iconType={template.icon ? undefined : 'empty'}
               onClick={() => {
-                setSelectedTemplate({ index, template });
+                setSelectedTemplate({ index, template: { ...template, isDefault: false } });
               }}
               key={index}
               label={template.description}

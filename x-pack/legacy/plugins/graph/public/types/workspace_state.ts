@@ -18,10 +18,20 @@ interface JsonObject {
 export interface WorkspaceNode {
   label: string;
   icon: FontawesomeIcon;
+  data: {
+    field: string;
+    term: string;
+  };
 }
 
 export interface Workspace {
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];
   getLikeThisButNotThisQuery(startNodes?: WorkspaceNode[]): JsonObject;
+
+  /**
+   * Flatten grouped nodes and return a flat array of nodes
+   * @param nodes List of nodes probably containing grouped nodes
+   */
+  returnUnpackedGroupeds(nodes: WorkspaceNode[]): WorkspaceNode[];
 }

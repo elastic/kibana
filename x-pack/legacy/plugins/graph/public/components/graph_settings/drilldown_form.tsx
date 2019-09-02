@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UrlTemplate } from '../../types';
@@ -115,31 +116,34 @@ export function DrilldownForm({ template, setValue, onSubmit, onGoBack }: Drilld
             />
           </EuiFormRow>
           {autoformatUrl && (
-            <EuiCallOut
-              size="s"
-              title={i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
-                defaultMessage: 'Kibana URL pasted',
-              })}
-            >
-              <p>
-                {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
-                  defaultMessage:
-                    'This looks like a Kibana URL. Would you like us to convert it to a template for you?',
-                })}
-              </p>
-              <EuiButton
+            <>
+              <EuiCallOut
                 size="s"
-                onClick={() => {
-                  setValue('url', replaceKibanaUrlParam(template.url));
-                  setAutoformatUrl(false);
-                }}
+                title={i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
+                  defaultMessage: 'Kibana URL pasted',
+                })}
               >
-                {i18n.translate(
-                  'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                  { defaultMessage: 'Convert' }
-                )}
-              </EuiButton>
-            </EuiCallOut>
+                <p>
+                  {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
+                    defaultMessage:
+                      'This looks like a Kibana URL. Would you like us to convert it to a template for you?',
+                  })}
+                </p>
+                <EuiButton
+                  size="s"
+                  onClick={() => {
+                    setValue('url', replaceKibanaUrlParam(template.url));
+                    setAutoformatUrl(false);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
+                    { defaultMessage: 'Convert' }
+                  )}
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
           )}
         </EuiForm>
         <EuiFormRow

@@ -722,7 +722,7 @@ app.controller('graphuiPlugin', function (
         columns: ['_source'],
         index: $scope.selectedIndex.id,
         interval: 'auto',
-        query: tag,
+        query: { language: 'kuery', query: tag },
         sort: ['_score', 'desc']
       }));
 
