@@ -17,16 +17,33 @@
  * under the License.
  */
 /* eslint no-undef: 0 */
-jest.mock('../../src/sense_editor/mode/worker', () => { return { workerModule: { id: 'sense_editor/mode/worker', src: '' } }; });
-window.Worker = function () { this.postMessage = () => {}; this.terminate = () => {}; };
-window.URL = {
-  createObjectURL: () => { return ''; }
+jest.mock('../../src/sense_editor/mode/worker', () => {
+  return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
+});
+window.Worker = function () {
+  this.postMessage = () => {};
+  this.terminate = () => {};
 };
-jest.mock('../../src/storage');
+window.URL = {
+  createObjectURL: () => {
+    return '';
+  },
+};
+
+import 'brace';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
+import 'brace/mode/json';
+import 'brace/mode/text';
+
+jest.mock('../../../../np_ready/public/app', () => ({ legacyBackDoorToSettings: () => {} }));
 
 document.queryCommandSupported = () => true;
 
 import jQuery from 'jquery';
-jest.spyOn(jQuery, 'ajax').mockImplementation(() => new Promise(() => {
-  // never resolve
-}));
+jest.spyOn(jQuery, 'ajax').mockImplementation(
+  () =>
+    new Promise(() => {
+      // never resolve
+    })
+);
