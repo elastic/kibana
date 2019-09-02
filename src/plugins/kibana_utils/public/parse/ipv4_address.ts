@@ -31,7 +31,7 @@ function isIntegerInRange(integer: number, min: number, max: number) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default class Ipv4Address {
+export class Ipv4Address {
   private value: number;
 
   constructor(ipAddress: string | number) {

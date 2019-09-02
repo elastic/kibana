@@ -88,7 +88,7 @@ describe('point series editor', function () {
 
   it('should update series when new agg is added', function () {
     const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
-    $parentScope.vis.aggs.push(aggConfig);
+    $parentScope.vis.aggs.aggs.push(aggConfig);
     $parentScope.$digest();
     expect($parentScope.editorState.params.seriesParams.length).to.be(2);
   });
@@ -138,23 +138,23 @@ describe('point series editor', function () {
   });
 
   it('should set the custom title to match the value axis label when only one agg exists for that axis', function () {
-    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.editorState.aggs.aggs[0].params.customLabel = 'Custom Label';
     $parentScope.updateAxisTitle();
     expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Label');
   });
 
   it('should not set the custom title to match the value axis label when more than one agg exists for that axis', function () {
     const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
-    $parentScope.vis.aggs.push(aggConfig);
+    $parentScope.vis.aggs.aggs.push(aggConfig);
     $parentScope.$digest();
-    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.editorState.aggs.aggs[0].params.customLabel = 'Custom Label';
     $parentScope.updateAxisTitle();
     expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Count');
   });
 
   it('should not overwrite the custom title with the value axis label if the custom title has been changed', function () {
     $parentScope.editorState.params.valueAxes[0].title.text = 'Custom Title';
-    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.editorState.aggs.aggs[0].params.customLabel = 'Custom Label';
     $parentScope.updateAxisTitle();
     expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Title');
   });
@@ -163,11 +163,11 @@ describe('point series editor', function () {
     const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
 
     $parentScope.editorState.params.valueAxes[0].title.text = 'Custom Title';
-    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.editorState.aggs.aggs[0].params.customLabel = 'Custom Label';
     $parentScope.updateAxisTitle();
 
-    $parentScope.vis.aggs.push(aggConfig);
-    $parentScope.vis.aggs.shift();
+    $parentScope.vis.aggs.aggs.push(aggConfig);
+    $parentScope.vis.aggs.aggs.shift();
     $parentScope.$digest();
     $parentScope.updateAxisTitle();
 
