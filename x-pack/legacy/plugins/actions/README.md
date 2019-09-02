@@ -23,6 +23,27 @@ action types.
 2. Create an action by using the RESTful API (see actions -> create action).
 3. Use alerts to execute actions or execute manually (see firing actions).
 
+## Kibana Actions Configuration
+Implemented under the [Actions Config](./server/actions_config.ts).
+
+### Configuration Options
+
+Built-In-Actions are configured using the _xpack.actions_ namespoace under _kibana.yml_, and have the following configuration options:
+
+| Namespaced Key                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Type                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| _xpack.actions._**enabled**          | ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | boolean               |
+| _xpack.actions._**WhitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" (instead of the array) to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | "\*" or Array<String> |
+
+### Configuration Utilities
+
+This module provides a Utilities for interacting with the configuration.
+
+| Method                | Arguments                                          | Description                                                                                                                                                                                                                                                            | Return Type                                                                                                                                                                                                                   |
+| --------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| isWhitelistedHostname | _uri_: The URI you wish to validate is whitelisted | Validates whether the URI is whitelisted. This checkes the configuration and validates that the hostname of the URI is in the list of whitelisted Hosts. If the configuration says that all URI's are whitelisted (using an "\*") then it will always returns an _Ok_. | Result<String,String>: Returns a [Result type](./server/builtin_action_types/lib/result_type.ts) where an _Ok_ is returns with the whitelisted URI (if it is whitelisted) or an _Err_ with an error message if it isn't whitelisted. |
+
+
 ## Action types
 
 ### Methods
