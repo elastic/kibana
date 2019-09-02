@@ -20,7 +20,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { PieOptions } from './editors/pie';
+import { PieOptions } from './components/options';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);

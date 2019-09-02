@@ -45,6 +45,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   ]);
   const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(jobCreator.aggFieldPair);
   const [lineChartsData, setLineChartData] = useState<LineChartData>([]);
+  const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
   const [start, setStart] = useState(jobCreator.start);
@@ -100,6 +101,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   async function loadChart() {
     if (aggFieldPair !== null) {
+      setLoadingData(true);
       const resp: LineChartData = await chartLoader.loadLineCharts(
         jobCreator.start,
         jobCreator.end,
@@ -111,6 +113,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       if (resp[DTR_IDX] !== undefined) {
         setLineChartData(resp);
       }
+      setLoadingData(false);
     }
   }
 
@@ -124,7 +127,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           removeOptions={[]}
         />
       )}
-      {lineChartsData[DTR_IDX] !== undefined && (
+      {(lineChartsData[DTR_IDX] !== undefined || loadingData === true) && (
         <Fragment>
           <AnomalyChart
             chartType={CHART_TYPE.LINE}
@@ -133,6 +136,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
             anomalyData={anomalyData}
             height="300px"
             width="100%"
+            loading={loadingData}
           />
         </Fragment>
       )}

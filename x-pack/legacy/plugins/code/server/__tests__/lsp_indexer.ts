@@ -129,7 +129,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-describe('lsp_indexer unit tests', function(this: any) {
+describe('LSP indexer unit tests', function(this: any) {
   this.timeout(20000);
 
   // @ts-ignore
@@ -338,7 +338,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 49 * 2);
+    assert.strictEqual(total, 48 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

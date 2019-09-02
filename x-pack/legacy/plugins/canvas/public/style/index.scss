@@ -5,7 +5,7 @@
 @import 'main';
 
 // Canvas apps
-@import '../apps/home/home_app';
+@import '../apps/home/home_app/home_app';
 @import '../apps/workpad/workpad_app/workpad_app';
 @import '../apps/export/export/export_app';
 
@@ -30,6 +30,7 @@
 @import '../components/debug/debug';
 @import '../components/dom_preview/dom_preview';
 @import '../components/dragbox_annotation/dragbox_annotation';
+@import '../components/editor/editor';
 @import '../components/element_card/element_card';
 @import '../components/element_content/element_content';
 @import '../components/expression/expression';

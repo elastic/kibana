@@ -5,14 +5,26 @@
  */
 
 export {
+  getAnalysisType,
   isAnalyticsIdValid,
-  moveToAnalyticsWizard,
+  isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-  CreateRequestBody,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
 } from './analytics';
+
+export {
+  getDefaultSelectableFields,
+  getFlattenedFields,
+  sortColumns,
+  toggleSelectedField,
+  EsId,
+  EsDoc,
+  EsDocSource,
+  EsFieldName,
+  MAX_COLUMNS,
+} from './fields';

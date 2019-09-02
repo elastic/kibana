@@ -7,25 +7,16 @@
 import React from 'react';
 
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
 
-import { getSelectableFields, EsDoc } from '../../../../common';
+import { EsDoc } from '../../../../common';
 
-interface ExpandedRowProps {
-  item: EsDoc;
-}
-
-export const ExpandedRow: React.SFC<ExpandedRowProps> = ({ item }) => {
-  const keys = getSelectableFields([item]);
-  const list = keys.map(k => {
-    // split the attribute key string and use reduce with an idx check to access nested attributes.
-    const value = k.split('.').reduce((obj, i) => idx(obj, _ => _[i]), item._source) || '';
-    return (
+export const ExpandedRow: React.SFC<{ item: EsDoc }> = ({ item }) => (
+  <EuiText>
+    {Object.entries(item._source).map(([k, value]) => (
       <span key={k}>
         <EuiBadge>{k}:</EuiBadge>
         <small> {typeof value === 'string' ? value : JSON.stringify(value)}&nbsp;&nbsp;</small>
       </span>
-    );
-  });
-  return <EuiText>{list}</EuiText>;
-};
+    ))}
+  </EuiText>
+);

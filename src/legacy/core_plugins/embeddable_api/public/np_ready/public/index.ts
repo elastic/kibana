@@ -24,6 +24,7 @@ export {
   ADD_PANEL_ACTION_ID,
   APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
+  PANEL_BADGE_TRIGGER,
   Action,
   ActionContext,
   Adapters,
@@ -37,7 +38,7 @@ export {
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
-  EmbeddableChildPanelUiProps,
+  EmbeddableChildPanelProps,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
@@ -69,3 +70,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { EmbeddablePublicPlugin as Plugin };
+export * from './plugin';

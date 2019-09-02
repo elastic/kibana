@@ -18,6 +18,7 @@ export function deleteRoute(server: Hapi.Server) {
     method: 'DELETE',
     path: `/api/action/{id}`,
     options: {
+      tags: ['access:actions-all'],
       validate: {
         params: Joi.object()
           .keys({

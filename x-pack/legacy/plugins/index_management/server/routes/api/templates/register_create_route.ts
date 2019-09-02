@@ -10,18 +10,14 @@ import {
   RouterRouteHandler,
   wrapCustomError,
 } from '../../../../../../server/lib/create_router';
-import { Template } from '../../../../common/types';
+import { Template, TemplateEs } from '../../../../common/types';
+import { serializeTemplate } from '../../../../common/lib';
 
 const handler: RouterRouteHandler = async (req, callWithRequest) => {
-  const {
-    name = '',
-    order,
-    version,
-    settings = {},
-    mappings = {},
-    aliases = {},
-    indexPatterns = [],
-  } = req.payload as Template;
+  const template = req.payload as Template;
+  const serializedTemplate = serializeTemplate(template) as TemplateEs;
+
+  const { name, order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 
   const conflictError = wrapCustomError(
     new Error(
@@ -54,7 +50,7 @@ const handler: RouterRouteHandler = async (req, callWithRequest) => {
     name,
     order,
     body: {
-      index_patterns: indexPatterns,
+      index_patterns,
       version,
       settings,
       mappings,

@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem
+} from '@elastic/eui';
 import _ from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -20,6 +27,8 @@ import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -34,10 +43,23 @@ export function TransactionDetails() {
   const { data: waterfall, exceedsMax } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
-  const { transactionName } = urlParams;
+  const { transactionName, transactionType, serviceName } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
+
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['transactionResult'],
+      projection: PROJECTION.TRANSACTIONS,
+      params: {
+        transactionName,
+        transactionType,
+        serviceName
+      }
+    };
+    return config;
+  }, [transactionName, transactionType, serviceName]);
 
   return (
     <div>
@@ -47,43 +69,50 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      <ChartsSyncContextProvider>
-        <TransactionBreakdown />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localUIFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <ChartsSyncContextProvider>
+            <TransactionBreakdown />
 
-        <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-        <TransactionCharts
-          hasMLJob={false}
-          charts={transactionChartsData}
-          urlParams={urlParams}
-          location={location}
-        />
-      </ChartsSyncContextProvider>
+            <TransactionCharts
+              hasMLJob={false}
+              charts={transactionChartsData}
+              urlParams={urlParams}
+              location={location}
+            />
+          </ChartsSyncContextProvider>
 
-      <EuiHorizontalRule size="full" margin="l" />
+          <EuiHorizontalRule size="full" margin="l" />
 
-      <EuiPanel>
-        <TransactionDistribution
-          distribution={distributionData}
-          isLoading={
-            distributionStatus === FETCH_STATUS.LOADING ||
-            distributionStatus === undefined
-          }
-          urlParams={urlParams}
-        />
-      </EuiPanel>
+          <EuiPanel>
+            <TransactionDistribution
+              distribution={distributionData}
+              isLoading={
+                distributionStatus === FETCH_STATUS.LOADING ||
+                distributionStatus === undefined
+              }
+              urlParams={urlParams}
+            />
+          </EuiPanel>
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      {transaction && (
-        <Transaction
-          location={location}
-          transaction={transaction}
-          urlParams={urlParams}
-          waterfall={waterfall}
-          exceedsMax={exceedsMax}
-        />
-      )}
+          {transaction && (
+            <Transaction
+              location={location}
+              transaction={transaction}
+              urlParams={urlParams}
+              waterfall={waterfall}
+              exceedsMax={exceedsMax}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }

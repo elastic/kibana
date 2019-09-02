@@ -36,7 +36,7 @@ export const PopulationSettings: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <BucketSpan />
+              <BucketSpan setIsValid={setIsValid} />
             </EuiFlexItem>
             <EuiFlexItem>
               <Influencers />

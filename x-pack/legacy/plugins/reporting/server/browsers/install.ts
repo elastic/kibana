@@ -47,6 +47,7 @@ export async function installBrowser(
     await chmod(binaryPath, '755');
   }
 
+  logger.debug(`Browser installed at ${binaryPath}`);
   return {
     binaryPath,
   };

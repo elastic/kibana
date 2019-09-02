@@ -109,7 +109,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.addLogColumnButtonLabel"
-            defaultMessage="Add Column"
+            defaultMessage="Add column"
           />
         </EuiButton>
       }

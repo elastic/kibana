@@ -89,6 +89,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                   {flyoutComponent}
                   <ElasticsearchNodes
                     clusterStatus={clusterStatus}
+                    clusterUuid={globalState.cluster_uuid}
                     setupMode={setupMode}
                     nodes={nodes}
                     showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}

@@ -29,10 +29,6 @@ export function fromUser(userInput: object | string) {
   const matchAll = '';
 
   if (_.isObject(userInput)) {
-    // If we get an empty object, treat it as a *
-    if (!Object.keys(userInput).length) {
-      return matchAll;
-    }
     return userInput;
   }
 

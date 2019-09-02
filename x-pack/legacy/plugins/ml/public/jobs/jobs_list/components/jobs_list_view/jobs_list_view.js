@@ -69,6 +69,7 @@ export class JobsListView extends Component {
     this.showCreateWatchFlyout = () => {};
 
     this.blockRefresh = false;
+    this.refreshIntervalSubscription = null;
   }
 
   componentDidMount() {
@@ -100,7 +101,7 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     if (this.props.isManagementTable === undefined) {
-      timefilter.off('refreshIntervalUpdate');
+      if (this.refreshIntervalSubscription) this.refreshIntervalSubscription.unsubscribe();
       deletingJobsRefreshTimeout = null;
       this.clearRefreshInterval();
     }
@@ -122,8 +123,8 @@ export class JobsListView extends Component {
 
   initAutoRefreshUpdate() {
     // update the interval if it changes
-    timefilter.on('refreshIntervalUpdate', () => {
-      this.setAutoRefresh();
+    this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
+      next: () => this.setAutoRefresh()
     });
   }
 
@@ -362,21 +363,22 @@ export class JobsListView extends Component {
   }
 
   renderManagementJobsListComponents() {
-    const { loading } = this.state;
+    const { loading, itemIdToExpandedRowMap, filteredJobsSummaryList, fullJobsList, selectedJobs } = this.state;
     return (
       <div className="managementJobsList">
         <div>
           <JobFilterBar setFilters={this.setFilters} />
         </div>
         <JobsList
-          jobsSummaryList={this.state.filteredJobsSummaryList}
-          fullJobsList={this.state.fullJobsList}
-          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          jobsSummaryList={filteredJobsSummaryList}
+          fullJobsList={fullJobsList}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
           selectJobChange={this.selectJobChange}
-          selectedJobsCount={this.state.selectedJobs.length}
+          selectedJobsCount={selectedJobs.length}
           loading={loading}
           isManagementTable={true}
+          isMlEnabledInSpace={this.props.isMlEnabledInSpace}
         />
       </div>
     );
@@ -430,7 +432,6 @@ export class JobsListView extends Component {
         <CreateWatchFlyout
           setShowFunction={this.setShowCreateWatchFlyoutFunction}
           unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
-          compile={this.props.compile}
         />
       </div>
     );

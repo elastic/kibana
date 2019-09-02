@@ -21,6 +21,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { i18n } from '@kbn/i18n';
 import path from 'path';
 
+import { createFailError } from '@kbn/dev-utils';
 import {
   accessAsync,
   checkValuesProperty,
@@ -33,7 +34,6 @@ import {
   // @ts-ignore
 } from './utils';
 
-import { createFailError } from '../run';
 import { I18nConfig } from './config';
 import { serializeToJson } from './serializers';
 

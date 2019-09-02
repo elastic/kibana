@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { EuiContextMenuPanelDescriptor, EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
+import { Action } from '../../actions';
+import { IEmbeddable } from '../../embeddables';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -29,25 +30,40 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
+  badges: Action[];
+  embeddable: IEmbeddable;
 }
 
-interface PanelHeaderUiProps extends PanelHeaderProps {
-  intl: InjectedIntl;
+function renderBadges(badges: Action[], embeddable: IEmbeddable) {
+  return badges.map(badge => (
+    <EuiBadge
+      key={badge.id}
+      iconType={badge.getIconType({ embeddable })}
+      onClick={() => badge.execute({ embeddable })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+    >
+      {badge.getDisplayName({ embeddable })}
+    </EuiBadge>
+  ));
 }
 
-function PanelHeaderUi({
+export function PanelHeader({
   title,
   isViewMode,
   hidePanelTitles,
   getActionContextMenuPanel,
-  intl,
   closeContextMenu,
-}: PanelHeaderUiProps) {
+  badges,
+  embeddable,
+}: PanelHeaderProps) {
   const classes = classNames('embPanel__header', {
     'embPanel__header--floater': !title || hidePanelTitles,
   });
 
-  if (isViewMode && (!title || hidePanelTitles)) {
+  const showTitle = !isViewMode || (title && !hidePanelTitles);
+  const showPanelBar = badges.length > 0 || showTitle;
+
+  if (!showPanelBar) {
     return (
       <div className={classes}>
         <PanelOptionsMenu
@@ -68,17 +84,15 @@ function PanelHeaderUi({
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
         title={title}
-        aria-label={intl.formatMessage(
-          {
-            id: 'embeddableApi.panel.dashboardPanelAriaLabel',
-            defaultMessage: 'Dashboard panel: {title}',
-          },
-          {
+        aria-label={i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+          defaultMessage: 'Dashboard panel: {title}',
+          values: {
             title,
-          }
-        )}
+          },
+        })}
       >
-        {hidePanelTitles ? '' : title}
+        {showTitle ? `${title} ` : ''}
+        {renderBadges(badges, embeddable)}
       </div>
 
       <PanelOptionsMenu
@@ -89,5 +103,3 @@ function PanelHeaderUi({
     </div>
   );
 }
-
-export const PanelHeader = injectI18n(PanelHeaderUi);
