@@ -17,4 +17,19 @@
  * under the License.
  */
 
-export type FieldParamType = any;
+import { AggType, AggTypeConfig } from '../agg_type';
+import { AggConfig } from '../../vis';
+
+export class BucketAggType extends AggType {
+  getKey: (bucket: any, key: any, agg: AggConfig) => any;
+
+  constructor(config: AggTypeConfig) {
+    super(config);
+
+    this.getKey =
+      config.getKey ||
+      ((bucket, key) => {
+        return key || bucket.key;
+      });
+  }
+}
