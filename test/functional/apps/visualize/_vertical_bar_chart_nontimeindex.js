@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
   describe.skip('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
