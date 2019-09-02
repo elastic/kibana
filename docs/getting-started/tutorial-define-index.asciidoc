@@ -20,7 +20,8 @@ index named `shakespeare,` and the accounts data set, which has an index named
 
 . In Kibana, open *Management*, and then click *Index Patterns.*
 . If this is your first index pattern, the *Create index pattern* page opens automatically.
-Otherwise, click *Create index pattern*.
+Otherwise, click *Create index pattern*. (Index pattern names must not be exactly the same. 
+You have been provided with unique names throughout this tutorial).
 . Enter `shakes*` in the *Index pattern* field.
 +
 [role="screenshot"]
