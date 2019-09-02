@@ -7,9 +7,13 @@
 import { fromNullable } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 
+export enum WhitelistedHosts {
+  Any = '*',
+}
+
 export interface ActionsKibanaConfig {
   enabled: boolean;
-  whitelistedHosts: 'any' | 'none' | string[];
+  whitelistedHosts: WhitelistedHosts.Any | string[];
 }
 
 export interface ActionsConfigurationUtilities {
@@ -22,9 +26,7 @@ export function getActionsConfigurationUtilities(
   return {
     isWhitelistedHostname(uri: string): boolean {
       switch (config.whitelistedHosts) {
-        case 'none':
-          return false;
-        case 'any':
+        case WhitelistedHosts.Any:
           return true;
         default:
           if (Array.isArray(config.whitelistedHosts)) {

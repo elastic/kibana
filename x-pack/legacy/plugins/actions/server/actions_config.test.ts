@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
+import {
+  ActionsKibanaConfig,
+  getActionsConfigurationUtilities,
+  WhitelistedHosts,
+} from './actions_config';
 
 describe('isWhitelistedHostname', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: 'any' };
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: WhitelistedHosts.Any };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedHostname(
         'https://github.com/elastic/kibana'

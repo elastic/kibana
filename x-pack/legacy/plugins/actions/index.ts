@@ -32,9 +32,9 @@ export function actions(kibana: any) {
               Joi.array()
                 .items(Joi.string().hostname())
                 .sparse(false),
-              Joi.string().valid('any', 'none')
+              Joi.string().valid('*')
             )
-            .default('none'),
+            .default([]),
         })
         .default();
     },
