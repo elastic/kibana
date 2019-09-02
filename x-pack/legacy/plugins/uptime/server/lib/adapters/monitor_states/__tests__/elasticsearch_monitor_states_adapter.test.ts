@@ -5,7 +5,7 @@
  */
 
 import { DatabaseAdapter } from '../../database';
-import exampleFilter from './example_filter';
+import exampleFilter from './example_filter.json';
 import monitorState from './monitor_states_docs.json';
 import { ElasticsearchMonitorStatesAdapter } from '../elasticsearch_monitor_states_adapter';
 
