@@ -51,7 +51,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.filters[0];
+      const aggConfig = vis.aggs.byName('filters')[0];
       const filter = createFilterFilters(aggConfig, 'type:nginx');
       expect(filter.query.bool.must[0].query_string.query).to.be('type:nginx');
       expect(filter.meta).to.have.property('index', indexPattern.id);
