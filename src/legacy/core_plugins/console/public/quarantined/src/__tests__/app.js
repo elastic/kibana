@@ -23,7 +23,7 @@ import $ from 'jquery';
 import mappings from '../mappings';
 import init from '../app';
 
-const history = {};
+const history = { getSavedEditorState() {}, };
 
 describe('console app initialization', () => {
   const sandbox = sinon.createSandbox();
@@ -34,7 +34,6 @@ describe('console app initialization', () => {
   beforeEach(() => {
     ajaxDoneStub = sinon.stub();
     sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub });
-    sandbox.stub(history, 'getSavedEditorState');
     sandbox.stub(mappings, 'retrieveAutoCompleteInfo');
 
     inputMock = {
