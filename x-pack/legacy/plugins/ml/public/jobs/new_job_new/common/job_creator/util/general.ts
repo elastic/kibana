@@ -21,7 +21,7 @@ import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from '../';
-import { CREATED_BY_LABEL } from './constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(job: Job, datafeed: Datafeed) {
@@ -156,7 +156,10 @@ export function convertToMultiMetricJob(jobCreator: JobCreator) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   stashCombinedJob(jobCreator, true, false);
 
-  window.location.href = window.location.href.replace('single_metric', 'multi_metric');
+  window.location.href = window.location.href.replace(
+    JOB_TYPE.SINGLE_METRIC,
+    JOB_TYPE.MULTI_METRIC
+  );
 }
 
 export function convertToAdvancedJob(
@@ -165,14 +168,14 @@ export function convertToAdvancedJob(
   jobCreator.createdBy = null;
   stashCombinedJob(jobCreator, false, true);
 
-  let jobType = 'single_metric';
+  let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
-    jobType = 'multi_metric';
+    jobType = JOB_TYPE.MULTI_METRIC;
   } else if (isPopulationJobCreator(jobCreator)) {
-    jobType = 'population';
+    jobType = JOB_TYPE.POPULATION;
   }
 
-  window.location.href = window.location.href.replace(jobType, 'advanced');
+  window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
 }
 
 export function resetJob(jobCreator: JobCreator) {
