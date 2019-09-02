@@ -331,7 +331,7 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
-        data-test-subj="mlJobListTable"
+        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
         loading={loading === true}
         noItemsMessage={loading ?
           intl.formatMessage({
