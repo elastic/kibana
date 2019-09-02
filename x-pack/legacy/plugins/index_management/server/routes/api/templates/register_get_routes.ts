@@ -4,33 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
 import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 
 const allHandler: RouterRouteHandler = async (_req, callWithRequest) => {
   const indexTemplatesByName = await callWithRequest('indices.getTemplate');
-  const indexTemplateNames = Object.keys(indexTemplatesByName);
 
-  const indexTemplates = indexTemplateNames.map(name => {
-    const {
-      version,
-      order,
-      index_patterns: indexPatterns = [],
-      settings = {},
-      aliases = {},
-      mappings = {},
-    } = indexTemplatesByName[name];
-    return {
-      name,
-      version,
-      order,
-      indexPatterns: indexPatterns.sort(),
-      settings,
-      aliases,
-      mappings,
-    };
-  });
-
-  return indexTemplates;
+  return deserializeTemplateList(indexTemplatesByName);
 };
 
 const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -38,24 +18,7 @@ const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const indexTemplateByName = await callWithRequest('indices.getTemplate', { name });
 
   if (indexTemplateByName[name]) {
-    const {
-      version,
-      order,
-      index_patterns: indexPatterns = [],
-      settings = {},
-      aliases = {},
-      mappings = {},
-    } = indexTemplateByName[name];
-
-    return {
-      name,
-      version,
-      order,
-      indexPatterns: indexPatterns.sort(),
-      settings,
-      aliases,
-      mappings,
-    };
+    return deserializeTemplate({ ...indexTemplateByName[name], name });
   }
 };
 

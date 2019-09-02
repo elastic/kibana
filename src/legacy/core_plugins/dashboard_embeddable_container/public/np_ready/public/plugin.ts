@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
-import { ExpandPanelAction, DashboardContainerFactory, DashboardCapabilities } from './lib';
+import { ExpandPanelAction, DashboardContainerFactory } from './lib';
 import { Start as InspectorStartContract } from '../../../../../../plugins/inspector/public';
 
 interface SetupDependencies {
@@ -52,16 +52,11 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, __LEGACY } = plugins;
 
-    const dashboardOptions = {
-      capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
-      getFactory: embeddable.getEmbeddableFactory,
-    };
-    const factory = new DashboardContainerFactory(dashboardOptions, {
-      getActions: embeddable.getTriggerCompatibleActions,
-      getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
-      getEmbeddableFactory: embeddable.getEmbeddableFactory,
+    const factory = new DashboardContainerFactory({
+      application,
       notifications,
       overlays,
+      embeddable,
       inspector,
       SavedObjectFinder: __LEGACY.SavedObjectFinder,
       ExitFullScreenButton: __LEGACY.ExitFullScreenButton,

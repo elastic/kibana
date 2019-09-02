@@ -124,7 +124,7 @@ export class Server {
   private registerDefaultRoute(httpSetup: HttpServiceSetup) {
     const router = httpSetup.createRouter('/core');
     router.get({ path: '/', validate: false }, async (context, req, res) =>
-      res.ok({ version: '0.0.1' })
+      res.ok({ body: { version: '0.0.1' } })
     );
   }
 

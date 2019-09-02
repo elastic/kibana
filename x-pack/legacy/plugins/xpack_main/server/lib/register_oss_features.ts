@@ -46,7 +46,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['visualization', 'url', 'query'],
+            all: ['visualization', 'url', 'query', 'lens'],
             read: ['index-pattern', 'search'],
           },
           ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
@@ -54,7 +54,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
           },
           ui: ['show'],
         },

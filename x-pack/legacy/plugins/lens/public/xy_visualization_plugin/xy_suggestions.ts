@@ -138,33 +138,36 @@ function getSuggestion(
     xValue,
   };
 
-  // if current state is using the same data, suggest same chart with different presentational configuration
-  if (currentState && changeType === 'unchanged') {
-    if (xValue.operation.scale && xValue.operation.scale !== 'ordinal') {
-      // change chart type for interval or ratio scales on x axis
-      const newSeriesType = flipSeriesType(seriesType);
-      return buildSuggestion({
-        ...options,
-        seriesType: newSeriesType,
-        title: newSeriesType.startsWith('area')
-          ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
-              defaultMessage: 'Area chart',
-            })
-          : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
-              defaultMessage: 'Bar chart',
-            }),
-      });
-    } else {
-      // flip between horizontal/vertical for ordinal scales
-      return buildSuggestion({
-        ...options,
-        title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        isHorizontal: !options.isHorizontal,
-      });
-    }
-  } else {
+  const isSameState = currentState && changeType === 'unchanged';
+
+  if (!isSameState) {
     return buildSuggestion(options);
   }
+
+  // if current state is using the same data, suggest same chart with different presentational configuration
+
+  if (xValue.operation.scale === 'ordinal') {
+    // flip between horizontal/vertical for ordinal scales
+    return buildSuggestion({
+      ...options,
+      title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
+      isHorizontal: !options.isHorizontal,
+    });
+  }
+
+  // change chart type for interval or ratio scales on x axis
+  const newSeriesType = flipSeriesType(seriesType);
+  return buildSuggestion({
+    ...options,
+    seriesType: newSeriesType,
+    title: newSeriesType.startsWith('area')
+      ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
+          defaultMessage: 'Area chart',
+        })
+      : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+          defaultMessage: 'Bar chart',
+        }),
+  });
 }
 
 function flipSeriesType(oldSeriesType: SeriesType) {
