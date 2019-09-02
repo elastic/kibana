@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { indexBy, Dictionary } from 'lodash';
+import { IFieldFormat } from '../types';
+
+interface FieldFormatConfig {
+  id: string;
+  params?: Record<string, any>;
+}
 
 export class FieldFormatsService {
-  constructor(fieldFormatClasses, getConfig) {
-    this._fieldFormats = _.indexBy(fieldFormatClasses, 'id');
+  getConfig: any;
+  _fieldFormats: Dictionary<IFieldFormat>;
+
+  constructor(fieldFormatClasses: IFieldFormat[], getConfig: Function) {
+    this._fieldFormats = indexBy(fieldFormatClasses, 'id');
     this.getConfig = getConfig;
   }
 
@@ -30,9 +39,9 @@ export class FieldFormatsService {
    * using the format:defaultTypeMap config map
    *
    * @param  {String} fieldType - the field type
-   * @return {String}
+   * @return {FieldFormatConfig}
    */
-  getDefaultConfig(fieldType) {
+  getDefaultConfig(fieldType: string): FieldFormatConfig {
     const defaultMap = this.getConfig('format:defaultTypeMap');
     return defaultMap[fieldType] || defaultMap._default_;
   }
@@ -43,20 +52,20 @@ export class FieldFormatsService {
    * @param  {String} fieldType
    * @return {FieldFormat}
    */
-  getDefaultInstance(fieldType) {
-    const conf = this.getDefaultConfig(fieldType);
-    const FieldFormat = this._fieldFormats[conf.id];
-    return new FieldFormat(conf.params, this.getConfig);
+  getDefaultInstance(fieldType: string): IFieldFormat {
+    return this.getInstance(this.getDefaultConfig(fieldType));
   }
 
   /**
    * Get the fieldFormat instance for a field format configuration.
    *
-   * @param  {Object} conf:id, conf:params
+   * @param  {FieldFormatConfig} field format config
    * @return {FieldFormat}
    */
-  getInstance(conf) {
+  getInstance(conf: FieldFormatConfig): IFieldFormat {
     const FieldFormat = this._fieldFormats[conf.id];
+
+    // @ts-ignore
     return new FieldFormat(conf.params, this.getConfig);
   }
 
@@ -66,7 +75,7 @@ export class FieldFormatsService {
    * @param  {String} fieldFormatId - the FieldFormat id
    * @return {FieldFormat}
    */
-  getType(fieldFormatId) {
+  getType(fieldFormatId: string): IFieldFormat {
     return this._fieldFormats[fieldFormatId];
   }
 }
