@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isOk, unsafeGet } from './builtin_action_types/lib/result_type';
+import { unsafeGet } from './builtin_action_types/lib/result_type';
 import {
   ActionsKibanaConfig,
   getActionsConfigurationUtilities,
