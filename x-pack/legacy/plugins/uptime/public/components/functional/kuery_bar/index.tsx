@@ -69,14 +69,9 @@ export function KueryBar() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
-  async function fetchIndexPattern() {
-    const getPatternResult = await getIndexPattern(basePath);
-    setIndexPattern(toStaticIndexPattern(getPatternResult));
-    setIsLoadingIndexPattern(false);
-  }
-
   useEffect(() => {
-    fetchIndexPattern();
+    getIndexPattern(basePath, (result: any) => setIndexPattern(toStaticIndexPattern(result)));
+    setIsLoadingIndexPattern(false);
   }, []);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
