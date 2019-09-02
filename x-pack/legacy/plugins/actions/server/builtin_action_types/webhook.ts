@@ -50,24 +50,29 @@ export function getActionType(configurationUtilities: ActionsConfigurationUtilit
     name: 'webhook',
     validate: {
       config: schema.object(configSchemaProps, {
-        validate: configObject => {
-          const { url }: ActionTypeConfigType = configObject;
-          const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
-          if (isErr(whitelistValidation)) {
-            return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
-              defaultMessage: 'error configuring webhook: {message}',
-              values: {
-                message: whitelistValidation.error,
-              },
-            });
-          }
-        },
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
     executor: curry(executor)(configurationUtilities),
   };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ActionTypeConfigType
+) {
+  const { url } = configObject;
+  const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
+  if (isErr(whitelistValidation)) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+      defaultMessage: 'error configuring webhook: {message}',
+      values: {
+        message: whitelistValidation.error,
+      },
+    });
+  }
 }
 
 // action executor
