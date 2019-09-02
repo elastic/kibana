@@ -17,34 +17,38 @@
  * under the License.
  */
 
-import { TimefilterService, TimefilterSetup } from '.';
+import { TimefilterService, Timefilter, TimeHistory } from '.';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<TimefilterSetup> = {
-    timefilter: {
-      isAutoRefreshSelectorEnabled: false,
-      isTimeRangeSelectorEnabled: false,
-      getEnabledUpdated$: jest.fn(),
-      getTimeUpdate$: jest.fn(),
-      getRefreshIntervalUpdate$: jest.fn(),
-      getAutoRefreshFetch$: jest.fn(),
-      getFetch$: jest.fn(),
-      getTime: jest.fn(),
-      setTime: jest.fn(),
-      setRefreshInterval: jest.fn(),
-      getRefreshInterval: jest.fn(),
-      getActiveBounds: jest.fn(),
-      disableAutoRefreshSelector: jest.fn(),
-      disableTimeRangeSelector: jest.fn(),
-      enableAutoRefreshSelector: jest.fn(),
-      enableTimeRangeSelector: jest.fn(),
-    },
-    history: {
-      add: jest.fn(),
-      get: jest.fn(),
-    },
+  const timefilterMock: jest.Mocked<Timefilter> = {
+    isAutoRefreshSelectorEnabled: false,
+    isTimeRangeSelectorEnabled: false,
+    getEnabledUpdated$: jest.fn(),
+    getTimeUpdate$: jest.fn(),
+    getRefreshIntervalUpdate$: jest.fn(),
+    getAutoRefreshFetch$: jest.fn(),
+    getFetch$: jest.fn(),
+    getTime: jest.fn(),
+    setTime: jest.fn(),
+    setRefreshInterval: jest.fn(),
+    getRefreshInterval: jest.fn(),
+    getActiveBounds: jest.fn(),
+    disableAutoRefreshSelector: jest.fn(),
+    disableTimeRangeSelector: jest.fn(),
+    enableAutoRefreshSelector: jest.fn(),
+    enableTimeRangeSelector: jest.fn(),
+  };
+
+  const historyMock: jest.Mocked<TimeHistory> = {
+    add: jest.fn(),
+    get: jest.fn(),
+  };
+
+  const setupContract = {
+    timefilter: timefilterMock,
+    history: historyMock,
   };
 
   return setupContract;

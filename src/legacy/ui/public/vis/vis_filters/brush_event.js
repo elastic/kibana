@@ -20,9 +20,8 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { buildRangeFilter } from '@kbn/es-query';
-import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
-export function onBrushEvent(event, $state) {
+export function onBrushEvent(event, $state, timefilter) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
@@ -49,7 +48,7 @@ export function onBrushEvent(event, $state) {
 
     if (to - from === 0) return;
 
-    data.timefilter.timefilter.setTime({
+    timefilter.setTime({
       from,
       to,
       mode: 'absolute'

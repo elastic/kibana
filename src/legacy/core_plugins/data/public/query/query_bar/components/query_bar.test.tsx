@@ -50,6 +50,10 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
   }
 });
 
+timefilterSetupMock.history.get.mockImplementation(() => {
+  return [];
+});
+
 const noop = () => {
   return;
 };
