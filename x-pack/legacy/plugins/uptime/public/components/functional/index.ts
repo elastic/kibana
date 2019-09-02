@@ -6,7 +6,7 @@
 
 export { EmptyState } from './empty_state';
 export { EmptyStatusBar } from './empty_status_bar';
-export { FilterDropdowns } from './filter_dropdowns';
+export { FilterGroup } from './filter_group';
 export { KueryBar } from './kuery_bar';
 export { IntegrationLink } from './integration_link';
 export { MonitorCharts } from './monitor_charts';

@@ -25,7 +25,7 @@ interface FilterBarDropdownsProps {
 
 type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
 
-export const FilterDropdownsComponent = ({
+export const FilterGroupComponent = ({
   loading: isLoading,
   currentFilter,
   data,
@@ -142,7 +142,7 @@ export const FilterDropdownsComponent = ({
   );
 };
 
-export const FilterDropdowns = withUptimeGraphQL<FilterBarQueryResult, FilterBarDropdownsProps>(
-  FilterDropdownsComponent,
+export const FilterGroup = withUptimeGraphQL<FilterBarQueryResult, FilterBarDropdownsProps>(
+  FilterGroupComponent,
   filterBarQuery
 );

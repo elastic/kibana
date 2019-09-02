@@ -11,7 +11,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
-  FilterDropdowns,
+  FilterGroup,
   KueryBar,
   MonitorList,
   OverviewPageParsingErrorCallout,
@@ -115,12 +115,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     statusFilter,
   };
 
-  const onFilterUpdate = (filtersKuery: string) => {
-    if (urlFilters !== filtersKuery) {
-      updateUrl({ filters: filtersKuery });
-    }
-  };
-
   const linkParameters = stringifyUrlParams(params);
 
   // TODO: reintroduce for pagination and sorting
@@ -141,9 +135,13 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
             <KueryBar />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <FilterDropdowns
+            <FilterGroup
               currentFilter={urlFilters}
-              onFilterUpdate={onFilterUpdate}
+              onFilterUpdate={(filtersKuery: string) => {
+                if (urlFilters !== filtersKuery) {
+                  updateUrl({ filters: filtersKuery });
+                }
+              }}
               variables={sharedProps}
             />
           </EuiFlexItem>
