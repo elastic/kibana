@@ -19,6 +19,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 // @ts-ignore
 import mappings from '../../../../../public/quarantined/src/mappings';
@@ -130,21 +131,32 @@ export function Main() {
 
   return (
     <>
-      <TopNavMenu
-        items={getTopNavConfig({
-          onClickHistory: () => setShowHistory(!showingHistory),
-          onClickSettings: () => setShowSettings(true),
-          onClickHelp: () => setShowHelp(!showHelp),
-        })}
-      />
-      {showingHistory ? renderConsoleHistory() : null}
-      <MemoConsoleEditor
-        onEditorsReady={onEditorReady}
-        docLinkVersion={docLinkVersion}
-        onPanelWidthChange={onPanelWidthChange}
-        initialInputPanelWidth={firstPanelWidth}
-        initialOutputPanelWidth={secondPanelWidth}
-      />
+      <EuiFlexGroup
+        style={{ height: '100%' }}
+        gutterSize="none"
+        direction="column"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <TopNavMenu
+            items={getTopNavConfig({
+              onClickHistory: () => setShowHistory(!showingHistory),
+              onClickSettings: () => setShowSettings(true),
+              onClickHelp: () => setShowHelp(!showHelp),
+            })}
+          />
+        </EuiFlexItem>
+        {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
+        <EuiFlexItem>
+          <MemoConsoleEditor
+            onEditorsReady={onEditorReady}
+            docLinkVersion={docLinkVersion}
+            onPanelWidthChange={onPanelWidthChange}
+            initialInputPanelWidth={firstPanelWidth}
+            initialOutputPanelWidth={secondPanelWidth}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {showWelcome ? (
         <WelcomePanel
