@@ -87,7 +87,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <FormattedMessage
-                  id="common.ui.savedObjects.saveModal.saveTitle"
+                  id="kibana-react.savedObjects.saveModal.saveTitle"
                   defaultMessage="Save {objectType}"
                   values={{ objectType: this.props.objectType }}
                 />
@@ -109,7 +109,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                   fullWidth
                   label={
                     <FormattedMessage
-                      id="common.ui.savedObjects.saveModal.titleLabel"
+                      id="kibana-react.savedObjects.saveModal.titleLabel"
                       defaultMessage="Title"
                     />
                   }
@@ -133,7 +133,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <EuiModalFooter>
               <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
                 <FormattedMessage
-                  id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+                  id="kibana-react.savedObjects.saveModal.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
@@ -195,10 +195,10 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     const { isLoading, title, hasTitleDuplicate } = this.state;
 
     let confirmLabel: string | React.ReactNode = hasTitleDuplicate
-      ? i18n.translate('common.ui.savedObjects.saveModal.confirmSaveButtonLabel', {
+      ? i18n.translate('kibana-react.savedObjects.saveModal.confirmSaveButtonLabel', {
           defaultMessage: 'Confirm save',
         })
-      : i18n.translate('common.ui.savedObjects.saveModal.saveButtonLabel', {
+      : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
           defaultMessage: 'Save',
         });
 
@@ -229,7 +229,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.duplicateTitleLabel"
+              id="kibana-react.savedObjects.saveModal.duplicateTitleLabel"
               defaultMessage="A {objectType} with the title '{title}' already exists."
               values={{ objectType: this.props.objectType, title: this.state.title }}
             />
@@ -239,7 +239,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.duplicateTitleDescription"
+              id="kibana-react.savedObjects.saveModal.duplicateTitleDescription"
               defaultMessage="Click {confirmSaveLabel} to save the {objectType} with the duplicate title."
               values={{
                 objectType: this.props.objectType,
@@ -248,7 +248,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                     {this.props.confirmButtonLabel
                       ? this.props.confirmButtonLabel
                       : i18n.translate(
-                          'common.ui.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText',
+                          'kibana-react.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText',
                           {
                             defaultMessage: 'Confirm save',
                           }
@@ -277,7 +277,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           onChange={this.onCopyOnSaveChange}
           label={
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.saveAsNewLabel"
+              id="kibana-react.savedObjects.saveModal.saveAsNewLabel"
               defaultMessage="Save as a new {objectType}"
               values={{ objectType: this.props.objectType }}
             />
