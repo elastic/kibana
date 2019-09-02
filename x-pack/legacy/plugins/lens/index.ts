@@ -25,6 +25,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
         description: 'Explore and visualize data.',
         main: `plugins/${PLUGIN_ID}/index`,
+        listed: false,
       },
       embeddableFactories: ['plugins/lens/register_embeddable'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -53,7 +54,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       server.plugins.xpack_main.registerFeature({
         id: PLUGIN_ID,
         name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-        navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         privileges: {
