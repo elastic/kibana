@@ -13,6 +13,7 @@ import {
   EuiForm,
   EuiFieldText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiSwitch,
@@ -76,8 +77,19 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       {!isJobCreated && (
         <Fragment>
           <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
+              defaultMessage: 'Job type',
+            })}
+            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeHelpText', {
+              defaultMessage: `This form let's you create an outlier detection job using a model memory limit of 50MByte. To create jobs using other settings or to create other types of jobs, please switch to the advanced editor below.`,
+            })}
+          >
+            <EuiText>Outlier Detection</EuiText>
+          </EuiFormRow>
+          <EuiHorizontalRule />
+          <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-              defaultMessage: 'Analytics job ID',
+              defaultMessage: 'Job ID',
             })}
             isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             error={[
@@ -100,7 +112,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="analytics job ID"
+              placeholder="Job ID"
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
@@ -119,7 +131,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             helpText={
               !sourceIndexNameEmpty &&
               !indexPatternsWithNumericFields.includes(sourceIndex) &&
-              i18n.translate('xpack.ml.dataframe.stepDetailsForm.sourceIndexHelpText', {
+              i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
@@ -243,6 +255,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
             />
           </EuiFormRow>
+          <EuiHorizontalRule />
           <EuiButtonEmpty onClick={actions.switchToAdvancedEditor} size="s" flush="left">
             {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton', {
               defaultMessage: 'Switch to advanced editor',
@@ -251,7 +264,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           <EuiText size="s" color="subdued">
             {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorHelpText', {
               defaultMessage:
-                'Note you cannot switch back to this form once the advanced editor is enabled.',
+                'The advanced editor allows you to edit the full analytics configuration. Note you cannot switch back to this form once the advanced editor is enabled.',
             })}
           </EuiText>
         </Fragment>
