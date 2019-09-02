@@ -43,8 +43,8 @@ export const JAVA: LanguageServerDefinition = {
   priority: 2,
   downloadUrl: (version: string, devMode?: boolean) =>
     devMode!
-      ? `https://snapshots.elastic.co/downloads/java-langserver-plugins/java-langserver/java-langserver-${version}-SNAPSHOT-$OS.zip`
-      : `https://artifacts.elastic.co/downloads/java-langserver-plugins/java-langserver/java-langserver-${version}-$OS.zip`,
+      ? `https://snapshots.elastic.co/downloads/kibana-plugins/java-langserver/java-langserver-${version}-SNAPSHOT-$OS.zip`
+      : `https://artifacts.elastic.co/downloads/kibana-plugins/java-langserver/java-langserver-${version}-$OS.zip`,
 };
 export const GO: LanguageServerDefinition = {
   name: 'Go',
