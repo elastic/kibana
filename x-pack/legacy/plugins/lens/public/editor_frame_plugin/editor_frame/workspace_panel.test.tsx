@@ -575,7 +575,7 @@ describe('workspace_panel', () => {
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
-          tables: [expectedTable],
+          table: expectedTable,
         })
       );
       expect(mockDispatch).toHaveBeenCalledWith({

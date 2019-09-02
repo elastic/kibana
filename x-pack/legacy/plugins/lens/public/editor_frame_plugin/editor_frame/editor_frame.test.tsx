@@ -1044,6 +1044,17 @@ describe('editor_frame', () => {
     });
 
     it('should fetch suggestions of all visualizations', async () => {
+      mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+        {
+          state: {},
+          table: {
+            changeType: 'unchanged',
+            columns: [],
+            isMultiRow: true,
+            layerId: 'first',
+          },
+        },
+      ]);
       mount(
         <EditorFrame
           {...getDefaultProps()}
