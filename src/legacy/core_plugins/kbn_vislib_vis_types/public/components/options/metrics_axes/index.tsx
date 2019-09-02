@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, capitalize, uniq, get } from 'lodash';
+import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
@@ -27,8 +27,16 @@ import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';
-import { mapPositionOpposite, mapPosition } from './utils';
-import { makeSerie, isAxisHorizontal, countNextAxisNumber } from './helper';
+import {
+  makeSerie,
+  isAxisHorizontal,
+  countNextAxisNumber,
+  getUpdatedAxisName,
+  getPreviousAxisNumbers,
+  AxesNumbers,
+  mapPositionOpposite,
+  mapPosition,
+} from './utils';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',
@@ -44,13 +52,12 @@ export type ChangeValueAxis = (
 ) => void;
 
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
-const AXIS_PREFIX = 'Axis-';
 
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, aggs, aggsLabels, setVisType, vis } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
-  const [axesNumbers, setAxesNumbers] = useState({} as { [key: string]: number });
+  const [axesNumbers, setAxesNumbers] = useState({} as AxesNumbers);
 
   const setParamByIndex: SetParamByIndex = useCallback(
     (axesName, index, paramName, value) => {
@@ -132,46 +139,31 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     setLastCustomLabels(lastLabels);
   };
 
-  const getUpdatedAxisName = useCallback(
-    (axisPosition: ValueAxis['position']) => {
-      const axisName = capitalize(axisPosition) + AXIS_PREFIX;
-      const lastAxisNameNumber = axesNumbers[axisPosition];
-      let nextAxisNameNumber;
-
-      if (!lastAxisNameNumber) {
-        nextAxisNameNumber = stateParams.valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);
-      } else {
-        nextAxisNameNumber = lastAxisNameNumber + 1;
-      }
-
-      setAxesNumbers({ ...axesNumbers, [axisPosition]: nextAxisNameNumber });
-
-      return `${axisName}${nextAxisNameNumber}`;
-    },
-    [stateParams.valueAxes, axesNumbers]
-  );
-
   const onValueAxisPositionChanged = useCallback(
     (index: number, value: ValueAxis['position']) => {
       const valueAxes = [...stateParams.valueAxes];
+      const [name, lastAxisNameNumber] = getUpdatedAxisName(
+        value,
+        axesNumbers,
+        stateParams.valueAxes
+      );
 
       valueAxes[index] = {
         ...valueAxes[index],
-        name: getUpdatedAxisName(value),
+        name,
         position: value,
       };
 
+      setAxesNumbers({ ...axesNumbers, [value]: lastAxisNameNumber });
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes, getUpdatedAxisName, setValue]
+    [axesNumbers, stateParams.valueAxes, getUpdatedAxisName, setValue]
   );
 
   const onCategoryAxisPositionChanged = useCallback(
     (chartPosition: Axis['position']) => {
       const isChartHorizontal = isAxisHorizontal(chartPosition);
-      if (isChartHorizontal !== isCategoryAxisHorizontal) {
-        setIsCategoryAxisHorizontal(isChartHorizontal);
-      }
+      setIsCategoryAxisHorizontal(isAxisHorizontal(chartPosition));
 
       stateParams.valueAxes.forEach((axis, index) => {
         if (isAxisHorizontal(axis.position) === isChartHorizontal) {
@@ -180,7 +172,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         }
       });
     },
-    [stateParams.valueAxes, isCategoryAxisHorizontal, onValueAxisPositionChanged]
+    [stateParams.valueAxes, onValueAxisPositionChanged]
   );
 
   const addValueAxis = useCallback(() => {
@@ -197,16 +189,22 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     newAxis.id = VALUE_AXIS_PREFIX + nextAxisIdNumber;
     newAxis.position = mapPositionOpposite(newAxis.position);
 
-    newAxis.name = getUpdatedAxisName(newAxis.position);
+    const [name, lastAxisNameNumber] = getUpdatedAxisName(
+      newAxis.position,
+      axesNumbers,
+      stateParams.valueAxes
+    );
+    newAxis.name = name;
 
     setAxesNumbers({
       ...axesNumbers,
       [VALUE_AXIS_PREFIX]: nextAxisIdNumber,
+      [newAxis.position]: lastAxisNameNumber,
     });
 
     setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
     return newAxis;
-  }, [stateParams.valueAxes, axesNumbers, setValue]);
+  }, [stateParams.valueAxes, axesNumbers, getUpdatedAxisName, setValue]);
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
@@ -214,12 +212,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       setValue('valueAxes', newValueAxes);
 
-      const lastNumber = axesNumbers[VALUE_AXIS_PREFIX];
-
-      if (lastNumber === parseInt(axis.id.substr(VALUE_AXIS_PREFIX.length), 10)) {
+      const updatedNumbers = getPreviousAxisNumbers(axis, axesNumbers);
+      if (updatedNumbers) {
         setAxesNumbers({
-          ...axesNumbers,
-          [VALUE_AXIS_PREFIX]: lastNumber - 1,
+          ...updatedNumbers,
         });
       }
 
@@ -277,8 +273,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         const series = makeSerie(
           agg.id,
           label,
-          stateParams.seriesParams[stateParams.seriesParams.length - 1],
-          firstValueAxesId
+          firstValueAxesId,
+          stateParams.seriesParams[stateParams.seriesParams.length - 1]
         );
         return series;
       }

@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
-import { rotateOptions } from './utils';
+import { rotateOptions } from '../../../utils/collections';
 
 interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;

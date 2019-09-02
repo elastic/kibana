@@ -57,6 +57,7 @@ uiModules
         editorState: '=',
         onAggParamsChange: '=',
         hasHistogramAgg: '=',
+        currentTab: '=',
       },
       link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
@@ -96,7 +97,7 @@ uiModules
             aggs="editorState.aggs"
             aggs-labels="aggsLabels"
             has-histogram-agg="hasHistogramAgg"
-            current-tab="$parent.$parent.sidebar.section"
+            current-tab="sidebar.section"
             state-params="editorState.params"
             vis="vis"
             ui-state="uiState"

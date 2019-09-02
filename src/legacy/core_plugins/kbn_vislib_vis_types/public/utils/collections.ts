@@ -226,6 +226,27 @@ const thresholdLineStyles = [
   },
 ];
 
+const rotateOptions = [
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.horizontalText', {
+      defaultMessage: 'Horizontal',
+    }),
+    value: Rotates.HORIZONTAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.verticalText', {
+      defaultMessage: 'Vertical',
+    }),
+    value: Rotates.VERTICAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.angledText', {
+      defaultMessage: 'Angled',
+    }),
+    value: Rotates.ANGLED,
+  },
+];
+
 const getConfigCollections = () => ({
   legendPositions: positions,
   positions,
@@ -237,4 +258,4 @@ const getConfigCollections = () => ({
   thresholdLineStyles,
 });
 
-export { getConfigCollections };
+export { getConfigCollections, rotateOptions };

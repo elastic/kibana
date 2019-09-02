@@ -31,7 +31,7 @@ import {
 } from '../../common';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
-import { isAxisHorizontal } from './helper';
+import { isAxisHorizontal } from './utils';
 import { SetParamByIndex } from './';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(

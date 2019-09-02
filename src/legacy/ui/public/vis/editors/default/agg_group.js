@@ -51,7 +51,7 @@ uiModules
       template: function () {
         return `<vis-editor-agg-group-wrapper	
             ng-if="setValidity"	
-            current-tab="$parent.$parent.sidebar.section"
+            current-tab="sidebar.section"
             form-is-touched="formIsTouched"
             group-name="groupName"
             last-parent-pipeline-agg-title="lastParentPipelineAggTitle"
