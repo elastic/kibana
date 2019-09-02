@@ -462,6 +462,7 @@ export class WebElementWrapper {
           .getActions()
           .pause(wrapper.getActions().mouse)
           .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
           .perform();
       }
     });
