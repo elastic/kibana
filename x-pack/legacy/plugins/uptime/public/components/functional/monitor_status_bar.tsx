@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -28,13 +36,14 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
-    const { monitor, timestamp } = data.monitorStatus[0];
+    const { monitor, timestamp, tls } = data.monitorStatus[0];
     const duration = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
+    const certificateValidity = get(tls, 'certificate_not_valid_after', undefined);
     return (
       <EuiPanel>
-        <EuiFlexGroup gutterSize="l">
+        <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem grow={false}>
             <EuiHealth
               aria-label={i18n.translate(
@@ -93,11 +102,29 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
                 defaultMessage: 'Time since last check',
               }
             )}
-            grow={false}
+            grow={true}
           >
             {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
+        {certificateValidity && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              color="subdued"
+              grow={false}
+              size="s"
+              aria-label={i18n.translate('xpack.uptime.monitorStatusBar.sslCertificateExpiry', {
+                defaultMessage: 'SSL certificate expires',
+              })}
+            >
+              {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificateExpiry', {
+                defaultMessage: 'SSL certificate expires ',
+              })}
+              {moment(new Date(certificateValidity).valueOf()).fromNow()}
+            </EuiText>
+          </>
+        )}
       </EuiPanel>
     );
   }
