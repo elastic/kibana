@@ -124,7 +124,6 @@ function PreviewExpression({
 
 const MemoizedPreviewExpression = debouncedComponent(memo(PreviewExpression), 2000);
 
-
 export function SuggestionPanel({
   activeDatasourceId,
   datasourceMap,
