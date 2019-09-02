@@ -29,14 +29,10 @@ import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
 
 const name = 'timelion_vis';
 
-type Context = KibanaContext | null;
-
 interface Arguments {
   expression: string;
   interval: any;
 }
-
-export type VisParams = Required<Arguments>;
 
 interface RenderValue {
   visData: Context;
@@ -44,6 +40,8 @@ interface RenderValue {
   visParams: VisParams;
 }
 
+type Context = KibanaContext | null;
+type VisParams = Arguments;
 type Return = Promise<Render<RenderValue>>;
 
 export const timelionVis = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
