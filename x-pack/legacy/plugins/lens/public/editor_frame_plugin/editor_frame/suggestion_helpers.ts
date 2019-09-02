@@ -6,7 +6,13 @@
 
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI, TableChangeType } from '../../types';
+import {
+  Visualization,
+  Datasource,
+  FramePublicAPI,
+  TableChangeType,
+  TableSuggestion,
+} from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -63,47 +69,73 @@ export function getSuggestions({
     )
   );
 
+  // Collect all table suggestions from available datasources
   const datasourceTableSuggestions = _.flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
-      return (
-        (field
-          ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
-          : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
-        )
-          // TODO have the datasource in there by default
-          .map(suggestion => ({ ...suggestion, datasourceId }))
-      );
+      return (field
+        ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
+        : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
+      ).map(suggestion => ({ ...suggestion, datasourceId }));
     })
   );
 
+  // Pass all table suggestions to all visualization extensions to get visualization suggestions
+  // and rank them by score
   return _.flatten(
     Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
       _.flatten(
         datasourceTableSuggestions.map(datasourceSuggestion => {
           const table = datasourceSuggestion.table;
-          return visualization
-            .getSuggestions({
-              table,
-              state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-            })
-            .map(({ state, ...visualizationSuggestion }) => ({
-              ...visualizationSuggestion,
-              visualizationId,
-              visualizationState: state,
-              keptLayerIds:
-                visualizationId !== activeVisualizationId
-                  ? [datasourceSuggestion.table.layerId]
-                  : allLayerIds,
-              datasourceState: datasourceSuggestion.state,
-              datasourceId: datasourceSuggestion.datasourceId,
-              columns: table.columns.length,
-              changeType: table.changeType,
-            }));
+          const currentVisualizationState =
+            visualizationId === activeVisualizationId ? visualizationState : undefined;
+          const keptLayerIds =
+            visualizationId !== activeVisualizationId
+              ? [datasourceSuggestion.table.layerId]
+              : allLayerIds;
+          return getVisualizationSuggestions(
+            visualization,
+            table,
+            visualizationId,
+            datasourceSuggestion,
+            currentVisualizationState,
+            keptLayerIds
+          );
         })
       )
     )
   ).sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Queries a single visualization extensions for a single datasource suggestion and
+ * creates an array of complete suggestions containing both the target datasource
+ * state and target visualization state along with suggestion meta data like score,
+ * title and preview expression.
+ */
+function getVisualizationSuggestions(
+  visualization: Visualization<unknown, unknown>,
+  table: TableSuggestion,
+  visualizationId: string,
+  datasourceSuggestion: { datasourceId: string; state: unknown; table: TableSuggestion },
+  currentVisualizationState: unknown,
+  keptLayerIds: string[]
+) {
+  return visualization
+    .getSuggestions({
+      table,
+      state: currentVisualizationState,
+    })
+    .map(({ state, ...visualizationSuggestion }) => ({
+      ...visualizationSuggestion,
+      visualizationId,
+      visualizationState: state,
+      keptLayerIds,
+      datasourceState: datasourceSuggestion.state,
+      datasourceId: datasourceSuggestion.datasourceId,
+      columns: table.columns.length,
+      changeType: table.changeType,
+    }));
 }
 
 export function switchToSuggestion(
