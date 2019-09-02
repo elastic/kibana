@@ -137,12 +137,26 @@ interface InitialPageOptions extends PageSizeOptions {
   initialPageIndex: number;
   initialPageSize: number;
 }
-type Pagination = boolean | PageSizeOptions | InitialPageOptions;
+type PaginationProp = boolean | PageSizeOptions | InitialPageOptions;
 
-type PropertySortType = any;
-type Sorting = boolean | { sort: PropertySortType };
+export enum SORT_DIRECTION {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+export type SortDirection = SORT_DIRECTION.ASC | SORT_DIRECTION.DESC;
+export interface Sorting {
+  sort: {
+    field: string;
+    direction: SortDirection;
+  };
+}
+export type SortingPropType = boolean | Sorting;
 
 type SelectionType = any;
+
+export interface OnTableChangeArg extends Sorting {
+  page: { index: number; size: number };
+}
 
 type ItemIdTypeFunc = (item: Item) => string;
 type ItemIdType =
@@ -160,8 +174,8 @@ export type EuiInMemoryTableProps = CommonProps & {
   error?: string;
   compressed?: boolean;
   search?: SearchType;
-  pagination?: Pagination;
-  sorting?: Sorting;
+  pagination?: PaginationProp;
+  sorting?: SortingPropType;
   // Set `allowNeutralSort` to false to force column sorting. Defaults to true.
   allowNeutralSort?: boolean;
   responsive?: boolean;
@@ -170,10 +184,7 @@ export type EuiInMemoryTableProps = CommonProps & {
   itemIdToExpandedRowMap?: Record<string, Item>;
   rowProps?: () => void | Record<string, any>;
   cellProps?: () => void | Record<string, any>;
-  onTableChange?: (arg: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: string };
-  }) => void;
+  onTableChange?: (arg: OnTableChangeArg) => void;
 };
 
 interface ComponentWithConstructor<T> extends Component {
