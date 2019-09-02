@@ -111,9 +111,12 @@
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English - en , by default , Chinese - zh-CN .
-# i18n.locale: "en"
-i18n.locales:
-  - "en"
-  - "zh-CN"
-  - "ja-JP"
+# Supported languages are the following: English - en , Chinese - zh-CN, Japanese - ja-JP.
+# i18n.locales:
+#   - "en"
+#   - "zh-CN"
+#   - "ja-JP"
+
+# Set the default locale, defaults to first locale in i18n.locales if set, or english
+# i18n.defaultLocale: "en"
+

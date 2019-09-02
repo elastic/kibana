@@ -7,7 +7,7 @@
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
 
@@ -34,7 +34,6 @@ export interface State {
     jobIdEmpty: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
-    sourceIndexNameExists: boolean;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
   };
@@ -48,7 +47,7 @@ export interface State {
   isModalButtonDisabled: boolean;
   isModalVisible: boolean;
   isValid: boolean;
-  jobConfig: DeepPartial<DataFrameAnalyticsOutlierConfig>;
+  jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
 }
@@ -68,7 +67,6 @@ export const getInitialState = (): State => ({
     jobIdEmpty: true,
     jobIdValid: false,
     sourceIndex: '',
-    sourceIndexNameExists: false,
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
   },
@@ -91,7 +89,7 @@ export const getInitialState = (): State => ({
 
 export const getJobConfigFromFormState = (
   formState: State['form']
-): DeepPartial<DataFrameAnalyticsOutlierConfig> => {
+): DeepPartial<DataFrameAnalyticsConfig> => {
   return {
     source: {
       index: formState.sourceIndex,
