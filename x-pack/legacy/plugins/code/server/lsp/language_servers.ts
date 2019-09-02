@@ -57,8 +57,8 @@ export const GO: LanguageServerDefinition = {
   installationFolderName: 'golsp',
   downloadUrl: (version: string, devMode?: boolean) =>
     devMode!
-      ? `https://snapshots.elastic.co/downloads/go-langserver-plugins/go-langserver/go-langserver-${version}-SNAPSHOT-$OS.zip`
-      : `https://artifacts.elastic.co/downloads/go-langserver-plugins/go-langserver/go-langserver-${version}-$OS.zip`,
+      ? `https://snapshots.elastic.co/downloads/kibana-plugins/go-langserver/go-langserver-${version}-SNAPSHOT-$OS.zip`
+      : `https://artifacts.elastic.co/downloads/kibana-plugins/go-langserver/go-langserver-${version}-$OS.zip`,
 };
 export const CTAGS: LanguageServerDefinition = {
   name: 'Ctags',
