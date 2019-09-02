@@ -19,41 +19,33 @@
 
 import './timefilter.test.mocks';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
+jest.mock('ui/chrome', () => ({
+  getBasePath: () => `/some/base/path`,
+  getUiSettingsClient: () => {
+    return {
+      get: (key: string) => {
+        switch (key) {
+          case 'timepicker:timeDefaults':
+            return { from: 'now-15m', to: 'now' };
+          case 'timepicker:refreshIntervalDefaults':
+            return { pause: false, value: 0 };
+          default:
+            throw new Error(`Unexpected config key: ${key}`);
+        }
+      },
+    };
+  },
+}));
 
-jest.mock(
-  './lib/parse_querystring',
-  () => ({
-    parseQueryString: () => {
-      return {
-        // Can not access local variable from within a mock
-        // @ts-ignore
-        forceNow: global.nowTime,
-      };
-    },
-  }),
-  { virtual: true }
-);
+jest.mock('./lib/parse_querystring', () => ({
+  parseQueryString: () => {
+    return {
+      // Can not access local variable from within a mock
+      // @ts-ignore
+      forceNow: global.nowTime,
+    };
+  },
+}));
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
