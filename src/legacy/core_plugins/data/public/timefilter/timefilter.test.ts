@@ -42,7 +42,7 @@ jest.mock(
 );
 
 jest.mock(
-  'ui/timefilter/lib/parse_querystring',
+  './lib/parse_querystring',
   () => ({
     parseQueryString: () => {
       return {
@@ -58,7 +58,7 @@ jest.mock(
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { timefilter } from './timefilter';
+import { timefilter } from 'ui/timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
 
