@@ -65,22 +65,14 @@
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
       <context-loading-button
-        data-test-subj="predecessorLoadMoreButton"
-        is-disabled="![
+        click-handler="contextApp.actions.fetchMorePredecessorRows"
+        default-step-size="contextApp.state.queryParameters.defaultStepSize"
+        is-loading="![
           contextApp.constants.LOADING_STATUS.LOADED,
           contextApp.constants.LOADING_STATUS.FAILED,
         ].includes(contextApp.state.loadingStatus.predecessors.status)"
-        icon="'fa-chevron-up'"
-        ng-click="contextApp.actions.fetchMorePredecessorRows()"
-      >
-        <span
-          i18n-id="kbn.context.loadMoreDescription"
-          i18n-default-message="Load {defaultStepSize} more"
-          i18n-values="{
-            defaultStepSize: contextApp.state.queryParameters.defaultStepSize
-          }"
-        ></span>
-      </context-loading-button>
+        type="'loadPredecessor'"
+      ></context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
@@ -138,13 +130,13 @@
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
       <context-loading-button
-        data-test-subj="successorLoadMoreButton"
-        is-disabled="![
+        click-handler="contextApp.actions.fetchMoreSuccessorRows"
+        default-step-size="contextApp.state.queryParameters.defaultStepSize"
+        is-loading="![
           contextApp.constants.LOADING_STATUS.LOADED,
           contextApp.constants.LOADING_STATUS.FAILED,
         ].includes(contextApp.state.loadingStatus.successors.status)"
-        icon="'fa-chevron-down'"
-        ng-click="contextApp.actions.fetchMoreSuccessorRows()"
+        type="'loadSuccessor'"
       >
         <span
           i18n-id="kbn.context.loadMoreDescription"

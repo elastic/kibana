@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './loading_button';
+import './loading_button_directive';

@@ -16,25 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import 'ngreact';
 import { uiModules } from 'ui/modules';
-import contextLoadingButtonTemplate from './loading_button.html';
+import { wrapInI18nContext } from 'ui/i18n';
+import { LoadingButton } from './loading_button';
 
-
-const module = uiModules.get('apps/context', [
-  'kibana',
-  'ngRoute',
-]);
-
-module.directive('contextLoadingButton', function ContextLoadingButton() {
-  return {
-    replace: true,
-    restrict: 'E',
-    scope: {
-      isDisabled: '=',
-      icon: '=',
-    },
-    template: contextLoadingButtonTemplate,
-    transclude: true,
-  };
+uiModules.get('apps/context').directive('contextLoadingButton', function (reactDirective) {
+  return reactDirective(wrapInI18nContext(LoadingButton));
 });
