@@ -92,21 +92,6 @@
             "sum_other_doc_count": 0,
             "buckets": [
               {
-                "key": "app",
-                "doc_count": 16,
-                "subtypes": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "",
-                      "doc_count": 16,
-                      "total_self_time_per_subtype": { "value": 73798 }
-                    }
-                  ]
-                }
-              },
-              {
                 "key": "db",
                 "doc_count": 11,
                 "subtypes": {
