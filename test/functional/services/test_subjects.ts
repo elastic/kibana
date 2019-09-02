@@ -96,7 +96,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick(element);
+        await element.doubleClick();
       });
     }
 

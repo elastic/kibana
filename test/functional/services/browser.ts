@@ -155,49 +155,25 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Moves the remote environment’s mouse cursor to the specified element or relative
-     * position.
+     * Moves the remote environment’s mouse cursor to the specified pointer {x, y}
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
-     * @param {WebElementWrapper} element Optional
-     * @param {number} xOffset Optional
-     * @param {number} yOffset Optional
+     * @param {x: number, y: number} pointer
      * @return {Promise<void>}
      */
-    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
-    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
-    public async moveMouseTo(
-      element: WebElementWrapper,
-      xOffset?: number,
-      yOffset?: number
-    ): Promise<void> {
+    public async moveMouseTo(pointer: { x: number; y: number }): Promise<void> {
       if (this.isW3CEnabled) {
-        // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
-        // https://github.com/mozilla/geckodriver/issues/776
         await this.getActions()
           .move({ x: 0, y: 0 })
           .perform();
-        if (element instanceof WebElementWrapper) {
-          await this.getActions()
-            .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
-            .perform();
-        } else {
-          await this.getActions()
-            .move({ origin: { x: xOffset, y: yOffset } })
-            .perform();
-        }
+        await this.getActions()
+          .move({ origin: { x: pointer.x, y: pointer.y } })
+          .perform();
       } else {
-        if (element instanceof WebElementWrapper) {
-          await this.getActions()
-            .pause(this.getActions().mouse)
-            .move({ origin: element._webElement })
-            .perform();
-        } else {
-          await this.getActions()
-            .pause(this.getActions().mouse)
-            .move({ origin: { x: xOffset, y: yOffset } })
-            .perform();
-        }
+        await this.getActions()
+          .pause(this.getActions().mouse)
+          .move({ x: pointer.x, y: pointer.y, origin: 'pointer' })
+          .perform();
       }
     }
 
@@ -330,24 +306,21 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
-    public async clickMouseButton(element: WebElementWrapper): Promise<void>;
-    public async clickMouseButton(...args: unknown[]): Promise<void> {
-      const arg0 = args[0];
-      if (arg0 instanceof WebElementWrapper) {
+    public async clickMouseButton(pointer: { x: number; y: number }): Promise<void> {
+      if (this.isW3CEnabled) {
         await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ origin: arg0._webElement })
-          .click()
+          .move({ x: 0, y: 0 })
           .perform();
-      } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ origin: { x: args[1], y: args[2] } })
+          .move({ origin: { x: pointer.x, y: pointer.y } })
           .click()
           .perform();
       } else {
-        throw new Error('Element or coordinates should be provided');
+        await this.getActions()
+          .pause(this.getActions().mouse)
+          .move({ x: pointer.x, y: pointer.y, origin: 'pointer' })
+          .click()
+          .perform();
       }
     }
 
@@ -378,16 +351,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element?: WebElementWrapper): Promise<void> {
-      if (element instanceof WebElementWrapper) {
-        await this.getActions()
-          .doubleClick(element._webElement)
-          .perform();
-      } else {
-        await this.getActions()
-          .doubleClick()
-          .perform();
-      }
+    public async doubleClick(): Promise<void> {
+      await this.getActions()
+        .doubleClick()
+        .perform();
     }
 
     /**
