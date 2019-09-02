@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { I18nContext } from 'ui/i18n';
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
 import { CoreStart } from 'src/core/public';
@@ -28,7 +27,7 @@ import {
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 import { DashboardContainerExample } from './dashboard_container_example';
-import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
+import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
   getActions: GetActionsCompatibleWithTrigger;
@@ -38,6 +37,7 @@ export interface AppProps {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  I18nContext: CoreStart['i18n']['Context'];
 }
 
 export class App extends Component<AppProps, { selectedTabId: string }> {
@@ -85,12 +85,12 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
 
   public render() {
     return (
-      <I18nContext>
+      <this.props.I18nContext>
         <div id="dashboardViewport" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
           <div>{this.renderTabs()}</div>
           {this.getContentsForTab()}
         </div>
-      </I18nContext>
+      </this.props.I18nContext>
     );
   }
 

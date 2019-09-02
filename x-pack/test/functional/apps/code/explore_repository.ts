@@ -24,7 +24,12 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', function() {
+  // FLAKY https://github.com/elastic/kibana/issues/44572
+  // FLAKY https://github.com/elastic/kibana/issues/42111
+  // FLAKY https://github.com/elastic/kibana/issues/44286
+  // FLAKY https://github.com/elastic/kibana/issues/43557
+  // FLAKY https://github.com/elastic/kibana/issues/42567
+  describe.skip('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
