@@ -21,7 +21,6 @@ import classNames from 'classnames';
 import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
@@ -34,8 +33,7 @@ import {
 } from '../types';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 
-export interface EmbeddableChildPanelUiProps {
-  intl: InjectedIntl;
+export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
@@ -57,13 +55,13 @@ interface State {
  * for the child to be initialized, showing a loading indicator until that is complete.
  */
 
-class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps, State> {
+export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State> {
   [panel: string]: any;
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
   private subscription?: Subscription;
 
-  constructor(props: EmbeddableChildPanelUiProps) {
+  constructor(props: EmbeddableChildPanelProps) {
     super(props);
     this.state = {
       loading: true,
@@ -114,5 +112,3 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
     );
   }
 }
-
-export const EmbeddableChildPanel = injectI18n(EmbeddableChildPanelUi);

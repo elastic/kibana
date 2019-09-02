@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import dateMath from '@elastic/datemath';
 import ApolloClient from 'apollo-client';
 import { getOr, set } from 'lodash/fp';
 import { ActionCreator } from 'typescript-fsa';
@@ -28,6 +27,7 @@ import {
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import { getDefaultFromValue, getDefaultToValue } from '../../utils/default_date_settings';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -177,16 +177,14 @@ export const queryTimelineById = <TCache>({
         );
 
         const { timeline, notes } = formatTimelineResultToModel(timelineToOpen, duplicate);
-
-        const momentDate = dateMath.parse('now-24h');
         if (updateTimeline) {
           updateTimeline({
             duplicate,
-            from: getOr(momentDate ? momentDate.valueOf() : 0, 'dateRange.start', timeline),
+            from: getOr(getDefaultFromValue(), 'dateRange.start', timeline),
             id: 'timeline-1',
             notes,
             timeline,
-            to: getOr(Date.now(), 'dateRange.end', timeline),
+            to: getOr(getDefaultToValue(), 'dateRange.end', timeline),
           })();
         }
       })

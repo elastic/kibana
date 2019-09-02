@@ -9,11 +9,13 @@ import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { asTime } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
+import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 
 type ItemType = 'transaction' | 'span';
 
@@ -178,6 +180,15 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
+  const tooltipContent = i18n.translate(
+    'xpack.apm.transactionDetails.errorsOverviewLinkTooltip',
+    {
+      values: { errorCount },
+      defaultMessage:
+        '{errorCount, plural, one {View 1 related error} other {View # related errors}}'
+    }
+  );
+
   return (
     <Container
       type={item.docType}
@@ -199,10 +210,26 @@ export function WaterfallItem({
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
-          <ErrorCountBadge
-            errorCount={errorCount}
-            transaction={item.transaction}
-          />
+          <ErrorOverviewLink
+            serviceName={item.transaction.service.name}
+            query={{
+              kuery: encodeURIComponent(
+                `trace.id : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
+              )
+            }}
+            color="danger"
+            style={{ textDecoration: 'none' }}
+          >
+            <EuiToolTip content={tooltipContent}>
+              <ErrorCountBadge
+                errorCount={errorCount}
+                onClick={event => {
+                  event.stopPropagation();
+                }}
+                onClickAriaLabel={tooltipContent}
+              />
+            </EuiToolTip>
+          </ErrorOverviewLink>
         ) : null}
         <Duration item={item} />
       </ItemText>

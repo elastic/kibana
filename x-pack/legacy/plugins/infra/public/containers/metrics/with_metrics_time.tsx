@@ -5,57 +5,67 @@
  */
 
 import createContainer from 'constate-latest';
+import React, { useContext, useState, useMemo, useCallback } from 'react';
+import { isNumber } from 'lodash';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { InfraTimerangeInput } from '../../graphql/types';
-import { useInterval } from '../../hooks/use_interval';
+import dateMath from '@elastic/datemath';
+import * as rt from 'io-ts';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
+import { InfraTimerangeInput } from '../../graphql/types';
+
+export interface MetricsTimeInput {
+  from: string;
+  to: string;
+  interval: string;
+}
 
 interface MetricsTimeState {
-  timeRange: InfraTimerangeInput;
-  setTimeRange: (timeRange: InfraTimerangeInput) => void;
+  timeRange: MetricsTimeInput;
+  parsedTimeRange: InfraTimerangeInput;
+  setTimeRange: (timeRange: MetricsTimeInput) => void;
   refreshInterval: number;
   setRefreshInterval: (refreshInterval: number) => void;
   isAutoReloading: boolean;
   setAutoReload: (isAutoReloading: boolean) => void;
+  lastRefresh: number;
+  triggerRefresh: () => void;
 }
 
 export const useMetricsTime = () => {
   const [isAutoReloading, setAutoReload] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(5000);
+  const [lastRefresh, setLastRefresh] = useState<number>(moment().valueOf());
   const [timeRange, setTimeRange] = useState({
-    from: moment()
-      .subtract(1, 'hour')
-      .valueOf(),
-    to: moment().valueOf(),
+    from: 'now-1h',
+    to: 'now',
     interval: '>=1m',
   });
 
-  const setTimeRangeToNow = useCallback(() => {
-    const range = timeRange.to - timeRange.from;
-    const nowInMs = moment().valueOf();
-    setTimeRange({
-      from: nowInMs - range,
-      to: nowInMs,
-      interval: '>=1m',
-    });
-  }, [timeRange.from, timeRange.to]);
-
-  useInterval(setTimeRangeToNow, isAutoReloading ? refreshInterval : null);
-
-  useEffect(() => {
-    if (isAutoReloading) {
-      setTimeRangeToNow();
-    }
-  }, [isAutoReloading]);
+  const parsedFrom = dateMath.parse(timeRange.from);
+  const parsedTo = dateMath.parse(timeRange.to, { roundUp: true });
+  const parsedTimeRange = useMemo(
+    () => ({
+      ...timeRange,
+      from:
+        (parsedFrom && parsedFrom.valueOf()) ||
+        moment()
+          .subtract(1, 'hour')
+          .valueOf(),
+      to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
+    }),
+    [parsedFrom, parsedTo, lastRefresh]
+  );
 
   return {
     timeRange,
     setTimeRange,
+    parsedTimeRange,
     refreshInterval,
     setRefreshInterval,
     isAutoReloading,
     setAutoReload,
+    lastRefresh,
+    triggerRefresh: useCallback(() => setLastRefresh(moment().valueOf()), [setLastRefresh]),
   };
 };
 
@@ -141,8 +151,23 @@ const mapToUrlState = (value: any): MetricsTimeUrlState | undefined =>
       }
     : undefined;
 
-const mapToTimeUrlState = (value: any) =>
-  value && (typeof value.to === 'number' && typeof value.from === 'number') ? value : undefined;
+const MetricsTimeRT = rt.type({
+  from: rt.union([rt.string, rt.number]),
+  to: rt.union([rt.string, rt.number]),
+  interval: rt.string,
+});
+
+const mapToTimeUrlState = (value: any) => {
+  const result = MetricsTimeRT.decode(value);
+  if (result.isRight()) {
+    const to = isNumber(result.value.to) ? moment(result.value.to).toISOString() : result.value.to;
+    const from = isNumber(result.value.from)
+      ? moment(result.value.from).toISOString()
+      : result.value.from;
+    return { ...result.value, from, to };
+  }
+  return undefined;
+};
 
 const mapToAutoReloadUrlState = (value: any) => (typeof value === 'boolean' ? value : undefined);
 
@@ -155,7 +180,7 @@ export const replaceMetricTimeInQueryString = (from: number, to: number) =>
         autoReload: false,
         time: {
           interval: '>=1m',
-          from,
-          to,
+          from: moment(from).toISOString(),
+          to: moment(to).toISOString(),
         },
       });
