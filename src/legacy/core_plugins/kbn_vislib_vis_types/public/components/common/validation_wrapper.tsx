@@ -32,7 +32,10 @@ interface Item {
   valid: boolean;
 }
 
-function ValidationWrapper({ component: Component, ...rest }: ValidationWrapperProps<unknown>) {
+function ValidationWrapper<T = unknown>({
+  component: Component,
+  ...rest
+}: ValidationWrapperProps<T>) {
   const [panelState, setPanelState] = useState({} as { [key: string]: Item });
   const isPanelValid = Object.values(panelState).every(item => item.valid);
   const { setValidity } = rest;

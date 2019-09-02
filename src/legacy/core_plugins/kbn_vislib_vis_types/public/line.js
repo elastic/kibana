@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
-import { PointSeriesOptions, MetricsAxisOptions } from './components/options';
-import { ValidationWrapper } from './components/common';
 import {
   Positions,
   ChartTypes,
@@ -36,6 +33,7 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
+import { getAreaOptionTabs } from './utils/common_config';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -59,7 +57,7 @@ export default function PointSeriesVisType(Private) {
             show: true,
             style: {},
             scale: {
-              type: ScaleTypes.LINEAR
+              type: ScaleTypes.LINEAR,
             },
             labels: {
               show: true,
@@ -123,22 +121,7 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: getConfigCollections(),
-      optionTabs: [
-        {
-          name: 'advanced',
-          title: i18n.translate('kbnVislibVisTypes.line.tabs.metricsAxesTitle', {
-            defaultMessage: 'Metrics & axes',
-          }),
-          editor: props => <ValidationWrapper {...props} component={MetricsAxisOptions} />,
-        },
-        {
-          name: 'options',
-          title: i18n.translate('kbnVislibVisTypes.line.tabs.panelSettingsTitle', {
-            defaultMessage: 'Panel settings',
-          }),
-          editor: PointSeriesOptions,
-        },
-      ],
+      optionTabs: getAreaOptionTabs(),
       schemas: new Schemas([
         {
           group: AggGroupNames.Metrics,
