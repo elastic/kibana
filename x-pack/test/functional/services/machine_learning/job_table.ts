@@ -38,29 +38,38 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
           id: $tr
             .findTestSubject('id')
             .find('.euiTableCellContent__text')
-            .text(),
-          description: $description.text(),
+            .text()
+            .trim(),
+          description: $description
+            .text()
+            .replace(/(&nbsp;$)/g, '')
+            .trim(),
           jobGroups,
           recordCount: $tr
             .findTestSubject('rcordCount')
             .find('.euiTableCellContent__text')
-            .text(),
+            .text()
+            .trim(),
           memoryStatus: $tr
             .findTestSubject('memoryStatus')
             .find('.euiTableCellContent__text')
-            .text(),
+            .text()
+            .trim(),
           jobState: $tr
             .findTestSubject('jobState')
             .find('.euiTableCellContent__text')
-            .text(),
+            .text()
+            .trim(),
           datafeedState: $tr
             .findTestSubject('datafeedState')
             .find('.euiTableCellContent__text')
-            .text(),
+            .text()
+            .trim(),
           latestTimestamp: $tr
             .findTestSubject('latestTimestamp')
             .find('.euiTableCellContent__text')
-            .text(),
+            .text()
+            .trim(),
         });
       }
 
@@ -89,7 +98,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
               .find('td')
               .toArray();
 
-            vars[$(name).text()] = $(value).text();
+            vars[
+              $(name)
+                .text()
+                .trim()
+            ] = $(value)
+              .text()
+              .trim();
           }
 
           return vars;
