@@ -16,5 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { wrapInI18nContext } from 'ui/i18n';
+import { ActionBar } from './action_bar';
 
-import './size_picker_directive';
+uiModules.get('apps/context').directive('contextActionBar', function(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(ActionBar));
+});

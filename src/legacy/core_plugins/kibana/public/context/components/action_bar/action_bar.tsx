@@ -20,16 +20,28 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
-export function SizePicker({
+export function ActionBar({
   count,
+  defaultStepSize = 5,
   isDisabled,
+  isLoading,
+  onButtonClick,
   onChangeCount,
   type,
 }: {
   count: number;
+  defaultStepSize: number;
+  isLoading: boolean;
   isDisabled: boolean;
+  onButtonClick: () => void;
   onChangeCount: (count: number) => void;
   type: string;
 }) {
@@ -44,6 +56,22 @@ export function SizePicker({
 
   return (
     <EuiFlexGroup component="span">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj={
+            type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
+          }
+          isLoading={isLoading}
+          iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
+          onClick={onButtonClick}
+        >
+          <FormattedMessage
+            id="kbn.context.loadMoreDescription"
+            defaultMessage="Load {defaultStepSize} more"
+            values={{ defaultStepSize }}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFormRow>
           <EuiFieldNumber

@@ -64,21 +64,18 @@
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
-      <context-loading-button
-        click-handler="contextApp.actions.fetchMorePredecessorRows"
-        default-step-size="contextApp.state.queryParameters.defaultStepSize"
-        is-loading="![
-          contextApp.constants.LOADING_STATUS.LOADED,
-          contextApp.constants.LOADING_STATUS.FAILED,
-        ].includes(contextApp.state.loadingStatus.predecessors.status)"
-        type="'loadPredecessor'"
-      ></context-loading-button>
-      <context-size-picker
+      <context-action-bar
         count="contextApp.state.queryParameters.predecessorCount"
+        default-step-size="contextApp.state.queryParameters.defaultStepSize"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-loading="![
+        contextApp.constants.LOADING_STATUS.LOADED,
+        contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.predecessors.status)"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
+        on-button-click="contextApp.actions.fetchMorePredecessorRows"
         type="'predecessor'"
-      ></context-size-picker>
+      ></context-action-bar>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
@@ -129,29 +126,18 @@
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
-      <context-loading-button
-        click-handler="contextApp.actions.fetchMoreSuccessorRows"
-        default-step-size="contextApp.state.queryParameters.defaultStepSize"
-        is-loading="![
-          contextApp.constants.LOADING_STATUS.LOADED,
-          contextApp.constants.LOADING_STATUS.FAILED,
-        ].includes(contextApp.state.loadingStatus.successors.status)"
-        type="'loadSuccessor'"
-      >
-        <span
-          i18n-id="kbn.context.loadMoreDescription"
-          i18n-default-message="Load {defaultStepSize} more"
-          i18n-values="{
-            defaultStepSize: contextApp.state.queryParameters.defaultStepSize
-          }"
-        ></span>
-      </context-loading-button>
-      <context-size-picker
+      <context-action-bar
         count="contextApp.state.queryParameters.successorCount"
+        default-step-size="contextApp.state.queryParameters.defaultStepSize"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-loading="![
+        contextApp.constants.LOADING_STATUS.LOADED,
+        contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.successors.status)"
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
+        on-button-click="contextApp.actions.fetchMoreSuccessorRows"
         type="'successor'"
-      ></context-size-picker>
+      ></context-action-bar>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)
