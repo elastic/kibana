@@ -19,12 +19,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export class Panel {
-  name: any;
-  help: any;
-  render: any;
+interface PanelConfig {
+  help?: string;
+  render?: Function;
+}
 
-  constructor(name: any, config: any) {
+export class Panel {
+  name: string;
+  help: string;
+  render: Function | undefined;
+
+  constructor(name: string, config: PanelConfig) {
     this.name = name;
     this.help = config.help || '';
     this.render = config.render;
