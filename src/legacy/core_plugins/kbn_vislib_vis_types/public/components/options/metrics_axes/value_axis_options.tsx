@@ -128,7 +128,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       />
 
       <TextInputOption
-        id={`valueAxisTitle${index}`}
+        dataTestSubj={`valueAxisTitle${index}`}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel', {
           defaultMessage: 'Title',
         })}

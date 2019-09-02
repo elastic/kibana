@@ -36,7 +36,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setAxisTitle(title, { index = 0 } = {}) {
-      return await find.setValue(`#valueAxisTitle${index}`, title);
+      return await testSubjects.setValue(`valueAxisTitle${index}`, title);
     }
 
     async getValueAxesCount() {

@@ -36,14 +36,14 @@ function TruncateLabelsOption({ disabled, value, setValue }: TruncateLabelsOptio
       label={i18n.translate('kbnVislibVisTypes.controls.truncateLabel', {
         defaultMessage: 'Truncate',
       })}
-      fullWidth={true}
+      fullWidth
       compressed
     >
       <EuiFieldNumber
         disabled={disabled}
         value={value === null ? '' : value}
         onChange={onChange}
-        fullWidth={true}
+        fullWidth
       />
     </EuiFormRow>
   );
