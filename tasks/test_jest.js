@@ -31,16 +31,9 @@ module.exports = function (grunt) {
   });
 
   function runJest(jestScript) {
-    // TODO: Remove, just temp debugging in ci
-    const xs = [jestScript, '--ci'];
-    if (jestScript.includes('integration')) {
-      // xs.push('--debug');
-      xs.push('--runInBand');  // Run all tests serially in the current process
-    }
-
     const serverCmd = {
       cmd: 'node',
-      args: xs, // TODO: Remove, just temp debugging in ci
+      args: [jestScript, '--ci'],
       opts: { stdio: 'inherit' }
     };
 
