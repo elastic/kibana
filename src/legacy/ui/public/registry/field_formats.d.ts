@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FieldParamType } from './field';
+export type FieldFormat = any;

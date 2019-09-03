@@ -45,7 +45,7 @@ describe('visualize_legend directive', function () {
 
   // basically a parameterized beforeEach
   function init(vis, esResponse) {
-    vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
+    vis.aggs.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
     $rootScope.visData = esResponse;
