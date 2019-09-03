@@ -27,7 +27,6 @@ export class UMMonitorStatesDomain {
     pagination?: CursorPagination,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    console.log('MONITOR_STATES.TS', pagination);
     return this.adapter.getMonitorStates(
       request,
       dateRangeStart,

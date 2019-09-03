@@ -1,6 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { set } from 'lodash';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { set } from 'lodash';
 import { MonitorIdWithGroups } from './monitor_id_with_groups';
 import { CursorDirection } from '../../../../common/graphql/types';
 
@@ -32,11 +38,10 @@ const filteredCheckGroupsQueryBody = (
   // We know we can exclude any down matches because an 'up' monitor may not have any 'down' matches.
   // However, we can't optimize anything in any other case, because a sibling check in the same check_group
   // or in another location may have a different status.
-  const statusFilterClause = !queryContext.statusFilter
-    ? { exists: { field: 'summary.down' } }
-    : queryContext.statusFilter === 'up'
-    ? { match_all: {} }
-    : { match: { 'summary.down': 0 } };
+  const statusFilterClause =
+    queryContext.statusFilter && queryContext.statusFilter === 'up'
+      ? { match: { 'summary.down': 0 } }
+      : { exists: { field: 'summary.down' } };
 
   const body = {
     size: 0,
@@ -44,7 +49,7 @@ const filteredCheckGroupsQueryBody = (
     aggs: {
       monitors: {
         composite: {
-          size: size,
+          size,
           sources: [
             {
               monitor_id: { terms: { field: 'monitor.id', order: compositeOrder } },
@@ -77,10 +82,10 @@ const filteredCheckGroupsQueryBody = (
   return body;
 };
 
-export type CheckGroupsPageResult = {
-  checkGroups: MonitorIdWithGroups[];
+export interface CheckGroupsPageResult {
+  monitorIdGroups: MonitorIdWithGroups[];
   searchAfter: string;
-};
+}
 
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';

@@ -1,6 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { get, sortBy } from 'lodash';
 import { CursorDirection } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { get, sortBy } from 'lodash';
 import { CursorPagination } from './adapter_types';
 import { mostRecentCheckGroups } from './most_recent_check_groups_query';
 import { MonitorLocCheckGroup } from './monitor_loc_check_group';
@@ -82,6 +88,10 @@ export class MonitorIterator {
         // Keep searching if we haven't matched
         if (found.matchesFilter) {
           return found;
+        } else {
+          // If this item doesn't match the filter continue the loop
+          // to see if the next one does
+          continue;
         }
       }
 
@@ -95,7 +105,7 @@ export class MonitorIterator {
   async peek(): Promise<MonitorIdWithGroups | null> {
     let bufAheadPos = this.bufferPos + 1;
     while (true) {
-      let bufAhead = this.buffer[bufAheadPos];
+      const bufAhead = this.buffer[bufAheadPos];
 
       if (!bufAhead) {
         const fetchedMore = await this.queryNextAndBuffer(500, false);
@@ -104,10 +114,8 @@ export class MonitorIterator {
         }
       }
 
-      if (bufAhead) {
-        if (bufAhead.matchesFilter) {
-          return bufAhead;
-        }
+      if (bufAhead && bufAhead.matchesFilter) {
+        return bufAhead;
       }
 
       bufAheadPos++;
@@ -123,11 +131,11 @@ export class MonitorIterator {
     }
 
     const results = await this.queryNext(size);
-    if (results.checkGroups.length === 0) {
+    if (results.monitorIdGroups.length === 0) {
       return false;
     }
 
-    results.checkGroups.forEach(mlcg => this.buffer.push(mlcg));
+    results.monitorIdGroups.forEach(mlcg => this.buffer.push(mlcg));
     this.searchAfter = results.searchAfter;
 
     return true;
@@ -142,8 +150,8 @@ export class MonitorIterator {
     const elapsed = new Date().getTime() - start.getTime();
     console.debug('Exec Query in', elapsed + 'ms', 'Len', matching.length);
     return {
-      checkGroups: matching,
-      searchAfter: searchAfter,
+      monitorIdGroups: matching,
+      searchAfter,
     };
   }
 
@@ -189,7 +197,7 @@ export class MonitorIterator {
     monitorIds.forEach((id: string) => {
       const mostRecentGroups = recentGroupsMatchingStatus.get(id);
       matches.push({
-        id: id,
+        id,
         matchesFilter: !!mostRecentGroups,
         groups: mostRecentGroups || [],
       });
@@ -204,19 +212,19 @@ export class MonitorIterator {
   private async fullyMatchingIds(monitorIds: string[], filteredCheckGroups: Set<string>) {
     const mostRecentQueryResult = await mostRecentCheckGroups(this.queryContext, monitorIds);
 
-    let matching = new Map<string, MonitorLocCheckGroup[]>();
+    const matching = new Map<string, MonitorLocCheckGroup[]>();
     MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
       const monitorId: string = monBucket.key;
       const groups: MonitorLocCheckGroup[] = [];
-      LocationLoop: for (const locBucket of monBucket.location.buckets) {
+      for (const locBucket of monBucket.location.buckets) {
         const location = locBucket.key;
         const topSource = locBucket.top.hits.hits[0]._source;
         const checkGroup = topSource.monitor.check_group;
 
         const mlcg: MonitorLocCheckGroup = {
-          monitorId: monitorId,
-          location: location,
-          checkGroup: checkGroup,
+          monitorId,
+          location,
+          checkGroup,
           filterMatchesLatest: filteredCheckGroups.has(checkGroup),
           timestamp: topSource['@timestamp'],
           up: topSource.summary.up,
@@ -228,6 +236,13 @@ export class MonitorIterator {
         if (this.queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {
           continue MonitorLoop;
         }
+        console.log(
+          'MATCH STATUS FILTER',
+          this.queryContext.statusFilter,
+          mlcg.status,
+          mlcg,
+          topSource.monitor
+        );
         groups.push(mlcg);
       }
       matching.set(monitorId, groups);

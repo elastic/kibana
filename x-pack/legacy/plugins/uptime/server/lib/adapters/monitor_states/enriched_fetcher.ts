@@ -1,8 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { get, flatten, sortBy } from 'lodash';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { getHistogramInterval } from '../../helper';
 import { QUERY, INDEX_NAMES, STATES } from '../../../../common/constants';
 import { fetchPaginatedMonitors } from './monitor_fetcher';
-import { get, flatten, sortBy } from 'lodash';
 import {
   MonitorSummary,
   SummaryHistogram,
@@ -12,11 +18,11 @@ import {
 } from '../../../../common/graphql/types';
 import { CursorPagination } from './adapter_types';
 
-export type EnrichedQueryResult = {
+export interface EnrichedQueryResult {
   items: any[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
-};
+}
 
 export const queryEnriched = async (queryContext: QueryContext): Promise<EnrichedQueryResult> => {
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
@@ -35,8 +41,13 @@ export const queryEnriched = async (queryContext: QueryContext): Promise<Enriche
           filter: [
             { terms: { 'monitor.check_group': checkGroups } },
             // Even though this work is already done when calculating the groups
-            // this helps the planner
-            queryContext.filterClause,
+            // this helps the planner figure out time constraints and hence which indices to
+            // analyze
+            {
+              range: {
+                '@timestamp': { gte: queryContext.dateRangeStart, lte: queryContext.dateRangeEnd },
+              },
+            },
           ],
         },
       },

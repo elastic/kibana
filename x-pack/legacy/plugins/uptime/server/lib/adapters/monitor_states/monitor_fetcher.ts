@@ -1,21 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { MonitorIterator } from './monitor_iterator';
 import { MonitorIdWithGroups } from './monitor_id_with_groups';
 import { CursorPagination } from './adapter_types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 
-export type MonitorPage = {
+export interface MonitorPage {
   items: MonitorIdWithGroups[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
-};
+}
 
 export const fetchPaginatedMonitors = async (
   queryContext: QueryContext,
   size: number
 ): Promise<MonitorPage> => {
   const items: MonitorIdWithGroups[] = [];
-  console.log('INIT ITER', queryContext.pagination);
   const iterator = new MonitorIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
