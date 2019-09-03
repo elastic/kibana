@@ -14,12 +14,11 @@ import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasRenderedElement } from '../types';
 import { ExternalEmbedContext } from '../context';
 
-// @ts-ignore CSS Module
-import css from './rendered_element.module';
+import css from './rendered_element.module.scss';
 
 interface Props {
   element: CanvasRenderedElement;
-  number?: number;
+  index: number;
 }
 
 /**
@@ -56,13 +55,13 @@ export class RenderedElement extends React.PureComponent<Props> {
       });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e.message);
+      console.log(as, e.message);
     }
   }
 
   render() {
-    const { element, number } = this.props;
-    const shape = elementToShape(element, number || 1);
+    const { element, index } = this.props;
+    const shape = elementToShape(element, index || 1);
     const { id, expressionRenderable, position } = element;
     const { value } = expressionRenderable;
     const { as, css: elementCSS, containerStyle } = value;

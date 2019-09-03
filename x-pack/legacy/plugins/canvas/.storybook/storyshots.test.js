@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
@@ -60,6 +61,11 @@ jest.mock(
     return 'Disabled Panel';
   }
 );
+
+// This element uses a `ref` and cannot be rendered by Jest snapshots.
+import { RenderedElement } from '../external_runtime/components/rendered_element';
+jest.mock('../external_runtime/components/rendered_element');
+RenderedElement.mockImplementation(() => 'RenderedElement');
 
 addSerializer(styleSheetSerializer);
 
