@@ -73,8 +73,8 @@ describe('Field Renderers', () => {
   });
 
   describe('#autonomousSystemRenderer', () => {
-    const emptyMock: AutonomousSystem = { as_org: null, asn: null, ip: '10.10.10.10' };
-    const halfEmptyMock: AutonomousSystem = { as_org: null, asn: 'Test ASN', ip: '10.10.10.10' };
+    const emptyMock: AutonomousSystem = { organization: {}, number: null };
+    const halfEmptyMock: AutonomousSystem = { organization: { name: 'Test Org' }, number: null };
 
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(

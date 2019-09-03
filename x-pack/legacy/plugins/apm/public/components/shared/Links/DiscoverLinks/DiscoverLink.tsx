@@ -11,7 +11,7 @@ import rison, { RisonValue } from 'rison-node';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { useCore } from '../../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../../observability/public';
 
 interface Props {
   query: {
@@ -31,7 +31,7 @@ interface Props {
 }
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
-  const core = useCore();
+  const core = useKibanaCore();
   const apmIndexPattern = useAPMIndexPattern();
   const location = useLocation();
 
