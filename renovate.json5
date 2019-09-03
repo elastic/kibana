@@ -370,6 +370,14 @@
         ],
       },
       {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
         groupSlug: 'humps',
         groupName: 'humps related packages',
         packageNames: [
@@ -618,14 +626,6 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
-        ],
-      },
-      {
         groupSlug: 'jsdom',
         groupName: 'jsdom related packages',
         packageNames: [
@@ -639,6 +639,14 @@
         packageNames: [
           'jsonwebtoken',
           '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
         ],
       },
       {

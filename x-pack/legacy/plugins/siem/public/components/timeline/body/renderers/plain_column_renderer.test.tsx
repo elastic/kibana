@@ -17,6 +17,8 @@ import { getEmptyValue } from '../../../empty_value';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
@@ -93,7 +95,7 @@ describe('plain_column_renderer', () => {
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('120.563KB');
+      expect(wrapper.text()).toEqual('120.6KB');
     });
 
     test('should return the value of event.action if event has a valid value', () => {
