@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/colormaps';
-import { GaugeOptions } from './editors/gauge';
+import { GaugeOptions } from './components/options';
 
 export default function GaugeVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);

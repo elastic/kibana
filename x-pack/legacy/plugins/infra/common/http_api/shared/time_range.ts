@@ -10,3 +10,5 @@ export const timeRangeRT = rt.type({
   startTime: rt.number,
   endTime: rt.number,
 });
+
+export type TimeRange = rt.TypeOf<typeof timeRangeRT>;
