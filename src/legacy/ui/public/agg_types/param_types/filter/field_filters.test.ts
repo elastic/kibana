@@ -20,10 +20,11 @@
 import { Field } from 'ui/index_patterns';
 import { IndexedArray } from 'ui/indexed_array';
 import { AggTypeFieldFilters } from './field_filters';
+import { AggConfig } from 'ui/vis';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;
-  const aggConfig = {};
+  const aggConfig = {} as AggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFieldFilters();

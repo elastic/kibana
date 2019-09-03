@@ -7,10 +7,13 @@
 import gql from 'graphql-tag';
 
 const ipOverviewSchema = gql`
+  type AutonomousSystemOrganization {
+    name: String
+  }
+
   type AutonomousSystem {
-    as_org: String
-    asn: String
-    ip: String
+    number: Float
+    organization: AutonomousSystemOrganization
   }
 
   type Overview {
