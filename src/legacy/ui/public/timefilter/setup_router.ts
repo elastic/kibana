@@ -46,7 +46,9 @@ export function getTimefilterConfig() {
 // This function is exposed for applications that do not use uiRoutes like APM
 // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
 export const registerTimefilterWithGlobalState = _.once(
-  (timefilter: Timefilter, config: any, globalState: any, $rootScope: IScope) => {
+  (timefilter: Timefilter, globalState: any, $rootScope: IScope) => {
+    // settings have to be re-fetched here, to make sure that settings changed by overrideLocalDefault are taken into account.
+    const config = getTimefilterConfig();
     timefilter.setTime(_.defaults(globalState.time || {}, config.timeDefaults));
     timefilter.setRefreshInterval(
       _.defaults(globalState.refreshInterval || {}, config.refreshIntervalDefaults)

@@ -28,5 +28,5 @@ export const timeHistory = new TimeHistory();
 export const timefilter = new Timefilter(config, timeHistory);
 
 uiRoutes.addSetupWork((globalState, $rootScope) => {
-  return registerTimefilterWithGlobalState(timefilter, config, globalState, $rootScope);
+  return registerTimefilterWithGlobalState(timefilter, globalState, $rootScope);
 });
