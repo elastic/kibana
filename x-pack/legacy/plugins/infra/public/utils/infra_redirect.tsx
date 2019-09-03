@@ -16,7 +16,7 @@ export const InfraRedirect: React.FunctionComponent<{
 }> = ({ from, to, exact }) => (
   <Route
     path={from}
-    component={({ location }: RouteProps) =>
+    render={({ location }: RouteProps) =>
       location ? (
         <Redirect
           from={from}
