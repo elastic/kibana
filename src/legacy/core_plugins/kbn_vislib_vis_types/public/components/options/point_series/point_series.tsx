@@ -85,7 +85,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
 
       <EuiSpacer size="s" />
 
-      <ThresholdPanel {...props} />
+      {stateParams.thresholdLine && <ThresholdPanel {...props} />}
     </>
   );
 }
