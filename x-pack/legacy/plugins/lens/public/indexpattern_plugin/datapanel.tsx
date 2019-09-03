@@ -536,6 +536,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     field={field}
                     highlight={localState.nameFilter.toLowerCase()}
                     exists={overallField ? !!overallField.exists : false}
+                    dateRange={dateRange}
+                    query={query}
                   />
                 );
               })}

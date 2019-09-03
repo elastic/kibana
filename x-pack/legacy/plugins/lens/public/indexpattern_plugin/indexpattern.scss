@@ -70,3 +70,12 @@
 .lnsFieldListPanel__fieldName {
   margin-left: $euiSizeXS;
 }
+
+.lnsFieldListPanel__fieldInfo {
+  font-weight: $euiFontWeightMedium;
+}
+
+.lnsDistributionChart {
+  min-height: 300px;
+  min-width: 300px;
+}

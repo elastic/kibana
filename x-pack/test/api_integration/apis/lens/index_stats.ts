@@ -106,5 +106,25 @@ export default ({ getService }: FtrProviderContext) => {
         expect(Object.keys(body)).to.eql(fieldsWithData.map(field => field.name));
       });
     });
+
+    describe('field distribution', () => {
+      it('should return an auto histogram for numbers and top values', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            earliest: TEST_START_TIME,
+            latest: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'bytes',
+              type: 'number',
+            },
+          })
+          .expect(200);
+
+        expect(Object.keys(body)).to.eql({});
+      });
+    });
   });
 };
