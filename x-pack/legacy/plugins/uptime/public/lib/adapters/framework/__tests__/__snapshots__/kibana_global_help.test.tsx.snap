@@ -39,7 +39,7 @@ exports[`renderUptimeKibanaGlobalHelp renders links with expected urls 1`] = `
     type="button"
   >
     <FormattedMessage
-      defaultMessage="Provide feedback for APM"
+      defaultMessage="Provide feedback for Uptime"
       description="The link is to a support form called 'Discuss', where users can submit feedback."
       id="xpack.uptime.header.helpLinkText"
       values={Object {}}
