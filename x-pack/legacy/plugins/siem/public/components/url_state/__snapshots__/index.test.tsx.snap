@@ -339,7 +339,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                   Object {
                                     "hash": "",
                                     "pathname": "/network",
-                                    "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                    "search": "?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
                                     "state": "",
                                   },
                                 ],
@@ -368,6 +368,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               "title": "logstash-*",
                             }
                           }
+                          isInitializing={true}
                         >
                           <Route>
                             <Connect(UrlStateContainer)
@@ -406,7 +407,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                         Object {
                                           "hash": "",
                                           "pathname": "/network",
-                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                          "search": "?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
                                           "state": "",
                                         },
                                       ],
@@ -433,6 +434,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                   "title": "logstash-*",
                                 }
                               }
+                              isInitializing={true}
                               location={
                                 Object {
                                   "hash": "",
@@ -451,6 +453,9 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               }
                             >
                               <Component
+                                addGlobalLinkTo={[Function]}
+                                addTimelineLinkTo={[Function]}
+                                dispatch={[Function]}
                                 history={
                                   Object {
                                     "action": "POP",
@@ -486,7 +491,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                           Object {
                                             "hash": "",
                                             "pathname": "/network",
-                                            "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                            "search": "?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
                                             "state": "",
                                           },
                                         ],
@@ -513,6 +518,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                     "title": "logstash-*",
                                   }
                                 }
+                                isInitializing={true}
                                 location={
                                   Object {
                                     "hash": "",
@@ -529,35 +535,21 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                     "url": "/",
                                   }
                                 }
+                                removeGlobalLinkTo={[Function]}
+                                removeTimelineLinkTo={[Function]}
                                 setAbsoluteTimerange={[Function]}
                                 setHostsKql={[Function]}
                                 setNetworkKql={[Function]}
                                 setRelativeTimerange={[Function]}
-                                toggleTimelineLinkTo={[Function]}
+                                updateTimeline={[Function]}
+                                updateTimelineIsLoading={[Function]}
                                 urlState={
                                   Object {
                                     "kqlQuery": Object {
-                                      "hosts.details": Object {
-                                        "filterQuery": null,
-                                        "queryLocation": "hosts.details",
-                                        "type": "details",
-                                      },
-                                      "hosts.page": Object {
-                                        "filterQuery": null,
-                                        "queryLocation": "hosts.page",
-                                        "type": "page",
-                                      },
-                                      "network.details": Object {
-                                        "filterQuery": null,
-                                        "queryLocation": "network.details",
-                                        "type": "details",
-                                      },
-                                      "network.page": Object {
-                                        "filterQuery": null,
-                                        "queryLocation": "network.page",
-                                        "type": "page",
-                                      },
+                                      "filterQuery": null,
+                                      "queryLocation": "network.page",
                                     },
+                                    "timelineId": "",
                                     "timerange": Object {
                                       "global": Object {
                                         "linkTo": Array [
@@ -586,9 +578,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                     },
                                   }
                                 }
-                              >
-                                <span />
-                              </Component>
+                              />
                             </Connect(UrlStateContainer)>
                           </Route>
                         </withRouter(Connect(UrlStateContainer))>

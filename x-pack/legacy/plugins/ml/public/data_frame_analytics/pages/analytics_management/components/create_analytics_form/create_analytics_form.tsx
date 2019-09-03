@@ -22,8 +22,14 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { metadata } from 'ui/metadata';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+
+// based on code used by `ui/index_patterns` internally
+// remove the space character from the list of illegal characters
+INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
+const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
@@ -49,12 +55,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdValid,
     sourceIndex,
     sourceIndexNameEmpty,
-    sourceIndexNameExists,
     sourceIndexNameValid,
   } = form;
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
@@ -119,39 +124,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
             }
-            isInvalid={!sourceIndexNameEmpty && (!sourceIndexNameValid || !sourceIndexNameExists)}
+            isInvalid={!sourceIndexNameEmpty && !sourceIndexNameValid}
             error={
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameValid && [
-                  <Fragment>
-                    {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-                      defaultMessage: 'Invalid source index name.',
-                    })}
-                    <br />
-                    <EuiLink
-                      href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.ml.dataframe.stepDetailsForm.sourceIndexInvalidErrorLink',
-                        {
-                          defaultMessage: 'Learn more about index name limitations.',
-                        }
-                      )}
-                    </EuiLink>
-                  </Fragment>,
-                ]) ||
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameExists && [
-                  <Fragment>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.sourceIndexDoesNotExistError',
-                      {
-                        defaultMessage: 'An index with this name does not exist.',
-                      }
-                    )}
-                  </Fragment>,
-                ])
+              !sourceIndexNameEmpty &&
+              !sourceIndexNameValid && [
+                <Fragment>
+                  {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
+                    defaultMessage:
+                      'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
+                    values: { characterList },
+                  })}
+                </Fragment>,
+              ]
             }
           >
             <Fragment>

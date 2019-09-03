@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
@@ -92,6 +94,8 @@ exports[`Error URL_FULL 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
+exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
@@ -183,6 +187,8 @@ exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 exports[`Span URL_FULL 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 

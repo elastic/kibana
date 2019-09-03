@@ -40,6 +40,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
+  isEventViewer?: boolean;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -62,6 +63,7 @@ export const Events = React.memo<Props>(
     eventIdToNoteIds,
     getNotesByIds,
     id,
+    isEventViewer = false,
     minWidth,
     onColumnResized,
     onPinEvent,
@@ -85,6 +87,7 @@ export const Events = React.memo<Props>(
               event={event}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
+              isEventViewer={isEventViewer}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUpdateColumns={onUpdateColumns}
