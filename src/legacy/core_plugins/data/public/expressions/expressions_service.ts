@@ -19,7 +19,7 @@
 
 import { npSetup } from 'ui/new_platform';
 // @ts-ignore
-import { getInterpreter } from '../../../interpreter/public/interpreter';
+
 import { setInspector, setInterpreter } from './services';
 import { execute } from './lib/execute';
 import { loader } from './lib/loader';
@@ -37,6 +37,8 @@ export interface ExpressionsServiceStartDependencies {
  */
 export class ExpressionsService {
   public setup() {
+    // eslint-disable-next-line
+    const { getInterpreter } = require('../../../interpreter/public/interpreter');
     getInterpreter()
       .then(setInterpreter)
       .catch((e: Error) => {
