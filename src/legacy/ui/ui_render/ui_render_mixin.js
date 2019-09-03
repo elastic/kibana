@@ -102,9 +102,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       async handler(request, h) {
         const { id } = request.params;
         const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        if (!app) {
-          throw Boom.notFound(`Unknown app: ${id}`);
-        }
+        const isCore = !app;
 
         const uiSettings = request.getUiSettingsService();
         const darkMode = !authEnabled || request.auth.isAuthenticated
@@ -130,7 +128,9 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
-          `${regularBundlePath}/${app.getId()}.style.css`,
+          ...(
+            !isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []
+          ),
           ...kbnServer.uiExports.styleSheetPaths
             .filter(path => (
               path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
@@ -145,7 +145,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            appId: app.getId(),
+            appId: isCore ? 'core' : app.getId(),
             regularBundlePath,
             dllBundlePath,
             styleSheetPaths,
@@ -164,12 +164,11 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   server.route({
-    path: '/app/{id}',
+    path: '/app/{id}/{any*}',
     method: 'GET',
     async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-      if (!app) throw Boom.notFound('Unknown app ' + id);
 
       try {
         if (kbnServer.status.isGreen()) {
@@ -183,9 +182,15 @@ export function uiRenderMixin(kbnServer, server, config) {
     }
   });
 
-  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
+  async function getUiSettings({ request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
+    return props({
+      defaults: uiSettings.getDefaults(),
+      user: includeUserProvidedConfig && uiSettings.getUserProvided()
+    });
+  }
 
+  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
     return {
       app,
       translations,
@@ -198,16 +203,15 @@ export function uiRenderMixin(kbnServer, server, config) {
       basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
-      uiSettings: await props({
-        defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided()
-      })
+      uiSettings: await getUiSettings({ request, includeUserProvidedConfig }),
     };
   }
 
   async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     const request = h.request;
     const basePath = request.getBasePath();
+    const uiSettings = await getUiSettings({ request, includeUserProvidedConfig });
+    app = app || { getId: () => 'core' };
 
     const legacyMetadata = await getLegacyKibanaPayload({
       app,
@@ -228,13 +232,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
       locale: i18n.getLocale(),
-      darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
+      darkMode: get(uiSettings.user, ['theme:darkMode', 'userValue'], false),
 
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
         branch: config.get('pkg.branch'),
         basePath,
+        legacyMode: app.getId() !== 'core',
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
@@ -245,7 +250,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           request,
           mergeVariables(
             injectedVarsOverrides,
-            await server.getInjectedUiAppVars(app.getId()),
+            app ? await server.getInjectedUiAppVars(app.getId()) : {},
             defaultInjectedVars,
           ),
         ),

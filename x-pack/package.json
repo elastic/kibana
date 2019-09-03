@@ -60,7 +60,7 @@
     "@types/glob": "^7.1.1",
     "@types/graphql": "^0.13.1",
     "@types/hapi__wreck": "^15.0.1",
-    "@types/history": "^4.6.2",
+    "@types/history": "^4.7.3",
     "@types/jest": "^24.0.9",
     "@types/joi": "^13.4.2",
     "@types/js-yaml": "^3.11.1",
