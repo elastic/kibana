@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const getKibanaUrl = path => {
     const host = process.env.TEST_KIBANA_HOST || 'localhost';
     const port = process.env.TEST_KIBANA_PORT || '5620';
-    return `http://${host}:${port}/${path}`;
+    return `http://${host}:${port}${path}`;
   };
 
   describe('ui applications', function describeIndexTests() {
