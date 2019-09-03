@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import 'ui/es'; // required for $injector.get('es') below
-import { CoreStart, Plugin } from 'kibana/public';
+import { Plugin } from 'kibana/public';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
@@ -30,8 +30,16 @@ export interface LegacyDependenciesPluginSetup {
   createAngularVisualization: Function;
 }
 
+/** @internal */
+export interface LegacyDependenciesPluginStart {
+  $rootScope: any;
+  $compile: any;
+  config: any;
+}
+
 export class LegacyDependenciesPlugin
-  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
+  implements
+    Plugin<Promise<LegacyDependenciesPluginSetup>, Promise<LegacyDependenciesPluginStart>> {
   public async setup() {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
@@ -43,7 +51,13 @@ export class LegacyDependenciesPlugin
     } as LegacyDependenciesPluginSetup;
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public async start() {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+
+    return {
+      $rootScope: $injector.get('$rootScope'),
+      $compile: $injector.get('$compile'),
+      config: chrome.getUiSettingsClient(),
+    } as LegacyDependenciesPluginStart;
   }
 }

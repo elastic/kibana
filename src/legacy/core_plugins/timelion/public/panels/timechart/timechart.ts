@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { IPrivate } from 'ui/private';
+// @ts-ignore
+import { timechartFn } from './schema';
 import { Panel } from '../panel';
+import { LegacyDependenciesPluginStart } from '../../shim';
 
-export function timeChartProvider(Private: IPrivate) {
+export function getTimeChart(dependencies: LegacyDependenciesPluginStart) {
   // Schema is broken out so that it may be extended for use in other plugins
   // Its also easier to test.
-  return new Panel('timechart', (Private(require('./schema')) as Function)());
+  return new Panel('timechart', timechartFn(dependencies)());
 }

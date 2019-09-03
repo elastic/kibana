@@ -27,15 +27,16 @@ import { timefilter } from 'ui/timefilter';
 
 const DEBOUNCE_DELAY = 50;
 
-export default function timechartFn(Private, config, $rootScope, $compile) {
+export function timechartFn(dependencies) {
+  const { config, $rootScope, $compile } = dependencies;
   return function () {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const tickFormatters = require('plugins/timelion/services/tick_formatters')();
-        const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
-        const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
+        const getxAxisFormatter = require('plugins/timelion/panels/timechart/xaxis_formatter')(config);
+        const generateTicks = require('plugins/timelion/panels/timechart/tick_generator')();
 
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?

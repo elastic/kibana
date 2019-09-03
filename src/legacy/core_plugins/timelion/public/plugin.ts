@@ -27,8 +27,12 @@ import { VisualizationsSetup } from 'src/legacy/core_plugins/visualizations/publ
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
-import { timeChartProvider } from './panels/timechart/timechart';
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+import { getTimeChart } from './panels/timechart/timechart';
+import {
+  LegacyDependenciesPlugin,
+  LegacyDependenciesPluginSetup,
+  LegacyDependenciesPluginStart,
+} from './shim';
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
@@ -42,6 +46,9 @@ export interface TimelionPluginSetupDependencies {
 /** @internal */
 export interface TimelionPluginStartDependencies {
   panelRegistry: any;
+
+  // Temporary solution
+  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -63,14 +70,18 @@ export class TimelionPlugin
     );
   }
 
-  public start(core: CoreStart & InternalCoreStart, plugins: TimelionPluginStartDependencies) {
+  public async start(
+    core: CoreStart & InternalCoreStart,
+    plugins: TimelionPluginStartDependencies
+  ) {
+    const dependencies: LegacyDependenciesPluginStart = await plugins.__LEGACY.start();
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
 
-    plugins.panelRegistry.register(timeChartProvider);
+    plugins.panelRegistry.register(() => getTimeChart(dependencies));
   }
 
   public stop(): void {}

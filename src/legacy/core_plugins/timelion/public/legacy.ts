@@ -37,6 +37,10 @@ const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
 
 const startPlugins: Readonly<TimelionPluginStartDependencies> = {
   panelRegistry,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
