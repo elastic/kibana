@@ -30,6 +30,7 @@ interface IWaterfallGroup {
 }
 
 export interface IWaterfall {
+  entryTransaction?: Transaction;
   traceRoot?: Transaction;
   traceRootDuration?: number;
 
@@ -224,7 +225,8 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
     }
 
     const item = itemsById[id];
-    if (idx(item, _ => _.docType) === 'transaction') {
+    const isTransaction = idx(item, _ => _.docType) === 'transaction';
+    if (isTransaction) {
       return (item as IWaterfallItemTransaction).transaction;
     }
   };
@@ -277,8 +279,10 @@ export function getWaterfall(
   const services = getServices(orderedItems);
   const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);
+  const entryTransaction = getTransactionById(entryTransactionId);
 
   return {
+    entryTransaction,
     traceRoot,
     traceRootDuration,
     duration,
