@@ -9,7 +9,7 @@ import { Route, Redirect, RouteProps } from 'react-router-dom';
 
 // This workaround preserves query parameters in the redirect
 // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
-export const InfraRedirect: React.FunctionComponent<{
+export const RedirectWithQueryParams: React.FunctionComponent<{
   from: string;
   to: string;
   exact?: boolean;

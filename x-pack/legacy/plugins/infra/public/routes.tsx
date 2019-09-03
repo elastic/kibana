@@ -15,7 +15,7 @@ import { InfrastructurePage } from './pages/infrastructure';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
-import { InfraRedirect } from './utils/infra_redirect';
+import { RedirectWithQueryParams } from './utils/infra_redirect';
 
 interface RouterProps {
   history: History;
@@ -27,28 +27,34 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
     <Router history={history}>
       <Switch>
         {uiCapabilities.infrastructure.show && (
-          <InfraRedirect from="/" exact={true} to="/infrastructure/inventory" />
+          <RedirectWithQueryParams from="/" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
-          <InfraRedirect from="/infrastructure" exact={true} to="/infrastructure/inventory" />
+          <RedirectWithQueryParams
+            from="/infrastructure"
+            exact={true}
+            to="/infrastructure/inventory"
+          />
         )}
         {uiCapabilities.infrastructure.show && (
-          <InfraRedirect
+          <RedirectWithQueryParams
             from="/infrastructure/snapshot"
             exact={true}
             to="/infrastructure/inventory"
           />
         )}
         {uiCapabilities.infrastructure.show && (
-          <InfraRedirect from="/home" exact={true} to="/infrastructure/inventory" />
+          <RedirectWithQueryParams from="/home" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure/metrics/:type/:node" component={MetricDetail} />
         )}
         {uiCapabilities.infrastructure.show && (
-          <InfraRedirect from="/metrics" to="/infrastructure/metrics" />
+          <RedirectWithQueryParams from="/metrics" to="/infrastructure/metrics" />
         )}
-        {uiCapabilities.logs.show && <InfraRedirect from="/logs" exact={true} to="/logs/stream" />}
+        {uiCapabilities.logs.show && (
+          <RedirectWithQueryParams from="/logs" exact={true} to="/logs/stream" />
+        )}
         {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure" component={InfrastructurePage} />
