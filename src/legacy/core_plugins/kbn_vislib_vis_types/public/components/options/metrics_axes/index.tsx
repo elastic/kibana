@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { capitalize, cloneDeep, uniq, get } from 'lodash';
+import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
@@ -32,12 +32,8 @@ import {
   isAxisHorizontal,
   countNextAxisNumber,
   getUpdatedAxisName,
-  getPreviousAxisNumbers,
-  AxesNumbers,
   mapPositionOpposite,
   mapPosition,
-  AXIS_PREFIX,
-  RADIX,
 } from './utils';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
@@ -59,7 +55,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const { stateParams, setValue, aggs, aggsLabels, setVisType, vis } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
-  const [axesNumbers, setAxesNumbers] = useState({} as AxesNumbers);
 
   const setParamByIndex: SetParamByIndex = useCallback(
     (axesName, index, paramName, value) => {
@@ -153,22 +148,16 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const onValueAxisPositionChanged = useCallback(
     (index: number, value: ValueAxis['position']) => {
       const valueAxes = [...stateParams.valueAxes];
-      const [name, lastAxisNameNumber] = getUpdatedAxisName(
-        value,
-        axesNumbers,
-        stateParams.valueAxes
-      );
+      const name = getUpdatedAxisName(value, valueAxes);
 
       valueAxes[index] = {
         ...valueAxes[index],
         name,
         position: value,
       };
-
-      setAxesNumbers({ ...axesNumbers, [value]: lastAxisNameNumber });
       setValue('valueAxes', valueAxes);
     },
-    [axesNumbers, stateParams.valueAxes, getUpdatedAxisName, setValue]
+    [stateParams.valueAxes, getUpdatedAxisName, setValue]
   );
 
   const onCategoryAxisPositionChanged = useCallback(
@@ -179,65 +168,33 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       stateParams.valueAxes.forEach((axis, index) => {
         if (isAxisHorizontal(axis.position) === isChartHorizontal) {
           const position = mapPosition(axis.position);
-          const newName =
-            capitalize(position) + AXIS_PREFIX + parseInt(axis.name.split(AXIS_PREFIX)[1], RADIX);
-
-          const valueAxes = [...stateParams.valueAxes];
-          valueAxes[index] = {
-            ...valueAxes[index],
-            name: newName,
-            position,
-          };
-          setValue('valueAxes', valueAxes);
+          onValueAxisPositionChanged(index, position);
         }
       });
     },
-    [stateParams.valueAxes, setValue]
+    [stateParams.valueAxes, onValueAxisPositionChanged]
   );
 
   const addValueAxis = useCallback(() => {
-    const lastAxisIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
-    let nextAxisIdNumber;
-
-    if (!lastAxisIdNumber) {
-      nextAxisIdNumber = stateParams.valueAxes.reduce(countNextAxisNumber(VALUE_AXIS_PREFIX), 1);
-    } else {
-      nextAxisIdNumber = lastAxisIdNumber + 1;
-    }
+    const nextAxisIdNumber = stateParams.valueAxes.reduce(
+      countNextAxisNumber(VALUE_AXIS_PREFIX),
+      1
+    );
 
     const newAxis = cloneDeep(stateParams.valueAxes[0]);
     newAxis.id = VALUE_AXIS_PREFIX + nextAxisIdNumber;
     newAxis.position = mapPositionOpposite(newAxis.position);
-
-    const [name, lastAxisNameNumber] = getUpdatedAxisName(
-      newAxis.position,
-      axesNumbers,
-      stateParams.valueAxes
-    );
-    newAxis.name = name;
-
-    setAxesNumbers({
-      ...axesNumbers,
-      [VALUE_AXIS_PREFIX]: nextAxisIdNumber,
-      [newAxis.position]: lastAxisNameNumber,
-    });
+    newAxis.name = getUpdatedAxisName(newAxis.position, stateParams.valueAxes);
 
     setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
     return newAxis;
-  }, [stateParams.valueAxes, axesNumbers, getUpdatedAxisName, setValue]);
+  }, [stateParams.valueAxes, setValue]);
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
       const newValueAxes = stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id);
 
       setValue('valueAxes', newValueAxes);
-
-      const updatedNumbers = getPreviousAxisNumbers(axis, axesNumbers);
-      if (updatedNumbers) {
-        setAxesNumbers({
-          ...updatedNumbers,
-        });
-      }
 
       let chartIndex;
       stateParams.seriesParams.forEach(({ valueAxis }, index) => {

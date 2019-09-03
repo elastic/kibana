@@ -61,43 +61,16 @@ function countNextAxisNumber(axisName: string, axisProp: 'id' | 'name' = 'id') {
   };
 }
 
-export interface AxesNumbers {
-  [key: string]: number;
-}
-
 const AXIS_PREFIX = 'Axis-';
-const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
 const getUpdatedAxisName = (
   axisPosition: ValueAxis['position'],
-  axesNumbers: AxesNumbers,
   valueAxes: BasicVislibParams['valueAxes']
 ) => {
   const axisName = capitalize(axisPosition) + AXIS_PREFIX;
-  const lastAxisNameNumber = axesNumbers[axisPosition];
-  const nextAxisNameNumber = lastAxisNameNumber
-    ? lastAxisNameNumber + 1
-    : valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);
+  const nextAxisNameNumber = valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);
 
-  return [`${axisName}${nextAxisNameNumber}`, nextAxisNameNumber] as [string, number];
-};
-
-const getPreviousAxisNumbers = (axis: ValueAxis, axesNumbers: AxesNumbers) => {
-  const lastIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
-  const lastNameNumber = axesNumbers[axis.position];
-  const updatedNumbers: AxesNumbers = { ...axesNumbers };
-  let isChanged = false;
-
-  if (axis.id.endsWith(`-${lastIdNumber}`)) {
-    delete updatedNumbers[VALUE_AXIS_PREFIX];
-    isChanged = true;
-  }
-  if (axis.name.endsWith(`-${lastNameNumber}`)) {
-    delete updatedNumbers[axis.position];
-    isChanged = true;
-  }
-
-  return isChanged ? updatedNumbers : null;
+  return `${axisName}${nextAxisNameNumber}`;
 };
 
 function mapPositionOpposite(position: Positions) {
@@ -133,9 +106,6 @@ export {
   isAxisHorizontal,
   countNextAxisNumber,
   getUpdatedAxisName,
-  getPreviousAxisNumbers,
   mapPositionOpposite,
   mapPosition,
-  AXIS_PREFIX,
-  RADIX,
 };
