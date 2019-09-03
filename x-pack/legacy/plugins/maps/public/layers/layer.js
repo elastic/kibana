@@ -57,15 +57,6 @@ export class AbstractLayer {
     }
   }
 
-  getPrevRequestToken(dataId) {
-    const prevDataRequest = this.getDataRequest(dataId);
-    if (!prevDataRequest) {
-      return;
-    }
-
-    return prevDataRequest.getRequestToken();
-  }
-
   async cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
@@ -259,6 +250,24 @@ export class AbstractLayer {
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
+
+  getPrevRequestToken(dataId) {
+    const prevDataRequest = this.getDataRequest(dataId);
+    if (!prevDataRequest) {
+      return;
+    }
+
+    return prevDataRequest.getRequestToken();
+  }
+
+  getInFlightRequestTokens() {
+    if (!this._dataRequests || this._dataRequests.length === 0) {
+      return [];
+    }
+
+    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    return _.compact(requestTokens);
+  }
 
   getSourceDataRequest() {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);

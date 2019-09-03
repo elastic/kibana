@@ -76,6 +76,16 @@ function getLayerById(layerId, state) {
   });
 }
 
+async function syncDataForAllLayers(getState, dispatch, dataFilters) {
+  const state = getState();
+  const layerList = getLayerList(state);
+  const syncs = layerList.map(layer => {
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, state, layer.getId());
+    return layer.syncData({ ...loadingFunctions, dataFilters });
+  });
+  await Promise.all(syncs);
+}
+
 function cancelRequest(requestToken, state) {
   if (!requestToken) {
     return;
@@ -84,6 +94,7 @@ function cancelRequest(requestToken, state) {
   const cancelCallback = getCancelRequestCallbacks(state).get(requestToken);
   if (cancelCallback) {
     cancelCallback();
+    unregisterCancelCallback(requestToken, state);
   }
 }
 
@@ -95,14 +106,14 @@ function unregisterCancelCallback(requestToken, state) {
   getCancelRequestCallbacks(state).set(requestToken, null);
 }
 
-async function syncDataForAllLayers(getState, dispatch, dataFilters) {
-  const state = getState();
-  const layerList = getLayerList(state);
-  const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, state, layer.getId());
-    return layer.syncData({ ...loadingFunctions, dataFilters });
-  });
-  await Promise.all(syncs);
+export function cancelAllInFlightRequests() {
+  return async (dispatch, getState) => {
+    getLayerList(getState()).forEach(layer => {
+      layer.getInFlightRequestTokens().forEach(requestToken => {
+        cancelRequest(requestToken, getState());
+      });
+    });
+  };
 }
 
 export function setMapInitError(errorMessage) {
@@ -600,6 +611,10 @@ export function removeLayer(layerId) {
     if (!layerGettingRemoved) {
       return;
     }
+
+    layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
+      cancelRequest(requestToken, getState());
+    });
     dispatch(clearTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();
     dispatch({
