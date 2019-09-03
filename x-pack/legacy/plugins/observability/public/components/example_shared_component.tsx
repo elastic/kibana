@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
-import { CoreContext } from '../context/CoreContext';
+import React from 'react';
 
-export function useCore() {
-  return useContext(CoreContext);
+interface Props {
+  message?: string;
+}
+
+export function ExampleSharedComponent({ message = 'See how it loads.' }: Props) {
+  return <p>This is an example of an observability shared component. {message}</p>;
 }
