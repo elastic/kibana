@@ -107,7 +107,7 @@ const deprecations = [
   rewriteBasePath,
   configPath,
   dataPath,
-  cspRules,
+  cspRules
 ];
 
 export const transformDeprecations = createTransform(deprecations);

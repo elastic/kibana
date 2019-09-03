@@ -88,14 +88,14 @@ export default async function (kbnServer, server, config) {
     method: 'GET',
     async handler(req, h) {
       const basePath = req.getBasePath();
+      const uiSettingsService = req.getUiSettingsService();
 
-      const defaultRouteSetting = await req.getUiSettingsService().get('defaultRoute');
+      const defaultRouteSetting = await uiSettingsService.get('defaultRoute');
       if (defaultRouteSetting && defaultRouteSetting.startsWith('/')) {
         return h.redirect(`${basePath}${defaultRouteSetting}`);
       }
 
-      const fallbackRoute = (await req.getUiSettingsService().getDefaults()).defaultRoute.value;
-
+      const fallbackRoute = (await uiSettingsService.getDefaults()).defaultRoute.value;
       return h.redirect(`${basePath}${fallbackRoute}`);
     }
   });
