@@ -154,7 +154,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(job.memoryStatus).to.eql('ok');
       expect(job.jobState).to.eql('closed');
       expect(job.datafeedState).to.eql('stopped');
-      expect(job.latestTimestamp).to.eql('2016-02-12 00:56:59');
+      expect(job.latestTimestamp).to.eql('2016-02-11 23:56:59');
 
       const countDetails = await ml.jobTable.parseJobCounts(jobId);
       const counts = countDetails.counts;
@@ -169,11 +169,11 @@ export default function({ getService }: FtrProviderContext) {
       expect(counts.empty_bucket_count).to.eql('0');
       expect(counts.sparse_bucket_count).to.eql('0');
       expect(counts.bucket_count).to.eql('239');
-      expect(counts.earliest_record_timestamp).to.eql('2016-02-07 01:02:50');
-      expect(counts.latest_record_timestamp).to.eql('2016-02-12 00:56:59');
+      expect(counts.earliest_record_timestamp).to.eql('2016-02-07 00:02:50');
+      expect(counts.latest_record_timestamp).to.eql('2016-02-11 23:56:59');
       expect(counts).to.have.property('last_data_time');
       expect(counts.input_record_count).to.eql('2,399');
-      expect(counts.latest_bucket_timestamp).to.eql('2016-02-12 00:30:00');
+      expect(counts.latest_bucket_timestamp).to.eql('2016-02-11 23:30:00');
 
       const modelSizeStats = countDetails.modelSizeStats;
       expect(modelSizeStats.job_id).to.eql(jobId);
@@ -187,7 +187,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(modelSizeStats.bucket_allocation_failures_count).to.eql('0');
       expect(modelSizeStats.memory_status).to.eql('ok');
       expect(modelSizeStats).to.have.property('log_time');
-      expect(modelSizeStats.timestamp).to.eql('2016-02-12 00:00:00');
+      expect(modelSizeStats.timestamp).to.eql('2016-02-11 23:00:00');
     });
   });
 }
