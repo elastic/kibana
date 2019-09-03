@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getOr, omit, uniq, isEmpty, isEqualWith, set } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
@@ -17,7 +17,6 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
 import { TimelineById, TimelineState } from './types';
-import { TimelineResult } from '../../graphql/types';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -106,20 +105,8 @@ export const addTimelineNoteToEvent = ({
 
 interface AddTimelineParams {
   id: string;
-  timeline: TimelineResult;
+  timeline: TimelineModel;
 }
-
-const mergeTimeline = (timeline: TimelineResult): TimelineModel => {
-  return Object.entries(timeline).reduce(
-    (acc: TimelineModel, [key, value]) => {
-      if (value != null) {
-        acc = set(key, value, acc);
-      }
-      return acc;
-    },
-    { ...timelineDefaults, id: '' }
-  );
-};
 
 /**
  * Add a saved object timeline to the store
@@ -128,8 +115,7 @@ const mergeTimeline = (timeline: TimelineResult): TimelineModel => {
 export const addTimelineToStore = ({ id, timeline }: AddTimelineParams): TimelineById => ({
   //  TODO: revisit this when we support multiple timelines
   [id]: {
-    ...mergeTimeline(timeline),
-    id: timeline.savedObjectId || '',
+    ...timeline,
     show: true,
   },
 });

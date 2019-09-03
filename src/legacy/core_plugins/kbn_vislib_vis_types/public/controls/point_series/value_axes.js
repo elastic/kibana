@@ -157,7 +157,7 @@ module.directive('vislibValueAxes', function () {
             const isMatchingSeries = (isFirst && !series.valueAxis) || (series.valueAxis === axis.id);
             if (isMatchingSeries) {
               let seriesNumber = 0;
-              $scope.editorState.aggs.forEach(agg => {
+              $scope.editorState.aggs.aggs.forEach(agg => {
                 if (agg.schema.name === 'metric') {
                   if (seriesNumber === i) matchingSeries.push(agg);
                   seriesNumber++;
@@ -194,7 +194,7 @@ module.directive('vislibValueAxes', function () {
       };
 
       $scope.$watch(() => {
-        return $scope.editorState.aggs.map(agg => {
+        return $scope.editorState.aggs.aggs.map(agg => {
           return safeMakeLabel(agg);
         }).join();
       }, () => {

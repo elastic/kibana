@@ -14,7 +14,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana';
 import {
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
 } from '../../../../common';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -198,7 +198,7 @@ export const useCreateAnalyticsForm = () => {
     try {
       setJobIds(
         (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsOutlierConfig) => job.id
+          (job: DataFrameAnalyticsConfig) => job.id
         )
       );
     } catch (e) {
@@ -285,9 +285,9 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+          'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
+            defaultMessage: 'An error occurred starting the data frame analytics job:',
           }
         ),
       });
