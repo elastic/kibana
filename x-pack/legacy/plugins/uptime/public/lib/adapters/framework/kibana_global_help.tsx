@@ -40,7 +40,7 @@ export const renderUptimeKibanaGlobalHelp = (docsSiteUrl: string, docLinkVersion
     >
       <FormattedMessage
         id="xpack.uptime.header.helpLinkText"
-        defaultMessage="Provide feedback for APM"
+        defaultMessage="Provide feedback for Uptime"
         description="The link is to a support form called 'Discuss', where users can submit feedback."
       />
     </EuiLink>
