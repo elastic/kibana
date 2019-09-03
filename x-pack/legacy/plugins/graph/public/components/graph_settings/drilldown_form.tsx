@@ -11,8 +11,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiCallOut,
   EuiSpacer,

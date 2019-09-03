@@ -604,7 +604,6 @@ app.controller('graphuiPlugin', function (
     $scope.description = null;
     $scope.allFields = [];
     $scope.urlTemplates = [];
-    $scope.resetNewUrlTemplate();
 
     $scope.fieldNamesFilterString = null;
     $scope.filteredFields = [];
