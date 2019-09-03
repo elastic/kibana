@@ -19,10 +19,13 @@ import {
   EuiProgress,
   EuiText,
   EuiTitle,
-  SortDirection,
 } from '@elastic/eui';
 
-import { ColumnType, MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
+import {
+  ColumnType,
+  MlInMemoryTable,
+  SORT_DIRECTION,
+} from '../../../../../../common/types/eui/in_memory_table';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
@@ -271,7 +274,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const sorting = {
     sort: {
       field: columns[0].field,
-      direction: SortDirection.ASC,
+      direction: SORT_DIRECTION.ASC,
     },
   };
 

@@ -17,6 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
+import _ from 'lodash';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
   defaultMessage: 'Layers'
@@ -38,8 +39,9 @@ export class WMSCreateSourceEditor extends Component {
     styleOptions: [],
     selectedLayerOptions: [],
     selectedStyleOptions: [],
+    attributionText: '',
+    attributionUrl: '',
   }
-
   componentDidMount() {
     this._isMounted = true;
   }
@@ -48,18 +50,26 @@ export class WMSCreateSourceEditor extends Component {
     this._isMounted = false;
   }
 
-  _previewIfPossible() {
+  _previewIfPossible = _.debounce(() => {
     const {
       serviceUrl,
       layers,
-      styles
+      styles,
+      attributionText,
+      attributionUrl,
     } = this.state;
 
     const sourceConfig = (serviceUrl && layers)
-      ? { serviceUrl, layers, styles }
+      ? {
+        serviceUrl,
+        layers,
+        styles,
+        attributionText,
+        attributionUrl,
+      }
       : null;
     this.props.onSourceConfigChange(sourceConfig);
-  }
+  }, 2000);
 
   _loadCapabilities = async () => {
     if (!this.state.serviceUrl) {
@@ -135,6 +145,18 @@ export class WMSCreateSourceEditor extends Component {
         return selectedOption.value;
       }).join(',')
     }, this._previewIfPossible);
+  }
+
+  _handleWMSAttributionChange(attributionUpdate) {
+    const {
+      attributionText,
+      attributionUrl,
+    } = this.state;
+    this.setState(attributionUpdate, () => {
+      if (attributionText && attributionUrl) {
+        this._previewIfPossible();
+      }
+    });
   }
 
   _renderLayerAndStyleInputs() {
@@ -226,6 +248,54 @@ export class WMSCreateSourceEditor extends Component {
     );
   }
 
+  _renderAttributionInputs() {
+    if (!this.state.layers) {
+      return;
+    }
+
+    const {
+      attributionText,
+      attributionUrl,
+    } = this.state;
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label="Attribution text"
+          isInvalid={attributionUrl !== '' && attributionText === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionText', {
+              defaultMessage:
+                'Attribution url must have accompanying text',
+            })
+          ]}
+        >
+          <EuiFieldText
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionText: target.value })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label="Attribution link"
+          isInvalid={attributionText !== '' && attributionUrl === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionLink', {
+              defaultMessage:
+                'Attribution text must have an accompanying link',
+            })
+          ]}
+        >
+          <EuiFieldText
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionUrl: target.value })
+            }
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <EuiForm>
@@ -243,6 +313,8 @@ export class WMSCreateSourceEditor extends Component {
         {this._renderGetCapabilitiesButton()}
 
         {this._renderLayerAndStyleInputs()}
+
+        {this._renderAttributionInputs()}
 
       </EuiForm>
     );
