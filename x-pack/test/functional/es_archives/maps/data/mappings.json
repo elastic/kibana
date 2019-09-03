@@ -109,3 +109,26 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "connections",
+    "mappings": {
+      "properties": {
+        "source": {
+          "type": "geo_point"
+        },
+        "destination": {
+          "type": "geo_point"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

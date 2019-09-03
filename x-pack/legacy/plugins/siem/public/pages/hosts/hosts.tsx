@@ -5,51 +5,42 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
+import { RouteComponentProps } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import {
-  EventsTable,
-  HostsTable,
-  KpiHostsComponent,
-  UncommonProcessTable,
-} from '../../components/page/hosts';
-import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
+import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
-import { UseUrlState } from '../../components/url_state';
-import { AuthenticationsQuery } from '../../containers/authentications';
-import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostsQuery } from '../../containers/hosts';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
-import * as i18n from './translations';
-import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { SiemNavigation } from '../../components/navigation';
 
-const AuthenticationTableManage = manageQuery(AuthenticationTable);
-const HostsTableManage = manageQuery(HostsTable);
-const EventsTableManage = manageQuery(EventsTable);
-const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
+import * as i18n from './translations';
+import {
+  navTabsHosts,
+  AnomaliesQueryTabBodyProps,
+  HostsComponentsQueryProps,
+} from './hosts_navigations';
+
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
+  kqlQueryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -57,7 +48,14 @@ interface HostsComponentReduxProps {
   }>;
 }
 
-type HostsComponentProps = HostsComponentReduxProps;
+type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
+export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
+
+export interface HostsQueryProps {
+  children: CommonChildren | AnonamaliesChildren;
+}
+
+export type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps & HostsQueryProps;
 
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => {
   return (
@@ -75,216 +73,42 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
             />
 
             <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <UseUrlState indexPattern={indexPattern}>
-                  {({ isInitializing }) => (
-                    <>
-                      <KpiHostsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                      >
-                        {({ kpiHosts, loading, id, inspect, refetch }) => (
-                          <KpiHostsComponentManage
-                            data={kpiHosts}
-                            from={from}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            to={to}
-                            narrowDateRange={(min: number, max: number) => {
-                              setTimeout(() => {
-                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                              }, 500);
-                            }}
-                          />
-                        )}
-                      </KpiHostsQuery>
-
-                      <EuiSpacer />
-
-                      <HostsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={hostsModel.HostsType.page}
-                      >
-                        {({
-                          hosts,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadPage,
-                          id,
-                          inspect,
-                          refetch,
-                        }) => (
-                          <HostsTableManage
-                            data={hosts}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            indexPattern={indexPattern}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
-                      </HostsQuery>
-
-                      <EuiSpacer />
-
-                      <AuthenticationsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={hostsModel.HostsType.page}
-                      >
-                        {({
-                          authentications,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadPage,
-                          id,
-                          inspect,
-                          refetch,
-                        }) => (
-                          <AuthenticationTableManage
-                            data={authentications}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            setQuery={setQuery}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
-                      </AuthenticationsQuery>
-
-                      <EuiSpacer />
-
-                      <UncommonProcessesQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={hostsModel.HostsType.page}
-                      >
-                        {({
-                          uncommonProcesses,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadPage,
-                          id,
-                          inspect,
-                          refetch,
-                        }) => (
-                          <UncommonProcessTableManage
-                            data={uncommonProcesses}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
-                      </UncommonProcessesQuery>
-
-                      <EuiSpacer />
-
-                      <AnomaliesHostTable
-                        startDate={from}
-                        endDate={to}
-                        skip={isInitializing}
-                        type={hostsModel.HostsType.page}
-                        narrowDateRange={(score, interval) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
+              {({ to, from, setQuery, isInitializing }) => (
+                <>
+                  <KpiHostsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    skip={isInitializing}
+                    sourceId="default"
+                    startDate={from}
+                  >
+                    {({ kpiHosts, loading, id, inspect, refetch }) => (
+                      <KpiHostsComponentManage
+                        data={kpiHosts}
+                        from={from}
+                        id={id}
+                        inspect={inspect}
+                        loading={loading}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        to={to}
+                        narrowDateRange={(min: number, max: number) => {
+                          /**
+                           * Using setTimeout here because of this issue:
+                           * https://github.com/elastic/elastic-charts/issues/360
+                           * Need to remove the setTimeout here after this issue is fixed.
+                           * */
+                          setTimeout(() => {
+                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                          }, 500);
                         }}
                       />
-
-                      <EuiSpacer />
-
-                      <EventsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={hostsModel.HostsType.page}
-                      >
-                        {({
-                          events,
-                          loading,
-                          id,
-                          inspect,
-                          refetch,
-                          totalCount,
-                          pageInfo,
-                          loadPage,
-                        }) => (
-                          <EventsTableManage
-                            data={events}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
-                      </EventsQuery>
-                    </>
-                  )}
-                </UseUrlState>
+                    )}
+                  </KpiHostsQuery>
+                  <EuiSpacer />
+                  <SiemNavigation navTabs={navTabsHosts} display="default" showBorder={true} />
+                  <EuiSpacer />
+                </>
               )}
             </GlobalTime>
           </StickyContainer>

@@ -36,6 +36,7 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   id: string;
+  isEventViewer?: boolean;
   height: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
@@ -83,7 +84,35 @@ type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const emptyColumnHeaders: ColumnHeader[] = [];
 
-class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentProps> {
+class StatefulBodyComponent extends React.Component<StatefulBodyComponentProps> {
+  public shouldComponentUpdate({
+    browserFields,
+    columnHeaders,
+    data,
+    eventIdToNoteIds,
+    getNotesByIds,
+    height,
+    id,
+    isEventViewer,
+    pinnedEventIds,
+    range,
+    sort,
+  }: StatefulBodyComponentProps) {
+    return (
+      browserFields !== this.props.browserFields ||
+      columnHeaders !== this.props.columnHeaders ||
+      data !== this.props.data ||
+      eventIdToNoteIds !== this.props.eventIdToNoteIds ||
+      getNotesByIds !== this.props.getNotesByIds ||
+      height !== this.props.height ||
+      id !== this.props.id ||
+      isEventViewer !== this.props.isEventViewer ||
+      pinnedEventIds !== this.props.pinnedEventIds ||
+      range !== this.props.range ||
+      sort !== this.props.sort
+    );
+  }
+
   public render() {
     const {
       browserFields,
@@ -93,6 +122,7 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       getNotesByIds,
       height,
       id,
+      isEventViewer = false,
       pinnedEventIds,
       range,
       sort,
@@ -103,13 +133,14 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       <Body
         addNoteToEvent={this.onAddNoteToEvent}
         browserFields={browserFields}
-        id={id}
         columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
         data={data}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
         height={height}
+        id={id}
+        isEventViewer={isEventViewer}
         onColumnResized={this.onColumnResized}
         onColumnRemoved={this.onColumnRemoved}
         onColumnSorted={this.onColumnSorted}
