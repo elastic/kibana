@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'lens';
+import { LensServer } from './plugin';
 
-export const BASE_APP_URL = '/app/lens';
-export const BASE_API_URL = '/api/lens';
+export * from './plugin';
 
-export function getEditPath(id: string) {
-  return `${BASE_APP_URL}#/edit/${encodeURIComponent(id)}`;
-}
+export const lensServerPlugin = () => new LensServer();

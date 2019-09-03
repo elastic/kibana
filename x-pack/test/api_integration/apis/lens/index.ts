@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'lens';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const BASE_APP_URL = '/app/lens';
-export const BASE_API_URL = '/api/lens';
-
-export function getEditPath(id: string) {
-  return `${BASE_APP_URL}#/edit/${encodeURIComponent(id)}`;
+export default function lensApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
+  describe('Lens', () => {
+    loadTestFile(require.resolve('./index_stats'));
+  });
 }
