@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { fixtures } from '../../../../index_patterns';
+import { mockFields, mockIndexPattern } from '../../../../index_patterns';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -43,21 +43,8 @@ import { phraseFilter } from './fixtures/phrase_filter';
 import { phrasesFilter } from './fixtures/phrases_filter';
 import { rangeFilter } from './fixtures/range_filter';
 
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => {},
-}));
+jest.mock('ui/new_platform');
 
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addWarning: () => {},
-    },
-  }),
-  { virtual: true }
-);
-
-const { mockFields, mockIndexPattern } = fixtures;
 const mockedFields = mockFields as Field[];
 const mockedIndexPattern = mockIndexPattern as IndexPattern;
 

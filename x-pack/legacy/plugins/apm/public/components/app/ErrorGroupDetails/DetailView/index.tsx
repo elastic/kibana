@@ -132,7 +132,7 @@ export function TabContent({
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error.service.name;
+  const codeLanguage = idx(error, _ => _.service.language.name);
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
   const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 

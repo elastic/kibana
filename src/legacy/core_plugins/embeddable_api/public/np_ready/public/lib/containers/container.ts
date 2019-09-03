@@ -35,10 +35,10 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export abstract class Container<
   TChildInput extends Partial<EmbeddableInput> = {},
-  TContainerInput extends ContainerInput = ContainerInput,
+  TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
   TContainerOutput extends ContainerOutput = ContainerOutput
 > extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;

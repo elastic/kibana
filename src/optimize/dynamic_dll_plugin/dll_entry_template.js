@@ -18,10 +18,8 @@
  */
 
 export function dllEntryTemplate(requirePaths = []) {
-  return [
-    `require('dll/set_csp_nonce');`,
-    ...requirePaths
-      .map(path => `require('${path}');`)
-      .sort()
-  ].join('\n');
+  return requirePaths
+    .map(path => `require('${path}');`)
+    .sort()
+    .join('\n');
 }

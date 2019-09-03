@@ -14,6 +14,7 @@ import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
+import { ExternalProgram } from './process/external_program';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
 
@@ -39,6 +40,9 @@ export class GoServerLauncher extends AbstractLauncher {
       maxWorkspace,
       this.options,
       {
+        initialOptions: {
+          installGoDependency: this.options.security.installGoDependency,
+        },
         clientCapabilities: {
           textDocument: {
             hover: {
@@ -94,7 +98,6 @@ export class GoServerLauncher extends AbstractLauncher {
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
-
     const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(installationPath, launchersFound[0]);
     const p = spawn(golsp, params, {
@@ -107,7 +110,6 @@ export class GoServerLauncher extends AbstractLauncher {
         GOROOT: goRoot,
         GOPATH: goPath,
         PATH: envPath,
-        GO111MODULE: 'on',
         CGO_ENABLED: '0',
       },
     });
@@ -120,6 +122,6 @@ export class GoServerLauncher extends AbstractLauncher {
     log.info(
       `Launch Go Language Server at port ${port.toString()}, pid:${p.pid}, GOROOT:${goRoot}`
     );
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 }

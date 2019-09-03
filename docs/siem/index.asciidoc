@@ -4,8 +4,6 @@
 
 [partintro]
 --
-coming[7.2]
-
 beta[]
 
 The SIEM app in Kibana provides an interactive workspace for security teams to

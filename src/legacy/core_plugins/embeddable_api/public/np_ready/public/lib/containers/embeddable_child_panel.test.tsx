@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { GetEmbeddableFactory } from '../types';
 import { EmbeddableFactory } from '../embeddables';
@@ -32,6 +32,7 @@ import {
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/public/mocks';
+import { mount } from 'enzyme';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -58,12 +59,11 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 
   expect(newEmbeddable.id).toBeDefined();
 
-  const component = mountWithIntl(
-    <EmbeddableChildPanel.WrappedComponent
-      intl={null as any}
+  const component = mount(
+    <EmbeddableChildPanel
       container={container}
       embeddableId={newEmbeddable.id}
-      getActions={(() => undefined) as any}
+      getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={(() => []) as any}
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
@@ -97,12 +97,11 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     { getEmbeddableFactory } as any
   );
 
-  const component = mountWithIntl(
-    <EmbeddableChildPanel.WrappedComponent
-      intl={null as any}
+  const component = mount(
+    <EmbeddableChildPanel
       container={container}
       embeddableId={'1'}
-      getActions={(() => undefined) as any}
+      getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={(() => []) as any}
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}

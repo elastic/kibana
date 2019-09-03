@@ -33,13 +33,14 @@ import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
+import { InfraLoadingPanel } from '../../components/loading';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -86,7 +87,7 @@ export const MetricDetail = withMetricPageProviders(
         }
         const { sourceId } = useContext(Source.Context);
         const layouts = layoutCreator(theme);
-        const { name, filteredLayouts, loading: metadataLoading } = useMetadata(
+        const { name, filteredLayouts, loading: metadataLoading, cloudId } = useMetadata(
           nodeId,
           nodeType,
           layouts,
@@ -114,15 +115,30 @@ export const MetricDetail = withMetricPageProviders(
           []
         );
 
+        if (metadataLoading && !filteredLayouts.length) {
+          return (
+            <InfraLoadingPanel
+              height="100vh"
+              width="100%"
+              text={intl.formatMessage({
+                id: 'xpack.infra.metrics.loadingNodeDataText',
+                defaultMessage: 'Loading data',
+              })}
+            />
+          );
+        }
+
         return (
           <WithMetricsTime>
             {({
               timeRange,
+              parsedTimeRange,
               setTimeRange,
               refreshInterval,
               setRefreshInterval,
               isAutoReloading,
               setAutoReload,
+              triggerRefresh,
             }) => (
               <ColumnarPage>
                 <Header
@@ -145,9 +161,10 @@ export const MetricDetail = withMetricPageProviders(
                   <WithMetrics
                     layouts={filteredLayouts}
                     sourceId={sourceId}
-                    timerange={timeRange as InfraTimerangeInput}
+                    timerange={parsedTimeRange}
                     nodeType={nodeType}
                     nodeId={nodeId}
+                    cloudId={cloudId}
                   >
                     {({ metrics, error, loading, refetch }) => {
                       if (error) {
@@ -189,9 +206,10 @@ export const MetricDetail = withMetricPageProviders(
                           />
                           <AutoSizer content={false} bounds detectAnyWindowResize>
                             {({ measureRef, bounds: { width = 0 } }) => {
+                              const w = width ? `${width}px` : `100%`;
                               return (
                                 <MetricsDetailsPageColumn innerRef={measureRef}>
-                                  <EuiPageBody style={{ width: `${width}px` }}>
+                                  <EuiPageBody style={{ width: w }}>
                                     <EuiPageHeader style={{ flex: '0 0 auto' }}>
                                       <EuiPageHeaderSection style={{ width: '100%' }}>
                                         <MetricsTitleTimeRangeContainer>
@@ -207,6 +225,7 @@ export const MetricDetail = withMetricPageProviders(
                                             setRefreshInterval={setRefreshInterval}
                                             onChangeTimeRange={setTimeRange}
                                             setAutoReload={setAutoReload}
+                                            onRefresh={triggerRefresh}
                                           />
                                         </MetricsTitleTimeRangeContainer>
                                       </EuiPageHeaderSection>

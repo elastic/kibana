@@ -24,3 +24,5 @@
 
 /** @public types */
 export { TopNavMenu, TopNavMenuData } from './top_nav_menu';
+
+export { Markdown, MarkdownSimple } from './markdown';

@@ -20,3 +20,5 @@
 export function parseCommaSeparatedList(input: string | string[]): string[];
 
 export function formatListAsProse(list: string[], options?: { inclusive?: boolean }): string;
+
+export function castEsToKbnFieldTypeName(name: string): string;

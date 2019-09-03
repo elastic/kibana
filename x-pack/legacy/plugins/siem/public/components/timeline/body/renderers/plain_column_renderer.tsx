@@ -70,10 +70,10 @@ export const plainColumnRenderer: ColumnRenderer = {
             // since ip fields may contain multiple IP addresses, return a FormattedIp here to avoid a "draggable of draggables"
             return (
               <FormattedIp
-                key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
-                eventId={eventId}
                 contextId={contextId}
+                eventId={eventId}
                 fieldName={field.id}
+                key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 value={!isNumber(value) ? value : String(value)}
                 width={width}
               />
@@ -89,11 +89,13 @@ export const plainColumnRenderer: ColumnRenderer = {
                   key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 >
                   <FormattedFieldValue
-                    eventId={eventId}
                     contextId={contextId}
+                    eventId={eventId}
+                    fieldFormat={field.format || ''}
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 </TruncatableText>
               );
@@ -105,11 +107,13 @@ export const plainColumnRenderer: ColumnRenderer = {
                   key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 >
                   <FormattedFieldValue
-                    eventId={eventId}
                     contextId={contextId}
+                    eventId={eventId}
+                    fieldFormat={field.format || ''}
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 </EuiText>
               );
@@ -128,11 +132,13 @@ export const plainColumnRenderer: ColumnRenderer = {
                   </DragEffects>
                 ) : (
                   <FormattedFieldValue
-                    eventId={eventId}
                     contextId={contextId}
+                    eventId={eventId}
+                    fieldFormat={field.format || ''}
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 )
               }

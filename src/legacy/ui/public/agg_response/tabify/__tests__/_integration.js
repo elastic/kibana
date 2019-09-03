@@ -36,7 +36,7 @@ describe('tabifyAggResponse Integration', function () {
   }));
 
   function normalizeIds(vis) {
-    vis.aggs.forEach(function (agg, i) {
+    vis.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
   }

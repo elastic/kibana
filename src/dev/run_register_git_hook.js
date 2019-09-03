@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { run, createFailError } from './run';
+import { run, createFailError } from '@kbn/dev-utils';
 import { registerPrecommitGitHook } from './register_git_hook';
 
 run(async ({ log }) => {

@@ -158,46 +158,35 @@ async function detectProducts(req) {
     }
   };
 
-  const msearch = [
-    { index: '*beat-*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: '.management-beats*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: 'logstash-*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: '.logstash*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: 'apm*' },
-    { size: 0, terminate_after: 0 },
+  const detectionSearch = [
+    {
+      id: BEATS_SYSTEM_ID,
+      indices: [
+        '*beat-*',
+        '.management-beats*',
+      ]
+    },
+    {
+      id: LOGSTASH_SYSTEM_ID,
+      indices: [
+        'logstash-*',
+        '.logstash*',
+      ]
+    },
+    {
+      id: APM_CUSTOM_ID,
+      indices: [
+        'apm-*'
+      ]
+    }
   ];
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const {
-    responses: [
-      beatsDataDetectionResponse,
-      beatsManagementDetectionResponse,
-      logstashDataDetectionResponse,
-      logstashManagementDetectionResponse,
-      apmDetectionResponse
-    ]
-  } = await callWithRequest(req, 'msearch', { body: msearch });
-
-  if (get(beatsDataDetectionResponse, 'hits.total.value', 0) > 0
-    || get(beatsManagementDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[BEATS_SYSTEM_ID].mightExist = true;
-  }
-
-  if (get(logstashDataDetectionResponse, 'hits.total.value', 0) > 0
-    || get(logstashManagementDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[LOGSTASH_SYSTEM_ID].mightExist = true;
-  }
-
-  if (get(apmDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[APM_CUSTOM_ID].mightExist = true;
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  for (const { id, indices } of detectionSearch) {
+    const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
+    if (response.length) {
+      result[id].mightExist = true;
+    }
   }
 
   return result;
@@ -269,6 +258,27 @@ async function getLiveElasticsearchClusterUuid(req) {
   return clusterUuid;
 }
 
+async function getLiveElasticsearchCollectionEnabled(req) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'GET',
+    path: '/_cluster/settings?include_defaults',
+    filter_path: [
+      'persistent.xpack.monitoring',
+      'transient.xpack.monitoring',
+      'defaults.xpack.monitoring'
+    ]
+  });
+  const sources = ['persistent', 'transient', 'defaults'];
+  for (const source of sources) {
+    const collectionSettings = get(response[source], 'xpack.monitoring.collection');
+    if (collectionSettings && collectionSettings.enabled === 'true') {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
  * and determine which products fall into one of four states:
@@ -316,9 +326,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   ]);
 
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
+  const liveEsNodes = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
+  const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
@@ -362,7 +373,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
       productStatus.totalUniqueInstanceCount = 0;
-      productStatus.detected = detectedProducts[product.name];
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
@@ -425,9 +435,11 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
+      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_CUSTOM_ID &&
+        clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
-        const isFullyMigrated = indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+        const isFullyMigrated = considerAllInstancesMigrated || indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
@@ -502,6 +514,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
       };
     }
 
+    if (productStatus.totalUniqueInstanceCount === 0) {
+      productStatus.detected = detectedProducts[product.name];
+    }
+
     return {
       ...products,
       [product.name]: productStatus,
@@ -510,7 +526,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
-    clusterUuid: liveClusterUuid,
+    liveClusterUuid,
     isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 

@@ -2,7 +2,8 @@
   "data_frame.get_data_frame_transform_stats": {
     "url_params": {
       "from": "",
-      "size": ""
+      "size": "",
+      "allow_no_match": "__flag__"
     },
     "methods": [
       "GET"

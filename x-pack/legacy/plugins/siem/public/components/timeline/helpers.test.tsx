@@ -116,10 +116,29 @@ describe('Build KQL Query', () => {
 });
 
 describe('Combined Queries', () => {
-  test('No Data Provider & No kqlQuery', () => {
+  test('No Data Provider & No kqlQuery & and isEventViewer is false', () => {
     expect(
       combineQueries([], mockIndexPattern, mockBrowserFields, '', 'search', startDate, endDate)
     ).toBeNull();
+  });
+
+  test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
+    const isEventViewer = true;
+    expect(
+      combineQueries(
+        [],
+        mockIndexPattern,
+        mockBrowserFields,
+        '',
+        'search',
+        startDate,
+        endDate,
+        isEventViewer
+      )
+    ).toEqual({
+      filterQuery:
+        '{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}',
+    });
   });
 
   test('Only Data Provider', () => {

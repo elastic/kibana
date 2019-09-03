@@ -135,6 +135,10 @@ describe('AllowedPrivileges', () => {
           privileges: ['all'],
           canUnassign: true, // feature 3 has no "read" privilege governed by global "all"
         },
+        feature4: {
+          privileges: ['all', 'read'],
+          canUnassign: false,
+        },
       },
     };
 
@@ -198,6 +202,10 @@ describe('AllowedPrivileges', () => {
             privileges: ['all'],
             canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
           },
+          feature4: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
         },
       },
     ]);
@@ -236,6 +244,10 @@ describe('AllowedPrivileges', () => {
             privileges: ['all'],
             canUnassign: false,
           },
+          feature4: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
         },
       },
     ]);
@@ -250,6 +262,7 @@ describe('AllowedPrivileges', () => {
           feature: {
             feature1: ['all'],
             feature2: ['read'],
+            feature4: ['all'],
           },
         },
         {
@@ -288,6 +301,10 @@ describe('AllowedPrivileges', () => {
           feature3: {
             privileges: ['all'],
             canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
+          },
+          feature4: {
+            privileges: ['all'],
+            canUnassign: false,
           },
         },
       },

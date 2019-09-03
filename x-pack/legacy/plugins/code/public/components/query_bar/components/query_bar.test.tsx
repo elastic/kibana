@@ -15,8 +15,6 @@ import { AutocompleteSuggestionType } from '../suggestions';
 import props from './__fixtures__/props.json';
 import { CodeQueryBar } from './query_bar';
 
-jest.mock('ui/kfetch');
-
 // Injest a mock random function to fixiate the output for generating component id.
 const mockMath = Object.create(global.Math);
 mockMath.random = () => 0.5;
