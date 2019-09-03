@@ -96,7 +96,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               />
             }
           >
-            <EuiText>Outlier Detection</EuiText>
+            <EuiText>Outlier detection</EuiText>
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
