@@ -18,7 +18,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Duration } from 'moment';
 
 export type KibanaConfigType = TypeOf<typeof config.schema>;
 
@@ -33,23 +32,3 @@ export const config = {
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
 };
-export class KibanaConfig {
-  readonly autoCompleteTerminateAfter: Duration;
-  readonly autocompleteTimeout: Duration;
-  readonly defaultAppId: string;
-  readonly disableWelcomeScreen: boolean;
-  readonly enabled: boolean;
-  readonly index: string;
-
-  /**
-   * @internal
-   */
-  constructor(rawConfig: KibanaConfigType) {
-    this.autoCompleteTerminateAfter = rawConfig.autocompleteTerminateAfter;
-    this.autocompleteTimeout = rawConfig.autocompleteTimeout;
-    this.defaultAppId = rawConfig.defaultAppId;
-    this.disableWelcomeScreen = rawConfig.disableWelcomeScreen;
-    this.enabled = rawConfig.enabled;
-    this.index = rawConfig.index;
-  }
-}

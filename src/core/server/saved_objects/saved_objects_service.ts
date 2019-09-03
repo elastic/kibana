@@ -23,7 +23,7 @@ import { KibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { KibanaConfig } from '../kibana_config';
+import { KibanaConfigType } from '../kibana_config';
 import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { Logger } from '..';
 
@@ -72,7 +72,7 @@ export class SavedObjectsService
     const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     const kibanaConfig = await this.coreContext.configService
-      .atPath<KibanaConfig>('kibana')
+      .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
 
@@ -84,7 +84,7 @@ export class SavedObjectsService
       logger: this.coreContext.logger.get('migrations'),
       kibanaVersion: this.coreContext.env.packageInfo.version,
       config: coreSetup.legacy.pluginExtendedConfig,
-      kibanaConfig: (kibanaConfig as any) as KibanaConfig,
+      kibanaConfig,
       callCluster: retryCallCluster(adminClient.callAsInternalUser.bind(adminClient)),
     });
 

@@ -23,7 +23,7 @@
  */
 
 import { Logger } from 'src/core/server/logging';
-import { KibanaConfig } from 'src/core/server/kibana_config';
+import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { MappingProperties, SavedObjectsMapping } from '../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
@@ -40,7 +40,7 @@ import { Config } from '../../../config';
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
   config: Config;
-  kibanaConfig: KibanaConfig;
+  kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
   savedObjectMappings: SavedObjectsMapping[];
@@ -59,7 +59,7 @@ export class KibanaMigrator {
   private callCluster: CallCluster;
   private config: Config;
   private documentMigrator: VersionedTransformer;
-  private kibanaConfig: KibanaConfig;
+  private kibanaConfig: KibanaConfigType;
   private log: Logger;
   private mappingProperties: MappingProperties;
   private readonly schema: SavedObjectsSchema;
