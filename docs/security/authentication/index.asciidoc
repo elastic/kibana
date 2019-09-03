@@ -9,6 +9,7 @@
 
 - <<basic-authentication>>
 - <<token-authentication>>
+- <<pki-authentication>>
 - <<saml>>
 - <<oidc>>
 
@@ -43,6 +44,36 @@ The token authentication provider can be used in conjunction with the basic auth
 --------------------------------------------------------------------------------
 xpack.security.authc.providers: [token, basic]
 --------------------------------------------------------------------------------
+
+[[pki-authentication]]
+==== Public Key Infrastructure (PKI) Authentication
+
+[IMPORTANT]
+============================================================================
+PKI authentication will not work if {kib} is hosted behind a TLS termination reverse proxy. In this configuration, {kib} does not have direct access to the client certificates and cannot authenticate the user.
+============================================================================
+
+PKI authentication allows users to log into {kib} using X.509 client certificates that must be presented while connecting to {kib}. The certificates must first be accepted for authentication on the {kib} TLS layer, and then they are further validated by an {es} PKI realm. The PKI authentication provider relies on the {es} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to access tokens. All subsequent requests to {es} APIs on behalf of users will be authenticated using these access tokens.
+
+Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
+
+To enable the PKI authentication provider in {kib}, you must first <<configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.certificateAuthorities: /path/to/your/cacert.pem
+server.ssl.clientAuthentication: required
+xpack.security.authc.providers: [pki]
+--------------------------------------------------------------------------------
+
+PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and Basic authentication for the same {kib} instance:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers: [pki, basic]
+--------------------------------------------------------------------------------
+
+Note that with `server.ssl.clientAuthentication` set to `required`, users are asked to provide a valid client certificate, even if they want to authenticate with username and password. Depending on the security policies, it may or may not be desired. If not, `server.ssl.clientAuthentication` can be set to `optional`. In this case, {kib} still requests a client certificate, but the client won't be required to present one. The `optional` client authentication mode might also be needed in other cases, for example, when PKI authentication is used in conjunction with Reporting.
 
 [[saml]]
 ==== SAML Single Sign-On

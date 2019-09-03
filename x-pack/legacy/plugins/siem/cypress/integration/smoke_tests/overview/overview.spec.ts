@@ -18,7 +18,7 @@ describe('Overview Page', () => {
   });
 
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('Host and Network stats render with correct values', () => {
