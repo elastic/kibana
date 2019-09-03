@@ -34,6 +34,7 @@ export const getKibanaFrameworkAdapter = (core: InternalCoreStart): UMFrameworkA
   );
   const props: UptimeAppProps = {
     basePath: basePath.get(),
+    canSave: !!capabilities.uptime.save,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
     darkMode: core.uiSettings.get('theme:darkMode'),
     i18n,
