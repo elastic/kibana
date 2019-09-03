@@ -315,6 +315,7 @@ class ReportListingUi extends Component<Props, State> {
         }
         pagination={pagination}
         onChange={this.onTableChange}
+        data-test-subj="reportJobListing"
       />
     );
   }

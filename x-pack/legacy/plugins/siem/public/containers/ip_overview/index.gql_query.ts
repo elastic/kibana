@@ -21,9 +21,10 @@ export const ipOverviewQuery = gql`
           firstSeen
           lastSeen
           autonomousSystem {
-            as_org
-            asn
-            ip
+            number
+            organization {
+              name
+            }
           }
           geo {
             continent_name
@@ -42,9 +43,10 @@ export const ipOverviewQuery = gql`
           firstSeen
           lastSeen
           autonomousSystem {
-            as_org
-            asn
-            ip
+            number
+            organization {
+              name
+            }
           }
           geo {
             continent_name

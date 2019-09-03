@@ -11,7 +11,9 @@ import { getOr } from 'lodash/fp';
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
+import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
+import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
 import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
 import { InspectButton } from '../../../inspect';
@@ -26,7 +28,6 @@ import { OverviewWrapper } from '../../index';
 import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
-import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
 interface HostSummaryProps {
   data: HostItem;
@@ -69,7 +70,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
-    const config = useContext(KibanaConfigContext);
+    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
 
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
@@ -195,7 +196,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           <Loader
             overlay
             overlayBackground={
-              config.darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+              darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
             }
             size="xl"
           />
