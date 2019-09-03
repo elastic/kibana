@@ -6,8 +6,8 @@
 import { useRef } from 'react';
 import { isEqual } from 'lodash';
 
-// preserve object identify if it is deeply equal to the previous instance of it
-export function usePreserveIdentify<T>(value: T) {
+// preserve object identity if it is deeply equal to the previous instance of it
+export function usePreserveIdentity<T>(value: T) {
   const valueRef = useRef<T>(value);
 
   // update ref if object has changed. Else return the original object and discard the new one
