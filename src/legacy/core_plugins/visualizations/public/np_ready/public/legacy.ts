@@ -25,9 +25,7 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
 import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
-import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
-// @ts-ignore
-import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
