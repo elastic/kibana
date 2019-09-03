@@ -6,15 +6,13 @@
 
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { data } from 'plugins/data/setup';
+import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
 export let SearchSource;
-export let filterBarQueryFilter;
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(
@@ -41,5 +39,4 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
 uiModules.get('app/maps').run(($injector) => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
-  filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
 });

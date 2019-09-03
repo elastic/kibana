@@ -6,23 +6,12 @@
 
 import { mapValues } from 'lodash';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
-
-export interface ShortcutMap {
-  osx: string[];
-  windows: string[];
-  linux: string[];
-  other: string[];
-  help: string;
-}
-
-export interface ShortcutNameSpace {
-  displayName: string;
-  [shortcut: string]: string | ShortcutMap;
-}
+import { ShortcutMap, ShortcutNameSpace } from '../../types';
 
 interface KeyMap {
   [category: string]: ShortcutNameSpace;
 }
+
 type Modifier = 'ctrl' | 'command' | 'shift' | 'alt' | 'option';
 
 // maps key for all OS's with optional modifiers
@@ -72,6 +61,10 @@ const getShortcuts = (
 const refreshShortcut = getShortcuts('r', { modifiers: 'alt', help: 'Refresh workpad' });
 const previousPageShortcut = getShortcuts('[', { modifiers: 'alt', help: 'Go to previous page' });
 const nextPageShortcut = getShortcuts(']', { modifiers: 'alt', help: 'Go to next page' });
+const fullscreenShortcut = getShortcuts(['f', 'p'], {
+  modifiers: 'alt',
+  help: 'Enter presentation mode',
+});
 
 export const keymap: KeyMap = {
   ELEMENT: {
@@ -141,10 +134,11 @@ export const keymap: KeyMap = {
     ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
     ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
     ZOOM_RESET: getShortcuts('[', { modifiers: ['ctrl', 'alt'], help: 'Reset zoom to 100%' }),
+    FULLSCREEN: fullscreenShortcut,
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
-    FULLSCREEN: getShortcuts(['f', 'p'], { modifiers: 'alt', help: 'Enter presentation mode' }),
+    FULLSCREEN: fullscreenShortcut,
     FULLSCREEN_EXIT: getShortcuts('esc', { help: 'Exit presentation mode' }),
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS

@@ -1,0 +1,11 @@
+{
+  "sql.clear_cursor": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_sql/close"
+    ],
+    "documentation": "Clear SQL cursor"
+  }
+}

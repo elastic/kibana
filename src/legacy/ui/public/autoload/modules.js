@@ -31,7 +31,7 @@ import '../state_management/global_state';
 import '../storage';
 import '../style_compile';
 import '../url';
-import '../watch_multi';
+import '../directives/watch_multi';
 import '../react_components';
 import '../i18n';
 

@@ -1,0 +1,11 @@
+{
+  "rollup.get_rollup_caps": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_rollup/data/{id}",
+      "_rollup/data/"
+    ]
+  }
+}

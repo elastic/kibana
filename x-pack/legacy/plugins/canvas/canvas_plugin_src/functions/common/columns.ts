@@ -6,7 +6,7 @@
 
 import { omit, pick, find } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, DatatableColumn } from '../types';
+import { Datatable, DatatableColumn } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -26,6 +26,7 @@ export function columns(): ExpressionFunction<'columns', Datatable, Arguments, D
     },
     args: {
       include: {
+        aliases: ['_'],
         types: ['string'],
         help: argHelp.include,
       },

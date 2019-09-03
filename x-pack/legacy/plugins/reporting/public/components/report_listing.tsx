@@ -12,6 +12,7 @@ declare module '@elastic/eui' {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -46,6 +47,7 @@ interface Job {
   max_size_reached: boolean;
   attempts: number;
   max_attempts: number;
+  csv_contains_formulas: boolean;
 }
 
 interface Props {
@@ -313,6 +315,7 @@ class ReportListingUi extends Component<Props, State> {
         }
         pagination={pagination}
         onChange={this.onTableChange}
+        data-test-subj="reportJobListing"
       />
     );
   }
@@ -333,6 +336,21 @@ class ReportListingUi extends Component<Props, State> {
         })}
       />
     );
+
+    if (record.csv_contains_formulas) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={intl.formatMessage({
+            id: 'xpack.reporting.listing.table.csvContainsFormulas',
+            defaultMessage:
+              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
+          })}
+        >
+          {button}
+        </EuiToolTip>
+      );
+    }
 
     if (record.max_size_reached) {
       return (
@@ -365,19 +383,13 @@ class ReportListingUi extends Component<Props, State> {
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
     const { index: pageIndex } = page;
-
-    this.setState(
-      {
-        page: pageIndex,
-      },
-      this.fetchJobs
-    );
+    this.setState(() => ({ page: pageIndex }), this.fetchJobs);
   };
 
   private fetchJobs = async () => {
     // avoid page flicker when poller is updating table - only display loading screen on first load
     if (this.isInitialJobsFetch) {
-      this.setState({ isLoading: true });
+      this.setState(() => ({ isLoading: true }));
     }
 
     let jobs: JobQueueEntry[];
@@ -403,34 +415,37 @@ class ReportListingUi extends Component<Props, State> {
         );
       }
       if (this.mounted) {
-        this.setState({ isLoading: false, jobs: [], total: 0 });
+        this.setState(() => ({ isLoading: false, jobs: [], total: 0 }));
       }
       return;
     }
 
     if (this.mounted) {
-      this.setState({
+      this.setState(() => ({
         isLoading: false,
         total,
         jobs: jobs.map(
-          (job: JobQueueEntry): Job => ({
-            id: job._id,
-            type: job._source.jobtype,
-            object_type: job._source.payload.type,
-            object_title: job._source.payload.title,
-            created_by: job._source.created_by,
-            created_at: job._source.created_at,
-            started_at: job._source.started_at,
-            completed_at: job._source.completed_at,
-            status: job._source.status,
-            statusLabel:
-              jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
-            max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
-            attempts: job._source.attempts,
-            max_attempts: job._source.max_attempts,
-          })
+          (job: JobQueueEntry): Job => {
+            const { _source: source } = job;
+            return {
+              id: job._id,
+              type: source.jobtype,
+              object_type: source.payload.type,
+              object_title: source.payload.title,
+              created_by: source.created_by,
+              created_at: source.created_at,
+              started_at: source.started_at,
+              completed_at: source.completed_at,
+              status: source.status,
+              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
+              max_size_reached: source.output ? source.output.max_size_reached : false,
+              attempts: source.attempts,
+              max_attempts: source.max_attempts,
+              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
+            };
+          }
         ),
-      });
+      }));
     }
   };
 

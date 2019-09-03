@@ -82,3 +82,5 @@ export const Fingerprints = pure<{
     </EuiFlexGroup>
   )
 );
+
+Fingerprints.displayName = 'Fingerprints';

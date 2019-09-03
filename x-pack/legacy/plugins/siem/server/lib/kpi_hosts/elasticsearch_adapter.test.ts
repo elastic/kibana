@@ -14,7 +14,6 @@ import {
   mockKpiHostsUniqueIpsQuery,
   mockKpiHostDetailsUniqueIpsQuery,
   mockKpiHostsMsearchOptions,
-  mockKpiHostDetailsMsearchOptions,
   mockKpiHostsOptions,
   mockKpiHostDetailsOptions,
   mockKpiHostsRequest,
@@ -23,13 +22,35 @@ import {
   mockKpiHostDetailsResponse,
   mockKpiHostsResult,
   mockKpiHostDetailsResult,
+  mockKpiHostDetailsDsl,
+  mockKpiHostsQueryDsl,
+  mockKpiHostDetailsMsearchOptions,
+  mockKpiHostsResponseNodata,
+  mockKpiHostDetailsResponseNoData,
 } from './mock';
-import * as authQueryDsl from './query_authentication.dsl';
-import * as uniqueIpsQueryDsl from './query_unique_ips.dsl';
-import * as hostsQueryDsl from './query_hosts.dsl';
+import { buildAuthQuery } from './query_authentication.dsl';
+import { buildUniqueIpsQuery } from './query_unique_ips.dsl';
+import { buildHostsQuery } from './query_hosts.dsl';
 import { KpiHostsData, KpiHostDetailsData } from '../../graphql/types';
 
-describe('Hosts Kpi elasticsearch_adapter', () => {
+jest.mock('./query_authentication.dsl', () => {
+  return {
+    buildAuthQuery: jest.fn(),
+  };
+});
+jest.mock('./query_unique_ips.dsl', () => {
+  return {
+    buildUniqueIpsQuery: jest.fn(),
+  };
+});
+jest.mock('./query_hosts.dsl', () => {
+  return {
+    buildHostsQuery: jest.fn(),
+  };
+});
+
+describe('getKpiHosts', () => {
+  let data: KpiHostsData;
   const mockCallWithRequest = jest.fn();
   const mockFramework: FrameworkAdapter = {
     version: 'mock',
@@ -39,225 +60,228 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),
   };
-  let mockBuildUniqueIpsQuery: jest.SpyInstance;
-  let mockBuildAuthQuery: jest.SpyInstance;
-  let mockBuildHostsQuery: jest.SpyInstance;
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 
-  describe('getKpiHosts', () => {
-    let data: KpiHostsData;
+  describe('getKpiHosts - call stack', () => {
+    beforeAll(async () => {
+      (buildUniqueIpsQuery as jest.Mock).mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockReturnValue(mockKpiHostsUniqueIpsQuery);
+      (buildAuthQuery as jest.Mock).mockReset();
+      (buildAuthQuery as jest.Mock).mockReturnValue(mockKpiHostsAuthQuery);
+      (buildHostsQuery as jest.Mock).mockReset();
+      (buildHostsQuery as jest.Mock).mockReturnValue(mockHostsQuery);
+      mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
 
-    describe('getKpiHosts - call stack', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        mockBuildUniqueIpsQuery = jest
-          .spyOn(uniqueIpsQueryDsl, 'buildUniqueIpsQuery')
-          .mockReturnValue(mockKpiHostsUniqueIpsQuery);
-        mockBuildAuthQuery = jest
-          .spyOn(authQueryDsl, 'buildAuthQuery')
-          .mockReturnValue(mockKpiHostsAuthQuery);
-        mockBuildHostsQuery = jest
-          .spyOn(hostsQueryDsl, 'buildHostsQuery')
-          .mockReturnValue(mockHostsQuery);
-
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(
-          mockKpiHostsRequest as FrameworkRequest,
-          mockKpiHostsOptions
-        );
-      });
-
-      afterAll(() => {
-        mockCallWithRequest.mockRestore();
-        mockBuildUniqueIpsQuery.mockRestore();
-        mockBuildAuthQuery.mockRestore();
-        mockBuildHostsQuery.mockRestore();
-      });
-
-      test('should build general query with correct option', () => {
-        expect(mockBuildUniqueIpsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
-      });
-
-      test('should build auth query with correct option', () => {
-        expect(mockBuildAuthQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
-      });
-
-      test('should build hosts query with correct option', () => {
-        expect(mockBuildHostsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
-      });
-
-      test('should send msearch request', () => {
-        expect(mockCallWithRequest).toHaveBeenCalledWith(
-          mockKpiHostsRequest,
-          'msearch',
-          mockKpiHostsMsearchOptions
-        );
-      });
+      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+      data = await EsKpiHosts.getKpiHosts(
+        mockKpiHostsRequest as FrameworkRequest,
+        mockKpiHostsOptions
+      );
     });
 
-    describe('Happy Path - get Data', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiHostsResponse);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(
-          mockKpiHostsRequest as FrameworkRequest,
-          mockKpiHostsOptions
-        );
-      });
-
-      afterAll(() => {
-        mockCallWithRequest.mockReset();
-      });
-
-      test('getKpiHosts - response with data', () => {
-        expect(data).toEqual(mockKpiHostsResult);
-      });
+    afterAll(() => {
+      mockCallWithRequest.mockRestore();
+      (buildUniqueIpsQuery as jest.Mock).mockClear();
+      (buildAuthQuery as jest.Mock).mockClear();
+      (buildHostsQuery as jest.Mock).mockClear();
     });
 
-    describe('Unhappy Path - No data', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(null);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHosts(
-          mockKpiHostsRequest as FrameworkRequest,
-          mockKpiHostsOptions
-        );
-      });
+    test('should build general query with correct option', () => {
+      expect(buildUniqueIpsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
+    });
 
-      afterAll(() => {
-        mockCallWithRequest.mockReset();
-      });
+    test('should build auth query with correct option', () => {
+      expect(buildAuthQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
+    });
 
-      test('getKpiHosts - response without data', async () => {
-        expect(data).toEqual({
-          hosts: null,
-          hostsHistogram: null,
-          authSuccess: null,
-          authSuccessHistogram: null,
-          authFailure: null,
-          authFailureHistogram: null,
-          uniqueSourceIps: null,
-          uniqueSourceIpsHistogram: null,
-          uniqueDestinationIps: null,
-          uniqueDestinationIpsHistogram: null,
-        });
-      });
+    test('should build hosts query with correct option', () => {
+      expect(buildHostsQuery).toHaveBeenCalledWith(mockKpiHostsOptions);
+    });
+
+    test('should send msearch request', () => {
+      expect(mockCallWithRequest).toHaveBeenCalledWith(
+        mockKpiHostsRequest,
+        'msearch',
+        mockKpiHostsMsearchOptions
+      );
+    });
+
+    test('Happy Path - get Data', () => {
+      expect(data).toEqual(mockKpiHostsResult);
     });
   });
 
-  describe('getKpiHostDetails', () => {
-    let data: KpiHostDetailsData;
-
-    describe('getKpiHostDetails - call stack', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        mockBuildUniqueIpsQuery = jest
-          .spyOn(uniqueIpsQueryDsl, 'buildUniqueIpsQuery')
-          .mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
-        mockBuildAuthQuery = jest
-          .spyOn(authQueryDsl, 'buildAuthQuery')
-          .mockReturnValue(mockKpiHostDetailsAuthQuery);
-        mockBuildHostsQuery = jest
-          .spyOn(hostsQueryDsl, 'buildHostsQuery')
-          .mockReturnValue(mockHostsQuery);
-
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHostDetails(
-          mockKpiHostDetailsRequest as FrameworkRequest,
-          mockKpiHostDetailsOptions
-        );
-      });
-
-      afterAll(() => {
-        mockCallWithRequest.mockRestore();
-        mockBuildUniqueIpsQuery.mockRestore();
-        mockBuildAuthQuery.mockRestore();
-        mockBuildHostsQuery.mockRestore();
-      });
-
-      test('should build general query with correct option', () => {
-        expect(mockBuildUniqueIpsQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
-      });
-
-      test('should build auth query with correct option', () => {
-        expect(mockBuildAuthQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
-      });
-
-      test('should not build hosts query', () => {
-        expect(mockBuildHostsQuery).not.toHaveBeenCalled();
-      });
-
-      test('should send msearch request', () => {
-        expect(mockCallWithRequest).toHaveBeenCalledWith(
-          mockKpiHostDetailsRequest,
-          'msearch',
-          mockKpiHostDetailsMsearchOptions
-        );
-      });
+  describe('Unhappy Path - No data', () => {
+    beforeAll(async () => {
+      (buildUniqueIpsQuery as jest.Mock).mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockReturnValue(mockKpiHostsUniqueIpsQuery);
+      (buildAuthQuery as jest.Mock).mockReset();
+      (buildAuthQuery as jest.Mock).mockReturnValue(mockKpiHostsAuthQuery);
+      (buildHostsQuery as jest.Mock).mockReset();
+      (buildHostsQuery as jest.Mock).mockReturnValue(mockHostsQuery);
+      mockCallWithRequest.mockResolvedValue(mockKpiHostsResponseNodata);
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+      data = await EsKpiHosts.getKpiHosts(
+        mockKpiHostsRequest as FrameworkRequest,
+        mockKpiHostsOptions
+      );
     });
 
-    describe('Happy Path - get Data', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHostDetails(
-          mockKpiHostDetailsRequest as FrameworkRequest,
-          mockKpiHostDetailsOptions
-        );
-      });
-
-      afterAll(() => {
-        mockCallWithRequest.mockReset();
-      });
-
-      test('getKpiHostDetails - response with data', () => {
-        expect(data).toEqual(mockKpiHostDetailsResult);
-      });
+    afterAll(() => {
+      mockCallWithRequest.mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockClear();
+      (buildAuthQuery as jest.Mock).mockClear();
+      (buildHostsQuery as jest.Mock).mockClear();
     });
 
-    describe('Unhappy Path - No data', () => {
-      beforeAll(async () => {
-        mockCallWithRequest.mockResolvedValue(null);
-        jest.doMock('../framework', () => ({
-          callWithRequest: mockCallWithRequest,
-        }));
-        EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
-        data = await EsKpiHosts.getKpiHostDetails(
-          mockKpiHostDetailsRequest as FrameworkRequest,
-          mockKpiHostDetailsOptions
-        );
+    test('getKpiHosts - response without data', async () => {
+      expect(data).toEqual({
+        inspect: {
+          dsl: mockKpiHostsQueryDsl,
+          response: [
+            JSON.stringify(mockKpiHostsResponseNodata.responses[0], null, 2),
+            JSON.stringify(mockKpiHostsResponseNodata.responses[1], null, 2),
+            JSON.stringify(mockKpiHostsResponseNodata.responses[2], null, 2),
+          ],
+        },
+        hosts: null,
+        hostsHistogram: null,
+        authSuccess: null,
+        authSuccessHistogram: null,
+        authFailure: null,
+        authFailureHistogram: null,
+        uniqueSourceIps: null,
+        uniqueSourceIpsHistogram: null,
+        uniqueDestinationIps: null,
+        uniqueDestinationIpsHistogram: null,
       });
+    });
+  });
+});
 
-      afterAll(() => {
-        mockCallWithRequest.mockReset();
-      });
+describe('getKpiHostDetails', () => {
+  let data: KpiHostDetailsData;
+  const mockCallWithRequest = jest.fn();
+  const mockFramework: FrameworkAdapter = {
+    version: 'mock',
+    callWithRequest: mockCallWithRequest,
+    exposeStaticDir: jest.fn(),
+    registerGraphQLEndpoint: jest.fn(),
+    getIndexPatternsService: jest.fn(),
+    getSavedObjectsService: jest.fn(),
+  };
+  let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 
-      test('getKpiHostDetails - response without data', async () => {
-        expect(data).toEqual({
-          authSuccess: null,
-          authSuccessHistogram: null,
-          authFailure: null,
-          authFailureHistogram: null,
-          uniqueSourceIps: null,
-          uniqueSourceIpsHistogram: null,
-          uniqueDestinationIps: null,
-          uniqueDestinationIpsHistogram: null,
-        });
+  describe('getKpiHostDetails - call stack', () => {
+    beforeAll(async () => {
+      (buildUniqueIpsQuery as jest.Mock).mockReset();
+      (buildUniqueIpsQuery as jest.Mock).mockReturnValue(mockKpiHostDetailsUniqueIpsQuery);
+      (buildAuthQuery as jest.Mock).mockReset();
+      (buildAuthQuery as jest.Mock).mockReturnValue(mockKpiHostDetailsAuthQuery);
+      (buildHostsQuery as jest.Mock).mockReset();
+      mockCallWithRequest.mockReset();
+      mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
+
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+      data = await EsKpiHosts.getKpiHostDetails(
+        mockKpiHostDetailsRequest as FrameworkRequest,
+        mockKpiHostDetailsOptions
+      );
+    });
+
+    afterAll(() => {
+      mockCallWithRequest.mockRestore();
+      (buildUniqueIpsQuery as jest.Mock).mockClear();
+      (buildAuthQuery as jest.Mock).mockClear();
+      (buildHostsQuery as jest.Mock).mockClear();
+    });
+
+    test('should build unique Ip query with correct option', () => {
+      expect(buildUniqueIpsQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
+    });
+
+    test('should build auth query with correct option', () => {
+      expect(buildAuthQuery).toHaveBeenCalledWith(mockKpiHostDetailsOptions);
+    });
+
+    test('should not build hosts query', () => {
+      expect(buildHostsQuery).not.toHaveBeenCalled();
+    });
+
+    test('should send msearch request', () => {
+      expect(mockCallWithRequest).toHaveBeenCalledWith(
+        mockKpiHostDetailsRequest,
+        'msearch',
+        mockKpiHostDetailsMsearchOptions
+      );
+    });
+  });
+
+  describe('Happy Path - get Data', () => {
+    beforeAll(async () => {
+      mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponse);
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+      data = await EsKpiHosts.getKpiHostDetails(
+        mockKpiHostDetailsRequest as FrameworkRequest,
+        mockKpiHostDetailsOptions
+      );
+    });
+
+    afterAll(() => {
+      mockCallWithRequest.mockReset();
+    });
+
+    test('getKpiHostDetails - response with data', () => {
+      expect(data).toEqual(mockKpiHostDetailsResult);
+    });
+  });
+
+  describe('Unhappy Path - no Data', () => {
+    beforeEach(async () => {
+      mockCallWithRequest.mockResolvedValue(mockKpiHostDetailsResponseNoData);
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiHosts = new ElasticsearchKpiHostsAdapter(mockFramework);
+      data = await EsKpiHosts.getKpiHostDetails(
+        mockKpiHostDetailsRequest as FrameworkRequest,
+        mockKpiHostDetailsOptions
+      );
+    });
+
+    afterAll(() => {
+      mockCallWithRequest.mockRestore();
+    });
+
+    test('getKpiHostDetails - response without data', async () => {
+      expect(data).toEqual({
+        inspect: {
+          dsl: mockKpiHostDetailsDsl,
+          response: [
+            JSON.stringify(mockKpiHostDetailsResponseNoData.responses[0]),
+            JSON.stringify(mockKpiHostDetailsResponseNoData.responses[1]),
+          ],
+        },
+        authSuccess: null,
+        authSuccessHistogram: null,
+        authFailure: null,
+        authFailureHistogram: null,
+        uniqueSourceIps: null,
+        uniqueSourceIpsHistogram: null,
+        uniqueDestinationIps: null,
+        uniqueDestinationIpsHistogram: null,
       });
     });
   });

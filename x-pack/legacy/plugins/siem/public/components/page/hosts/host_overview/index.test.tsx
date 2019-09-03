@@ -40,13 +40,14 @@ describe('Host Summary Component', () => {
       const wrapper = shallow(
         <TestProviders>
           <HostOverview
-            startDate={new Date('2019-06-15T06:00:00.000Z').valueOf()}
-            endDate={new Date('2019-06-18T06:00:00.000Z').valueOf()}
-            loading={false}
-            data={mockData.Hosts.edges[0].node}
             anomaliesData={mockAnomalies}
+            data={mockData.Hosts.edges[0].node}
+            endDate={new Date('2019-06-18T06:00:00.000Z').valueOf()}
+            id="hostOverview"
             isLoadingAnomaliesData={false}
+            loading={false}
             narrowDateRange={jest.fn()}
+            startDate={new Date('2019-06-15T06:00:00.000Z').valueOf()}
           />
         </TestProviders>
       );

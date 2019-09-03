@@ -8,7 +8,6 @@ import { EuiSelect, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadEnvironmentsFilter } from '../../../services/rest/apm/ui_filters';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -17,6 +16,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED
 } from '../../../../common/environment_filter_values';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,
@@ -79,18 +79,20 @@ export const EnvironmentFilter: React.FC = () => {
   const { start, end, serviceName } = urlParams;
 
   const { environment } = uiFilters;
-  const { data: environments = [], status = 'loading' } = useFetcher(
-    () => {
-      if (start && end) {
-        return loadEnvironmentsFilter({
-          start,
-          end,
-          serviceName
-        });
-      }
-    },
-    [start, end, serviceName]
-  );
+  const { data: environments = [], status = 'loading' } = useFetcher(() => {
+    if (start && end) {
+      return callApmApi({
+        pathname: '/api/apm/ui_filters/environments',
+        params: {
+          query: {
+            start,
+            end,
+            serviceName
+          }
+        }
+      });
+    }
+  }, [start, end, serviceName]);
 
   return (
     <EuiSelect

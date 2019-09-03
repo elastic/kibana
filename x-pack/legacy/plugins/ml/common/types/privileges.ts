@@ -28,12 +28,17 @@ export interface Privileges {
   canDeleteFilter: boolean;
   // File Data Visualizer
   canFindFileStructure: boolean;
-  // Data Frames
-  canGetDataFrameJobs: boolean;
-  canDeleteDataFrameJob: boolean;
-  canPreviewDataFrameJob: boolean;
-  canCreateDataFrameJob: boolean;
-  canStartStopDataFrameJob: boolean;
+  // Data Frame Transforms
+  canGetDataFrame: boolean;
+  canDeleteDataFrame: boolean;
+  canPreviewDataFrame: boolean;
+  canCreateDataFrame: boolean;
+  canStartStopDataFrame: boolean;
+  // Data Frame Analytics
+  canGetDataFrameAnalytics: boolean;
+  canDeleteDataFrameAnalytics: boolean;
+  canCreateDataFrameAnalytics: boolean;
+  canStartStopDataFrameAnalytics: boolean;
 }
 
 export function getDefaultPrivileges(): Privileges {
@@ -60,11 +65,23 @@ export function getDefaultPrivileges(): Privileges {
     canDeleteFilter: false,
     // File Data Visualizer
     canFindFileStructure: false,
-    // Data Frames
-    canGetDataFrameJobs: false,
-    canDeleteDataFrameJob: false,
-    canPreviewDataFrameJob: false,
-    canCreateDataFrameJob: false,
-    canStartStopDataFrameJob: false,
+    // Data Frame Transforms
+    canGetDataFrame: false,
+    canDeleteDataFrame: false,
+    canPreviewDataFrame: false,
+    canCreateDataFrame: false,
+    canStartStopDataFrame: false,
+    // Data Frame Analytics
+    canGetDataFrameAnalytics: false,
+    canDeleteDataFrameAnalytics: false,
+    canCreateDataFrameAnalytics: false,
+    canStartStopDataFrameAnalytics: false,
   };
+}
+
+export interface PrivilegesResponse {
+  capabilities: Privileges;
+  upgradeInProgress: boolean;
+  isPlatinumOrTrialLicense: boolean;
+  mlFeatureEnabledInSpace: boolean;
 }

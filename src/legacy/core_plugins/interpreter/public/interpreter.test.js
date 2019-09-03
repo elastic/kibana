@@ -17,6 +17,17 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      http: {},
+      injectedMetadata: {
+        getKibanaVersion: () => '8.0.0',
+        getBasePath: () => '/lol',
+      }
+    }
+  }
+}));
 jest.mock('uiExports/interpreter');
 
 jest.mock('@kbn/interpreter/common', () => ({
@@ -39,39 +50,32 @@ jest.mock('./registries', () => ({
   },
 }));
 
-jest.mock('ui/ajax_stream', () => ({ ajaxStream: jest.fn() }));
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+jest.mock('../../../ui/public/new_platform');
 jest.mock('./functions', () => ({ functions: [{}, {}, {}] }));
 jest.mock('./renderers/visualization', () => ({ visualization: {} }));
 
 describe('interpreter/interpreter', () => {
-  let ajaxStream;
   let getInterpreter;
   let interpretAst;
   let initializeInterpreter;
-  let kfetch;
-  let registries;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    ajaxStream = require('ui/ajax_stream').ajaxStream;
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
     initializeInterpreter = require('./lib/interpreter').initializeInterpreter;
-    kfetch = require('ui/kfetch').kfetch;
-    registries = require('./registries').registries;
   });
 
   describe('getInterpreter', () => {
     it('initializes interpreter', async () => {
       await getInterpreter();
       expect(initializeInterpreter).toHaveBeenCalledTimes(1);
-      expect(initializeInterpreter).toHaveBeenCalledWith({
-        ajaxStream,
-        kfetch,
-        typesRegistry: registries.types,
-        functionsRegistry: registries.browserFunctions,
+      expect(initializeInterpreter.mock.calls[0][0]).toMatchObject({
+        ajaxStream: expect.any(Function),
+        http: expect.any(Object),
+        typesRegistry: expect.any(Function),
+        functionsRegistry: expect.any(Function),
       });
     });
 

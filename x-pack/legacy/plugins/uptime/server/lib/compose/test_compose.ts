@@ -8,8 +8,9 @@ import { UMMemoryAuthAdapter } from '../adapters/auth';
 import { UMTestBackendFrameworkAdapter } from '../adapters/framework/test_backend_framework_adapter';
 import { UMMemoryMonitorsAdapter } from '../adapters/monitors';
 import { MemoryPingsAdapter } from '../adapters/pings/memory_pings_adapter';
-import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
+import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain, UMMonitorStatesDomain } from '../domains';
 import { UMServerLibs } from '../lib';
+import { UMMemoryMonitorStatesAdapter } from '../adapters/monitor_states';
 
 export function compose(server: any): UMServerLibs {
   const framework = new UMTestBackendFrameworkAdapter(server);
@@ -20,12 +21,17 @@ export function compose(server: any): UMServerLibs {
     new UMMemoryMonitorsAdapter(server.pingsDB || []),
     framework
   );
+  const monitorStatesDomain = new UMMonitorStatesDomain(
+    new UMMemoryMonitorStatesAdapter(),
+    framework
+  );
 
   const libs: UMServerLibs = {
     auth: authDomain,
     framework,
     pings: pingsDomain,
     monitors: monitorsDomain,
+    monitorStates: monitorStatesDomain,
   };
 
   return libs;

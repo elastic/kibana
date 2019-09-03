@@ -36,6 +36,7 @@ require('ui/modules')
       scope: {
         isShown: '=',
         historyDirty: '=',
+        close: '&',
       },
       controller: function ($scope, $element) {
         $scope.$watch('historyDirty', () => {
@@ -71,6 +72,10 @@ require('ui/modules')
         this.clear = () => {
           history.clearHistory($element);
           this.init();
+        };
+
+        this.close = () => {
+          $scope.close();
         };
 
         this.restore = (req = this.selectedReq) => {

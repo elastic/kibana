@@ -9,7 +9,7 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { getDataFrameBreadcrumbs } from '../../breadcrumbs';
 
-const template = `<ml-nav-menu name="access-denied" /><ml-data-frame-access-denied />`;
+const template = `<ml-data-frame-access-denied />`;
 
 uiRoutes.when('/data_frames/access-denied', {
   template,

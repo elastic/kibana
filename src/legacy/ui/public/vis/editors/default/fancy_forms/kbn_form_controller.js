@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export function decorateFormController($delegate, $injector) {
   const [directive] = $delegate;
   const FormController = directive.controller;
@@ -50,15 +48,6 @@ export function decorateFormController($delegate, $injector) {
       return this._getInvalidModels()
         .filter(model => model.$touched || model.$dirty)
         .length;
-    }
-
-    describeErrors() {
-      const count = this.softErrorCount();
-      return i18n.translate('common.ui.fancyForm.errorDescription',
-        {
-          defaultMessage: '{count, plural, one {# Error} other {# Errors}}',
-          values: { count }
-        });
     }
 
     $setTouched() {

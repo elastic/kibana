@@ -11,12 +11,16 @@ import { RedirectWrapper } from './redirect_wrapper';
 
 export type NetworkComponentProps = RouteComponentProps<{
   ip: string;
+  search: string;
 }>;
 
 export const RedirectToNetworkPage = ({
   match: {
     params: { ip },
   },
-}: NetworkComponentProps) => <RedirectWrapper to={ip ? `/network/ip/${ip}` : '/network'} />;
+  location: { search },
+}: NetworkComponentProps) => (
+  <RedirectWrapper to={ip ? `/network/ip/${ip}${search}` : `/network/${search}`} />
+);
 
 export const getNetworkUrl = () => '#/link-to/network';

@@ -168,8 +168,9 @@ export class MeterGauge {
     const tooltip = this.gaugeChart.tooltip;
     const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
     const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', false);
-    const maxAngle = this.gaugeConfig.maxAngle;
-    const minAngle = this.gaugeConfig.minAngle;
+    const { maxAngle, minAngle } = this.gaugeConfig.gaugeType === 'Circle' ?
+      { maxAngle: 2 * Math.PI, minAngle: 0 } :
+      this.gaugeConfig;
     const angleFactor = this.gaugeConfig.gaugeType === 'Arc' ? 0.75 : 1;
     const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
@@ -264,8 +265,8 @@ export class MeterGauge {
       .attr('y', -5)
       .text(d => {
         if (this.gaugeConfig.percentageMode) {
-          const percentage = Math.round(100 * (d.y - min) / (max - min));
-          return `${percentage}%`;
+          const percentage = (d.y - min) / (max - min);
+          return data.yAxisFormatter(percentage);
         }
         return data.yAxisFormatter(d.y);
       })

@@ -94,6 +94,49 @@ export function sampleDataMixin(kbnServer, server) {
     sampleDataset.appLinks = sampleDataset.appLinks.concat(appLinks);
   });
 
+  server.decorate(
+    'server',
+    'replacePanelInSampleDatasetDashboard',
+    ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig = {} }) => {
+      const sampleDataset = sampleDatasets.find(sampleDataset => {
+        return sampleDataset.id === sampleDataId;
+      });
+      if (!sampleDataset) {
+        throw new Error(`Unable to find sample dataset with id: ${sampleDataId}`);
+      }
+
+      const dashboard = sampleDataset.savedObjects.find(savedObject => {
+        return savedObject.id === dashboardId && savedObject.type === 'dashboard';
+      });
+      if (!dashboard) {
+        throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
+      }
+
+      try {
+        const reference = dashboard.references.find(reference => {
+          return reference.id === oldEmbeddableId;
+        });
+        if (!reference) {
+          throw new Error(`Unable to find reference for embeddable: ${oldEmbeddableId}`);
+        }
+        reference.type = embeddableType;
+        reference.id = embeddableId;
+
+        const panels = JSON.parse(dashboard.attributes.panelsJSON);
+        const panel = panels.find(panel => {
+          return panel.panelRefName === reference.name;
+        });
+        if (!panel) {
+          throw new Error(`Unable to find panel for reference: ${reference.name}`);
+        }
+        panel.embeddableConfig = embeddableConfig;
+        dashboard.attributes.panelsJSON = JSON.stringify(panels);
+      } catch (error) {
+        throw new Error(`Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`);
+      }
+    }
+  );
+
   server.registerSampleDataset(flightsSpecProvider);
   server.registerSampleDataset(logsSpecProvider);
   server.registerSampleDataset(ecommerceSpecProvider);

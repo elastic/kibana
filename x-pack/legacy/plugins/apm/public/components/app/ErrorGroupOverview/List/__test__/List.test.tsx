@@ -5,12 +5,29 @@
  */
 
 import { mount } from 'enzyme';
-import { Location } from 'history';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
+import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
+import {
+  useUiFilters,
+  UrlParamsContext
+} from '../../../../../context/UrlParamsContext';
+
+const mockRefreshTimeRange = jest.fn();
+const MockUrlParamsProvider: React.FC<{
+  params?: IUrlParams;
+}> = ({ params = props.urlParams, children }) => (
+  <UrlParamsContext.Provider
+    value={{
+      urlParams: params,
+      refreshTimeRange: mockRefreshTimeRange,
+      uiFilters: useUiFilters(params)
+    }}
+    children={children}
+  />
+);
 
 describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
@@ -20,13 +37,9 @@ describe('ErrorGroupOverview -> List', () => {
   it('should render empty state', () => {
     const storeState = {};
     const wrapper = mount(
-      <MemoryRouter>
-        <ErrorGroupList
-          items={[]}
-          urlParams={props.urlParams}
-          location={{} as Location}
-        />
-      </MemoryRouter>,
+      <MockUrlParamsProvider>
+        <ErrorGroupList items={[]} />
+      </MockUrlParamsProvider>,
       storeState
     );
 
@@ -34,7 +47,11 @@ describe('ErrorGroupOverview -> List', () => {
   });
 
   it('should render with data', () => {
-    const wrapper = mount(<ErrorGroupList {...props} />);
+    const wrapper = mount(
+      <MockUrlParamsProvider>
+        <ErrorGroupList items={props.items} />
+      </MockUrlParamsProvider>
+    );
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

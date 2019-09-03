@@ -10,11 +10,9 @@ export const mockData: { Events: EventsData } = {
   Events: {
     totalCount: 15546,
     pageInfo: {
-      hasNextPage: true,
-      endCursor: {
-        value: '1546878704036',
-        tiebreaker: '10624',
-      },
+      activePage: 1,
+      fakeTotalCount: 50,
+      showMorePagesIndicator: true,
     },
     edges: [
       {

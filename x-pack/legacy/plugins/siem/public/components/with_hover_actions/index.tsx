@@ -33,9 +33,12 @@ interface State {
 }
 
 const HoverActionsPanelContainer = styled.div`
+  color: ${props => props.theme.eui.textColors.default}
   height: 100%;
   position: relative;
 `;
+
+HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
 
 const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
   <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
@@ -43,12 +46,16 @@ const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ chil
   </HoverActionsPanelContainer>
 ));
 
+HoverActionsPanel.displayName = 'HoverActionsPanel';
+
 const WithHoverActionsContainer = styled.div`
   display: flex;
   flex-direction: row;
   height: 100%;
   padding-right: 5px;
 `;
+
+WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
 
 /**
  * Decorates it's children with actions that are visible on hover.

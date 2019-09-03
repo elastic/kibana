@@ -30,7 +30,7 @@ Array [
                 "min": 90000,
               },
               "field": "timestamp",
-              "interval": "myInterval",
+              "fixed_interval": "myInterval",
               "min_doc_count": 0,
             },
           },

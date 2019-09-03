@@ -35,7 +35,7 @@
  */
 
 import _ from 'lodash';
-import { Logger } from './migration_logger';
+import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
@@ -52,7 +52,7 @@ export type MigrationResult =
 interface Opts {
   runMigration: () => Promise<MigrationResult>;
   isMigrated: () => Promise<boolean>;
-  log: Logger;
+  log: SavedObjectsMigrationLogger;
   pollInterval?: number;
 }
 
@@ -86,7 +86,7 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
  * and is the cue for us to fall into a polling loop, waiting for some
  * other Kibana instance to complete the migration.
  */
-function handleIndexExists(error: any, log: Logger) {
+function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
   const isIndexExistsError =
     _.get(error, 'body.error.type') === 'resource_already_exists_exception';
   if (!isIndexExistsError) {

@@ -13,11 +13,14 @@ import {
   EuiGlobalToastList,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { closeToast, importRepo } from '../../actions';
 import { RootState } from '../../reducers';
-import { ToastType } from '../../reducers/repository';
+import { ToastType } from '../../reducers/repository_management';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 class CodeImportProject extends React.PureComponent<
@@ -71,11 +74,15 @@ class CodeImportProject extends React.PureComponent<
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label="Repository URL"
+              label={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlTitle', {
+                defaultMessage: 'Repository URL',
+              })}
               helpText="e.g. https://github.com/Microsoft/TypeScript-Node-Starter"
               fullWidth
               isInvalid={this.state.isInvalid}
-              error="The URL shouldn't be empty."
+              error={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlEmptyText', {
+                defaultMessage: "The URL shouldn't be empty.",
+              })}
             >
               <EuiFieldText
                 value={this.state.value}
@@ -84,7 +91,6 @@ class CodeImportProject extends React.PureComponent<
                 data-test-subj="importRepositoryUrlInputBox"
                 isLoading={importLoading}
                 fullWidth={true}
-                onBlur={this.updateIsInvalid}
                 isInvalid={this.state.isInvalid}
                 autoFocus={true}
               />
@@ -98,7 +104,10 @@ class CodeImportProject extends React.PureComponent<
               onClick={this.submitImportProject}
               data-test-subj="importRepositoryButton"
             >
-              Import
+              <FormattedMessage
+                id="xpack.code.adminPage.repoTab.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -108,10 +117,10 @@ class CodeImportProject extends React.PureComponent<
 }
 
 const mapStateToProps = (state: RootState) => ({
-  importLoading: state.repository.importLoading,
-  toastMessage: state.repository.toastMessage,
-  toastType: state.repository.toastType,
-  showToast: state.repository.showToast,
+  importLoading: state.repositoryManagement.importLoading,
+  toastMessage: state.repositoryManagement.toastMessage,
+  toastType: state.repositoryManagement.toastType,
+  showToast: state.repositoryManagement.showToast,
 });
 
 const mapDispatchToProps = {

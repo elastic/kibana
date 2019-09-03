@@ -19,7 +19,6 @@ import { FORMATTERS } from '../../../../../infra/public/utils/formatters';
 interface TransactionBreakdownKpi {
   name: string;
   percentage: number;
-  count: number;
   color: string;
 }
 
@@ -47,7 +46,7 @@ const KpiDescription: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiIcon type="dot" color={color} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="xs">
           <Description>{name}</Description>
         </EuiText>
@@ -60,12 +59,12 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
   return (
     <EuiFlexGrid>
       {kpis.map(kpi => (
-        <EuiFlexItem key={kpi.name}>
+        <EuiFlexItem key={kpi.name} grow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <KpiDescription name={kpi.name} color={kpi.color} />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <span>
                   {FORMATTERS[InfraFormatterType.percent](kpi.percentage)}

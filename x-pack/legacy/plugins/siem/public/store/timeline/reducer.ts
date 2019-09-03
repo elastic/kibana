@@ -21,6 +21,7 @@ import {
   removeColumn,
   removeProvider,
   setKqlFilterQueryDraft,
+  showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
   unPinEvent,
@@ -89,6 +90,7 @@ export const initialTimelineState: TimelineState = {
     timelineId: null,
     newTimelineModel: null,
   },
+  showCallOutUnauthorizedMsg: false,
 };
 
 /** The reducer for all timeline actions  */
@@ -347,5 +349,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineId,
       newTimelineModel,
     },
+  }))
+  .case(showCallOutUnauthorizedMsg, state => ({
+    ...state,
+    showCallOutUnauthorizedMsg: true,
   }))
   .build();

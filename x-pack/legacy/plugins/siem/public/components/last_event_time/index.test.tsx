@@ -9,6 +9,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render } from 'react-testing-library';
 
+import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 import { wait } from '../../lib/helpers';
@@ -17,7 +18,7 @@ import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
 
-describe('Last Event Time Stat', async () => {
+describe('Last Event Time Stat', () => {
   // this is just a little hack to silence a warning that we'll get until react
   // fixes this: https://github.com/facebook/react/pull/14853
   // For us that mean we need to upgrade to 16.9.0
@@ -63,7 +64,7 @@ describe('Last Event Time Stat', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Last Event: 12 days ago</span>'
+      '<span class="euiToolTipAnchor">Last event: 12 days ago</span>'
     );
   });
   test('Bad date time string', async () => {
@@ -92,6 +93,6 @@ describe('Last Event Time Stat', async () => {
     );
     await wait();
 
-    expect(container.innerHTML).toBe('--');
+    expect(container.innerHTML).toContain(getEmptyValue());
   });
 });

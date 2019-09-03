@@ -6,36 +6,53 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { AlertType, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import {
+  AlertType,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from './types';
 
 interface ConstructorOptions {
-  getServices: (basePath: string) => Services;
+  isSecurityEnabled: boolean;
+  getServices: GetServicesFunction;
   taskManager: TaskManager;
-  fireAction: ActionsPlugin['fire'];
-  internalSavedObjectsRepository: SavedObjectsClientContract;
+  executeAction: ActionsPlugin['execute'];
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 export class AlertTypeRegistry {
-  private readonly getServices: (basePath: string) => Services;
+  private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
-  private readonly fireAction: ActionsPlugin['fire'];
+  private readonly executeAction: ActionsPlugin['execute'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
-  private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
+  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  private readonly getBasePath: GetBasePathFunction;
+  private readonly isSecurityEnabled: boolean;
 
   constructor({
-    internalSavedObjectsRepository,
-    fireAction,
+    encryptedSavedObjectsPlugin,
+    executeAction,
     taskManager,
     getServices,
+    spaceIdToNamespace,
+    getBasePath,
+    isSecurityEnabled,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.fireAction = fireAction;
-    this.internalSavedObjectsRepository = internalSavedObjectsRepository;
+    this.executeAction = executeAction;
+    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.getServices = getServices;
+    this.getBasePath = getBasePath;
+    this.spaceIdToNamespace = spaceIdToNamespace;
+    this.isSecurityEnabled = isSecurityEnabled;
   }
 
   public has(id: string) {
@@ -60,9 +77,12 @@ export class AlertTypeRegistry {
         type: `alerting:${alertType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
+          isSecurityEnabled: this.isSecurityEnabled,
           getServices: this.getServices,
-          fireAction: this.fireAction,
-          internalSavedObjectsRepository: this.internalSavedObjectsRepository,
+          executeAction: this.executeAction,
+          encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+          getBasePath: this.getBasePath,
+          spaceIdToNamespace: this.spaceIdToNamespace,
         }),
       },
     });

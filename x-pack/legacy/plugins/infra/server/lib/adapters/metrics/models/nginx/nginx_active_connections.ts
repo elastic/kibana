@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import {
+  InfraMetricModelCreator,
+  InfraMetricModelMetricType,
+  InfraMetricModel,
+} from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const nginxActiveConnections: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
-) => ({
-  id: 'nginxActiveConnections',
+): InfraMetricModel => ({
+  id: InfraMetric.nginxActiveConnections,
   requires: ['nginx.stubstatus'],
   index_pattern: indexPattern,
   interval,

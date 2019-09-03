@@ -9,5 +9,5 @@ Auth Headers map
 <b>Signature:</b>
 
 ```typescript
-export declare type AuthHeaders = Record<string, string>;
+export declare type AuthHeaders = Record<string, string | string[]>;
 ```

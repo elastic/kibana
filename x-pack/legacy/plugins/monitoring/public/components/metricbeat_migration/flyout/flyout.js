@@ -20,23 +20,25 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiText,
+  EuiCallOut,
+  EuiSpacer,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../../src/legacy/ui/public/storage/storage';
+import { Storage } from 'ui/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
-import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { KIBANA_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
-const AUTO_CHECK_INTERVAL_IN_MS = 5000;
 const DEFAULT_ES_MONITORING_URL = 'http://localhost:9200';
 
 export class Flyout extends Component {
@@ -61,58 +63,19 @@ export class Flyout extends Component {
       checkedStatusByStep: {
         [INSTRUCTION_STEP_ENABLE_METRICBEAT]: false,
         [INSTRUCTION_STEP_DISABLE_INTERNAL]: false,
+        userAcknowledgedNoClusterUuidPrompt: false
       },
-      checkingMigrationStatus: false,
     };
-  }
-
-  componentWillUpdate(_nextProps, nextState) {
-    // We attempt to provide a better UX for the user by automatically rechecking
-    // the status of their current step, once they have initiated a check manually.
-    // The logic here aims to remove the recheck one they have moved on from the
-    // step
-
-    const thisActiveStep = this.state.activeStep;
-    const nextActiveStep = nextState.activeStep;
-    const nextEnableMbStatus = nextState.checkedStatusByStep[INSTRUCTION_STEP_ENABLE_METRICBEAT];
-    const nowEnableMbStatus = this.state.checkedStatusByStep[INSTRUCTION_STEP_ENABLE_METRICBEAT];
-    const nextDisableInternalStatus = nextState.checkedStatusByStep[INSTRUCTION_STEP_DISABLE_INTERNAL];
-    const nowDisableInternalStatus = this.state.checkedStatusByStep[INSTRUCTION_STEP_DISABLE_INTERNAL];
-
-    const setupInterval = (nextEnableMbStatus && !nowEnableMbStatus) || (nextDisableInternalStatus && !nowDisableInternalStatus);
-    const removeInterval = thisActiveStep !== nextActiveStep;
-    if (removeInterval) {
-      clearInterval(this.checkInterval);
-      this.clearInterval = null;
-    }
-
-    if (setupInterval) {
-      this.checkInterval = setInterval(async () => {
-        await this.checkForMigrationStatus();
-      }, AUTO_CHECK_INTERVAL_IN_MS);
-    }
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.checkInterval);
-  }
-
-  checkForMigrationStatus = async () => {
-    this.setState({ checkingMigrationStatus: true });
-    await ensureMinimumTime(this.props.updateProduct(), 1000);
-    this.setState(state => ({
-      ...state,
-      checkingMigrationStatus: false,
-      checkedStatusByStep: {
-        ...state.checkedStatusByStep,
-        [this.state.activeStep]: true,
-      }
-    }));
   }
 
   setEsMonitoringUrl = esMonitoringUrl => {
     storage.set(ES_MONITORING_URL_KEY, esMonitoringUrl);
     this.setState({ esMonitoringUrl });
+  }
+
+  finishedFlyout() {
+    const { onClose } = this.props;
+    onClose();
   }
 
   renderActiveStep() {
@@ -121,7 +84,6 @@ export class Flyout extends Component {
       activeStep,
       esMonitoringUrl,
       checkedStatusByStep,
-      checkingMigrationStatus,
     } = this.state;
 
     switch (activeStep) {
@@ -151,10 +113,7 @@ export class Flyout extends Component {
         const instructionSteps = getInstructionSteps(productName, product, activeStep, meta, {
           doneWithMigration: onClose,
           esMonitoringUrl,
-          checkForMigrationStatus: this.checkForMigrationStatus,
-          checkingMigrationStatus,
           hasCheckedStatus: checkedStatusByStep[activeStep],
-          autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS,
         });
 
         return (
@@ -169,7 +128,7 @@ export class Flyout extends Component {
 
   renderActiveStepNextButton() {
     const { product, productName } = this.props;
-    const { activeStep, esMonitoringUrl } = this.state;
+    const { activeStep, esMonitoringUrl, userAcknowledgedNoClusterUuidPrompt } = this.state;
 
     // It is possible that, during the migration steps, products are not reporting
     // monitoring data for a period of time outside the window of our server-side check
@@ -182,9 +141,32 @@ export class Flyout extends Component {
     let willDisableDoneButton = !product.isFullyMigrated;
     let willShowNextButton = activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL;
 
-    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT && productName === ELASTICSEARCH_CUSTOM_ID) {
-      willShowNextButton = false;
-      willDisableDoneButton = !product.isPartiallyMigrated;
+    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+      if (productName === ELASTICSEARCH_CUSTOM_ID) {
+        willShowNextButton = false;
+        // ES can be fully migrated for net new users
+        willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
+      }
+      else {
+        // Do not bother taking them to the disable internal step for non ES use cases
+        // since disabling is an individual action per node, versus ES where it is
+        // a cluster setting
+        willShowNextButton = !product.isFullyMigrated;
+        willDisableDoneButton = !product.isFullyMigrated;
+      }
+    }
+
+    // This is a possible scenario that come up during testing where logstash/beats
+    // is not outputing to ES, but has monitorining enabled. In these scenarios,
+    // the monitoring documents will not have a `cluster_uuid` so once migrated,
+    // the instance/node will actually live in the standalone cluster listing
+    // instead of the one it currently lives in. We need the user to understand
+    // this so we're going to force them to acknowledge a prompt saying this
+    if (product.isFullyMigrated && product.clusterUuid === null) {
+      // Did they acknowledge the prompt?
+      if (!userAcknowledgedNoClusterUuidPrompt) {
+        willDisableDoneButton = true;
+      }
     }
 
     if (willShowNextButton) {
@@ -219,13 +201,12 @@ export class Flyout extends Component {
         </EuiButton>
       );
     }
-
     return (
       <EuiButton
         type="submit"
         fill
         isDisabled={willDisableDoneButton}
-        onClick={this.props.onClose}
+        onClick={() => this.finishedFlyout()}
       >
         {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.doneButtonLabel', {
           defaultMessage: 'Done'
@@ -259,7 +240,7 @@ export class Flyout extends Component {
   }
 
   render() {
-    const { onClose, instance, productName } = this.props;
+    const { onClose, instance, productName, product } = this.props;
 
     let instanceType = null;
     let instanceName = instance ? instance.name : null;
@@ -282,6 +263,89 @@ export class Flyout extends Component {
       }
     }
 
+    let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
+      defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
+      values: {
+        instanceName,
+        instanceType
+      }
+    });
+
+    if (product.isNetNewUser) {
+      title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitleNewUser', {
+        defaultMessage: 'Monitor {instanceName} {instanceType} with Metricbeat',
+        values: {
+          instanceName,
+          instanceType
+        }
+      });
+    }
+
+    let noClusterUuidPrompt = null;
+    if (product.isFullyMigrated && product.clusterUuid === null) {
+      const nodeText = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.node', {
+        defaultMessage: 'node'
+      });
+      const instanceText = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.instance', {
+        defaultMessage: 'instance'
+      });
+
+      let typeText = nodeText;
+      if (productName === BEATS_SYSTEM_ID) {
+        typeText = instanceText;
+      }
+
+      noClusterUuidPrompt = (
+        <Fragment>
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            title={i18n.translate(
+              'xpack.monitoring.metricbeatMigration.flyout.noClusterUuidTitle',
+              {
+                defaultMessage: 'No cluster detected'
+              }
+            )}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.flyout.noClusterUuidDescription"
+                defaultMessage="This {productName} {typeText} is not connected to an Elasticsearch cluster so once fully migrated,
+                this {productName} {typeText} will appear in the Standalone cluster instead of this one. {link}"
+                values={{
+                  productName,
+                  typeText,
+                  link: (
+                    <EuiLink href={`#/overview?_g=(cluster_uuid:__standalone_cluster__)`} target="_blank">
+                      Click here to view the Standalone cluster.
+                    </EuiLink>
+                  )
+                }}
+              />
+            </p>
+            <EuiSpacer size="s"/>
+            <EuiCheckbox
+              id="monitoringFlyoutNoClusterUuidCheckbox"
+              label={i18n.translate(
+                'xpack.monitoring.metricbeatMigration.flyout.noClusterUuidCheckboxLabel',
+                {
+                  defaultMessage: `Yes, I understand that I will need to look in the Standalone cluster for
+                  this {productName} {typeText}.`,
+                  values: {
+                    productName,
+                    typeText
+                  }
+                }
+              )}
+              checked={this.state.userAcknowledgedNoClusterUuidPrompt}
+              onChange={e => this.setState({ userAcknowledgedNoClusterUuidPrompt: e.target.checked })}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="s"/>
+        </Fragment>
+      );
+    }
+
     return (
       <EuiFlyout
         onClose={onClose}
@@ -290,19 +354,14 @@ export class Flyout extends Component {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
-              {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-                defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
-                values: {
-                  instanceName,
-                  instanceType
-                }
-              })}
+              {title}
             </h2>
           </EuiTitle>
           {this.getDocumentationTitle()}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {this.renderActiveStep()}
+          {noClusterUuidPrompt}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

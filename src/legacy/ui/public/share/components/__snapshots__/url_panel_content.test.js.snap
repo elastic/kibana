@@ -39,6 +39,7 @@ exports[`render 1`] = `
             "id": "snapshot",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -73,6 +74,7 @@ exports[`render 1`] = `
             "id": "savedObject",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -114,6 +116,7 @@ exports[`render 1`] = `
   >
     <EuiFlexGroup
       gutterSize="none"
+      responsive={false}
     >
       <EuiFlexItem>
         <EuiSwitch
@@ -183,6 +186,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             "id": "snapshot",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -217,6 +221,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             "id": "savedObject",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -258,6 +263,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   >
     <EuiFlexGroup
       gutterSize="none"
+      responsive={false}
     >
       <EuiFlexItem>
         <EuiSwitch
@@ -327,6 +333,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
             "id": "snapshot",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage
@@ -361,6 +368,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
             "id": "savedObject",
             "label": <EuiFlexGroup
               gutterSize="none"
+              responsive={false}
             >
               <EuiFlexItem>
                 <FormattedMessage

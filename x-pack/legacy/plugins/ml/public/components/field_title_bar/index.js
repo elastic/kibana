@@ -7,3 +7,5 @@
 
 
 import './field_title_bar_directive';
+
+export { FieldTitleBar } from './field_title_bar';

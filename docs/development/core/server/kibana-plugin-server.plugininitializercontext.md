@@ -19,4 +19,5 @@ export interface PluginInitializerContext<ConfigSchema = unknown>
 |  [config](./kibana-plugin-server.plugininitializercontext.config.md) | <code>{</code><br/><code>        create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;;</code><br/><code>        createIfExists: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T &#124; undefined&gt;;</code><br/><code>    }</code> |  |
 |  [env](./kibana-plugin-server.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: EnvironmentMode;</code><br/><code>    }</code> |  |
 |  [logger](./kibana-plugin-server.plugininitializercontext.logger.md) | <code>LoggerFactory</code> |  |
+|  [opaqueId](./kibana-plugin-server.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> |  |
 

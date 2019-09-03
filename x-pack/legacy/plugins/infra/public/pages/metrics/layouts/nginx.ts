@@ -17,7 +17,6 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'nginxOverview',
     label: 'Nginx',
-    requires: ['nginx'],
     sections: [
       {
         id: InfraMetric.nginxHits,

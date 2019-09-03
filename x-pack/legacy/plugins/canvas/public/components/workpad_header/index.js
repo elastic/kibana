@@ -24,7 +24,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...stateProps,
   ...dispatchProps,
   ...ownProps,
-  toggleWriteable: () => setWriteable(!stateProps.isWriteable),
+  toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
 });
 
 export const WorkpadHeader = connect(

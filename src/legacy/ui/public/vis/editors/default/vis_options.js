@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import visOptionsTemplate from './vis_options.html';
-import { I18nContext } from 'ui/i18n';
+import { VisOptionsReactWrapper } from './vis_options_react_wrapper';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -32,10 +29,21 @@ import { I18nContext } from 'ui/i18n';
 
 uiModules
   .get('app/visualize')
+  .directive('visOptionsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
+    ['component', { wrapApply: false }],
+    ['aggs', { watchDepth: 'collection' }],
+    ['stateParams', { watchDepth: 'collection' }],
+    ['vis', { watchDepth: 'collection' }],
+    ['uiState', { watchDepth: 'collection' }],
+    ['setValue', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
+    'hasHistogramAgg',
+  ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
       restrict: 'E',
-      template: visOptionsTemplate,
+      require: '?^ngModel',
       scope: {
         vis: '=',
         visData: '=',
@@ -43,45 +51,40 @@ uiModules
         editor: '=',
         visualizeEditor: '=',
         editorState: '=',
+        onAggParamsChange: '=',
+        hasHistogramAgg: '=',
       },
-      link: function ($scope, $el) {
-        const $optionContainer = $el.find('[data-visualization-options]');
+      link: function ($scope, $el, attrs, ngModelCtrl) {
+        $scope.setValue = (paramName, value) =>
+          $scope.onAggParamsChange($scope.editorState.params, paramName, value);
 
-        const reactOptionsComponent = typeof $scope.editor !== 'string';
-        const stageEditorParams = (params) => {
-          $scope.editorState.params = _.cloneDeep(params);
-          $scope.$apply();
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity(`visOptions`, isValid);
         };
-        const renderReactComponent = () => {
-          const Component = $scope.editor;
-          render(
-            <I18nContext>
-              <Component scope={$scope} editorState={$scope.editorState} stageEditorParams={stageEditorParams} />
-            </I18nContext>, $el[0]);
+
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
         };
-        // Bind the `editor` template with the scope.
-        if (reactOptionsComponent) {
-          renderReactComponent();
-        } else {
-          const $editor = $compile($scope.editor)($scope);
-          $optionContainer.append($editor);
-        }
 
-        $scope.$watchGroup(['visData', 'visualizeEditor', 'editorState.params'], () => {
-          if (reactOptionsComponent) {
-            renderReactComponent();
-          }
-        });
-
-        $scope.$watch('vis.type.schemas.all.length', function (len) {
-          $scope.alwaysShowOptions = len === 0;
-        });
-
-        $el.on('$destroy', () => {
-          if (reactOptionsComponent) {
-            unmountComponentAtNode($el[0]);
-          }
-        });
+        const comp = typeof $scope.editor === 'string' ?
+          $scope.editor :
+          `<vis-options-react-wrapper
+            component="editor"
+            aggs="editorState.aggs"
+            has-histogram-agg="hasHistogramAgg"
+            state-params="editorState.params"
+            vis="vis"
+            ui-state="uiState"
+            set-value="setValue"
+            set-validity="setValidity"
+            set-touched="setTouched">
+          </vis-options-react-wrapper>`;
+        const $editor = $compile(comp)($scope);
+        $el.append($editor);
       }
     };
   });

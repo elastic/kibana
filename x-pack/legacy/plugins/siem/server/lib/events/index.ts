@@ -10,11 +10,11 @@ import {
   TimelineData,
   TimelineDetailsData,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
 import {
   EventsAdapter,
-  EventsRequestOptions,
+  TimelineRequestOptions,
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
 } from './types';
@@ -22,13 +22,16 @@ import {
 export class Events {
   constructor(private readonly adapter: EventsAdapter) {}
 
-  public async getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
+  public async getEvents(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<EventsData> {
     return await this.adapter.getEvents(req, options);
   }
 
   public async getTimelineData(
     req: FrameworkRequest,
-    options: EventsRequestOptions
+    options: TimelineRequestOptions
   ): Promise<TimelineData> {
     return await this.adapter.getTimelineData(req, options);
   }

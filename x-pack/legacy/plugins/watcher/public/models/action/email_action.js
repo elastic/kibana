@@ -31,20 +31,12 @@ export class EmailAction extends BaseAction {
   validate() {
     const errors = {
       to: [],
-      body: [],
     };
 
     if (!this.to || !this.to.length) {
       errors.to.push(
         i18n.translate('xpack.watcher.watchActions.email.emailRecipientIsRequiredValidationMessage', {
           defaultMessage: '"To" email address is required.',
-        })
-      );
-    }
-    if (!this.body) {
-      errors.body.push(
-        i18n.translate('xpack.watcher.watchActions.email.emailBodyIsRequiredValidationMessage', {
-          defaultMessage: 'Email body is required.',
         })
       );
     }

@@ -41,7 +41,8 @@ describe('ManagedTable component', () => {
         <ManagedTable
           columns={columns}
           items={people}
-          initialSort={{ field: 'age', direction: 'desc' }}
+          initialSortField="age"
+          initialSortDirection="desc"
           initialPageIndex={1}
           initialPageSize={2}
           hidePerPageOptions={false}

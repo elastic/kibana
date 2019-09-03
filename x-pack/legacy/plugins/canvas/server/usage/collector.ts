@@ -10,16 +10,7 @@ import { Legacy } from 'kibana';
 import { CANVAS_USAGE_TYPE } from '../../common/lib/constants';
 import { workpadCollector } from './workpad_collector';
 import { customElementCollector } from './custom_element_collector';
-
-/**
-  Function for collecting information about canvas usage
- */
-export type TelemetryCollector = (
-  /** The server instance */
-  server: Legacy.Server,
-  /** Function for calling elasticsearch */
-  callCluster: CallCluster
-) => Record<string, any>;
+import { TelemetryCollector } from '../../types';
 
 const collectors: TelemetryCollector[] = [workpadCollector, customElementCollector];
 

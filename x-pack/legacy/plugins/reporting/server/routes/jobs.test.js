@@ -228,7 +228,7 @@ describe(`when job is completed`, () => {
     expect(headers['content-type']).toBe('application/pdf');
   });
 
-  describe(`when non-whitelisted contentType specified in job output`, async () => {
+  describe(`when non-whitelisted contentType specified in job output`, () => {
     test(`sets statusCode to 500`, async () => {
       const { statusCode } = await getCompletedResponse({ outputContentType: 'application/html' });
       expect(statusCode).toBe(500);

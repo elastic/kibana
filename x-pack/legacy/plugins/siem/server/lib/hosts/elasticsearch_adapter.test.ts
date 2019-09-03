@@ -15,13 +15,35 @@ import {
   mockGetHostOverviewResult,
   mockGetHostLastFirstSeenOptions,
   mockGetHostLastFirstSeenRequest,
-  mockGetHostLastFirstSeenResponse,
   mockGetHostsOptions,
   mockGetHostsRequest,
   mockGetHostsResponse,
   mockGetHostsResult,
+  mockGetHostLastFirstSeenResult,
+  mockGetHostLastFirstSeenResponse,
+  mockGetHostOverviewRequestDsl,
+  mockGetHostLastFirstSeenDsl,
 } from './mock';
 import { HostAggEsItem } from './types';
+import { mockGetHostsQueryDsl } from './mock';
+
+jest.mock('./query.hosts.dsl', () => {
+  return {
+    buildHostsQuery: jest.fn(() => mockGetHostsQueryDsl),
+  };
+});
+
+jest.mock('./query.detail_host.dsl', () => {
+  return {
+    buildHostOverviewQuery: jest.fn(() => mockGetHostOverviewRequestDsl),
+  };
+});
+
+jest.mock('./query.last_first_seen_host.dsl', () => {
+  return {
+    buildLastFirstSeenHostQuery: jest.fn(() => mockGetHostLastFirstSeenDsl),
+  };
+});
 
 describe('hosts elasticsearch_adapter', () => {
   describe('#formatHostsData', () => {
@@ -66,7 +88,7 @@ describe('hosts elasticsearch_adapter', () => {
     };
 
     test('it formats a host with a source of name correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: readonly string[] = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -77,7 +99,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of os correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.os.name'];
+      const fields: readonly string[] = ['host.os.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -88,7 +110,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of version correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.os.version'];
+      const fields: readonly string[] = ['host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -99,7 +121,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of id correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: readonly string[] = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -110,7 +132,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of name, lastBeat, os, and version correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name', 'host.os.name', 'host.os.version'];
+      const fields: readonly string[] = ['host.name', 'host.os.name', 'host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -127,7 +149,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host without any data if fields are empty', () => {
-      const fields: ReadonlyArray<string> = [];
+      const fields: readonly string[] = [];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: {
@@ -206,10 +228,7 @@ describe('hosts elasticsearch_adapter', () => {
         mockGetHostLastFirstSeenRequest as FrameworkRequest,
         mockGetHostLastFirstSeenOptions
       );
-      expect(data).toEqual({
-        firstSeen: '2019-02-22T03:41:32.826Z',
-        lastSeen: '2019-04-09T16:18:12.178Z',
-      });
+      expect(data).toEqual(mockGetHostLastFirstSeenResult);
     });
   });
 });

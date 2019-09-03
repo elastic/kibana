@@ -33,21 +33,21 @@ function shouldReadKeys(value: unknown): value is Record<string, any> {
  *  @param {Object} rootValue
  *  @returns {Object}
  */
-export function getFlattenedObject(rootValue: unknown) {
+export function getFlattenedObject(rootValue: Record<string, any>) {
   if (!shouldReadKeys(rootValue)) {
     throw new TypeError(`Root value is not flatten-able, received ${rootValue}`);
   }
 
-  return (function flatten<T extends Record<string, any>>(acc: T, prefix: string, object: T): T {
+  const result: { [key: string]: any } = {};
+  (function flatten(prefix, object) {
     for (const [key, value] of Object.entries(object)) {
       const path = prefix ? `${prefix}.${key}` : key;
       if (shouldReadKeys(value)) {
-        flatten(acc, path, value);
+        flatten(path, value);
       } else {
-        acc[path] = value;
+        result[path] = value;
       }
     }
-
-    return acc;
-  })({}, '', rootValue);
+  })('', rootValue);
+  return result;
 }

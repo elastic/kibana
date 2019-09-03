@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function statusPageFunctonalTests({ getService, getPageObjects }: TestInvoker) {
+export default function statusPageFunctonalTests({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
 

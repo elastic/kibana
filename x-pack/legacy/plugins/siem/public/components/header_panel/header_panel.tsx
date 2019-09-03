@@ -7,11 +7,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+import { InspectButton } from '../inspect';
 
 const Header = styled.header<{ border?: boolean }>`
-  ${props => `
+  ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
+    user-select: text;
 
     ${props.border &&
       `
@@ -21,29 +24,48 @@ const Header = styled.header<{ border?: boolean }>`
   `}
 `;
 
+Header.displayName = 'Header';
+
 export interface HeaderPanelProps {
   border?: boolean;
   children?: React.ReactNode;
+  id?: string;
   subtitle?: string | React.ReactNode;
+  showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
 export const HeaderPanel = pure<HeaderPanelProps>(
-  ({ border, children, subtitle, title, tooltip }) => (
+  ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle>
-            <h2 data-test-subj="page_headline_title">
-              {title}{' '}
-              {tooltip && <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2 data-test-subj="panel_headline_title">
+                  {title}
+                  {tooltip && (
+                    <>
+                      {' '}
+                      <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                    </>
+                  )}
+                </h2>
+              </EuiTitle>
 
-          <EuiText color="subdued" size="s">
-            {subtitle}
-          </EuiText>
+              <EuiText color="subdued" data-test-subj="subtitle" size="xs">
+                {subtitle}
+              </EuiText>
+            </EuiFlexItem>
+
+            {id && (
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
@@ -51,3 +73,5 @@ export const HeaderPanel = pure<HeaderPanelProps>(
     </Header>
   )
 );
+
+HeaderPanel.displayName = 'HeaderPanel';

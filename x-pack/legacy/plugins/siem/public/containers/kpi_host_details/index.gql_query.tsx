@@ -17,6 +17,7 @@ export const kpiHostDetailsQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -40,6 +41,10 @@ export const kpiHostDetailsQuery = gql`
         uniqueDestinationIps
         uniqueDestinationIpsHistogram {
           ...KpiHostDetailsChartFields
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

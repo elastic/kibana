@@ -133,6 +133,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -148,6 +159,36 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
         "removeItem": [MockFunction],
         "setItem": [MockFunction],
       },
+    }
+  }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
     }
   }
 >
@@ -250,6 +291,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="kuery"
                   onSelectLanguage={[Function]}
                 >
@@ -272,6 +314,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}
@@ -479,6 +522,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -494,6 +548,36 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
         "removeItem": [MockFunction],
         "setItem": [MockFunction],
       },
+    }
+  }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
     }
   }
 >
@@ -596,6 +680,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="lucene"
                   onSelectLanguage={[Function]}
                 >
@@ -618,6 +703,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}
@@ -825,6 +911,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -840,6 +937,36 @@ exports[`QueryBarInput Should render the given query 1`] = `
         "removeItem": [MockFunction],
         "setItem": [MockFunction],
       },
+    }
+  }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
     }
   }
 >
@@ -942,6 +1069,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="kuery"
                   onSelectLanguage={[Function]}
                 >
@@ -964,6 +1092,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}

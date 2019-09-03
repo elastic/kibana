@@ -13,16 +13,17 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const dataFrame = {
-  getDataFrameTransforms() {
+  getDataFrameTransforms(transformId) {
+    const transformIdString = transformId !== undefined ? `/${transformId}` : '';
     return http({
-      url: `${basePath}/_data_frame/transforms`,
+      url: `${basePath}/_data_frame/transforms${transformIdString}`,
       method: 'GET'
     });
   },
-  getDataFrameTransformsStats(jobId) {
-    if (jobId !== undefined) {
+  getDataFrameTransformsStats(transformId) {
+    if (transformId !== undefined) {
       return http({
-        url: `${basePath}/_data_frame/transforms/${jobId}/_stats`,
+        url: `${basePath}/_data_frame/transforms/${transformId}/_stats`,
         method: 'GET'
       });
     }
@@ -32,17 +33,20 @@ export const dataFrame = {
       method: 'GET'
     });
   },
-  createDataFrameTransformsJob(jobId, jobConfig) {
+  createDataFrameTransform(transformId, transformConfig) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}`,
+      url: `${basePath}/_data_frame/transforms/${transformId}`,
       method: 'PUT',
-      data: jobConfig
+      data: transformConfig
     });
   },
-  deleteDataFrameTransformsJob(jobId) {
+  deleteDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}`,
-      method: 'DELETE',
+      url: `${basePath}/_data_frame/transforms/delete_transforms`,
+      method: 'POST',
+      data: {
+        transformsInfo
+      }
     });
   },
   getDataFrameTransformsPreview(obj) {
@@ -52,16 +56,22 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransformsJob(jobId) {
+  startDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_start`,
+      url: `${basePath}/_data_frame/transforms/start_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
-  stopDataFrameTransformsJob(jobId) {
+  stopDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=true`,
+      url: `${basePath}/_data_frame/transforms/stop_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
   getTransformAuditMessages(transformId) {

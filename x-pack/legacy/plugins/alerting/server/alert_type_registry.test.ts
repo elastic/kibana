@@ -11,10 +11,12 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
 import { AlertTypeRegistry } from './alert_type_registry';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
+  isSecurityEnabled: true,
   getServices() {
     return {
       log: jest.fn(),
@@ -23,8 +25,10 @@ const alertTypeRegistryParams = {
     };
   },
   taskManager,
-  fireAction: jest.fn(),
-  internalSavedObjectsRepository: SavedObjectsClientMock.create(),
+  executeAction: jest.fn(),
+  getBasePath: jest.fn().mockReturnValue(undefined),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -40,23 +44,24 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
   });
 });
 
-describe('registry()', () => {
+describe('register()', () => {
   test('registers the executor with the task manager', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      executor: jest.fn(),
+    };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
-    registry.register({
-      id: 'test',
-      name: 'Test',
-      execute: jest.fn(),
-    });
+    registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
@@ -69,17 +74,15 @@ Array [
   },
 ]
 `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
-    const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(firstCall.alertType).toMatchInlineSnapshot(`
-Object {
-  "execute": [MockFunction],
-  "id": "test",
-  "name": "Test",
-}
-`);
-    expect(firstCall.internalSavedObjectsRepository).toBeTruthy();
-    expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
+      alertType,
+      isSecurityEnabled: true,
+      getServices: alertTypeRegistryParams.getServices,
+      encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
+      getBasePath: alertTypeRegistryParams.getBasePath,
+      spaceIdToNamespace: alertTypeRegistryParams.spaceIdToNamespace,
+      executeAction: alertTypeRegistryParams.executeAction,
+    });
   });
 
   test('should throw an error if type is already registered', () => {
@@ -87,13 +90,13 @@ Object {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
-        execute: jest.fn(),
+        executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -105,12 +108,12 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
 Object {
-  "execute": [MockFunction],
+  "executor": [MockFunction],
   "id": "test",
   "name": "Test",
 }
@@ -137,7 +140,7 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`

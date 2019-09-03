@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 // @ts-ignore unconverted local file
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings';
-import { PositionedElement } from '../../../lib/positioned_element';
+import { PositionedElement } from '../../../../types';
 
 interface State {
   persistent: { workpad: { pages: Array<{ elements: PositionedElement[] }> } };

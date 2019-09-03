@@ -1,0 +1,50 @@
+[role="xpack"]
+[[agent-configuration]]
+=== APM Agent configuration
+
+beta[] APM Agent configuration allows you to fine-tune your agent configuration directly in Kibana.
+Best of all, changes are automatically propagated to your APM agents so there's no need to redeploy.
+
+To get started, simply choose the service and environment you wish to configure.
+
+[role="screenshot"]
+image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
+
+IMPORTANT: As this feature is in Beta, a limited number of configuration settings are supported.
+We recommend you watch your agent logs to confirm that configuration has been applied.
+If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
+
+[float]
+==== Precedence
+
+Configurations set with APM Agent configuration take precedence over configurations set locally in the Agent.
+However, if APM Server is slow to respond, is offline, reports an error, etc.,
+APM agents will use local defaults until they're able to update the configuration.
+For this reason, it is still important to set custom default configurations locally in each of your agents.
+
+[float]
+==== APM Server setup
+
+This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+
+Why is additional configuration needed in APM Server?
+That's because APM Server acts as a proxy between the agents and Kibana.
+Kibana communicates any changed settings to APM Server so that your agents only need to poll APM Server to determine which settings have changed.
+
+[float]
+==== Supported configurations
+
+[float]
+===== `TRANSACTION_SAMPLE_RATE`
+
+added[7.3.0] A sample rate between `0.000` and `1.0`. Default configuration is `1.0` (100% of traces).
+
+Adjusting the sampling rate controls what percent of requests are traced.
+`1.0` means _all_ requests are traced. If you set the `TRANSACTION_SAMPLE_RATE` to a value below `1.0`,
+the agent will randomly sample only a subset of transactions.
+Unsampled transactions only record the name of the transaction, the overall transaction time, and the result.
+
+IMPORTANT: In a distributed trace, the sampling decision is propagated by the initializing Agent.
+This means if you're using multiple agents, only the originating service's sampling rate will be used.
+Be sure to set sensible defaults in _all_ of your agents, especially the
+{apm-rum-ref}/configuration.html#transaction-sample-rate[JavaScript RUM Agent].

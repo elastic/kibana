@@ -4,28 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
+import { first } from 'lodash';
+import { JOBS } from './helpers/constants';
 
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path,
-  breadcrumbs: { set: () => {} },
-  getInjected: () => ({}),
-}));
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
-}));
-
 const { setup } = pageHelpers.jobCreate;
 
-describe('Create Rollup Job, step 5: Metrics', () => {
+describe('Create Rollup Job, step 6: Review', () => {
   let server;
   let httpRequestsMockHelpers;
   let find;
@@ -47,7 +37,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
-
     ({
       find,
       exists,
@@ -96,12 +85,12 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         .simulate('click');
     };
 
-    it('should have a "Summary" & "JSON" tabs to review the Job', async () => {
+    it('should have a "Summary" & "Request" tabs to review the Job', async () => {
       await goToStep(6);
-      expect(getTabsText()).toEqual(['Summary', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Request']);
     });
 
-    it('should have a "Summary", "Terms" & "JSON" tab if a term aggregation was added', async () => {
+    it('should have a "Summary", "Terms" & "Request" tab if a term aggregation was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['my-field'] });
       await goToStep(3);
       selectFirstField('Terms');
@@ -110,10 +99,10 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       actions.clickNextStep(); // go to step 5
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Terms', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Terms', 'Request']);
     });
 
-    it('should have a "Summary", "Histogram" & "JSON" tab if a histogram field was added', async () => {
+    it('should have a "Summary", "Histogram" & "Request" tab if a histogram field was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'] });
       await goToStep(4);
       selectFirstField('Histogram');
@@ -122,10 +111,10 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       actions.clickNextStep(); // go to step 5
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Histogram', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Histogram', 'Request']);
     });
 
-    it('should have a "Summary", "Metrics" & "JSON" tab if a histogram field was added', async () => {
+    it('should have a "Summary", "Metrics" & "Request" tab if a histogram field was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
       await goToStep(5);
       selectFirstField('Metrics');
@@ -133,21 +122,53 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Metrics', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Metrics', 'Request']);
     });
   });
 
   describe('save()', () => {
-    it('should call the "create" Api server endpoint', async () => {
-      await goToStep(6);
+    const jobCreateApiPath = '/api/rollup/create';
+    const jobStartApiPath = '/api/rollup/start';
 
-      const jobCreateApiPath = '/api/rollup/create';
-      expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
+    describe('without starting job after creation', () => {
+      it('should call the "create" Api server endpoint', async () => {
+        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
 
-      actions.clickSave();
-      await nextTick();
+        await goToStep(6);
 
-      expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
+        expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
+
+        actions.clickSave();
+        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // we add a longer sleep here :(
+        await new Promise(res => setTimeout(res, 750));
+
+        expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // It has still not been called!
+      });
+    });
+
+    describe('with starting job after creation', () => {
+      it('should call the "create" and "start" Api server endpoints', async () => {
+        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
+        httpRequestsMockHelpers.setStartJobResponse();
+
+        await goToStep(6);
+
+        find('rollupJobToggleJobStartAfterCreation').simulate('change', {
+          target: { checked: true },
+        });
+
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
+
+        actions.clickSave();
+        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // we add a longer sleep here :(
+        await new Promise(res => setTimeout(res, 750));
+
+        expect(server.requests.find(r => r.url === jobStartApiPath)).not.toBe(undefined); // It has been called!
+      });
     });
   });
 });

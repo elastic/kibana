@@ -201,6 +201,8 @@ export const timelineSchema = gql`
   }
 
   type ResponseFavoriteTimeline {
+    code: Float
+    message: String
     savedObjectId: String!
     version: String!
     favorite: [FavoriteTimelineResult!]

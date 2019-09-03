@@ -4,6 +4,8 @@
 
 ## SavedObjectsClientWrapperOptions interface
 
+Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
+
 <b>Signature:</b>
 
 ```typescript

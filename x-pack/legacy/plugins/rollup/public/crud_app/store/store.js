@@ -11,10 +11,11 @@ import { rollupJobs } from './reducers';
 
 import {
   detailPanel,
+  cloneJob,
 } from './middleware';
 
 export function createRollupJobsStore(initialState = {}) {
-  const enhancers = [ applyMiddleware(thunk, detailPanel) ];
+  const enhancers = [ applyMiddleware(thunk, detailPanel, cloneJob) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(

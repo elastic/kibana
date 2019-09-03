@@ -25,6 +25,7 @@ const createSchemaMock = () => {
     getIndexForType: jest.fn().mockReturnValue('.kibana-test'),
     isHiddenType: jest.fn().mockReturnValue(false),
     isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+    getConvertToAliasScript: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

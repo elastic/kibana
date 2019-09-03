@@ -46,11 +46,8 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
     defaultValue: {
       mask: { model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false },
     },
-    defaultEmptyValue: {
-      mask: { model: EMPTY_STRING, value: EMPTY_STRING, isInvalid: false },
-    },
     validateClass: CidrMask,
-    getModelValue: (item: MaskObject) => ({
+    getModelValue: (item: MaskObject = {}) => ({
       mask: {
         model: item.mask || EMPTY_STRING,
         value: item.mask || EMPTY_STRING,
@@ -91,9 +88,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
         />
       </EuiFlexItem>
     ),
-    validateModel: (validateFn, object: MaskObject, model: MaskModel) => {
-      validateFn(object.mask, model.mask);
-    },
+    modelNames: 'mask',
   };
 
   return <InputList config={maskListConfig} {...rest} />;

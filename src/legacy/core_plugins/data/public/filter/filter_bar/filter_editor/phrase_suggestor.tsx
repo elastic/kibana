@@ -18,14 +18,14 @@
  */
 
 import { Component } from 'react';
-import chrome from 'ui/chrome';
-import { Field, IndexPattern } from 'ui/index_patterns';
 import { getSuggestions } from 'ui/value_suggestions';
-const config = chrome.getUiSettingsClient();
+import { UiSettingsClientContract } from 'src/core/public';
+import { Field, IndexPattern } from '../../../index_patterns';
 
 export interface PhraseSuggestorProps {
   indexPattern: IndexPattern;
   field?: Field;
+  uiSettings: UiSettingsClientContract;
 }
 
 export interface PhraseSuggestorState {
@@ -52,7 +52,7 @@ export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
   }
 
   protected isSuggestingValues() {
-    const shouldSuggestValues = config.get('filterEditor:suggestValues');
+    const shouldSuggestValues = this.props.uiSettings.get('filterEditor:suggestValues');
     const { field } = this.props;
     return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
   }

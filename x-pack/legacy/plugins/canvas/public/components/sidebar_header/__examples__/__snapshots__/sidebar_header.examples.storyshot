@@ -35,7 +35,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Save as new element"
               className="euiButtonIcon euiButtonIcon--text"
               onBlur={[Function]}
@@ -78,7 +77,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
                 onMouseOver={[Function]}
               >
                 <button
-                  aria-describedby="generated-id"
                   aria-label="Element options"
                   className="euiButtonIcon euiButtonIcon--text"
                   onBlur={[Function]}
@@ -142,7 +140,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader without layer controls 1`] 
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Save as new element"
               className="euiButtonIcon euiButtonIcon--text"
               onBlur={[Function]}
@@ -185,7 +182,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader without layer controls 1`] 
                 onMouseOver={[Function]}
               >
                 <button
-                  aria-describedby="generated-id"
                   aria-label="Element options"
                   className="euiButtonIcon euiButtonIcon--text"
                   onBlur={[Function]}

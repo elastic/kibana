@@ -43,15 +43,12 @@ describe('when simulating race condition', () => {
       ms: number;
       renderFn: any;
     }) {
-      const { data, status, error } = useFetcher(
-        async () => {
-          requestCallOrder.push(['request', name, ms]);
-          const res = await asyncFn(name, ms);
-          requestCallOrder.push(['response', name, ms]);
-          return res;
-        },
-        [name, ms]
-      );
+      const { data, status, error } = useFetcher(async () => {
+        requestCallOrder.push(['request', name, ms]);
+        const res = await asyncFn(name, ms);
+        requestCallOrder.push(['response', name, ms]);
+        return res;
+      }, [name, ms]);
       renderFn({ data, status, error });
       return null;
     }

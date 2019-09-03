@@ -4,9 +4,11 @@
 
 ## ChromeNavLink.linkToLastSubUrl property
 
-Whether or not the subUrl feature should be enabled.
+> Warning: This API is now obsolete.
+> 
+> 
 
-NOTE: only read by legacy platform.
+Whether or not the subUrl feature should be enabled.
 
 <b>Signature:</b>
 

@@ -120,6 +120,8 @@ export const AuditdGenericFileLine = pure<Props>(
   )
 );
 
+AuditdGenericFileLine.displayName = 'AuditdGenericFileLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
@@ -177,3 +179,5 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
     }
   }
 );
+
+AuditdGenericFileDetails.displayName = 'AuditdGenericFileDetails';

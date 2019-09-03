@@ -7,21 +7,22 @@
 import { i18n } from '@kbn/i18n';
 import { tail } from '../../functions/common/tail';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof tail>> = {
   help: i18n.translate('xpack.canvas.functions.tailHelpText', {
-    defaultMessage: 'Get the last N rows from the end of a {datatable}. Also see `{head}`',
+    defaultMessage: 'Retrieves the last N rows from the end of a {DATATABLE}. See also {headFn}.',
     values: {
-      datatable: 'datatable',
-      head: 'head',
+      DATATABLE,
+      headFn: '`head`',
     },
   }),
   args: {
     count: i18n.translate('xpack.canvas.functions.tail.args.countHelpText', {
-      defaultMessage: 'Return this many rows from the end of the {datatable}',
+      defaultMessage: 'The number of rows to retrieve from the end of the {DATATABLE}.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
   },

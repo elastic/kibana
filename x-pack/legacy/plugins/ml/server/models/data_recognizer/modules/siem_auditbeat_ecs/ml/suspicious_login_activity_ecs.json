@@ -29,7 +29,7 @@
     "custom_urls": [
       {
         "url_name": "IP Address Details",
-        "url_value": "siem#/network/ip/$source.ip$?_g=()&kqlQuery=(filterQuery:!n,queryLocation:network.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-network/ip/$source.ip$?_g=()&kqlQuery=(filterQuery:!n,queryLocation:network.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

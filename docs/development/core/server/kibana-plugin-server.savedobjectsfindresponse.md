@@ -4,6 +4,9 @@
 
 ## SavedObjectsFindResponse interface
 
+Return type of the Saved Objects `find()` method.
+
+\*Note\*: this type is different between the Public and Server Saved Objects clients.
 
 <b>Signature:</b>
 

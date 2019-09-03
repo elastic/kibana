@@ -8,5 +8,5 @@ export function getNextMidnight() {
   const nextMidnight = new Date();
   nextMidnight.setHours(0, 0, 0, 0);
   nextMidnight.setDate(nextMidnight.getDate() + 1);
-  return nextMidnight.toISOString();
+  return nextMidnight;
 }

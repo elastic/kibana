@@ -36,7 +36,11 @@ function getParams(filter, indexPattern) {
   // for example a user might manually edit the url or the index pattern's ID might change due to
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index or field is invalid.
-  const value = (indexPattern && indexPattern.fields.byName[key]) ? indexPattern.fields.byName[key].format.convert(query) : query;
+  const value = (
+    indexPattern &&
+      indexPattern.fields &&
+      indexPattern.fields.byName[key]
+  ) ? indexPattern.fields.byName[key].format.convert(query) : query;
   return { type, key, value, params };
 }
 

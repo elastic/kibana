@@ -40,7 +40,7 @@ describe('Filebeat Rules', () => {
         'user_agent.patch': 'a2',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -128,7 +128,7 @@ Array [
         'service.type': 'nginx',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[nginx]",
@@ -167,7 +167,7 @@ Array [
         'nginx.access.response_code': 200,
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[nginx][access] ",
@@ -236,7 +236,7 @@ Array [
         'nginx.error.level': 'error',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[nginx]",

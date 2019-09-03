@@ -41,7 +41,7 @@ export class UpdateScheduler extends AbstractScheduler {
         this.log.debug(`Repo ${repo.uri} is too soon to execute the next update job.`);
         return;
       }
-      this.log.info(`Start to schedule update repo request for ${repo.uri}`);
+      this.log.debug(`Start to schedule update repo request for ${repo.uri}`);
 
       let inDelete = false;
       try {
@@ -69,7 +69,7 @@ export class UpdateScheduler extends AbstractScheduler {
 
         await this.updateWorker.enqueueJob(payload, {});
       } else {
-        this.log.info(
+        this.log.debug(
           `Repo ${repo.uri} has not been fully cloned yet or in update/delete. Skip update.`
         );
       }

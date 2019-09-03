@@ -19,6 +19,6 @@
 
 import { IndexPatternsService } from './service';
 
-export type IndexPatternsServiceFactory = (
-  args: { callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any> }
-) => IndexPatternsService;
+export type IndexPatternsServiceFactory = (args: {
+  callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>;
+}) => IndexPatternsService;

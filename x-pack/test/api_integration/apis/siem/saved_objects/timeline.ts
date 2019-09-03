@@ -12,16 +12,15 @@
 
 import expect from '@kbn/expect';
 import ApolloClient from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { deleteTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/delete/persist.gql_query';
 import { persistTimelineFavoriteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/favorite/persist.gql_query';
 import { persistTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/persist.gql_query';
 import { TimelineResult } from '../../../../../legacy/plugins/siem/public/graphql/types';
 
-import { KbnTestProvider } from '../types';
-
-const timelinePersistenceTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -296,10 +295,7 @@ const timelinePersistenceTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default timelinePersistenceTests;
+}
 
 const omitTypename = (key: string, value: keyof TimelineResult) =>
   key === '__typename' ? undefined : value;
@@ -307,7 +303,7 @@ const omitTypename = (key: string, value: keyof TimelineResult) =>
 const omitTypenameInTimeline = (timeline: TimelineResult) =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
-const createBasicTimeline = async (client: ApolloClient<InMemoryCache>, titleToSaved: string) =>
+const createBasicTimeline = async (client: ApolloClient<any>, titleToSaved: string) =>
   await client.mutate<any>({
     mutation: persistTimelineMutation,
     variables: {

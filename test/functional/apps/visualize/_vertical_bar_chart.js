@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
-  describe('vertical bar chart', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
+  describe.skip('vertical bar chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';
@@ -224,6 +225,19 @@ export default function ({ getService, getPageObjects }) {
           '200', '400', '600', '800', '1,000', '1,200', '1,400',
         ];
         expect(labels).to.eql(expectedLabels);
+      });
+    });
+
+    describe('vertical bar in percent mode', async () => {
+      it('should show ticks with percentage values', async function () {
+        const axisId = 'ValueAxis-1';
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisMode('percentage');
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        expect(labels[0]).to.eql('0%');
+        expect(labels[labels.length - 1]).to.eql('100%');
       });
     });
 

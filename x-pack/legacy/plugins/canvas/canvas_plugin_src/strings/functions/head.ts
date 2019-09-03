@@ -7,22 +7,23 @@
 import { i18n } from '@kbn/i18n';
 import { head } from '../../functions/common/head';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof head>> = {
   help: i18n.translate('xpack.canvas.functions.headHelpText', {
-    defaultMessage: 'Get the first {n} rows from the {datatable}. Also see `{tail}`',
+    defaultMessage: 'Retrieves the first {n} rows from the {DATATABLE}. See also {tailFn}',
     values: {
       n: 'N',
-      datatable: 'datatable',
-      tail: 'tail',
+      DATATABLE,
+      tailFn: '`tail`',
     },
   }),
   args: {
     count: i18n.translate('xpack.canvas.functions.head.args.countHelpText', {
-      defaultMessage: 'Return this many rows from the beginning of the {datatable}',
+      defaultMessage: 'The number of rows to retrieve from the beginning of the {DATATABLE}.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
   },

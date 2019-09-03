@@ -4,6 +4,8 @@
 
 ## SavedObjectsClientWrapperFactory type
 
+Describes the factory used to create instances of Saved Objects Client Wrappers.
+
 <b>Signature:</b>
 
 ```typescript

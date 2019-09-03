@@ -28,7 +28,7 @@ module.exports = function (grunt) {
     if (grunt.option('browser')) {
       return grunt.option('browser');
     }
-    if (process.env.TEST_BROWSER_HEADLESS) {
+    if (process.env.TEST_BROWSER_HEADLESS === '1') {
       return 'Chrome_Headless';
     }
     return 'Chrome';

@@ -33,7 +33,6 @@ describe('Header', () => {
     const wrapper = shallow(
       <Header
         header={columnHeader}
-        isLoading={false}
         onColumnRemoved={jest.fn()}
         onColumnResized={jest.fn()}
         onColumnSorted={jest.fn()}
@@ -51,7 +50,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnHeader}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
@@ -64,7 +62,7 @@ describe('Header', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="header-text"]')
+          .find(`[data-test-subj="header-text-${columnHeader.id}"]`)
           .first()
           .text()
       ).toEqual(columnHeader.id);
@@ -75,7 +73,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnHeader}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
@@ -104,7 +101,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnWithFilter}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
@@ -129,7 +125,6 @@ describe('Header', () => {
           <TestProviders>
             <Header
               header={columnHeader}
-              isLoading={false}
               onColumnRemoved={jest.fn()}
               onColumnResized={jest.fn()}
               onColumnSorted={jest.fn()}
@@ -157,7 +152,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={headerSortable}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
@@ -186,7 +180,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={headerSortable}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
@@ -212,7 +205,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={headerSortable}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
@@ -238,7 +230,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={headerSortable}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
@@ -352,7 +343,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnHeader}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
@@ -363,7 +353,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="header-text"]')).toHaveStyleRule(
+      expect(wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`)).toHaveStyleRule(
         'text-overflow',
         'ellipsis'
       );
@@ -376,7 +366,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnHeader}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
@@ -398,7 +387,6 @@ describe('Header', () => {
         <TestProviders>
           <Header
             header={columnHeader}
-            isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}

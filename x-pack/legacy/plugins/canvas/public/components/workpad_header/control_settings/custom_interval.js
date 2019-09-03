@@ -7,36 +7,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
-
-const getRefreshInterval = (val = '') => {
-  // if it's a number, there is no interval, return undefined
-  if (!isNaN(Number(val))) {
-    return;
-  }
-
-  // if it's a string, try to parse out the shorthand duration value
-  const match = String(val).match(/^([0-9]{1,})([hmsd])$/);
-
-  // if it's invalid, there is no interval, return undefined
-  if (!match) {
-    return;
-  }
-
-  switch (match[2]) {
-    case 's':
-      return match[1] * 1000;
-    case 'm':
-      return match[1] * 1000 * 60;
-    case 'h':
-      return match[1] * 1000 * 60 * 60;
-    case 'd':
-      return match[1] * 1000 * 60 * 60 * 24;
-  }
-};
+import { getTimeInterval } from '../../../lib/time_interval';
 
 export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue }) => {
   const [customInterval, setCustomInterval] = useState(defaultValue);
-  const refreshInterval = getRefreshInterval(customInterval);
+  const refreshInterval = getTimeInterval(customInterval);
   const isInvalid = Boolean(customInterval.length && !refreshInterval);
 
   const handleChange = ev => setCustomInterval(ev.target.value);

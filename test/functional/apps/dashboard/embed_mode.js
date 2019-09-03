@@ -24,13 +24,13 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
 
-  describe('embed mode', async () => {
+  describe('embed mode', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
     it('hides the chrome', async () => {
-      let isChromeVisible = await PageObjects.common.isChromeVisible();
+      const isChromeVisible = await PageObjects.common.isChromeVisible();
       expect(isChromeVisible).to.be(true);
 
       const currentUrl = await browser.getCurrentUrl();
@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(newUrl.toString(), useTimeStamp);
 
       await retry.try(async () => {
-        isChromeVisible = await PageObjects.common.isChromeVisible();
-        expect(isChromeVisible).to.be(false);
+        const isChromeHidden = await PageObjects.common.isChromeHidden();
+        expect(isChromeHidden).to.be(true);
       });
     });
 

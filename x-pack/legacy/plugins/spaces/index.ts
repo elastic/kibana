@@ -23,6 +23,16 @@ import {
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
 import { SecurityPlugin } from '../security';
+import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
+
+export interface SpacesPlugin {
+  getSpaceId: SpacesServiceSetup['getSpaceId'];
+  spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
+  namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
+  getBasePath: SpacesServiceSetup['getBasePath'];
+  getScopedSpacesClient: SpacesServiceSetup['scopedClient'];
+}
+
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
@@ -73,6 +83,7 @@ export const spaces = (kibana: Record<string, any>) =>
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
+          hidden: true,
         },
       },
       home: ['plugins/spaces/register_feature'],
@@ -181,6 +192,9 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
+      server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
+      server.expose('getBasePath', spacesService.getBasePath);
       server.expose('getScopedSpacesClient', spacesService.scopedClient);
     },
   });

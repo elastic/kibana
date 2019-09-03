@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-
+import { i18n } from '@kbn/i18n';
 
 const createSeriesFromParams = (cfg, seri) => {
   //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
@@ -203,11 +203,17 @@ export const vislibPointSeriesTypes = {
 
   heatmap: (cfg, data) => {
     const defaults = create()(cfg, data);
-    const seriesLimit = 25;
     const hasCharts = defaults.charts.length;
-    const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
+    const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > cfg.heatmapMaxBuckets;
     if (hasCharts && tooManySeries) {
-      defaults.error = 'There are too many series defined.';
+      defaults.error = i18n.translate('common.ui.vislib.heatmap.maxBucketsText', {
+        defaultMessage: 'There are too many series defined ({nr}). The configured maximum is {max}.',
+        values: {
+          max: cfg.heatmapMaxBuckets,
+          nr: defaults.charts[0].series.length
+        },
+        description: 'This message appears at heatmap visualizations'
+      });
     }
     defaults.valueAxes[0].show = false;
     defaults.categoryAxes[0].style = {

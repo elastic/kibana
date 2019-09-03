@@ -16,6 +16,7 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { Overview } from '../../../components/logstash/overview';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -43,7 +44,7 @@ uiRoutes.when('/logstash', {
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
     pageData: getPageData
   },
@@ -64,6 +65,7 @@ uiRoutes.when('/logstash', {
               stats={data.clusterStatus}
               metrics={data.metrics}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
             />
           </I18nContext>
         );

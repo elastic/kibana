@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function iptablesLogsSpecProvider(server, context) {
   const moduleName = 'iptables';
@@ -29,12 +33,13 @@ export function iptablesLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.iptablesLogs.longDescription', {
-      defaultMessage: 'This is a module for iptables and ip6tables logs. It parses logs \
+      defaultMessage:
+        'This is a module for iptables and ip6tables logs. It parses logs \
 received over the network via syslog or from a file. Also, it understands the \
 prefix added by some Ubiquiti firewalls, which includes the rule set name, rule \
 number and the action performed on the traffic (allow/deny).. \
@@ -48,21 +53,18 @@ number and the action performed on the traffic (allow/deny).. \
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate(
-          'kbn.server.tutorials.iptablesLogs.artifacts.dashboards.linkLabel',
-          {
-            defaultMessage: 'SIEM App',
-          }
-        ),
+        label: i18n.translate('kbn.server.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'SIEM App',
+        }),
       },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iptables.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iptables.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/iptables_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

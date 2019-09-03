@@ -7,10 +7,9 @@
 import { ActionCreator } from 'typescript-fsa';
 
 import { AllTimelinesVariables } from '../../containers/timeline/all';
-import { Note } from '../../lib/note';
 import { TimelineModel } from '../../store/timeline/model';
-import { SerializedFilterQuery, KueryFilterQuery } from '../../store';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { NoteResult } from '../../graphql/types';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -61,9 +60,13 @@ export type OnDeleteSelected = () => void;
 export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 
 /** Invoked when the user clicks on the name of a timeline to open it */
-export type OnOpenTimeline = (
-  { duplicate, timelineId }: { duplicate: boolean; timelineId: string }
-) => void;
+export type OnOpenTimeline = ({
+  duplicate,
+  timelineId,
+}: {
+  duplicate: boolean;
+  timelineId: string;
+}) => void;
 
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
@@ -139,25 +142,30 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
 }
 
+export interface UpdateTimeline {
+  duplicate: boolean;
+  id: string;
+  from: number;
+  notes: NoteResult[] | null | undefined;
+  timeline: TimelineModel;
+  to: number;
+}
+
+export type DispatchUpdateTimeline = ({
+  duplicate,
+  id,
+  from,
+  notes,
+  timeline,
+  to,
+}: UpdateTimeline) => () => void;
+
 export interface OpenTimelineDispatchProps {
-  setKqlFilterQueryDraft: ActionCreator<{
-    id: string;
-    filterQueryDraft: KueryFilterQuery;
-  }>;
-  applyKqlFilterQuery: ActionCreator<{
-    id: string;
-    filterQuery: SerializedFilterQuery;
-  }>;
-  addTimeline: ActionCreator<{ id: string; timeline: TimelineModel }>;
-  addNotes: ActionCreator<{ notes: Note[] }>;
+  updateTimeline: DispatchUpdateTimeline;
   createNewTimeline: ActionCreator<{
     id: string;
     columns: ColumnHeader[];
     show?: boolean;
-  }>;
-  setTimelineRangeDatePicker: ActionCreator<{
-    from: number;
-    to: number;
   }>;
   updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
 }

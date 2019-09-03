@@ -20,13 +20,13 @@ export const cancelStartBasicLicense = createAction(
 export const startBasicLicense = (currentLicenseType, ack) => async (
   dispatch,
   getState,
-  { xPackInfo }
+  { xPackInfo, $injector }
 ) => {
   /*eslint camelcase: 0*/
   const { acknowledged, basic_was_started, error_message, acknowledge } = await startBasic(ack);
   if (acknowledged) {
     if (basic_was_started) {
-      await xPackInfo.refresh();
+      await xPackInfo.refresh($injector);
       // reload necessary to get left nav to refresh with proper links
       window.location.reload();
     } else {

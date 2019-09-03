@@ -20,6 +20,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   }
   className="eui-displayBlock"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="popover"
   isOpen={false}
@@ -122,6 +123,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   }
   className="eui-displayBlock"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="popover"
   isOpen={false}

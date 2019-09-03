@@ -7,7 +7,6 @@
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -66,6 +65,8 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   }
 `;
 
+EuiFlyoutContainer.displayName = 'EuiFlyoutContainer';
+
 const FlyoutHeaderContainer = styled.div`
   align-items: center;
   display: flex;
@@ -74,30 +75,41 @@ const FlyoutHeaderContainer = styled.div`
   width: 100%;
 `;
 
+FlyoutHeaderContainer.displayName = 'FlyoutHeaderContainer';
+
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`
 const WrappedCloseButton = styled.div`
   margin-right: 5px;
 `;
 
-const FlyoutHeaderWithCloseButton = pure<{
+WrappedCloseButton.displayName = 'WrappedCloseButton';
+
+const FlyoutHeaderWithCloseButton = React.memo<{
   onClose: () => void;
   timelineId: string;
   usersViewing: string[];
-}>(({ onClose, timelineId, usersViewing }) => (
-  <FlyoutHeaderContainer>
-    <WrappedCloseButton>
-      <EuiToolTip content={i18n.CLOSE_TIMELINE}>
-        <EuiButtonIcon
-          aria-label={i18n.CLOSE_TIMELINE}
-          data-test-subj="close-timeline"
-          iconType="cross"
-          onClick={onClose}
-        />
-      </EuiToolTip>
-    </WrappedCloseButton>
-    <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
-  </FlyoutHeaderContainer>
-));
+}>(
+  ({ onClose, timelineId, usersViewing }) => (
+    <FlyoutHeaderContainer>
+      <WrappedCloseButton>
+        <EuiToolTip content={i18n.CLOSE_TIMELINE}>
+          <EuiButtonIcon
+            aria-label={i18n.CLOSE_TIMELINE}
+            data-test-subj="close-timeline"
+            iconType="cross"
+            onClick={onClose}
+          />
+        </EuiToolTip>
+      </WrappedCloseButton>
+      <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
+    </FlyoutHeaderContainer>
+  ),
+  (prevProps, nextProps) =>
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.usersViewing === nextProps.usersViewing
+);
+
+FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
 class FlyoutPaneComponent extends React.PureComponent<Props> {
   public render() {

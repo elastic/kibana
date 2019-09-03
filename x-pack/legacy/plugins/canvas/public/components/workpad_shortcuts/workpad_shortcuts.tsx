@@ -118,7 +118,10 @@ export class WorkpadShortcuts extends Component<Props> {
       <Shortcuts
         name="ELEMENT"
         handler={(action: string, event: KeyboardEvent) => {
-          if (!isTextInput(event.target as HTMLInputElement)) {
+          if (
+            !isTextInput(event.target as HTMLInputElement) &&
+            typeof this._keyMap[action] === 'function'
+          ) {
             event.preventDefault();
             this._keyMap[action]();
           }

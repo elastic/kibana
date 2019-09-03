@@ -95,7 +95,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -158,7 +158,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -240,7 +240,7 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -318,7 +318,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -427,7 +427,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -508,7 +508,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -594,7 +594,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={true}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}

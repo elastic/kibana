@@ -5,19 +5,36 @@
  */
 
 import { getApmHref } from '../get_apm_href';
-import { LatestMonitor } from '../../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../common/graphql/types';
 
 describe('getApmHref', () => {
-  let monitor: LatestMonitor;
+  let summary: MonitorSummary;
 
   beforeEach(() => {
-    monitor = {
-      id: {
-        key: 'monitorId',
-      },
-      ping: {
-        timestamp: 'foo',
+    summary = {
+      monitor_id: 'foo',
+      state: {
+        summary: {},
+        checks: [
+          {
+            monitor: {
+              ip: '151.101.202.217',
+              status: 'up',
+            },
+            container: {
+              id: 'test-container-id',
+            },
+            kubernetes: {
+              pod: {
+                uid: 'test-pod-id',
+              },
+            },
+            timestamp: '123',
+          },
+        ],
+        timestamp: '123',
         url: {
+          full: 'https://www.elastic.co/',
           domain: 'www.elastic.co',
         },
       },
@@ -25,12 +42,12 @@ describe('getApmHref', () => {
   });
 
   it('creates href with base path when present', () => {
-    const result = getApmHref(monitor, 'foo', 'now-15m', 'now');
+    const result = getApmHref(summary, 'foo', 'now-15m', 'now');
     expect(result).toMatchSnapshot();
   });
 
   it('does not add a base path or extra slash when base path is empty string', () => {
-    const result = getApmHref(monitor, '', 'now-15m', 'now');
+    const result = getApmHref(summary, '', 'now-15m', 'now');
     expect(result).toMatchSnapshot();
   });
 });

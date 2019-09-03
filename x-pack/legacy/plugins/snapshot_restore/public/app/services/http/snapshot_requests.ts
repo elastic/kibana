@@ -5,6 +5,7 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
+import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -28,13 +29,16 @@ export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
 export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>
 ) => {
-  return sendRequest({
+  const result = await sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${snapshotIds
         .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
         .join(',')}`
     ),
     method: 'delete',
-    uimActionType: snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE);
+  return result;
 };

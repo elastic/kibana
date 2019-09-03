@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
+import { FilterBar as FilterBarType } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { filterBarQuery } from '../../queries';
@@ -42,7 +42,7 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
     return <FilterBarLoading />;
   }
   const {
-    filterBar: { ids, locations, names, ports, schemes },
+    filterBar: { ids, locations, names, ports, schemes, urls },
   } = data;
   // TODO: add a factory function + type for these filter options
   const filters = [
@@ -82,9 +82,9 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
       }),
       multiSelect: false,
       options: ids
-        ? ids.map(({ key }: MonitorKey) => ({
-            value: key,
-            view: key,
+        ? ids.map((id: string) => ({
+            value: id,
+            view: id,
           }))
         : [],
       searchThreshold: SEARCH_THRESHOLD,
@@ -108,7 +108,7 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
         defaultMessage: 'URL',
       }),
       multiSelect: false,
-      options: ids ? ids.map(({ url }: MonitorKey) => ({ value: url, view: url })) : [],
+      options: urls ? urls.map((url: string) => ({ value: url, view: url })) : [],
       searchThreshold: SEARCH_THRESHOLD,
     },
     {

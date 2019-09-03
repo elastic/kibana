@@ -16,20 +16,25 @@ import { getEmptyValue } from '../../../empty_value';
 import { getArgs, UncommonProcessTable } from '.';
 import { mockData } from './mock';
 
-describe('UncommonProcess Table Component', () => {
-  const loadMore = jest.fn();
+describe('Uncommon Process Table Component', () => {
+  const loadPage = jest.fn();
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
       const wrapper = shallow(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -42,12 +47,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -66,12 +76,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -91,12 +106,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -116,12 +136,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -141,12 +166,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -166,12 +196,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -190,12 +225,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -214,12 +254,17 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>

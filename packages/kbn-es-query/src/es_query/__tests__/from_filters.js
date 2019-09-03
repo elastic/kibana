@@ -52,7 +52,7 @@ describe('build query', function () {
 
       const result = buildQueryFromFilters(filters);
 
-      expect(result.must).to.eql(expectedESQueries);
+      expect(result.filter).to.eql(expectedESQueries);
     });
 
     it('should place negated filters in the must_not clause', function () {
@@ -86,7 +86,7 @@ describe('build query', function () {
 
       const result = buildQueryFromFilters(filters);
 
-      expect(result.must).to.eql(expectedESQueries);
+      expect(result.filter).to.eql(expectedESQueries);
     });
 
     it('should migrate deprecated match syntax', function () {
@@ -105,7 +105,7 @@ describe('build query', function () {
 
       const result = buildQueryFromFilters(filters);
 
-      expect(result.must).to.eql(expectedESQueries);
+      expect(result.filter).to.eql(expectedESQueries);
     });
 
     it('should not add query:queryString:options to query_string filters', function () {
@@ -119,7 +119,7 @@ describe('build query', function () {
 
       const result = buildQueryFromFilters(filters);
 
-      expect(result.must).to.eql(expectedESQueries);
+      expect(result.filter).to.eql(expectedESQueries);
     });
   });
 });

@@ -12,6 +12,7 @@ export const ipOverviewQuery = gql`
     $filterQuery: String
     $ip: String!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -20,9 +21,10 @@ export const ipOverviewQuery = gql`
           firstSeen
           lastSeen
           autonomousSystem {
-            as_org
-            asn
-            ip
+            number
+            organization {
+              name
+            }
           }
           geo {
             continent_name
@@ -41,9 +43,10 @@ export const ipOverviewQuery = gql`
           firstSeen
           lastSeen
           autonomousSystem {
-            as_org
-            asn
-            ip
+            number
+            organization {
+              name
+            }
           }
           geo {
             continent_name
@@ -71,6 +74,10 @@ export const ipOverviewQuery = gql`
             version
           }
           type
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

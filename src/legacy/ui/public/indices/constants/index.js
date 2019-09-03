@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../index_patterns';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [ ...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, '*' ];
 

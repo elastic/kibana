@@ -46,13 +46,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the doc view of the selected document', async function () {
-      const discoverDocTable = await docTable.getTable();
-      const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
-
       // navigate to the doc view
-      await (await docTable.getRowExpandToggle(firstRow)).click();
-      const firstDetailsRow = (await docTable.getDetailsRows(discoverDocTable))[0];
-      await (await docTable.getRowActions(firstDetailsRow))[1].click();
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      await (await docTable.getRowActions({ rowIndex: 0 }))[1].click();
 
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);

@@ -31,8 +31,10 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('dashboardAddPanelButton');
     }
 
-    async clickAddNewEmbeddableLink() {
-      await testSubjects.click('addNewSavedObjectLink');
+    async clickAddNewEmbeddableLink(type) {
+      await testSubjects.click('createNew');
+      await testSubjects.click(`createNew-${type}`);
+      await testSubjects.missingOrFail(`createNew-${type}`);
     }
 
     async toggleFilterPopover() {

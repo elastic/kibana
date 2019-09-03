@@ -17,27 +17,26 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+import { SavedObjectsClientContract } from 'src/core/public';
+import { createSavedQueryService } from './search_bar/lib/saved_query_service';
 
 /**
  * Search Service
  * @internal
  */
+
 export class SearchService {
-  public setup() {
+  public setup(savedObjectsClient: SavedObjectsClientContract) {
     return {
-      ui: {
-        SearchBar,
+      services: {
+        savedQueryService: createSavedQueryService(savedObjectsClient),
       },
-      loadLegacyDirectives: once(setupSearchBarDirective),
     };
   }
 
-  public stop() {
-    // nothing to do here yet
-  }
+  public stop() {}
 }
 
 /** @public */
+
 export type SearchSetup = ReturnType<SearchService['setup']>;

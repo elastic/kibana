@@ -9,23 +9,34 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterBarComponent as FilterBar } from '../filter_bar';
 
 describe('FilterBar component', () => {
-  const data = {
+  const data: any = {
     filterBar: {
       ports: [9200, 12349],
       ids: [
-        { key: 'auto-tcp-0X81440A68E839814C', url: 'tcp://localhost:9200' },
-        { key: 'auto-http-0X3675F89EF0612091', url: 'http://localhost:12349/' },
-        { key: 'auto-http-0X970CBD2F2102BFA8', url: 'http://www.google.com/' },
-        { key: 'auto-http-0X131221E73F825974', url: 'https://www.google.com/' },
-        { key: 'auto-http-0X9CB71300ABD5A2A8', url: 'https://www.github.com/' },
-        { key: 'auto-http-0XD9AE729FC1C1E04A', url: 'http://www.reddit.com/' },
-        { key: 'auto-http-0XDD2D4E60FD4A61C3', url: 'https://www.elastic.co' },
-        { key: 'auto-http-0XA8096548ECEB85B7', url: 'http://www.example.com/' },
-        { key: 'auto-http-0XC9CDA429418EDC2B', url: 'https://www.wikipedia.org/' },
-        { key: 'auto-http-0XE3B163481423197D', url: 'https://news.google.com/' },
+        'auto-tcp-0X81440A68E839814C',
+        'auto-http-0X3675F89EF0612091',
+        'auto-http-0X970CBD2F2102BFA8',
+        'auto-http-0X131221E73F825974',
+        'auto-http-0X9CB71300ABD5A2A8',
+        'auto-http-0XD9AE729FC1C1E04A',
+        'auto-http-0XDD2D4E60FD4A61C3',
+        'auto-http-0XA8096548ECEB85B7',
+        'auto-http-0XC9CDA429418EDC2B',
+        'auto-http-0XE3B163481423197D',
       ],
       names: [],
       schemes: ['tcp', 'http'],
+      urls: [
+        'tcp://localhost:9200',
+        'http://localhost:12349/',
+        'http://www.google.com/',
+        'https://www.google.com/',
+        'https://www.github.com/',
+        'http://www.reddit.com/',
+        'https://www.elastic.co',
+        'http://www.example.com/',
+        'https://www.wikipedia.org/',
+      ],
     },
   };
   let currentQuery;

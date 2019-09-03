@@ -4,8 +4,6 @@
 
 [partintro]
 --
-coming[7.2]
-
 beta[]
 
 The SIEM app in Kibana provides an interactive workspace for security teams to
@@ -52,3 +50,4 @@ SIEM can ingest and normalize events from ECS-compatible data sources.
 
 
 include::siem-ui.asciidoc[]
+include::machine-learning.asciidoc[]

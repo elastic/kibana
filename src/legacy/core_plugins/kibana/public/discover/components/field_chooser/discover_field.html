@@ -8,10 +8,11 @@
     kbn-accessible-click
     class="sidebar-item-title dscSidebarItem"
   >
-    <field-name
-      class="dscField dscSidebarItem__label"
-      field="field"
-    ></field-name>
+    <div class="dscField dscSidebarItem__label">
+      <field-name
+        field="field"
+      ></field-name>
+    </div>
 
     <button
       ng-if="field.name !== '_source'"

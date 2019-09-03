@@ -5,11 +5,14 @@
  */
 
 import chrome from 'ui/chrome';
-import { Anomalies, InfluencerInput } from '../types';
 
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
+import { throwIfNotOk } from './throw_if_not_ok';
 export interface Body {
   jobIds: string[];
-  criteriaFields: string[];
+  criteriaFields: CriteriaFields[];
   influencers: InfluencerInput[];
   aggregationInterval: string;
   threshold: number;
@@ -24,25 +27,18 @@ export const anomaliesTableData = async (
   body: Body,
   headers: Record<string, string | undefined>
 ): Promise<Anomalies> => {
-  try {
-    const response = await fetch('/api/ml/results/anomalies_table_data', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify(body),
-      headers: {
-        'kbn-system-api': 'true',
-        'content-Type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    const empty: Anomalies = {
-      anomalies: [],
-      interval: 'second',
-    };
-    return empty;
-  }
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify(body),
+    headers: {
+      'kbn-system-api': 'true',
+      'content-Type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  return await response.json();
 };

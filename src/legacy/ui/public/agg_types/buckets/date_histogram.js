@@ -27,8 +27,9 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
-import { dateHistogramInterval } from '../../../../core_plugins/data/common';
+import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { i18n } from '@kbn/i18n';
+import { writeParams } from '../agg_params';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
@@ -55,7 +56,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     date: true
   },
   makeLabel: function (agg) {
-    const output = this.params.write(agg);
+    const output = writeParams(this.params, agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
@@ -157,8 +158,9 @@ export const dateHistogramBucketAgg = new BucketAggType({
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
-          const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
-            return agg.type && agg.type.isScalable();
+          const metrics = aggs.aggs.filter(agg => agg.type && agg.type.type === 'metrics');
+          const all = _.every(metrics, function (agg) {
+            return agg.type.isScalable();
           });
           if (all) {
             output.metricScale = interval.scale;

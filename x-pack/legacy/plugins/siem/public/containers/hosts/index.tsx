@@ -17,29 +17,33 @@ import {
   GetHostsTableQuery,
   HostsEdges,
   HostsFields,
-  PageInfo,
+  PageInfoPaginated,
 } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { HostsTableQuery } from './hosts_table.gql_query';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 export { HostsFilter } from './filter';
 
+const ID = 'hostsQuery';
+
 export interface HostsArgs {
-  id: string;
+  endDate: number;
   hosts: HostsEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  id: string;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   startDate: number;
-  endDate: number;
+  totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: HostsArgs) => React.ReactNode;
   type: hostsModel.HostsType;
   startDate: number;
@@ -47,6 +51,8 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface HostsComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
   sortField: HostsFields;
   direction: Direction;
@@ -54,7 +60,7 @@ export interface HostsComponentReduxProps {
 
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
-class HostsComponentQuery extends QueryTemplate<
+class HostsComponentQuery extends QueryTemplatePaginated<
   HostsProps,
   GetHostsTableQuery.Query,
   GetHostsTableQuery.Variables
@@ -71,7 +77,9 @@ class HostsComponentQuery extends QueryTemplate<
 
   public render() {
     const {
-      id = 'hostsQuery',
+      activePage,
+      id = ID,
+      isInspected,
       children,
       direction,
       filterQuery,
@@ -82,6 +90,7 @@ class HostsComponentQuery extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
+
     const variables: GetHostsTableQuery.Variables = {
       sourceId,
       timerange: {
@@ -93,13 +102,10 @@ class HostsComponentQuery extends QueryTemplate<
         direction,
         field: sortField,
       },
-      pagination: {
-        limit,
-        cursor: null,
-        tiebreaker: null,
-      },
+      pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
     };
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
@@ -111,12 +117,9 @@ class HostsComponentQuery extends QueryTemplate<
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -128,22 +131,23 @@ class HostsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Hosts: {
                     ...fetchMoreResult.source.Hosts,
-                    edges: [...prev.source.Hosts.edges, ...fetchMoreResult.source.Hosts.edges],
+                    edges: [...fetchMoreResult.source.Hosts.edges],
                   },
                 },
               };
             },
           }));
           return children({
-            id,
-            refetch,
-            loading,
-            totalCount: getOr(0, 'source.Hosts.totalCount', data),
-            hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
-            startDate,
             endDate,
+            hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
+            id,
+            inspect: getOr(null, 'source.Hosts.inspect', data),
+            loading,
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            startDate,
+            totalCount: getOr(-1, 'source.Hosts.totalCount', data),
           });
         }}
       </Query>
@@ -158,8 +162,13 @@ class HostsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getHostsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getHostsSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };

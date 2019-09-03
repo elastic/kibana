@@ -6,7 +6,7 @@
 
 import { omit } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { Datatable, DatatableColumn, DatatableColumnType } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
@@ -33,14 +33,14 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
         required: true,
         help: argHelp.column,
       },
+      name: {
+        types: ['string'],
+        help: argHelp.name,
+      },
       type: {
         types: ['string'],
         help: argHelp.type,
         options: ['null', 'boolean', 'number', 'string', 'date'],
-      },
-      name: {
-        types: ['string'],
-        help: argHelp.name,
       },
     },
     fn: (context, args) => {

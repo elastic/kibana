@@ -7,14 +7,14 @@
 import { EuiComboBox } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
-import { StaticIndexPatternField } from 'ui/index_patterns';
+import { FieldType } from 'ui/index_patterns';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 
 interface Props {
   intl: InjectedIntl;
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null) => void;
-  fields: StaticIndexPatternField[];
+  fields: FieldType[];
 }
 
 export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fields }: Props) => {

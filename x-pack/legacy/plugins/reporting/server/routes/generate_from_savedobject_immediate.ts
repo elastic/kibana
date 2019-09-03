@@ -8,10 +8,15 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import { JobDocPayload, JobDocOutputExecuted, KbnServer } from '../../types';
-import { LevelLogger } from '../lib/level_logger';
+import {
+  KbnServer,
+  Logger,
+  JobDocPayload,
+  JobIDForImmediate,
+  JobDocOutputExecuted,
+} from '../../types';
 import { getRouteOptions } from './lib/route_config_factories';
-import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
+import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 interface KibanaResponse extends ResponseObject {
   isBoom: boolean;
@@ -26,7 +31,10 @@ interface KibanaResponse extends ResponseObject {
  *     - query bar
  *     - local (transient) changes the user made to the saved object
  */
-export function registerGenerateCsvFromSavedObjectImmediate(server: KbnServer) {
+export function registerGenerateCsvFromSavedObjectImmediate(
+  server: KbnServer,
+  parentLogger: Logger
+) {
   const routeOptions = getRouteOptions(server);
 
   /*
@@ -39,18 +47,22 @@ export function registerGenerateCsvFromSavedObjectImmediate(server: KbnServer) {
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
+      const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server, request);
+      const executeJobFn = executeJobFactory(server);
       const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
       const {
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(jobDocPayload, request);
+      }: JobDocOutputExecuted = await executeJobFn(
+        null as JobIDForImmediate,
+        jobDocPayload,
+        request
+      );
 
-      logger.info(`job output size: ${jobOutputSize} bytes`);
+      logger.info(`Job output size: ${jobOutputSize} bytes`);
 
       /*
        * ESQueue worker function defaults `content` to null, even if the

@@ -100,6 +100,32 @@ uiModules.get('kibana')
       );
 
       const maxSizeReached = get(job, '_source.output.max_size_reached');
+      const csvContainsFormulas = get(job, '_source.output.csv_contains_formulas');
+
+      if (csvContainsFormulas) {
+        return toastNotifications.addWarning({
+          title: (
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportTitle"
+              defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+              values={{ reportObjectType, reportObjectTitle }}
+            />
+          ),
+          text: (
+            <div>
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportMessage"
+                  defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+                />
+              </p>
+              {seeReportLink}
+              {downloadReportButton}
+            </div>
+          ),
+          'data-test-subj': 'completeReportSuccess',
+        });
+      }
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({

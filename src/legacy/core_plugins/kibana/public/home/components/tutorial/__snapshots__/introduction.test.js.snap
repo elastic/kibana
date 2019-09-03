@@ -13,10 +13,10 @@ exports[`props exportedFieldsUrl 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -70,10 +70,10 @@ exports[`props iconType 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -100,13 +100,13 @@ exports[`props isBeta 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
             <EuiBetaBadge
               label="Beta"
             />
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -133,10 +133,10 @@ exports[`props previewUrl 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -172,10 +172,10 @@ exports[`render 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>

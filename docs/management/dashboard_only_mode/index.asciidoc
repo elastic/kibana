@@ -1,32 +1,85 @@
 [role="xpack"]
 [[xpack-dashboard-only-mode]]
-== Kibana Dashboard Only Mode
+== Dashboard-only mode
 
-If {security} is enabled, you can use the `kibana_dashboard_only_user` built-in role to limit 
-what users see when they log in to {kib}. The `kibana_dashboard_only_user` role is 
-preconfigured with read-only permissions to {kib}.
+deprecated[7.4.0, Using the `kibana_dashboard_only_user` role is deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.]
 
-IMPORTANT: You must also assign roles that grant the user appropriate access to the data indices.
-For information on roles and privileges, see {xpack-ref}/authorization.html[User Authorization].
+In dashboard-only mode, users have access to only the *Dashboard* app. 
+Users can view and filter the dashboards, but cannot create, edit, or delete
+them. This enables you to:
 
-Users assigned this role are only able to see the Dashboard app in the navigation
-pane. When users open a dashboard, they will have a limited visual experience. 
-All edit and create controls are hidden. 
+* Show off your dashboards without giving users access to all of {kib}
+
+* Share your {kib} dashboards without the risk of users accidentally 
+editing or deleting them
+
+Dashboard-only mode pairs well with fullscreen mode.
+You can share your dashboard with the team responsible 
+for showing the dashboard on a big-screen monitor, and not worry about it being modified.
 
 [role="screenshot"]
 image:management/dashboard_only_mode/images/view_only_dashboard.png["View Only Dashboard"]
 
-To assign this role, go to *Management > Security > Users*, add or edit 
-a user, and add the `kibana_dashboard_only_user` role.
+[[setup-dashboard-only-mode]]
+[float]
+=== Assign dashboard-only mode
+With {security} enabled, you can restrict users to dashboard-only mode by assigning 
+them the built-in `kibana_dashboard_only_user` role. 
 
-IMPORTANT: If you assign users the `kibana_dashboard_only_user` role, along with a role 
+. Go to *Management > Security > Users*.
+. Create or edit a user.
+. Assign the `kibana_dashboard_only_user` role and a role that <<grant-read-access-to-indices, grants `read` access to the data indices>>.
++
+For example, 
+to enable users to view the dashboards in the sample data sets, you must assign them 
+the `kibana_dashboard_only_user` role and a role that has 
+`read` access to the kibana_* indices.
++
+[role="screenshot"]
+image:management/dashboard_only_mode/images/dashboard-only-user-role.png["Dashboard Only mode has no editing controls"]
+
+[IMPORTANT]
+===========================================
+* If you assign users the `kibana_dashboard_only_user` role and a role 
 with write permissions to {kib}, they *will* have write access, 
-even though the controls remain hidden in the {kib} UI.
+even though the controls remain hidden in {kib}.
 
-IMPORTANT: If you also assign users the reserved `superuser` role, they will be able to see 
-all of {kib} and have full access.
+* If you also assign users the reserved `superuser` role, they will have full
+access to {kib}.
 
-<<advanced-dashboard-mode-configuration, Advanced configurations>> that use a 
-custom {kib} index are possible.
+===========================================
 
-include::advanced_configuration.asciidoc[]
+[float]
+[[grant-read-access-to-indices]]
+=== Grant read access to indices
+
+The `kibana_dashboard_only_user` role  
+does not provide access to data indices.
+You must also assign the user a role that grants `read` access
+to each index you are using. Use *Management > Security > Roles* to create or edit a 
+role and assign index privileges.
+For information on roles and privileges, see {stack-ov}/authorization.html[User authorization].
+
+[role="screenshot"]
+image:management/dashboard_only_mode/images/custom_dashboard_mode_role.png["Dashboard Only mode has no editing controls"]
+
+
+[float]
+[[advanced-dashboard-mode-configuration]]
+=== Advanced settings for dashboard only mode
+
+The `kibana_dashboard_only_user` role grants access to all spaces. 
+If your setup requires access to a 
+subset of spaces, you can create a custom role, and then tag it as Dashboard only mode.
+
+. Go to *Management > Advanced Settings*, and search for `xpackDashboardMode:roles`. 
++
+By 
+default, this is set to 
+`kibana_dashboard_only_user`. 
+
+. Add as many roles as you require.
++
+[role="screenshot"]
+image:management/dashboard_only_mode/images/advanced_dashboard_mode_role_setup.png["Advanced dashboard mode role setup"]
+

@@ -9,7 +9,7 @@ import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
-import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export function createShim() {
   const {
@@ -35,7 +35,7 @@ export function createShim() {
         breadcrumb: MANAGEMENT_BREADCRUMB,
       },
       uiMetric: {
-        track,
+        createUiStatsReporter,
       },
     },
   };

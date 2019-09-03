@@ -12,96 +12,93 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowDirection,
-  FlowTarget,
+  FlowTargetNew,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
-  PageInfo,
+  PageInfoPaginated,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkTopNFlowQuery } from './index.gql_query';
+
+const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
-  networkTopNFlow: NetworkTopNFlowEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  networkTopNFlow: NetworkTopNFlowEdges[];
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
+  flowTarget: FlowTargetNew;
   type: networkModel.NetworkType;
 }
 
 export interface NetworkTopNFlowComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
-  flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTarget;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
 
-class NetworkTopNFlowComponentQuery extends QueryTemplate<
+class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   NetworkTopNFlowProps,
   GetNetworkTopNFlowQuery.Query,
   GetNetworkTopNFlowQuery.Variables
 > {
   public render() {
     const {
-      id = 'networkTopNFlowQuery',
+      activePage,
       children,
+      endDate,
+      flowTarget,
       filterQuery,
+      id = ID,
+      isInspected,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      flowDirection,
       topNFlowSort,
-      flowTarget,
     } = this.props;
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
-        query={networkTopNFlowQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        query={networkTopNFlowQuery}
         skip={skip}
         variables={{
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          inspect: isInspected,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort: topNFlowSort,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
-          sort: topNFlowSort,
-          flowDirection,
-          flowTarget,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -113,10 +110,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   NetworkTopNFlow: {
                     ...fetchMoreResult.source.NetworkTopNFlow,
-                    edges: [
-                      ...prev.source.NetworkTopNFlow.edges,
-                      ...fetchMoreResult.source.NetworkTopNFlow.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.NetworkTopNFlow.edges],
                   },
                 },
               };
@@ -124,12 +118,13 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
-            refetch,
+            inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
             loading,
-            totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
+            loadPage: this.wrappedLoadMore,
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}
       </Query>
@@ -137,11 +132,14 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
   }
 }
 
-const makeMapStateToProps = () => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
-
-  return mapStateToProps;
+const mapStateToProps = (state: State, { flowTarget, id = ID }: OwnProps) => {
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const { isInspected } = getQuery(state, id);
+  return {
+    ...getNetworkTopNFlowSelector(state),
+    isInspected,
+  };
 };
 
-export const NetworkTopNFlowQuery = connect(makeMapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);

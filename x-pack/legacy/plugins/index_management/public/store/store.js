@@ -11,7 +11,7 @@ import { defaultTableState } from './reducers/table_state';
 
 import { indexManagement } from './reducers/';
 
-export const indexManagementStore = () => {
+export function indexManagementStore() {
   const toggleNameToVisibleMap = {};
   getToggleExtensions().forEach((toggleExtension) => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
@@ -25,4 +25,4 @@ export const indexManagementStore = () => {
     initialState,
     compose(...enhancers)
   );
-};
+}

@@ -12,10 +12,11 @@ export const usersQuery = gql`
     $filterQuery: String
     $flowTarget: FlowTarget!
     $ip: String!
-    $pagination: PaginationInput!
+    $pagination: PaginationInputPaginated!
     $sort: UsersSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -44,10 +45,13 @@ export const usersQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

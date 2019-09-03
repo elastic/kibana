@@ -48,7 +48,7 @@ export class ElasticsearchLib {
         });
       }
 
-      return hiddenFieldsCheck.reduce((isvalid, field) => {
+      return hiddenFieldsCheck.reduce((isvalid: boolean, field) => {
         if (!isvalid) {
           return false;
         }

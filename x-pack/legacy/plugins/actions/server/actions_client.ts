@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttributes, SavedObject } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { SavedObjectReference } from './types';
-import { validateActionTypeConfig } from './lib';
+import { validateConfig, validateSecrets } from './lib';
+import { ActionResult } from './types';
 
-interface Action extends SavedObjectAttributes {
+interface ActionUpdate extends SavedObjectAttributes {
   description: string;
+  config: SavedObjectAttributes;
+  secrets: SavedObjectAttributes;
+}
+
+interface Action extends ActionUpdate {
   actionTypeId: string;
-  actionTypeConfig: SavedObjectAttributes;
 }
 
 interface CreateOptions {
-  attributes: Action;
-  options?: {
-    migrationVersion?: Record<string, string>;
-    references?: SavedObjectReference[];
-  };
+  action: Action;
 }
 
 interface FindOptions {
@@ -39,6 +39,13 @@ interface FindOptions {
   };
 }
 
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: ActionResult[];
+}
+
 interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
@@ -46,11 +53,7 @@ interface ConstructorOptions {
 
 interface UpdateOptions {
   id: string;
-  attributes: {
-    description: string;
-    actionTypeConfig: SavedObjectAttributes;
-  };
-  options: { version?: string; references?: SavedObjectReference[] };
+  action: ActionUpdate;
 }
 
 export class ActionsClient {
@@ -65,38 +68,82 @@ export class ActionsClient {
   /**
    * Create an action
    */
-  public async create({ attributes, options }: CreateOptions) {
-    const { actionTypeId } = attributes;
+  public async create({ action }: CreateOptions): Promise<ActionResult> {
+    const { actionTypeId, description, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateActionTypeConfig(
-      actionType,
-      attributes.actionTypeConfig
-    );
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(
-      actionType.unencryptedAttributes,
-      {
-        ...attributes,
-        actionTypeConfig: validatedActionTypeConfig,
-      }
-    );
-    return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
+    const validatedActionTypeConfig = validateConfig(actionType, config);
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+
+    const result = await this.savedObjectsClient.create('action', {
+      actionTypeId,
+      description,
+      config: validatedActionTypeConfig as SavedObjectAttributes,
+      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+    });
+
+    return {
+      id: result.id,
+      actionTypeId: result.attributes.actionTypeId,
+      description: result.attributes.description,
+      config: result.attributes.config,
+    };
+  }
+
+  /**
+   * Update action
+   */
+  public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
+    const existingObject = await this.savedObjectsClient.get('action', id);
+    const { actionTypeId } = existingObject.attributes;
+    const { description, config, secrets } = action;
+    const actionType = this.actionTypeRegistry.get(actionTypeId);
+    const validatedActionTypeConfig = validateConfig(actionType, config);
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+
+    const result = await this.savedObjectsClient.update('action', id, {
+      actionTypeId,
+      description,
+      config: validatedActionTypeConfig as SavedObjectAttributes,
+      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+    });
+
+    return {
+      id,
+      actionTypeId: result.attributes.actionTypeId as string,
+      description: result.attributes.description as string,
+      config: result.attributes.config as Record<string, any>,
+    };
   }
 
   /**
    * Get an action
    */
-  public async get({ id }: { id: string }) {
-    return await this.savedObjectsClient.get('action', id);
+  public async get({ id }: { id: string }): Promise<ActionResult> {
+    const result = await this.savedObjectsClient.get('action', id);
+
+    return {
+      id,
+      actionTypeId: result.attributes.actionTypeId as string,
+      description: result.attributes.description as string,
+      config: result.attributes.config as Record<string, any>,
+    };
   }
 
   /**
    * Find actions
    */
-  public async find({ options = {} }: FindOptions) {
-    return await this.savedObjectsClient.find({
+  public async find({ options = {} }: FindOptions): Promise<FindResult> {
+    const findResult = await this.savedObjectsClient.find({
       ...options,
       type: 'action',
     });
+
+    return {
+      page: findResult.page,
+      perPage: findResult.per_page,
+      total: findResult.total,
+      data: findResult.saved_objects.map(actionFromSavedObject),
+    };
   }
 
   /**
@@ -105,53 +152,11 @@ export class ActionsClient {
   public async delete({ id }: { id: string }) {
     return await this.savedObjectsClient.delete('action', id);
   }
+}
 
-  /**
-   * Update action
-   */
-  public async update({ id, attributes, options = {} }: UpdateOptions) {
-    const existingObject = await this.savedObjectsClient.get('action', id);
-    const { actionTypeId } = existingObject.attributes;
-    const actionType = this.actionTypeRegistry.get(actionTypeId);
-
-    const validatedActionTypeConfig = validateActionTypeConfig(
-      actionType,
-      attributes.actionTypeConfig
-    );
-    attributes = this.moveEncryptedAttributesToSecrets(actionType.unencryptedAttributes, {
-      ...attributes,
-      actionTypeConfig: validatedActionTypeConfig,
-    });
-    return await this.savedObjectsClient.update(
-      'action',
-      id,
-      {
-        ...attributes,
-        actionTypeId,
-      },
-      options
-    );
-  }
-
-  /**
-   * Set actionTypeConfigSecrets values on a given action
-   */
-  private moveEncryptedAttributesToSecrets(
-    unencryptedAttributes: string[] = [],
-    action: Action | UpdateOptions['attributes']
-  ) {
-    const actionTypeConfig: Record<string, any> = {};
-    const actionTypeConfigSecrets = { ...action.actionTypeConfig };
-    for (const attributeKey of unencryptedAttributes) {
-      actionTypeConfig[attributeKey] = actionTypeConfigSecrets[attributeKey];
-      delete actionTypeConfigSecrets[attributeKey];
-    }
-
-    return {
-      ...action,
-      // Important these overwrite attributes for encryption purposes
-      actionTypeConfig,
-      actionTypeConfigSecrets,
-    };
-  }
+function actionFromSavedObject(savedObject: SavedObject) {
+  return {
+    id: savedObject.id,
+    ...savedObject.attributes,
+  };
 }

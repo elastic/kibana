@@ -58,6 +58,12 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
       });
     }
 
+    get whiteListedTimerangeModes() {
+      return this.createUiRestriction({
+        last_value: true,
+      });
+    }
+
     getValidTimeInterval(userIntervalString) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
       const inRollupJobUnit = this.convertIntervalToUnit(userIntervalString, parsedRollupJobInterval.unit);

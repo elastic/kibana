@@ -17,6 +17,8 @@ const TimelinesContainer = styled.div`
   width: 100%:
 `;
 
+TimelinesContainer.displayName = 'TimelinesContainer';
+
 interface TimelinesProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
 }

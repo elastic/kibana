@@ -38,24 +38,27 @@ export class Workpad extends React.PureComponent {
     resetZoom: PropTypes.func.isRequired,
   };
 
-  // handle keypress events for editor and presentation events
+  _toggleFullscreen = () => {
+    const { setFullscreen, isFullscreen } = this.props;
+    setFullscreen(!isFullscreen);
+  };
+
+  // handle keypress events for editor events
   _keyMap = {
-    // this exists in both contexts
     REFRESH: this.props.fetchAllRenderables,
-    // editor events
     UNDO: this.props.undoHistory,
     REDO: this.props.redoHistory,
     GRID: () => this.props.setGrid(!this.props.grid),
     ZOOM_IN: this.props.zoomIn,
     ZOOM_OUT: this.props.zoomOut,
     ZOOM_RESET: this.props.resetZoom,
-    // presentation events
     PREV: this.props.previousPage,
     NEXT: this.props.nextPage,
+    FULLSCREEN: this._toggleFullscreen,
   };
 
   _keyHandler = (action, event) => {
-    if (!isTextInput(event.target)) {
+    if (!isTextInput(event.target) && typeof this._keyMap[action] === 'function') {
       event.preventDefault();
       this._keyMap[action]();
     }

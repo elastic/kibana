@@ -36,7 +36,7 @@ describe('Filebeat Rules', () => {
         'source.port': 40780,
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy] ",
@@ -98,7 +98,7 @@ Array [
         'source.port': 40962,
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy][tcp] ",
@@ -245,7 +245,7 @@ Array [
         'source.port': 38862,
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy][http] ",
@@ -428,7 +428,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy] ",
@@ -488,7 +488,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy][tcp] ",
@@ -630,7 +630,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[HAProxy][http] ",

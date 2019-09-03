@@ -19,7 +19,7 @@
 
 import { omit } from 'lodash';
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -30,8 +30,12 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
+export interface PluginInitializerContext {
+  /**
+   * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
+   */
+  readonly opaqueId: PluginOpaqueId;
+}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
@@ -43,9 +47,12 @@ export interface PluginInitializerContext {}
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: DiscoveredPlugin
 ): PluginInitializerContext {
-  return {};
+  return {
+    opaqueId,
+  };
 }
 
 /**
@@ -61,16 +68,22 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
-    http: deps.http,
+    application: {
+      register: app => deps.application.register(plugin.opaqueId, app),
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
+    context: deps.context,
     fatalErrors: deps.fatalErrors,
+    http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };
@@ -89,8 +102,8 @@ export function createPluginSetupContext<
 export function createPluginStartContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
@@ -99,6 +112,10 @@ export function createPluginStartContext<
   return {
     application: {
       capabilities: deps.application.capabilities,
+      navigateToApp: deps.application.navigateToApp,
+      getUrlForApp: deps.application.getUrlForApp,
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     docLinks: deps.docLinks,
     http: deps.http,
@@ -107,5 +124,6 @@ export function createPluginStartContext<
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    savedObjects: deps.savedObjects,
   };
 }

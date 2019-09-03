@@ -60,7 +60,7 @@ describe('<RemoteClusterList />', () => {
     });
   });
 
-  describe('when there are remote clusters', async () => {
+  describe('when there are remote clusters', () => {
     let find;
     let exists;
     let component;

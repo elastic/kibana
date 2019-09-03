@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * React modal dialog which allows the user to run and view time series forecasts.
  */
@@ -21,6 +19,8 @@ import {
   EuiButton,
   EuiToolTip
 } from '@elastic/eui';
+
+import { timefilter } from 'ui/timefilter';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -44,7 +44,6 @@ const WARN_NUM_PARTITIONS = 100;    // Warn about running a forecast with this n
 const FORECAST_STATS_POLL_FREQUENCY = 250;  // Frequency in ms at which to poll for forecast request stats.
 const WARN_NO_PROGRESS_MS = 120000; // If no progress in forecast request, abort check and warn.
 
-
 function getDefaultState() {
   return {
     isModalVisible: false,
@@ -60,7 +59,6 @@ function getDefaultState() {
   };
 }
 
-
 export const ForecastingModal = injectI18n(class ForecastingModal extends Component {
   static propTypes = {
     isDisabled: PropTypes.bool,
@@ -68,7 +66,6 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     detectorIndex: PropTypes.number,
     entities: PropTypes.array,
     loadForForecastId: PropTypes.func,
-    timefilter: PropTypes.object,
   };
 
   constructor(props) {
@@ -348,7 +345,7 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
 
     if (typeof job === 'object') {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
-      const bounds = this.props.timefilter.getActiveBounds();
+      const bounds = timefilter.getActiveBounds();
       const statusFinishedQuery = {
         term: {
           forecast_status: FORECAST_REQUEST_STATE.FINISHED
@@ -458,9 +455,9 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     const forecastButton = (
       <EuiButton
         onClick={this.openModal}
-        size="s"
         isDisabled={isForecastingDisabled}
         fill
+        data-test-subj="mlSingleMetricViewerButtonForecast"
       >
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"

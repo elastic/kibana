@@ -10,7 +10,3 @@ export interface AppDependencies {
   core: AppCore;
   plugins: AppPlugins;
 }
-
-export interface AppState {
-  [key: string]: any;
-}

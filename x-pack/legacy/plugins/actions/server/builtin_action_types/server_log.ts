@@ -4,32 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 const DEFAULT_TAGS = ['info', 'alerting'];
 
-const PARAMS_SCHEMA = Joi.object().keys({
-  message: Joi.string().required(),
-  tags: Joi.array()
-    .items(Joi.string())
-    .optional()
-    .default(DEFAULT_TAGS),
+// params definition
+
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+
+const ParamsSchema = schema.object({
+  message: schema.string(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: DEFAULT_TAGS }),
 });
+
+// action type definition
 
 export const actionType: ActionType = {
   id: '.server-log',
   name: 'server-log',
-  unencryptedAttributes: [],
   validate: {
-    params: PARAMS_SCHEMA,
+    params: ParamsSchema,
   },
   executor,
 };
 
-async function executor({ params, services }: ActionTypeExecutorOptions): Promise<any> {
-  const { message, tags } = params;
+// action executor
 
-  services.log(tags, message);
+async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
+  const params = execOptions.params as ActionParamsType;
+  const services = execOptions.services;
+
+  try {
+    services.log(params.tags, params.message);
+  } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
+      defaultMessage: 'error in action "{id}" logging message: {errorMessage}',
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
+    return {
+      status: 'error',
+      message,
+    };
+  }
+
+  return { status: 'ok' };
 }

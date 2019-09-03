@@ -49,7 +49,9 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
 
   const deleteRepository = () => {
     const repositoriesToDelete = [...repositoryNames];
-    deleteRepositories(repositoriesToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
+    deleteRepositories(repositoriesToDelete).then(({ data, error }) => {
+      const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
+
       // Surface success notifications
       if (itemsDeleted && itemsDeleted.length) {
         const hasMultipleSuccesses = itemsDeleted.length > 1;
@@ -153,7 +155,8 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleDescription"
-                defaultMessage="The snapshots in this repository will still exist, but Elasticsearch won’t have access to them."
+                defaultMessage="The snapshots in this repository will still exist, but Elasticsearch won’t have access to them.
+                  Adjust policies that use this repository to prevent scheduled snapshots from failing."
               />
             </p>
           ) : (
@@ -172,7 +175,8 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
               <p>
                 <FormattedMessage
                   id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleDescription"
-                  defaultMessage="The snapshots in these repositories will still exist, but Elasticsearch won't have access to them."
+                  defaultMessage="The snapshots in these repositories will still exist, but Elasticsearch won't have access to them.
+                    Adjust policies that use these repositories to prevent scheduled snapshots from failing."
                 />
               </p>
             </Fragment>

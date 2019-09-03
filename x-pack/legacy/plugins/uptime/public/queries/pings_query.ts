@@ -26,11 +26,19 @@ query PingList(
     location: $location
   ) {
       total
+      locations
       pings {
+        id
         timestamp
         http {
           response {
-            status_code
+            status_code 
+            body {
+              bytes
+              hash
+              content
+              content_bytes
+            }
           }
         }
         error {
@@ -47,6 +55,11 @@ query PingList(
           scheme
           status
           type
+        }
+        observer {
+          geo {
+            name
+          }
         }
       }
     }

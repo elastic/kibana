@@ -22,11 +22,12 @@ import {
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
 import { RestoreList } from './restore_list';
+import { PolicyList } from './policy_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -68,6 +69,15 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
+      id: 'policies',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+    },
+    {
       id: 'restore_status',
       name: (
         <FormattedMessage
@@ -82,10 +92,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     history.push(`${BASE_PATH}/${newSection}`);
   };
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('home');
-  }, []);
+    breadcrumbService.setBreadcrumbs(section || 'home');
+    docTitleService.setTitle(section || 'home');
+  }, [section]);
 
   return (
     <EuiPageBody>
@@ -158,6 +169,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             component={SnapshotList}
           />
           <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
+          <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

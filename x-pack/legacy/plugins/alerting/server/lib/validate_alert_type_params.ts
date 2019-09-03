@@ -15,9 +15,10 @@ export function validateAlertTypeParams<T extends Record<string, any>>(
   if (!validator) {
     return params;
   }
-  const { error, value } = validator.validate(params);
-  if (error) {
-    throw Boom.badRequest(`alertTypeParams invalid: ${error.message}`);
+
+  try {
+    return validator.validate(params);
+  } catch (err) {
+    throw Boom.badRequest(`alertTypeParams invalid: ${err.message}`);
   }
-  return value;
 }

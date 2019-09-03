@@ -28,7 +28,7 @@ exports[`FilterBar snapshot suggestions not shown 1`] = `
       onClick={[Function]}
       onKeyDown={[Function]}
       onKeyUp={[Function]}
-      placeholder="Filter by influencer fields… (E.g. Test placeholder)"
+      placeholder="Test placeholder"
       spellCheck={false}
       style={
         Object {
@@ -93,7 +93,7 @@ exports[`FilterBar snapshot suggestions shown 1`] = `
       onClick={[Function]}
       onKeyDown={[Function]}
       onKeyUp={[Function]}
-      placeholder="Filter by influencer fields… (E.g. Test placeholder)"
+      placeholder="Test placeholder"
       spellCheck={false}
       style={
         Object {

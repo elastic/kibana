@@ -21,6 +21,7 @@ export default function ({ getService }) {
         min: '2017-08-23T21:29:35Z',
         max: '2017-08-23T21:47:25Z'
       };
+      const codePaths = ['all'];
 
       before('load clusters archive', () => {
         return esArchiver.load(archive);
@@ -34,7 +35,7 @@ export default function ({ getService }) {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters/y1qOsQPiRrGtmdEuM3APJw')
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange })
+          .send({ timeRange, codePaths })
           .expect(200);
         expect(body).to.eql(overviewFixture);
       });

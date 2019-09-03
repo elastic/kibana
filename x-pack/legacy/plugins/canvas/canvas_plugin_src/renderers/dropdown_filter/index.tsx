@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
-import { RendererFactory } from '../types';
+import { RendererFactory } from '../../../types';
 import { DropdownFilter } from './component';
 
 interface Config {

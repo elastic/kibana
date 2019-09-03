@@ -46,6 +46,7 @@ describe('Spaces Public API', () => {
       id: 'my-space-id',
       name: 'my new space',
       description: 'with a description',
+      disabledFeatures: ['foo'],
     };
 
     const { mockSavedObjectsRepository, response } = await request('POST', '/api/spaces/space', {
@@ -58,7 +59,7 @@ describe('Spaces Public API', () => {
     expect(mockSavedObjectsRepository.create).toHaveBeenCalledTimes(1);
     expect(mockSavedObjectsRepository.create).toHaveBeenCalledWith(
       'space',
-      { name: 'my new space', description: 'with a description' },
+      { name: 'my new space', description: 'with a description', disabledFeatures: ['foo'] },
       { id: 'my-space-id' }
     );
   });
@@ -101,5 +102,27 @@ describe('Spaces Public API', () => {
       message: 'A space with the identifier a-space already exists.',
       statusCode: 409,
     });
+  });
+
+  test('POST /space should not require disabledFeatures to be specified', async () => {
+    const payload = {
+      id: 'my-space-id',
+      name: 'my new space',
+      description: 'with a description',
+    };
+
+    const { mockSavedObjectsRepository, response } = await request('POST', '/api/spaces/space', {
+      payload,
+    });
+
+    const { statusCode } = response;
+
+    expect(statusCode).toEqual(200);
+    expect(mockSavedObjectsRepository.create).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepository.create).toHaveBeenCalledWith(
+      'space',
+      { name: 'my new space', description: 'with a description', disabledFeatures: [] },
+      { id: 'my-space-id' }
+    );
   });
 });

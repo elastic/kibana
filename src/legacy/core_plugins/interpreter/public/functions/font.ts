@@ -49,7 +49,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
     aliases: [],
     type: 'style',
     help: i18n.translate('interpreter.functions.fontHelpText', {
-      defaultMessage: 'Create a font style',
+      defaultMessage: 'Create a font style.',
     }),
     context: {
       types: ['null'],
@@ -58,14 +58,14 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       align: {
         default: 'left',
         help: i18n.translate('interpreter.functions.font.args.alignHelpText', {
-          defaultMessage: 'Horizontal text alignment',
+          defaultMessage: 'The horizontal text alignment.',
         }),
         options: Object.values(TextAlignment),
         types: ['string'],
       },
       color: {
         help: i18n.translate('interpreter.functions.font.args.colorHelpText', {
-          defaultMessage: 'Text color',
+          defaultMessage: 'The text color.',
         }),
         types: ['string'],
       },
@@ -82,7 +82,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       italic: {
         default: false,
         help: i18n.translate('interpreter.functions.font.args.italicHelpText', {
-          defaultMessage: 'Italicize, true or false',
+          defaultMessage: 'Italicize the text?',
         }),
         options: [true, false],
         types: ['boolean'],
@@ -90,27 +90,21 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       lHeight: {
         aliases: ['lineHeight'],
         help: i18n.translate('interpreter.functions.font.args.lHeightHelpText', {
-          defaultMessage: 'Line height ({px})',
-          values: {
-            px: 'px',
-          },
+          defaultMessage: 'The line height in pixels',
         }),
         types: ['number', 'null'],
       },
       size: {
         default: 14,
         help: i18n.translate('interpreter.functions.font.args.sizeHelpText', {
-          defaultMessage: 'Font size ({px})',
-          values: {
-            px: 'px',
-          },
+          defaultMessage: 'The font size in pixels',
         }),
         types: ['number'],
       },
       underline: {
         default: false,
         help: i18n.translate('interpreter.functions.font.args.underlineHelpText', {
-          defaultMessage: 'Underline the text, true or false',
+          defaultMessage: 'Underline the text?',
         }),
         options: [true, false],
         types: ['boolean'],
@@ -118,9 +112,13 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       weight: {
         default: 'normal',
         help: i18n.translate('interpreter.functions.font.args.weightHelpText', {
-          defaultMessage: 'Set the font weight, e.g. {examples}',
+          defaultMessage: 'The font weight. For example, {list}, or {end}.',
           values: {
-            examples: Object.values(FontWeight).join(', '),
+            list: Object.values(FontWeight)
+              .slice(0, -1)
+              .map(weight => `\`"${weight}"\``)
+              .join(', '),
+            end: `\`"${Object.values(FontWeight).slice(-1)[0]}"\``,
           },
         }),
         options: Object.values(FontWeight),

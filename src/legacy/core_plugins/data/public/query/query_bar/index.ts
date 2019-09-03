@@ -22,10 +22,4 @@ export { fromUser } from './lib/from_user';
 export { toUser } from './lib/to_user';
 export { getQueryLog } from './lib/get_query_log';
 
-// @ts-ignore
-export { setupDirective } from './directive';
-
-export interface Query {
-  query: string | { [key: string]: any };
-  language: string;
-}
+export { Query } from '../../../../../../plugins/data/common/query/types';

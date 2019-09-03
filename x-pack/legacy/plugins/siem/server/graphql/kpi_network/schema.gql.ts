@@ -21,6 +21,7 @@ export const kpiNetworkSchema = gql`
     uniqueDestinationPrivateIpsHistogram: [KpiNetworkHistogramData!]
     dnsQueries: Float
     tlsHandshakes: Float
+    inspect: Inspect
   }
 
   extend type Source {

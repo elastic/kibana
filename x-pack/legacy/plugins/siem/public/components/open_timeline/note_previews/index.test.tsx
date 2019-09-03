@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
 describe('NotePreviews', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
   let note1updated: number;
   let note2updated: number;
@@ -33,7 +36,11 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={hasNotes[0].notes} />);
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <NotePreviews isModal={false} notes={hasNotes[0].notes} />
+      </ThemeProvider>
+    );
 
     hasNotes[0].notes!.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -43,7 +50,11 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews isModal={true} notes={hasNotes[0].notes} />);
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <NotePreviews isModal={true} notes={hasNotes[0].notes} />
+      </ThemeProvider>
+    );
 
     hasNotes[0].notes!.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -90,7 +101,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+      </ThemeProvider>
+    );
 
     expect(
       wrapper
@@ -122,7 +137,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+      </ThemeProvider>
+    );
 
     expect(
       wrapper
@@ -153,7 +172,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+      </ThemeProvider>
+    );
 
     expect(
       wrapper

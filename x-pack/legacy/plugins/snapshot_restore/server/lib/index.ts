@@ -9,5 +9,5 @@ export {
   serializeRepositorySettings,
 } from './repository_serialization';
 export { cleanSettings } from './clean_settings';
-export { deserializeSnapshotDetails } from './snapshot_serialization';
+export { getManagedRepositoryName } from './get_managed_repository_name';
 export { deserializeRestoreShard } from './restore_serialization';

@@ -15,8 +15,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get, has } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { get } from 'lodash';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
 
@@ -35,15 +35,11 @@ interface State {
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: JobInfo) => {
+const getDimensions = (info: JobInfo): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
   if (width && height) {
-    return (
-      <Fragment>
-        Width: {width} x Height: {height}
-      </Fragment>
-    );
+    return `Width: ${width} x Height: ${height}`;
   }
   return NA;
 };
@@ -75,52 +71,64 @@ export class ReportInfoButton extends Component<Props, State> {
       return null;
     }
 
-    const jobType = get(info, 'jobtype', NA);
-    const processedBy =
-      has(info, 'kibana_name') && has(info, 'kibana_id')
-        ? `${info.kibana_name} (${info.kibana_id})`
-        : UNKNOWN;
+    const jobType = info.jobtype || NA;
 
-    // TODO queue method (clicked UI, watcher, etc)
-    const jobInfoParts = {
+    interface JobInfo {
+      title: string;
+      description: string;
+    }
+
+    interface JobInfoMap {
+      [thing: string]: JobInfo[];
+    }
+
+    const attempts = info.attempts ? info.attempts.toString() : NA;
+    const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
+    const priority = info.priority ? info.priority.toString() : NA;
+    const timeout = info.timeout ? info.timeout.toString() : NA;
+
+    const jobInfoParts: JobInfoMap = {
       datetimes: [
         {
           title: 'Created By',
-          description: get(info, 'created_by', NA),
+          description: info.created_by || NA,
         },
         {
           title: 'Created At',
-          description: get(info, 'created_at', NA),
+          description: info.created_at || NA,
         },
         {
           title: 'Started At',
-          description: get(info, 'started_at', NA),
+          description: info.started_at || NA,
         },
         {
           title: 'Completed At',
-          description: get(info, 'completed_at', NA),
+          description: info.completed_at || NA,
         },
         {
           title: 'Processed By',
-          description: processedBy,
+          description:
+            info.kibana_name && info.kibana_id
+              ? `${info.kibana_name} (${info.kibana_id})`
+              : UNKNOWN,
         },
         {
           title: 'Browser Timezone',
-          description: get(info, 'payload.browserTimezone', NA),
+          description: get(info, 'payload.browserTimezone') || NA,
         },
       ],
       payload: [
         {
           title: 'Title',
-          description: get(info, 'payload.title', NA),
+          description: get(info, 'payload.title') || NA,
         },
         {
           title: 'Type',
-          description: get(info, 'payload.type', NA),
+          description: get(info, 'payload.type') || NA,
         },
         {
           title: 'Layout',
-          description: get(info, 'meta.layout', NA),
+          description: get(info, 'meta.layout') || NA,
         },
         {
           title: 'Dimensions',
@@ -142,28 +150,28 @@ export class ReportInfoButton extends Component<Props, State> {
       status: [
         {
           title: 'Attempts',
-          description: get(info, 'attempts', NA),
+          description: attempts,
         },
         {
           title: 'Max Attempts',
-          description: get(info, 'max_attempts', NA),
+          description: maxAttempts,
         },
         {
           title: 'Priority',
-          description: get(info, 'priority', NA),
+          description: priority,
         },
         {
           title: 'Timeout',
-          description: get(info, 'timeout', NA),
+          description: timeout,
         },
         {
           title: 'Status',
-          description: get(info, 'status', NA),
+          description: info.status || NA,
         },
         {
           title: 'Browser Type',
           description: USES_HEADLESS_JOB_TYPES.includes(jobType)
-            ? get(info, 'browser_type', UNKNOWN)
+            ? info.browser_type || UNKNOWN
             : NA,
         },
       ],

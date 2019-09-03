@@ -33,9 +33,12 @@ export const startJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
-      defaultMessage: 'Error starting rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
+        defaultMessage: 'Error starting rollup jobs',
+      })
+    );
   }
 
   dispatch({
@@ -57,9 +60,12 @@ export const stopJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.stopJobsAction.errorTitle', {
-      defaultMessage: 'Error stopping rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.stopJobsAction.errorTitle', {
+        defaultMessage: 'Error stopping rollup jobs',
+      })
+    );
   }
 
   dispatch({

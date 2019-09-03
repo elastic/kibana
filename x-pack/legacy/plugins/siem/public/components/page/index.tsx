@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { injectGlobal } from 'styled-components';
-import { getOr } from 'lodash/fp';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
@@ -32,6 +31,8 @@ export const PageContainer = styled.div`
   margin: 0px;
 `;
 
+PageContainer.displayName = 'PageContainer';
+
 export const PageContent = styled.div`
   flex: 1 1 auto;
   height: 100%;
@@ -41,9 +42,13 @@ export const PageContent = styled.div`
   margin-top: 62px;
 `;
 
+PageContent.displayName = 'PageContent';
+
 export const FlexPage = styled(EuiPage)`
   flex: 1 0 0;
 `;
+
+FlexPage.displayName = 'FlexPage';
 
 export const PageHeader = styled.div`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
@@ -53,6 +58,8 @@ export const PageHeader = styled.div`
   width: 100vw;
   position: fixed;
 `;
+
+PageHeader.displayName = 'PageHeader';
 
 export const FooterContainer = styled.div`
   bottom: 0;
@@ -68,6 +75,8 @@ export const FooterContainer = styled.div`
   border-top: 1px solid #d3dae6;
 `;
 
+FooterContainer.displayName = 'FooterContainer';
+
 export const PaneScrollContainer = styled.div`
   height: 100%;
   overflow-y: scroll;
@@ -76,15 +85,21 @@ export const PaneScrollContainer = styled.div`
   }
 `;
 
+PaneScrollContainer.displayName = 'PaneScrollContainer';
+
 export const Pane = styled.div`
   height: 100%;
   overflow: hidden;
   user-select: none;
 `;
 
+Pane.displayName = 'Pane';
+
 export const PaneHeader = styled.div`
   display: flex;
 `;
+
+PaneHeader.displayName = 'PaneHeader';
 
 export const Pane1FlexContent = styled.div`
   display: flex;
@@ -92,6 +107,8 @@ export const Pane1FlexContent = styled.div`
   flex-wrap: wrap;
   height: 100%;
 `;
+
+Pane1FlexContent.displayName = 'Pane1FlexContent';
 
 // Ref: https://github.com/elastic/eui/issues/1655
 // const Badge = styled(EuiBadge)`
@@ -101,9 +118,13 @@ export const CountBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ marginLeft: '5px' }} />
 );
 
+CountBadge.displayName = 'CountBadge';
+
 export const Spacer = styled.span`
   margin-left: 5px;
 `;
+
+Spacer.displayName = 'Spacer';
 
 // Ref: https://github.com/elastic/eui/issues/1655
 // export const Badge = styled(EuiBadge)`
@@ -113,21 +134,23 @@ export const Badge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
 );
 
+Badge.displayName = 'Badge';
+
 export const MoreRowItems = styled(EuiIcon)`
   margin-left: 5px;
 `;
 
+MoreRowItems.displayName = 'MoreRowItems';
+
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
+
+  .euiButtonIcon {
+    position: absolute;
+    right: ${props => props.theme.eui.euiSizeM};
+    top: 6px;
+    z-index: 2;
+  }
 `;
 
-export const LoadingOverlay = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -4px 5px;
-  height: 100%;
-  opacity: 0.7;
-  width: calc(100% - 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
-`;
+OverviewWrapper.displayName = 'OverviewWrapper';

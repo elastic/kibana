@@ -7,25 +7,25 @@
 import { i18n } from '@kbn/i18n';
 import { rounddate } from '../../functions/common/rounddate';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { MOMENTJS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof rounddate>> = {
   help: i18n.translate('xpack.canvas.functions.rounddateHelpText', {
     defaultMessage:
-      'Round {ms} since epoch using a {moment} formatting string. Returns {ms} since epoch',
+      'Uses a {MOMENTJS} formatting string to round milliseconds since epoch, and returns milliseconds since epoch.',
     values: {
-      ms: 'ms',
-      moment: 'MomentJS',
+      MOMENTJS,
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
       defaultMessage:
-        '{moment} format with which to bucket (See {url}). For example "{example}" would round to the month',
+        'The {MOMENTJS} format to use for bucketing. For example, {example} would round each date to months. See {url}.',
       values: {
-        moment: 'MomentJS',
+        example: '`"YYYY-MM"`',
+        MOMENTJS,
         url: 'https://momentjs.com/docs/#/displaying/',
-        example: 'YYYY-MM',
       },
     }),
   },

@@ -8,3 +8,7 @@ import { i18n } from '@kbn/i18n';
 export const statusTitle = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.statusTitle', {
   defaultMessage: `Migration status`
 });
+
+export const statusTitleNewUser = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.statusTitleNewUser', {
+  defaultMessage: `Monitoring status`
+});

@@ -528,6 +528,22 @@
         "description": "",
         "fields": [
           {
+            "name": "code",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "message",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pinnedEventId",
             "description": "",
             "args": [],
@@ -670,7 +686,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -717,7 +737,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -985,7 +1009,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1217,7 +1245,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1289,73 +1321,6 @@
             "deprecationReason": null
           },
           {
-            "name": "DomainFirstLastSeen",
-            "description": "",
-            "args": [
-              {
-                "name": "id",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "ip",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "domainName",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "flowTarget",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "defaultIndex",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                    }
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "FirstLastSeenDomain", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "Tls",
             "description": "",
             "args": [
@@ -1387,7 +1352,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1480,7 +1449,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1713,22 +1686,12 @@
                 "defaultValue": null
               },
               {
-                "name": "flowDirection",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowDirection", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "flowTarget",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "FlowTargetNew", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -1738,7 +1701,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1825,7 +1792,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1998,7 +1969,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -2350,6 +2325,14 @@
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "format",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -2400,13 +2383,13 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "PaginationInput",
+        "name": "PaginationInputPaginated",
         "description": "",
         "fields": null,
         "inputFields": [
           {
-            "name": "limit",
-            "description": "The limit parameter allows you to configure the maximum amount of items to be returned",
+            "name": "activePage",
+            "description": "The activePage parameter defines the page of results you want to fetch",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -2415,15 +2398,33 @@
             "defaultValue": null
           },
           {
-            "name": "cursor",
-            "description": "The cursor parameter defines the next result you want to fetch",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "name": "cursorStart",
+            "description": "The cursorStart parameter defines the start of the results to be displayed",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           },
           {
-            "name": "tiebreaker",
-            "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "name": "fakePossibleCount",
+            "description": "The fakePossibleCount parameter determines the total count in order to show 5 additional pages",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "querySize",
+            "description": "The querySize parameter is the number of items to be returned",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
@@ -2475,8 +2476,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3028,22 +3037,93 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PageInfo",
+        "name": "PageInfoPaginated",
         "description": "",
         "fields": [
           {
-            "name": "endCursor",
+            "name": "activePage",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "hasNextPage",
+            "name": "fakeTotalCount",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "showMorePagesIndicator",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Inspect",
+        "description": "",
+        "fields": [
+          {
+            "name": "dsl",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "response",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3090,22 +3170,6 @@
         "description": "",
         "fields": [
           {
-            "name": "kpiEventType",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "OBJECT", "name": "KpiItem", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "edges",
             "description": "",
             "args": [],
@@ -3144,39 +3208,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "KpiItem",
-        "description": "",
-        "fields": [
-          {
-            "name": "value",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "count",
+            "name": "inspect",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5165,6 +5206,39 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "PaginationInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "limit",
+            "description": "The limit parameter allows you to configure the maximum amount of items to be returned",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "cursor",
+            "description": "The cursor parameter defines the next result you want to fetch",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "tiebreaker",
+            "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "TimelineData",
         "description": "",
@@ -5210,6 +5284,14 @@
               "name": null,
               "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5350,6 +5432,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PageInfo",
+        "description": "",
+        "fields": [
+          {
+            "name": "endCursor",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasNextPage",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "TimelineDetailsData",
         "description": "",
         "fields": [
@@ -5368,6 +5477,14 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -5381,47 +5498,7 @@
         "description": "",
         "fields": [
           {
-            "name": "category",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "example",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "field",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "type",
             "description": "",
             "args": [],
             "type": {
@@ -5522,6 +5599,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5629,8 +5714,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5709,6 +5802,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "CloudFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5821,6 +5922,14 @@
         "description": "",
         "fields": [
           {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "firstSeen",
             "description": "",
             "args": [],
@@ -5890,6 +5999,14 @@
             "type": { "kind": "OBJECT", "name": "Overview", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -5954,23 +6071,34 @@
         "description": "",
         "fields": [
           {
-            "name": "as_org",
+            "name": "number",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "asn",
+            "name": "organization",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemOrganization", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
-          },
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AutonomousSystemOrganization",
+        "description": "",
+        "fields": [
           {
-            "name": "ip",
+            "name": "name",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -6137,8 +6265,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -6399,33 +6535,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "FirstLastSeenDomain",
-        "description": "",
-        "fields": [
-          {
-            "name": "firstSeen",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "lastSeen",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
         "name": "TlsSortField",
         "description": "",
@@ -6512,8 +6621,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -6753,8 +6870,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -6969,6 +7094,14 @@
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7127,6 +7260,14 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7261,11 +7402,37 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "FlowTargetNew",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "destination",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "source", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {
@@ -7307,14 +7474,31 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "bytes", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
-            "name": "packets",
+            "name": "bytes_in",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "ipCount", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "bytes_out",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "flows", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "destination_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
@@ -7362,8 +7546,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -7422,18 +7614,10 @@
             "deprecationReason": null
           },
           {
-            "name": "timestamp",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "source",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNFlowItemSource", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7441,23 +7625,7 @@
             "name": "destination",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "client",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "server",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNFlowItemDestination", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7477,14 +7645,14 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TopNFlowItem",
+        "name": "TopNFlowItemSource",
         "description": "",
         "fields": [
           {
-            "name": "count",
+            "name": "autonomous_system",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemItem", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7511,6 +7679,151 @@
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flows",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "destination_ips",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AutonomousSystemItem",
+        "description": "",
+        "fields": [
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "number",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "GeoItem",
+        "description": "",
+        "fields": [
+          {
+            "name": "geo",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoEcsFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flowTarget",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "FlowTarget", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TopNFlowItemDestination",
+        "description": "",
+        "fields": [
+          {
+            "name": "autonomous_system",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "domain",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ip",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flows",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7524,7 +7837,7 @@
         "description": "",
         "fields": [
           {
-            "name": "bytes",
+            "name": "bytes_in",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -7532,34 +7845,10 @@
             "deprecationReason": null
           },
           {
-            "name": "packets",
+            "name": "bytes_out",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "transport",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "direction",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "ENUM", "name": "NetworkDirectionEcs", "ofType": null }
-              }
-            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -7685,8 +7974,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -7773,14 +8070,6 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "timestamp",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7874,6 +8163,14 @@
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7949,6 +8246,14 @@
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -8000,8 +8305,16 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -9660,6 +9973,22 @@
         "description": "",
         "fields": [
           {
+            "name": "code",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "message",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "savedObjectId",
             "description": "",
             "args": [],
@@ -10393,6 +10722,69 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "EventsTimelineData",
+        "description": "",
+        "fields": [
+          {
+            "name": "edges",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "EcsEdges", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inspect",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Inspect", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {

@@ -111,11 +111,12 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   }
 
   execute_precommit_hook() {
-    node scripts/precommit_hook
+    node scripts/precommit_hook || return 1
+
     PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
     if [ -x "\${PRECOMMIT_FILE}" ]; then
       echo "Executing local precommit hook found in \${PRECOMMIT_FILE}"
-      "$PRECOMMIT_FILE"
+      "$PRECOMMIT_FILE" || return 1
     fi
   }
 

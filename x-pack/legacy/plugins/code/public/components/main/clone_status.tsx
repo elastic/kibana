@@ -5,8 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { CloneProgress } from '../../../model';
 
 interface Props {
@@ -17,20 +20,38 @@ interface Props {
 
 export const CloneStatus = (props: Props) => {
   const { progress: progressRate, cloneProgress, repoName } = props;
-  let progress = `Receiving objects: ${progressRate.toFixed(2)}%`;
+  let progress = i18n.translate(
+    'xpack.code.mainPage.content.cloneStatus.progress.receivingRateOnlyText',
+    {
+      defaultMessage: 'Receiving objects: {progressRate}%',
+      values: { progressRate: progressRate.toFixed(2) },
+    }
+  );
   if (progressRate < 0) {
-    progress = 'Clone Failed';
+    progress = i18n.translate('xpack.code.mainPage.content.cloneStatus.progress.cloneFailedText', {
+      defaultMessage: 'Clone Failed',
+    });
   } else if (cloneProgress) {
     const { receivedObjects, totalObjects, indexedObjects } = cloneProgress;
 
     if (receivedObjects === totalObjects) {
-      progress = `Indexing objects: ${((indexedObjects * 100) / totalObjects).toFixed(
-        2
-      )}% (${indexedObjects}/${totalObjects})`;
+      progress = i18n.translate('xpack.code.mainPage.content.cloneStatus.progress.indexingText', {
+        defaultMessage: 'Indexing objects: {progressRate}% {indexedObjects}/{totalObjects}',
+        values: {
+          progressRate: ((indexedObjects * 100) / totalObjects).toFixed(2),
+          indexedObjects,
+          totalObjects,
+        },
+      });
     } else {
-      progress = `Receiving objects: ${((receivedObjects * 100) / totalObjects).toFixed(
-        2
-      )}% (${receivedObjects}/${totalObjects})`;
+      progress = i18n.translate('xpack.code.mainPage.content.cloneStatus.progress.receivingText', {
+        defaultMessage: 'Receiving objects: {progressRate}% {receivedObjects}/{totalObjects}',
+        values: {
+          progressRate: ((receivedObjects * 100) / totalObjects).toFixed(2),
+          receivedObjects,
+          totalObjects,
+        },
+      });
     }
   }
   return (
@@ -39,13 +60,20 @@ export const CloneStatus = (props: Props) => {
       <EuiSpacer size="xxl" />
       <EuiFlexItem grow={false}>
         <EuiText style={{ fontSize: theme.euiSizeXXL, color: '#1A1A1A' }}>
-          {repoName} is cloning
+          {repoName}{' '}
+          <FormattedMessage
+            id="xpack.code.mainPage.content.cloneStatus.isCloningText"
+            defaultMessage="is cloning"
+          />
         </EuiText>
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiText style={{ fontSize: theme.euiSizeM, color: '#69707D' }}>
-          Your project will be available when this process is complete
+          <FormattedMessage
+            id="xpack.code.mainPage.content.cloneStatus.yourProjectWillBeAvailableText"
+            defaultMessage="Your project will be available when this process is complete"
+          />
         </EuiText>
       </EuiFlexItem>
       <EuiSpacer size="xl" />

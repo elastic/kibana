@@ -33,16 +33,14 @@ interface SaveOptions {
 }
 
 interface Props {
-  onSave: (
-    {
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      newTimeRestore,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }: SaveOptions
-  ) => void;
+  onSave: ({
+    newTitle,
+    newDescription,
+    newCopyOnSave,
+    newTimeRestore,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+  }: SaveOptions) => void;
   onClose: () => void;
   title: string;
   description: string;

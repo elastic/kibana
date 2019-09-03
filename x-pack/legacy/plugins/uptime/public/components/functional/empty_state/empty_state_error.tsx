@@ -6,13 +6,14 @@
 
 import { EuiEmptyPrompt, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
+import { GraphQLError } from 'graphql';
 
 interface EmptyStateErrorProps {
-  errorMessage?: string;
+  errors: GraphQLError[];
 }
 
-export const EmptyStateError = ({ errorMessage }: EmptyStateErrorProps) => (
+export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => (
   <EuiPanel>
     <EuiEmptyPrompt
       title={
@@ -24,7 +25,13 @@ export const EmptyStateError = ({ errorMessage }: EmptyStateErrorProps) => (
           </h3>
         </EuiTitle>
       }
-      body={<p>{errorMessage ? errorMessage : ''}</p>}
+      body={
+        <Fragment>
+          {errors.map((error: GraphQLError) => (
+            <p key={error.message}>{error.message}</p>
+          ))}
+        </Fragment>
+      }
     />
   </EuiPanel>
 );

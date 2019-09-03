@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Markdown } from 'ui/markdown/markdown';
+import { Markdown } from '../../../../../kibana_react/public';
 
 const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
 

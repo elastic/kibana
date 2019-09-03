@@ -7,17 +7,28 @@
 import { i18n } from '@kbn/i18n';
 import { filterrows } from '../../functions/common/filterrows';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE, TYPE_BOOLEAN, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {
-    defaultMessage: 'Filter rows in a datatable based on the return value of a subexpression.',
+    defaultMessage: 'Filter rows in a {DATATABLE} based on the return value of a sub-expression.',
+    values: {
+      DATATABLE,
+    },
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.filterrows.args.fnHelpText', {
       defaultMessage:
-        'An expression to pass each rows in the datatable into. The expression should return a ' +
-        'boolean. A true value will preserve the row, and a false value will remove it.',
+        'An expression to pass into each row in the {DATATABLE}. ' +
+        'The expression should return a {TYPE_BOOLEAN}. ' +
+        'A {BOOLEAN_TRUE} value preserves the row, and a {BOOLEAN_FALSE} value removes it.',
+      values: {
+        BOOLEAN_FALSE,
+        BOOLEAN_TRUE,
+        DATATABLE,
+        TYPE_BOOLEAN,
+      },
     }),
   },
 };

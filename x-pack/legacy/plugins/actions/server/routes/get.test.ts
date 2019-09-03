@@ -6,6 +6,7 @@
 
 import { createMockServer } from './_mock_server';
 import { getRoute } from './get';
+import { ActionResult } from '../types';
 
 const { server, actionsClient } = createMockServer();
 getRoute(server);
@@ -19,11 +20,11 @@ it('calls get with proper parameters', async () => {
     method: 'GET',
     url: '/api/action/1',
   };
-  const expectedResult = {
+  const expectedResult: ActionResult = {
     id: '1',
-    type: 'action',
-    attributes: {},
-    references: [],
+    actionTypeId: 'my-action-type-id',
+    config: {},
+    description: 'my action type description',
   };
 
   actionsClient.get.mockResolvedValueOnce(expectedResult);

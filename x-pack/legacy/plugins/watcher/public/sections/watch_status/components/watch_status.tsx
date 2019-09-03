@@ -80,12 +80,9 @@ export const WatchStatus = ({
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
 
-  useEffect(
-    () => {
-      chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
-    },
-    [id]
-  );
+  useEffect(() => {
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
+  }, [id]);
 
   const errorCode = getPageErrorCode(watchDetailError);
 

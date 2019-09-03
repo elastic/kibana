@@ -7,10 +7,11 @@
 import { EuiBadge, EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { LogColumnConfiguration } from '../../utils/source_configuration';
+import { useVisibilityState } from '../../utils/use_visibility_state';
 import { euiStyled } from '../../../../../common/eui_styled_components';
 
 interface SelectableColumnOption {
@@ -23,7 +24,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
   availableFields: string[];
   isDisabled?: boolean;
 }> = ({ addLogColumn, availableFields, isDisabled }) => {
-  const [isOpen, openPopover, closePopover] = usePopoverVisibilityState(false);
+  const { isVisible: isOpen, show: openPopover, hide: closePopover } = useVisibilityState(false);
 
   const availableColumnOptions = useMemo<SelectableColumnOption[]>(
     () => [
@@ -108,7 +109,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.addLogColumnButtonLabel"
-            defaultMessage="Add Column"
+            defaultMessage="Add column"
           />
         </EuiButton>
       }
@@ -144,18 +145,6 @@ const searchProps = {
 
 const selectableListProps = {
   showIcons: false,
-};
-
-const usePopoverVisibilityState = (initialState: boolean) => {
-  const [isOpen, setIsOpen] = useState(initialState);
-
-  const closePopover = useCallback(() => setIsOpen(false), []);
-  const openPopover = useCallback(() => setIsOpen(true), []);
-
-  return useMemo<[typeof isOpen, typeof openPopover, typeof closePopover]>(
-    () => [isOpen, openPopover, closePopover],
-    [isOpen, openPopover, closePopover]
-  );
 };
 
 const SystemColumnBadge: React.FunctionComponent = () => (

@@ -23,6 +23,7 @@ export const kpiHostsSchema = gql`
     uniqueSourceIpsHistogram: [KpiHostHistogramData!]
     uniqueDestinationIps: Float
     uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
+    inspect: Inspect
   }
 
   type KpiHostDetailsData {
@@ -34,6 +35,7 @@ export const kpiHostsSchema = gql`
     uniqueSourceIpsHistogram: [KpiHostHistogramData!]
     uniqueDestinationIps: Float
     uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
+    inspect: Inspect
   }
 
   extend type Source {

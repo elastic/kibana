@@ -25,7 +25,7 @@ export default function ({ getPageObjects }) {
   describe('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
-    describe('create and delete', async function () {
+    describe('create and delete', function () {
 
       before(async function () {
         await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -35,7 +35,6 @@ export default function ({ getPageObjects }) {
       it('create new viz', async function () {
         // type markdown is used for simplicity
         await PageObjects.visualize.createSimpleMarkdownViz(vizName);
-
         await PageObjects.visualize.gotoVisualizationLandingPage();
         const visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(visCount).to.equal(1);

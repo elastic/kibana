@@ -59,7 +59,7 @@ describe('Filebeat Rules', () => {
         'user_agent.version': '70.0.3538',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -168,7 +168,7 @@ Array [
         'user_agent.version': '7.0',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -270,7 +270,7 @@ Array [
         'url.original': '/qos/1kbfile.txt',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[iis][error] ",
@@ -332,7 +332,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[iis][access] ",
@@ -422,7 +422,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[iis][access] ",
@@ -505,7 +505,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[iis][error] ",

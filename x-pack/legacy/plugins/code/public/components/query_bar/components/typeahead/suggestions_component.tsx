@@ -5,6 +5,9 @@
  */
 
 import { EuiFlexGroup, EuiText, EuiToken, IconType } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -53,7 +56,10 @@ export class SuggestionsComponent extends Component<Props> {
             {this.renderSuggestionGroups()}
             <Link to={this.viewMoreUrl()}>
               <div className="codeSearch__full-text-button">
-                Press ⮐ Return for Full Text Search
+                <FormattedMessage
+                  id="xpack.code.searchBar.viewFullSearchLinkText"
+                  defaultMessage="Press ⮐ Return for Full Text Search"
+                />
               </div>
             </Link>
           </div>
@@ -109,15 +115,24 @@ export class SuggestionsComponent extends Component<Props> {
               </EuiText>
             </EuiFlexGroup>
             <div className="codeSearch-suggestion__group-result">
-              {total} Result
-              {total === 1 ? '' : 's'}
+              <FormattedMessage
+                id="xpack.code.searchBar.resultCountText"
+                defaultMessage="{total} {total, plural, one {Result} other {Results}}"
+                values={{ total }}
+              />
             </div>
           </EuiFlexGroup>
         );
 
         const viewMore = (
           <div className="codeSearch-suggestion__link">
-            <Link to={this.viewMoreUrl()}>View More</Link>
+            <Link to={this.viewMoreUrl()}>
+              {' '}
+              <FormattedMessage
+                id="xpack.code.searchBar.viewMoreLinkText"
+                defaultMessage="View More"
+              />
+            </Link>
           </div>
         );
 
@@ -153,11 +168,17 @@ export class SuggestionsComponent extends Component<Props> {
   private getGroupTitle(type: AutocompleteSuggestionType): string {
     switch (type) {
       case AutocompleteSuggestionType.FILE:
-        return 'Files';
+        return i18n.translate('xpack.code.searchBar.fileGroupTitle', {
+          defaultMessage: 'Files',
+        });
       case AutocompleteSuggestionType.REPOSITORY:
-        return 'Repos';
+        return i18n.translate('xpack.code.searchBar.repositorylGroupTitle', {
+          defaultMessage: 'Repos',
+        });
       case AutocompleteSuggestionType.SYMBOL:
-        return 'Symbols';
+        return i18n.translate('xpack.code.searchBar.symbolGroupTitle', {
+          defaultMessage: 'Symbols',
+        });
     }
   }
 

@@ -4,33 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAvatar,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import * as React from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
-import { AssociateNote, UpdateNote } from '../../notes/helpers';
-import { SuperDatePicker } from '../../super_date_picker';
-
-import { Description, Name, NewTimeline, NotesButton, StarIcon } from './helpers';
-import {
-  DatePicker,
-  PropertiesLeft,
-  PropertiesRight,
-  TimelineProperties,
-  LockIconContainer,
-} from './styles';
-import * as i18n from './translations';
-import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
 import { InputsModelId } from '../../../store/inputs/constants';
+import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
+import { TimelineProperties } from './styles';
+import { PropertiesRight } from './properties_right';
+import { PropertiesLeft } from './properties_left';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -54,22 +38,31 @@ const Avatar = styled(EuiAvatar)`
   margin-left: 5px;
 `;
 
+Avatar.displayName = 'Avatar';
+
 const DescriptionPopoverMenuContainer = styled.div`
   margin-top: 15px;
 `;
+
+DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
 
 const SettingsIcon = styled(EuiIcon)`
   margin-left: 4px;
   cursor: pointer;
 `;
 
+SettingsIcon.displayName = 'SettingsIcon';
+
 const HiddenFlexItem = styled(EuiFlexItem)`
   display: none;
 `;
 
+HiddenFlexItem.displayName = 'HiddenFlexItem';
+
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
+  isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
   title: string;
@@ -136,6 +129,7 @@ export class Properties extends React.PureComponent<Props, State> {
       description,
       getNotesByIds,
       isFavorite,
+      isDataInTimeline,
       isDatepickerLocked,
       title,
       noteIds,
@@ -157,165 +151,53 @@ export class Properties extends React.PureComponent<Props, State> {
       noteWidth -
       settingsWidth;
 
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <TimelineProperties data-test-subj="timeline-properties" width={width}>
-        <PropertiesLeft alignItems="center" data-test-subj="properties-left" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <StarIcon
-              isFavorite={isFavorite}
-              timelineId={timelineId}
-              updateIsFavorite={updateIsFavorite}
-            />
-          </EuiFlexItem>
-
-          <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
-
-          {width >= showDescriptionThreshold ? (
-            <EuiFlexItem grow={2}>
-              <Description
-                description={description}
-                timelineId={timelineId}
-                updateDescription={updateDescription}
-              />
-            </EuiFlexItem>
-          ) : null}
-
-          {width >= showNotesThreshold ? (
-            <EuiFlexItem grow={false}>
-              <NotesButton
-                animate={true}
-                associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds}
-                showNotes={this.state.showNotes}
-                size="l"
-                text={i18n.NOTES}
-                toggleShowNotes={this.onToggleShowNotes}
-                toolTip={i18n.NOTES_TOOL_TIP}
-                updateNote={updateNote}
-              />
-            </EuiFlexItem>
-          ) : null}
-
-          <EuiFlexItem grow={1}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="none"
-              data-test-subj="timeline-date-picker-container"
-            >
-              <LockIconContainer grow={false}>
-                <EuiToolTip
-                  data-test-subj="timeline-date-picker-lock-tooltip"
-                  position="top"
-                  content={
-                    isDatepickerLocked
-                      ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
-                      : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
-                  }
-                >
-                  <EuiButtonIcon
-                    data-test-subj={`timeline-date-picker-${
-                      isDatepickerLocked ? 'lock' : 'unlock'
-                    }-button`}
-                    color="primary"
-                    onClick={this.toggleLock}
-                    iconType={isDatepickerLocked ? 'lock' : 'lockOpen'}
-                    aria-label={
-                      isDatepickerLocked
-                        ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
-                        : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
-                    }
-                  />
-                </EuiToolTip>
-              </LockIconContainer>
-              <DatePicker
-                grow={1}
-                width={
-                  datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
-                }
-              >
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
-              </DatePicker>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </PropertiesLeft>
-
-        <PropertiesRight alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              anchorPosition="downRight"
-              button={
-                <SettingsIcon
-                  data-test-subj="settings-gear"
-                  type="gear"
-                  size="l"
-                  onClick={this.onButtonClick}
-                />
-              }
-              id="timelineSettingsPopover"
-              isOpen={this.state.showActions}
-              closePopover={this.onClosePopover}
-            >
-              <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <NewTimeline
-                    createTimeline={createTimeline}
-                    onClosePopover={this.onClosePopover}
-                    timelineId={timelineId}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <OpenTimelineModalButton />
-                </EuiFlexItem>
-
-                {width < showNotesThreshold ? (
-                  <EuiFlexItem grow={false}>
-                    <NotesButton
-                      animate={true}
-                      associateNote={associateNote}
-                      getNotesByIds={getNotesByIds}
-                      noteIds={noteIds}
-                      showNotes={this.state.showNotes}
-                      size="l"
-                      text={i18n.NOTES}
-                      toggleShowNotes={this.onToggleShowNotes}
-                      toolTip={i18n.NOTES_TOOL_TIP}
-                      updateNote={updateNote}
-                    />
-                  </EuiFlexItem>
-                ) : null}
-
-                {width < showDescriptionThreshold ? (
-                  <EuiFlexItem grow={false}>
-                    <DescriptionPopoverMenuContainer>
-                      <Description
-                        description={description}
-                        timelineId={timelineId}
-                        updateDescription={updateDescription}
-                      />
-                    </DescriptionPopoverMenuContainer>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiPopover>
-          </EuiFlexItem>
-
-          {title != null && title.length
-            ? usersViewing.map(user => (
-                // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
-                // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
-                <HiddenFlexItem key={user}>
-                  <EuiToolTip
-                    data-test-subj="timeline-action-pin-tool-tip"
-                    content={`${user} ${i18n.IS_VIEWING}`}
-                  >
-                    <Avatar data-test-subj="avatar" size="s" name={user} />
-                  </EuiToolTip>
-                </HiddenFlexItem>
-              ))
-            : null}
-        </PropertiesRight>
+      <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
+        <PropertiesLeft
+          isFavorite={isFavorite}
+          timelineId={timelineId}
+          updateIsFavorite={updateIsFavorite}
+          showDescription={width >= showDescriptionThreshold}
+          description={description}
+          title={title}
+          updateTitle={updateTitle}
+          updateDescription={updateDescription}
+          showNotes={this.state.showNotes}
+          showNotesFromWidth={width >= showNotesThreshold}
+          associateNote={associateNote}
+          getNotesByIds={getNotesByIds}
+          noteIds={noteIds}
+          onToggleShowNotes={this.onToggleShowNotes}
+          updateNote={updateNote}
+          isDatepickerLocked={isDatepickerLocked}
+          toggleLock={this.toggleLock}
+          datePickerWidth={
+            datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
+          }
+        />
+        <PropertiesRight
+          onButtonClick={this.onButtonClick}
+          onClosePopover={this.onClosePopover}
+          showActions={this.state.showActions}
+          createTimeline={createTimeline}
+          timelineId={timelineId}
+          isDataInTimeline={isDataInTimeline}
+          showNotesFromWidth={width < showNotesThreshold}
+          showNotes={this.state.showNotes}
+          showDescription={width < showDescriptionThreshold}
+          showUsersView={title.length > 0}
+          usersViewing={usersViewing}
+          description={description}
+          updateDescription={updateDescription}
+          associateNote={associateNote}
+          getNotesByIds={getNotesByIds}
+          noteIds={noteIds}
+          onToggleShowNotes={this.onToggleShowNotes}
+          updateNote={updateNote}
+        />
       </TimelineProperties>
     );
   }

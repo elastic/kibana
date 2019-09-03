@@ -11,14 +11,15 @@ import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
 import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult } from '../../../../../server/lib/authentication/authentication_result';
-import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
+import { AuthenticationResult, DeauthenticationResult } from '../../../../../../../../plugins/security/server';
 import { initAuthenticateApi } from '../authenticate';
-import { DeauthenticationResult } from '../../../../lib/authentication/deauthentication_result';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 describe('Authentication routes', () => {
   let serverStub;
   let hStub;
+  let loginStub;
+  let logoutStub;
 
   beforeEach(() => {
     serverStub = serverFixture();
@@ -28,14 +29,18 @@ describe('Authentication routes', () => {
       redirect: sinon.stub(),
       response: sinon.stub()
     };
+    loginStub = sinon.stub();
+    logoutStub = sinon.stub();
 
-    initAuthenticateApi(serverStub);
+    initAuthenticateApi({
+      authc: { login: loginStub, logout: logoutStub },
+      config: { authc: { providers: ['basic'] } },
+    }, serverStub);
   });
 
   describe('login', () => {
     let loginRoute;
     let request;
-    let authenticateStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -47,10 +52,6 @@ describe('Authentication routes', () => {
         headers: {},
         payload: { username: 'user', password: 'password' }
       });
-
-      authenticateStub = serverStub.plugins.security.authenticate.withArgs(
-        sinon.match(BasicCredentials.decorateRequest(request, 'user', 'password'))
-      );
     });
 
     it('correctly defines route.', async () => {
@@ -73,7 +74,7 @@ describe('Authentication routes', () => {
 
     it('returns 500 if authentication throws unhandled exception.', async () => {
       const unhandledException = new Error('Something went wrong.');
-      authenticateStub.throws(unhandledException);
+      loginStub.throws(unhandledException);
 
       return loginRoute
         .handler(request, hStub)
@@ -89,7 +90,7 @@ describe('Authentication routes', () => {
 
     it('returns 401 if authentication fails.', async () => {
       const failureReason = new Error('Something went wrong.');
-      authenticateStub.returns(Promise.resolve(AuthenticationResult.failed(failureReason)));
+      loginStub.resolves(AuthenticationResult.failed(failureReason));
 
       return loginRoute
         .handler(request, hStub)
@@ -101,9 +102,7 @@ describe('Authentication routes', () => {
     });
 
     it('returns 401 if authentication is not handled.', async () => {
-      authenticateStub.returns(
-        Promise.resolve(AuthenticationResult.notHandled())
-      );
+      loginStub.resolves(AuthenticationResult.notHandled());
 
       return loginRoute
         .handler(request, hStub)
@@ -117,14 +116,17 @@ describe('Authentication routes', () => {
     describe('authentication succeeds', () => {
 
       it(`returns user data`, async () => {
-        const user = { username: 'user' };
-        authenticateStub.returns(
-          Promise.resolve(AuthenticationResult.succeeded(user))
-        );
+        loginStub.resolves(AuthenticationResult.succeeded({ username: 'user' }));
 
         await loginRoute.handler(request, hStub);
 
         sinon.assert.calledOnce(hStub.response);
+        sinon.assert.calledOnce(loginStub);
+        sinon.assert.calledWithExactly(
+          loginStub,
+          sinon.match.instanceOf(KibanaRequest),
+          { provider: 'basic', value: { username: 'user', password: 'password' } }
+        );
       });
     });
 
@@ -155,9 +157,7 @@ describe('Authentication routes', () => {
       const request = requestFixture();
 
       const unhandledException = new Error('Something went wrong.');
-      serverStub.plugins.security.deauthenticate
-        .withArgs(request)
-        .returns(Promise.reject(unhandledException));
+      logoutStub.rejects(unhandledException);
 
       return logoutRoute
         .handler(request, hStub)
@@ -167,19 +167,22 @@ describe('Authentication routes', () => {
         });
     });
 
-    it('returns 500 if authenticator fails to deauthenticate.', async () => {
+    it('returns 500 if authenticator fails to logout.', async () => {
       const request = requestFixture();
 
       const failureReason = Boom.forbidden();
-      serverStub.plugins.security.deauthenticate
-        .withArgs(request)
-        .returns(Promise.resolve(DeauthenticationResult.failed(failureReason)));
+      logoutStub.resolves(DeauthenticationResult.failed(failureReason));
 
       return logoutRoute
         .handler(request, hStub)
         .catch((response) => {
           expect(response).to.be(Boom.boomify(failureReason));
           sinon.assert.notCalled(hStub.redirect);
+          sinon.assert.calledOnce(logoutStub);
+          sinon.assert.calledWithExactly(
+            logoutStub,
+            sinon.match.instanceOf(KibanaRequest)
+          );
         });
     });
 
@@ -199,11 +202,7 @@ describe('Authentication routes', () => {
     it('redirects user to the URL returned by authenticator.', async () => {
       const request = requestFixture();
 
-      serverStub.plugins.security.deauthenticate
-        .withArgs(request)
-        .returns(
-          Promise.resolve(DeauthenticationResult.redirectTo('https://custom.logout'))
-        );
+      logoutStub.resolves(DeauthenticationResult.redirectTo('https://custom.logout'));
 
       await logoutRoute.handler(request, hStub);
 
@@ -214,9 +213,7 @@ describe('Authentication routes', () => {
     it('redirects user to the base path if deauthentication succeeds.', async () => {
       const request = requestFixture();
 
-      serverStub.plugins.security.deauthenticate
-        .withArgs(request)
-        .returns(Promise.resolve(DeauthenticationResult.succeeded()));
+      logoutStub.resolves(DeauthenticationResult.succeeded());
 
       await logoutRoute.handler(request, hStub);
 
@@ -227,9 +224,7 @@ describe('Authentication routes', () => {
     it('redirects user to the base path if deauthentication is not handled.', async () => {
       const request = requestFixture();
 
-      serverStub.plugins.security.deauthenticate
-        .withArgs(request)
-        .returns(Promise.resolve(DeauthenticationResult.notHandled()));
+      logoutStub.resolves(DeauthenticationResult.notHandled());
 
       await logoutRoute.handler(request, hStub);
 
@@ -293,7 +288,7 @@ describe('Authentication routes', () => {
 
     it('returns 500 if authentication throws unhandled exception.', async () => {
       const unhandledException = new Error('Something went wrong.');
-      serverStub.plugins.security.authenticate.throws(unhandledException);
+      loginStub.throws(unhandledException);
 
       const response = await samlAcsRoute.handler(request, hStub);
 
@@ -308,9 +303,7 @@ describe('Authentication routes', () => {
 
     it('returns 401 if authentication fails.', async () => {
       const failureReason = new Error('Something went wrong.');
-      serverStub.plugins.security.authenticate.returns(
-        Promise.resolve(AuthenticationResult.failed(failureReason))
-      );
+      loginStub.resolves(AuthenticationResult.failed(failureReason));
 
       const response = await samlAcsRoute.handler(request, hStub);
 
@@ -321,9 +314,7 @@ describe('Authentication routes', () => {
     });
 
     it('returns 401 if authentication is not handled.', async () => {
-      serverStub.plugins.security.authenticate.returns(
-        Promise.resolve(AuthenticationResult.notHandled())
-      );
+      loginStub.resolves(AuthenticationResult.notHandled());
 
       const response = await samlAcsRoute.handler(request, hStub);
 
@@ -334,9 +325,7 @@ describe('Authentication routes', () => {
     });
 
     it('returns 401 if authentication completes with unexpected result.', async () => {
-      serverStub.plugins.security.authenticate.returns(
-        Promise.resolve(AuthenticationResult.succeeded({}))
-      );
+      loginStub.resolves(AuthenticationResult.succeeded({}));
 
       const response = await samlAcsRoute.handler(request, hStub);
 
@@ -347,9 +336,7 @@ describe('Authentication routes', () => {
     });
 
     it('redirects if required by the authentication process.', async () => {
-      serverStub.plugins.security.authenticate.returns(
-        Promise.resolve(AuthenticationResult.redirectTo('http://redirect-to/path'))
-      );
+      loginStub.resolves(AuthenticationResult.redirectTo('http://redirect-to/path'));
 
       await samlAcsRoute.handler(request, hStub);
 

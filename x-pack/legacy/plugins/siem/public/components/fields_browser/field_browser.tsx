@@ -24,36 +24,28 @@ import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types'
 import { Header } from './header';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
-
-const TOP_OFFSET = 207;
-
-const FieldsBrowserContainer = styled.div<{
-  top: number;
-  width: number;
-}>`
+const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 4px;
   padding: 8px 8px 16px 8px;
   position: absolute;
-  ${({ top }) => `top: ${top}px`};
+  top: 25px;
   ${({ width }) => `width: ${width}px`};
   z-index: 9990;
 `;
+
+FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
 
+PanesFlexGroup.displayName = 'PanesFlexGroup';
+
 type Props = Pick<
   FieldBrowserProps,
-  | 'browserFields'
-  | 'height'
-  | 'isLoading'
-  | 'onFieldSelected'
-  | 'onUpdateColumns'
-  | 'timelineId'
-  | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -120,7 +112,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
       browserFields,
       filteredBrowserFields,
       searchInput,
-      isLoading,
       isSearching,
       onCategorySelected,
       onFieldSelected,
@@ -138,12 +129,9 @@ export class FieldsBrowser extends React.PureComponent<Props> {
         onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
         isDisabled={false}
       >
-        <FieldsBrowserContainer
-          data-test-subj="fields-browser-container"
-          top={TOP_OFFSET}
-          width={width}
-        >
+        <FieldsBrowserContainer data-test-subj="fields-browser-container" width={width}>
           <Header
+            data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
             isSearching={isSearching}
             onOutsideClick={onOutsideClick}
@@ -160,7 +148,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
                 data-test-subj="left-categories-pane"
                 filteredBrowserFields={filteredBrowserFields}
                 width={CATEGORY_PANE_WIDTH}
-                isLoading={isLoading}
                 onCategorySelected={onCategorySelected}
                 onUpdateColumns={onUpdateColumns}
                 selectedCategoryId={selectedCategoryId}
@@ -173,7 +160,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
                 columnHeaders={columnHeaders}
                 data-test-subj="fields-pane"
                 filteredBrowserFields={filteredBrowserFields}
-                isLoading={isLoading}
                 onCategorySelected={onCategorySelected}
                 onFieldSelected={this.selectFieldAndHide}
                 onUpdateColumns={onUpdateColumns}

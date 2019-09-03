@@ -30,14 +30,15 @@ export const authenticationsSchema = gql`
   type AuthenticationsData {
     edges: [AuthenticationsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {
     "Gets Authentication success and failures based on a timerange"
     Authentications(
       timerange: TimerangeInput!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       filterQuery: String
       defaultIndex: [String!]!
     ): AuthenticationsData!

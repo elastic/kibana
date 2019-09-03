@@ -18,8 +18,8 @@ export async function getAnomalySeries({
   setup
 }: {
   serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
   timeSeriesDates: number[];
   setup: Setup;
 }) {

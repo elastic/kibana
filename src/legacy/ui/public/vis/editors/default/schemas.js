@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import { IndexedArray } from '../../../indexed_array';
-import { AggParams } from '../../../agg_types/agg_params';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { AggGroupNames } from './agg_groups';
 
 class Schemas {
   constructor(schemas) {
@@ -45,16 +45,12 @@ class Schemas {
         _.defaults(schema, {
           min: 0,
           max: Infinity,
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           title: schema.name,
           aggFilter: '*',
           editor: false,
           params: [],
-          deprecate: false
         });
-
-        // convert the params into a params registry
-        schema.params = new AggParams(schema.params);
 
         return schema;
       })

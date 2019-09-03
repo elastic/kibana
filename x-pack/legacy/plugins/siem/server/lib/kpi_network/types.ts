@@ -48,8 +48,3 @@ export interface KpiNetworkBody {
 export type KpiNetworkESMSearchBody = KpiNetworkBody | MSearchHeader;
 
 export type UniquePrivateAttributeQuery = 'source' | 'destination';
-
-// export interface KpiNetworkHistogram {
-//   x: string | null | undefined;
-//   y: number | null | undefined;
-// }

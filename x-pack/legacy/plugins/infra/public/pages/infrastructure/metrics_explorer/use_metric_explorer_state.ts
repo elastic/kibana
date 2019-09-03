@@ -20,9 +20,14 @@ export const useMetricsExplorerState = (
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null>(null);
-  const { options, currentTimerange, setTimeRange, setOptions } = useContext(
-    MetricsExplorerOptionsContainer.Context
-  );
+  const {
+    options,
+    currentTimerange,
+    chartOptions,
+    setChartOptions,
+    setTimeRange,
+    setOptions,
+  } = useContext(MetricsExplorerOptionsContainer.Context);
   const { loading, error, data } = useMetricsExplorerData(
     options,
     source,
@@ -32,13 +37,10 @@ export const useMetricsExplorerState = (
     refreshSignal
   );
 
-  const handleRefresh = useCallback(
-    () => {
-      setAfterKey(null);
-      setRefreshSignal(refreshSignal + 1);
-    },
-    [refreshSignal]
-  );
+  const handleRefresh = useCallback(() => {
+    setAfterKey(null);
+    setRefreshSignal(refreshSignal + 1);
+  }, [refreshSignal]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
@@ -104,6 +106,8 @@ export const useMetricsExplorerState = (
     data,
     currentTimerange,
     options,
+    chartOptions,
+    setChartOptions,
     handleAggregationChange,
     handleMetricsChange,
     handleFilterQuerySubmit,

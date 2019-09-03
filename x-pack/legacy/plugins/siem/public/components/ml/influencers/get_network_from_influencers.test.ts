@@ -28,6 +28,11 @@ describe('get_network_from_influencers', () => {
     expect(network).toEqual(null);
   });
 
+  test('returns null if the influencers are undefined', () => {
+    const network = getNetworkFromInfluencers();
+    expect(network).toEqual(null);
+  });
+
   test('returns network name of source mixed with other data', () => {
     anomalies.anomalies[0].influencers = [{ 'host.name': 'name-1' }, { 'source.ip': '127.0.0.1' }];
     const network = getNetworkFromInfluencers(anomalies.anomalies[0].influencers);

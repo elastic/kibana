@@ -38,14 +38,13 @@ import {
 } from './query';
 import { timefilter } from 'ui/timefilter';
 
-import { data } from 'plugins/data/setup';
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public/legacy';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
   'kibana',
   'kibana/config',
-  'kibana/notify',
   'ngRoute',
 ]);
 
@@ -56,7 +55,6 @@ module.directive('contextApp', function ContextApp() {
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
-      anchorType: '=',
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
@@ -111,7 +109,6 @@ function ContextAppController($scope, config, Private) {
       const { queryParameters } = this.state;
       if (
         (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorType !== queryParameters.anchorType)
         || (newQueryParameters.anchorId !== queryParameters.anchorId)
         || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
       ) {

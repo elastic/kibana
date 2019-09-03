@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { kpiHostsQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_hosts/index.gql_query';
 import { GetKpiHostsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const kpiHostsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Kpi Hosts', () => {
@@ -108,6 +108,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -211,6 +212,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -220,6 +222,4 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-// eslint-disable-next-line import/no-default-export
-export default kpiHostsTests;
+}

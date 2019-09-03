@@ -45,8 +45,8 @@ describe('SearchSource', function () {
     SearchSource = Private(SearchSourceProvider);
 
     const IndexPattern = Private(StubIndexPatternProv);
-    indexPattern = new IndexPattern('test-*', null, []);
-    indexPattern2 = new IndexPattern('test2-*', null, []);
+    indexPattern = new IndexPattern('test-*', cfg => cfg, null, []);
+    indexPattern2 = new IndexPattern('test2-*', cfg => cfg, null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
   beforeEach(() => searchRequestQueue.removeAll());

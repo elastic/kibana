@@ -9,7 +9,9 @@ exports[`disabled 1`] = `
 >
   <ValidatedDualRange
     allowEmptyRange={true}
+    compressed={false}
     disabled={true}
+    fullWidth={false}
     showInput={true}
   />
 </FormRow>
@@ -24,6 +26,8 @@ exports[`renders RangeControl 1`] = `
 >
   <ValidatedDualRange
     allowEmptyRange={true}
+    compressed={false}
+    fullWidth={false}
     id="mock-range-control"
     max={100}
     min={0}

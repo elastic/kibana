@@ -27,6 +27,7 @@ import Hapi from 'hapi';
 import * as exportMock from '../../../../core/server/saved_objects/export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
+import { createListStream } from '../../../utils/streams';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 
@@ -70,26 +71,28 @@ describe('POST /api/saved_objects/_export', () => {
         includeReferencesDeep: true,
       },
     };
-    getSortedObjectsForExport.mockResolvedValueOnce([
-      {
-        id: '1',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      },
-      {
-        id: '2',
-        type: 'search',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'index-pattern',
-            id: '1',
-          },
-        ],
-      },
-    ]);
+    getSortedObjectsForExport.mockResolvedValueOnce(
+      createListStream([
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+      ])
+    );
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));

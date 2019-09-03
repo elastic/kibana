@@ -14,9 +14,13 @@ const LinkIcon = styled(EuiIcon)`
   top: -2px;
 `;
 
+LinkIcon.displayName = 'LinkIcon';
+
 const LinkIconWithMargin = styled(LinkIcon)`
   margin-left: 5px;
 `;
+
+LinkIconWithMargin.displayName = 'LinkIconWithMargin';
 
 const color = 'subdued';
 const iconSize = 's';
@@ -40,3 +44,5 @@ export const ExternalLinkIcon = pure<{
     <LinkIcon color={color} data-test-subj="external-link-icon" size={iconSize} type={iconType} />
   )
 );
+
+ExternalLinkIcon.displayName = 'ExternalLinkIcon';

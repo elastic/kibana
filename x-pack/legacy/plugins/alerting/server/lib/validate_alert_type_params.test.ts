@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { validateAlertTypeParams } from './validate_alert_type_params';
 
 test('should return passed in params when validation not defined', () => {
@@ -12,7 +12,7 @@ test('should return passed in params when validation not defined', () => {
     {
       id: 'my-alert-type',
       name: 'My description',
-      async execute() {},
+      async executor() {},
     },
     {
       foo: true,
@@ -27,14 +27,12 @@ test('should validate and apply defaults when params is valid', () => {
       id: 'my-alert-type',
       name: 'My description',
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-            param2: Joi.string().default('default-value'),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+          param2: schema.string({ defaultValue: 'default-value' }),
+        }),
       },
-      async execute() {},
+      async executor() {},
     },
     { param1: 'value' }
   );
@@ -51,17 +49,15 @@ test('should validate and throw error when params is invalid', () => {
         id: 'my-alert-type',
         name: 'My description',
         validate: {
-          params: Joi.object()
-            .keys({
-              param1: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            param1: schema.string(),
+          }),
         },
-        async execute() {},
+        async executor() {},
       },
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });

@@ -43,11 +43,15 @@ const NotesPanel = styled(EuiPanel)`
   }
 `;
 
+NotesPanel.displayName = 'NotesPanel';
+
 const InMemoryTable = styled(EuiInMemoryTable)`
   overflow-x: hidden;
   overflow-y: auto;
   height: 220px;
 `;
+
+InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
 export class Notes extends React.PureComponent<Props, State> {

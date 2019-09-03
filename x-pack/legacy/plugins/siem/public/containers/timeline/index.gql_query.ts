@@ -14,6 +14,7 @@ export const timelineQuery = gql`
     $sortField: SortField!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -25,6 +26,10 @@ export const timelineQuery = gql`
         defaultIndex: $defaultIndex
       ) {
         totalCount
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
         pageInfo {
           endCursor {
             value

@@ -20,15 +20,15 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['search', 'url'],
+            all: ['search', 'url', 'query'],
             read: ['index-pattern'],
           },
-          ui: ['show', 'createShortUrl', 'save'],
+          ui: ['show', 'createShortUrl', 'save', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search'],
+            read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
         },
@@ -46,15 +46,15 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['visualization', 'url'],
+            all: ['visualization', 'url', 'query'],
             read: ['index-pattern', 'search'],
           },
-          ui: ['show', 'createShortUrl', 'delete', 'save'],
+          ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization'],
+            read: ['index-pattern', 'search', 'visualization', 'query'],
           },
           ui: ['show'],
         },
@@ -72,7 +72,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['dashboard', 'url'],
+            all: ['dashboard', 'url', 'query'],
             read: [
               'index-pattern',
               'search',
@@ -82,7 +82,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
               'map',
             ],
           },
-          ui: ['createNew', 'show', 'showWriteControls'],
+          ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
           savedObject: {
@@ -95,6 +95,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
               'canvas-workpad',
               'map',
               'dashboard',
+              'query',
             ],
           },
           ui: ['show'],
@@ -202,13 +203,15 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       },
       privileges: {
         all: {
+          api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: ['read', 'edit', 'delete'],
+          ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
         },
         read: {
+          api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [],
             read: [...savedObjectTypes],
@@ -220,39 +223,41 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
   ];
 };
 
-const timelionFeatures: Feature[] = [
-  {
-    id: 'timelion',
-    name: 'Timelion',
-    icon: 'timelionApp',
-    navLinkId: 'timelion',
-    app: ['timelion', 'kibana'],
-    catalogue: ['timelion'],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['timelion-sheet'],
-          read: ['index-pattern'],
-        },
-        ui: ['save'],
+const timelionFeature: Feature = {
+  id: 'timelion',
+  name: 'Timelion',
+  icon: 'timelionApp',
+  navLinkId: 'timelion',
+  app: ['timelion', 'kibana'],
+  catalogue: ['timelion'],
+  privileges: {
+    all: {
+      savedObject: {
+        all: ['timelion-sheet'],
+        read: ['index-pattern'],
       },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['index-pattern', 'timelion-sheet'],
-        },
-        ui: [],
+      ui: ['save'],
+    },
+    read: {
+      savedObject: {
+        all: [],
+        read: ['index-pattern', 'timelion-sheet'],
       },
+      ui: [],
     },
   },
-];
+};
 
 export function registerOssFeatures(
   registerFeature: (feature: Feature) => void,
-  savedObjectTypes: string[]
+  savedObjectTypes: string[],
+  includeTimelion: boolean
 ) {
-  const kibanaFeatures = buildKibanaFeatures(savedObjectTypes);
-  for (const feature of [...kibanaFeatures, ...timelionFeatures]) {
+  for (const feature of buildKibanaFeatures(savedObjectTypes)) {
     registerFeature(feature);
+  }
+
+  if (includeTimelion) {
+    registerFeature(timelionFeature);
   }
 }

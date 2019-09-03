@@ -19,6 +19,12 @@ import {
 import { State } from '../store';
 
 import { defaultHeaders } from './header';
+import {
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  DEFAULT_INTERVAL_TYPE,
+  DEFAULT_INTERVAL_VALUE,
+} from '../../common/constants';
 
 export const mockGlobalState: State = {
   app: {
@@ -31,28 +37,32 @@ export const mockGlobalState: State = {
   hosts: {
     page: {
       queries: {
-        authentications: { limit: 10 },
+        authentications: { activePage: 0, limit: 10 },
         hosts: {
+          activePage: 0,
           limit: 10,
           direction: Direction.desc,
           sortField: HostsFields.lastSeen,
         },
-        events: { limit: 10 },
-        uncommonProcesses: { limit: 10 },
+        events: { activePage: 0, limit: 10 },
+        uncommonProcesses: { activePage: 0, limit: 10 },
+        anomalies: null,
       },
       filterQuery: null,
       filterQueryDraft: null,
     },
     details: {
       queries: {
-        authentications: { limit: 10 },
+        authentications: { activePage: 0, limit: 10 },
         hosts: {
+          activePage: 0,
           limit: 10,
           direction: Direction.desc,
           sortField: HostsFields.lastSeen,
         },
-        events: { limit: 10 },
-        uncommonProcesses: { limit: 10 },
+        events: { activePage: 0, limit: 10 },
+        uncommonProcesses: { activePage: 0, limit: 10 },
+        anomalies: null,
       },
       filterQuery: null,
       filterQueryDraft: null,
@@ -61,13 +71,18 @@ export const mockGlobalState: State = {
   network: {
     page: {
       queries: {
-        topNFlow: {
+        topNFlowSource: {
+          activePage: 0,
           limit: 10,
-          flowTarget: FlowTarget.source,
-          flowDirection: FlowDirection.uniDirectional,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+        },
+        topNFlowDestination: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
         dns: {
+          activePage: 0,
           limit: 10,
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
@@ -82,15 +97,18 @@ export const mockGlobalState: State = {
       flowTarget: FlowTarget.source,
       queries: {
         domains: {
+          activePage: 0,
           limit: 10,
           flowDirection: FlowDirection.uniDirectional,
           domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
         tls: {
+          activePage: 0,
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
         users: {
+          activePage: 0,
           limit: 10,
           usersSortField: { field: UsersFields.name, direction: Direction.asc },
         },
@@ -99,20 +117,21 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['timeline'],
       query: [],
-      policy: { kind: 'manual', duration: 300000 },
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
     timeline: {
-      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['global'],
       query: [],
-      policy: { kind: 'manual', duration: 300000 },
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },
   timeline: {
+    showCallOutUnauthorizedMsg: false,
     autoSavedWarningMsg: {
       timelineId: null,
       newTimelineModel: null,

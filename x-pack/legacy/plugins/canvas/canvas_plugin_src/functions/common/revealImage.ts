@@ -9,7 +9,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { Render } from '../types';
+import { Render } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Origin {

@@ -15,15 +15,15 @@ import { PreferenceFormattedDate } from '../../../formatted_date';
 
 import * as i18n from './translations';
 
-export const getTlsColumns = (
-  tableId: string
-): [
+export type TlsColumns = [
   Columns<TlsNode>,
   Columns<TlsNode>,
   Columns<TlsNode['_id']>,
   Columns<TlsNode>,
   Columns<TlsNode>
-] => [
+];
+
+export const getTlsColumns = (tableId: string): TlsColumns => [
   {
     field: 'node',
     name: i18n.ISSUER,

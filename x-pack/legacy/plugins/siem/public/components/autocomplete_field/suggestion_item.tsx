@@ -8,7 +8,7 @@ import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-
+import styled from 'styled-components';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface SuggestionItemProps {
@@ -25,7 +25,6 @@ export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
 
   public render() {
     const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
-
     return (
       <SuggestionItemContainer
         isSelected={isSelected}
@@ -55,6 +54,8 @@ const SuggestionItemContainer = euiStyled.div<{
     props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
+SuggestionItemContainer.displayName = 'SuggestionItemContainer';
+
 const SuggestionItemField = euiStyled.div`
   align-items: center;
   cursor: pointer;
@@ -64,7 +65,9 @@ const SuggestionItemField = euiStyled.div`
   padding: ${props => props.theme.eui.euiSizeXS};
 `;
 
-const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
+SuggestionItemField.displayName = 'SuggestionItemField';
+
+const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
   background-color: ${props =>
     transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
@@ -73,12 +76,16 @@ const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: str
   width: ${props => props.theme.eui.euiSizeXL};
 `;
 
-const SuggestionItemTextField = SuggestionItemField.extend`
+SuggestionItemIconField.displayName = 'SuggestionItemIconField';
+
+const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
 
-const SuggestionItemDescriptionField = SuggestionItemField.extend`
+SuggestionItemTextField.displayName = 'SuggestionItemTextField';
+
+const SuggestionItemDescriptionField = styled(SuggestionItemField)`
   flex: 3 0 0;
 
   p {
@@ -89,6 +96,8 @@ const SuggestionItemDescriptionField = SuggestionItemField.extend`
     }
   }
 `;
+
+SuggestionItemDescriptionField.displayName = 'SuggestionItemDescriptionField';
 
 const getEuiIconType = (suggestionType: string) => {
   switch (suggestionType) {

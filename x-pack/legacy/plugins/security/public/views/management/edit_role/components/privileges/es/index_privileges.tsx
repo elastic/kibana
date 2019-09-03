@@ -14,6 +14,7 @@ import { IndexPrivilegeForm } from './index_privilege_form';
 interface Props {
   role: Role;
   indexPatterns: string[];
+  availableIndexPrivileges: string[];
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   httpClient: any;
@@ -42,7 +43,12 @@ export class IndexPrivileges extends Component<Props, State> {
   public render() {
     const { indices = [] } = this.props.role.elasticsearch;
 
-    const { indexPatterns, allowDocumentLevelSecurity, allowFieldLevelSecurity } = this.props;
+    const {
+      indexPatterns,
+      allowDocumentLevelSecurity,
+      allowFieldLevelSecurity,
+      availableIndexPrivileges,
+    } = this.props;
 
     const props = {
       indexPatterns,
@@ -60,6 +66,7 @@ export class IndexPrivileges extends Component<Props, State> {
         {...props}
         formIndex={idx}
         validator={this.props.validator}
+        availableIndexPrivileges={availableIndexPrivileges}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}

@@ -39,21 +39,10 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
 
 export class AdvancedSettingsVoiceAnnouncement extends Component {
-
-  constructor() {
-    super();
-
-    // The state's isDealying is used to prevent component updating whether the time is not over yet.
-    this.state = {
-      isDelaying: true,
-    };
-    this.delayID = null;
-  }
-
-  shouldComponentUpdate = (nextProps, nextState) => {
+  shouldComponentUpdate = (nextProps) => {
     /*
       If a user typed smth new, we should clear the previous timer
       and start another one + block component rendering.
@@ -61,48 +50,28 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
       When it is reset and delaying is over as well as no new string came,
       it's ready to be rendered.
     */
-    const needsReset = nextProps.queryText !== this.props.queryText;
-    this.resetDelayOffTiming(needsReset);
-    return !nextState.isDelaying && !needsReset;
-  };
-
-  resetDelayOffTiming = (needsReset) => {
-    /*
-      Just clears prev timer and sets another before prev rings
-    */
-    if (!needsReset) { return; }
-    clearTimeout(this.delayID);
-    this.delayID = setTimeout(() => this.turnDelayOff(), 500);
-  };
-
-  turnDelayOff = () => {
-    this.setState({ isDelaying: false });
-  };
-
-  componentWillUnmount = () => {
-    clearTimeout(this.delayID);
+    return nextProps.queryText !== this.props.queryText;
   };
 
   render() {
-    if (this.props.queryText === '') {
-      return null;
-    }
     const filteredSections = Object.values(this.props.settings).map(setting => setting.map(option => option.ariaName));
     const filteredOptions = [].concat(...filteredSections);
     return (
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">
-          <FormattedMessage
-            id="kbn.settings.advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
-            defaultMessage="You searched for {query}.
-              There {optionLenght, plural, one {is # option} other {are # options}}
-              in {sectionLenght, plural, one {# section} other {# sections}}"
-            values={{
-              query: this.props.queryText,
-              sectionLenght: filteredSections.length,
-              optionLenght: filteredOptions.length
-            }}
-          />
+          <EuiDelayRender>
+            <FormattedMessage
+              id="kbn.settings.advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
+              defaultMessage="You searched for {query}.
+                There {optionLenght, plural, one {is # option} other {are # options}}
+                in {sectionLenght, plural, one {# section} other {# sections}}"
+              values={{
+                query: this.props.queryText,
+                sectionLenght: filteredSections.length,
+                optionLenght: filteredOptions.length
+              }}
+            />
+          </EuiDelayRender>
         </div>
       </EuiScreenReaderOnly>
     );

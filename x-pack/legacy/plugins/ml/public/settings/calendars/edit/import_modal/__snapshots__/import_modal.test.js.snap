@@ -45,6 +45,7 @@ exports[`ImportModal Renders import modal 1`] = `
           <EuiFilePicker
             compressed={true}
             disabled={false}
+            display="large"
             initialPromptText="Select or drag and drop a file"
             onChange={[Function]}
           />

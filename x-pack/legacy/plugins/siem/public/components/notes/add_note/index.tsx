@@ -26,15 +26,21 @@ const AddNotesContainer = styled(EuiFlexGroup)`
   user-select: none;
 `;
 
+AddNotesContainer.displayName = 'AddNotesContainer';
+
 const ButtonsContainer = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
+
+ButtonsContainer.displayName = 'ButtonsContainer';
 
 export const CancelButton = pure<{ onCancelAddNote: () => void }>(({ onCancelAddNote }) => (
   <EuiButtonEmpty data-test-subj="cancel" onClick={onCancelAddNote}>
     {i18n.CANCEL}
   </EuiButtonEmpty>
 ));
+
+CancelButton.displayName = 'CancelButton';
 
 /** Displays an input for entering a new note, with an adjacent "Add" button */
 export const AddNote = pure<{
@@ -77,3 +83,5 @@ export const AddNote = pure<{
     </ButtonsContainer>
   </AddNotesContainer>
 ));
+
+AddNote.displayName = 'AddNote';

@@ -18,16 +18,15 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
-
-export const getNetworkDnsColumns = (
-  type: networkModel.NetworkType
-): [
+export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsName']>,
   Columns<NetworkDnsItem['queryCount']>,
   Columns<NetworkDnsItem['uniqueDomains']>,
   Columns<NetworkDnsItem['dnsBytesIn']>,
   Columns<NetworkDnsItem['dnsBytesOut']>
-] => [
+];
+
+export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDnsColumns => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,
@@ -48,7 +47,7 @@ export const getNetworkDnsColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: 'dns.question.etld_plus_one',
+                field: 'dns.question.registered_domain',
                 value: dnsName,
                 operator: IS_OPERATOR,
               },

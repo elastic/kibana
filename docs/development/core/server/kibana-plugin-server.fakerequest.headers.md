@@ -9,5 +9,5 @@ Headers used for authentication against Elasticsearch
 <b>Signature:</b>
 
 ```typescript
-headers: Record<string, string>;
+headers: Headers;
 ```

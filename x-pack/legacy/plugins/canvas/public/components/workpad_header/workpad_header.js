@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiButton,
+  EuiButtonEmpty,
   EuiOverlayMask,
   EuiModal,
   EuiModalFooter,
@@ -20,6 +21,7 @@ import {
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { AddEmbeddablePanel } from '../embeddable_flyout';
 import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
@@ -32,7 +34,7 @@ export class WorkpadHeader extends React.PureComponent {
     toggleWriteable: PropTypes.func,
   };
 
-  state = { isModalVisible: false };
+  state = { isModalVisible: false, isPanelVisible: false };
 
   _fullscreenButton = ({ toggleFullscreen }) => (
     <EuiToolTip
@@ -60,6 +62,9 @@ export class WorkpadHeader extends React.PureComponent {
   _hideElementModal = () => this.setState({ isModalVisible: false });
   _showElementModal = () => this.setState({ isModalVisible: true });
 
+  _hideEmbeddablePanel = () => this.setState({ isPanelVisible: false });
+  _showEmbeddablePanel = () => this.setState({ isPanelVisible: true });
+
   _elementAdd = () => (
     <EuiOverlayMask>
       <EuiModal
@@ -78,27 +83,40 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiOverlayMask>
   );
 
-  _getTooltipText = () => {
+  _embeddableAdd = () => <AddEmbeddablePanel onClose={this._hideEmbeddablePanel} />;
+
+  _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
     if (!this.props.canUserWrite) {
       return "You don't have permission to edit this workpad";
-    } else {
-      const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
-      return (
-        <span>
-          {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
-        </span>
-      );
     }
+
+    const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+
+    if (textOnly) {
+      return content;
+    }
+
+    return (
+      <span>
+        {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
+      </span>
+    );
   };
 
   render() {
     const { isWriteable, canUserWrite, toggleWriteable } = this.props;
-    const { isModalVisible } = this.state;
+    const { isModalVisible, isPanelVisible } = this.state;
 
     return (
       <div>
         {isModalVisible ? this._elementAdd() : null}
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+        {isPanelVisible ? this._embeddableAdd() : null}
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          className="canvasLayout__stageHeaderInner"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
@@ -110,7 +128,7 @@ export class WorkpadHeader extends React.PureComponent {
               <EuiFlexItem grow={false}>
                 <FullscreenControl>{this._fullscreenButton}</FullscreenControl>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <WorkpadZoom />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -123,14 +141,15 @@ export class WorkpadHeader extends React.PureComponent {
                     handler={this._keyHandler}
                     targetNodeSelector="body"
                     global
+                    isolate
                   />
                 )}
-                <EuiToolTip position="bottom" content={this._getTooltipText()}>
+                <EuiToolTip position="bottom" content={this._getEditToggleToolTip()}>
                   <EuiButtonIcon
                     iconType={isWriteable ? 'lockOpen' : 'lock'}
                     onClick={toggleWriteable}
                     size="s"
-                    aria-label={this._getTooltipText()}
+                    aria-label={this._getEditToggleToolTip({ textOnly: true })}
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>
@@ -142,6 +161,9 @@ export class WorkpadHeader extends React.PureComponent {
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <AssetManager />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={this._showEmbeddablePanel}>Embed object</EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton

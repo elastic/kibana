@@ -1,13 +1,11 @@
 {
   "index": {
     "url_params": {
-      "include_type_name": "",
       "wait_for_active_shards": "",
       "op_type": [
         "index",
         "create"
       ],
-      "parent": "",
       "refresh": [
         "true",
         "false",
@@ -22,6 +20,8 @@
         "external_gte",
         "force"
       ],
+      "if_seq_no": "",
+      "if_primary_term": "",
       "pipeline": ""
     },
     "methods": [
@@ -29,11 +29,11 @@
       "PUT"
     ],
     "patterns": [
-      "{indices}/{type}",
-      "{indices}/{type}/{id}",
       "{indices}/_doc/{id}",
-      "{indices}/_doc"
+      "{indices}/_doc",
+      "{indices}/{type}",
+      "{indices}/{type}/{id}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
 }

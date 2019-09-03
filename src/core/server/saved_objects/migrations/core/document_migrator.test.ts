@@ -575,7 +575,7 @@ describe('DocumentMigrator', () => {
 
 function renameAttr(path: string, newPath: string) {
   return (doc: RawSavedObjectDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)), path) as RawSavedObjectDoc;
+    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as RawSavedObjectDoc;
 }
 
 function setAttr(path: string, value: any) {

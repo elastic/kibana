@@ -32,6 +32,13 @@ export const TIMELINE_TITLE = i18n.translate(
   }
 );
 
+export const INSPECT_TIMELINE_TITLE = i18n.translate(
+  'xpack.siem.timeline.properties.inspectTimelineTitle',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.siem.timeline.properties.untitledTimelinePlaceholder',
   {

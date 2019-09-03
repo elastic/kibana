@@ -5,8 +5,15 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router';
 import { RedirectWrapper } from './redirect_wrapper';
 
-export const RedirectToOverviewPage = () => <RedirectWrapper to={'/overview'} />;
+export type OverviewComponentProps = RouteComponentProps<{
+  search: string;
+}>;
+
+export const RedirectToOverviewPage = ({ location: { search } }: OverviewComponentProps) => (
+  <RedirectWrapper to={`/overview${search}`} />
+);
 
 export const getOverviewUrl = () => '#/link-to/overview';

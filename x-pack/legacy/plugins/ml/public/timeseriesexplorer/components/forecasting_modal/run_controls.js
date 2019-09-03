@@ -107,6 +107,7 @@ export function RunControls({
     <EuiButton
       onClick={runForecast}
       isDisabled={disabledState.isDisabled || !isNewForecastDurationValid}
+      data-test-subj="mlModalForecastButtonRun"
     >
       <FormattedMessage
         id="xpack.ml.timeSeriesExplorer.runControls.runButtonLabel"

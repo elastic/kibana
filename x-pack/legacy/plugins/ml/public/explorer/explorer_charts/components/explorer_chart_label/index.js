@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './explorer_chart_label';
+export { ExplorerChartLabel } from './explorer_chart_label';

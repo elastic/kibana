@@ -26,7 +26,7 @@ describe('Filebeat Rules', () => {
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Icinga][",
@@ -71,7 +71,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Icinga][",
@@ -114,7 +114,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Icinga][",

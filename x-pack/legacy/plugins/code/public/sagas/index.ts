@@ -47,10 +47,14 @@ import {
   watchSearchRouteChange,
 } from './search';
 import { watchRootRoute } from './setup';
-import { watchRepoCloneSuccess, watchRepoDeleteFinished } from './status';
+import { watchRepoCloneSuccess, watchRepoDeleteFinished, watchStatusChange } from './status';
 import { watchLoadStructure } from './structure';
+import { watchRoute, watchRepoChange, watchRepoOrRevisionChange } from './route';
 
 export function* rootSaga() {
+  yield fork(watchRepoChange);
+  yield fork(watchRepoOrRevisionChange);
+  yield fork(watchRoute);
   yield fork(watchRootRoute);
   yield fork(watchLoadCommit);
   yield fork(watchFetchRepos);
@@ -82,6 +86,7 @@ export function* rootSaga() {
   yield fork(watchInstallLanguageServer);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
+  yield fork(watchStatusChange);
 
   // Repository status polling sagas begin
   yield fork(watchPollingRepoStatus);

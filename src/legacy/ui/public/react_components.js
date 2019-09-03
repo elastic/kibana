@@ -20,22 +20,14 @@
 import 'ngreact';
 
 import {
-  KuiToolBarSearchBox,
-} from '@kbn/ui-framework/components';
-
-import {
   EuiConfirmModal,
   EuiIcon,
   EuiIconTip,
-  EuiCallOut,
-  EuiSuperDatePicker,
 } from '@elastic/eui';
 
 import { uiModules } from './modules';
 
 const app = uiModules.get('app/kibana', ['react']);
-
-app.directive('toolBarSearchBox', reactDirective => reactDirective(KuiToolBarSearchBox));
 
 app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 
@@ -43,20 +35,3 @@ app.directive('icon', reactDirective => reactDirective(EuiIcon));
 
 app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color']));
 
-app.directive('callOut', reactDirective => reactDirective(EuiCallOut, ['title', 'color', 'size', 'iconType', 'children']));
-
-app.directive('superDatePicker', reactDirective => reactDirective(EuiSuperDatePicker, [
-  'start',
-  'end',
-  'isPaused',
-  'refreshInterval',
-  'commonlyUsedRanges',
-  'dateFormat',
-  'recentlyUsedRanges',
-  'onTimeChange',
-  'onRefreshChange',
-  'isAutoRefreshOnly',
-  'commonlyUsedRanges',
-  'dateFormat',
-  'recentlyUsedRanges',
-]));

@@ -5,17 +5,17 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { exportTestSuiteFactory } from '../../common/suites/export';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const {
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
+    expectInvalidTypeSpecified,
     exportTest,
   } = exportTestSuiteFactory(esArchiver, supertest);
 
@@ -27,6 +27,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.SPACE_1.spaceId),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -43,6 +48,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.DEFAULT.spaceId),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',

@@ -21,6 +21,7 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
+import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
@@ -35,7 +36,6 @@ import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import 'ui/timepicker';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';
 

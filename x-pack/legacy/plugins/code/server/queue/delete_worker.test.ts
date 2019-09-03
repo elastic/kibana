@@ -69,6 +69,12 @@ test('Execute delete job.', async () => {
   };
   lspService.deleteWorkspace = deleteWorkspaceSpy;
 
+  // Setup GitOperations
+  const cleanRepoSpy = sinon.spy();
+  const gitOps = {
+    cleanRepo: cleanRepoSpy,
+  };
+
   const deleteWorker = new DeleteWorker(
     esQueue as Esqueue,
     log,
@@ -78,7 +84,7 @@ test('Execute delete job.', async () => {
         enableGitCertCheck: true,
       },
     } as ServerOptions,
-    {} as GitOperations,
+    (gitOps as any) as GitOperations,
     (cancellationService as any) as CancellationSerivce,
     (lspService as any) as LspService,
     (repoServiceFactory as any) as RepositoryServiceFactory
@@ -98,8 +104,7 @@ test('Execute delete job.', async () => {
 
   expect(newInstanceSpy.calledOnce).toBeTruthy();
   expect(removeSpy.calledOnce).toBeTruthy();
-
-  expect(deleteSpy.calledTwice).toBeTruthy();
+  expect(deleteSpy.calledThrice).toBeTruthy();
 
   expect(deleteWorkspaceSpy.calledOnce).toBeTruthy();
 });

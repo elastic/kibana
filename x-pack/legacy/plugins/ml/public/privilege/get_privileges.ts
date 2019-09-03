@@ -7,19 +7,34 @@
 import { ml } from '../services/ml_api_service';
 
 import { setUpgradeInProgress } from '../services/upgrade_service';
-import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';
+import { PrivilegesResponse } from '../../common/types/privileges';
 
-export function getPrivileges(): Promise<Privileges> {
+export function getPrivileges(): Promise<PrivilegesResponse> {
   return new Promise((resolve, reject) => {
     ml.checkMlPrivileges()
-      .then(({ capabilities, upgradeInProgress }) => {
-        if (upgradeInProgress === true) {
+      .then((resp: PrivilegesResponse) => {
+        if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);
         }
-        resolve(capabilities);
+        resolve(resp);
       })
       .catch(() => {
-        reject(getDefaultPrivileges());
+        reject();
+      });
+  });
+}
+
+export function getManageMlPrivileges(): Promise<PrivilegesResponse> {
+  return new Promise((resolve, reject) => {
+    ml.checkManageMLPrivileges()
+      .then((resp: PrivilegesResponse) => {
+        if (resp.upgradeInProgress === true) {
+          setUpgradeInProgress(true);
+        }
+        resolve(resp);
+      })
+      .catch(() => {
+        reject();
       });
   });
 }

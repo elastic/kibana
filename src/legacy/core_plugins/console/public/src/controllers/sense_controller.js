@@ -106,6 +106,10 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
     $scope.showHistory = !$scope.showHistory;
   };
 
+  $scope.closeHistory = () => {
+    $scope.showHistory = false;
+  };
+
   $scope.topNavMenu = getTopNavConfig($scope, $scope.toggleHistory);
 
   $scope.openDocumentation = () => {

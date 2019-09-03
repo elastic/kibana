@@ -1,0 +1,10 @@
+{
+  "id": "dashboard_embeddable_container",
+  "version": "kibana",
+  "requiredPlugins": [
+    "embeddable",
+    "inspector"
+  ],
+  "server": false,
+  "ui": true
+}

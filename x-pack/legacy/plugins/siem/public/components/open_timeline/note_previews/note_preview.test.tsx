@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { getEmptyValue } from '../../empty_value';
 import { NotePreview } from './note_preview';
@@ -13,9 +15,15 @@ import { NotePreview } from './note_preview';
 import * as i18n from '../translations';
 
 describe('NotePreview', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   describe('Avatar', () => {
     test('it renders an avatar with the expected initials when updatedBy is provided', () => {
-      const wrapper = mountWithIntl(<NotePreview updatedBy="admin" />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updatedBy="admin" />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -26,7 +34,11 @@ describe('NotePreview', () => {
     });
 
     test('it renders an avatar with a "?" when updatedBy is undefined', () => {
-      const wrapper = mountWithIntl(<NotePreview />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -37,7 +49,11 @@ describe('NotePreview', () => {
     });
 
     test('it renders an avatar with a "?" when updatedBy is null', () => {
-      const wrapper = mountWithIntl(<NotePreview updatedBy={null} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updatedBy={null} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -50,7 +66,11 @@ describe('NotePreview', () => {
 
   describe('UpdatedBy', () => {
     test('it renders the username when updatedBy is provided', () => {
-      const wrapper = mountWithIntl(<NotePreview updatedBy="admin" />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updatedBy="admin" />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -61,7 +81,11 @@ describe('NotePreview', () => {
     });
 
     test('it renders placeholder text when updatedBy is undefined', () => {
-      const wrapper = mountWithIntl(<NotePreview />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -72,7 +96,11 @@ describe('NotePreview', () => {
     });
 
     test('it renders placeholder text when updatedBy is null', () => {
-      const wrapper = mountWithIntl(<NotePreview updatedBy={null} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updatedBy={null} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -87,7 +115,11 @@ describe('NotePreview', () => {
     const updated = 1553300753 * 1000;
 
     test('it is always prefixed by "Posted:"', () => {
-      const wrapper = mountWithIntl(<NotePreview updated={updated} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updated={updated} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -99,7 +131,11 @@ describe('NotePreview', () => {
     });
 
     test('it renders the relative date when updated is provided', () => {
-      const wrapper = mountWithIntl(<NotePreview updated={updated} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updated={updated} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -110,7 +146,11 @@ describe('NotePreview', () => {
     });
 
     test('it does NOT render the relative date when updated is undefined', () => {
-      const wrapper = mountWithIntl(<NotePreview />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -121,7 +161,11 @@ describe('NotePreview', () => {
     });
 
     test('it does NOT render the relative date when updated is null', () => {
-      const wrapper = mountWithIntl(<NotePreview updated={null} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updated={null} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
@@ -132,25 +176,33 @@ describe('NotePreview', () => {
     });
 
     test('it renders placeholder text when updated is undefined', () => {
-      const wrapper = mountWithIntl(<NotePreview />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
           .find('[data-test-subj="posted"]')
           .first()
           .text()
-      ).toEqual('Posted: --');
+      ).toEqual(`Posted: ${getEmptyValue()}`);
     });
 
     test('it renders placeholder text when updated is null', () => {
-      const wrapper = mountWithIntl(<NotePreview updated={null} />);
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <NotePreview updated={null} />
+        </ThemeProvider>
+      );
 
       expect(
         wrapper
           .find('[data-test-subj="posted"]')
           .first()
           .text()
-      ).toEqual('Posted: --');
+      ).toEqual(`Posted: ${getEmptyValue()}`);
     });
   });
 });

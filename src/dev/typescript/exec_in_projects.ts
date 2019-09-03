@@ -40,7 +40,9 @@ export function execInProjects(
     projects.map(project => ({
       task: () =>
         execa(cmd, getArgs(project), {
-          cwd: project.directory,
+          // execute in the current working directory so that relative paths in errors
+          // are relative from the right location
+          cwd: process.cwd(),
           env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
         }).catch(error => {

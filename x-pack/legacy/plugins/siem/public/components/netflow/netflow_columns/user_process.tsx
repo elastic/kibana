@@ -63,3 +63,5 @@ export const UserProcess = pure<{
       : null}
   </EuiFlexGroup>
 ));
+
+UserProcess.displayName = 'UserProcess';

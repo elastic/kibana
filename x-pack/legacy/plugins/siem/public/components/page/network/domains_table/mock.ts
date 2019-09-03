@@ -68,9 +68,8 @@ export const mockDomainsData: DomainsData = {
     },
   ],
   pageInfo: {
-    endCursor: {
-      value: '10',
-    },
-    hasNextPage: false,
+    activePage: 1,
+    fakeTotalCount: 50,
+    showMorePagesIndicator: true,
   },
 };

@@ -5,10 +5,10 @@
  */
 
 export const reduceFields = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   fieldMap: Readonly<Record<string, string>>
-): ReadonlyArray<string> =>
+): readonly string[] =>
   fields.reduce(
     (res, field) => (fieldMap[field] != null ? [...res, fieldMap[field]] : res),
-    [] as ReadonlyArray<string>
+    [] as readonly string[]
   );

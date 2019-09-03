@@ -41,6 +41,7 @@ import {
   MockDocLinksService,
   MockRenderingService,
   RenderingServiceConstructor,
+  MockContextService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -51,6 +52,7 @@ const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
   browserSupportsCsp: true,
   injectedMetadata: {
+    uiPlugins: [],
     csp: {
       warnLegacyBrowsers: true,
     },
@@ -160,6 +162,11 @@ describe('#setup()', () => {
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls context#setup()', async () => {
+    await setupCore();
+    expect(MockContextService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
@@ -265,7 +272,9 @@ describe('#start()', () => {
     await startCore();
     expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
     expect(MockRenderingService.start).toHaveBeenCalledWith({
+      application: expect.any(Object),
       chrome: expect.any(Object),
+      injectedMetadata: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -357,7 +366,7 @@ describe('LegacyPlatformService targetDomElement', () => {
   it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
     const core = createCoreSystem();
 
-    let targetDomElementInStart: HTMLElement | null;
+    let targetDomElementInStart: HTMLElement | undefined;
     MockLegacyPlatformService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementInStart = targetDomElement;
     });
@@ -379,12 +388,10 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementParentInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(
-      ({ targetDomElement }): any => {
-        expect(targetDomElement.parentElement).not.toBeNull();
-        targetDomElementParentInStart = targetDomElement.parentElement;
-      }
-    );
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }): any => {
+      expect(targetDomElement.parentElement).not.toBeNull();
+      targetDomElementParentInStart = targetDomElement.parentElement;
+    });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();

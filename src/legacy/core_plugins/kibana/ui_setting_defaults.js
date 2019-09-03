@@ -298,6 +298,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'discover:searchOnPageLoad': {
+      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
+        defaultMessage: 'Search on page load',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
+        defaultMessage:
+          'Controls whether a search is executed when Discover first loads. This setting does not ' +
+          'have an effect when loading a saved search.',
+      }),
+      category: ['discover'],
+    },
     'doc_table:highlight': {
       name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
         defaultMessage: 'Highlight results',
@@ -402,6 +415,19 @@ export function getUiSettingDefaults() {
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
+      }),
+      category: ['search'],
+    },
+    'courier:batchSearches': {
+      name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
+        defaultMessage: 'Batch concurrent searches',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
+        defaultMessage:
+          'Batch multiple concurrent searches in a single request. This may improve overall load' +
+          'times, but it also means that no single search request will be returned until the last has completed.',
       }),
       category: ['search'],
     },
@@ -559,6 +585,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['visualization'],
     },
+    'visualization:heatmap:maxBuckets': {
+      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
+        defaultMessage: 'Heatmap maximum buckets',
+      }),
+      value: 50,
+      type: 'number',
+      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
+        defaultMessage:
+          'The maximum number of buckets a single datasource can return. ' +
+          'A higher number might have negative impact on browser rendering performance'
+      }),
+      category: ['visualization'],
+    },
     'csv:separator': {
       name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
         defaultMessage: 'CSV separator',
@@ -667,7 +706,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
-      value: '0,0.[000]b',
+      value: '0,0.[0]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
         defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',

@@ -20,7 +20,7 @@
 import React from 'react';
 
 interface Props {
-  extension?: (el: HTMLDivElement) => (() => void);
+  extension?: (el: HTMLDivElement) => () => void;
 }
 
 export class HeaderExtension extends React.Component<Props> {

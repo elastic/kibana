@@ -20,7 +20,7 @@
 import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DevToolsSettingsModal } from '../components/settings_modal';
+import { DevToolsSettingsModal, AutocompleteOptions } from '../components/settings_modal';
 import { DevToolsSettings } from '../components/dev_tools_settings';
 
 // @ts-ignore
@@ -32,8 +32,8 @@ export function showSettingsModal() {
   const container = document.getElementById('consoleSettingsModal');
   const curSettings = getCurrentSettings();
 
-  const refreshAutocompleteSettings = () => {
-    mappings.retrieveAutoCompleteInfo();
+  const refreshAutocompleteSettings = (selectedSettings: any) => {
+    mappings.retrieveAutoCompleteInfo(selectedSettings);
   };
 
   const closeModal = () => {
@@ -53,13 +53,30 @@ export function showSettingsModal() {
     newSettings: DevToolsSettings,
     prevSettings: DevToolsSettings
   ) => {
-    // We'll only retrieve settings if polling is on.
-    const isPollingChanged = prevSettings.polling !== newSettings.polling;
+    // We'll only retrieve settings if polling is on. The expectation here is that if the user
+    // disables polling it's because they want manual control over the fetch request (possibly
+    // because it's a very expensive request given their cluster and bandwidth). In that case,
+    // they would be unhappy with any request that's sent automatically.
     if (newSettings.polling) {
       const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
-      if (autocompleteDiff.length > 0) {
-        mappings.retrieveAutoCompleteInfo(newSettings.autocomplete);
+
+      const isSettingsChanged = autocompleteDiff.length > 0;
+      const isPollingChanged = prevSettings.polling !== newSettings.polling;
+
+      if (isSettingsChanged) {
+        // If the user has changed one of the autocomplete settings, then we'll fetch just the
+        // ones which have changed.
+        const changedSettings: any = autocompleteDiff.reduce(
+          (changedSettingsAccum: any, setting: string): any => {
+            changedSettingsAccum[setting] =
+              newSettings.autocomplete[setting as AutocompleteOptions];
+            return changedSettingsAccum;
+          },
+          {}
+        );
+        mappings.retrieveAutoCompleteInfo(changedSettings);
       } else if (isPollingChanged) {
+        // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
         mappings.retrieveAutoCompleteInfo();
       }
     }

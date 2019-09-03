@@ -8,12 +8,23 @@ import chrome from 'ui/chrome';
 import {
   CloseJobsResponse,
   Group,
+  IndexPatternResponse,
+  IndexPatternSavedObject,
   Job,
   MlSetupArgs,
   SetupMlResponse,
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
+import {
+  throwIfNotOk,
+  throwIfErrorAttached,
+  throwIfErrorAttachedToSetup,
+} from '../ml/api/throw_if_not_ok';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+
+const emptyIndexPattern: IndexPatternSavedObject[] = [];
 
 /**
  * Fetches ML Groups Data
@@ -21,22 +32,19 @@ import {
  * @param headers
  */
 export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
-  try {
-    const response = await fetch('/api/ml/jobs/groups', {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-system-api': 'true',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return [];
-  }
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-system-api': 'true',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  return await response.json();
 };
 
 /**
@@ -55,60 +63,61 @@ export const setupMlJob = async ({
   prefix = '',
   headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  try {
-    const response = await fetch(`/api/ml/modules/setup/${configTemplate}`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        prefix,
-        groups,
-        indexPatternName,
-        startDatafeed: false,
-        useDedicatedIndex: false,
-      }),
-      headers: {
-        'kbn-system-api': 'true',
-        'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return { jobs: [], datafeeds: [], kibana: {} };
-  }
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      prefix,
+      groups,
+      indexPatternName,
+      startDatafeed: false,
+      useDedicatedIndex: true,
+    }),
+    headers: {
+      'kbn-system-api': 'true',
+      'content-type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  const json = await response.json();
+  throwIfErrorAttachedToSetup(json);
+  return json;
 };
 
 /**
  * Starts the given dataFeedIds
  *
  * @param datafeedIds
+ * @param start
  * @param headers
  */
 export const startDatafeeds = async (
   datafeedIds: string[],
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  start = 0
 ): Promise<StartDatafeedResponse> => {
-  try {
-    const response = await fetch('/api/ml/jobs/force_start_datafeeds', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        datafeedIds,
-      }),
-      headers: {
-        'kbn-system-api': 'true',
-        'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return {};
-  }
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      datafeedIds,
+      ...(start !== 0 && { start }),
+    }),
+    headers: {
+      'kbn-system-api': 'true',
+      'content-type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  const json = await response.json();
+  throwIfErrorAttached(json, datafeedIds);
+  return json;
 };
 
 /**
@@ -121,47 +130,45 @@ export const stopDatafeeds = async (
   datafeedIds: string[],
   headers: Record<string, string | undefined>
 ): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
-  try {
-    const stopDatafeedsResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        datafeedIds,
-      }),
-      headers: {
-        'kbn-system-api': 'true',
-        'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      datafeedIds,
+    }),
+    headers: {
+      'kbn-system-api': 'true',
+      'content-type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
 
-    const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
+  await throwIfNotOk(stopDatafeedsResponse);
+  const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
 
-    const datafeedPrefix = 'datafeed-';
-    const closeJobsResponse = await fetch('/api/ml/jobs/close_jobs', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        jobIds: datafeedIds.map(dataFeedId =>
-          dataFeedId.startsWith(datafeedPrefix)
-            ? dataFeedId.substring(datafeedPrefix.length)
-            : dataFeedId
-        ),
-      }),
-      headers: {
-        'content-type': 'application/json',
-        'kbn-system-api': 'true',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
+  const datafeedPrefix = 'datafeed-';
+  const closeJobsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/close_jobs`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      jobIds: datafeedIds.map(dataFeedId =>
+        dataFeedId.startsWith(datafeedPrefix)
+          ? dataFeedId.substring(datafeedPrefix.length)
+          : dataFeedId
+      ),
+    }),
+    headers: {
+      'content-type': 'application/json',
+      'kbn-system-api': 'true',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
 
-    return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return [{}, {}];
-  }
+  await throwIfNotOk(closeJobsResponse);
+  return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
 };
 
 /**
@@ -174,21 +181,50 @@ export const jobsSummary = async (
   jobIds: string[],
   headers: Record<string, string | undefined>
 ): Promise<Job[]> => {
-  try {
-    const response = await fetch('/api/ml/jobs/jobs_summary', {
-      method: 'POST',
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: JSON.stringify({ jobIds }),
+    headers: {
+      'content-type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      'kbn-system-api': 'true',
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  return await response.json();
+};
+
+/**
+ * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
+ * TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
+ * @param headers
+ */
+export const getIndexPatterns = async (
+  headers: Record<string, string | undefined>
+): Promise<IndexPatternSavedObject[]> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(
+    `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
+    {
+      method: 'GET',
       credentials: 'same-origin',
-      body: JSON.stringify({ jobIds }),
       headers: {
         'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
+        'kbn-xsrf': kbnVersion,
         'kbn-system-api': 'true',
         ...headers,
       },
-    });
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    }
+  );
+  await throwIfNotOk(response);
+  const results: IndexPatternResponse = await response.json();
+
+  if (results.saved_objects && Array.isArray(results.saved_objects)) {
+    return results.saved_objects;
+  } else {
+    return emptyIndexPattern;
   }
 };

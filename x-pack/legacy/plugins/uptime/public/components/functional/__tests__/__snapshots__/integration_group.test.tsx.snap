@@ -30,6 +30,14 @@ exports[`IntegrationGroup will not display APM links when APM is unavailable 1`]
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
+      ariaLabel="Check Logging UI for this monitor's ip address"
+      iconType="loggingApp"
+      message="Show host logs"
+      tooltipContent="Check Logging UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
       ariaLabel="Show pod logs"
       iconType="loggingApp"
       message="Show pod logs"
@@ -54,10 +62,18 @@ exports[`IntegrationGroup will not display infra links when infra is unavailable
   <EuiFlexItem>
     <IntegrationLink
       ariaLabel="Search APM for this monitor"
-      href="/foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
+      href="foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
       iconType="apmApp"
       message="Check APM for domain"
       tooltipContent="Click here to check APM for the domain \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Logging UI for this monitor's ip address"
+      iconType="loggingApp"
+      message="Show host logs"
+      tooltipContent="Check Logging UI for the IP \\"\\""
     />
   </EuiFlexItem>
   <EuiFlexItem>
@@ -86,7 +102,7 @@ exports[`IntegrationGroup will not display logging links when logging is unavail
   <EuiFlexItem>
     <IntegrationLink
       ariaLabel="Search APM for this monitor"
-      href="/foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
+      href="foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
       iconType="apmApp"
       message="Check APM for domain"
       tooltipContent="Click here to check APM for the domain \\"\\"."

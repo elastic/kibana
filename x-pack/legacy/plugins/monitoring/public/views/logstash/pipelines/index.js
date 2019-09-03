@@ -7,9 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
-import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import {
@@ -20,6 +18,7 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
+import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
 /*
  * Logstash Pipelines Listing page
@@ -63,7 +62,7 @@ uiRoutes
     resolve: {
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
-        return routeInit();
+        return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
       pageData: getPageData
     },
@@ -85,14 +84,6 @@ uiRoutes
         const globalState = $injector.get('globalState');
         $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
-        function onBrush(xaxis) {
-          timefilter.setTime({
-            from: moment(xaxis.from),
-            to: moment(xaxis.to),
-            mode: 'absolute'
-          });
-        }
-
         const renderReact = (pageData) => {
           if (!pageData) {
             return;
@@ -102,11 +93,11 @@ uiRoutes
             ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
             : null;
 
-          render(
+          super.renderReact(
             <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
-                onBrush={onBrush}
+                onBrush={(xaxis) => this.onBrush({ xaxis })}
                 stats={pageData.clusterStatus}
                 data={pageData.pipelines}
                 sorting={this.sorting}
@@ -119,8 +110,7 @@ uiRoutes
                   scope: $scope,
                 }}
               />
-            </I18nContext>,
-            document.getElementById('monitoringLogstashPipelinesApp')
+            </I18nContext>
           );
         };
 

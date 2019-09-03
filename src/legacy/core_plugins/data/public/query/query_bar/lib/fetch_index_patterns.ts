@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { isEmpty } from 'lodash';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { getFromSavedObject } from '../../../index_patterns';
 
-const config = chrome.getUiSettingsClient();
-
-export async function fetchIndexPatterns(indexPatternStrings: string[]) {
+export async function fetchIndexPatterns(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatternStrings: string[],
+  uiSettings: UiSettingsClientContract
+) {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
 
   const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
-  const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+  const indexPatternsFromSavedObjects = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title', 'fields'],
     search: searchString,
@@ -40,15 +41,12 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
     return indexPatternStrings.includes(savedObject.attributes.title as string);
   });
 
+  const defaultIndex = uiSettings.get('defaultIndex');
+
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
-      : [...exactMatches, await fetchDefaultIndexPattern()];
+      : [...exactMatches, await savedObjectsClient.get('index-pattern', defaultIndex)];
 
   return allMatches.map(getFromSavedObject);
 }
-
-const fetchDefaultIndexPattern = async () => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  return await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-};

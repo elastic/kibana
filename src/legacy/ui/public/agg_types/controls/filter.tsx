@@ -28,11 +28,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-// @ts-ignore
-import { data } from 'plugins/data/setup';
-import { Query } from 'plugins/data';
-
-const { QueryBarInput } = data.query.ui;
+import { Query, QueryBarInput } from 'plugins/data';
+import { npStart } from 'ui/new_platform';
+import { Storage } from 'ui/storage';
+const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
   id: string;
@@ -100,7 +99,7 @@ function FilterRow({
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
-        className="visEditorSidebar__aggParamFormRow"
+        compressed
       >
         <QueryBarInput
           query={value}
@@ -111,6 +110,9 @@ function FilterRow({
           data-test-subj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
+          store={localStorage}
+          uiSettings={npStart.core.uiSettings}
+          savedObjectsClient={npStart.core.savedObjects.client}
         />
       </EuiFormRow>
       {showCustomLabel ? (
@@ -125,7 +127,7 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          className="visEditorSidebar__aggParamFormRow"
+          compressed
         >
           <EuiFieldText
             value={customLabel}

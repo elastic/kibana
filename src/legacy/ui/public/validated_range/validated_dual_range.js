@@ -66,6 +66,9 @@ export class ValidatedDualRange extends Component {
 
   render() {
     const {
+      compressed,
+      fullWidth,
+      label,
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       allowEmptyRange, // eslint-disable-line no-unused-vars
@@ -75,10 +78,15 @@ export class ValidatedDualRange extends Component {
 
     return (
       <EuiFormRow
+        compressed={compressed}
+        fullWidth={fullWidth}
         isInvalid={!this.state.isValid}
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
+        label={label}
       >
         <EuiDualRange
+          compressed={compressed}
+          fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}
           {...rest}
@@ -90,8 +98,13 @@ export class ValidatedDualRange extends Component {
 
 ValidatedDualRange.propTypes = {
   allowEmptyRange: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  compressed: PropTypes.bool,
+  label: PropTypes.node,
 };
 
 ValidatedDualRange.defaultProps = {
-  allowEmptyRange: true
+  allowEmptyRange: true,
+  fullWidth: false,
+  compressed: false,
 };

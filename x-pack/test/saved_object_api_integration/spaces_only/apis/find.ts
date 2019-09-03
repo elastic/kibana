@@ -5,11 +5,10 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { findTestSuiteFactory } from '../../common/suites/find';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -34,6 +33,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         unknownType: {
           description: 'empty result',
@@ -70,6 +74,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         unknownType: {
           description: 'empty result',

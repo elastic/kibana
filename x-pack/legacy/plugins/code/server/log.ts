@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { inspect } from 'util';
 import { Logger as VsLogger } from 'vscode-jsonrpc';
 
+import { ServerFacade } from '..';
+
 export class Logger implements VsLogger {
   private readonly verbose: boolean = false;
-  constructor(private server: Hapi.Server, private baseTags: string[] = ['code']) {
+  constructor(private server: ServerFacade, private baseTags: string[] = ['code']) {
     if (server) {
       this.verbose = this.server.config().get('xpack.code.verbose');
     }
+  }
+
+  // Return a new logger with new tags
+  public addTags(tags: string[]): Logger {
+    return new Logger(this.server, this.baseTags.concat(tags));
   }
 
   public info(msg: string | any) {
@@ -91,7 +97,10 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-
-    this.server.log([...this.baseTags, 'error', 'stderr'], msg);
+    if (this.verbose) {
+      this.server.log([...this.baseTags, 'error', 'stderr'], msg);
+    } else {
+      this.server.log([...this.baseTags, 'debug', 'stderr'], msg);
+    }
   }
 }

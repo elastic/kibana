@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
+import { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 const noop = () => {};

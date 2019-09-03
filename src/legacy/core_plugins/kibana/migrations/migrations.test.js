@@ -572,6 +572,32 @@ Object {
 `);
     });
 
+    it('delete savedSearchId when empty string in doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+          savedSearchId: '',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
     it('should return a new object if vis is table and has multiple split aggs', () => {
       const aggs = [
         {
@@ -1115,6 +1141,43 @@ Array [
       const migratedDoc = migrate(doc);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
       expect(series[0].filter).toEqual(params.series[0].filter);
+    });
+  });
+
+  describe('7.3.1', () => {
+    const migrate = migrations.visualization['7.3.1'];
+
+    it('should migrate filters agg query string queries', () => {
+      const state = {
+        aggs: [
+          { type: 'count', params: {} },
+          {
+            type: 'filters',
+            params: {
+              filters: [{
+                input: {
+                  query: {
+                    query_string: { query: 'machine.os.keyword:\"win 8\"' }
+                  }
+                }
+              }]
+            }
+          }
+        ],
+      };
+      const expected = {
+        aggs: [
+          { type: 'count', params: {} },
+          {
+            type: 'filters',
+            params: {
+              filters: [{ input: { query: 'machine.os.keyword:\"win 8\"' } }]
+            }
+          }
+        ],
+      };
+      const migratedDoc = migrate({ attributes: { visState: JSON.stringify(state) } });
+      expect(migratedDoc).toEqual({ attributes: { visState: JSON.stringify(expected) } });
     });
   });
 });
@@ -1760,6 +1823,58 @@ Object {
 }
 `);
       /* eslint-enable max-len */
+    });
+  });
+
+  describe('7.4.0', function () {
+    const migration = migrations.search['7.4.0'];
+
+    test('transforms one dimensional sort arrays into two dimensional arrays', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: ['bytes', 'desc'],
+        },
+      };
+
+      const expected = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: [['bytes', 'desc']],
+        },
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(expected);
+    });
+
+    test('doesn\'t modify search docs that already have two dimensional sort arrays', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: [['bytes', 'desc']],
+        },
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(doc);
+    });
+
+    test('doesn\'t modify search docs that have no sort array', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {},
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(doc);
     });
   });
 });

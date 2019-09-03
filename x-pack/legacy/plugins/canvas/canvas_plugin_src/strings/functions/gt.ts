@@ -7,15 +7,22 @@
 import { i18n } from '@kbn/i18n';
 import { gt } from '../../functions/common/gt';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof gt>> = {
   help: i18n.translate('xpack.canvas.functions.gtHelpText', {
-    defaultMessage: 'Return if the context is greater than the argument',
+    defaultMessage: 'Returns whether the {CONTEXT} is greater than the argument.',
+    values: {
+      CONTEXT,
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.gt.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
+      values: {
+        CONTEXT,
+      },
     }),
   },
 };
