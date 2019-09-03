@@ -154,7 +154,7 @@ export const spaces = (kibana: Record<string, any>) =>
         usage: server.usage,
         uiSettingsServiceFactory: (server as any)
           .uiSettingsServiceFactory as SpacesCoreSetup['uiSettingsServiceFactory'],
-        fallbackDefaultRoute: server.config().get('server.defaultRoute') || '/app/kibana',
+        fallbackDefaultRoute: '/app/kibana',
         tutorial: {
           addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
         },

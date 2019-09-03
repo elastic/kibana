@@ -62,6 +62,24 @@ describe('server/config', function () {
       });
     });
 
+    describe('server.defaultRoute', () => {
+      it('renames to uiSettings.overrides.defaultRoute when specified', () => {
+        const settings = {
+          server: {
+            defaultRoute: '/app/foo',
+          },
+        };
+
+        expect(transformDeprecations(settings)).toEqual({
+          uiSettings: {
+            overrides: {
+              defaultRoute: '/app/foo'
+            }
+          }
+        });
+      });
+    });
+
     describe('csp.rules', () => {
       describe('with nonce source', () => {
         it('logs a warning', () => {
@@ -74,20 +92,18 @@ describe('server/config', function () {
           const log = jest.fn();
           transformDeprecations(settings, log);
           expect(log.mock.calls).toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in script-src",
-              ],
-            ]
-          `);
+                        Array [
+                          Array [
+                            "csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in script-src",
+                          ],
+                        ]
+                    `);
         });
 
         it('replaces a nonce', () => {
           expect(
-            transformDeprecations(
-              { csp: { rules: [`script-src 'nonce-{nonce}'`] } },
-              jest.fn()
-            ).csp.rules
+            transformDeprecations({ csp: { rules: [`script-src 'nonce-{nonce}'`] } }, jest.fn()).csp
+              .rules
           ).toEqual([`script-src 'self'`]);
           expect(
             transformDeprecations(
@@ -158,12 +174,12 @@ describe('server/config', function () {
           const log = jest.fn();
           transformDeprecations({ csp: { rules: [`script-src 'unsafe-eval'`] } }, log);
           expect(log.mock.calls).toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "csp.rules must contain the 'self' source. Automatically adding to script-src.",
-              ],
-            ]
-          `);
+                        Array [
+                          Array [
+                            "csp.rules must contain the 'self' source. Automatically adding to script-src.",
+                          ],
+                        ]
+                    `);
         });
 
         it('adds self', () => {

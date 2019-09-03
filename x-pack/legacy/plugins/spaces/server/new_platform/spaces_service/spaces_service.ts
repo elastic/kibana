@@ -102,7 +102,13 @@ export class SpacesService {
           namespace: spaceIdToNamespace(spaceId),
         });
 
-        return (await uiSettingsService.get('defaultRoute')) || fallbackDefaultRoute;
+        const defaultRoute = await uiSettingsService.get('defaultRoute');
+
+        if (!defaultRoute || !defaultRoute.startsWith('/')) {
+          return fallbackDefaultRoute;
+        }
+
+        return defaultRoute;
       },
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
