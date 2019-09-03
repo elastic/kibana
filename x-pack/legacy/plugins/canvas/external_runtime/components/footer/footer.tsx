@@ -6,46 +6,32 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useExternalEmbedState, setScrubberVisible } from '../../context';
-import { Scrubber } from './scrubber';
-import { Title } from './title';
-import { PageControls } from './page_controls';
+import { Scrubber } from './scrubber.container';
+import { Title } from './title.container';
+import { PageControls } from './page_controls.container';
 import { Settings } from './settings';
 
-// @ts-ignore CSS Module
-import css from './footer.module';
+import css from './footer.module.scss';
 
 export const FOOTER_HEIGHT = 48;
 
 interface Props {
-  hidden?: boolean;
+  isAutohide?: boolean;
+  isHidden?: boolean;
 }
 
 /**
  * The footer of the Embedded Workpad.
  */
-export const Footer = ({ hidden = false }: Props) => {
-  const [{ workpad, settings }] = useExternalEmbedState();
-  if (!workpad) {
-    return null;
-  }
-
-  const { autohide } = settings.toolbar;
-
-  // If autohide is enabled, and the toolbar is hidden, set the scrubber
-  // visibility to hidden.  This is useful for state changes where one
-  // sets the footer to hidden, and the scrubber would be left open with
-  // no toolbar.
-  if (autohide && hidden) {
-    setScrubberVisible(false);
-  }
+export const Footer = ({ isAutohide = false, isHidden = false }: Props) => {
+  const { root, bar, title } = css;
 
   return (
-    <div className={css.root} style={{ height: FOOTER_HEIGHT }}>
+    <div className={root} style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
-      <div className={css.bar} style={{ bottom: autohide && hidden ? -FOOTER_HEIGHT : 0 }}>
+      <div className={bar} style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem className={css.title}>
+          <EuiFlexItem className={title}>
             <Title />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

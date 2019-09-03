@@ -6,11 +6,15 @@
 
 import React from 'react';
 import classnames from 'classnames';
-import { useExternalEmbedState } from '../../context';
-import { PagePreview } from './page_preview';
+import { PagePreview } from './page_preview.container';
 
-// @ts-ignore CSS Module
-import css from './scrubber.module';
+import css from './scrubber.module.scss';
+import { CanvasRenderedPage } from '../../types';
+
+interface Props {
+  isScrubberVisible: boolean;
+  pages: CanvasRenderedPage[];
+}
 
 const THUMBNAIL_HEIGHT = 100;
 
@@ -18,19 +22,11 @@ const THUMBNAIL_HEIGHT = 100;
  * The panel of previews of the pages in the workpad, allowing one to select and
  * navigate to a specific page.
  */
-export const Scrubber = () => {
-  const [{ workpad, footer }] = useExternalEmbedState();
-
-  if (!workpad) {
-    return null;
-  }
-
-  const { pages } = workpad;
-  const { isScrubberVisible } = footer;
+export const Scrubber = ({ isScrubberVisible, pages }: Props) => {
   const className = isScrubberVisible ? classnames(css.root, css.visible) : css.root;
 
   const slides = pages.map((page, index) => (
-    <PagePreview key={page.id} page={page} number={index} height={THUMBNAIL_HEIGHT} />
+    <PagePreview key={page.id} height={THUMBNAIL_HEIGHT} {...{ index }} />
   ));
 
   return (

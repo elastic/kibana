@@ -6,25 +6,18 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { useExternalEmbedState } from '../../../context';
-// @ts-ignore Untyped local
-import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
-import { ToolbarSettings } from './toolbar_settings';
-import { AutoplaySettings } from './autoplay_settings';
+import { Refs } from '../../../types';
+import { ToolbarSettings } from './toolbar_settings.container';
+import { AutoplaySettings } from './autoplay_settings.container';
 
-// @ts-ignore CSS Module
-import css from './settings.module';
+interface Props {
+  refs: Refs;
+}
 
 /**
  * The Settings Popover for External Workpads.
  */
-export const Settings = () => {
-  const [{ workpad, refs }] = useExternalEmbedState();
-
-  if (!workpad) {
-    return null;
-  }
-
+export const Settings = ({ refs }: Props) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
     <EuiButtonIcon
@@ -69,7 +62,7 @@ export const Settings = () => {
         panel: {
           id: 2,
           title: 'Toolbar',
-          content: <ToolbarSettings onChange={() => setPopoverOpen(false)} />,
+          content: <ToolbarSettings onSetAutohide={() => setPopoverOpen(false)} />,
         },
       },
     ],
@@ -78,8 +71,6 @@ export const Settings = () => {
   return (
     <EuiFlexGroup alignItems="flexEnd" justifyContent="center" direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
-        {/* 
-         //@ts-ignore EuiPopover missing insert property */}
         <EuiPopover
           closePopover={() => setPopoverOpen(false)}
           id="settings"
@@ -88,7 +79,9 @@ export const Settings = () => {
           panelPaddingSize="none"
           withTitle
           anchorPosition="upRight"
-          insert={{ sibling: refs.stage.current, position: 'after' }}
+          insert={
+            refs.stage.current ? { sibling: refs.stage.current, position: 'after' } : undefined
+          }
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>

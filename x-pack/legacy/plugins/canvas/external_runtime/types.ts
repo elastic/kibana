@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RefObject } from 'react';
 // @ts-ignore Unlinked Webpack Type
 import ContainerStyle from 'types/interpreter';
-import { CSSProperties } from 'react';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 
-import { CanvasElement, CanvasPage, CanvasWorkpad } from '../types';
+import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
 
 /**
  * Represents a Canvas Element whose expression has been evaluated and now
  * exists in a transient, ready-to-render state.
  */
-export interface CanvasRenderedElement extends CanvasElement {
+export interface CanvasRenderedElement {
+  id: string;
+  position: ElementPosition;
   expressionRenderable: CanvasRenderable;
 }
 
@@ -23,7 +25,7 @@ export interface CanvasRenderedElement extends CanvasElement {
  * Represents a Page within a Canvas Workpad that is made up of ready-to-
  * render Elements.
  */
-export interface CanvasRenderedPage extends CanvasPage {
+export interface CanvasRenderedPage extends Omit<Omit<CanvasPage, 'elements'>, 'groups'> {
   elements: CanvasRenderedElement[];
   groups: CanvasRenderedElement[][];
 }
@@ -31,7 +33,7 @@ export interface CanvasRenderedPage extends CanvasPage {
 /**
  * A Canvas Workpad made up of ready-to-render Elements.
  */
-export interface CanvasRenderedWorkpad extends CanvasWorkpad {
+export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages'> {
   pages: CanvasRenderedPage[];
 }
 
@@ -45,13 +47,48 @@ export type CanvasRenderedWorkpadSavedObject = SavedObject<
  * upon a stage.
  */
 export interface CanvasRenderable {
-  error: string;
+  error: string | null;
   state: 'ready' | 'error';
   value: {
     as: string;
     containerStyle: ContainerStyle;
-    css: CSSProperties;
+    css: string;
     type: 'render';
     value: any;
   };
+}
+
+export interface ExternalEmbedState {
+  renderers: { [key: string]: RendererSpec };
+  workpad: CanvasRenderedWorkpad | null;
+  stage: Stage;
+  footer: {
+    isScrubberVisible: boolean;
+  };
+  settings: Settings;
+  refs: Refs;
+}
+
+export interface Stage {
+  page: number;
+  height: number;
+  width: number;
+}
+
+export interface Refs {
+  stage: RefObject<HTMLDivElement>;
+}
+
+export interface Settings {
+  autoplay: AutoplaySettings;
+  toolbar: ToolbarSettings;
+}
+
+export interface AutoplaySettings {
+  isEnabled: boolean;
+  interval: string;
+}
+
+export interface ToolbarSettings {
+  isAutohide: boolean;
 }

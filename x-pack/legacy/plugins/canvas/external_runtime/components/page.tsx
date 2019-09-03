@@ -5,28 +5,22 @@
  */
 
 import React from 'react';
-import { RenderedElement } from './rendered_element';
-import { useExternalEmbedState } from '../context';
+import { RenderedElement } from './rendered_element.container';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 
-// @ts-ignore CSS Module
-import css from './page.module';
+import css from './page.module.scss';
 
 interface Props {
+  height: number;
+  width: number;
   page: CanvasRenderedPage;
 }
 
-export const Page = (props: Props) => {
-  const [{ workpad }] = useExternalEmbedState();
-  if (!workpad) {
-    return null;
-  }
+export const Page = ({ page, height, width }: Props) => {
+  const { elements, style, id } = page;
 
-  const { height, width, id } = workpad;
-  const { elements, style } = props.page;
-
-  const output = elements.map((element: CanvasRenderedElement, index) => (
-    <RenderedElement key={element.id} element={element} number={index + 1} />
+  const output = elements.map((element: CanvasRenderedElement, i) => (
+    <RenderedElement key={element.id} element={element} index={i + 1} />
   ));
 
   return (

@@ -4,64 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  createContext,
-  useContext,
-  Dispatch,
-  useReducer,
-  ReactChild,
-  RefObject,
-} from 'react';
-import { CanvasRenderedWorkpad } from '../types';
+import React, { createContext, useContext, Dispatch, useReducer, ReactChild } from 'react';
+import { ExternalEmbedState } from '../types';
 import { reducer } from './reducer';
 import { ExternalEmbedAction } from './actions';
-
-export interface ExternalEmbedState {
-  renderersRegistry: {
-    register: (fn: Function) => void;
-    get: (name: string) => Function;
-  } | null;
-  workpad: CanvasRenderedWorkpad | null;
-  page: number;
-  height: number;
-  width: number;
-  footer: {
-    isScrubberVisible: boolean;
-  };
-  settings: {
-    autoplay: {
-      enabled: boolean;
-      interval: string;
-      animate: boolean;
-    };
-    toolbar: {
-      autohide: boolean;
-    };
-  };
-  refs: {
-    stage: RefObject<HTMLDivElement>;
-  };
-}
 
 type StateType = [ExternalEmbedState, Dispatch<ExternalEmbedAction>];
 
 export const initialExternalEmbedState: ExternalEmbedState = {
-  renderersRegistry: null,
+  renderers: {},
   workpad: null,
-  page: 0,
-  height: 0,
-  width: 0,
+  stage: {
+    page: 0,
+    height: 0,
+    width: 0,
+  },
   footer: {
     isScrubberVisible: false,
   },
   settings: {
     autoplay: {
-      enabled: false,
+      isEnabled: false,
       interval: '5s',
-      animate: false,
     },
     toolbar: {
-      autohide: false,
+      isAutohide: false,
     },
   },
   refs: {

@@ -6,42 +6,42 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { useExternalEmbedState, setScrubberVisible, setPage, setAutoplay } from '../../context';
+
+export type onSetPageNumberProp = (page: number) => void;
+export type onToggleScrubberProp = () => void;
+
+interface Props {
+  page: number;
+  totalPages: number;
+  onSetPageNumber: onSetPageNumberProp;
+  onToggleScrubber: onToggleScrubberProp;
+}
 
 /**
  * The page count and paging controls within the footer of the Embedded Workpad.
  */
-export const PageControls = () => {
-  const [{ workpad, footer, page }, dispatch] = useExternalEmbedState();
-
-  if (!workpad) {
-    return null;
-  }
-
-  const { isScrubberVisible } = footer;
-
-  const toggleScrubber = () => {
-    dispatch(setAutoplay(false));
-    dispatch(setScrubberVisible(!isScrubberVisible));
-  };
-
-  const setPageNumber = (number: number) => dispatch(setPage(number));
+export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubber }: Props) => {
   const currentPage = page + 1;
-  const totalPages = workpad.pages.length;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="ghost"
-          onClick={() => setPageNumber(page - 1)}
+          data-test-subj="pageControlsPrevPage"
+          onClick={() => onSetPageNumber(page - 1)}
           iconType="arrowLeft"
           disabled={currentPage <= 1}
           aria-label="Previous Page"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty color="ghost" size="s" onClick={toggleScrubber}>
+        <EuiButtonEmpty
+          color="ghost"
+          size="s"
+          onClick={onToggleScrubber}
+          data-test-subj="pageControlsCurrentPage"
+        >
           <EuiText color="ghost" size="s">
             Page {currentPage}
             {totalPages > 1 ? ` of ${totalPages}` : null}
@@ -51,7 +51,8 @@ export const PageControls = () => {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="ghost"
-          onClick={() => setPageNumber(page + 1)}
+          data-test-subj="pageControlsNextPage"
+          onClick={() => onSetPageNumber(page + 1)}
           iconType="arrowRight"
           disabled={currentPage >= totalPages}
           aria-label="Next Page"

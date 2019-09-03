@@ -10,16 +10,35 @@ import { App } from '../components/app';
 import { CanvasRenderedWorkpad } from '../types';
 
 export interface Options {
-  /** The preferred height to scale the embedded workpad.  If only `height` is
+  /**
+   * The preferred height to scale the embedded workpad.  If only `height` is
    * specified, `width` will be calculated by the workpad ratio.  If both are
-   * specified, the ratio will be overriden by an absolute size. */
+   * specified, the ratio will be overriden by an absolute size.
+   */
   height?: number;
-  /** The preferred width to scale the embedded workpad.  If only `width` is
+  /**
+   * The preferred width to scale the embedded workpad.  If only `width` is
    * specified, `height` will be calculated by the workpad ratio.  If both are
-   * specified, the ratio will be overriden by an absolute size. */
+   * specified, the ratio will be overriden by an absolute size.
+   */
   width?: number;
   /** The initial page to display. */
   page?: number;
+  /**
+   * Should the runtime automatically move through the pages of the workpad?
+   * @default false
+   */
+  autoplay?: boolean;
+  /**
+   * The interval upon which the pages will advance in time format, (e.g. 2s, 1m)
+   * @default '5s'
+   * */
+  interval?: string;
+  /**
+   * Should the toolbar be hidden?
+   * @default false
+   */
+  toolbar?: boolean;
 }
 
 const PREFIX = 'kbn-canvas';
@@ -51,12 +70,15 @@ const getWorkpad = async (url: string): Promise<CanvasRenderedWorkpad | null> =>
 };
 
 const updateArea = async (area: Element) => {
-  const { url, page: pageAttr, height: heightAttr, weight: widthAttr } = getAttributes(area, [
-    'url',
-    'page',
-    'height',
-    'width',
-  ]);
+  const {
+    url,
+    page: pageAttr,
+    height: heightAttr,
+    width: widthAttr,
+    autoplay,
+    interval,
+    toolbar,
+  } = getAttributes(area, ['url', 'page', 'height', 'width', 'autoplay', 'interval', 'toolbar']);
 
   if (url) {
     const workpad = await getWorkpad(url);
@@ -68,22 +90,32 @@ const updateArea = async (area: Element) => {
 
       if (height && !width) {
         // If we have a height but no width, the width should honor the workpad ratio.
-        width = workpad.width * (height / workpad.height);
+        width = Math.round(workpad.width * (height / workpad.height));
       } else if (width && !height) {
         // If we have a width but no height, the height should honor the workpad ratio.
-        height = workpad.height * (width / workpad.width);
+        height = Math.round(workpad.height * (width / workpad.width));
       }
 
-      const options = {
+      const stage = {
         height: height || workpad.height,
         width: width || workpad.width,
-        page: page ? page : workpad.page,
+        page: page !== null ? page : workpad.page,
+      };
+
+      const settings = {
+        autoplay: {
+          isEnabled: !!autoplay,
+          interval: interval || '5s',
+        },
+        toolbar: {
+          isAutohide: !!toolbar,
+        },
       };
 
       area.classList.add('kbnCanvas');
       area.removeAttribute(EMBED);
 
-      render(<App workpad={workpad} {...options} />, area);
+      render(<App workpad={workpad} {...{ stage, settings }} />, area);
     }
   }
 };

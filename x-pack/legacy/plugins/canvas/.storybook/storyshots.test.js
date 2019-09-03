@@ -12,6 +12,10 @@ import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-story
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
+import jquery from 'jquery';
+global.$ = jquery;
+global.jQuery = jquery;
+
 // Set our default timezone to UTC for tests so we can generate predictable snapshots
 moment.tz.setDefault('UTC');
 
@@ -60,6 +64,11 @@ jest.mock(
     return 'Disabled Panel';
   }
 );
+
+// This element uses a `ref` and cannot be rendered by Jest snapshots.
+import { RenderedElement } from '../external_runtime/components/rendered_element';
+jest.mock('../external_runtime/components/rendered_element');
+RenderedElement.mockImplementation(() => 'RenderedElement');
 
 addSerializer(styleSheetSerializer);
 

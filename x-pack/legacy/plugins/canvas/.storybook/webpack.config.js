@@ -57,6 +57,53 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  config.module.rules.push({
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      { loader: 'sass-loader' },
+    ],
+  });
+
+  config.module.rules.push({
+    test: /\.module\.s(a|c)ss$/,
+    loader: [
+      'style-loader',
+      {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 2,
+          modules: true,
+          localIdentName: '[name]__[local]___[hash:base64:5]',
+        },
+      },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      {
+        loader: 'sass-loader',
+      },
+    ],
+  });
+
+  config.plugins.push(
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+    })
+  );
+
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
@@ -109,8 +156,8 @@ module.exports = async ({ config }) => {
     })
   );
 
-  // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  // Tell Webpack about the extensions
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Alias imports to either a mock or the proper module or directory.
   // NOTE: order is important here - `ui/notify` will override `ui/notify/foo` if it

@@ -5,42 +5,52 @@
  */
 
 import React, { useState } from 'react';
-import { useExternalEmbedState, setPage, setScrubberVisible } from '../context';
-import { Page } from './page';
+import { Page } from './page.container';
 import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
 
-// @ts-ignore CSS Module
-import css from './canvas.module';
+import css from './canvas.module.scss';
+import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
+
+export type onSetPageProp = (page: number) => void;
+export type onSetScrubberVisibleProp = (visible: boolean) => void;
+
+interface Props {
+  onSetPage: onSetPageProp;
+  onSetScrubberVisible: onSetScrubberVisibleProp;
+  refs: Pick<Refs, 'stage'>;
+  settings: Settings;
+  stage: Stage;
+  workpad: Pick<CanvasRenderedWorkpad, 'height' | 'width' | 'pages'>;
+}
 
 /**
  * The "stage" for a workpad, which composes the toolbar and other components.
  */
-export const Canvas = () => {
-  const [
-    { workpad, height: containerHeight, width: containerWidth, page, settings, refs },
-    dispatch,
-  ] = useExternalEmbedState();
-
-  if (!workpad) {
-    return null;
-  }
-
+export const Canvas = ({
+  onSetPage,
+  onSetScrubberVisible,
+  refs,
+  settings,
+  stage,
+  workpad,
+}: Props) => {
   const { toolbar, autoplay } = settings;
-  const { height, width, pages } = workpad;
-  const ratio = Math.max(width / containerWidth, height / containerHeight);
-  const transform = `scale3d(${containerHeight / (containerHeight * ratio)}, ${containerWidth /
-    (containerWidth * ratio)}, 1)`;
+  const { height: stageHeight, width: stageWidth, page } = stage;
+  const { height: workpadHeight, width: workpadWidth } = workpad;
+  const ratio = Math.max(workpadWidth / stageWidth, workpadHeight / stageHeight);
+  const transform = `scale3d(${stageHeight / (stageHeight * ratio)}, ${stageWidth /
+    (stageWidth * ratio)}, 1)`;
 
   const pageStyle = {
-    height,
+    height: workpadHeight,
     transform,
-    width,
+    width: workpadWidth,
   };
 
-  if (autoplay.enabled && autoplay.interval) {
+  if (autoplay.isEnabled && autoplay.interval) {
     // We need to clear the timeout every time, even if it doesn't need to be or
     // it's null.  Since one could select a different page from the scrubber at
     // any point, or change the interval, we need to make sure the interval is
@@ -49,19 +59,19 @@ export const Canvas = () => {
     clearTimeout(timeout);
 
     timeout = setTimeout(
-      () => dispatch(setPage(page >= workpad.pages.length - 1 ? 0 : page + 1)),
+      () => onSetPage(page >= workpad.pages.length - 1 ? 0 : page + 1),
       getTimeInterval(autoplay.interval)
     );
   }
 
-  const [toolbarHidden, setToolbarHidden] = useState(toolbar.autohide);
-  const rootHeight = containerHeight + (toolbar.autohide ? 0 : FOOTER_HEIGHT);
+  const [toolbarHidden, setToolbarHidden] = useState(toolbar.isAutohide);
+  const rootHeight = stageHeight + (toolbar.isAutohide ? 0 : FOOTER_HEIGHT);
 
   const hideToolbar = (hidden: boolean) => {
-    if (settings.toolbar.autohide) {
+    if (toolbar.isAutohide) {
       if (hidden) {
         // Hide the scrubber if we hide the toolbar.
-        dispatch(setScrubberVisible(false));
+        onSetScrubberVisible(false);
       }
       setToolbarHidden(hidden);
     }
@@ -70,17 +80,17 @@ export const Canvas = () => {
   return (
     <div
       className={css.root}
-      style={{ height: rootHeight, width: containerWidth }}
+      style={{ height: rootHeight, width: stageWidth }}
       onMouseEnter={() => hideToolbar(false)}
       onMouseLeave={() => hideToolbar(true)}
       ref={refs.stage}
     >
-      <div className={css.container} style={{ height: containerHeight, width: containerWidth }}>
+      <div className={css.container} style={{ height: stageHeight, width: stageWidth }}>
         <div className={css.page} style={pageStyle}>
-          <Page page={pages[page]} />
+          <Page index={page} />
         </div>
       </div>
-      <Footer hidden={toolbarHidden} />
+      <Footer isHidden={toolbarHidden} />
     </div>
   );
 };

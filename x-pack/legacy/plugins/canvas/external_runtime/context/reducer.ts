@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalEmbedState } from './state';
+import { ExternalEmbedState } from '../types';
 import { ExternalEmbedAction, ExternalEmbedActions } from './actions';
 
 /**
  * The Action Reducer for the Embedded Canvas Workpad interface.
  */
-export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) => {
+export const reducer = (
+  state: ExternalEmbedState,
+  action: ExternalEmbedAction
+): ExternalEmbedState => {
   switch (action.type) {
-    case ExternalEmbedActions.SET_WORKPAD: {
-      return {
-        ...state,
-        workpad: action.payload.workpad,
-      };
-    }
     case ExternalEmbedActions.SET_PAGE: {
+      const { stage } = state;
       return {
         ...state,
-        page: action.payload.page,
+        stage: {
+          ...stage,
+          page: action.payload.page,
+        },
       };
     }
     case ExternalEmbedActions.SET_SCRUBBER_VISIBLE: {
@@ -38,6 +39,7 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
     case ExternalEmbedActions.SET_AUTOPLAY: {
       const { settings } = state;
       const { autoplay } = settings;
+      const { isEnabled } = action.payload;
 
       return {
         ...state,
@@ -45,23 +47,7 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
           ...settings,
           autoplay: {
             ...autoplay,
-            enabled: action.payload.autoplay,
-          },
-        },
-      };
-    }
-    case ExternalEmbedActions.SET_AUTOPLAY_ANIMATE: {
-      const { settings } = state;
-      const { autoplay } = settings;
-      const { animate } = action.payload;
-
-      return {
-        ...state,
-        settings: {
-          ...settings,
-          autoplay: {
-            ...autoplay,
-            animate,
+            isEnabled,
           },
         },
       };
@@ -85,7 +71,7 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
     case ExternalEmbedActions.SET_TOOLBAR_AUTOHIDE: {
       const { settings } = state;
       const { toolbar } = settings;
-      const { autohide } = action.payload;
+      const { isAutohide } = action.payload;
 
       return {
         ...state,
@@ -93,7 +79,7 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
           ...settings,
           toolbar: {
             ...toolbar,
-            autohide,
+            isAutohide,
           },
         },
       };

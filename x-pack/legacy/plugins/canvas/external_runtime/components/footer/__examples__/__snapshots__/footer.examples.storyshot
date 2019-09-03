@@ -1,0 +1,519 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots runtime/Footer Footer 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 172,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    style={
+      Object {
+        "height": 48,
+      }
+    }
+  >
+    <div
+      className="root"
+    >
+      <div
+        className="slideContainer"
+      >
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 150,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 100,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 150,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-page-7186b301-f8a7-4c65-8b89-38d68d31cfc4"
+              style={
+                Object {
+                  "background": "#777777",
+                  "height": 720,
+                  "width": 1080,
+                }
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="bar"
+      style={
+        Object {
+          "bottom": 0,
+        }
+      }
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem title"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </div>
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "cursor": "default",
+                  "minWidth": 0,
+                }
+              }
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <div
+                  className="euiTextColor euiTextColor--ghost"
+                >
+                  <div
+                    className="eui-textTruncate"
+                  >
+                    My Canvas Workpad
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              style={
+                Object {
+                  "margin": "0 12px",
+                }
+              }
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Previous Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsPrevPage"
+                  disabled={true}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+                  data-test-subj="pageControlsCurrentPage"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      <div
+                        className="euiText euiText--small"
+                      >
+                        <div
+                          className="euiTextColor euiTextColor--ghost"
+                        >
+                          Page 
+                          1
+                        </div>
+                      </div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Next Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsNextPage"
+                  disabled={true}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                  id="settings"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <button
+                      aria-label="Settings"
+                      className="euiButtonIcon euiButtonIcon--ghost"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots runtime/Footer PageControls 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    style={
+      Object {
+        "margin": "0 12px",
+      }
+    }
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="Previous Page"
+        className="euiButtonIcon euiButtonIcon--ghost"
+        data-test-subj="pageControlsPrevPage"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+        data-test-subj="pageControlsCurrentPage"
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          className="euiButtonEmpty__content"
+        >
+          <span
+            className="euiButtonEmpty__text"
+          >
+            <div
+              className="euiText euiText--small"
+            >
+              <div
+                className="euiTextColor euiTextColor--ghost"
+              >
+                Page 
+                1
+              </div>
+            </div>
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="Next Page"
+        className="euiButtonIcon euiButtonIcon--ghost"
+        data-test-subj="pageControlsNextPage"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots runtime/Footer PagePreview 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": undefined,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    onClick={[Function]}
+    onKeyPress={[Function]}
+    style={
+      Object {
+        "height": 172,
+        "width": 258,
+      }
+    }
+  >
+    <div
+      className="preview"
+      style={
+        Object {
+          "height": 172,
+          "transform": "scale3d(0.2388888888888889, 0.2388888888888889, 1)",
+          "width": 258,
+        }
+      }
+    >
+      <div
+        className="root"
+        id="page-page-7186b301-f8a7-4c65-8b89-38d68d31cfc4"
+        style={
+          Object {
+            "background": "#777777",
+            "height": 720,
+            "width": 1080,
+          }
+        }
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots runtime/Footer Scrubber 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 172,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root visible"
+  >
+    <div
+      className="slideContainer"
+    >
+      <div
+        className="root"
+        onClick={[Function]}
+        onKeyPress={[Function]}
+        style={
+          Object {
+            "height": 100,
+            "width": 150,
+          }
+        }
+      >
+        <div
+          className="preview"
+          style={
+            Object {
+              "height": 100,
+              "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+              "width": 150,
+            }
+          }
+        >
+          <div
+            className="root"
+            id="page-page-7186b301-f8a7-4c65-8b89-38d68d31cfc4"
+            style={
+              Object {
+                "background": "#777777",
+                "height": 720,
+                "width": 1080,
+              }
+            }
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots runtime/Footer Title 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "cursor": "default",
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--ghost"
+        >
+          <div
+            className="eui-textTruncate"
+          >
+            My Canvas Workpad
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
