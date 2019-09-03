@@ -119,27 +119,22 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
 }) => {
   const { entryTransaction } = waterfall;
   if (!entryTransaction) {
-    if (isLoading) {
-      return (
-        <EuiPanel paddingSize="m">
-          <LoadingStatePrompt />
-        </EuiPanel>
-      );
-    }
-    return (
-      <EuiPanel paddingSize="m">
-        <EuiEmptyPrompt
-          title={
-            <div>
-              {i18n.translate('xpack.apm.transactionDetails.traceNotFound', {
-                defaultMessage: 'The selected trace cannot be found'
-              })}
-            </div>
-          }
-          titleSize="s"
-        />
-      </EuiPanel>
+    const content = isLoading ? (
+      <LoadingStatePrompt />
+    ) : (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.transactionDetails.traceNotFound', {
+              defaultMessage: 'The selected trace cannot be found'
+            })}
+          </div>
+        }
+        titleSize="s"
+      />
     );
+
+    return <EuiPanel paddingSize="m">{content}</EuiPanel>;
   }
 
   return (
