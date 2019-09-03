@@ -7,13 +7,11 @@
 import React, { Fragment, FC } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiSwitch,
@@ -21,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
@@ -80,13 +79,25 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
               defaultMessage: 'Job type',
             })}
-            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeHelpText', {
-              defaultMessage: `This form let's you create an outlier detection job using a model memory limit of 50MByte. To create jobs using other settings or to create other types of jobs, please switch to the advanced editor below.`,
-            })}
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
+                defaultMessage="This form let's you create an outlier detection job using a model memory limit of 50MByte based on a feature index. To create jobs with more advanced settings or other types of analysis, please switch to the {advancedEditorButton}. Note you cannot switch back to this form once the advanced editor is enabled."
+                values={{
+                  advancedEditorButton: (
+                    <EuiLink onClick={actions.switchToAdvancedEditor}>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
+                        defaultMessage="advanced editor"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
           >
             <EuiText>Outlier Detection</EuiText>
           </EuiFormRow>
-          <EuiHorizontalRule />
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
               defaultMessage: 'Job ID',
@@ -255,18 +266,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
             />
           </EuiFormRow>
-          <EuiHorizontalRule />
-          <EuiButtonEmpty onClick={actions.switchToAdvancedEditor} size="s" flush="left">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton', {
-              defaultMessage: 'Switch to advanced editor',
-            })}
-          </EuiButtonEmpty>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorHelpText', {
-              defaultMessage:
-                'The advanced editor allows you to edit the full analytics configuration. Note you cannot switch back to this form once the advanced editor is enabled.',
-            })}
-          </EuiText>
         </Fragment>
       )}
     </EuiForm>
