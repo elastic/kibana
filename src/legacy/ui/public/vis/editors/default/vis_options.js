@@ -97,7 +97,7 @@ uiModules
             aggs="editorState.aggs"
             aggs-labels="aggsLabels"
             has-histogram-agg="hasHistogramAgg"
-            current-tab="sidebar.section"
+            current-tab="currentTab"
             state-params="editorState.params"
             vis="vis"
             ui-state="uiState"
