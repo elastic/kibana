@@ -49,7 +49,7 @@ describe('ApplySiemFilterAction', () => {
   });
 
   describe('#isCompatible', () => {
-    test('when embeddable type is MAP_SAVED_OBJECT_TYPE and triggerContext filters exist, returns true', async () => {
+    test('when embeddable type is MAP_SAVED_OBJECT_TYPE and filters exist, returns true', async () => {
       const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
@@ -65,23 +65,7 @@ describe('ApplySiemFilterAction', () => {
       }
     });
 
-    test('when embeddable type is MAP_SAVED_OBJECT_TYPE and triggerContext does not exist, returns false', async () => {
-      const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
-      const embeddable = {
-        type: MAP_SAVED_OBJECT_TYPE,
-      };
-      if (isEmbeddable(embeddable)) {
-        const result = await action.isCompatible({
-          embeddable,
-          filters: [],
-        });
-        expect(result).toBe(false);
-      } else {
-        throw new Error('Invalid embeddable in unit test');
-      }
-    });
-
-    test('when embeddable type is MAP_SAVED_OBJECT_TYPE and triggerContext filters do not exist, returns false', async () => {
+    test('when embeddable type is MAP_SAVED_OBJECT_TYPE and filters do not exist, returns false', async () => {
       const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
