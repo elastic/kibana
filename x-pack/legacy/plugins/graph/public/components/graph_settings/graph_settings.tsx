@@ -62,7 +62,7 @@ export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) 
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{i18n.translate('xpack.grah.settings.title', { defaultMessage: 'Settings' })}</h2>
+          <h2>{i18n.translate('xpack.graph.settings.title', { defaultMessage: 'Settings' })}</h2>
         </EuiTitle>
         <EuiTabs style={{ marginBottom: '-25px' }}>
           {tabs.map(({ title }, index) => (
