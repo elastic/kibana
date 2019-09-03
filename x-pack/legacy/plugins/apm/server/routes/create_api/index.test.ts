@@ -98,7 +98,7 @@ describe('createApi', () => {
       expect(() =>
         route.handler({
           query: {
-            _debug: true
+            _debug: 'true'
           }
         })
       ).not.toThrow();
@@ -124,7 +124,7 @@ describe('createApi', () => {
       expect(() =>
         route.handler({
           query: {
-            _debug: true,
+            _debug: 'true',
             extra: ''
           }
         })
@@ -227,7 +227,7 @@ describe('createApi', () => {
         route.handler({
           query: {
             bar: '',
-            _debug: true
+            _debug: 'true'
           }
         })
       ).not.toThrow();

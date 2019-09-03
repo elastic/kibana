@@ -16,10 +16,10 @@ export const zeekRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },
-  renderRow: ({ browserFields, data, width, children }) => (
+  renderRow: ({ browserFields, data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <ZeekDetails data={data} browserFields={browserFields} />
       </RowRendererContainer>
     </Row>

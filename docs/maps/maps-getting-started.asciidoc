@@ -13,7 +13,6 @@ light to dark.
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
-[float]
 [[maps-read-only-access]]
 NOTE: If you have insufficient privileges to create or save maps, a read-only icon 
 appears in the application header. The buttons to create new maps or edit

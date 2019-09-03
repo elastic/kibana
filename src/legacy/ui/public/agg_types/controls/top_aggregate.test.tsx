@@ -62,14 +62,14 @@ describe('TopAggregateParamEditor', () => {
     aggParam = {
       options,
     };
-    agg = {
+    agg = ({
       params: {
         field: {
           type: 'number',
         },
       },
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
-    };
+    } as any) as AggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,
@@ -150,7 +150,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    };
+    } as AggConfig;
 
     comp.setProps({ agg });
 
@@ -165,7 +165,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'date',
         },
       },
-    };
+    } as AggConfig;
 
     comp.setProps({ agg });
 
@@ -179,7 +179,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    };
+    } as AggConfig;
 
     comp.setProps({ agg, value: undefined });
 

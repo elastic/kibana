@@ -23,9 +23,10 @@ interface Props {
   onPinEvent: OnPinEvent;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  expanded: boolean;
   data: TimelineNonEcsData[];
+  expanded: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  isEventViewer?: boolean;
   loading: boolean;
   onColumnResized: OnColumnResized;
   onUnPinEvent: OnUnPinEvent;
@@ -35,7 +36,6 @@ interface Props {
   onToggleExpanded: (eventId: string) => () => void;
   onToggleShowNotes: (eventId: string) => () => void;
   getNotesByIds: (noteIds: string[]) => Note[];
-  width: number;
   associateNote: (
     eventId: string,
     addNoteToEvent: AddNoteToEvent,
@@ -60,6 +60,7 @@ export const StatefulEventChild = React.memo<Props>(
     data,
     eventIdToNoteIds,
     getNotesByIds,
+    isEventViewer = false,
     loading,
     onColumnResized,
     onToggleExpanded,
@@ -68,7 +69,6 @@ export const StatefulEventChild = React.memo<Props>(
     showNotes,
     onToggleShowNotes,
     updateNote,
-    width,
   }) => (
     <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
       <EuiFlexItem data-test-subj="event-column-data" grow={false}>
@@ -78,10 +78,11 @@ export const StatefulEventChild = React.memo<Props>(
           associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
-          expanded={expanded}
           data={data}
+          expanded={expanded}
           eventIdToNoteIds={eventIdToNoteIds}
           getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
           loading={loading}
           onColumnResized={onColumnResized}
           onEventToggled={onToggleExpanded(id)}
@@ -104,7 +105,6 @@ export const StatefulEventChild = React.memo<Props>(
           showAddNote={showNotes}
           toggleShowAddNote={onToggleShowNotes(id)}
           updateNote={updateNote}
-          width={`${width - 10}px`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

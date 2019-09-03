@@ -14,10 +14,11 @@ import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { EMS_TMS } from '../../../../common/constants';
 
 export class EMSTMSSource extends AbstractTMSSource {
 
-  static type = 'EMS_TMS';
+  static type = EMS_TMS;
   static title = i18n.translate('xpack.maps.source.emsTileTitle', {
     defaultMessage: 'Tiles'
   });
@@ -117,17 +118,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     if (!markdown) {
       return [];
     }
-
-    return markdown.split('|').map((attribution) => {
-      attribution = attribution.trim();
-      //this assumes attribution is plain markdown link
-      const extractLink = /\[(.*)\]\((.*)\)/;
-      const result = extractLink.exec(attribution);
-      return {
-        label: result ? result[1] : null,
-        url: result ? result[2] : null
-      };
-    });
+    return this.convertMarkdownLinkToObjectArr(markdown);
   }
 
   async getUrlTemplate() {
