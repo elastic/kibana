@@ -177,15 +177,18 @@ export const Wizard: FC<Props> = ({
 
   function getSummaryStepTitle() {
     if (kibanaContext.currentSavedSearch.id !== undefined) {
-      return i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
+      return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
         values: { title: kibanaContext.currentSavedSearch.title },
       });
     } else if (kibanaContext.currentIndexPattern.id !== undefined) {
-      return i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
-        defaultMessage: 'New job from index pattern {title}',
-        values: { title: kibanaContext.currentIndexPattern.title },
-      });
+      return i18n.translate(
+        'xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleIndexPattern',
+        {
+          defaultMessage: 'New job from index pattern {title}',
+          values: { title: kibanaContext.currentIndexPattern.title },
+        }
+      );
     }
     return '';
   }
