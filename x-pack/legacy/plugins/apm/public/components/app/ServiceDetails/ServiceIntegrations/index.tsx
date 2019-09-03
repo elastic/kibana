@@ -13,13 +13,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
-import { InternalCoreStart } from 'src/core/public';
 import { idx } from '@kbn/elastic-idx';
+import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
-import { CoreContext } from '../../../../context/CoreContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -31,7 +30,9 @@ interface State {
 type FlyoutName = null | 'ML' | 'Watcher';
 
 export class ServiceIntegrations extends React.Component<Props, State> {
-  static contextType = CoreContext;
+  static contextType = KibanaCoreContext;
+  context!: React.ContextType<typeof KibanaCoreContext>;
+
   public state: State = { isPopoverOpen: false, activeFlyout: null };
 
   public getPanelItems = memoize((mlAvailable: boolean | undefined) => {
@@ -67,7 +68,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
   };
 
   public getWatcherPanelItems = () => {
-    const core: InternalCoreStart = this.context;
+    const core = this.context;
 
     return [
       {

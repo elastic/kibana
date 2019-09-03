@@ -28,7 +28,12 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { ColumnType, MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
+import {
+  ColumnType,
+  MlInMemoryTable,
+  SortingPropType,
+  SORT_DIRECTION,
+} from '../../../../../../common/types/eui/in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { Dictionary } from '../../../../../../common/types/common';
@@ -51,23 +56,6 @@ import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
 const CELL_CLICK_ENABLED = false;
-
-// Defining our own ENUM here.
-// EUI's SortDirection wasn't usable as a union type
-// required for the Sorting interface.
-enum SORT_DIRECTON {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
-interface Sorting {
-  sort: {
-    field: string;
-    direction: SORT_DIRECTON.ASC | SORT_DIRECTON.DESC;
-  };
-}
-
-type TableSorting = Sorting | boolean;
 
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
@@ -301,13 +289,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     return column;
   });
 
-  let sorting: TableSorting = false;
+  let sorting: SortingPropType = false;
 
   if (columns.length > 0) {
     sorting = {
       sort: {
         field: `_source["${selectedFields[0]}"]`,
-        direction: SORT_DIRECTON.ASC,
+        direction: SORT_DIRECTION.ASC,
       },
     };
   }
