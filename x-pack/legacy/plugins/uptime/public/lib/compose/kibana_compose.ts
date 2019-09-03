@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uiRoutes from 'ui/routes';
-import { UMKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { npStart } from 'ui/new_platform';
 import { UMFrontendLibs } from '../lib';
+import { getKibanaFrameworkAdapter } from '../adapters/framework/new_platform_adapter';
 
 export function compose(): UMFrontendLibs {
   const libs: UMFrontendLibs = {
-    framework: new UMKibanaFrameworkAdapter(uiRoutes),
+    framework: getKibanaFrameworkAdapter(npStart.core),
   };
 
   return libs;

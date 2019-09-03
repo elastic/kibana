@@ -5,16 +5,27 @@
  */
 
 import 'react-vis/dist/style.css';
-import 'ui/angular-bootstrap';
-import 'ui/autoload/all';
-import 'ui/autoload/styles';
-import 'ui/courier';
-import 'ui/persisted_log';
-import 'uiExports/autocompleteProviders';
+import chrome from 'ui/chrome';
 import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';
 import { UMFrontendLibs } from '../lib/lib';
 import { UptimeApp } from '../uptime_app';
+import template from './template.html';
+import { PLUGIN } from '../../common/constants';
 
 export async function startApp(libs: UMFrontendLibs) {
-  libs.framework.render(UptimeApp, createApolloClient);
+  // @ts-ignore
+  chrome.setRootTemplate(template);
+  const checkForRoot = () => {
+    return new Promise(resolve => {
+      const ready = !!document.getElementById(PLUGIN.APP_ROOT_ID);
+      if (ready) {
+        resolve();
+      } else {
+        setTimeout(() => resolve(checkForRoot()), 10);
+      }
+    });
+  };
+  checkForRoot().then(() => {
+    libs.framework.render(UptimeApp, createApolloClient);
+  });
 }
