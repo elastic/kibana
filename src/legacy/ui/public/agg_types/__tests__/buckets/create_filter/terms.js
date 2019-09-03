@@ -40,7 +40,7 @@ describe('AggConfig Filters', function () {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
@@ -57,7 +57,7 @@ describe('AggConfig Filters', function () {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: 'ssl' } } ]
       });
-      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const aggConfig = vis.aggs.byName('terms')[0];
       const filterFalse = createFilterTerms(aggConfig, 0);
       expect(filterFalse).to.have.property('query');
       expect(filterFalse.query).to.have.property('match');
@@ -76,7 +76,7 @@ describe('AggConfig Filters', function () {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, '__missing__');
       expect(filter).to.have.property('exists');
       expect(filter.exists).to.have.property('field', '_type');
@@ -90,7 +90,7 @@ describe('AggConfig Filters', function () {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, '__other__', { terms: ['apache'] })[0];
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('bool');
