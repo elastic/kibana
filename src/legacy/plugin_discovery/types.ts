@@ -75,7 +75,7 @@ export interface LegacyPluginOptions {
     interpreter?: string[];
     uiSettingDefaults?: Record<string, any>;
   }>;
-  uiCapabilities?: Capabilities | (() => Record<string, any>);
+  uiCapabilities?: Capabilities | (() => Partial<Capabilities>);
   publicDir: any;
   configPrefix: any;
   config: any;
