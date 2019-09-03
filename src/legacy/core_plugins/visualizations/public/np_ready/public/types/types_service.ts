@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
@@ -27,6 +28,7 @@ import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import * as types from 'ui/vis/vis';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 

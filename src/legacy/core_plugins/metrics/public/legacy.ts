@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { visualizations } from '../../visualizations/public';
+import { visualizations } from '../../visualizations/public/np_ready/public';
 import { MetricsPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
