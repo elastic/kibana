@@ -432,7 +432,7 @@ export class DashboardAppController {
     };
 
     $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = savedQuery;
+      $scope.savedQuery = { ...savedQuery };
     };
 
     $scope.onClearSavedQuery = () => {
@@ -447,7 +447,6 @@ export class DashboardAppController {
         },
         []
       );
-      courier.fetch();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -465,7 +464,6 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      courier.fetch();
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
@@ -517,17 +515,6 @@ export class DashboardAppController {
     );
 
     $scope.timefilterSubscriptions$ = new Subscription();
-    // The only reason this is here is so that search embeddables work on a dashboard with
-    // a refresh interval turned on. This kicks off the search poller. It should be
-    // refactored so no embeddables need to listen to the timefilter directly but instead
-    // the container tells it when to reload.
-    $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getFetch$(), {
-        next: () => {
-          courier.fetch();
-        },
-      })
-    );
 
     $scope.timefilterSubscriptions$.add(
       subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
