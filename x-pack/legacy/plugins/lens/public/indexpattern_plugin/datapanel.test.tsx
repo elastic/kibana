@@ -5,8 +5,8 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import React, { ChangeEvent, ReactElement } from 'react';
-import { EuiComboBox, EuiContextMenuPanel } from '@elastic/eui';
+import React, { ChangeEvent } from 'react';
+import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';

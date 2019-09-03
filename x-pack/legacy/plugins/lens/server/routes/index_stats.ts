@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { get, uniq } from 'lodash';
+import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';

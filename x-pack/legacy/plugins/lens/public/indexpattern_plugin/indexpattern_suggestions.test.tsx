@@ -1171,6 +1171,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
+        showEmptyFields: true,
         layers: {
           first: {
             ...persistedState.layers.first,
@@ -1287,6 +1288,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
+        showEmptyFields: true,
         layers: {
           first: {
             ...persistedState.layers.first,
@@ -1337,6 +1339,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
+        showEmptyFields: true,
         layers: {
           first: {
             ...persistedState.layers.first,
