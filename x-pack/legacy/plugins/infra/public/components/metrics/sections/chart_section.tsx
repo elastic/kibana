@@ -35,11 +35,12 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { InfraMetricCombinedData } from '../../../containers/metrics/with_metrics';
 import { isInfraMetricData } from '../../../utils/is_infra_apm_metrics';
 import { SourceConfiguration } from '../../../utils/source_configuration';
+import { MetricsTimeInput } from '../../../containers/metrics/with_metrics_time';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metric: InfraMetricCombinedData;
-  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
+  onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;
@@ -70,8 +71,8 @@ export const ChartSection = injectI18n(
             stopLiveStreaming();
           }
           onChangeRangeTime({
-            from,
-            to,
+            from: moment(from).toISOString(),
+            to: moment(to).toISOString(),
             interval: '>=1m',
           });
         }
@@ -121,7 +122,7 @@ export const ChartSection = injectI18n(
         <EuiTitle size="xs">
           <h3 id={section.id}>{section.label}</h3>
         </EuiTitle>
-        <div style={{ height: 200 }}>
+        <div style={{ height: 250, marginBottom: 16 }}>
           <Chart>
             <Axis
               id={getAxisId('timestamp')}
@@ -146,6 +147,8 @@ export const ChartSection = injectI18n(
               tooltip={tooltipProps}
               onBrushEnd={handleTimeChange}
               theme={getChartTheme()}
+              showLegend={true}
+              legendPosition="right"
             />
           </Chart>
         </div>

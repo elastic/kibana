@@ -10,11 +10,14 @@ import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { sections } from './sections';
 import { InfraMetricCombinedData } from '../../containers/metrics/with_metrics';
 import { SourceConfiguration } from '../../utils/source_configuration';
+import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricCombinedData[];
-  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
+  onChangeRangeTime?: (time: MetricsTimeInput) => void;
+  crosshairValue?: number;
+  onCrosshairUpdate?: (crosshairValue: number) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   nodeId: string;

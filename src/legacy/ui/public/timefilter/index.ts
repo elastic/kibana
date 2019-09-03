@@ -17,9 +17,8 @@
  * under the License.
  */
 
-// @ts-ignore
-export { registerTimefilterWithGlobalState } from './timefilter';
-export { timefilter, Timefilter, RefreshInterval } from './timefilter';
-export { timeHistory, TimeRange, TimeHistory } from './time_history';
+export { TimeRange, RefreshInterval } from '../../../../plugins/data/public';
 
+export { timefilter, Timefilter, registerTimefilterWithGlobalState } from './timefilter';
+export { timeHistory, TimeHistory } from './time_history';
 export { getTime } from './get_time';

@@ -54,7 +54,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.ip_range[0];
+      const aggConfig = vis.aggs.byName('ip_range')[0];
       const filter = createFilterIpRange(aggConfig, '0.0.0.0 to 1.1.1.1');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
@@ -84,7 +84,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.ip_range[0];
+      const aggConfig = vis.aggs.byName('ip_range')[0];
       const filter = createFilterIpRange(aggConfig, '67.129.65.201/27');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');

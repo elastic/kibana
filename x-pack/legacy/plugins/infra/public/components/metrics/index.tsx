@@ -15,6 +15,7 @@ import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 import { InfraMetricCombinedData } from '../../containers/metrics/with_metrics';
 import { SourceConfiguration } from '../../utils/source_configuration';
+import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
 
 interface Props {
   metrics: InfraMetricCombinedData[];
@@ -22,7 +23,7 @@ interface Props {
   loading: boolean;
   refetch: () => void;
   label: string;
-  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
+  onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;

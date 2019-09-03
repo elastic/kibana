@@ -34,7 +34,7 @@ import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
@@ -137,11 +137,13 @@ export const MetricDetail = withMetricPageProviders(
           <WithMetricsTime>
             {({
               timeRange,
+              parsedTimeRange,
               setTimeRange,
               refreshInterval,
               setRefreshInterval,
               isAutoReloading,
               setAutoReload,
+              triggerRefresh,
             }) => (
               <ColumnarPage>
                 <Header
@@ -164,7 +166,7 @@ export const MetricDetail = withMetricPageProviders(
                   <WithMetrics
                     layouts={filteredLayouts}
                     sourceId={sourceId}
-                    timerange={timeRange as InfraTimerangeInput}
+                    timerange={parsedTimeRange}
                     nodeType={nodeType}
                     nodeId={nodeId}
                     cloudId={cloudId}
@@ -231,6 +233,7 @@ export const MetricDetail = withMetricPageProviders(
                                             setRefreshInterval={setRefreshInterval}
                                             onChangeTimeRange={setTimeRange}
                                             setAutoReload={setAutoReload}
+                                            onRefresh={triggerRefresh}
                                           />
                                         </MetricsTitleTimeRangeContainer>
                                       </EuiPageHeaderSection>
@@ -243,7 +246,7 @@ export const MetricDetail = withMetricPageProviders(
                                         sourceConfiguration={source.configuration}
                                         nodeId={nodeId}
                                         nodeType={nodeType}
-                                        timeRange={timeRange}
+                                        timeRange={parsedTimeRange}
                                         metrics={metrics}
                                         loading={
                                           metrics.length > 0 && isAutoReloading ? false : loading
