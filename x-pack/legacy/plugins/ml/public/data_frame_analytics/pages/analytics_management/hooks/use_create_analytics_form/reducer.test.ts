@@ -8,6 +8,10 @@ import { ACTION } from './actions';
 import { reducer } from './reducer';
 import { getInitialState } from './state';
 
+jest.mock('ui/index_patterns', () => ({
+  validateIndexPattern: () => true,
+}));
+
 describe('useCreateAnalyticsForm', () => {
   test('reducer(): provide a minimum required valid job config, then reset.', () => {
     const initialState = getInitialState();

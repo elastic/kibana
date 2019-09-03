@@ -113,14 +113,15 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               title="KPI HOSTS"
                             >
                               <InspectContainer
+                                data-test-subj="transparent-inspect-container"
                                 showInspect={false}
                               >
                                 <div
                                   className="sc-EHOje wlqEL"
+                                  data-test-subj="transparent-inspect-container"
                                 >
                                   <EuiButtonIcon
                                     aria-label="Inspect"
-                                    className=""
                                     color="primary"
                                     data-test-subj="inspect-icon-button"
                                     iconSize="m"
@@ -367,14 +368,15 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               title="KPI HOSTS"
                             >
                               <InspectContainer
+                                data-test-subj="transparent-inspect-container"
                                 showInspect={false}
                               >
                                 <div
                                   className="sc-EHOje wlqEL"
+                                  data-test-subj="transparent-inspect-container"
                                 >
                                   <EuiButtonIcon
                                     aria-label="Inspect"
-                                    className=""
                                     color="primary"
                                     data-test-subj="inspect-icon-button"
                                     iconSize="m"
@@ -691,14 +693,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             title="KPI UNIQUE_PRIVATE_IPS"
                           >
                             <InspectContainer
+                              data-test-subj="transparent-inspect-container"
                               showInspect={false}
                             >
                               <div
                                 className="sc-EHOje dUUqHB"
+                                data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
-                                  className=""
                                   color="primary"
                                   data-test-subj="inspect-icon-button"
                                   iconSize="m"
