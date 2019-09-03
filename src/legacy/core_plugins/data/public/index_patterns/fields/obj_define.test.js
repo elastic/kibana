@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ObjDefine } from '../obj_define';
+import { ObjDefine } from './obj_define';
 
 describe('ObjDefine Utility', function () {
 
