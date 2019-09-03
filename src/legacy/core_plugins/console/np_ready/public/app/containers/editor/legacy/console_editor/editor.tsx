@@ -58,9 +58,9 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
   useUIAceKeyboardMode(textArea);
 
   useEffect(() => {
-    const editor$ = $(editorRef.current!);
-    const actions$ = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput(editor$, actions$, history, settings);
+    const $editor = $(editorRef.current!);
+    const $actions = $(actionsRef.current!);
+    editorInstanceRef.current = initializeInput($editor, $actions, history, settings);
     if (onEditorReady) {
       onEditorReady({ editor: editorInstanceRef.current, element: editorRef.current! });
     }

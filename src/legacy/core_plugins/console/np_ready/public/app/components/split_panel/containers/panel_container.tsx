@@ -28,6 +28,12 @@ export interface Props {
   onPanelWidthChange?: (arrayOfPanelWidths: number[]) => any;
 }
 
+interface State {
+  currentPanel: number;
+  isDragging: boolean;
+  currentResizerPos: number;
+}
+
 const initialState = { currentPanel: -1, isDragging: false, currentResizerPos: -1 };
 
 const pxToPercent = (proportion: number, whole: number) => (proportion / whole) * 100;
@@ -38,7 +44,7 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState<State>(initialState);
 
   const getContainerWidth = () => {
     return containerRef.current!.getBoundingClientRect().width;

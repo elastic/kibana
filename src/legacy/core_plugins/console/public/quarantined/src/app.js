@@ -23,7 +23,7 @@ const mappings = require('./mappings');
 const DEFAULT_INPUT_VALUE = `GET _search
 {
   "query": {
-    "match_all": { }
+    "match_all": {}
   }
 }`;
 
@@ -64,7 +64,6 @@ export default function init(input, output, history, sourceLocation = 'stored') 
         resetToValues(previousSaveState.content);
       } else {
         resetToValues();
-        input.autoIndent();
       }
     } else if (/^https?:\/\//.test(sourceLocation)) {
       const loadFrom = {

@@ -31,4 +31,10 @@ export function PanelContextProvider({ children, registry }: ContextProps) {
   return <PanelContext.Provider value={{ registry }}>{children}</PanelContext.Provider>;
 }
 
-export const usePanelContext = () => useContext(PanelContext);
+export const usePanelContext = () => {
+  const context = useContext(PanelContext);
+  if (context === undefined) {
+    throw new Error('usePanelContext must be used within a <PanelContextProvider />');
+  }
+  return context;
+};

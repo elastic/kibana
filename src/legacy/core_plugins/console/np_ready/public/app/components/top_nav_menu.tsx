@@ -24,7 +24,7 @@ export interface TopNavMenuItem {
   id: string;
   label: string;
   description: string;
-  run: () => void;
+  onClick: () => void;
   testId: string;
 }
 
@@ -37,7 +37,7 @@ export function TopNavMenu({ items }: Props) {
     <EuiTabs size="s">
       {items.map((item, idx) => {
         return (
-          <EuiTab key={idx} onClick={item.run} title={item.label} data-test-subj={item.testId}>
+          <EuiTab key={idx} onClick={item.onClick} title={item.label} data-test-subj={item.testId}>
             {item.label}
           </EuiTab>
         );

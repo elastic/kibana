@@ -35,7 +35,7 @@ export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }
       description: i18n.translate('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
-      run: () => {
+      onClick: () => {
         onClickHistory();
       },
       testId: 'consoleHistoryButton',
@@ -48,7 +48,7 @@ export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }
       description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
-      run: () => {
+      onClick: () => {
         onClickSettings();
       },
       testId: 'consoleSettingsButton',
@@ -61,7 +61,7 @@ export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }
       description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
-      run: () => {
+      onClick: () => {
         onClickHelp();
       },
       testId: 'consoleHelpButton',

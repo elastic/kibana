@@ -27,7 +27,7 @@ export type ConsoleEditorProps = { readOnly?: boolean } & EditorProps;
 export function ConsoleEditor(props: ConsoleEditorProps) {
   const { readOnly, ...editorProps } = props;
   if (props.readOnly) {
-    return <MemoReadOnlyEditor {...editorProps} />;
+    return <MemoReadOnlyEditor onEditorReady={editorProps.onEditorReady} />;
   }
   return <MemoEditor {...editorProps} />;
 }

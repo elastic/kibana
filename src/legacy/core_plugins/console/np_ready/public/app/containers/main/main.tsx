@@ -48,6 +48,12 @@ import { getTopNavConfig } from './get_top_nav';
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
+// We only run certain initialization after we know all our editors have
+// been instantiated -- which is what we use the below streams for.
+const inputReadySubject$ = new BehaviorSubject<any>(null);
+const outputReadySubject$ = new BehaviorSubject<any>(null);
+const editorsReady$ = combineLatest(inputReadySubject$, outputReadySubject$);
+
 export function Main() {
   const {
     services: { storage, settings, history },
@@ -69,20 +75,12 @@ export function Main() {
 
   const containerRef = useRef<null | HTMLDivElement>(null);
 
-  // We want to only run certain initialization after we now all our editors have
-  // been instantiated.
-  const inputReadySubject$ = useRef(new BehaviorSubject<any>(null));
-  const outputReadySubject$ = useRef(new BehaviorSubject<any>(null));
-  const editorsReady$ = useRef(
-    combineLatest(inputReadySubject$.current, outputReadySubject$.current)
-  );
-
   const onInputEditorReady = useCallback((value: any) => {
-    inputReadySubject$.current.next(value);
+    inputReadySubject$.next(value);
   }, []);
 
   const onOutputEditorReady = useCallback((value: any) => {
-    outputReadySubject$.current.next(value);
+    outputReadySubject$.next(value);
   }, []);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
@@ -101,12 +99,12 @@ export function Main() {
     []
   );
 
-  const sendCurrentRequest = () => {
+  const sendCurrentRequest = useCallback(() => {
     inputEditor.focus();
     inputEditor.sendCurrentRequestToES(() => {
       forceUpdate(undefined);
     }, outputEditor);
-  };
+  }, [inputEditor, outputEditor]);
 
   const renderConsoleHistory = () => {
     return editorReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -165,7 +163,7 @@ export function Main() {
 
   useEffect(() => {
     let resizerSubscriptions: Array<() => void> = [];
-    const subscription = editorsReady$.current.subscribe(([input, output]) => {
+    const subscription = editorsReady$.subscribe(([input, output]) => {
       settings.registerOutput(output.editor);
       settings.registerInput(input.editor);
       history.setEditor(input.editor);
@@ -187,7 +185,7 @@ export function Main() {
       resizerSubscriptions.map(done => done());
       subscription.unsubscribe();
     };
-  });
+  }, []);
 
   return (
     <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
