@@ -27,6 +27,7 @@ import del from 'del';
 import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
 import { createEsTestCluster } from '@kbn/test';
 import execa from 'execa';
+import { Stream } from 'stream';
 
 const statP = util.promisify(stat);
 const ROOT_DIR = resolve(__dirname, '../../../');
@@ -75,7 +76,11 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
-      const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
+      const noopStream = new Stream.Writable();
+      noopStream._write = (chunk, encoding, next) => {
+        next();
+      };
+      const log = new ToolingLog({ level: 'info', writeTo: noopStream });
       const es = createEsTestCluster({ license: 'basic', log });
       await es.start();
       await withProcRunner(log, async proc => {

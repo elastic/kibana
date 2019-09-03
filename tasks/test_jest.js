@@ -31,16 +31,16 @@ module.exports = function (grunt) {
   });
 
   function runJest(jestScript) {
-    // TODO: Remove, just temp debugging in ci
-    const xs = [jestScript, '--ci'];
-    if (jestScript.includes('integration')) {
-      xs.push('--debug');
-      xs.push('--runInBand');
-    }
+    // // TODO: Remove, just temp debugging in ci
+    // const xs = [jestScript, '--ci'];
+    // if (jestScript.includes('integration')) {
+    //   xs.push('--debug');
+    //   xs.push('--runInBand');
+    // }
 
     const serverCmd = {
       cmd: 'node',
-      args: xs, // TODO: Remove, just temp debugging in ci
+      args: [jestScript, '--ci'], //xs, // TODO: Remove, just temp debugging in ci
       opts: { stdio: 'inherit' }
     };
 
