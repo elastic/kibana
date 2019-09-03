@@ -48,7 +48,7 @@ export function FieldItem({ field, indexPattern, highlight, exists }: FieldItemP
       draggable
       className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${
         field.type
-      } lnsFieldListPanel__field-${exists ? 'exists' : 'missing'}`}
+      } lnsFieldListPanel__field--${exists ? 'exists' : 'missing'}`}
     >
       <div className="lnsFieldListPanel__fieldInfo">
         <FieldIcon type={field.type as DataType} />
