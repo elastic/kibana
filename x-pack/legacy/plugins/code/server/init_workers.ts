@@ -100,5 +100,5 @@ export function initWorkers(
   // Check if the repository is local on the file system.
   // This should be executed once at the startup time of Kibana.
   cloneScheduler.schedule();
-  return { indexScheduler, updateScheduler };
+  return { indexScheduler, updateScheduler, cloneWorker, deleteWorker, indexWorker, updateWorker };
 }
