@@ -16,13 +16,14 @@ import { IPDetails } from './ip_details';
 import { Network } from './network';
 import { PageRoute } from '../../components/page_route/pageroute';
 
+const networkPath = `/:pageName(network)`;
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
   <>
     <Switch>
       <Route
         strict
         exact
-        path={match.url}
+        path={networkPath}
         render={props => (
           <PageRoute
             {...props}
@@ -34,7 +35,7 @@ export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
         )}
       />
       <Route
-        path={`${match.url}/ip/:ip`}
+        path={`${networkPath}/ip/:ip`}
         render={props => (
           <PageRoute {...props} component={IPDetails} title={props.match.params.ip} />
         )}

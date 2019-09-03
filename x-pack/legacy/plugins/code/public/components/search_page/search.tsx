@@ -169,8 +169,11 @@ class SearchPage extends React.PureComponent<Props, State> {
           <h1>
             <FormattedMessage
               id="xpack.code.searchPage.showingResultsTitle"
-              defaultMessage="Showing {from} - {to} of {total} results."
-              values={{ from, to, total }}
+              defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                one {result}
+                other {results}
+              }."
+              values={{ from: from + 1, to, total }}
             />
           </h1>
         </EuiTitle>
@@ -193,8 +196,11 @@ class SearchPage extends React.PureComponent<Props, State> {
             <h1>
               <FormattedMessage
                 id="xpack.code.searchPage.showingResultsTitle"
-                defaultMessage="Showing {from} - {to} of {total} results."
-                values={{ from, to, total }}
+                defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                  one {result}
+                  other {results}
+                }."
+                values={{ from: from + 1, to, total }}
               />
             </h1>
           </EuiTitle>

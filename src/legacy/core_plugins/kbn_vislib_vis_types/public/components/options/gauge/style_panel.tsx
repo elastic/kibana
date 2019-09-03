@@ -17,41 +17,19 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { SelectOption } from '../../common';
-import { GaugeVisParams } from '../../../gauge';
 import { GaugeOptionsInternalProps } from '.';
 
-function StylePanel({
-  aggs,
-  setGaugeValue,
-  stateParams,
-  setValue,
-  vis,
-}: GaugeOptionsInternalProps) {
+function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
   const diasableAlignment =
-    aggs.bySchemaGroup[AggGroupNames.Metrics].length === 1 &&
-    !aggs.bySchemaGroup[AggGroupNames.Buckets];
-
-  const setGaugeType = useCallback(
-    (paramName: 'gaugeType', value: GaugeVisParams['gauge']['gaugeType']) => {
-      const minAngle = value === 'Arc' ? undefined : 0;
-      const maxAngle = value === 'Arc' ? undefined : 2 * Math.PI;
-
-      setValue('gauge', {
-        ...stateParams.gauge,
-        [paramName]: value,
-        minAngle,
-        maxAngle,
-      });
-    },
-    [setValue, stateParams.gauge]
-  );
+    aggs.bySchemaGroup(AggGroupNames.Metrics).length === 1 &&
+    !aggs.bySchemaGroup(AggGroupNames.Buckets);
 
   return (
     <EuiPanel paddingSize="s">
@@ -72,7 +50,7 @@ function StylePanel({
         options={vis.type.editorConfig.collections.gaugeTypes}
         paramName="gaugeType"
         value={stateParams.gauge.gaugeType}
-        setValue={setGaugeType}
+        setValue={setGaugeValue}
       />
 
       <SelectOption
