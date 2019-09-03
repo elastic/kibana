@@ -6,7 +6,12 @@
 
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SortDirection, SORT_DIRECTION } from '../../../../../../common/types/eui/in_memory_table';
+import moment from 'moment-timezone';
+import {
+  SortDirection,
+  SORT_DIRECTION,
+  ColumnType,
+} from '../../../../../../common/types/eui/in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -16,6 +21,8 @@ import {
   PreviewRequestBody,
   DataFrameTransformPivotConfig,
 } from '../../../../common';
+import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { TransformTable } from './transform_table';
 
 interface Column {
@@ -99,13 +106,44 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
         if (resp.preview.length > 0) {
           const columnKeys = getFlattenedFields(resp.preview[0]);
           columnKeys.sort(sortColumns(groupByArr));
+
           const tableColumns = columnKeys.map(k => {
-            return {
+            const column: ColumnType = {
               field: k,
               name: k,
               sortable: true,
               truncateText: true,
             };
+
+            if (typeof resp.mappings.properties[k] !== 'undefined') {
+              const esFieldType = resp.mappings.properties[k].type;
+              switch (esFieldType) {
+                case ES_FIELD_TYPES.BOOLEAN:
+                  column.dataType = 'boolean';
+                  break;
+                case ES_FIELD_TYPES.DATE:
+                  column.align = 'right';
+                  column.render = (d: any) =>
+                    formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+                  break;
+                case ES_FIELD_TYPES.BYTE:
+                case ES_FIELD_TYPES.DOUBLE:
+                case ES_FIELD_TYPES.FLOAT:
+                case ES_FIELD_TYPES.HALF_FLOAT:
+                case ES_FIELD_TYPES.INTEGER:
+                case ES_FIELD_TYPES.LONG:
+                case ES_FIELD_TYPES.SCALED_FLOAT:
+                case ES_FIELD_TYPES.SHORT:
+                  column.dataType = 'number';
+                  break;
+                case ES_FIELD_TYPES.KEYWORD:
+                case ES_FIELD_TYPES.TEXT:
+                  column.dataType = 'string';
+                  break;
+              }
+            }
+
+            return column;
           });
 
           setDataFramePreviewData(resp.preview);
