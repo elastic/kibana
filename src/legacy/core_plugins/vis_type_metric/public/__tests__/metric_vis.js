@@ -38,7 +38,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
         const Vis = Private(VisProvider);
         const metricVisType = createMetricVisTypeDefinition();
 
-        visualizations.types.VisTypesRegistryProvider.register(() => metricVisType);
+        visualizations.types.registerVisualization(() => metricVisType);
 
         const indexPattern = Private(LogstashIndexPatternStubProvider);
 

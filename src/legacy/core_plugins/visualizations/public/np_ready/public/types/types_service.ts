@@ -51,7 +51,9 @@ export class TypesService {
     return {
       Vis,
       VisFactoryProvider,
-      VisTypesRegistryProvider,
+      registerVisualization: (registerFn: () => any) => {
+        VisTypesRegistryProvider.register(registerFn);
+      },
       defaultFeedbackMessage, // make default in base vis type, or move?
       visTypeAliasRegistry,
     };

@@ -50,7 +50,7 @@ const createSetupContract = (): Setup => ({
   types: {
     Vis,
     VisFactoryProvider: jest.fn(),
-    VisTypesRegistryProvider: jest.fn(),
+    registerVisualization: jest.fn(),
     defaultFeedbackMessage,
     visTypeAliasRegistry: {
       add: jest.fn(),

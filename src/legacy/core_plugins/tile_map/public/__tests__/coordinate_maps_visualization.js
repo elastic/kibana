@@ -84,9 +84,7 @@ describe('CoordinateMapsVisualizationTest', function () {
         $injector,
       };
 
-      visualizations.types.VisTypesRegistryProvider.register(() =>
-        createTileMapTypeDefinition(dependencies)
-      );
+      visualizations.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
 
       Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);

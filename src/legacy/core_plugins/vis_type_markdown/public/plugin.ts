@@ -39,7 +39,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { data, visualizations }: MarkdownPluginSetupDependencies) {
-    visualizations.types.VisTypesRegistryProvider.register(() => markdownVis);
+    visualizations.types.registerVisualization(() => markdownVis);
     data.expressions.registerFunction(createMarkdownVisFn);
   }
 
