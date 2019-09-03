@@ -46,6 +46,7 @@ describe('run through steps', () => {
       pullNumber: undefined,
       repoName: 'kibana',
       repoOwner: 'elastic',
+      resetAuthor: false,
       sha: undefined,
       username: 'sqren'
     };

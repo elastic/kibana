@@ -10,7 +10,8 @@ import {
   deleteFeatureBranch,
   isIndexDirty,
   pushFeatureBranch,
-  getRemoteName
+  getRemoteName,
+  setCommitAuthor
 } from '../services/git';
 import { confirmPrompt } from '../services/prompts';
 import { createPullRequest } from '../services/github/createPullRequest';
@@ -65,6 +66,13 @@ export async function doBackportVersion(
   await sequentially(commits, commit =>
     cherrypickAndConfirm(options, commit.sha)
   );
+
+  if (options.resetAuthor) {
+    await withSpinner(
+      { text: `Changing author to "${options.username}"` },
+      () => setCommitAuthor(options, options.username)
+    );
+  }
 
   const headBranchName = getHeadBranchName(options, featureBranch);
 

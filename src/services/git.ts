@@ -103,6 +103,15 @@ export function cherrypick(options: BackportOptions, commitSha: string) {
   );
 }
 
+export function setCommitAuthor(options: BackportOptions, username: string) {
+  return exec(
+    `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
+    {
+      cwd: getRepoPath(options)
+    }
+  );
+}
+
 export async function isIndexDirty(options: BackportOptions) {
   try {
     await exec(`git diff-index --quiet HEAD --`, {

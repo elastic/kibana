@@ -99,6 +99,7 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --pr-description | Pull request description suffix                        |                | string  |
 | --pr-title       | Pull request title pattern                             |                | string  |
 | --pr             | Pull request to backport                               |                | number  |
+| --reset-author   | Set yourself as commit author                          |                | boolean |
 | --sha            | Sha of commit to backport                              |                | string  |
 | --upstream       | Name of organization and repository                    |                | string  |
 | --username       | Github username                                        |                | string  |

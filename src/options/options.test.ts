@@ -20,6 +20,7 @@ const validOptions: OptionsFromCliArgs = {
   prDescription: undefined,
   prTitle: 'myPrTitle',
   pullNumber: undefined,
+  resetAuthor: false,
   sha: undefined,
   upstream: 'elastic/kibana',
   username: 'sqren'
