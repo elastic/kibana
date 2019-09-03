@@ -13,12 +13,14 @@ export default function({ loadTestFile, getService }: TestInvoker) {
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {
-    this.tags('ciGroup8');
+    this.tags('ciGroup3');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);
     });
 
+    loadTestFile(require.resolve('./copy_to_space'));
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));

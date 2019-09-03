@@ -85,7 +85,7 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
         indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),
-      search: this.search.setup(),
+      search: this.search.setup(savedObjectsClient),
     };
   }
 

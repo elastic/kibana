@@ -36,17 +36,17 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   id: string;
+  isEventViewer?: boolean;
   height: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
-  width: number;
 }
 
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
-  eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
-  pinnedEventIds?: Readonly<Record<string, boolean>>;
+  pinnedEventIds: Readonly<Record<string, boolean>>;
   range?: string;
 }
 
@@ -82,7 +82,37 @@ interface DispatchProps {
 
 type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
-class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentProps> {
+export const emptyColumnHeaders: ColumnHeader[] = [];
+
+class StatefulBodyComponent extends React.Component<StatefulBodyComponentProps> {
+  public shouldComponentUpdate({
+    browserFields,
+    columnHeaders,
+    data,
+    eventIdToNoteIds,
+    getNotesByIds,
+    height,
+    id,
+    isEventViewer,
+    pinnedEventIds,
+    range,
+    sort,
+  }: StatefulBodyComponentProps) {
+    return (
+      browserFields !== this.props.browserFields ||
+      columnHeaders !== this.props.columnHeaders ||
+      data !== this.props.data ||
+      eventIdToNoteIds !== this.props.eventIdToNoteIds ||
+      getNotesByIds !== this.props.getNotesByIds ||
+      height !== this.props.height ||
+      id !== this.props.id ||
+      isEventViewer !== this.props.isEventViewer ||
+      pinnedEventIds !== this.props.pinnedEventIds ||
+      range !== this.props.range ||
+      sort !== this.props.sort
+    );
+  }
+
   public render() {
     const {
       browserFields,
@@ -92,24 +122,25 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       getNotesByIds,
       height,
       id,
+      isEventViewer = false,
       pinnedEventIds,
       range,
       sort,
       toggleColumn,
-      width,
     } = this.props;
 
     return (
       <Body
         addNoteToEvent={this.onAddNoteToEvent}
         browserFields={browserFields}
-        id={id}
-        columnHeaders={columnHeaders || []}
+        columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
         data={data}
-        eventIdToNoteIds={eventIdToNoteIds!}
+        eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
         height={height}
+        id={id}
+        isEventViewer={isEventViewer}
         onColumnResized={this.onColumnResized}
         onColumnRemoved={this.onColumnRemoved}
         onColumnSorted={this.onColumnSorted}
@@ -117,13 +148,12 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         onPinEvent={this.onPinEvent}
         onUpdateColumns={this.onUpdateColumns}
         onUnPinEvent={this.onUnPinEvent}
-        pinnedEventIds={pinnedEventIds!}
+        pinnedEventIds={pinnedEventIds}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort}
         toggleColumn={toggleColumn}
         updateNote={this.onUpdateNote}
-        width={width}
       />
     );
   }

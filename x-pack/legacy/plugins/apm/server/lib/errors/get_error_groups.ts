@@ -29,8 +29,8 @@ export async function getErrorGroups({
   setup
 }: {
   serviceName: string;
-  sortField: string;
-  sortDirection: string;
+  sortField?: string;
+  sortDirection?: string;
   setup: Setup;
 }) {
   const { client } = setup;
@@ -112,8 +112,8 @@ export async function getErrorGroups({
       return {
         message,
         occurrenceCount: bucket.doc_count,
-        culprit: idx(source, _ => _.error.culprit),
-        groupId: idx(source, _ => _.error.grouping_key),
+        culprit: source.error.culprit,
+        groupId: source.error.grouping_key,
         latestOccurrenceAt: source['@timestamp'],
         handled: idx(source, _ => _.error.exception[0].handled)
       };

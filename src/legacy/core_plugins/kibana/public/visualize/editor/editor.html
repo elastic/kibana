@@ -23,25 +23,26 @@
       </a>
     </div>
   </div>
-  
-  <!-- 
-    Local nav. 
-    Most visualizations have all search bar components enabled 
-    Some visualizations have fewer options but all visualizations have a search bar 
+
+  <!--
+    Local nav.
+    Most visualizations have all search bar components enabled
+    Some visualizations have fewer options but all visualizations have a search bar
     which is why show-search-baris set to "true".
     All visualizaions also have least a timepicker \ autorefresh component, which is why
     show-query-bar is set to "true".
   -->
-  <kbn-top-nav 
+  <kbn-top-nav
     app-name="'visualize'"
     config="topNavMenu"
     show-search-bar="true"
-    show-query-bar="true" 
+    show-query-bar="true"
     show-query-input="showQueryInput()"
     show-filter-bar="showFilterBar() && chrome.getVisible()"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
     query="state.query"
+    saved-query="savedQuery"
     screen-title="state.vis.title"
     on-query-submit="updateQueryAndFetch"
     index-patterns="[indexPattern]"
@@ -52,6 +53,10 @@
     is-refresh-paused="refreshInterval.pause"
     refresh-interval="refreshInterval.value"
     on-refresh-change="onRefreshChange"
+    show-save-query="showSaveQuery"
+    on-saved="onQuerySaved"
+    on-saved-query-updated="onSavedQueryUpdated"
+    on-clear-saved-query="onClearSavedQuery"
   >
   </kbn-top-nav>
 

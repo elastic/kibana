@@ -18,7 +18,7 @@
  */
 import { addDocView } from 'ui/registry/doc_views';
 import { i18n } from '@kbn/i18n';
-import { JsonCodeEditor } from './json_code_editor';
+import { JsonCodeBlock } from './json_code_block';
 
 /*
  * Registration of the the doc view: json
@@ -29,5 +29,5 @@ addDocView({
     defaultMessage: 'JSON',
   }),
   order: 20,
-  component: JsonCodeEditor,
+  component: JsonCodeBlock,
 });

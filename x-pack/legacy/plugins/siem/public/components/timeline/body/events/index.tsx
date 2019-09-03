@@ -40,6 +40,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
+  isEventViewer?: boolean;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -49,7 +50,6 @@ interface Props {
   rowRenderers: RowRenderer[];
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
 }
 
 export const Events = React.memo<Props>(
@@ -63,6 +63,7 @@ export const Events = React.memo<Props>(
     eventIdToNoteIds,
     getNotesByIds,
     id,
+    isEventViewer = false,
     minWidth,
     onColumnResized,
     onPinEvent,
@@ -72,7 +73,6 @@ export const Events = React.memo<Props>(
     rowRenderers,
     toggleColumn,
     updateNote,
-    width,
   }) => (
     <EventsContainer data-test-subj="events" minWidth={minWidth}>
       <EuiFlexGroup data-test-subj="events-flex-group" direction="column" gutterSize="none">
@@ -87,6 +87,7 @@ export const Events = React.memo<Props>(
               event={event}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
+              isEventViewer={isEventViewer}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUpdateColumns={onUpdateColumns}
@@ -96,7 +97,6 @@ export const Events = React.memo<Props>(
               timelineId={id}
               toggleColumn={toggleColumn}
               updateNote={updateNote}
-              width={width}
               maxDelay={maxDelay(i)}
             />
           </EuiFlexItem>

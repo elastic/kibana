@@ -7,13 +7,14 @@
 import { Request } from 'hapi';
 import { oncePerServer } from '../../../server/lib/once_per_server';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { KbnServer, JobParams, ConditionalHeaders, CreateJobFactory } from '../../../types';
+import { KbnServer, ConditionalHeaders, CreateJobFactory } from '../../../types';
+import { JobParamsDiscoverCsv, ESQueueCreateJobFnDiscoverCsv } from '../types';
 
 function createJobFn(server: KbnServer) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
-    jobParams: JobParams,
+    jobParams: JobParamsDiscoverCsv,
     headers: ConditionalHeaders,
     request: Request
   ) {
@@ -34,4 +35,6 @@ function createJobFn(server: KbnServer) {
   };
 }
 
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as CreateJobFactory);
+export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
+  server: KbnServer
+) => ESQueueCreateJobFnDiscoverCsv);

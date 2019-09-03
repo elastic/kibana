@@ -105,6 +105,8 @@ export class EmbeddedVisualizeHandler {
   private actions: any = {};
   private events$: Rx.Observable<any>;
   private autoFetch: boolean;
+  private abortController?: AbortController;
+  private autoRefreshFetchSubscription: Rx.Subscription | undefined;
 
   constructor(
     private readonly element: HTMLElement,
@@ -167,7 +169,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.onUiStateChange);
     if (autoFetch) {
-      timefilter.on('autoRefreshFetch', this.reload);
+      this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.reload);
     }
 
     // This is a hack to give maps visualizations access to data in the
@@ -267,9 +269,10 @@ export class EmbeddedVisualizeHandler {
    */
   public destroy(): void {
     this.destroyed = true;
+    this.cancel();
     this.debouncedFetchAndRender.cancel();
     if (this.autoFetch) {
-      timefilter.off('autoRefreshFetch', this.reload);
+      if (this.autoRefreshFetchSubscription) this.autoRefreshFetchSubscription.unsubscribe();
     }
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
@@ -442,7 +445,14 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
+  private cancel = () => {
+    if (this.abortController) this.abortController.abort();
+  };
+
   private fetch = (forceFetch: boolean = false) => {
+    this.cancel();
+    this.abortController = new AbortController();
+    this.dataLoaderParams.abortSignal = this.abortController.signal;
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
@@ -451,23 +461,27 @@ export class EmbeddedVisualizeHandler {
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
 
-    return this.dataLoader
-      .fetch(this.dataLoaderParams)
-      .then(data => {
-        // Pipeline responses never throw errors, so we need to check for
-        // `type: 'error'`, and then throw so it can be caught below.
-        // TODO: We should revisit this after we have fully migrated
-        // to the new expression pipeline infrastructure.
-        if (data && data.type === 'error') {
-          throw data.error;
-        }
+    return (
+      this.dataLoader
+        // Don't pass in this.dataLoaderParams directly because it may be modified async in another
+        // call to fetch before the previous one has completed
+        .fetch({ ...this.dataLoaderParams })
+        .then(data => {
+          // Pipeline responses never throw errors, so we need to check for
+          // `type: 'error'`, and then throw so it can be caught below.
+          // TODO: We should revisit this after we have fully migrated
+          // to the new expression pipeline infrastructure.
+          if (data && data.type === 'error') {
+            throw data.error;
+          }
 
-        if (data && data.value) {
-          this.dataSubject.next(data.value);
-        }
-        return data;
-      })
-      .catch(this.handleDataLoaderError);
+          if (data && data.value) {
+            this.dataSubject.next(data.value);
+          }
+          return data;
+        })
+        .catch(this.handleDataLoaderError)
+    );
   };
 
   /**
@@ -477,6 +491,9 @@ export class EmbeddedVisualizeHandler {
    * frequently encountered by users.
    */
   private handleDataLoaderError = (error: any): void => {
+    // If the data loader was aborted then no need to surface this error in the UI
+    if (error && error.name === 'AbortError') return;
+
     // TODO: come up with a general way to cancel execution of pipeline expressions.
     if (this.dataLoaderParams.searchSource && this.dataLoaderParams.searchSource.cancelQueued) {
       this.dataLoaderParams.searchSource.cancelQueued();

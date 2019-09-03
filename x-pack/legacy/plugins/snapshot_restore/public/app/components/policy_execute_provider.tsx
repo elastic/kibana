@@ -87,7 +87,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
-              defaultMessage="Run policy '{name}'?"
+              defaultMessage="Run '{name}' now?"
               values={{ name: policyName }}
             />
           }
@@ -102,18 +102,11 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
           confirmButtonText={
             <FormattedMessage
               id="xpack.snapshotRestore.executePolicy.confirmModal.confirmButtonLabel"
-              defaultMessage="Run"
+              defaultMessage="Run policy"
             />
           }
           data-test-subj="srExecutePolicyConfirmationModal"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.executePolicy.confirmModal.executeDescription"
-              defaultMessage="A snapshot will be taken immediately using this policy configuration."
-            />
-          </p>
-        </EuiConfirmModal>
+        />
       </EuiOverlayMask>
     );
   };

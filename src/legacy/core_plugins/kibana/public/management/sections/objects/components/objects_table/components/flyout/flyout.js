@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, take, get as getField } from 'lodash';
+import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -50,9 +50,9 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
-  processImportResponse,
   getDefaultTitle,
 } from '../../../../lib';
+import { processImportResponse } from '../../../../lib/process_import_response';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
@@ -273,9 +273,15 @@ class FlyoutUI extends Component {
       confirmModalPromise
     );
 
-    const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
-      obj.searchSource.getOwnField('index')
-    );
+    const byId = {};
+    conflictedIndexPatterns
+      .map(({ doc, obj }) => {
+        return { doc, obj: obj._serialize() };
+      }).forEach(({ doc, obj }) =>
+        obj.references.forEach(ref => {
+          byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
+        })
+      );
     const unmatchedReferences = Object.entries(byId).reduce(
       (accum, [existingIndexPatternId, list]) => {
         accum.push({

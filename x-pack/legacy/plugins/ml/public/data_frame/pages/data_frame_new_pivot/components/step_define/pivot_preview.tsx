@@ -15,16 +15,18 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
   EuiText,
   EuiTitle,
-  SortDirection,
 } from '@elastic/eui';
 
-import { Dictionary, dictionaryToArray } from '../../../../../../common/types/common';
+import {
+  ColumnType,
+  MlInMemoryTable,
+  SORT_DIRECTION,
+} from '../../../../../../common/types/eui/in_memory_table';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
@@ -41,13 +43,6 @@ import {
 
 import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
-
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface CompressedTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-}
-
-const CompressedTable = (EuiInMemoryTable as any) as SFC<CompressedTableProps>;
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -237,7 +232,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const columns = columnKeys
     .filter(k => typeof dataFramePreviewMappings.properties[k] !== 'undefined')
     .map(k => {
-      const column: Dictionary<any> = {
+      const column: ColumnType = {
         field: k,
         name: k,
         sortable: true,
@@ -279,7 +274,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const sorting = {
     sort: {
       field: columns[0].field,
-      direction: SortDirection.ASC,
+      direction: SORT_DIRECTION.ASC,
     },
   };
 
@@ -290,8 +285,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {dataFramePreviewData.length > 0 && clearTable === false && (
-        <CompressedTable
+      {dataFramePreviewData.length > 0 && clearTable === false && columns.length > 0 && (
+        <MlInMemoryTable
+          allowNeutralSort={false}
           compressed
           items={dataFramePreviewData}
           columns={columns}

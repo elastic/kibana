@@ -60,7 +60,6 @@ export const ChartGrid: FC<ChartGridProps> = ({
                 index={i}
                 agg={aggFieldPairList[i].agg}
                 field={aggFieldPairList[i].field}
-                splitField={splitField}
                 deleteDetector={deleteDetector}
               />
               <AnomalyChart

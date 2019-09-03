@@ -131,7 +131,9 @@ export interface CoreStart {
 }
 
 // @public
-export interface CustomHttpResponseOptions extends HttpResponseOptions {
+export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
+    body?: T;
+    headers?: ResponseHeaders;
     // (undocumented)
     statusCode: number;
 }
@@ -184,6 +186,12 @@ export interface ElasticsearchServiceSetup {
 }
 
 // @public
+export interface ErrorHttpResponseOptions {
+    body?: ResponseError;
+    headers?: ResponseHeaders;
+}
+
+// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -206,7 +214,7 @@ export type Headers = {
 
 // @public
 export interface HttpResponseOptions {
-    // Warning: (ae-forgotten-export) The symbol "ResponseHeaders" needs to be exported by the entry point index.d.ts
+    body?: HttpResponsePayload;
     headers?: ResponseHeaders;
 }
 
@@ -339,23 +347,20 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: (payload: string | Error | Record<string, any> | Buffer | Stream | {
+    custom: <T extends string | Error | Record<string, any> | Buffer | Stream | {
         message: string | Error;
-        meta?: ResponseErrorMeta | undefined;
-    } | undefined, options: CustomHttpResponseOptions) => KibanaResponse<string | Error | Record<string, any> | Buffer | Stream | {
-        message: string | Error;
-        meta?: ResponseErrorMeta | undefined;
-    }>;
-    badRequest: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    internalError: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (error: ResponseError, options: CustomHttpResponseOptions) => KibanaResponse<ResponseError>;
-    redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    ok: (payload: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (payload?: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+        attributes?: Record<string, any> | undefined;
+    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
@@ -593,18 +598,18 @@ export type RequestHandlerReturn = KibanaResponse;
 // @public
 export type ResponseError = string | Error | {
     message: string | Error;
-    meta?: ResponseErrorMeta;
+    attributes?: ResponseErrorAttributes;
 };
 
 // @public
-export interface ResponseErrorMeta {
-    // (undocumented)
-    data?: Record<string, any>;
-    // (undocumented)
-    docLink?: string;
-    // (undocumented)
-    errorCode?: string;
-}
+export type ResponseErrorAttributes = Record<string, any>;
+
+// @public
+export type ResponseHeaders = {
+    [header in KnownHeaders]?: string | string[];
+} & {
+    [header: string]: string | string[];
+};
 
 // @public
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {

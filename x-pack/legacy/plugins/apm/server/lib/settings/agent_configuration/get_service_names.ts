@@ -46,5 +46,5 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.services.buckets) || [];
-  return buckets.map(bucket => bucket.key);
+  return buckets.map(bucket => bucket.key).sort();
 }

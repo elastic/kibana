@@ -195,6 +195,11 @@ export const InteractivePage = compose(
   withProps(({ commit, forceRerender }) => ({
     commit: (...args) => forceRerender(commit(...args)),
   })),
+  withProps((...props) => ({
+    ...props,
+    canDragElement: element =>
+      !element.closest('.embeddable') || element.closest('.embPanel__header'),
+  })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent
 );
