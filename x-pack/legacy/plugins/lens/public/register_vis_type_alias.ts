@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
-import { BASE_APP_URL } from '../common';
+import { BASE_APP_URL, getEditPath } from '../common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
@@ -30,7 +30,7 @@ visualizations.types.visTypeAliasRegistry.add({
         return {
           id,
           title,
-          editUrl: `${BASE_APP_URL}#/edit/${id}`,
+          editUrl: getEditPath(id),
           icon: 'faceHappy',
           isExperimental: true,
           savedObjectType: type,
