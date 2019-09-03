@@ -12,32 +12,76 @@ import {
   startChecks
 } from 'plugins/monitoring/lib/elasticsearch_settings';
 import { ModelUpdater } from './model_updater';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
+import { MonitoringViewBaseController } from '../base_controller';
+import { i18n } from '@kbn/i18n';
 
-const REACT_NODE_ID_NO_DATA = 'noDataReact';
-
-// NoDataController watches all this attributes.
-// After consulting with @Chris Roberson, decided to move this out of the class for now.
-let timeUpdateSubscription;
-
-export class NoDataController {
+export class NoDataController extends MonitoringViewBaseController {
 
   constructor($injector, $scope) {
-    const $executor = $injector.get('$executor');
-    this.enableTimefilter($executor);
-    this.registerCleanup($scope, $executor);
+    const monitoringClusters = $injector.get('monitoringClusters');
+    const kbnUrl = $injector.get('kbnUrl');
+    const $http = $injector.get('$http');
+    const checkers = [
+      new ClusterSettingsChecker($http),
+      new NodeSettingsChecker($http)
+    ];
 
+    let watcherSet;
+
+    const getData = async () => {
+      let catchReason;
+      try {
+        const monitoringClustersData = await monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]);
+        if (monitoringClustersData && monitoringClustersData.length) {
+          kbnUrl.redirect('/home');
+          return monitoringClustersData;
+        }
+      }
+      catch (err) {
+        if (err && err.status === 503) {
+          catchReason = {
+            property: 'custom',
+            message: err.data.message,
+          };
+        }
+      }
+
+      const { updateModel } = new ModelUpdater($scope, this);
+      const enabler = new Enabler($http, updateModel);
+      if (!watcherSet) {
+        watcherSet = $scope.$watch(() => this, () => this.render(enabler), true);
+      }
+
+      if (catchReason) {
+        this.reason = catchReason;
+      } else if (!this.isCollectionEnabledUpdating
+        && !this.isCollectionEnabledUpdated
+        && !this.isCollectionIntervalUpdating
+        && !this.isCollectionIntervalUpdated) {
+        await startChecks(checkers, updateModel);
+      }
+    };
+
+    super({
+      title: i18n.translate('xpack.monitoring.noData.routeTitle', {
+        defaultMessage: 'Setup Monitoring'
+      }),
+      getPageData: async () => await getData(),
+      reactNodeId: 'noDataReact',
+      $scope,
+      $injector
+    });
+
+    this.enableTimefilter();
     Object.assign(this, this.getDefaultModel());
-    this.start($scope, $injector, $executor);
   }
 
   getDefaultModel() {
     return {
-      hasData: false, // control flag to control a redirect
       errors: [], // errors can happen from trying to check or set ES settings
       checkMessage: null, // message to show while waiting for api response
       isLoading: true, // flag for in-progress state of checking for no data reason
@@ -48,92 +92,25 @@ export class NoDataController {
     };
   }
 
-  /*
-   * Start the page logic of observing scope changes, and changes to the data model.
-   * @param {Object} $scope Angular $scope of the view controller
-   * @param {Object} $injector Angular $injector service
-   * @param {Object} $executor Kibana $executor service for Angular
-   */
-  start($scope, $injector, $executor) {
-    const model = this;
-
-    const $http = $injector.get('$http');
-    const kbnUrl = $injector.get('kbnUrl');
-    const monitoringClusters = $injector.get('monitoringClusters');
-
-    const { updateModel } = new ModelUpdater($scope, model);
-    const checkers = [
-      new ClusterSettingsChecker($http),
-      new NodeSettingsChecker($http)
-    ];
-    const enabler = new Enabler($http, updateModel);
-
-    $scope.$$postDigest(() => {
-      startChecks(checkers, updateModel); // Start the checkers that use APIs for finding the reason for no data
-    });
-
-    $scope.$watch(
-      () => model,
-      props => {
-        render(
-          <I18nContext>
-            <NoData {...props} enabler={enabler} />
-          </I18nContext>,
-          document.getElementById(REACT_NODE_ID_NO_DATA)
-        );
-      },
-      true // deep watch
+  render(enabler) {
+    const props = this;
+    /**
+     * Need to do this because {data} can either be an array or string, because of
+     * some race condtions.
+     */
+    if (typeof props.data !== 'string') {
+      props.data = props.reason && props.reason.data || '';
+    }
+    this.renderReact(
+      <I18nContext>
+        <NoData {...props} enabler={enabler} />
+      </I18nContext>
     );
-
-    $scope.$watch(
-      () => model.hasData,
-      hasData => {
-        if (hasData) {
-          kbnUrl.redirect('/home'); // redirect if to cluster overview if data is found from background refreshes
-        }
-      }
-    );
-
-    // register the monitoringClusters service.
-    $executor.register({
-      execute: async () => {
-        try {
-          return await monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]);
-        }
-        catch (err) {
-          if (err && err.status === 503) {
-            model.reason = {
-              property: 'custom',
-              message: err.data.message,
-            };
-          }
-        }
-      },
-      handleResponse: clusters => {
-        if (clusters.length) {
-          model.hasData = true; // use the control flag because we can't redirect from inside here
-        }
-      }
-    });
-
-    $executor.start($scope); // start the executor to keep refreshing the search for data
-    $executor.run();
   }
 
-  enableTimefilter($executor) {
+  enableTimefilter() {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-
-    // re-fetch if they change the time filter
-    timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(() => $executor.run());
   }
 
-  registerCleanup($scope, $executor) {
-    // destroy the executor, unmount the react component
-    $scope.$on('$destroy', () => {
-      $executor.destroy();
-      unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));
-      if (timeUpdateSubscription) { timeUpdateSubscription.unsubscribe(); }
-    });
-  }
 }
