@@ -27,6 +27,7 @@ import {
 import { LocationDurationLine } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
+import { ChartWrapper } from './chart_wrapper';
 
 interface DurationChartProps {
   /**
@@ -42,6 +43,11 @@ interface DurationChartProps {
    * The color to be used for the range duration series.
    */
   rangeColor: string;
+
+  /**
+   * To represent the loading spinner on chart
+   */
+  loading: boolean;
 }
 
 /**
@@ -54,6 +60,7 @@ export const DurationChart = ({
   locationDurationLines,
   meanColor,
   rangeColor,
+  loading,
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   // this id is used for the line chart representing the average duration length
@@ -80,42 +87,44 @@ export const DurationChart = ({
 
   return (
     <React.Fragment>
-      <EuiTitle size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-            defaultMessage="Monitor duration"
-            description="The 'ms' is an abbreviation for milliseconds."
-          />
-        </h4>
-      </EuiTitle>
-      <EuiPanel style={{ height: '170px' }}>
-        <Chart>
-          <Settings
-            xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
-            showLegend={true}
-            legendPosition={Position.Bottom}
-          />
-          <Axis
-            id={getAxisId('bottom')}
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'Timestamp',
-            })}
-          />
-          <Axis
-            domain={{ min: 0 }}
-            id={getAxisId('left')}
-            position={Position.Left}
-            tickFormat={d => Number(d).toFixed(0)}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration ms',
-            })}
-          />
-          {lineSeries}
-        </Chart>
+      <EuiPanel paddingSize="m">
+        <EuiTitle size="xs">
+          <h4>
+            <FormattedMessage
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+              defaultMessage="Monitor duration"
+              description="The 'ms' is an abbreviation for milliseconds."
+            />
+          </h4>
+        </EuiTitle>
+        <ChartWrapper height="400px" loading={loading}>
+          <Chart>
+            <Settings
+              xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+              showLegend={true}
+              legendPosition={Position.Bottom}
+            />
+            <Axis
+              id={getAxisId('bottom')}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+              title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
+                defaultMessage: 'Timestamp',
+              })}
+            />
+            <Axis
+              domain={{ min: 0 }}
+              id={getAxisId('left')}
+              position={Position.Left}
+              tickFormat={d => Number(d).toFixed(0)}
+              title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
+                defaultMessage: 'Duration ms',
+              })}
+            />
+            {lineSeries}
+          </Chart>
+        </ChartWrapper>
       </EuiPanel>
     </React.Fragment>
   );
