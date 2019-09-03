@@ -370,6 +370,14 @@
         ],
       },
       {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
         groupSlug: 'humps',
         groupName: 'humps related packages',
         packageNames: [
@@ -615,14 +623,6 @@
         packageNames: [
           'git-url-parse',
           '@types/git-url-parse',
-        ],
-      },
-      {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
         ],
       },
       {
