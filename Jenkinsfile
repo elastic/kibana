@@ -40,7 +40,6 @@ timeout(time: 180, unit: 'MINUTES') {
           getPostBuildWorker('xpack-firefoxSmoke', { bash './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
           getPostBuildWorker('xpack-visualRegression', { bash './test/scripts/jenkins_xpack_visual_regression.sh' }),
         ]),
-        'kibana-xpack-ciGroup6': legacyJobRunner('x-pack-ciGroup6'), // This group has tests that rely upon ES transport port being :9300 - that needs to be solved before parallelization can happen
         // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
       ])
     }
