@@ -148,7 +148,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                     />
                   </EuiButton>
                 </EuiFlexItem>
-
+              </Fragment>
+            )}
+            {progress === 100 && (
+              <Fragment>
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={clickResetJob} data-test-subj="mlJobWizardButtonResetJob">
                     <FormattedMessage
@@ -157,9 +160,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                     />
                   </EuiButton>
                 </EuiFlexItem>
+                <PostSaveOptions jobRunner={jobRunner} />
               </Fragment>
             )}
-            {progress === 100 && <PostSaveOptions jobRunner={jobRunner} />}
           </EuiFlexGroup>
           {showJsonFlyout && (
             <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />

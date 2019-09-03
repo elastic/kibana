@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
-import { AggConfig } from './agg_config';
+import { AggType, AggTypeConfig } from '../agg_type';
+import { AggConfig } from '../../vis';
 
-export interface AggConfigs extends IndexedArray<AggConfig> {
-  bySchemaGroup: {
-    [key: string]: AggConfig[];
-  };
-  bySchemaName: {
-    [key: string]: AggConfig[];
-  };
+export class BucketAggType extends AggType {
+  getKey: (bucket: any, key: any, agg: AggConfig) => any;
+
+  constructor(config: AggTypeConfig) {
+    super(config);
+
+    this.getKey =
+      config.getKey ||
+      ((bucket, key) => {
+        return key || bucket.key;
+      });
+  }
 }

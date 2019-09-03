@@ -19,5 +19,7 @@ describe('useCreateAnalyticsForm', () => {
 
     expect(idx(jobConfig, _ => _.dest.index)).toBe('the-destination-index');
     expect(idx(jobConfig, _ => _.source.index)).toBe('the-source-index');
+    expect(idx(jobConfig, _ => _.analyzed_fields.excludes)).toStrictEqual([]);
+    expect(typeof idx(jobConfig, _ => _.analyzed_fields.includes)).toBe('undefined');
   });
 });
