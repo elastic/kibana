@@ -11,7 +11,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip
+  EuiToolTip,
+  EuiEmptyPrompt
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -24,6 +25,7 @@ import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/Tra
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 function MaybeViewTraceLink({
   transaction,
@@ -101,20 +103,40 @@ function MaybeViewTraceLink({
 }
 
 interface Props {
-  transaction: ITransaction;
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
   exceedsMax: boolean;
+  isLoading: boolean;
 }
 
-export const Transaction: React.SFC<Props> = ({
-  transaction,
+export const WaterfallWithSummmary: React.SFC<Props> = ({
   urlParams,
   location,
   waterfall,
-  exceedsMax
+  exceedsMax,
+  isLoading
 }) => {
+  const { entryTransaction } = waterfall;
+  if (!entryTransaction) {
+    const content = isLoading ? (
+      <LoadingStatePrompt />
+    ) : (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.transactionDetails.traceNotFound', {
+              defaultMessage: 'The selected trace cannot be found'
+            })}
+          </div>
+        }
+        titleSize="s"
+      />
+    );
+
+    return <EuiPanel paddingSize="m">{content}</EuiPanel>;
+  }
+
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -131,10 +153,10 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu transaction={transaction} />
+              <TransactionActionMenu transaction={entryTransaction} />
             </EuiFlexItem>
             <MaybeViewTraceLink
-              transaction={transaction}
+              transaction={entryTransaction}
               waterfall={waterfall}
             />
           </EuiFlexGroup>
@@ -143,14 +165,14 @@ export const Transaction: React.SFC<Props> = ({
 
       <StickyTransactionProperties
         errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
-        transaction={transaction}
+        transaction={entryTransaction}
         totalDuration={waterfall.traceRootDuration}
       />
 
       <EuiSpacer />
 
       <TransactionTabs
-        transaction={transaction}
+        transaction={entryTransaction}
         location={location}
         urlParams={urlParams}
         waterfall={waterfall}
