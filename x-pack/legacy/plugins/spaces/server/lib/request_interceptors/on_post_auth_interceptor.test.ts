@@ -203,6 +203,9 @@ describe('onPostAuthRequestInterceptor', () => {
       });
 
       const uiSettingsService = {
+        getDefaults: jest.fn().mockResolvedValue({
+          defaultRoute: { value: '/app/fallbackRoute' },
+        }),
         get: jest.fn().mockImplementation((key: string) => {
           if (key === 'defaultRoute') {
             return defaultRoute;
@@ -218,7 +221,6 @@ describe('onPostAuthRequestInterceptor', () => {
         http: httpMock,
         elasticsearch: elasticsearchServiceMock.createSetupContract(),
         uiSettingsServiceFactory,
-        fallbackDefaultRoute: '/app/fallbackRoute',
         savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
         security: {} as OptionalPlugin<SecurityPlugin>,
         spacesAuditLogger: {} as SpacesAuditLogger,

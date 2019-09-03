@@ -216,6 +216,9 @@ export function createTestHandler(
     };
 
     const uiSettingsService = {
+      getDefaults: jest.fn().mockResolvedValue({
+        defaultRoute: { value: '/app/fallbackRoute' },
+      }),
       get: jest.fn().mockImplementation((key: string) => {
         if (key === 'defaultRoute') {
           return '/app/spaceDefaultRoute';
@@ -231,7 +234,6 @@ export function createTestHandler(
       http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       uiSettingsServiceFactory,
-      fallbackDefaultRoute: '/app/fallbackRoute',
       savedObjects: server.savedObjects,
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       spacesAuditLogger: {} as SpacesAuditLogger,

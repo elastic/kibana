@@ -94,7 +94,9 @@ export default async function (kbnServer, server, config) {
         return h.redirect(`${basePath}${defaultRouteSetting}`);
       }
 
-      return h.redirect(`${basePath}/app/kibana`);
+      const fallbackRoute = (await req.getUiSettingsService().getDefaults()).defaultRoute.value;
+
+      return h.redirect(`${basePath}${fallbackRoute}`);
     }
   });
 

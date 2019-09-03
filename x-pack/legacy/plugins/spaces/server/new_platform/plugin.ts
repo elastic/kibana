@@ -43,8 +43,12 @@ export interface SpacesCoreSetup {
   http: SpacesHttpServiceSetup;
   savedObjects: SavedObjectsService;
   elasticsearch: ElasticsearchServiceSetup;
-  uiSettingsServiceFactory: (options: Record<string, any>) => Record<string, any>;
-  fallbackDefaultRoute: string;
+  uiSettingsServiceFactory: (
+    options: Record<string, any>
+  ) => {
+    getDefaults(): Promise<Record<string, any>>;
+    get(key: string): Promise<any>;
+  };
   usage: {
     collectorSet: {
       register: (collector: any) => void;
@@ -115,7 +119,6 @@ export class Plugin {
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
       uiSettingsServiceFactory: core.uiSettingsServiceFactory,
-      fallbackDefaultRoute: core.fallbackDefaultRoute,
       security: plugins.security,
       spacesAuditLogger,
       config$: this.config$,

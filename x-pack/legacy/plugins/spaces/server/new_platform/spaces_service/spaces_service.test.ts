@@ -36,6 +36,9 @@ const setup = async (serverBasePath: string = '', spaceDefaultRoute?: string) =>
   });
 
   const uiSettingsService = {
+    getDefaults: jest.fn().mockResolvedValue({
+      defaultRoute: { value: '/app/mockFallbackRoute' },
+    }),
     get: jest.fn().mockImplementation((key: string) => {
       if (key === 'defaultRoute') {
         return spaceDefaultRoute;
@@ -56,7 +59,6 @@ const setup = async (serverBasePath: string = '', spaceDefaultRoute?: string) =>
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of({ maxSpaces: 10 }),
     uiSettingsServiceFactory,
-    fallbackDefaultRoute: '/app/mockFallbackRoute',
     security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
     savedObjects: savedObjectsService,
     spacesAuditLogger: new SpacesAuditLogger({}),

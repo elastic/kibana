@@ -21,6 +21,7 @@ import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
+import { SpacesCoreSetup } from '../plugin';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -44,8 +45,7 @@ interface SpacesServiceDeps {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
-  uiSettingsServiceFactory: any;
-  fallbackDefaultRoute: string;
+  uiSettingsServiceFactory: SpacesCoreSetup['uiSettingsServiceFactory'];
   security: OptionalPlugin<SecurityPlugin>;
   config$: Observable<SpacesConfigType>;
   spacesAuditLogger: any;
@@ -61,7 +61,6 @@ export class SpacesService {
     elasticsearch,
     savedObjects,
     uiSettingsServiceFactory,
-    fallbackDefaultRoute,
     security,
     config$,
     spacesAuditLogger,
@@ -104,11 +103,11 @@ export class SpacesService {
 
         const defaultRoute = await uiSettingsService.get('defaultRoute');
 
-        if (!defaultRoute || !defaultRoute.startsWith('/')) {
-          return fallbackDefaultRoute;
+        if (defaultRoute && defaultRoute.startsWith('/')) {
+          return defaultRoute;
         }
 
-        return defaultRoute;
+        return (await uiSettingsService.getDefaults()).defaultRoute.value;
       },
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
