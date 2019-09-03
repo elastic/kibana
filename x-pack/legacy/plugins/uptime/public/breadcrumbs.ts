@@ -5,24 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ChromeBreadcrumb } from 'src/core/public';
 
-export interface UMBreadcrumb {
-  text: string;
-  href?: string;
-}
-
-const makeOverviewBreadcrumb = (search?: string): UMBreadcrumb => ({
+const makeOverviewBreadcrumb = (search?: string): ChromeBreadcrumb => ({
   text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
     defaultMessage: 'Uptime',
   }),
   href: `#/${search ? search : ''}`,
 });
 
-export const getOverviewPageBreadcrumbs = (search?: string): UMBreadcrumb[] => [
+export const getOverviewPageBreadcrumbs = (search?: string): ChromeBreadcrumb[] => [
   makeOverviewBreadcrumb(search),
 ];
 
-export const getMonitorPageBreadcrumb = (name: string, search?: string): UMBreadcrumb[] => [
+export const getMonitorPageBreadcrumb = (name: string, search?: string): ChromeBreadcrumb[] => [
   makeOverviewBreadcrumb(search),
   { text: name },
 ];
