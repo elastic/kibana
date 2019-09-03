@@ -37,21 +37,4 @@ uiModules.get('kibana')
         emitter.off(eventName, handler);
       });
     };
-
-    /**
-     * Helper that registers an event listener, and removes that listener when
-     * the $scope is destroyed. Handler is executed inside $evalAsync, ensuring digest cycle is run after the handler
-     *
-     * @param  {SimpleEmitter} emitter - the event emitter to listen to
-     * @param  {string} eventName - the event name
-     * @param  {Function} handler - the event handler
-     * @return {undefined}
-     */
-    $rootScope.constructor.prototype.$listenAndDigestAsync = function (emitter, eventName, handler) {
-      const evalAsyncWrappedHandler = (...args) => {
-        this.$evalAsync(() => handler(args));
-      };
-      this.$listen(emitter, eventName, evalAsyncWrappedHandler);
-    };
-
   });

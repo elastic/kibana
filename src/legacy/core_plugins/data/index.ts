@@ -18,7 +18,6 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from 'kibana';
 import { registerSearchApi } from './server/routes/search';
 import {
   getSearchParams,
@@ -26,6 +25,9 @@ import {
   setSearchStrategy,
   search,
 } from './server/lib';
+import { Legacy } from '../../../../kibana';
+import { mappings } from './mappings';
+import { SavedQuery } from './public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -48,6 +50,23 @@ export default function DataPlugin(kibana: any) {
     uiExports: {
       injectDefaultVars: () => ({}),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
+      savedObjectsManagement: {
+        query: {
+          icon: 'search',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj: SavedQuery) {
+            return obj.attributes.title;
+          },
+          getInAppUrl(obj: SavedQuery) {
+            return {
+              path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
+              uiCapabilitiesPath: 'discover.show',
+            };
+          },
+        },
+      },
     },
   };
 

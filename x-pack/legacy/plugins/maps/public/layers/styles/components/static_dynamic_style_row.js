@@ -87,6 +87,7 @@ export class StaticDynamicStyleRow extends React.Component {
       <StaticSelector
         onChange={this._onStaticStyleChange}
         styleOptions={this._getStyleOptions()}
+        swatches={this.props.swatches}
       />
     );
   }

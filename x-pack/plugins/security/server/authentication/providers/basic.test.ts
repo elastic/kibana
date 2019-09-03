@@ -10,18 +10,10 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { mockAuthenticationProviderOptions, mockScopedClusterClient } from './base.mock';
 
-import { BasicAuthenticationProvider, BasicCredentials } from './basic';
+import { BasicAuthenticationProvider } from './basic';
 
 function generateAuthorizationHeader(username: string, password: string) {
-  const {
-    headers: { authorization },
-  } = BasicCredentials.decorateRequest(
-    { headers: {} as Record<string, string> },
-    username,
-    password
-  );
-
-  return authorization as string;
+  return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 }
 
 describe('BasicAuthenticationProvider', () => {
@@ -212,42 +204,6 @@ describe('BasicAuthenticationProvider', () => {
       expect(deauthenticateResult.redirected()).toBe(true);
       expect(deauthenticateResult.redirectURL).toBe(
         '/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
-      );
-    });
-  });
-
-  describe('BasicCredentials', () => {
-    it('`decorateRequest` fails if username or password is not provided.', () => {
-      expect(() =>
-        BasicCredentials.decorateRequest(undefined as any, undefined as any, undefined as any)
-      ).toThrowError('Request should be a valid object');
-      expect(() =>
-        BasicCredentials.decorateRequest({} as any, undefined as any, undefined as any)
-      ).toThrowError('Username should be a valid non-empty string');
-      expect(() => BasicCredentials.decorateRequest({} as any, '', undefined as any)).toThrowError(
-        'Username should be a valid non-empty string'
-      );
-      expect(() => BasicCredentials.decorateRequest({} as any, '', '')).toThrowError(
-        'Username should be a valid non-empty string'
-      );
-      expect(() => BasicCredentials.decorateRequest({} as any, 'username', '')).toThrowError(
-        'Password should be a valid non-empty string'
-      );
-      expect(() => BasicCredentials.decorateRequest({} as any, '', 'password')).toThrowError(
-        'Username should be a valid non-empty string'
-      );
-    });
-
-    it('`decorateRequest` correctly sets authorization header.', () => {
-      const oneRequest = { headers: {} as Record<string, string> };
-      const anotherRequest = { headers: { authorization: 'Basic ***' } };
-
-      BasicCredentials.decorateRequest(oneRequest, 'one-user', 'one-password');
-      BasicCredentials.decorateRequest(anotherRequest, 'another-user', 'another-password');
-
-      expect(oneRequest.headers.authorization).toBe('Basic b25lLXVzZXI6b25lLXBhc3N3b3Jk');
-      expect(anotherRequest.headers.authorization).toBe(
-        'Basic YW5vdGhlci11c2VyOmFub3RoZXItcGFzc3dvcmQ='
       );
     });
   });

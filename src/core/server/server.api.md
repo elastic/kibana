@@ -121,6 +121,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
         createRouter: () => IRouter;
     };
 }
@@ -130,7 +131,9 @@ export interface CoreStart {
 }
 
 // @public
-export interface CustomHttpResponseOptions extends HttpResponseOptions {
+export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
+    body?: T;
+    headers?: ResponseHeaders;
     // (undocumented)
     statusCode: number;
 }
@@ -183,6 +186,12 @@ export interface ElasticsearchServiceSetup {
 }
 
 // @public
+export interface ErrorHttpResponseOptions {
+    body?: ResponseError;
+    headers?: ResponseHeaders;
+}
+
+// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -205,7 +214,7 @@ export type Headers = {
 
 // @public
 export interface HttpResponseOptions {
-    // Warning: (ae-forgotten-export) The symbol "ResponseHeaders" needs to be exported by the entry point index.d.ts
+    body?: HttpResponsePayload;
     headers?: ResponseHeaders;
 }
 
@@ -239,7 +248,8 @@ export interface HttpServerSetup {
 
 // @public (undocumented)
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string) => IRouter;
+    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
 };
 
 // @public (undocumented)
@@ -273,17 +283,15 @@ export interface IKibanaSocket {
 // @internal (undocumented)
 export interface InternalCoreSetup {
     // (undocumented)
+    context: ContextSetup;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
 }
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -339,23 +347,20 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: (payload: string | Error | Record<string, any> | Buffer | Stream | {
+    custom: <T extends string | Error | Record<string, any> | Buffer | Stream | {
         message: string | Error;
-        meta?: ResponseErrorMeta | undefined;
-    } | undefined, options: CustomHttpResponseOptions) => KibanaResponse<string | Error | Record<string, any> | Buffer | Stream | {
-        message: string | Error;
-        meta?: ResponseErrorMeta | undefined;
-    }>;
-    badRequest: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    internalError: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (error: ResponseError, options: CustomHttpResponseOptions) => KibanaResponse<ResponseError>;
-    redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    ok: (payload: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (payload?: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+        attributes?: Record<string, any> | undefined;
+    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
@@ -366,6 +371,28 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceSetupDeps {
+    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreSetup" which is marked as @internal
+    // 
+    // (undocumented)
+    core: InternalCoreSetup & {
+        plugins: PluginsServiceSetup;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceStartDeps {
+    // (undocumented)
+    core: InternalCoreStart & {
+        plugins: PluginsServiceStart;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -543,23 +570,46 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: {}, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+
+// @public
+export interface RequestHandlerContext {
+    // (undocumented)
+    core: {
+        elasticsearch: {
+            dataClient: ScopedClusterClient;
+            adminClient: ScopedClusterClient;
+        };
+    };
+}
+
+// @public
+export type RequestHandlerContextContainer<TContext> = IContextContainer<TContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
+
+// @public
+export type RequestHandlerReturn = KibanaResponse;
 
 // @public
 export type ResponseError = string | Error | {
     message: string | Error;
-    meta?: ResponseErrorMeta;
+    attributes?: ResponseErrorAttributes;
 };
 
 // @public
-export interface ResponseErrorMeta {
-    // (undocumented)
-    data?: Record<string, any>;
-    // (undocumented)
-    docLink?: string;
-    // (undocumented)
-    errorCode?: string;
-}
+export type ResponseErrorAttributes = Record<string, any>;
+
+// @public
+export type ResponseHeaders = {
+    [header in KnownHeaders]?: string | string[];
+} & {
+    [header: string]: string | string[];
+};
 
 // @public
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {

@@ -166,3 +166,8 @@ test('throws an error when params is invalid', async () => {
     message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
+
+test('throws an error when failing to load action through savedObjectsClient', async () => {
+  savedObjectsClient.get.mockRejectedValueOnce(new Error('No access'));
+  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(`"No access"`);
+});

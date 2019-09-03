@@ -5,15 +5,15 @@
  */
 
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export const getNumberOfItems = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<number> => {
-  logger.debug('determining how many items we have');
+  logger.debug('determining how many rendered items to wait for');
 
   // returns the value of the `itemsCountAttribute` if it's there, otherwise
   // we just count the number of `itemSelector`

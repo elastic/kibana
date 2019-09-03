@@ -35,7 +35,6 @@ import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 // @ts-ignore
 import { timeBasedIndexCheck } from '../../util/index_utils';
-// @ts-ignore
 import { MlTimeBuckets } from '../../util/ml_time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -166,9 +165,9 @@ export const Page: FC = () => {
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
   useEffect(() => {
-    timefilter.on('timeUpdate', loadOverallStats);
+    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(loadOverallStats);
     return () => {
-      timefilter.off('timeUpdate', loadOverallStats);
+      timeUpdateSubscription.unsubscribe();
     };
   }, []);
 

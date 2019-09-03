@@ -32,7 +32,6 @@ export const JobIdInput: FC = () => {
   return (
     <Description validation={validation}>
       <EuiFieldText
-        placeholder="Job Id"
         value={jobId}
         onChange={e => setJobId(e.target.value)}
         isInvalid={validation.valid === false}

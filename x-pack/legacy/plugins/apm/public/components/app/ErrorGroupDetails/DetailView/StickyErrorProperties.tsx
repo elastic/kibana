@@ -20,7 +20,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { StickyProperties } from '../../../shared/StickyProperties';
-import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { isRumAgentName } from '../../../../../common/agent_name';
 
 interface Props {
@@ -43,9 +43,15 @@ function TransactionLinkWrapper({
   }
 
   return (
-    <TransactionLink transaction={transaction}>
+    <TransactionDetailLink
+      serviceName={transaction.service.name}
+      transactionId={transaction.transaction.id}
+      traceId={transaction.trace.id}
+      transactionName={transaction.transaction.name}
+      transactionType={transaction.transaction.type}
+    >
       {transaction.transaction.id}
-    </TransactionLink>
+    </TransactionDetailLink>
   );
 }
 

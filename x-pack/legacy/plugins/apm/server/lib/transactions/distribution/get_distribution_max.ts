@@ -56,5 +56,5 @@ export async function getDistributionMax(
   };
 
   const resp = await client.search(params);
-  return resp.aggregations.stats.max;
+  return resp.aggregations ? resp.aggregations.stats.max : null;
 }

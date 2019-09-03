@@ -16,5 +16,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async reloadIndicesButton() {
       return await testSubjects.find('reloadIndicesButton');
     },
+    async changeTabs(tab: 'indicesTab' | 'templatesTab') {
+      return await testSubjects.click(tab);
+    },
   };
 }

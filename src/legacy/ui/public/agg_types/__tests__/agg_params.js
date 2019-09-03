@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AggParams } from '../agg_params';
+import { initParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';
@@ -31,11 +31,10 @@ describe('AggParams class', function () {
         { name: 'one' },
         { name: 'two' }
       ];
-      const aggParams = new AggParams(params);
+      const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams).to.be.an(Array);
-      expect(aggParams.byName).to.have.keys(['one', 'two']);
     });
   });
 
@@ -44,7 +43,7 @@ describe('AggParams class', function () {
       const params = [
         { name: 'field', type: 'field' }
       ];
-      const aggParams = new AggParams(params);
+      const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(FieldParamType);
@@ -57,7 +56,7 @@ describe('AggParams class', function () {
           type: 'optioned'
         }
       ];
-      const aggParams = new AggParams(params);
+      const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedParamType);
@@ -70,7 +69,7 @@ describe('AggParams class', function () {
           type: 'optioned'
         }
       ];
-      const aggParams = new AggParams(params);
+      const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedParamType);
@@ -91,7 +90,7 @@ describe('AggParams class', function () {
           editor: '<blink>small</blink>'
         }
       ];
-      const aggParams = new AggParams(params);
+      const aggParams = initParams(params);
 
       expect(aggParams).to.have.length(params.length);
       aggParams.forEach(function (aggParam) {

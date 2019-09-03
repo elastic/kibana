@@ -21,5 +21,33 @@ export default function ({ getPageObjects, getService }) {
       });
 
     });
+
+    describe('dynamic coloring', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap('join and dynamic coloring demo');
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+      });
+
+      // eslint-disable-next-line max-len
+      it('should symbolize fill color with custom steps from join value and border color with dynamic color ramp from prop value', async () => {
+        await visualTesting.snapshot();
+      });
+
+    });
+
+    describe('dynamic line coloring', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap('pew pew demo');
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+      });
+
+      // eslint-disable-next-line max-len
+      it('should symbolize pew pew lines', async () => {
+        await visualTesting.snapshot();
+      });
+
+    });
   });
 }

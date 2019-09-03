@@ -222,7 +222,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, setupMode } = props;
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode } = props;
   const columns = getColumns(showCgroupMetricsElasticsearch, setupMode);
 
   // Merge the nodes data with the setup data if enabled
@@ -251,6 +251,10 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     // Think net new user scenario
     const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
     if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+      const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+        ? setupMode.shortcutToFinishMigration
+        : setupMode.openFlyout;
+
       disableInternalCollectionForMigrationMessage = (
         <Fragment>
           <EuiCallOut
@@ -266,7 +270,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                 but you need to disable internal collection to finish the migration.`
               })}
             </p>
-            <EuiButton onClick={() => setupMode.openFlyout()} size="s" color="warning" fill>
+            <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
               {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
                 defaultMessage: 'Disable and finish migration'
               })}

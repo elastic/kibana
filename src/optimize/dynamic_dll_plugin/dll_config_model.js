@@ -57,10 +57,7 @@ function generateDLL(config) {
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: {
-        ...dllAlias,
-        'dll/set_csp_nonce$': require.resolve('./public/set_csp_nonce')
-      },
+      alias: dllAlias,
       modules: [
         'webpackShims',
         fromRoot('webpackShims'),

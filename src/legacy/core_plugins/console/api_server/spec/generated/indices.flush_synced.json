@@ -18,6 +18,6 @@
       "_flush/synced",
       "{indices}/_flush/synced"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-synced-flush.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html#synced-flush-api"
   }
 }

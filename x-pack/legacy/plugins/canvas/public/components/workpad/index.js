@@ -19,7 +19,7 @@ import {
   getPages,
 } from '../../state/selectors/workpad';
 import { zoomHandlerCreators } from '../../lib/app_handler_creators';
-import { trackCanvasUiMetric } from '../../lib/ui_metric';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { Workpad as Component } from './workpad';
 
@@ -56,6 +56,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
       if (value === true) {
         trackCanvasUiMetric(
+          METRIC_TYPE.COUNT,
           stateProps.autoplayEnabled
             ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
             : LAUNCHED_FULLSCREEN

@@ -42,6 +42,12 @@ class Plugin {
       `Setting up TestBed with core contract [${Object.keys(core)}] and deps [${Object.keys(deps)}]`
     );
 
+    const router = core.http.createRouter();
+    router.get({ path: '/ping', validate: false }, async (context, req, res) => {
+      const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+      return res.ok({ body: `Pong: ${response}` });
+    });
+
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(
         map(configValue => {

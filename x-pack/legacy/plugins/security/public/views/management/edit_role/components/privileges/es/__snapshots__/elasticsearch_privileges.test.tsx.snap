@@ -48,7 +48,7 @@ exports[`it renders without crashing 1`] = `
       labelType="label"
     >
       <ClusterPrivileges
-        availableClusterPrivileges={
+        builtinClusterPrivileges={
           Array [
             "all",
             "manage",

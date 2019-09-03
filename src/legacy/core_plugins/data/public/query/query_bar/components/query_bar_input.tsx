@@ -32,7 +32,7 @@ import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -44,13 +44,14 @@ import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 interface Props {
   uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  savedObjectsClient: SavedObjectsClientContract;
   store: Storage;
   intl: InjectedIntl;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: any;
+  prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
@@ -111,6 +112,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as IndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
+      this.props.savedObjectsClient,
       stringPatterns,
       this.props.uiSettings
     )) as IndexPattern[];
@@ -202,10 +204,8 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private onQueryStringChange = (value: string) => {
-    const hasValue = Boolean(value.trim());
-
     this.setState({
-      isSuggestionsVisible: hasValue,
+      isSuggestionsVisible: true,
       index: null,
       suggestionLimit: 50,
     });
@@ -391,6 +391,11 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
+
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
@@ -399,6 +404,11 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
+
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
@@ -443,6 +453,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'uiSettings',
+      'savedObjectsClient',
     ]);
 
     return (
