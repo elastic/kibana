@@ -16,7 +16,9 @@ export const convertKueryToElasticSearchQuery = (
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)) // .replace(/\\\\/g, '')
+      ? JSON.stringify(
+          toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+        ).replace(/\\\\/g, '')
       : '';
   } catch (err) {
     return '';
@@ -28,7 +30,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
     if (isEmpty(val)) {
       return '""';
     }
-    return val.split(' ').length > 1 ? `"${val}"` : val;
+    return val.split(' ').length > 1 ? `"${escapeKuery(val)}"` : escapeKuery(val);
   }
 
   return val;
