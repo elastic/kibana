@@ -6,7 +6,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Redirect, Route, Router, Switch, RouteProps } from 'react-router-dom';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
@@ -41,10 +41,22 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
           <Route path="/infrastructure/metrics/:type/:node" component={MetricDetail} />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect
-            from="/metrics/:type/:node"
-            exact={true}
-            to="/infrastructure/metrics/:type/:node"
+          // This workaround preserves query parameters in the redirect
+          // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
+          <Route
+            path="/metrics"
+            component={({ location }: RouteProps) =>
+              location ? (
+                <Redirect
+                  from="/metrics/:type/:node"
+                  exact={true}
+                  to={{
+                    ...location,
+                    pathname: location.pathname.replace(/metrics/, 'infrastructure/metrics'),
+                  }}
+                />
+              ) : null
+            }
           />
         )}
         {uiCapabilities.logs.show && <Redirect from="/logs" exact={true} to="/logs/stream" />}
