@@ -21,7 +21,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsListRow, isCompletedBatchAnalytics } from './common';
+import { DataFrameAnalyticsListRow, isCompletedAnalyticsJob } from './common';
 
 interface StartActionProps {
   item: DataFrameAnalyticsListRow;
@@ -43,14 +43,14 @@ export const StartAction: FC<StartActionProps> = ({ item }) => {
     defaultMessage: 'Start',
   });
 
-  // Disable start for batch analytics which have completed.
-  const completedBatchAnalytics = isCompletedBatchAnalytics(item);
+  // Disable start for analytics jobs which have completed.
+  const completeAnalytics = isCompletedAnalyticsJob(item.stats);
 
   let startButton = (
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={!canStartStopDataFrameAnalytics || completedBatchAnalytics}
+      disabled={!canStartStopDataFrameAnalytics || completeAnalytics}
       iconType="play"
       onClick={openModal}
       aria-label={buttonStartText}
@@ -59,7 +59,7 @@ export const StartAction: FC<StartActionProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  if (!canStartStopDataFrameAnalytics || completedBatchAnalytics) {
+  if (!canStartStopDataFrameAnalytics || completeAnalytics) {
     startButton = (
       <EuiToolTip
         position="top"
@@ -68,7 +68,7 @@ export const StartAction: FC<StartActionProps> = ({ item }) => {
             ? createPermissionFailureMessage('canStartStopDataFrameAnalytics')
             : i18n.translate('xpack.ml.dataframe.analyticsList.completeBatchAnalyticsToolTip', {
                 defaultMessage:
-                  '{analyticsId} is a completed batch analytics job and cannot be restarted.',
+                  '{analyticsId} is a completed analytics job and cannot be restarted.',
                 values: { analyticsId: item.config.id },
               })
         }

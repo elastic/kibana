@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
@@ -24,12 +25,17 @@ import {
 } from '../../../shared/StickyProperties';
 import { ErrorCountBadge } from './ErrorCountBadge';
 import { isRumAgentName } from '../../../../../common/agent_name';
+import { fontSize } from '../../../../style/variables';
 
 interface Props {
   transaction: Transaction;
   totalDuration?: number;
   errorCount?: number;
 }
+
+const ErrorTitle = styled.span`
+  font-size: ${fontSize};
+`;
 
 export function StickyTransactionProperties({
   transaction,
@@ -124,11 +130,17 @@ export function StickyTransactionProperties({
         }
       ),
       val: errorCount ? (
-        <ErrorCountBadge
-          errorCount={errorCount}
-          transaction={transaction}
-          verbose
-        />
+        <>
+          <ErrorCountBadge errorCount={errorCount} />
+          <ErrorTitle>
+            &nbsp;
+            {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
+              values: { errorCount },
+              defaultMessage:
+                '{errorCount, plural, one {Related error} other {Related errors}}'
+            })}
+          </ErrorTitle>
+        </>
       ) : (
         noErrorsText
       ),

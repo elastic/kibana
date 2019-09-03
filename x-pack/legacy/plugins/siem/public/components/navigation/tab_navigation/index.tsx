@@ -10,7 +10,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
 
-import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
+import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/track_usage';
 import { HostsTableType } from '../../../store/hosts/model';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
@@ -96,7 +96,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
               disabled={tab.disabled}
               isSelected={this.state.selectedTabId === tab.id}
               onClick={() => {
-                track(METRIC_TYPE.CLICK, `tab_${tab.id}`);
+                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${tab.id}`);
               }}
             >
               {tab.name}

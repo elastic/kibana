@@ -120,8 +120,11 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
-export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS));
+export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(
+    defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
+    cliArgs
+  );
 }
 
 /**
