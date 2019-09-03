@@ -34,7 +34,8 @@ export async function createOrUpgradeSavedConfig(options) {
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
-    version
+    version,
+    namespace
   });
 
   // default to the attributes of the upgradeableConfig if available

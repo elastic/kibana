@@ -26,14 +26,15 @@ import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
  *  @property {string} version
  *  @return {Promise<SavedConfig|undefined>}
  */
-export async function getUpgradeableConfig({ savedObjectsClient, version }) {
+export async function getUpgradeableConfig({ savedObjectsClient, version, namespace }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } = await savedObjectsClient.find({
     type: 'config',
     page: 1,
     perPage: 1000,
     sortField: 'buildNum',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
+    namespace,
   });
 
   // try to find a config that we can upgrade
