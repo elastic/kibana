@@ -19,7 +19,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       for (const tr of $.findTestSubjects('row').toArray()) {
         const $tr = $(tr);
 
-        const $description = $tr.findTestSubject('description').find('.euiTableCellContent__text');
+        const $description = $tr.findTestSubject('description').find('.euiTableCellContent');
         const $jobGroups = $description.findTestSubjects('jobGroup');
         const jobGroups = [];
         for (const el of $jobGroups.toArray()) {
@@ -37,7 +37,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         rows.push({
           id: $tr
             .findTestSubject('id')
-            .find('.euiTableCellContent__text')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
           description: $description
@@ -46,28 +46,28 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
             .trim(),
           jobGroups,
           recordCount: $tr
-            .findTestSubject('rcordCount')
-            .find('.euiTableCellContent__text')
+            .findTestSubject('recordCount')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
           memoryStatus: $tr
             .findTestSubject('memoryStatus')
-            .find('.euiTableCellContent__text')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
           jobState: $tr
             .findTestSubject('jobState')
-            .find('.euiTableCellContent__text')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
           datafeedState: $tr
             .findTestSubject('datafeedState')
-            .find('.euiTableCellContent__text')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
           latestTimestamp: $tr
             .findTestSubject('latestTimestamp')
-            .find('.euiTableCellContent__text')
+            .find('.euiTableCellContent')
             .text()
             .trim(),
         });
