@@ -22,13 +22,13 @@ import _ from 'lodash';
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { IPrivate } from 'ui/private';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/data/common/expressions/types';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { LegacyDependenciesPluginSetup } from '../shim';
 
 interface Stats {
   cacheCount: number;
@@ -51,8 +51,9 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-const TimelionRequestHandlerProvider = function(Private: IPrivate, $http: any, config: any) {
-  const timezone = (Private(timezoneProvider) as Function)();
+export function getTimelionRequestProvider(dependencies: LegacyDependenciesPluginSetup) {
+  const { config, $http } = dependencies;
+  const timezone = timezoneProvider(config)();
 
   return {
     name: 'timelion',
@@ -107,6 +108,4 @@ const TimelionRequestHandlerProvider = function(Private: IPrivate, $http: any, c
       });
     },
   };
-};
-
-export { TimelionRequestHandlerProvider };
+}

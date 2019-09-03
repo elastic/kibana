@@ -25,14 +25,18 @@ import {
 } from 'kibana/public';
 import { VisualizationsSetup } from 'src/legacy/core_plugins/visualizations/public';
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
-import { timelionVis } from './timelion_vis_fn';
-import { TimelionVisProvider } from './vis';
+import { getTimelionVisualizationConfig } from './timelion_vis_fn';
+import { getTimelionVisualization } from './vis';
 import { timeChartProvider } from './panels/timechart/timechart';
+import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+
+  // Temporary solution
+  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -51,8 +55,12 @@ export class TimelionPlugin
   }
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
-    plugins.data.expressions.registerFunction(timelionVis);
-    plugins.visualizations.types.VisTypesRegistryProvider.register(TimelionVisProvider);
+    const dependencies: LegacyDependenciesPluginSetup = await plugins.__LEGACY.setup();
+
+    plugins.data.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
+    plugins.visualizations.types.VisTypesRegistryProvider.register(() =>
+      getTimelionVisualization(dependencies)
+    );
   }
 
   public start(core: CoreStart & InternalCoreStart, plugins: TimelionPluginStartDependencies) {

@@ -24,10 +24,15 @@ import { visualizations } from '../../visualizations/public';
 import { TimelionPluginSetupDependencies, TimelionPluginStartDependencies } from './plugin';
 // @ts-ignore
 import panelRegistry from './lib/panel_registry';
+import { LegacyDependenciesPlugin } from './shim';
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
   data: npSetup.plugins.data,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const startPlugins: Readonly<TimelionPluginStartDependencies> = {

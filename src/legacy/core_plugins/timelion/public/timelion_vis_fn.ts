@@ -19,17 +19,16 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import {
   ExpressionFunction,
   KibanaContext,
   Render,
 } from 'src/plugins/data/common/expressions/types';
 import {
-  TimelionRequestHandlerProvider,
+  getTimelionRequestProvider,
   TimelionSuccessResponse,
 } from './vis/timelion_request_handler';
+import { LegacyDependenciesPluginSetup } from './shim';
 
 const name = 'timelion_vis';
 
@@ -48,7 +47,9 @@ type Context = KibanaContext | null;
 type VisParams = Arguments;
 type Return = Promise<Render<RenderValue>>;
 
-export const timelionVis = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const getTimelionVisualizationConfig = (
+  dependencies: LegacyDependenciesPluginSetup
+): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name,
   type: 'render',
   context: {
@@ -71,9 +72,7 @@ export const timelionVis = (): ExpressionFunction<typeof name, Context, Argument
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private: IPrivate = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+    const timelionRequestHandler = getTimelionRequestProvider(dependencies).handler;
 
     const visParams = { expression: args.expression, interval: args.interval };
 
