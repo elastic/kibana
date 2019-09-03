@@ -82,7 +82,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             helpText={
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
-                defaultMessage="This form lets you create an outlier detection job using a model memory limit of 50MB based on a feature index. To create jobs with more advanced settings or other types of analysis, please switch to the {advancedEditorButton}. Note you cannot switch back to this form once the advanced editor is enabled."
+                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
                 values={{
                   advancedEditorButton: (
                     <EuiLink onClick={actions.switchToAdvancedEditor}>
