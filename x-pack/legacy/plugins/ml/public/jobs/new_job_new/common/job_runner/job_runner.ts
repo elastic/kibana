@@ -98,7 +98,12 @@ export class JobRunner {
             await check();
           }, this._refreshInterval);
         } else {
-          // job has finished running, unsubscribe everyone
+          // job has finished running, set progress to 100%
+          // it may be lower than 100 on completion as the progress
+          // is calculated based on latest_record_timestamp which may be earlier
+          // than the end date supplied to the datafeed
+          this._progress$.next(100);
+          // unsubscribe everyone
           subscriptions.forEach(s => s.unsubscribe());
         }
       };

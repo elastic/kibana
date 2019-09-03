@@ -3,14 +3,9 @@
 exports[`MonitorCharts component renders the component without errors 1`] = `
 <Fragment>
   <EuiFlexGroup>
-    <EuiFlexItem
-      style={
-        Object {
-          "height": 400,
-        }
-      }
-    >
+    <EuiFlexItem>
       <DurationChart
+        loading={false}
         locationDurationLines={
           Array [
             Object {
@@ -73,6 +68,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         absoluteEndDate={1322903730000}
         absoluteStartDate={1322903730000}
         dangerColor="#bd271e"
+        height="400px"
         successColor="#017d73"
         variables={
           Object {
