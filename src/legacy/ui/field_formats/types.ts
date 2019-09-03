@@ -17,8 +17,11 @@
  * under the License.
  */
 
+import { Field } from '../../core_plugins/data/public/index_patterns';
+
 export type ContentType = 'html' | 'text';
 
+/** @public **/
 export interface IFieldFormat {
   id?: string;
   type: any;
@@ -81,6 +84,21 @@ export interface IFieldFormat {
   _convert: FieldFormatConvert;
 }
 
+/** @internal **/
+export type HtmlConventTypeConvert = (
+  value: any,
+  field?: Field,
+  hit?: Record<string, any>,
+  meta?: any
+) => string;
+
+/** @internal **/
+export type TextContextTypeConvert = (value: any) => string;
+
+/** @internal **/
+export type FieldFormatConvertFunction = HtmlConventTypeConvert | TextContextTypeConvert;
+
+/** @internal **/
 export interface FieldFormatConvert {
-  [key: string]: Function;
+  [key: string]: FieldFormatConvertFunction;
 }

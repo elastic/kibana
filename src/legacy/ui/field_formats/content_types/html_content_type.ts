@@ -17,19 +17,12 @@
  * under the License.
  */
 import { escape, isFunction } from 'lodash';
-import { FieldFormatConvert, IFieldFormat } from '../types';
+import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../types';
 
 // @ts-ignore
 import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
 // @ts-ignore
 import { getHighlightHtml } from '../../../core_plugins/kibana/common/highlight/highlight_html';
-
-type HtmlConventTypeConvert = (
-  value: any,
-  field: any,
-  hit: Record<string, any>,
-  meta?: any
-) => string;
 
 const CONTEXT_TYPE = 'html';
 
@@ -40,16 +33,12 @@ const getConvertFn = (
   const fallbackHtml: HtmlConventTypeConvert = (value, field, hit) => {
     const formatted = escape(format.convert(value, 'text'));
 
-    return !hit || !hit.highlight || !hit.highlight[field.name]
+    return !field || !hit || !hit.highlight || !hit.highlight[field.name]
       ? formatted
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  if (!fieldFormatConvert[CONTEXT_TYPE]) {
-    return fallbackHtml;
-  }
-
-  return fieldFormatConvert[CONTEXT_TYPE] as HtmlConventTypeConvert;
+  return (fieldFormatConvert[CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
 };
 
 export const setup = (

@@ -90,8 +90,8 @@ describe('FieldFormat class', () => {
         const htmlConverter = f.getConverterFor('html');
         const textConverter = f.getConverterFor('text');
 
-        expect(htmlConverter && typeof htmlConverter()).toBe('string');
-        expect(textConverter && typeof textConverter()).toBe('string');
+        expect(htmlConverter && typeof htmlConverter('')).toBe('string');
+        expect(textConverter && typeof textConverter('')).toBe('string');
       });
     });
 

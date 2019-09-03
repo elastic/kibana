@@ -19,13 +19,13 @@
 
 import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, IFieldFormat } from './types';
+import { ContentType, FieldFormatConvert, IFieldFormat, FieldFormatConvertFunction } from './types';
 
 import { htmlContentTypeSetup, textContentTypeSetup } from './content_types';
 
 const DEFAULT_CONTEXT_TYPE = 'text';
 
-export type FieldFormatConvert = { [key: string]: Function } | Function;
+export type FieldFormatConvert = { [key: string]: Function } | FieldFormatConvertFunction;
 
 export abstract class FieldFormat implements IFieldFormat {
   _convert: FieldFormatConvert = FieldFormat.setupContentType(this, get(this, '_convert', {}));
@@ -91,13 +91,13 @@ export abstract class FieldFormat implements IFieldFormat {
     };
   }
 
-  static from(convertFn: Function) {
+  static from(convertFn: FieldFormatConvertFunction) {
     return createCustomFieldFormat(FieldFormat.toConvertObject(convertFn));
   }
 
   private static setupContentType(
     fieldFormat: IFieldFormat,
-    convert: FieldFormatConvert | Function
+    convert: FieldFormatConvert | FieldFormatConvertFunction
   ): FieldFormatConvert {
     const convertObject = FieldFormat.toConvertObject(convert);
 
@@ -107,7 +107,9 @@ export abstract class FieldFormat implements IFieldFormat {
     };
   }
 
-  private static toConvertObject(convert: FieldFormatConvert | Function): FieldFormatConvert {
+  private static toConvertObject(
+    convert: FieldFormatConvert | FieldFormatConvertFunction
+  ): FieldFormatConvert {
     if (isFunction(convert)) {
       return {
         [DEFAULT_CONTEXT_TYPE]: convert,

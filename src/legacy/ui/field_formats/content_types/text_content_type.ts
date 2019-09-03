@@ -18,22 +18,15 @@
  */
 
 import { isFunction } from 'lodash';
-import { IFieldFormat, FieldFormatConvert } from '../types';
+import { IFieldFormat, FieldFormatConvert, TextContextTypeConvert } from '../types';
 
 // @ts-ignore
 import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
 
-type TextContextTypeConvert = (value: any) => string;
-
 const CONTEXT_TYPE = 'text';
 
-const getConvertFn = (fieldFormatConvert: FieldFormatConvert): TextContextTypeConvert => {
-  if (!fieldFormatConvert[CONTEXT_TYPE]) {
-    return asPrettyString;
-  }
-
-  return fieldFormatConvert[CONTEXT_TYPE] as TextContextTypeConvert;
-};
+const getConvertFn = (fieldFormatConvert: FieldFormatConvert): TextContextTypeConvert =>
+  (fieldFormatConvert[CONTEXT_TYPE] || asPrettyString) as TextContextTypeConvert;
 
 export const setup = (
   format: IFieldFormat,
