@@ -56,10 +56,10 @@ export class ExpressionRenderHandler {
       reload: () => {
         updateSubject.next(null);
       },
-      update: (params: any) => {
+      update: params => {
         updateSubject.next(params);
       },
-      event: (data: any) => {
+      event: data => {
         eventsSubject.next(data);
       },
     };

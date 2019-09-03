@@ -18,12 +18,13 @@
  */
 
 import { execute, ExpressionDataHandler } from './execute';
-import { fromExpression, Ast } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
+import { ExpressionAST } from '../../../../../../plugins/data/common/expressions/types';
 
 jest.mock('../services', () => ({
   getInterpreter: () => {
     return {
-      interpretAst: async (expression: Ast) => {
+      interpretAst: async (expression: ExpressionAST) => {
         return {};
       },
     };
@@ -47,7 +48,7 @@ describe('ExpressionDataHandler', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString);
+      const expressionAST = fromExpression(expressionString) as ExpressionAST;
       const expressionDataHandler = new ExpressionDataHandler(expressionAST, {});
       expect(expressionDataHandler.getExpression()).toEqual(expressionString);
       expect(expressionDataHandler.getAst()).toEqual(expressionAST);

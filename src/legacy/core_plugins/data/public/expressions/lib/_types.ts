@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
-import { TimeRange } from 'ui/timefilter/time_history';
-import { Adapters } from 'ui/inspector';
+import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { Adapters } from '../../../../../ui/public/inspector';
 import { Query } from '../../query';
+import { ExpressionAST } from '../../../../../../plugins/data/common/expressions/types';
 
-export { Ast, TimeRange, Adapters, Filter, Query };
+export { ExpressionAST, TimeRange, Adapters, Filter, Query };
 
 export type RenderId = number;
 export type Data = any;
@@ -79,7 +79,7 @@ export interface IInterpreterRenderFunction {
 
 export interface IInterpreter {
   interpretAst(
-    ast: Ast,
+    ast: ExpressionAST,
     context: Context,
     handlers: IInterpreterHandlers
   ): Promise<IInterpreterResult>;

@@ -19,15 +19,14 @@
 
 import { useRef, useEffect } from 'react';
 import React from 'react';
-import { Ast } from '@kbn/interpreter/common';
 
-import { IInterpreterResult } from './lib/_types';
-import { IExpressionLoader } from './lib/loader';
+import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './lib/_types';
+import { IExpressionLoader, ExpressionLoader } from './lib/loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
-export interface ExpressionRendererProps {
-  expression: string | Ast;
+export interface ExpressionRendererProps extends IExpressionLoaderParams {
+  expression: string | ExpressionAST;
   /**
    * If an element is specified, but the response of the expression run can't be rendered
    * because it isn't a valid response or the specified renderer isn't available,
@@ -45,10 +44,16 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
+  const handlerRef = useRef((null as any) as ExpressionLoader);
+
   useEffect(() => {
     if (mountpoint.current) {
-      const handler = loader(mountpoint.current, expression, options);
-      handler.data$.toPromise().catch(result => {
+      if (!handlerRef.current) {
+        handlerRef.current = loader(mountpoint.current, expression, options);
+      } else {
+        handlerRef.current.update(expression, options);
+      }
+      handlerRef.current.data$.toPromise().catch(result => {
         if (onRenderFailure) {
           onRenderFailure(result);
         }

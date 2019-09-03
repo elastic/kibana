@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
 import { Observable, Subject } from 'rxjs';
 import { first, share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
 import { execute, ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { RenderId, Data, IExpressionLoaderParams } from './_types';
+import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './_types';
 import { getInspector } from '../services';
 
 export class ExpressionLoader {
@@ -37,7 +36,11 @@ export class ExpressionLoader {
   private dataSubject: Subject<Data>;
   private data: Data;
 
-  constructor(element: HTMLElement, expression: string | Ast, params: IExpressionLoaderParams) {
+  constructor(
+    element: HTMLElement,
+    expression: string | ExpressionAST,
+    params: IExpressionLoaderParams
+  ) {
     this.dataSubject = new Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
 
@@ -69,7 +72,7 @@ export class ExpressionLoader {
     return this.dataHandler.getExpression();
   }
 
-  getAst(): Ast {
+  getAst(): ExpressionAST {
     return this.dataHandler.getAst();
   }
 
@@ -87,7 +90,7 @@ export class ExpressionLoader {
     return this.dataHandler.inspect();
   }
 
-  update(expression: string | Ast, params: IExpressionLoaderParams): Promise<RenderId> {
+  update(expression: string | ExpressionAST, params: IExpressionLoaderParams): Promise<RenderId> {
     const promise = this.render$.pipe(first()).toPromise();
 
     if (expression !== null) {
@@ -99,7 +102,7 @@ export class ExpressionLoader {
   }
 
   private execute = async (
-    expression: string | Ast,
+    expression: string | ExpressionAST,
     params: IExpressionLoaderParams
   ): Promise<Data> => {
     if (this.dataHandler) {
@@ -118,7 +121,7 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | Ast,
+  expression: string | ExpressionAST,
   params: IExpressionLoaderParams
 ) => ExpressionLoader;
 
