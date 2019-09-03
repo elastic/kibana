@@ -17,9 +17,10 @@
  * under the License.
  */
 
-// @ts-ignore
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
+interface SetupDependecies {
+  VisFiltersProvider: any;
+  createFilter: any;
+}
 
 /**
  * Vis Filters Service
@@ -27,7 +28,7 @@ import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
  * @internal
  */
 export class FiltersService {
-  public setup() {
+  public setup({ VisFiltersProvider, createFilter }: SetupDependecies) {
     return {
       VisFiltersProvider,
       createFilter,

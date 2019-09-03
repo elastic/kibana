@@ -19,13 +19,14 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPublicPlugin, Setup } from './plugin';
+import { setup } from './legacy';
 
 /**
  * We export visualizations here so that users importing from 'plugins/visualizations'
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-export const visualizations = new VisualizationsPublicPlugin({} as any).setup({} as any);
+export const visualizations = setup;
 
 /** @public */
 export type VisualizationsSetup = Setup;

@@ -19,18 +19,21 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-// @ts-ignore
-import { VisProvider as Vis } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import * as types from 'ui/vis/vis';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+import { VisTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+
+interface SetupDependencies {
+  Vis: any;
+  VisFactoryProvider: any;
+  VisTypesRegistryProvider: any;
+  defaultFeedbackMessage: any;
+  visTypeAliasRegistry: VisTypeAliasRegistry;
+}
 
 /**
  * Vis Types Service
@@ -38,7 +41,13 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
  * @internal
  */
 export class TypesService {
-  public setup() {
+  public setup({
+    Vis,
+    VisFactoryProvider,
+    VisTypesRegistryProvider,
+    defaultFeedbackMessage,
+    visTypeAliasRegistry,
+  }: SetupDependencies) {
     return {
       Vis,
       VisFactoryProvider,

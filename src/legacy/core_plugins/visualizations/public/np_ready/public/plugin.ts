@@ -17,8 +17,23 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+
 import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup } from './types';
+import { VisTypeAliasRegistry } from './types/vis_type_alias_registry';
+
+interface SetupDependencies {
+  __LEGACY: {
+    VisFiltersProvider: any;
+    createFilter: any;
+
+    Vis: any;
+    VisFactoryProvider: any;
+    VisTypesRegistryProvider: any;
+    defaultFeedbackMessage: any;
+    visTypeAliasRegistry: VisTypeAliasRegistry;
+  };
+}
 
 export interface Setup {
   filters: FiltersSetup;
@@ -27,7 +42,7 @@ export interface Setup {
 
 export type Start = void;
 
-export class VisualizationsPublicPlugin implements Plugin<Setup, Start, {}, {}> {
+export class VisualizationsPublicPlugin implements Plugin<Setup, Start, SetupDependencies, {}> {
   private readonly filters: FiltersService;
   private readonly types: TypesService;
 
@@ -36,10 +51,29 @@ export class VisualizationsPublicPlugin implements Plugin<Setup, Start, {}, {}> 
     this.types = new TypesService();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { __LEGACY }: SetupDependencies) {
+    const {
+      VisFiltersProvider,
+      createFilter,
+      Vis,
+      VisFactoryProvider,
+      VisTypesRegistryProvider,
+      defaultFeedbackMessage,
+      visTypeAliasRegistry,
+    } = __LEGACY;
+
     return {
-      filters: this.filters.setup(),
-      types: this.types.setup(),
+      filters: this.filters.setup({
+        VisFiltersProvider,
+        createFilter,
+      }),
+      types: this.types.setup({
+        Vis,
+        VisFactoryProvider,
+        VisTypesRegistryProvider,
+        defaultFeedbackMessage,
+        visTypeAliasRegistry,
+      }),
     };
   }
 
