@@ -41,6 +41,8 @@ import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_p
 import { RemoteClustersFormField } from './remote_clusters_form_field';
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
 
+import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
+
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
@@ -88,8 +90,15 @@ export class AutoFollowPatternForm extends PureComponent {
       fieldsErrors: validateAutoFollowPattern(autoFollowPattern),
       areErrorsVisible: false,
       isNew,
+      isRequestVisible: false,
     };
   }
+
+  toggleRequest = () => {
+    this.setState(({ isRequestVisible }) => ({
+      isRequestVisible: !isRequestVisible,
+    }));
+  };
 
   onFieldsChange = (fields) => {
     this.setState(({ autoFollowPattern }) => ({
@@ -590,7 +599,7 @@ export class AutoFollowPatternForm extends PureComponent {
      */
     const renderActions = () => {
       const { apiStatus, saveButtonLabel } = this.props;
-      const { areErrorsVisible } = this.state;
+      const { areErrorsVisible, isRequestVisible } = this.state;
 
       if (apiStatus === API_STATUS.SAVING) {
         return (
@@ -614,30 +623,49 @@ export class AutoFollowPatternForm extends PureComponent {
       const isSaveDisabled = areErrorsVisible && !this.isFormValid();
 
       return (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="secondary"
-              iconType="check"
-              onClick={this.sendForm}
-              fill
-              disabled={isSaveDisabled}
-              data-test-subj="submitButton"
-            >
-              {saveButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="secondary"
+                iconType="check"
+                onClick={this.sendForm}
+                fill
+                disabled={isSaveDisabled}
+                data-test-subj="submitButton"
+              >
+                {saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
 
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="primary"
+                onClick={this.cancelForm}
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                  data-test-subj="cancelButton"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              color="primary"
-              onClick={this.cancelForm}
+              onClick={this.toggleRequest}
             >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
-                defaultMessage="Cancel"
-                data-test-subj="cancelButton"
-              />
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternForm.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternFormm.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -674,10 +702,25 @@ export class AutoFollowPatternForm extends PureComponent {
   }
 
   render() {
+    const {
+      autoFollowPattern,
+      isRequestVisible,
+      isNew,
+    } = this.state;
+
     return (
       <Fragment>
         {this.renderForm()}
         {this.renderLoading()}
+
+        {isRequestVisible ? (
+          <AutoFollowPatternRequestFlyout
+            name={autoFollowPattern.name}
+            autoFollowPattern={this.getFields()}
+            isNew={isNew}
+            close={() => this.setState({ isRequestVisible: false })}
+          />
+        ) : null}
       </Fragment>
     );
   }

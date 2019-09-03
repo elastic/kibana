@@ -71,8 +71,9 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
           />
 
           <BasicTable
-            items={networks}
             columns={columns}
+            compressed
+            items={networks}
             pagination={pagination}
             sorting={sorting}
           />
@@ -96,3 +97,7 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
     overflow: hidden;
   `}
 `;
+
+Panel.displayName = 'Panel';
+
+AnomaliesNetworkTable.displayName = 'AnomaliesNetworkTable';

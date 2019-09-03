@@ -8,7 +8,7 @@ import { CancellationToken } from '../lib/esqueue';
 
 import sinon from 'sinon';
 
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 
 afterEach(() => {
   sinon.restore();
@@ -30,9 +30,9 @@ test('Register and cancel cancellation token', async () => {
   const promise = new Promise(resolve => {
     promiseResolve = resolve;
   });
-  await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
+  await service.registerCancelableIndexJob(repoUri, (token as any) as CancellationToken, promise);
   // do not wait on the promise, or there will be a dead lock
-  const cancelPromise = service.cancelIndexJob(repoUri);
+  const cancelPromise = service.cancelIndexJob(repoUri, CancellationReason.NEW_JOB_OVERRIDEN);
   // resolve the promise now
   promiseResolve();
 
@@ -57,10 +57,10 @@ test('Register and cancel cancellation token while an exception is thrown from t
   const promise = new Promise((resolve, reject) => {
     promiseReject = reject;
   });
-  await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
+  await service.registerCancelableIndexJob(repoUri, (token as any) as CancellationToken, promise);
   // expect no exceptions are thrown when cancelling the job
   // do not wait on the promise, or there will be a dead lock
-  const cancelPromise = service.cancelIndexJob(repoUri);
+  const cancelPromise = service.cancelIndexJob(repoUri, CancellationReason.NEW_JOB_OVERRIDEN);
   // reject the promise now
   promiseReject();
 

@@ -28,6 +28,9 @@ import {
   UIM_INDEX_UNFREEZE_MANY,
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
+  UIM_TEMPLATE_CREATE,
+  UIM_TEMPLATE_UPDATE,
+  UIM_TEMPLATE_CLONE,
 } from '../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
@@ -201,18 +204,55 @@ export function loadIndexTemplates() {
   });
 }
 
-export const deleteTemplates = async (names: Array<Template['name']>) => {
-  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
-
-  return sendRequest({
+export async function deleteTemplates(names: Array<Template['name']>) {
+  const result = sendRequest({
     path: `${apiPrefix}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
-    uimActionType,
   });
-};
+
+  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
+
+  trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
+
+  return result;
+}
 
 export function loadIndexTemplate(name: Template['name']) {
   return useRequest({
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
+    method: 'get',
+  });
+}
+
+export async function saveTemplate(template: Template, isClone?: boolean) {
+  const result = sendRequest({
+    path: `${apiPrefix}/templates`,
+    method: 'put',
+    body: template,
+  });
+
+  const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
+
+  trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
+
+  return result;
+}
+
+export async function updateTemplate(template: Template) {
+  const { name } = template;
+  const result = sendRequest({
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
+    method: 'put',
+    body: template,
+  });
+
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_UPDATE);
+
+  return result;
+}
+
+export async function loadTemplateToClone(name: Template['name']) {
+  return sendRequest({
     path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
     method: 'get',
   });

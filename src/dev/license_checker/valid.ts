@@ -18,7 +18,7 @@
  */
 
 import dedent from 'dedent';
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 
 interface Options {
   packages: Array<{

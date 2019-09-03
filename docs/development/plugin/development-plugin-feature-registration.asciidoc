@@ -1,15 +1,15 @@
 [[development-plugin-feature-registration]]
 === Plugin feature registration
 
-If your plugin will be used with {kib}’s default distribution, then you have the ability to register the features that your plugin provides. Features are typically apps in {kib}; once registered, you can toggle them via Spaces, and secure them via Roles when security is enabled.
+If your plugin will be used with {kib}'s default distribution, then you have the ability to register the features that your plugin provides. Features are typically apps in {kib}; once registered, you can toggle them via Spaces, and secure them via Roles when security is enabled.
 
 ==== UI Capabilities
 
-Registering features also gives your plugin access to “UI Capabilities”. These capabilities are boolean flags that you can use to conditionally render your interface, based on the current user’s permissions. For example, you can  hide or disable a Save button if the current user is not authorized.
+Registering features also gives your plugin access to “UI Capabilities”. These capabilities are boolean flags that you can use to conditionally render your interface, based on the current user's permissions. For example, you can  hide or disable a Save button if the current user is not authorized.
 
 ==== Registering a feature
 
-Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`'s `registerFeature` function from your plugin’s `init` function, and provide the appropriate details:
+Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`'s `registerFeature` function from your plugin's `init` function, and provide the appropriate details:
 
 ["source","javascript"]
 -----------
@@ -42,7 +42,7 @@ Registering a feature consists of the following fields. For more information, co
 |`app` (required)
 |`string[]`
 |`["sample_app", "kibana"]`
-|An array of applications this feature enables. Typically, all of your plugin’s apps (from `uiExports`) will be included here.
+|An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
 |{repo}blob/{branch}/x-pack/legacy/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[`FeatureWithAllOrReadPrivileges`].
@@ -72,7 +72,7 @@ To access capabilities, import them from `ui/capabilities`:
 
 ["source","javascript"]
 -----------
-import { uiCapabilities } from ‘ui/capabilities’;
+import { uiCapabilities } from 'ui/capabilities';
 
 const canUserSave = uiCapabilities.foo.save;
 if (canUserSave) {
@@ -124,7 +124,7 @@ The `all` privilege defines a single “save” UI Capability. To access this in
 
 ["source","javascript"]
 -----------
-import { uiCapabilities } from ‘ui/capabilities’;
+import { uiCapabilities } from 'ui/capabilities';
 
 const canUserSave = uiCapabilities.canvas.save;
 if (canUserSave) {

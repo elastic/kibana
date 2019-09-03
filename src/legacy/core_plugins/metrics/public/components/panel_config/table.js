@@ -43,11 +43,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -233,7 +230,7 @@ export class TablePanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
                       language: model.filter.language
                         ? model.filter.language
@@ -241,9 +238,7 @@ export class TablePanelConfig extends Component {
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

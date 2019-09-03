@@ -66,6 +66,8 @@ const HoverActionsContainer = styled(EuiPanel)`
   cursor: pointer;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 interface AddToKqlProps {
   children: JSX.Element;
   indexPattern: StaticIndexPattern;
@@ -109,3 +111,5 @@ export const AddToKql = pure<AddToKqlProps>(
     assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
   }
 );
+
+AddToKql.displayName = 'AddToKql';

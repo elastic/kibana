@@ -19,11 +19,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Field } from 'ui/index_patterns';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { FieldParamType } from '../param_types';
 import { FieldParamEditor } from './field';
 
-function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+function TopSortFieldParamEditor(props: AggParamEditorProps<Field>) {
   const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
     defaultMessage: 'Sort on',
   });

@@ -41,7 +41,12 @@ const testHook = (callback) => {
 const wait = async wait =>
   new Promise(resolve => setTimeout(resolve, wait || 1));
 
-describe('request lib', () => {
+// FLAKY:
+// - https://github.com/elastic/kibana/issues/42561
+// - https://github.com/elastic/kibana/issues/42562
+// - https://github.com/elastic/kibana/issues/42563
+// - https://github.com/elastic/kibana/issues/42225
+describe.skip('request lib', () => {
   const successRequest = { path: '/success', method: 'post', body: {} };
   const errorRequest = { path: '/error', method: 'post', body: {} };
   const successResponse = { statusCode: 200, data: { message: 'Success message' } };

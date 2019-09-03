@@ -22,8 +22,7 @@ import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { npSetup } from 'ui/new_platform';
-
+import { UiSettingsClientContract } from 'src/core/public';
 // @ts-ignore
 import { compareFilters } from './lib/compare_filters';
 // @ts-ignore
@@ -46,9 +45,11 @@ export class FilterManager {
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
+  private uiSettings: UiSettingsClientContract;
 
-  constructor(indexPatterns: IndexPatterns) {
+  constructor(indexPatterns: IndexPatterns, uiSettings: UiSettingsClientContract) {
     this.indexPatterns = indexPatterns;
+    this.uiSettings = uiSettings;
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -144,9 +145,8 @@ export class FilterManager {
       return;
     }
 
-    const { uiSettings } = npSetup.core;
     if (pinFilterStatus === undefined) {
-      pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
+      pinFilterStatus = this.uiSettings.get('filters:pinnedByDefault');
     }
 
     // Set the store of all filters. For now.

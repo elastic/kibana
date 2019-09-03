@@ -7,6 +7,7 @@
 import React, { Fragment, FC, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiStepsHorizontal, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -39,6 +40,7 @@ interface Props {
   chartInterval: MlTimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
+  skipTimeRangeStep: boolean;
 }
 
 export const Wizard: FC<Props> = ({
@@ -48,6 +50,7 @@ export const Wizard: FC<Props> = ({
   chartInterval,
   jobValidator,
   existingJobsAndGroups,
+  skipTimeRangeStep = false,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
@@ -102,6 +105,10 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
+
+    if (skipTimeRangeStep) {
+      setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
+    }
   }, []);
 
   // disable the step links if the job is running
@@ -176,7 +183,12 @@ export const Wizard: FC<Props> = ({
 
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleTimeRange">Time range</Title>
+          <Title data-test-subj="mlJobWizardStepTitleTimeRange">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.timeRangeTitle"
+              defaultMessage="Time range"
+            />
+          </Title>
           <TimeRangeStep
             isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
             setCurrentStep={setCurrentStep}
@@ -185,7 +197,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitlePickFields">Pick fields</Title>
+          <Title data-test-subj="mlJobWizardStepTitlePickFields">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
+              defaultMessage="Pick fields"
+            />
+          </Title>
           <PickFieldsStep
             isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
             setCurrentStep={setCurrentStep}
@@ -194,7 +211,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleJobDetails">Job details</Title>
+          <Title data-test-subj="mlJobWizardStepTitleJobDetails">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.jobDetailsTitle"
+              defaultMessage="Job details"
+            />
+          </Title>
           <JobDetailsStep
             isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
             setCurrentStep={setCurrentStep}
@@ -207,7 +229,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.VALIDATION && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleValidation">Validation</Title>
+          <Title data-test-subj="mlJobWizardStepTitleValidation">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.validationTitle"
+              defaultMessage="Validation"
+            />
+          </Title>
           <ValidationStep
             isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
             setCurrentStep={setCurrentStep}
@@ -216,7 +243,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.SUMMARY && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleSummary">Summary</Title>
+          <Title data-test-subj="mlJobWizardStepTitleSummary">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitle"
+              defaultMessage="Summary"
+            />
+          </Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
             setCurrentStep={setCurrentStep}

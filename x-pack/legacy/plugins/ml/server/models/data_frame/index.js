@@ -6,3 +6,4 @@
 
 
 export { transformAuditMessagesProvider } from './transform_audit_messages';
+export { transformServiceProvider } from './transforms';

@@ -8,7 +8,7 @@ import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import rison from 'rison-node';
-import chrome from 'ui/chrome'; // TODO: get from context once walter's PR is merged
+import chrome from 'ui/chrome';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -149,7 +149,14 @@ function showResults(resp, action) {
 export function cloneJob(jobId) {
   loadFullJob(jobId)
     .then((job) => {
-      mlJobService.currentJob = job;
+      if(job.custom_settings && job.custom_settings.created_by) {
+        // if the job is from a wizards, i.e. contains a created_by property
+        // use tempJobCloningObjects to temporarily store the job
+        mlJobService.tempJobCloningObjects.job = job;
+      } else {
+        // otherwise use the currentJob
+        mlJobService.currentJob = job;
+      }
       window.location.href = `#/jobs/new_job`;
     })
     .catch((error) => {

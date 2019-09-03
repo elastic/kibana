@@ -74,51 +74,51 @@ describe('getSortedObjectsForExport()', () => {
     const response = await readStreamToCompletion(exportStream);
 
     expect(response).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "name",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "attributes": Object {},
+                "id": "1",
+                "references": Array [],
+                "type": "index-pattern",
+              },
+              Object {
+                "attributes": Object {},
+                "id": "2",
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "name",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "search",
+              },
+            ]
+        `);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "namespace": undefined,
-              "perPage": 500,
-              "sortField": "_id",
-              "sortOrder": "asc",
-              "type": Array [
-                "index-pattern",
-                "search",
+            [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "namespace": undefined,
+                    "perPage": 500,
+                    "sortField": "_id",
+                    "sortOrder": "asc",
+                    "type": Array [
+                      "index-pattern",
+                      "search",
+                    ],
+                  },
+                ],
               ],
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            }
+        `);
   });
 
   test('exports from the provided namespace when present', async () => {
@@ -157,51 +157,51 @@ describe('getSortedObjectsForExport()', () => {
     const response = await readStreamToCompletion(exportStream);
 
     expect(response).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "name",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "attributes": Object {},
+                "id": "1",
+                "references": Array [],
+                "type": "index-pattern",
+              },
+              Object {
+                "attributes": Object {},
+                "id": "2",
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "name",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "search",
+              },
+            ]
+        `);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "namespace": "foo",
-              "perPage": 500,
-              "sortField": "_id",
-              "sortOrder": "asc",
-              "type": Array [
-                "index-pattern",
-                "search",
+            [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "namespace": "foo",
+                    "perPage": 500,
+                    "sortField": "_id",
+                    "sortOrder": "asc",
+                    "type": Array [
+                      "index-pattern",
+                      "search",
+                    ],
+                  },
+                ],
               ],
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            }
+        `);
   });
 
   test('export selected types throws error when exceeding exportSizeLimit', async () => {
@@ -279,54 +279,54 @@ describe('getSortedObjectsForExport()', () => {
     });
     const response = await readStreamToCompletion(exportStream);
     expect(response).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "name",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-      ]
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
             Array [
               Object {
+                "attributes": Object {},
                 "id": "1",
+                "references": Array [],
                 "type": "index-pattern",
               },
               Object {
+                "attributes": Object {},
                 "id": "2",
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "name",
+                    "type": "index-pattern",
+                  },
+                ],
                 "type": "search",
               },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+            ]
+        `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+            [MockFunction] {
+              "calls": Array [
+                Array [
+                  Array [
+                    Object {
+                      "id": "1",
+                      "type": "index-pattern",
+                    },
+                    Object {
+                      "id": "2",
+                      "type": "search",
+                    },
+                  ],
+                  Object {
+                    "namespace": undefined,
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            }
+        `);
   });
 
   test('includes nested dependencies when passed in', async () => {
@@ -370,65 +370,65 @@ describe('getSortedObjectsForExport()', () => {
     });
     const response = await readStreamToCompletion(exportStream);
     expect(response).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "name",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-      ]
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
             Array [
               Object {
-                "id": "2",
-                "type": "search",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-          Array [
-            Array [
-              Object {
+                "attributes": Object {},
                 "id": "1",
+                "references": Array [],
                 "type": "index-pattern",
               },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+              Object {
+                "attributes": Object {},
+                "id": "2",
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "name",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "search",
+              },
+            ]
+        `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+            [MockFunction] {
+              "calls": Array [
+                Array [
+                  Array [
+                    Object {
+                      "id": "2",
+                      "type": "search",
+                    },
+                  ],
+                  Object {
+                    "namespace": undefined,
+                  },
+                ],
+                Array [
+                  Array [
+                    Object {
+                      "id": "1",
+                      "type": "index-pattern",
+                    },
+                  ],
+                  Object {
+                    "namespace": undefined,
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            }
+        `);
   });
 
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {
@@ -449,6 +449,19 @@ describe('getSortedObjectsForExport()', () => {
     };
     await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`
+    );
+  });
+
+  test('rejects when neither type nor objects paramaters are passed in', () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient,
+      types: undefined,
+      objects: undefined,
+    };
+
+    expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Either \`type\` or \`objects\` are required."`
     );
   });
 });

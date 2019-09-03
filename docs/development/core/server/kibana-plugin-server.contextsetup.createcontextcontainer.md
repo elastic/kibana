@@ -4,7 +4,7 @@
 
 ## ContextSetup.createContextContainer() method
 
-Creates a new  for a service owner.
+Creates a new [IContextContainer](./kibana-plugin-server.icontextcontainer.md) for a service owner.
 
 <b>Signature:</b>
 

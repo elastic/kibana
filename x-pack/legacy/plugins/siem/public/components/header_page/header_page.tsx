@@ -17,6 +17,8 @@ const Header = styled.header`
   `}
 `;
 
+Header.displayName = 'Header';
+
 export interface HeaderPageProps {
   badgeLabel?: string;
   badgeTooltip?: string;
@@ -47,7 +49,7 @@ export const HeaderPage = pure<HeaderPageProps>(
             </h1>
           </EuiTitle>
 
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="xs">
             {subtitle}
           </EuiText>
         </EuiFlexItem>
@@ -57,3 +59,5 @@ export const HeaderPage = pure<HeaderPageProps>(
     </Header>
   )
 );
+
+HeaderPage.displayName = 'HeaderPage';

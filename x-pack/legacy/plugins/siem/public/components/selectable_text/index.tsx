@@ -9,3 +9,5 @@ import styled from 'styled-components';
 export const SelectableText = styled.span`
   user-select: text;
 `;
+
+SelectableText.displayName = 'SelectableText';

@@ -21,6 +21,8 @@ const SpinnerFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
 
+SpinnerFlexItem.displayName = 'SpinnerFlexItem';
+
 interface LoadingProps {
   text: string;
   height: number | string;
@@ -63,6 +65,8 @@ export const LoadingPanel = pure<LoadingProps>(
   )
 );
 
+LoadingPanel.displayName = 'LoadingPanel';
+
 export const LoadingStaticPanel = styled.div<{
   height: number | string;
   position: string;
@@ -79,6 +83,8 @@ export const LoadingStaticPanel = styled.div<{
   z-index: ${({ zIndex }) => zIndex};
 `;
 
+LoadingStaticPanel.displayName = 'LoadingStaticPanel';
+
 export const LoadingStaticContentPanel = styled.div`
   flex: 0 0 auto;
   align-self: center;
@@ -88,3 +94,5 @@ export const LoadingStaticContentPanel = styled.div`
     padding: 10px;
   }
 `;
+
+LoadingStaticContentPanel.displayName = 'LoadingStaticContentPanel';

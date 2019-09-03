@@ -48,12 +48,10 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         // Check that proxy page is returned with proper headers.
-        const scriptNonce = dom.window.document.querySelector('script')!.getAttribute('nonce');
-        expect(scriptNonce).to.have.length(16);
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'nonce-${scriptNonce}'; worker-src blob:; child-src blob:`
+          `script-src 'unsafe-eval' 'self'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.

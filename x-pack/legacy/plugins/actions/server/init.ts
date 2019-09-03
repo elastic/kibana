@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import { Legacy } from 'kibana';
+import { TaskManager } from '../../task_manager';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createFireFunction } from './create_fire_function';
+import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   createRoute,
   deleteRoute,
@@ -16,14 +19,27 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
-  fireRoute,
+  executeRoute,
 } from './routes';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { SpacesPlugin } from '../../spaces';
 import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
-export function init(server: Legacy.Server) {
+// Extend PluginProperties to indicate which plugins are guaranteed to exist
+// due to being marked as dependencies
+interface Plugins extends Hapi.PluginProperties {
+  task_manager: TaskManager;
+  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
+}
+
+interface Server extends Legacy.Server {
+  plugins: Plugins;
+}
+
+export function init(server: Server) {
   const config = server.config();
+  const taskManager = server.plugins.task_manager;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const spaces = createOptionalPlugin<SpacesPlugin>(
     config,
     'xpack.spaces',
@@ -31,50 +47,67 @@ export function init(server: Legacy.Server) {
     'spaces'
   );
 
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
-    callWithInternalUser
-  );
+  server.plugins.xpack_main.registerFeature({
+    id: 'actions',
+    name: 'Actions',
+    app: ['actions', 'kibana'],
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['action', 'action_task_params'],
+          read: [],
+        },
+        ui: [],
+        api: ['actions-read', 'actions-all'],
+      },
+      read: {
+        savedObject: {
+          all: ['action_task_params'],
+          read: ['action'],
+        },
+        ui: [],
+        api: ['actions-read'],
+      },
+    },
+  });
 
   // Encrypted attributes
   // - `secrets` properties will be encrypted
   // - `config` will be included in AAD
   // - everything else excluded from AAD
-  server.plugins.encrypted_saved_objects!.registerType({
+  server.plugins.encrypted_saved_objects.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
+  server.plugins.encrypted_saved_objects.registerType({
+    type: 'action_task_params',
+    attributesToEncrypt: new Set(['apiKey']),
+  });
 
-  function getServices(basePath: string, overwrites: Partial<Services> = {}): Services {
-    // Fake request is here to allow creating a scoped saved objects client
-    // and use it when security is disabled. This will be replaced when the
-    // future phase of API tokens is complete.
-    const fakeRequest: any = {
-      headers: {},
-      getBasePath: () => basePath,
-    };
+  function getServices(request: any): Services {
     return {
-      log: server.log.bind(server),
-      callCluster: callWithInternalUser,
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
-      ...overwrites,
+      log: (...args) => server.log(...args),
+      callCluster: (...args) => callWithRequest(request, ...args),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
+  function getBasePath(spaceId?: string): string {
+    return spaces.isEnabled && spaceId
+      ? spaces.getBasePath(spaceId)
+      : ((server.config().get('server.basePath') || '') as string);
+  }
+  function spaceIdToNamespace(spaceId?: string): string | undefined {
+    return spaces.isEnabled && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined;
+  }
 
-  const { taskManager } = server;
   const actionTypeRegistry = new ActionTypeRegistry({
     getServices,
-    taskManager: taskManager!,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
-    getBasePath(...args) {
-      return spaces.isEnabled
-        ? spaces.getBasePath(...args)
-        : server.config().get('server.basePath');
-    },
-    spaceIdToNamespace(...args) {
-      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
-    },
+    taskManager,
+    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
+    getBasePath,
+    spaceIdToNamespace,
+    isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -86,18 +119,17 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
-  fireRoute({
+  executeRoute({
     server,
     actionTypeRegistry,
     getServices,
   });
 
-  const fireFn = createFireFunction({
-    taskManager: taskManager!,
-    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
-    spaceIdToNamespace(...args) {
-      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
-    },
+  const executeFn = createExecuteFunction({
+    taskManager,
+    getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
+    getBasePath,
+    isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 
   // Expose functions to server
@@ -111,7 +143,7 @@ export function init(server: Legacy.Server) {
     return actionsClient;
   });
   const exposedFunctions: ActionsPlugin = {
-    fire: fireFn,
+    execute: executeFn,
     registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
     listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
   };

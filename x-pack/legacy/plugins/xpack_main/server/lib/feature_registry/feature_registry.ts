@@ -12,6 +12,11 @@ import { UICapabilities } from 'ui/capabilities';
  */
 export interface FeatureKibanaPrivileges {
   /**
+   * Whether or not this specific privilege should be excluded from the base privileges.
+   */
+  excludeFromBasePrivileges?: boolean;
+
+  /**
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *
@@ -235,6 +240,7 @@ const managementSchema = Joi.object().pattern(
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
 const privilegeSchema = Joi.object({
+  excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),

@@ -63,6 +63,7 @@ interface TestOpts {
   privilegeIndex?: number;
   ignoreAssigned?: boolean;
   result: Record<string, any>;
+  feature?: string;
 }
 
 function runTest(
@@ -73,6 +74,7 @@ function runTest(
     privilegeIndex = 0,
     ignoreAssigned = false,
     only = false,
+    feature = 'feature1',
   }: TestOpts
 ) {
   const fn = only ? it.only : it;
@@ -91,7 +93,7 @@ function runTest(
     const actualResult = featurePrivilegeCalculator.getMostPermissiveFeaturePrivilege(
       role.kibana[privilegeIndex],
       baseExplanation,
-      'feature1',
+      feature,
       ignoreAssigned
     );
 
@@ -321,6 +323,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
         actualPrivilege: 'read',
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
+        directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
       },
     });
 
@@ -457,6 +460,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
           actualPrivilege: 'all',
           actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
           isDirectlyAssigned: true,
+          directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
         },
       }
     );
@@ -541,6 +545,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
         actualPrivilege: 'all',
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
+        directlyAssignedFeaturePrivilegeMorePermissiveThanBase: false,
       },
     });
 
@@ -571,6 +576,92 @@ describe('getMostPermissiveFeaturePrivilege', () => {
         supersededPrivilege: 'read',
         supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
       },
+    });
+
+    describe('feature with "all" excluded from base privileges', () => {
+      runTest('returns "read" when "all" assigned as the global base privilege', {
+        role: {
+          spacesPrivileges: [
+            {
+              spaces: ['*'],
+              base: ['all'],
+              feature: {},
+            },
+            {
+              spaces: ['marketing'],
+              base: [],
+              feature: {},
+            },
+          ],
+        },
+        feature: 'feature4',
+        privilegeIndex: 1,
+        result: {
+          actualPrivilege: 'read',
+          actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+          isDirectlyAssigned: false,
+        },
+      });
+
+      runTest(
+        'returns "read" when "all" assigned as the global base privilege, which does not override assigned space feature privilege',
+        {
+          role: {
+            spacesPrivileges: [
+              {
+                spaces: ['*'],
+                base: ['all'],
+                feature: {},
+              },
+              {
+                spaces: ['marketing'],
+                base: [],
+                feature: {
+                  feature4: ['read'],
+                },
+              },
+            ],
+          },
+          feature: 'feature4',
+          privilegeIndex: 1,
+          result: {
+            actualPrivilege: 'read',
+            actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+            isDirectlyAssigned: true,
+            directlyAssignedFeaturePrivilegeMorePermissiveThanBase: false,
+          },
+        }
+      );
+
+      runTest(
+        'returns "all" when assigned as the feature privilege, which is more permissive than the base privilege',
+        {
+          role: {
+            spacesPrivileges: [
+              {
+                spaces: ['*'],
+                base: ['all'],
+                feature: {},
+              },
+              {
+                spaces: ['marketing'],
+                base: [],
+                feature: {
+                  feature4: ['all'],
+                },
+              },
+            ],
+          },
+          feature: 'feature4',
+          privilegeIndex: 1,
+          result: {
+            actualPrivilege: 'all',
+            actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+            isDirectlyAssigned: true,
+            directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
+          },
+        }
+      );
     });
   });
 

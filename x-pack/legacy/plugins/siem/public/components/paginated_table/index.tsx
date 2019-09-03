@@ -237,8 +237,9 @@ export const PaginatedTable = memo<SiemTables>(
         ) : (
           <>
             <BasicTable
-              items={pageOfItems}
               columns={columns}
+              compressed
+              items={pageOfItems}
               onChange={onChange}
               sorting={
                 sorting
@@ -286,6 +287,8 @@ export const PaginatedTable = memo<SiemTables>(
   }
 );
 
+PaginatedTable.displayName = 'PaginatedTable';
+
 const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   position: relative;
 
@@ -296,14 +299,22 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   `}
 `;
 
+Panel.displayName = 'Panel';
+
 const BasicTable = styled(EuiBasicTable)`
   tbody {
     th,
     td {
       vertical-align: top;
     }
+
+    .euiTableCellContent {
+      display: block;
+    }
   }
 `;
+
+BasicTable.displayName = 'BasicTable';
 
 const FooterAction = styled(EuiFlexGroup).attrs({
   alignItems: 'center',
@@ -311,6 +322,8 @@ const FooterAction = styled(EuiFlexGroup).attrs({
 })`
   margin-top: ${props => props.theme.eui.euiSizeXS};
 `;
+
+FooterAction.displayName = 'FooterAction';
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
   ${props => css`
@@ -335,3 +348,5 @@ const PaginationEuiFlexItem = styled(EuiFlexItem)`
     }
   `}
 `;
+
+PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

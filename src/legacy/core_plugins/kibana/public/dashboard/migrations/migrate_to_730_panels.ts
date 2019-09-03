@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
-import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/embeddable/types';
+import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import {
   RawSavedDashboardPanelTo60,

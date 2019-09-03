@@ -18,8 +18,6 @@ import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { TimeRangePicker } from './time_range_picker';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
-import { mlJobService } from '../../../../../services/job_service';
-import { ml } from '../../../../../services/ml_api_service';
 
 export interface TimeRange {
   start: number;
@@ -41,14 +39,21 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     end: jobCreator.end,
   });
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
 
   async function loadChart() {
-    const resp = await chartLoader.loadEventRateChart(
-      jobCreator.start,
-      jobCreator.end,
-      chartInterval.getInterval().asMilliseconds()
-    );
-    setEventRateChartData(resp);
+    setLoadingData(true);
+    try {
+      const resp = await chartLoader.loadEventRateChart(
+        jobCreator.start,
+        jobCreator.end,
+        chartInterval.getInterval().asMilliseconds()
+      );
+      setEventRateChartData(resp);
+    } catch (error) {
+      setEventRateChartData([]);
+    }
+    setLoadingData(false);
   }
 
   useEffect(() => {
@@ -82,28 +87,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     });
   }
 
-  useEffect(() => {
-    if (mlJobService.currentJob !== undefined) {
-      (async (index: string, timeFieldName: string | undefined, query: object) => {
-        const resp = await ml.getTimeFieldRange({
-          index,
-          timeFieldName,
-          query,
-        });
-        setTimeRange({
-          start: resp.start.epoch,
-          end: resp.end.epoch,
-        });
-        // wipe the cloning job
-        mlJobService.currentJob = undefined;
-      })(
-        kibanaContext.currentIndexPattern.title,
-        kibanaContext.currentIndexPattern.timeFieldName,
-        kibanaContext.combinedQuery
-      );
-    }
-  }, []);
-
   return (
     <Fragment>
       {isCurrentStep && (
@@ -128,6 +111,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             height="300px"
             width="100%"
             showAxis={true}
+            loading={loadingData}
           />
 
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={true} />

@@ -31,7 +31,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**
@@ -40,6 +40,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
@@ -159,6 +160,8 @@ module.exports = {
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
+                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
+                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
                   'src/legacy/core_plugins/**/public/np_ready/**/*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
                   'x-pack/legacy/plugins/**/public/np_ready/**/*',

@@ -28,3 +28,5 @@ export const NetworkEmptyPage = pure(() => (
     title={i18n.EMPTY_TITLE}
   />
 ));
+
+NetworkEmptyPage.displayName = 'NetworkEmptyPage';

@@ -16,6 +16,8 @@ const NoteCardContainer = styled(EuiPanel)`
   width: 100%;
 `;
 
+NoteCardContainer.displayName = 'NoteCardContainer';
+
 export const NoteCard = pure<{ created: Date; rawNote: string; user: string }>(
   ({ created, rawNote, user }) => (
     <NoteCardContainer data-test-subj="note-card" hasShadow={false} paddingSize="none">
@@ -24,3 +26,5 @@ export const NoteCard = pure<{ created: Date; rawNote: string; user: string }>(
     </NoteCardContainer>
   )
 );
+
+NoteCard.displayName = 'NoteCard';

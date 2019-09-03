@@ -73,3 +73,5 @@ export const Summary = pure(() => (
     </EuiText>
   </EuiFlexItem>
 ));
+
+Summary.displayName = 'Summary';

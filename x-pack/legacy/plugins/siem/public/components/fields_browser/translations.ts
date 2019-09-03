@@ -66,6 +66,10 @@ export const RESET_FIELDS = i18n.translate('xpack.siem.fieldBrowser.resetFieldsL
   defaultMessage: 'Reset Fields',
 });
 
+export const TOGGLE_COLUMN_TOOLTIP = i18n.translate('xpack.siem.fieldBrowser.toggleColumnTooltip', {
+  defaultMessage: 'Toggle column',
+});
+
 export const VIEW_CATEGORY = (categoryId: string) =>
   i18n.translate('xpack.siem.fieldBrowser.viewCategoryTooltip', {
     defaultMessage: 'View all {categoryId} fields',

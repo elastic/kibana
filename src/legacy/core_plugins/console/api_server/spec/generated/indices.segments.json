@@ -18,6 +18,6 @@
       "_segments",
       "{indices}/_segments"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html"
   }
 }

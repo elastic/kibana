@@ -6,7 +6,8 @@
 
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SortDirection } from '@elastic/eui';
+import { SortDirection, SORT_DIRECTION } from '../../../../../../common/types/eui/in_memory_table';
+
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
@@ -75,7 +76,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -148,10 +149,10 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: columns[0].field, direction: SortDirection.ASC },
+    sort = { field: columns[0].field, direction: SORT_DIRECTION.ASC },
   }: {
     page: { index: number; size: number };
-    sort: { field: string; direction: string };
+    sort: { field: string; direction: SortDirection };
   }) => {
     const { index, size } = page;
     setPageIndex(index);
@@ -164,11 +165,12 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   return (
     <TransformTable
+      allowNeutralSort={false}
       loading={dataFramePreviewData.length === 0 && isLoading === true}
       compressed
       items={dataFramePreviewData}
       columns={columns}
-      onChange={onTableChange}
+      onTableChange={onTableChange}
       pagination={pagination}
       sorting={sorting}
       error={errorMessage}

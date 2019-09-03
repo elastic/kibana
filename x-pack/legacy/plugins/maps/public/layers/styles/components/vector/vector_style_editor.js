@@ -12,9 +12,16 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
+import {
+  getDefaultDynamicProperties,
+  getDefaultStaticProperties
+} from '../../vector_style_defaults';
+import {
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS
+} from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE } from '../../vector_constants';
+import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
@@ -91,6 +98,7 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="fillColor"
+        swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
         ordinalFields={this.state.ordinalFields}
@@ -104,6 +112,7 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="lineColor"
+        swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
         ordinalFields={this.state.ordinalFields}
@@ -140,23 +149,8 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderPointProperties() {
-    let lineColor;
-    let lineWidth;
     let iconOrientation;
-    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE)  {
-      lineColor = (
-        <Fragment>
-          {this._renderLineColor()}
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
-      lineWidth = (
-        <Fragment>
-          {this._renderLineWidth()}
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
-    } else {
+    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON)  {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
@@ -185,9 +179,11 @@ export class VectorStyleEditor extends Component {
         {this._renderFillColor()}
         <EuiSpacer size="m" />
 
-        {lineColor}
+        {this._renderLineColor()}
+        <EuiSpacer size="m" />
 
-        {lineWidth}
+        {this._renderLineWidth()}
+        <EuiSpacer size="m" />
 
         {iconOrientation}
 

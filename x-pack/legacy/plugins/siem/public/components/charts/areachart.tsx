@@ -111,6 +111,8 @@ export const AreaChartBaseComponent = React.memo<{
   ) : null;
 });
 
+AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
+
 export const AreaChartWithCustomPrompt = React.memo<{
   data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
@@ -131,6 +133,8 @@ export const AreaChartWithCustomPrompt = React.memo<{
   );
 });
 
+AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
+
 export const AreaChart = React.memo<{
   areaChart: ChartConfigsData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -148,3 +152,5 @@ export const AreaChart = React.memo<{
     )}
   </AutoSizer>
 ));
+
+AreaChart.displayName = 'AreaChart';

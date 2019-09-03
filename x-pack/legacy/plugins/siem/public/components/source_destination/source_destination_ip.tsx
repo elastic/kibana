@@ -93,6 +93,8 @@ const IpAdressesWithPorts = pure<{
   ) : null;
 });
 
+IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
+
 /**
  * When the ip field (i.e. `sourceIp`, `destinationIp`) that corresponds with
  * the specified `type` (i.e. `source`, `destination`) is populated, this component
@@ -167,3 +169,5 @@ export const SourceDestinationIp = pure<SourceDestinationIpProps>(
     ) : null;
   }
 );
+
+SourceDestinationIp.displayName = 'SourceDestinationIp';

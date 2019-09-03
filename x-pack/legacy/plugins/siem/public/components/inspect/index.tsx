@@ -26,7 +26,10 @@ const InspectContainer = styled.div<{ showInspect: boolean }>`
   }
 `;
 
+InspectContainer.displayName = 'InspectContainer';
+
 interface OwnProps {
+  compact?: boolean;
   queryId: string;
   inputId?: InputsModelId;
   inspectIndex?: number;
@@ -57,6 +60,7 @@ type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatc
 
 const InspectButtonComponent = pure<InspectButtonProps>(
   ({
+    compact = false,
     inputId = 'global',
     inspect,
     isDisabled,
@@ -70,8 +74,11 @@ const InspectButtonComponent = pure<InspectButtonProps>(
     show,
     title = '',
   }: InspectButtonProps) => (
-    <InspectContainer showInspect={show}>
-      {inputId === 'timeline' && (
+    <InspectContainer
+      data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
+      showInspect={show}
+    >
+      {inputId === 'timeline' && !compact && (
         <EuiButtonEmpty
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-empty-button"
@@ -92,10 +99,9 @@ const InspectButtonComponent = pure<InspectButtonProps>(
           {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
-      {inputId === 'global' && (
+      {(inputId === 'global' || compact) && (
         <EuiButtonIcon
           aria-label={i18n.INSPECT}
-          className={show ? '' : ''}
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
@@ -134,6 +140,8 @@ const InspectButtonComponent = pure<InspectButtonProps>(
     </InspectContainer>
   )
 );
+
+InspectButtonComponent.displayName = 'InspectButtonComponent';
 
 const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();

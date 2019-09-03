@@ -7,7 +7,11 @@
 import { Legacy } from 'kibana';
 import { schema } from '@kbn/config-schema';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import { HttpServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
+import {
+  HttpServiceSetup,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '../../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
 import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
@@ -59,15 +63,15 @@ describe('onRequestInterceptor', () => {
 
       router.get(
         { path: '/foo', validate: false },
-        (context: unknown, req: KibanaRequest, h: any) => {
-          return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
+        (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
+          return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
         }
       );
 
       router.get(
         { path: '/some/path/s/foo/bar', validate: false },
-        (context: unknown, req: KibanaRequest, h: any) => {
-          return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
+        (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
+          return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
         }
       );
 
@@ -82,11 +86,13 @@ describe('onRequestInterceptor', () => {
             }),
           },
         },
-        (context: unknown, req: KibanaRequest, h: any) => {
+        (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
           return h.ok({
-            path: req.url.pathname,
-            basePath: http.basePath.get(req),
-            query: req.query,
+            body: {
+              path: req.url.pathname,
+              basePath: http.basePath.get(req),
+              query: req.query,
+            },
           });
         }
       );

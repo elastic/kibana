@@ -50,7 +50,7 @@ export const filtersBucketAgg = new BucketAggType({
         if (!_.size(inFilters)) return;
 
         inFilters.forEach((filter) => {
-          const persistedLog = getQueryLog('filtersAgg', filter.input.language);
+          const persistedLog = getQueryLog(config, 'filtersAgg', filter.input.language);
           persistedLog.add(filter.input.query);
         });
 

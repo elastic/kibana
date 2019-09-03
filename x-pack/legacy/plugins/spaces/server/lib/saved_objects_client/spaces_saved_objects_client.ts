@@ -132,7 +132,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find(options: SavedObjectsFindOptions = {}) {
+  public async find(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.find({

@@ -51,10 +51,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  if (mlJobService.currentJob !== undefined) {
-    const clonedJob = mlJobService.cloneJob(mlJobService.currentJob);
+  let skipTimeRangeStep = false;
+
+  if (mlJobService.tempJobCloningObjects.job !== undefined) {
+    const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
     const { job, datafeed } = expandCombinedJobConfig(clonedJob);
     jobCreator.cloneFromExistingJob(job, datafeed);
+
+    skipTimeRangeStep = mlJobService.tempJobCloningObjects.skipTimeRangeStep;
+    // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
+    if (skipTimeRangeStep === false) {
+      jobCreator.jobId = '';
+    }
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
+    mlJobService.tempJobCloningObjects.job = undefined;
   } else {
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
@@ -78,7 +88,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = new ChartLoader(
     kibanaContext.currentIndexPattern,
-    kibanaContext.currentSavedSearch,
     kibanaContext.combinedQuery
   );
 
@@ -89,7 +98,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   useEffect(() => {
     return () => {
       jobCreator.forceStopRefreshPolls();
-      mlJobService.currentJob = undefined;
     };
   });
 
@@ -105,6 +113,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               chartInterval={chartInterval}
               jobValidator={jobValidator}
               existingJobsAndGroups={existingJobsAndGroups}
+              skipTimeRangeStep={skipTimeRangeStep}
             />
           </EuiPageContentBody>
         </EuiPageBody>

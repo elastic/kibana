@@ -76,3 +76,5 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
     </EuiFlexItem>
   );
 });
+
+OverviewHost.displayName = 'OverviewHost';

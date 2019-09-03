@@ -27,6 +27,10 @@ import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
 
+import EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR from './ems_mocks/sample_style_bright_vector';
+import EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR_SOURCE from './ems_mocks/sample_style_bright_vector_source';
+import EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR_SOURCE_PROXIED from './ems_mocks/sample_style_bright_vector_source_proxied';
+
 import EMS_CATALOGUE_PROXIED from './ems_mocks/sample_manifest_proxied.json';
 import EMS_FILES_PROXIED from './ems_mocks/sample_files_proxied.json';
 import EMS_TILES_PROXIED from './ems_mocks/sample_tiles_proxied.json';
@@ -64,6 +68,16 @@ export function getEMSClient(options = {}) {
       return EMS_FILES_PROXIED;
     } else if (url.startsWith('http://proxy.com/foobar/tiles')) {
       return EMS_TILES_PROXIED;
+    } else if (url.startsWith('https://vector-style.foobar/styles')) {
+      if (url.includes('osm-bright')) {
+        return EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR;
+      }
+    } else if (url.startsWith('https://tiles.maps.elastic.co/data/v3.json')) {
+      return EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR_SOURCE;
+    } else if (url.startsWith('http://proxy.com/foobar/data/v3.json')) {
+      return EMS_STYLE_ROAD_MAP_BRIGHT_VECTOR_SOURCE_PROXIED;
+    } else {
+      throw new Error(`url unexecpted: ${url}`);
     }
   };
   return emsClient;

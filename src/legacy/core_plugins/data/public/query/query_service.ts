@@ -35,6 +35,10 @@ export class QueryService {
     };
   }
 
+  public start() {
+    // nothing to do here yet
+  }
+
   public stop() {
     // nothing to do here yet
   }

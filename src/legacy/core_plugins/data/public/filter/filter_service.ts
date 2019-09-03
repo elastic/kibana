@@ -17,24 +17,29 @@
  * under the License.
  */
 
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
+
 /**
- * FilterSearch Service
+ * Filter Service
  * @internal
  */
 
 export interface FilterServiceDependencies {
   indexPatterns: IndexPatterns;
+  uiSettings: UiSettingsClientContract;
 }
 
 export class FilterService {
-  public setup({ indexPatterns }: FilterServiceDependencies) {
-    const filterManager = new FilterManager(indexPatterns);
-
+  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
     return {
-      filterManager,
+      filterManager: new FilterManager(indexPatterns, uiSettings),
     };
+  }
+
+  public start() {
+    // nothing to do here yet
   }
 
   public stop() {

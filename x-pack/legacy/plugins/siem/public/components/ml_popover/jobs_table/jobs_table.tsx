@@ -25,6 +25,8 @@ const JobNameWrapper = styled.div`
   margin: 5px 0;
 `;
 
+JobNameWrapper.displayName = 'JobNameWrapper';
+
 // TODO: Use SASS mixin @include EuiTextTruncate when we switch from styled components
 const truncateThreshold = 200;
 
@@ -99,6 +101,8 @@ export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobT
   );
 });
 
+JobsTable.displayName = 'JobsTable';
+
 export const NoItemsMessage = React.memo(() => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
@@ -116,3 +120,5 @@ export const NoItemsMessage = React.memo(() => (
     }
   />
 ));
+
+NoItemsMessage.displayName = 'NoItemsMessage';

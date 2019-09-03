@@ -15,6 +15,8 @@ const ShowingContainer = styled.div`
   margin-top: 5px;
 `;
 
+ShowingContainer.displayName = 'ShowingContainer';
+
 export interface ShowingCountProps {
   filterResultsLength: number;
 }
@@ -33,3 +35,5 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
     </EuiText>
   </ShowingContainer>
 ));
+
+ShowingCount.displayName = 'ShowingCount';

@@ -5,15 +5,20 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
+import { SparseDataSwitch } from '../sparse_data';
+
+import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (proceed: boolean) => void;
 }
 
-export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
+export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
@@ -27,5 +32,30 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
-  return <Fragment>{isActive && <BucketSpan />}</Fragment>;
+  const convertToMultiMetric = () => {
+    convertToMultiMetricJob(jobCreator);
+  };
+
+  return (
+    <Fragment>
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <BucketSpan setIsValid={setIsValid} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SparseDataSwitch />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={convertToMultiMetric}>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
+              defaultMessage="Convert to multi metric job"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
 };

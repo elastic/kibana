@@ -132,6 +132,8 @@ export const SystemGenericFileLine = pure<Props>(
   )
 );
 
+SystemGenericFileLine.displayName = 'SystemGenericFileLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
@@ -185,3 +187,5 @@ export const SystemGenericFileDetails = pure<GenericDetailsProps>(({ data, conte
     </Details>
   );
 });
+
+SystemGenericFileDetails.displayName = 'SystemGenericFileDetails';

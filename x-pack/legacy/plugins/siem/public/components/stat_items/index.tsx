@@ -36,11 +36,15 @@ const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
 `;
 
+FlexItem.displayName = 'FlexItem';
+
 const StatValue = styled(EuiTitle)`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+StatValue.displayName = 'StatValue';
 
 interface StatItem {
   key: string;
@@ -278,3 +282,5 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     );
   }
 );
+
+StatItemsComponent.displayName = 'StatItemsComponent';

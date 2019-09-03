@@ -5,6 +5,7 @@
  */
 
 jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 import {
   hitsToGeoJson,
@@ -12,6 +13,7 @@ import {
   geoShapeToGeometry,
   createExtentFilter,
   convertMapExtentToPolygon,
+  roundCoordinates,
 } from './elasticsearch_geo_utils';
 
 import { flattenHitWrapper } from 'ui/index_patterns';
@@ -332,7 +334,7 @@ describe('createExtentFilter', () => {
             'coordinates': [
               [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
             ],
-            'type': 'polygon'
+            'type': 'Polygon'
           }
         }
       }
@@ -355,7 +357,7 @@ describe('createExtentFilter', () => {
             'coordinates': [
               [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
             ],
-            'type': 'polygon'
+            'type': 'Polygon'
           }
         }
       }
@@ -372,7 +374,7 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 90,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'polygon',
+      'type': 'Polygon',
       'coordinates': [
         [[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]
       ]
@@ -387,7 +389,7 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'polygon',
+      'type': 'Polygon',
       'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
@@ -402,7 +404,7 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'polygon',
+      'type': 'Polygon',
       'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
@@ -417,7 +419,7 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 170,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'polygon',
+      'type': 'Polygon',
       'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
@@ -432,10 +434,26 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -190,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'polygon',
+      'type': 'Polygon',
       'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
     });
+  });
+});
+
+describe('roundCoordinates', () => {
+  it('should set coordinates precision', () => {
+    const coordinates  = [
+      [110.21515290475513, 40.23193047044205],
+      [-105.30620093073654, 40.23193047044205],
+      [-105.30620093073654, 30.647128842617803]
+    ];
+    roundCoordinates(coordinates);
+    expect(coordinates).toEqual([
+      [110.21515, 40.23193],
+      [-105.30620, 40.23193],
+      [-105.3062, 30.64713]
+    ]);
   });
 });

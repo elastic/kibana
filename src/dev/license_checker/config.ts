@@ -94,7 +94,7 @@ export const LICENSE_OVERRIDES = {
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
 
   // TODO can be removed if the ISSUE#239 is accepted on the source
-  'xmldom@0.1.19': ['MIT'],
+  'xmldom@0.1.27': ['MIT'],
 
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],

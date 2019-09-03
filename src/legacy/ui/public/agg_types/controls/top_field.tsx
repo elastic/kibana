@@ -19,12 +19,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Field } from 'ui/index_patterns';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { FieldParamType } from '../param_types';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 
-function TopFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+function TopFieldParamEditor(props: AggParamEditorProps<Field>) {
   const compatibleAggs = getCompatibleAggs(props.agg);
   let customError;
 

@@ -42,3 +42,5 @@ export const Ip = pure<{
     />
   </DefaultDraggable>
 ));
+
+Ip.displayName = 'Ip';

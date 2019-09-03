@@ -21,7 +21,7 @@ import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { matchesAnyGlob } from '../globs';
 
 import {

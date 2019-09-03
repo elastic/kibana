@@ -240,6 +240,35 @@
               "type": "text"
             }
           }
+        },
+        "query": {
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
+            },
+            "filters": {
+              "type": "object",
+              "enabled": false
+            },
+            "timefilter": {
+              "type": "object",
+              "enabled": false
+            }
+          }
         }
       }
     },

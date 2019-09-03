@@ -20,6 +20,7 @@ export function updateRoute(server: Hapi.Server) {
     method: 'PUT',
     path: `/api/action/{id}`,
     options: {
+      tags: ['access:actions-all'],
       validate: {
         options: {
           abortEarly: false,

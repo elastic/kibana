@@ -28,9 +28,13 @@ const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
 
+CountsFlexGroup.displayName = 'CountsFlexGroup';
+
 const CountFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
+
+CountFlexItem.displayName = 'CountFlexItem';
 
 // background-color: ${props => props.theme.eui.euiColorLightestShade};
 const HeaderContainer = styled.div`
@@ -38,12 +42,16 @@ const HeaderContainer = styled.div`
   margin-bottom: 8px;
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 const SearchContainer = styled.div`
   input {
     max-width: ${SEARCH_INPUT_WIDTH}px;
     width: ${SEARCH_INPUT_WIDTH}px;
   }
 `;
+
+SearchContainer.displayName = 'SearchContainer';
 
 interface Props {
   filteredBrowserFields: BrowserFields;
@@ -81,6 +89,8 @@ const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFi
   </CountsFlexGroup>
 ));
 
+CountRow.displayName = 'CountRow';
+
 const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateColumns }>(
   ({ onOutsideClick, onUpdateColumns }) => (
     <EuiFlexGroup
@@ -90,13 +100,14 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
       gutterSize="none"
     >
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
+        <EuiTitle data-test-subj="field-browser-title" size="s">
           <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
         </EuiTitle>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="reset-fields"
           onClick={() => {
             onUpdateColumns(defaultHeaders);
             onOutsideClick();
@@ -108,6 +119,8 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
     </EuiFlexGroup>
   )
 );
+
+TitleRow.displayName = 'TitleRow';
 
 export const Header = pure<Props>(
   ({
@@ -124,6 +137,7 @@ export const Header = pure<Props>(
       <SearchContainer>
         <EuiFieldSearch
           className={getFieldBrowserSearchInputClassName(timelineId)}
+          data-test-subj="field-search"
           isLoading={isSearching}
           onChange={onSearchInputChange}
           placeholder={i18n.FILTER_PLACEHOLDER}
@@ -134,3 +148,5 @@ export const Header = pure<Props>(
     </HeaderContainer>
   )
 );
+
+Header.displayName = 'Header';

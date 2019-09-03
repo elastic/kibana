@@ -104,6 +104,7 @@ type Func<T> = (arg: T) => string | number;
 
 export interface Columns<T, U = T> {
   field?: string;
+  align?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
   sortable?: boolean | Func<T>;
@@ -209,8 +210,9 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         ) : (
           <>
             <BasicTable
-              items={pageOfItems}
               columns={columns}
+              compressed
+              items={pageOfItems}
               onChange={onChange}
               sorting={
                 sorting
@@ -303,14 +305,22 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   `}
 `;
 
+Panel.displayName = 'Panel';
+
 const BasicTable = styled(EuiBasicTable)`
   tbody {
     th,
     td {
       vertical-align: top;
     }
+
+    .euiTableCellContent {
+      display: block;
+    }
   }
 `;
+
+BasicTable.displayName = 'BasicTable';
 
 const FooterAction = styled(EuiFlexGroup).attrs({
   alignItems: 'center',
@@ -318,3 +328,5 @@ const FooterAction = styled(EuiFlexGroup).attrs({
 })`
   margin-top: ${props => props.theme.eui.euiSizeXS};
 `;
+
+FooterAction.displayName = 'FooterAction';

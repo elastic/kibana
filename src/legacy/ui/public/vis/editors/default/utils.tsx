@@ -17,56 +17,55 @@
  * under the License.
  */
 
-import { EuiComboBoxOptionProps } from '@elastic/eui';
-import { AggType } from 'ui/agg_types';
+interface ComboBoxOption<T> {
+  label: string;
+  target: T;
+}
+interface ComboBoxGroupedOption<T> {
+  label: string;
+  options: Array<ComboBoxOption<T>>;
+}
 
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
-export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
-  label?: string;
-  value?: AggType;
-  options?: ComboBoxGroupedOption[];
-};
+type GroupOrOption<T> = ComboBoxGroupedOption<T> | ComboBoxOption<T>;
+
+export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
 
 /**
- * Groups and sorts alphabetically aggregation objects and returns an array of options that are compatible with EuiComboBox options.
+ * Groups and sorts alphabetically objects and returns an array of options that are compatible with EuiComboBox options.
  *
- * @param aggs An array of aggregations that will be grouped.
- * @param groupBy A field name which aggregations is grouped by.
+ * @param objects An array of objects that will be grouped.
+ * @param groupBy A field name which objects are grouped by.
  * @param labelName A name of a property which value will be displayed.
  *
- * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an empty array.
+ * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
-function groupAggregationsBy(
-  aggs: AggType[],
-  groupBy: string = 'type',
-  labelName = 'title'
-): ComboBoxGroupedOption[] | [] {
-  if (!Array.isArray(aggs)) {
-    return [];
-  }
+function groupAndSortBy<
+  T extends Record<TGroupBy | TLabelName, string>,
+  TGroupBy extends string = 'type',
+  TLabelName extends string = 'title'
+>(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
+  const groupedOptions = objects.reduce(
+    (array, obj) => {
+      const group = array.find(element => element.label === obj[groupBy]);
+      const option = {
+        label: obj[labelName],
+        target: obj,
+      };
 
-  const groupedOptions: ComboBoxGroupedOption[] = aggs.reduce((array: AggType[], type: AggType) => {
-    const group = array.find(element => element.label === type[groupBy]);
-    const option = {
-      label: type[labelName],
-      value: type,
-    };
+      if (group && group.options) {
+        group.options.push(option);
+      } else {
+        array.push({ label: obj[groupBy], options: [option] });
+      }
 
-    if (group) {
-      group.options.push(option);
-    } else {
-      array.push({ label: type[groupBy], options: [option] });
-    }
-
-    return array;
-  }, []);
+      return array;
+    },
+    [] as Array<ComboBoxGroupedOption<T>>
+  );
 
   groupedOptions.sort(sortByLabel);
 
-  groupedOptions.forEach((group: ComboBoxGroupedOption) => {
+  groupedOptions.forEach(group => {
     if (Array.isArray(group.options)) {
       group.options.sort(sortByLabel);
     }
@@ -79,8 +78,8 @@ function groupAggregationsBy(
   return groupedOptions;
 }
 
-function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
+function sortByLabel<T>(a: GroupOrOption<T>, b: GroupOrOption<T>) {
   return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 
-export { groupAggregationsBy };
+export { groupAndSortBy };

@@ -16,6 +16,8 @@ const P = styled.p`
   margin-bottom: 5px;
 `;
 
+P.displayName = 'P';
+
 export const FormattedDurationTooltipContent = pure<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
@@ -30,6 +32,8 @@ export const FormattedDurationTooltipContent = pure<{
     </P>
   </>
 ));
+
+FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
 
 export const FormattedDurationTooltip = pure<{
   children: JSX.Element;
@@ -48,3 +52,5 @@ export const FormattedDurationTooltip = pure<{
     <>{children}</>
   </EuiToolTip>
 ));
+
+FormattedDurationTooltip.displayName = 'FormattedDurationTooltip';

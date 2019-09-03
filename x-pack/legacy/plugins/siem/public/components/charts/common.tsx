@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
 
 const chartHeight = 74;
 const chartDefaultRotation: Rotation = 0;
@@ -30,6 +31,9 @@ const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+
+FlexGroup.displayName = 'FlexGroup';
+
 export type UpdateDateRange = (min: number, max: number) => void;
 
 export const ChartHolder = () => (
@@ -89,6 +93,8 @@ export const WrappedByAutoSizer = styled.div`
   }
 `;
 
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
 export enum SeriesType {
   BAR = 'bar',
   AREA = 'area',
@@ -133,10 +139,10 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
-const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
 export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
