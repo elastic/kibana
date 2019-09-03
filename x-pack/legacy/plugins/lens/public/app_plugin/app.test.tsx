@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { App, setBreadcrumbs } from './app';
+import { App } from './app';
 import { EditorFrameInstance } from '../types';
-
 import { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
