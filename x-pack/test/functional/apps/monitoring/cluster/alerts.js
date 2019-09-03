@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('alert actions take you to the elasticsearch indices listing', async () => {
+    describe('alert actions take you to the elasticsearch indices listing', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {

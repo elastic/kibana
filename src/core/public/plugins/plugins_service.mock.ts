@@ -38,6 +38,7 @@ const createStartContractMock = () => {
 type PluginsServiceContract = PublicMethodsOf<PluginsService>;
 const createMock = () => {
   const mocked: jest.Mocked<PluginsServiceContract> = {
+    getOpaqueIds: jest.fn(),
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

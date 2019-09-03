@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('line charts', function () {
@@ -103,11 +104,40 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data, ordered by Term', async function () {
-
       const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
       await inspector.open();
       await inspector.expectTableData(expectedChartData);
+    });
+
+    it('should request new data when autofresh is enabled', async () => {
+      // enable autorefresh
+      const interval = 3;
+      await PageObjects.timePicker.openQuickSelectTimeMenu();
+      await PageObjects.timePicker.inputValue('superDatePickerRefreshIntervalInput', interval.toString());
+      await testSubjects.click('superDatePickerToggleRefreshButton');
+      await PageObjects.timePicker.closeQuickSelectTimeMenu();
+
+      // check inspector panel request stats for timestamp
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
+      const requestStatsBefore = await inspector.getTableData();
+      const requestTimestampBefore = requestStatsBefore.filter(r => r[0].includes('Request timestamp'))[0][1];
+
+      // pause to allow time for autorefresh to fire another request
+      await PageObjects.common.sleep(interval * 1000 * 1.5);
+
+      // get the latest timestamp from request stats
+      const requestStatsAfter = await inspector.getTableData();
+      const requestTimestampAfter = requestStatsAfter.filter(r => r[0].includes('Request timestamp'))[0][1];
+      log.debug(`Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`);
+
+      // cleanup
+      await inspector.close();
+      await PageObjects.timePicker.pauseAutoRefresh();
+
+      // if autorefresh is working, timestamps should be different
+      expect(requestTimestampBefore).not.to.equal(requestTimestampAfter);
     });
 
     it('should be able to save and load', async function () {

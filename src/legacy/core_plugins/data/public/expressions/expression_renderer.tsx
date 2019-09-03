@@ -48,18 +48,15 @@ export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
-  useEffect(
-    () => {
-      if (mountpoint.current) {
-        run(expression, { ...options, element: mountpoint.current }).catch(result => {
-          if (onRenderFailure) {
-            onRenderFailure(result);
-          }
-        });
-      }
-    },
-    [expression, mountpoint.current]
-  );
+  useEffect(() => {
+    if (mountpoint.current) {
+      run(expression, { ...options, element: mountpoint.current }).catch(result => {
+        if (onRenderFailure) {
+          onRenderFailure(result);
+        }
+      });
+    }
+  }, [expression, mountpoint.current]);
 
   return (
     <div

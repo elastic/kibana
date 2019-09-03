@@ -11,7 +11,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 class VerticalLines extends PureComponent {
   render() {
-    const { traceRootDuration } = this.props;
+    const { topTraceDuration } = this.props;
     const {
       width,
       height,
@@ -47,9 +47,9 @@ class VerticalLines extends PureComponent {
             style={{ stroke: theme.euiColorMediumShade }}
           />
 
-          {traceRootDuration > 0 && (
+          {topTraceDuration > 0 && (
             <VerticalGridLines
-              tickValues={[traceRootDuration]}
+              tickValues={[topTraceDuration]}
               style={{ stroke: theme.gray3euiColorMediumShade }}
             />
           )}

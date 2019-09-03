@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['dashboard', 'discover']);
 
-  describe('dashboard query bar', async () => {
+  describe('dashboard query bar', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });

@@ -19,20 +19,30 @@
 
 import './core.css';
 
-import { InternalCoreSetup, InternalCoreStart } from '.';
+import { CoreId } from '../server';
+import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataService,
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject } from '../utils/';
+import { mapToObject, pick } from '../utils/';
 import { DocLinksService } from './doc_links';
+import { RenderingService } from './rendering';
+import { SavedObjectsService } from './saved_objects/saved_objects_service';
+import { ContextService } from './context';
+import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -43,8 +53,21 @@ interface Params {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CoreContext {}
+export interface CoreContext {
+  coreId: CoreId;
+}
+
+/** @internal */
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+  application: InternalApplicationSetup;
+  injectedMetadata: InjectedMetadataSetup;
+}
+
+/** @internal */
+export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
+  application: InternalApplicationStart;
+  injectedMetadata: InjectedMetadataStart;
+}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -60,6 +83,7 @@ export class CoreSystem {
   private readonly legacyPlatform: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
+  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
@@ -67,8 +91,11 @@ export class CoreSystem {
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
+  private readonly rendering: RenderingService;
+  private readonly context: ContextService;
 
   private readonly rootDomElement: HTMLElement;
+  private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -95,14 +122,17 @@ export class CoreSystem {
 
     this.notifications = new NotificationsService();
     this.http = new HttpService();
+    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
     this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
+    this.application = new ApplicationService();
 
-    const core: CoreContext = {};
-    this.plugins = new PluginsService(core);
+    this.coreContext = { coreId: Symbol('core') };
+    this.context = new ContextService(this.coreContext);
+    this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
 
     this.legacyPlatform = new LegacyPlatformService({
       requireLegacyFiles,
@@ -122,10 +152,14 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const application = this.application.setup();
+
+      const pluginDependencies = this.plugins.getOpaqueIds();
+      const context = this.context.setup({ pluginDependencies });
+      const application = this.application.setup({ context });
 
       const core: InternalCoreSetup = {
         application,
+        context,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -135,7 +169,11 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       const plugins = await this.plugins.setup(core);
-      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
+
+      await this.legacyPlatform.setup({
+        core,
+        plugins: mapToObject(plugins.contracts),
+      });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -154,18 +192,20 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
-      const application = await this.application.start({ injectedMetadata });
+      const application = await this.application.start({ http, injectedMetadata });
 
+      const coreUiTargetDomElement = document.createElement('div');
+      coreUiTargetDomElement.id = 'kibana-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
-      const legacyPlatformTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
@@ -176,17 +216,30 @@ export class CoreSystem {
       });
       const chrome = await this.chrome.start({
         application,
+        docLinks,
         http,
         injectedMetadata,
         notifications,
       });
       const uiSettings = await this.uiSettings.start();
 
+      application.registerMountContext(this.coreContext.coreId, 'core', () => ({
+        application: pick(application, ['capabilities', 'navigateToApp']),
+        chrome,
+        docLinks,
+        http,
+        i18n,
+        notifications,
+        overlays,
+        uiSettings,
+      }));
+
       const core: InternalCoreStart = {
         application,
         chrome,
         docLinks,
         http,
+        savedObjects,
         i18n,
         injectedMetadata,
         notifications,
@@ -195,10 +248,17 @@ export class CoreSystem {
       };
 
       const plugins = await this.plugins.start(core);
+      const rendering = this.rendering.start({
+        application,
+        chrome,
+        injectedMetadata,
+        targetDomElement: coreUiTargetDomElement,
+      });
+
       await this.legacyPlatform.start({
         core,
         plugins: mapToObject(plugins.contracts),
-        targetDomElement: legacyPlatformTargetDomElement,
+        targetDomElement: rendering.legacyTargetDomElement,
       });
     } catch (error) {
       if (this.fatalErrorsSetup) {

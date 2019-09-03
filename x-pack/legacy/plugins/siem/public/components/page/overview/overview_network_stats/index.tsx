@@ -37,6 +37,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Auditbeat Socket"
       />
     ),
+    id: 'auditbeatSocket',
   },
   {
     description:
@@ -49,6 +50,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Filebeat Cisco"
       />
     ),
+    id: 'filebeatCisco',
   },
   {
     description:
@@ -61,6 +63,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Filebeat Netflow"
       />
     ),
+    id: 'filebeatNetflow',
   },
   {
     description:
@@ -73,6 +76,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Filebeat Palo Alto Network"
       />
     ),
+    id: 'filebeatPanw',
   },
   {
     description:
@@ -85,6 +89,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Filebeat Suricata"
       />
     ),
+    id: 'filebeatSuricata',
   },
   {
     description:
@@ -94,6 +99,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
     title: (
       <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Filebeat Zeek" />
     ),
+    id: 'filebeatZeek',
   },
   {
     description:
@@ -106,6 +112,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Packetbeat DNS"
       />
     ),
+    id: 'packetbeatDNS',
   },
   {
     description:
@@ -118,6 +125,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Packetbeat Flow"
       />
     ),
+    id: 'packetbeatFlow',
   },
   {
     description:
@@ -130,6 +138,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         defaultMessage="Packetbeat TLS"
       />
     ),
+    id: 'packetbeatTLS',
   },
 ];
 
@@ -137,21 +146,27 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   text-align: right;
 `;
 
+DescriptionListDescription.displayName = 'DescriptionListDescription';
+
 const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
   ({ isLoading, value }) => (
     <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
   )
 );
 
+StatValue.displayName = 'StatValue';
+
 export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewNetworkStats(data).map((item, index) => (
       <React.Fragment key={index}>
         <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription data-test-subj="stat-loader-description">
+        <DescriptionListDescription data-test-subj={`network-stat-${item.id}`}>
           <StatValue isLoading={loading} value={item.description} />
         </DescriptionListDescription>
       </React.Fragment>
     ))}
   </EuiDescriptionList>
 ));
+
+OverviewNetworkStats.displayName = 'OverviewNetworkStats';

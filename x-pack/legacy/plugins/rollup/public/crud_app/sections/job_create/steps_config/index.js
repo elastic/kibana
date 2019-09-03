@@ -5,8 +5,11 @@
  */
 
 import cloneDeep from 'lodash/lang/cloneDeep';
+import get from 'lodash/object/get';
+import pick from 'lodash/object/pick';
 
-import { WEEK } from '../../../services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { WEEK } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
 
 import { validateId } from './validate_id';
 import { validateIndexPattern } from './validate_index_pattern';
@@ -35,25 +38,48 @@ export const stepIds = [
   STEP_REVIEW,
 ];
 
+/**
+ * Map a specific wizard step to two functions:
+ *  1. getDefaultFields: (overrides) => object
+ *  2. fieldValidations
+ *
+ * See x-pack/legacy/plugins/rollup/public/crud_app/services/jobs.js for more information on override's shape
+ */
 export const stepIdToStepConfigMap = {
   [STEP_LOGISTICS]: {
-    defaultFields: {
-      id: '',
-      indexPattern: '',
-      rollupIndex: '',
-      // Every week on Saturday, at 00:00:00
-      rollupCron: '0 0 0 ? * 7',
-      simpleRollupCron: '0 0 0 ? * 7',
+    getDefaultFields: (overrides = {}) => {
+      // We don't display the simple editor if there are overrides for the rollup's cron
+      const isAdvancedCronVisible = !!overrides.rollupCron;
+
       // The best page size boils down to how much memory the user has, e.g. how many buckets should
       // be accumulated at one time. 1000 is probably a safe size without being too small.
-      rollupPageSize: 1000,
-      // Though the API doesn't require a delay, in many real-world cases, servers will go down for
-      // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
-      // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
-      rollupDelay: '1d',
-      cronFrequency: WEEK,
-      isAdvancedCronVisible: false,
-      fieldToPreferredValueMap: {},
+      const rollupPageSize = get(overrides, ['json', 'config', 'page_size'], 1000);
+      const clonedRollupId = overrides.id || undefined;
+      const id = overrides.id ? `${overrides.id}-copy` : '';
+
+      const defaults = {
+        indexPattern: '',
+        rollupIndex: '',
+        // Every week on Saturday, at 00:00:00
+        rollupCron: '0 0 0 ? * 7',
+        simpleRollupCron: '0 0 0 ? * 7',
+        rollupPageSize,
+        // Though the API doesn't require a delay, in many real-world cases, servers will go down for
+        // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
+        // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
+        rollupDelay: '1d',
+        cronFrequency: WEEK,
+        fieldToPreferredValueMap: {},
+      };
+
+      return {
+        ...defaults,
+        ...pick(overrides, Object.keys(defaults)),
+        id,
+        isAdvancedCronVisible,
+        rollupPageSize,
+        clonedRollupId,
+      };
     },
     fieldsValidator: fields => {
       const {
@@ -63,80 +89,82 @@ export const stepIdToStepConfigMap = {
         rollupCron,
         rollupPageSize,
         rollupDelay,
+        clonedRollupId,
       } = fields;
-
-      const errors = {
-        id: validateId(id),
+      return {
+        id: validateId(id, clonedRollupId),
         indexPattern: validateIndexPattern(indexPattern, rollupIndex),
         rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
         rollupDelay: validateRollupDelay(rollupDelay),
       };
-
-      return errors;
     },
   },
   [STEP_DATE_HISTOGRAM]: {
-    defaultFields: {
-      dateHistogramField: null,
-      dateHistogramInterval: null,
-      dateHistogramTimeZone: 'UTC',
+    getDefaultFields: (overrides = {}) => {
+      const defaults = {
+        dateHistogramField: null,
+        dateHistogramInterval: null,
+        dateHistogramTimeZone: 'UTC',
+      };
+
+      return {
+        ...defaults,
+        ...pick(overrides, Object.keys(defaults)),
+      };
     },
     fieldsValidator: fields => {
-      const {
-        dateHistogramField,
-        dateHistogramInterval,
-      } = fields;
+      const { dateHistogramField, dateHistogramInterval } = fields;
 
-      const errors = {
+      return {
         dateHistogramField: validateDateHistogramField(dateHistogramField),
         dateHistogramInterval: validateDateHistogramInterval(dateHistogramInterval),
       };
-
-      return errors;
     },
   },
   [STEP_TERMS]: {
-    defaultFields: {
-      terms: [],
+    getDefaultFields: (overrides = {}) => {
+      return {
+        terms: [],
+        ...pick(overrides, ['terms']),
+      };
     },
   },
   [STEP_HISTOGRAM]: {
-    defaultFields: {
-      histogram: [],
-      histogramInterval: undefined,
+    getDefaultFields: overrides => {
+      return {
+        histogram: [],
+        histogramInterval: undefined,
+        ...pick(overrides, ['histogram', 'histogramInterval']),
+      };
     },
     fieldsValidator: fields => {
-      const {
-        histogram,
-        histogramInterval,
-      } = fields;
+      const { histogram, histogramInterval } = fields;
 
-      const errors = {
+      return {
         histogramInterval: validateHistogramInterval(histogram, histogramInterval),
       };
-
-      return errors;
     },
   },
   [STEP_METRICS]: {
-    defaultFields: {
-      metrics: [],
+    getDefaultFields: (overrides = {}) => {
+      return {
+        metrics: [],
+        ...pick(overrides, ['metrics']),
+      };
     },
     fieldsValidator: fields => {
-      const {
-        metrics,
-      } = fields;
+      const { metrics } = fields;
 
-      const errors = {
+      return {
         metrics: validateMetrics(metrics),
       };
-
-      return errors;
     },
   },
-  [STEP_REVIEW]: {},
+  [STEP_REVIEW]: {
+    getDefaultFields: () => ({}),
+  },
 };
 
 export function getAffectedStepsFields(fields, stepsFields) {

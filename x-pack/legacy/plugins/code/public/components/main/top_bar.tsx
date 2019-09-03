@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
-import { SearchOptions, SearchScope } from '../../../model';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { SearchOptions, SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
-import { history } from '../../utils/url';
+import { decodeRevisionString } from '../../../common/uri_util';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
+import { StatusIndicator } from '../status_indicator/status_indicator';
+import { BranchSelector } from './branch_selector';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -20,26 +21,59 @@ interface Props {
   buttons: React.ReactNode;
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
   query: string;
+  currentRepository?: Repository;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
+  static getDerivedStateFromProps(props: Props) {
+    return { value: decodeRevisionString(props.routeParams.revision) };
+  }
   public state = {
-    value: 'master',
+    value: decodeRevisionString(this.props.routeParams.revision),
   };
 
-  public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  public get branch() {
+    return this.getBranch(this.state.value);
+  }
+
+  getBranch = (revision: string) => {
+    const r = decodeRevisionString(revision);
+    if (r.toUpperCase() === 'HEAD' && this.props.currentRepository) {
+      return this.props.currentRepository.defaultBranch;
+    }
+    if (this.props.branches.length === 0 && this.props.tags.length === 0) {
+      return r;
+    }
+    const branch = this.props.branches.find(b => b.name === r);
+    const tag = this.props.tags.find(b => b.name === r);
+    if (branch) {
+      return branch.name;
+    } else if (tag) {
+      return tag.name;
+    } else {
+      return `tree: ${r}`;
+    }
+  };
+
+  public get branchOptions() {
+    return this.props.branches.map(b => ({
+      value: b.name,
+      text: b.name,
+      ['data-test-subj']: `codeBranchSelectOption-${b.name}${
+        this.branch === b.name ? 'Active' : ''
+      }`,
+    }));
+  }
+
+  getHrefFromRevision = (r: string) => {
     const { resource, org, repo, path = '', pathType } = this.props.routeParams;
-    this.setState({
-      value: e.target.value,
-    });
-    const revision = this.props.branches.find(b => b.name === e.target.value)!.commit.id;
-    history.push(
-      `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`
-    );
+    return `#/${resource}/${org}/${repo}/${pathType}/${r}/${path}`;
   };
 
   public render() {
+    const { branch } = this;
     return (
       <div className="code-top-bar__container">
         <SearchBar
@@ -53,19 +87,20 @@ export class TopBar extends React.Component<Props, { value: string }> {
           justifyContent="spaceBetween"
           className="codeTopBar__toolbar"
         >
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem
-                className="codeContainer__select"
-                grow={false}
-                style={{ display: 'none' }}
-              >
-                <EuiSelect
-                  options={this.props.branches.map(b => ({ value: b.name, text: b.name }))}
-                  onChange={this.onChange}
+          <EuiFlexItem className="codeTopBar__left">
+            <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexItem className="codeContainer__select" grow={false}>
+                <BranchSelector
+                  getHrefFromRevision={this.getHrefFromRevision}
+                  branches={this.props.branches}
+                  tags={this.props.tags}
+                  revision={branch!}
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
+              <EuiFlexItem grow={false}>
+                <StatusIndicator />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>

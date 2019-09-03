@@ -15,11 +15,21 @@ import {
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
 
-import { NetworkType } from './model';
+import { IpDetailsTableType, NetworkTableType, NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
+
+export const updateNetworkPageTableActivePage = actionCreator<{
+  activePage: number;
+  tableType: NetworkTableType;
+}>('UPDATE_NETWORK_PAGE_TABLE_ACTIVE_PAGE');
+
+export const updateIpDetailsTableActivePage = actionCreator<{
+  activePage: number;
+  tableType: IpDetailsTableType;
+}>('UPDATE_NETWORK_DETAILS_TABLE_ACTIVE_PAGE');
 
 export const updateDnsLimit = actionCreator<{
   limit: number;
@@ -39,21 +49,14 @@ export const updateIsPtrIncluded = actionCreator<{
 export const updateTopNFlowLimit = actionCreator<{
   limit: number;
   networkType: NetworkType;
+  tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_LIMIT');
 
 export const updateTopNFlowSort = actionCreator<{
   topNFlowSort: NetworkTopNFlowSortField;
   networkType: NetworkType;
+  tableType: networkModel.NetworkTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
-
-export const updateTopNFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
-}>('UPDATE_TOP_N_FLOW_TARGET');
-
-export const updateTopNFlowDirection = actionCreator<{
-  flowDirection: FlowDirection;
-  networkType: NetworkType;
-}>('UPDATE_TOP_N_FLOW_DIRECTION');
 
 export const setNetworkFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;

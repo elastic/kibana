@@ -38,7 +38,7 @@ export class BaseAction {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseAction.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
             id: 'id'
           }

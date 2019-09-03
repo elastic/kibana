@@ -7,98 +7,29 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody } from './types';
+import { getIpFilter } from './helpers';
 
 const getTlsHandshakesQueryFilter = () => [
   {
     bool: {
-      filter: [
+      should: [
         {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'source.ip',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'destination.ip',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'tls.version',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'suricata.eve.tls.version',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'zeek.ssl.version',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+          exists: {
+            field: 'tls.version',
+          },
+        },
+        {
+          exists: {
+            field: 'suricata.eve.tls.version',
+          },
+        },
+        {
+          exists: {
+            field: 'zeek.ssl.version',
           },
         },
       ],
+      minimum_should_match: 1,
     },
   },
 ];
@@ -112,6 +43,7 @@ export const buildTlsHandshakeQuery = ({
   },
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
+    ...getIpFilter(),
     ...createQueryFilterClauses(filterQuery),
     ...getTlsHandshakesQueryFilter(),
     {

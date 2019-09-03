@@ -387,9 +387,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await tableView.getVisibleText();
     }
 
-    public async clickMetricPanelOptions() {
-      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
-      await button.click();
+    public async clickPanelOptions(tabName: string) {
+      await testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -401,11 +400,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
-      const el = await testSubjects.find('comboBoxSearchInput');
-      await el.clearValue();
-      await el.type(timeField);
-      await el.pressKeys(browser.keys.RETURN);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
     }
 
     /**
@@ -451,7 +446,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async clickColorPicker(): Promise<void> {
-      await testSubjects.click('tvbColorPicker');
+      const picker = await find.byCssSelector('.tvbColorPicker button');
+      await browser.clickMouseButton(picker);
+    }
+
+    public async setBackgroundColor(colorHex: string): Promise<void> {
+      await this.clickColorPicker();
+      await this.checkColorPickerPopUpIsPresent();
+      await find.setValue('.tvbColorPickerPopUp input', colorHex);
+      await this.clickColorPicker();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {

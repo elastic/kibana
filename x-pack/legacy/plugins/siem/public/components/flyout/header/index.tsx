@@ -6,10 +6,10 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
+import { isEmpty, get } from 'lodash/fp';
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import {
@@ -37,8 +37,9 @@ interface OwnProps {
 interface StateReduxProps {
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
-  isFavorite: boolean;
+  isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
+  isFavorite: boolean;
   noteIds: string[];
   title: string;
   width: number;
@@ -46,21 +47,19 @@ interface StateReduxProps {
 
 interface DispatchProps {
   associateNote: (noteId: string) => void;
-  applyDeltaToWidth?: (
-    {
-      id,
-      delta,
-      bodyClientWidthPixels,
-      maxWidthPercent,
-      minWidthPixels,
-    }: {
-      id: string;
-      delta: number;
-      bodyClientWidthPixels: number;
-      maxWidthPercent: number;
-      minWidthPixels: number;
-    }
-  ) => void;
+  applyDeltaToWidth?: ({
+    id,
+    delta,
+    bodyClientWidthPixels,
+    maxWidthPercent,
+    minWidthPixels,
+  }: {
+    id: string;
+    delta: number;
+    bodyClientWidthPixels: number;
+    maxWidthPercent: number;
+    minWidthPixels: number;
+  }) => void;
   createTimeline: ActionCreator<{ id: string; show?: boolean }>;
   toggleLock: ActionCreator<{ linkToId: InputsModelId }>;
   updateDescription: ActionCreator<{ id: string; description: string }>;
@@ -71,13 +70,14 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const statefulFlyoutHeader = pure<Props>(
+const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
     createTimeline,
     description,
     getNotesByIds,
     isFavorite,
+    isDataInTimeline,
     isDatepickerLocked,
     title,
     width = DEFAULT_TIMELINE_WIDTH,
@@ -95,6 +95,7 @@ const statefulFlyoutHeader = pure<Props>(
       createTimeline={createTimeline}
       description={description}
       getNotesByIds={getNotesByIds}
+      isDataInTimeline={isDataInTimeline}
       isDatepickerLocked={isDatepickerLocked}
       isFavorite={isFavorite}
       title={title}
@@ -111,7 +112,11 @@ const statefulFlyoutHeader = pure<Props>(
   )
 );
 
+StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
+
 const emptyHistory: History[] = []; // stable reference
+
+const emptyNotesId: string[] = []; //stable reference
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -121,10 +126,12 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, timelineId);
     const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
+      dataProviders,
       description = '',
       isFavorite = false,
+      kqlQuery,
       title = '',
-      noteIds = [],
+      noteIds = emptyNotesId,
       width = DEFAULT_TIMELINE_WIDTH,
     } = timeline;
 
@@ -134,6 +141,8 @@ const makeMapStateToProps = () => {
       description,
       getNotesByIds: getNotesByIds(state),
       history,
+      isDataInTimeline:
+        !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
       isFavorite,
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
@@ -203,4 +212,4 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
 export const FlyoutHeader = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(statefulFlyoutHeader);
+)(StatefulFlyoutHeader);

@@ -5,7 +5,6 @@ bower_components
 /target
 /.es
 /plugins
-/optimize
 /built_assets
 /html_docs
 /src/fixtures/vislib/mock_data
@@ -25,6 +24,8 @@ bower_components
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
+/packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
+/packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /x-pack/legacy/plugins/maps/public/vendor/**
 /x-pack/coverage
 /x-pack/build

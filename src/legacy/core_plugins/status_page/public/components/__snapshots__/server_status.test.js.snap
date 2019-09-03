@@ -22,7 +22,6 @@ exports[`render 1`] = `
             Object {
               "kibanaStatus": <EuiBadge
                 color="secondary"
-                iconSide="left"
               >
                 Green
               </EuiBadge>,

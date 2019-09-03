@@ -19,7 +19,7 @@ import { createStore, hostsModel, networkModel, State } from '../../../store';
 
 import { AddToKql } from '.';
 
-describe('AddToKql Component', async () => {
+describe('AddToKql Component', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
@@ -87,19 +87,24 @@ describe('AddToKql Component', async () => {
     expect(store.getState().hosts.page).toEqual({
       queries: {
         authentications: {
+          activePage: 0,
           limit: 10,
         },
         hosts: {
+          activePage: 0,
           limit: 10,
           direction: 'desc',
           sortField: 'lastSeen',
         },
         events: {
+          activePage: 0,
           limit: 10,
         },
         uncommonProcesses: {
+          activePage: 0,
           limit: 10,
         },
+        anomalies: null,
       },
       filterQuery: {
         kuery: {
@@ -139,16 +144,24 @@ describe('AddToKql Component', async () => {
 
     expect(store.getState().network.page).toEqual({
       queries: {
-        topNFlow: {
+        topNFlowDestination: {
+          activePage: 0,
           limit: 10,
-          flowDirection: 'uniDirectional',
-          flowTarget: 'source',
           topNFlowSort: {
-            field: 'bytes',
+            field: 'bytes_out',
+            direction: 'desc',
+          },
+        },
+        topNFlowSource: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: {
+            field: 'bytes_out',
             direction: 'desc',
           },
         },
         dns: {
+          activePage: 0,
           limit: 10,
           dnsSortField: {
             field: 'queryCount',

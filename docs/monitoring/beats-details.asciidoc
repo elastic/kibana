@@ -5,8 +5,8 @@
 <titleabbrev>Beats Metrics</titleabbrev>
 ++++
 
-If you are monitoring Beats, the *Monitoring* page in {kib} contains a panel for
-Beats in the cluster overview. added[6.2.0]
+If you are monitoring Beats, the *Stack Monitoring* page in {kib} contains a
+panel for Beats in the cluster overview.
 
 [role="screenshot"]
 image::monitoring/images/monitoring-beats.jpg["Monitoring Beats",link="images/monitoring-beats.jpg"]

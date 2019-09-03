@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './commit_search_client';
 export * from './document_search_client';
 export * from './repository_search_client';
 export * from './symbol_search_client';
 export * from './repository_object_client';
+export * from './integraions_search_client';

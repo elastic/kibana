@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
+import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
 export class App extends Component {
@@ -34,7 +34,7 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    trackUiMetric(UIM_APP_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

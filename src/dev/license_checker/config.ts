@@ -67,6 +67,7 @@ export const LICENSE_WHITELIST = [
   'Unlicense',
   'WTFPL OR ISC',
   'WTFPL',
+  'Nuclide software',
 ];
 
 // The following list only applies to licenses that
@@ -93,7 +94,7 @@ export const LICENSE_OVERRIDES = {
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
 
   // TODO can be removed if the ISSUE#239 is accepted on the source
-  'xmldom@0.1.19': ['MIT'],
+  'xmldom@0.1.27': ['MIT'],
 
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],
@@ -106,4 +107,6 @@ export const LICENSE_OVERRIDES = {
 
   // TODO remove this once we upgrade past or equal to v1.0.2
   'babel-plugin-mock-imports@1.0.1': ['MIT'],
+
+  '@elastic/node-ctags@1.0.2': ['Nuclide software'],
 };

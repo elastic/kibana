@@ -9,7 +9,7 @@ exports[`render 1`] = `
   <EuiTitle
     size="xs"
   >
-    <h3>
+    <h2>
       <EuiTextColor
         color="subdued"
       >
@@ -19,7 +19,7 @@ exports[`render 1`] = `
           values={Object {}}
         />
       </EuiTextColor>
-    </h3>
+    </h2>
   </EuiTitle>
   <EuiSpacer
     size="s"

@@ -11,13 +11,14 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { CODE_PATH_BEATS } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beat/:beatUuid', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
     pageData: getPageData,
   },

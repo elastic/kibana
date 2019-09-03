@@ -24,6 +24,7 @@ import { defaultHeaders } from '../../mock';
 import {
   addNewTimeline,
   addTimelineProvider,
+  addTimelineToStore,
   applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
   removeTimelineProvider,
@@ -97,6 +98,24 @@ const timelineByIdMock: TimelineById = {
 const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
 
 describe('Timeline', () => {
+  describe('#add saved object Timeline to store ', () => {
+    test('should return a timelineModel with default value and not just a timelineResult ', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...timelineByIdMock.foo,
+        },
+      });
+
+      expect(update).toEqual({
+        foo: {
+          ...timelineByIdMock.foo,
+          show: true,
+        },
+      });
+    });
+  });
+
   describe('#addNewTimeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = addNewTimeline({

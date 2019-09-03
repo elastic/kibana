@@ -122,6 +122,14 @@ export function extractJobDetails(job) {
   if (job.node) {
     datafeed.items.push(['node', JSON.stringify(job.node)]);
   }
+  if (job.datafeed_config && job.datafeed_config.timing_stats) {
+    // remove the timing_stats list from the datafeed section
+    // so not to show it twice.
+    const i = datafeed.items.findIndex(item => item[0] === 'timing_stats');
+    if (i >= 0) {
+      datafeed.items.splice(i, 1);
+    }
+  }
 
   const counts = {
     title: i18n.translate('xpack.ml.jobsList.jobDetails.countsTitle', {
@@ -139,6 +147,17 @@ export function extractJobDetails(job) {
     items: filterObjects(job.model_size_stats).map(formatValues)
   };
 
+  const datafeedTimingStats = {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
+      defaultMessage: 'Timing stats'
+    }),
+    position: 'right',
+    items: (job.datafeed_config && job.datafeed_config.timing_stats) ?
+      filterObjects(job.datafeed_config.timing_stats)
+        .filter(o => o[0] !== 'total_search_time_ms') // remove total_search_time_ms as average_search_time_per_bucket_ms is better
+        .map(formatValues) : []
+  };
+
   return {
     general,
     customUrl,
@@ -151,6 +170,7 @@ export function extractJobDetails(job) {
     dataDescription,
     datafeed,
     counts,
-    modelSizeStats
+    modelSizeStats,
+    datafeedTimingStats
   };
 }

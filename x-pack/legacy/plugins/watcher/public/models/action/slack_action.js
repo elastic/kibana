@@ -12,71 +12,63 @@ export class SlackAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    const toArray = get(props, 'to', []);
-    this.to = isArray(toArray) ? toArray : [ toArray ];
-    this.text = props.text;
+    const toArray = get(props, 'to');
+    this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
+
+    const defaultText = i18n.translate('xpack.watcher.models.slackAction.defaultText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
   }
 
   validate() {
-    const errors = [];
-
-    if (!this.to.length) {
-      errors.push({
-        message: i18n.translate('xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description', {
-          // eslint-disable-next-line max-len
-          defaultMessage: 'This watch has a Slack action without a "to" property.  This watch will only be valid if you specified the "to" property in the Slack "message_default" setting in Elasticsearch.'
-        })
-      });
-    }
-
-    return { errors: errors.length ? errors : null };
+    // Currently no validation required
+    const errors = {
+      to: [],
+      text: [],
+    };
+    return errors;
   }
 
   get upstreamJson() {
     const result = super.upstreamJson;
-    const message = this.text || this.to.length
+    const to = this.to && this.to.length > 0 ? this.to : undefined;
+    const message = this.text || to
       ? {
         text: this.text,
-        to: this.to.length ? this.to : undefined
+        to,
       }
-      : undefined;
+      : {};
     Object.assign(result, {
-      to: this.to,
+      to,
       text: this.text,
       slack: {
         message
-      }
+      },
     });
 
     return result;
   }
 
-  get description() {
-    const toList = this.to.join(', ');
-    return i18n.translate('xpack.watcher.models.slackAction.description', {
-      defaultMessage: 'Slack message will be sent to {toList}',
-      values: {
-        toList
-      }
-    });
-  }
-
   get simulateMessage() {
-    const toList = this.to.join(', ');
+    const toList = this.to && this.to.join(', ');
     return i18n.translate('xpack.watcher.models.slackAction.simulateMessage', {
-      defaultMessage: 'Sample Slack message sent to {toList}.',
+      defaultMessage: 'Sample Slack message sent {toList}.',
       values: {
-        toList
+        toList: toList ? `to ${toList}` : '',
       }
     });
   }
 
   get simulateFailMessage() {
-    const toList = this.to.join(', ');
+    const toList = this.to && this.to.join(', ');
     return i18n.translate('xpack.watcher.models.slackAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send sample Slack message to {toList}.',
+      defaultMessage: 'Failed to send sample Slack message {toList}.',
       values: {
-        toList
+        toList: toList ? `to ${toList}` : '',
       }
     });
   }
@@ -88,12 +80,11 @@ export class SlackAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.slackAction.TypeName', {
     defaultMessage: 'Slack'
   });
-  static iconClass = 'kuiIcon fa-slack';
-  static template = '<watch-slack-action></watch-slack-action>';
+  static iconClass = 'logoSlack';
   static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
-    defaultMessage: 'Send a message to a slack user or channel.'
+    defaultMessage: 'Send a message to a Slack user or channel.'
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
-    defaultMessage: 'Send a sample message now'
+    defaultMessage: 'Send a sample message'
   });
 }

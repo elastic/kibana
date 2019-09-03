@@ -6,6 +6,7 @@
 
 import crypto from 'crypto';
 import { Legacy, Server } from 'kibana';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsRepository } from 'src/core/server/saved_objects/service';
 import { SavedObjectsBaseOptions, SavedObject, SavedObjectAttributes } from 'src/core/server';
 import {
@@ -60,6 +61,7 @@ export class Plugin {
     // `namespace` is included into AAD.
     core.savedObjects.addScopedSavedObjectsClientWrapperFactory(
       Number.MAX_SAFE_INTEGER,
+      'encrypted_saved_objects',
       ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
     );
 

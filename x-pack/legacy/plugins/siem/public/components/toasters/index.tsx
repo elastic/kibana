@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, Toast, EuiButton } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast as Toast, EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -120,3 +120,5 @@ const formatToErrorToastIfNeeded = (
 const ErrorToastContainer = styled.div`
   text-align: right;
 `;
+
+ErrorToastContainer.displayName = 'ErrorToastContainer';

@@ -8,7 +8,6 @@ import { getHistogramInterval } from '../get_histogram_interval';
 
 describe('getHistogramInterval', () => {
   it('specifies the interval necessary to divide a given timespan into equal buckets, rounded to the nearest integer, expressed in ms', () => {
-    expect.assertions(3);
     const result = getHistogramInterval('now-15m', 'now', 10);
     /**
      * These assertions were verbatim comparisons but that introduced
@@ -21,7 +20,6 @@ describe('getHistogramInterval', () => {
   });
 
   it('will supply a default constant value for bucketCount when none is provided', () => {
-    expect.assertions(3);
     const result = getHistogramInterval('now-15m', 'now');
     /**
      * These assertions were verbatim comparisons but that introduced

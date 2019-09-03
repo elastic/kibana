@@ -18,6 +18,7 @@ export function deleteAlertRoute(server: Hapi.Server) {
     method: 'DELETE',
     path: '/api/alert/{id}',
     options: {
+      tags: ['access:alerting-all'],
       validate: {
         params: Joi.object()
           .keys({
@@ -26,10 +27,11 @@ export function deleteAlertRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: DeleteRequest) {
+    async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const alertsClient = request.getAlertsClient!();
-      return await alertsClient.delete({ id });
+      await alertsClient.delete({ id });
+      return h.response().code(204);
     },
   });
 }

@@ -18,46 +18,16 @@
  */
 
 /**
- * The interface that the adapters used to open an inspector have to fullfill.
+ * Do not import these types from here, instead import them from `inspector` plugin.
+ *
+ * ```ts
+ * import { InspectorViewDescription } from 'src/plugins/inspector/public';
+ * ```
+ *
+ * @deprecated
  */
-export interface Adapters {
-  [key: string]: any;
-}
-
-/**
- * The props interface that a custom inspector view component, that will be passed
- * to {@link InspectorViewDescription#component}, must use.
- */
-export interface InspectorViewProps {
-  /**
-   * The adapters thta has been used to open the inspector.
-   */
-  adapters: Adapters;
-  /**
-   * The title that the inspector is currently using e.g. a visualization name.
-   */
-  title: string;
-}
-
-/**
- * An object describing an inspector view.
- * @typedef {object} InspectorViewDescription
- * @property {string} title - The title that will be used to present that view.
- * @property {string} icon - An icon name to present this view. Must match an EUI icon.
- * @property {React.ComponentType<InspectorViewProps>} component - The actual React component to render that
- *    that view. It should always return an `InspectorView` element at the toplevel.
- * @property {number} [order=9000] - An order for this view. Views are ordered from lower
- *    order values to higher order values in the UI.
- * @property {string} [help=''] - An help text for this view, that gives a brief description
- *    of this view.
- * @property {viewShouldShowFunc} [shouldShow] - A function, that determines whether
- *    this view should be visible for a given collection of adapters. If not specified
- *    the view will always be visible.
- */
-export interface InspectorViewDescription {
-  component: React.ComponentType<InspectorViewProps>;
-  help?: string;
-  order?: number;
-  shouldShow?: (adapters: Adapters) => boolean;
-  title: string;
-}
+export {
+  Adapters,
+  InspectorViewProps,
+  InspectorViewDescription,
+} from '../../../../plugins/inspector/public';

@@ -72,7 +72,7 @@ export function getIndexPatternById(id) {
   return fullIndexPatterns.get(id);
 }
 
-export function loadCurrentSavedSearch($route, savedSearches) {
+export function loadCurrentSavedSearch(savedSearches, $route) {
   currentSavedSearch = savedSearches.get($route.current.params.savedSearchId);
   return currentSavedSearch;
 }

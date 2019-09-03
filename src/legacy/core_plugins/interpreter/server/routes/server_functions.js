@@ -18,8 +18,7 @@
  */
 
 import Boom from 'boom';
-import { serializeProvider } from '../../common/serialize';
-import { API_ROUTE } from '../../common/constants';
+import { serializeProvider, API_ROUTE } from '../../common';
 import { createHandlers } from '../lib/create_handlers';
 import Joi from 'joi';
 

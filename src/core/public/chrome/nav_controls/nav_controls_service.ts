@@ -18,7 +18,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
 /** @public */
@@ -48,6 +48,10 @@ export interface ChromeNavControls {
   registerLeft(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the right side of the chrome header. */
   registerRight(navControl: ChromeNavControl): void;
+  /** @internal */
+  getLeft$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getRight$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */

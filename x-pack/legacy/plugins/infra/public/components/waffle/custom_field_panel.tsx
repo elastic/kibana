@@ -7,10 +7,10 @@
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraIndexField } from '../../../server/graphql/types';
+import { FieldType } from 'ui/index_patterns';
 interface Props {
   onSubmit: (field: string) => void;
-  fields: InfraIndexField[];
+  fields: FieldType[];
   intl: InjectedIntl;
 }
 

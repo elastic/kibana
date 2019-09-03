@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const jsts = require('jsts');
+import * as jsts from 'jsts';
 import rewind from 'geojson-rewind';
 
 export function geoJsonCleanAndValidate(parsedFile) {

@@ -142,16 +142,45 @@ test('Repository url parsing with port', () => {
 });
 
 test('Normalize repository index name', () => {
+  // index name with repository URI should be case insensitive even after attaching a hash at the end.
   const indexName1 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/Kibana');
   const indexName2 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana');
-
-  expect(indexName1 === indexName2).toBeFalsy();
-  expect(indexName1).toEqual('github.com-elastic-kibana-e2b881a9');
+  expect(indexName1 === indexName2).toBeTruthy();
+  expect(indexName1).toEqual('github.com-elastic-kibana-7bf00473');
   expect(indexName2).toEqual('github.com-elastic-kibana-7bf00473');
 
   const indexName3 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic-kibana/code');
   const indexName4 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana-code');
   expect(indexName3 === indexName4).toBeFalsy();
+
+  // illegal characters should be replaced
+  const indexName5 = RepositoryUtils.normalizeRepoUriToIndexName(
+    'github.com:1234/elastic-kibana/code'
+  );
+  const indexName6 = RepositoryUtils.normalizeRepoUriToIndexName(
+    'github.com/1234?elastic/kibana-code'
+  );
+  expect(indexName5 === indexName6).toBeFalsy();
+  expect(indexName5).toEqual('github.com-1234-elastic-kibana-code-2a9788f8');
+  expect(indexName6).toEqual('github.com-1234-elastic-kibana-code-2b342309');
+
+  // the normalized index name must not exceed RepositoryUtils.MAX_NORMALIZED_NAME_LEN
+  const uniqNames = new Set<string>();
+  let repoName: string = '';
+  for (let i = 0; i < 1024; i++) {
+    const normalized = RepositoryUtils.normalizeRepoUriToIndexName(repoName);
+    expect(normalized.length).toBeLessThanOrEqual(RepositoryUtils.MAX_NORMALIZED_NAME_LEN);
+    if (
+      repoName.length >=
+      RepositoryUtils.MAX_NORMALIZED_NAME_LEN - RepositoryUtils.MAX_HASH_LEN - 1
+    ) {
+      expect(normalized.length).toEqual(RepositoryUtils.MAX_NORMALIZED_NAME_LEN);
+    }
+    // a weak confliction test
+    expect(uniqNames.has(normalized)).toBeFalsy();
+    uniqNames.add(normalized);
+    repoName = repoName + String.fromCharCode(97 + (i % 26));
+  }
 });
 
 test('Parse repository uri', () => {

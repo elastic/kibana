@@ -20,8 +20,8 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
 
 export default function GoalVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -80,12 +80,36 @@ export default function GoalVisType(Private) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        gaugeTypes: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+              defaultMessage: 'Arc',
+            }),
+            value: 'Arc',
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+              defaultMessage: 'Circle',
+            }),
+            value: 'Circle',
+          },
+        ],
+        alignments: [
+          {
+            value: 'automatic',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+          },
+          {
+            value: 'horizontal',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+          },
+          {
+            value: 'vertical',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+        ],
+        colorSchemas,
       },
-      optionsTemplate: gaugeTemplate,
+      optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
           group: 'metrics',

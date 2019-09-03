@@ -5,12 +5,17 @@
  */
 
 import { createAction } from 'redux-actions';
-import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
+import { DocumentSymbol } from 'vscode-languageserver-types';
+
+export interface SymbolWithMembers extends DocumentSymbol {
+  members?: SymbolWithMembers[];
+  path?: string;
+}
 
 export interface SymbolsPayload {
   path: string;
-  data: SymbolInformation[];
-  structureTree: any;
+  data: DocumentSymbol[];
+  structureTree: SymbolWithMembers[];
 }
 
 export const loadStructure = createAction<string>('LOAD STRUCTURE');

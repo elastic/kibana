@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Size } from '../../../types';
+
+import { Size } from './layout';
 
 export interface CaptureConfig {
   zoom: number;

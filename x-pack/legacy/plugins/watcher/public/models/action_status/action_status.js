@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { getMoment } from 'plugins/watcher/../common/lib/get_moment';
+import { getMoment } from '../../../common/lib/get_moment';
 
 export class ActionStatus {
   constructor(props = {}) {

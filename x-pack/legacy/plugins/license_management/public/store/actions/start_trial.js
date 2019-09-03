@@ -20,12 +20,12 @@ export const loadTrialStatus = () => async dispatch => {
 export const startLicenseTrial = () => async (
   dispatch,
   getState,
-  { xPackInfo }
+  { xPackInfo, $injector }
 ) => {
   /*eslint camelcase: 0*/
   const { trial_was_started, error_message } = await startTrial();
   if (trial_was_started) {
-    await xPackInfo.refresh();
+    await xPackInfo.refresh($injector);
     // reload necessary to get left nav to refresh with proper links
     window.location.reload();
   } else {

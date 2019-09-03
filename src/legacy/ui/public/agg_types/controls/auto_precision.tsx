@@ -29,7 +29,7 @@ function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boole
   });
 
   return (
-    <EuiFormRow className="visEditorSidebar__aggParamFormRow">
+    <EuiFormRow compressed>
       <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
     </EuiFormRow>
   );

@@ -13,6 +13,10 @@ declare module '@elastic/eui' {
   export const EuiCard: any;
 }
 
+declare module '@elastic/eui/lib/services' {
+  export const RIGHT_ALIGNMENT: any;
+}
+
 declare module '@elastic/eui/lib/services/format' {
   export const dateFormatAliases: any;
 }

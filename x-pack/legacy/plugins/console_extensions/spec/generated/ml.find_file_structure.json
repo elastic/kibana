@@ -2,6 +2,7 @@
   "ml.find_file_structure": {
     "url_params": {
       "lines_to_sample": 0,
+      "line_merge_size_limit": 0,
       "timeout": "",
       "charset": "",
       "format": [
@@ -26,6 +27,6 @@
     "patterns": [
       "_ml/find_file_structure"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-file-structure.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-find-file-structure.html"
   }
 }

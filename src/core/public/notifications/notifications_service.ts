@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsSetup } from '../ui_settings';
+import { UiSettingsClientContract } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
-  uiSettings: UiSettingsSetup;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface StartDeps {

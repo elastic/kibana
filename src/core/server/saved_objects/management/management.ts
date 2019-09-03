@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 
 interface SavedObjectsManagementTypeDefinition {
   isImportableAndExportable?: boolean;

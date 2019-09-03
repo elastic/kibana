@@ -7,7 +7,6 @@ exports[`ExplorerChartLabelBadge Render entity label badge. 1`] = `
   <EuiBadge
     className="ml-reset-font-weight"
     color="hollow"
-    iconSide="left"
   >
     nginx.access.remote_ip
      

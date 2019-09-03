@@ -23,9 +23,11 @@ import moment from 'moment';
  * returns the nanos as string like this:
  * 9ns -> 000000009
  * 10000ns -> 0000010000
- */
+ * returns 000000000 for invalid timestamps or timestamps with just date
+ **/
 export function extractNanos(timeFieldValue: string = ''): string {
-  const fractionSeconds = timeFieldValue.split('.')[1].replace('Z', '');
+  const fieldParts = timeFieldValue.split('.');
+  const fractionSeconds = fieldParts.length === 2 ? fieldParts[1].replace('Z', '') : '';
   return fractionSeconds.length !== 9 ? fractionSeconds.padEnd(9, '0') : fractionSeconds;
 }
 

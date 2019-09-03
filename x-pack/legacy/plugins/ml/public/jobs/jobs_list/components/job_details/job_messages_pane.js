@@ -17,7 +17,7 @@ import {
 
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { JobIcon } from '../job_message_icon';
+import { JobIcon } from '../../../../components/job_message_icon';
 import { injectI18n } from '@kbn/i18n/react';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

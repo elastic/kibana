@@ -32,6 +32,8 @@ export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginSt
     // eslint-disable-next-line no-console
     console.log(`Testbed plugin started`);
   }
+
+  public stop() {}
 }
 
 export type TestbedPluginSetup = ReturnType<TestbedPlugin['setup']>;

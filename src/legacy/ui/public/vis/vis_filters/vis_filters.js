@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import { pushFilterBarFilters } from '../../filter_manager/push_filters';
+import { pushFilterBarFilters } from '../push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters } from '../../filter_manager/lib/uniq_filters';
+import { uniqFilters } from '../../../../core_plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
-
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.

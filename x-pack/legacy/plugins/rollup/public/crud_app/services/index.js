@@ -24,17 +24,6 @@ export {
 } from './breadcrumbs';
 
 export {
-  cronExpressionToParts,
-  cronPartsToExpression,
-  MINUTE,
-  HOUR,
-  DAY,
-  WEEK,
-  MONTH,
-  YEAR,
-} from './cron';
-
-export {
   logisticalDetailsUrl,
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,
@@ -45,7 +34,7 @@ export {
 } from './documentation_links';
 
 export {
-  filterItems,
+  filterItems
 } from './filter_items';
 
 export {
@@ -60,12 +49,6 @@ export {
   setHttp,
   getHttp,
 } from './http_provider';
-
-export {
-  getOrdinalValue,
-  getDayName,
-  getMonthName,
-} from './humanized_numbers';
 
 export {
   serializeJob,
@@ -94,5 +77,7 @@ export {
 } from './sort_table';
 
 export {
-  trackUiMetric,
-} from './track_ui_metric';
+  retypeMetrics,
+} from './retype_metrics';
+
+export { trackUiMetric, METRIC_TYPE } from './track_ui_metric';

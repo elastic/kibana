@@ -14,6 +14,8 @@ const TableHeader = styled.thead`
   font-weight: bold;
 `;
 
+TableHeader.displayName = 'TableHeader';
+
 /** prevents links to the new pages from accessing `window.opener` */
 const REL_NOOPENER = 'noopener';
 
@@ -67,3 +69,5 @@ export const Markdown = pure<{ raw?: string; size?: 'xs' | 's' | 'm' }>(({ raw, 
     />
   );
 });
+
+Markdown.displayName = 'Markdown';

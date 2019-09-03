@@ -5,28 +5,38 @@
  */
 
 import { useMemo } from 'react';
-import { getWaterfall } from '../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { loadTrace } from '../services/rest/apm/traces';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { callApmApi } from '../services/rest/callApmApi';
+import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
-const INITIAL_DATA = { trace: [], errorsPerTransaction: {} };
+const INITIAL_DATA = {
+  root: undefined,
+  trace: { items: [], exceedsMax: false },
+  errorsPerTransaction: {}
+};
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => {
-      if (traceId && start && end) {
-        return loadTrace({ traceId, start, end });
-      }
-    },
-    [traceId, start, end]
-  );
+  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
+    if (traceId && start && end) {
+      return callApmApi({
+        pathname: '/api/apm/traces/{traceId}',
+        params: {
+          path: { traceId },
+          query: {
+            start,
+            end
+          }
+        }
+      });
+    }
+  }, [traceId, start, end]);
 
   const waterfall = useMemo(() => getWaterfall(data, transactionId), [
     data,
     transactionId
   ]);
 
-  return { data: waterfall, status, error };
+  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }

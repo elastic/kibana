@@ -8,7 +8,7 @@
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -26,15 +26,19 @@ export class Breadcrumb extends React.PureComponent<Props> {
     }> = [];
     const pathSegments = path ? path.split('/') : [];
 
-    pathSegments.forEach((p, index) => {
+    pathSegments.forEach((p, index, array) => {
       const paths = pathSegments.slice(0, index + 1);
       const href = `#${repoUri}/tree/${encodeRevisionString(revision)}/${paths.join('/')}`;
-      breadcrumbs.push({
+      const breadcrumb = {
         text: p,
         href,
         className: 'codeNoMinWidth',
         ['data-test-subj']: `codeFileBreadcrumb-${p}`,
-      });
+      };
+      if (index === array.length - 1) {
+        delete breadcrumb.href;
+      }
+      breadcrumbs.push(breadcrumb);
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;
   }

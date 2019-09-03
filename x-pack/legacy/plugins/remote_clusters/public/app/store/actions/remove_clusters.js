@@ -12,6 +12,7 @@ import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
 import {
   removeClusterRequest as sendRemoveClusterRequest,
   trackUiMetric,
+  METRIC_TYPE,
 } from '../../services';
 
 import {
@@ -83,7 +84,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
 
   if (itemsDeleted.length > 0) {
     // Only track successful requests.
-    trackUiMetric(names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE);
+    trackUiMetric(METRIC_TYPE.COUNT, names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE);
 
     if (itemsDeleted.length === 1) {
       toasts.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { RequestFacade } from '../../';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithRequest {
   public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
-  constructor(readonly req: Request) {
+  constructor(readonly req: RequestFacade) {
     const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
     // @ts-ignore

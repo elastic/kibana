@@ -7,9 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiHealth,
-} from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 
 const statusToHealthMap = {
   stopped: (
@@ -17,6 +15,14 @@ const statusToHealthMap = {
       <FormattedMessage
         id="xpack.rollupJobs.jobStatus.stoppedLabel"
         defaultMessage="Stopped"
+      />
+    </EuiHealth>
+  ),
+  stopping: (
+    <EuiHealth color="warning">
+      <FormattedMessage
+        id="xpack.rollupJobs.jobStatus.stoppingLabel"
+        defaultMessage="Stopping"
       />
     </EuiHealth>
   ),
@@ -46,4 +52,13 @@ const statusToHealthMap = {
   ),
 };
 
-export const JobStatus = ({ status }) => statusToHealthMap[status];
+const statusUnknown = (
+  <EuiHealth color="subdued">
+    <FormattedMessage
+      id="xpack.rollupJobs.jobStatus.unknownLabel"
+      defaultMessage="Unknown"
+    />
+  </EuiHealth>
+);
+
+export const JobStatus = ({ status }) => statusToHealthMap[status] || statusUnknown;

@@ -18,9 +18,10 @@
  */
 
 import { resolve } from 'path';
+import JoiNamespace from 'joi';
+import { Server } from 'hapi';
 import { Legacy } from '../../../../kibana';
-import { registerUserActionRoute } from './server/routes/api/ui_metric';
-import { registerUiMetricUsageCollector } from './server/usage/index';
+import { registerUiMetricRoute } from './server/routes/api/ui_metric';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -28,15 +29,25 @@ export default function(kibana: any) {
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
-
+    config(Joi: typeof JoiNamespace) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        debug: Joi.boolean().default(Joi.ref('$dev')),
+      }).default();
+    },
     uiExports: {
+      injectDefaultVars(server: Server) {
+        const config = server.config();
+        return {
+          debugUiMetric: config.get('ui_metric.debug'),
+        };
+      },
       mappings: require('./mappings.json'),
-      hacks: ['plugins/ui_metric'],
+      hacks: ['plugins/ui_metric/hacks/ui_metric_init'],
     },
 
     init(server: Legacy.Server) {
-      registerUserActionRoute(server);
-      registerUiMetricUsageCollector(server);
+      registerUiMetricRoute(server);
     },
   });
 }

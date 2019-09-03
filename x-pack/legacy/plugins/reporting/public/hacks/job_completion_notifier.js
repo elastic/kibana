@@ -13,7 +13,7 @@ import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';
 import { Path } from 'plugins/xpack_main/services/path';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
   EuiButton,
@@ -25,7 +25,7 @@ import { npStart } from 'ui/new_platform';
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run((Private, reportingPollConfig) => {
+  .run(reportingPollConfig => {
     // Don't show users any reporting toasts until they're logged in.
     if (Path.isUnauthenticated()) {
       return;
@@ -33,7 +33,6 @@ uiModules.get('kibana')
 
     // We assume that all license types offer Reporting, and that we only need to check if the
     // license is active or expired.
-    const xpackInfo = Private(XPackInfoProvider);
     const isLicenseActive = xpackInfo.getLicense().isActive;
 
     async function showCompletionNotification(job) {
@@ -65,8 +64,9 @@ uiModules.get('kibana')
       // the job completes, that way we don't give the user a toast to download their report if they can't.
       // NOTE: this should be looking at configuration rather than the existence of a navLink
       if (chrome.navLinks.has('kibana:management')) {
-        const managementUrl = chrome.navLinks.get('kibana:management').url;
-        const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
+        const { baseUrl } = chrome.navLinks.get('kibana:management');
+        const reportingSectionUrl = `${baseUrl}/kibana/reporting`;
+
         seeReportLink = (
           <p>
             <FormattedMessage
@@ -100,6 +100,32 @@ uiModules.get('kibana')
       );
 
       const maxSizeReached = get(job, '_source.output.max_size_reached');
+      const csvContainsFormulas = get(job, '_source.output.csv_contains_formulas');
+
+      if (csvContainsFormulas) {
+        return toastNotifications.addWarning({
+          title: (
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportTitle"
+              defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+              values={{ reportObjectType, reportObjectTitle }}
+            />
+          ),
+          text: (
+            <div>
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportMessage"
+                  defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+                />
+              </p>
+              {seeReportLink}
+              {downloadReportButton}
+            </div>
+          ),
+          'data-test-subj': 'completeReportSuccess',
+        });
+      }
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({

@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import metricAggTemplate from '../../controls/sub_agg.html';
 import { MetricAggParamEditor } from '../../controls/metric_agg';
+import { SubAggParamEditor } from '../../controls/sub_agg';
 import _ from 'lodash';
-import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
-import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
@@ -55,15 +53,9 @@ const parentPipelineAggHelper = {
       },
       {
         name: 'customMetric',
-        editor: metricAggTemplate,
-        type: AggConfig,
+        editorComponent: SubAggParamEditor,
+        type: 'agg',
         default: null,
-        serialize: function (customMetric) {
-          return customMetric.toJSON();
-        },
-        deserialize: function (state, agg) {
-          return this.makeAgg(agg, state);
-        },
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
@@ -72,8 +64,7 @@ const parentPipelineAggHelper = {
           return metricAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: _.noop,
-        controller: parentPipelineAggController
+        write: _.noop
       },
       {
         name: 'buckets_path',
@@ -86,7 +77,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
+      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
     }
     return subAgg.type.getFormat(subAgg);
   }

@@ -7,23 +7,25 @@
 import { i18n } from '@kbn/i18n';
 import { formatdate } from '../../functions/common/formatdate';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { ISO8601, MOMENTJS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
   help: i18n.translate('xpack.canvas.functions.formatdateHelpText', {
     defaultMessage:
-      'Format a valid date string or number of {ms} since epoch using {moment} (see {url})',
+      'Formats an {ISO8601} date string or a date in milliseconds since epoch using {MOMENTJS}. See {url}.',
     values: {
-      ms: 'ms',
-      moment: 'momentJS',
-      url: 'https://momentjs.com/',
+      ISO8601,
+      MOMENTJS,
+      url: 'https://momentjs.com/docs/#/displaying/',
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.formatdate.args.formatHelpText', {
-      defaultMessage: '{moment} Format with which to bucket (See {url})',
+      defaultMessage: 'A {MOMENTJS} format. For example, {example}. See {url}.',
       values: {
-        moment: 'momentJS',
+        MOMENTJS,
+        example: `"MM/DD/YYYY"`,
         url: 'https://momentjs.com/docs/#/displaying/',
       },
     }),

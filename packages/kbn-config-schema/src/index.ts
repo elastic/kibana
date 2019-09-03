@@ -36,6 +36,7 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
+  NeverType,
   NumberOptions,
   NumberType,
   ObjectType,
@@ -72,7 +73,7 @@ function uri(options?: URIOptions): Type<string> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null>(value: T): Type<T> {
   return new LiteralType(value);
 }
 
@@ -88,11 +89,19 @@ function duration(options?: DurationOptions): Type<Duration> {
   return new DurationType(options);
 }
 
+function never(): Type<never> {
+  return new NeverType();
+}
+
 /**
  * Create an optional type
  */
 function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
+}
+
+function nullable<V>(type: Type<V>): Type<V | null> {
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
@@ -167,7 +176,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
 
 function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A,
+  rightOperand: Reference<A> | A | Type<unknown>,
   equalType: Type<B>,
   notEqualType: Type<C>,
   options?: TypeOptions<B | C>
@@ -186,6 +195,8 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  nullable,
+  never,
   number,
   object,
   oneOf,

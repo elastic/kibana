@@ -149,3 +149,25 @@ Array [
 ]
 `);
 });
+
+it('preserves the context of the observer functions', () => {
+  const $scope = new Scope();
+  const observer = {
+    next() {
+      expect(this).toBe(observer);
+    },
+    complete() {
+      expect(this).toBe(observer);
+    },
+  };
+
+  subscribeWithScope($scope as any, Rx.of([1, 2, 3]), observer);
+
+  const observer2 = {
+    error() {
+      expect(this).toBe(observer);
+    },
+  };
+
+  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), observer2);
+});

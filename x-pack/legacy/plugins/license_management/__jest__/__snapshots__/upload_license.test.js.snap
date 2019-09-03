@@ -860,6 +860,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       >
                         <EuiFilePicker
                           compressed={false}
+                          display="large"
                           id="licenseFile"
                           initialPromptText={
                             <FormattedMessage
@@ -885,20 +886,22 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             }
                           >
                             <div
-                              className="euiFilePicker"
+                              className="euiFilePicker euiFilePicker--large"
                             >
                               <div
                                 className="euiFilePicker__wrap"
                               >
-                                <input
-                                  className="euiFilePicker__input"
-                                  id="licenseFile"
-                                  onChange={[Function]}
-                                  onDragLeave={[Function]}
-                                  onDragOver={[Function]}
-                                  onDrop={[Function]}
-                                  type="file"
-                                />
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFilePicker__input"
+                                    id="licenseFile"
+                                    onChange={[Function]}
+                                    onDragLeave={[Function]}
+                                    onDragOver={[Function]}
+                                    onDrop={[Function]}
+                                    type="file"
+                                  />
+                                </EuiValidatableControl>
                                 <div
                                   className="euiFilePicker__prompt"
                                 >
@@ -980,6 +983,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
                                 href="#/management/elasticsearch/license_management/home"
+                                rel="noreferrer"
                               >
                                 <span
                                   className="euiButtonEmpty__content"
@@ -1313,6 +1317,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       >
                         <EuiFilePicker
                           compressed={false}
+                          display="large"
                           id="licenseFile"
                           initialPromptText={
                             <FormattedMessage
@@ -1338,20 +1343,22 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             }
                           >
                             <div
-                              className="euiFilePicker"
+                              className="euiFilePicker euiFilePicker--large"
                             >
                               <div
                                 className="euiFilePicker__wrap"
                               >
-                                <input
-                                  className="euiFilePicker__input"
-                                  id="licenseFile"
-                                  onChange={[Function]}
-                                  onDragLeave={[Function]}
-                                  onDragOver={[Function]}
-                                  onDrop={[Function]}
-                                  type="file"
-                                />
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFilePicker__input"
+                                    id="licenseFile"
+                                    onChange={[Function]}
+                                    onDragLeave={[Function]}
+                                    onDragOver={[Function]}
+                                    onDrop={[Function]}
+                                    type="file"
+                                  />
+                                </EuiValidatableControl>
                                 <div
                                   className="euiFilePicker__prompt"
                                 >
@@ -1437,6 +1444,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
                                 href="#/management/elasticsearch/license_management/home"
+                                rel="noreferrer"
                               >
                                 <span
                                   className="euiButtonEmpty__content"
@@ -1770,6 +1778,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       >
                         <EuiFilePicker
                           compressed={false}
+                          display="large"
                           id="licenseFile"
                           initialPromptText={
                             <FormattedMessage
@@ -1795,20 +1804,22 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             }
                           >
                             <div
-                              className="euiFilePicker"
+                              className="euiFilePicker euiFilePicker--large"
                             >
                               <div
                                 className="euiFilePicker__wrap"
                               >
-                                <input
-                                  className="euiFilePicker__input"
-                                  id="licenseFile"
-                                  onChange={[Function]}
-                                  onDragLeave={[Function]}
-                                  onDragOver={[Function]}
-                                  onDrop={[Function]}
-                                  type="file"
-                                />
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFilePicker__input"
+                                    id="licenseFile"
+                                    onChange={[Function]}
+                                    onDragLeave={[Function]}
+                                    onDragOver={[Function]}
+                                    onDrop={[Function]}
+                                    type="file"
+                                  />
+                                </EuiValidatableControl>
                                 <div
                                   className="euiFilePicker__prompt"
                                 >
@@ -1894,6 +1905,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
                                 href="#/management/elasticsearch/license_management/home"
+                                rel="noreferrer"
                               >
                                 <span
                                   className="euiButtonEmpty__content"
@@ -2227,6 +2239,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       >
                         <EuiFilePicker
                           compressed={false}
+                          display="large"
                           id="licenseFile"
                           initialPromptText={
                             <FormattedMessage
@@ -2252,20 +2265,22 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             }
                           >
                             <div
-                              className="euiFilePicker"
+                              className="euiFilePicker euiFilePicker--large"
                             >
                               <div
                                 className="euiFilePicker__wrap"
                               >
-                                <input
-                                  className="euiFilePicker__input"
-                                  id="licenseFile"
-                                  onChange={[Function]}
-                                  onDragLeave={[Function]}
-                                  onDragOver={[Function]}
-                                  onDrop={[Function]}
-                                  type="file"
-                                />
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFilePicker__input"
+                                    id="licenseFile"
+                                    onChange={[Function]}
+                                    onDragLeave={[Function]}
+                                    onDragOver={[Function]}
+                                    onDrop={[Function]}
+                                    type="file"
+                                  />
+                                </EuiValidatableControl>
                                 <div
                                   className="euiFilePicker__prompt"
                                 >
@@ -2347,6 +2362,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
                                 href="#/management/elasticsearch/license_management/home"
+                                rel="noreferrer"
                               >
                                 <span
                                   className="euiButtonEmpty__content"
@@ -2680,6 +2696,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       >
                         <EuiFilePicker
                           compressed={false}
+                          display="large"
                           id="licenseFile"
                           initialPromptText={
                             <FormattedMessage
@@ -2705,20 +2722,22 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             }
                           >
                             <div
-                              className="euiFilePicker"
+                              className="euiFilePicker euiFilePicker--large"
                             >
                               <div
                                 className="euiFilePicker__wrap"
                               >
-                                <input
-                                  className="euiFilePicker__input"
-                                  id="licenseFile"
-                                  onChange={[Function]}
-                                  onDragLeave={[Function]}
-                                  onDragOver={[Function]}
-                                  onDrop={[Function]}
-                                  type="file"
-                                />
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFilePicker__input"
+                                    id="licenseFile"
+                                    onChange={[Function]}
+                                    onDragLeave={[Function]}
+                                    onDragOver={[Function]}
+                                    onDrop={[Function]}
+                                    type="file"
+                                  />
+                                </EuiValidatableControl>
                                 <div
                                   className="euiFilePicker__prompt"
                                 >
@@ -2804,6 +2823,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
                                 href="#/management/elasticsearch/license_management/home"
+                                rel="noreferrer"
                               >
                                 <span
                                   className="euiButtonEmpty__content"

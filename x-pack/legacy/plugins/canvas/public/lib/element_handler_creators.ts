@@ -14,7 +14,7 @@ import { cloneSubgraphs } from './clone_subgraphs';
 import { notify } from './notify';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
-import { PositionedElement } from './positioned_element';
+import { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
@@ -99,6 +99,25 @@ export const basicHandlerCreators = {
     }
   },
 };
+
+// handlers for alignment and distribution
+export const alignmentDistributionHandlerCreators = Object.assign(
+  {},
+  ...[
+    'alignLeft',
+    'alignCenter',
+    'alignRight',
+    'alignTop',
+    'alignMiddle',
+    'alignBottom',
+    'distributeHorizontally',
+    'distributeVertically',
+  ].map((event: string) => ({
+    [event]: ({ commit }: Props) => (): void => {
+      commit('actionEvent', { event });
+    },
+  }))
+);
 
 // handlers for group and ungroup
 export const groupHandlerCreators = {

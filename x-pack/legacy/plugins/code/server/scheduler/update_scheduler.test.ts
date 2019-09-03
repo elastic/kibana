@@ -13,7 +13,11 @@ import {
   Repository,
   WorkerReservedProgress,
 } from '../../model';
-import { RepositoryGitStatusReservedField, RepositoryReservedField } from '../indexer/schema';
+import {
+  RepositoryDeleteStatusReservedField,
+  RepositoryGitStatusReservedField,
+  RepositoryReservedField,
+} from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { UpdateWorker } from '../queue/update_worker';
@@ -64,7 +68,7 @@ const createSearchSpy = (nextUpdateTimestamp: number): sinon.SinonSpy => {
   );
 };
 
-const createGetSpy = (progress: number): sinon.SinonStub => {
+const createGetSpy = (progress: number, inDelete: boolean): sinon.SinonStub => {
   const cloneStatus: CloneWorkerProgress = {
     uri: 'github.com/elastic/code',
     progress,
@@ -74,7 +78,21 @@ const createGetSpy = (progress: number): sinon.SinonStub => {
     } as CloneProgress,
   };
   const stub = sinon.stub();
-  stub.onFirstCall().throwsException('Failed to get delete status');
+  if (inDelete) {
+    stub.onFirstCall().returns(
+      Promise.resolve({
+        _source: {
+          [RepositoryDeleteStatusReservedField]: {
+            uri: 'github.com/elastic/code',
+            progress: WorkerReservedProgress.INIT,
+            timestamp: new Date(),
+          },
+        },
+      })
+    );
+  } else {
+    stub.onFirstCall().throwsException('Failed to get delete status');
+  }
   stub.onSecondCall().returns(
     Promise.resolve({
       _source: {
@@ -100,7 +118,7 @@ test('Next job should not execute when scheduled update time is not current.', d
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED);
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED, false /* inDelete */);
   esClient.get = getSpy;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -145,7 +163,7 @@ test('Next job should not execute when repo is still in clone.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getSpy = createGetSpy(50);
+  const getSpy = createGetSpy(50, false /* inDelete */);
   esClient.get = getSpy;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;
@@ -155,6 +173,51 @@ test('Next job should not execute when repo is still in clone.', done => {
       // Expect the search stub to be called to pull all repositories and
       // the get stub to be called twice to pull out git status and delete
       // status.
+      expect(searchSpy.calledOnce).toBeTruthy();
+      expect(getSpy.calledTwice).toBeTruthy();
+      // Expect no update on anything regarding the update task scheduling.
+      expect(enqueueJobSpy.notCalled).toBeTruthy();
+      expect(updateSpy.notCalled).toBeTruthy();
+      done();
+    } catch (err) {
+      done.fail(err);
+    }
+  };
+
+  // Start the scheduler.
+  const updateScheduler = new UpdateScheduler(
+    (updateWorker as any) as UpdateWorker,
+    serverOpts as ServerOptions,
+    esClient as EsClient,
+    log,
+    onScheduleFinished
+  );
+  updateScheduler.start();
+
+  // Roll the clock to the time when the first scheduled update task
+  // is executed.
+  clock.tick(UPDATE_FREQUENCY_MS);
+});
+
+test('Next job should not execute when repository is in deletion', done => {
+  const clock = sinon.useFakeTimers();
+
+  // Setup the UpdateWorker spy.
+  const enqueueJobSpy = sinon.stub(updateWorker, 'enqueueJob');
+
+  // Setup the search stub to mock loading all repositories from ES.
+  const searchSpy = createSearchSpy(UPDATE_FREQUENCY_MS - 1);
+  esClient.search = searchSpy;
+
+  // Set up the update and get spies of esClient
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED, true /* inDelete */);
+  esClient.get = getSpy;
+  const updateSpy = sinon.spy();
+  esClient.update = updateSpy;
+
+  const onScheduleFinished = () => {
+    try {
+      // Expect the search stub to be called to pull all repositories.
       expect(searchSpy.calledOnce).toBeTruthy();
       expect(getSpy.calledTwice).toBeTruthy();
       // Expect no update on anything regarding the update task scheduling.
@@ -192,7 +255,7 @@ test('Next job should execute.', done => {
   esClient.search = searchSpy;
 
   // Set up the update and get spies of esClient
-  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED);
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED, false /* inDelete */);
   esClient.get = getSpy;
   const updateSpy = sinon.spy();
   esClient.update = updateSpy;

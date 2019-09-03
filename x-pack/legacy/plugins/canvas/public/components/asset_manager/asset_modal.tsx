@@ -27,7 +27,8 @@ import React, { FunctionComponent } from 'react';
 // @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
-import { Asset, AssetType } from './asset';
+import { Asset } from './asset';
+import { AssetType } from '../../../types';
 
 interface Props {
   /** The assets to display within the modal */

@@ -55,25 +55,22 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
         updateState(result.loading, result.data, result.errors);
       });
     };
-    useEffect(
-      () => {
-        fetch();
+    useEffect(() => {
+      fetch();
 
-        /**
-         * If the `then` handler in `fetch`'s promise is fired after
-         * this component has unmounted, it will try to set state on an
-         * unmounted component, which indicates a memory leak and will trigger
-         * React warnings.
-         *
-         * We counteract this side effect by providing a cleanup function that will
-         * reassign the update function to do nothing with the returned values.
-         */
-        return () => {
-          updateState = () => {};
-        };
-      },
-      [variables, lastRefresh]
-    );
+      /**
+       * If the `then` handler in `fetch`'s promise is fired after
+       * this component has unmounted, it will try to set state on an
+       * unmounted component, which indicates a memory leak and will trigger
+       * React warnings.
+       *
+       * We counteract this side effect by providing a cleanup function that will
+       * reassign the update function to do nothing with the returned values.
+       */
+      return () => {
+        updateState = () => {};
+      };
+    }, [variables, lastRefresh]);
     if (!implementsCustomErrorState && errors && errors.length > 0) {
       return <Fragment>{formatUptimeGraphQLErrorList(errors)}</Fragment>;
     }

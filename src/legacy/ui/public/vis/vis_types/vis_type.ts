@@ -18,8 +18,8 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { RequestHandler, ResponseHandler, Vis } from '..';
 import { Status } from '../update_status';
+import { RequestHandler, ResponseHandler, Vis } from '..';
 
 export declare class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);

@@ -39,7 +39,7 @@ export class LspIndexerFactory implements IndexerFactory {
         this.log.info(`Create indexer to index ${repoUri} from ${indexedRevision} to ${revision}`);
         // Create the indexer to index only the diff between these 2 revisions.
         return new LspIncrementalIndexer(
-          repoUri,
+          repo.uri,
           revision,
           indexedRevision,
           this.lspService,
@@ -52,7 +52,7 @@ export class LspIndexerFactory implements IndexerFactory {
         this.log.info(`Create indexer to index ${repoUri} at ${revision}`);
         // Create the indexer to index the entire repository.
         return new LspIndexer(
-          repoUri,
+          repo.uri,
           revision,
           this.lspService,
           this.options,

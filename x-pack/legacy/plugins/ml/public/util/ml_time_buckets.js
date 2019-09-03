@@ -16,8 +16,8 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 
-import { timeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
-import { inherits } from 'plugins/ml/util/inherits';
+import { timeBucketsCalcAutoIntervalProvider } from './ml_calc_auto_interval';
+import { inherits } from './inherits';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
@@ -183,4 +183,3 @@ export function calcEsInterval(duration) {
     expression: ms + 'ms'
   };
 }
-

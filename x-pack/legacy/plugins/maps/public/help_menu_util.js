@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HelpMenu } from './shared/components/help_menu';
+import { HelpMenu } from './components/help_menu';
 
 export function addHelpMenuToAppChrome(chrome) {
   chrome.helpExtension.set(domElement => {

@@ -8,11 +8,18 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
-import chrome from 'ui/chrome';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'src/core/public';
 
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
+const coreMock = ({
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  }
+} as unknown) as LegacyCoreStart;
+
+jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 test('InfraLink produces the correct URL', async () => {
   const href = await getRenderedHref(

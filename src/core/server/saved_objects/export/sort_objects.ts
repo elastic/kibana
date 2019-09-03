@@ -18,11 +18,11 @@
  */
 
 import Boom from 'boom';
-import { SavedObject } from '../service/saved_objects_client';
+import { SavedObject } from '../types';
 
-export function sortObjects(savedObjects: SavedObject[]) {
-  const path = new Set();
-  const sorted = new Set();
+export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
+  const path = new Set<SavedObject>();
+  const sorted = new Set<SavedObject>();
   const objectsByTypeId = new Map(
     savedObjects.map(object => [`${object.type}:${object.id}`, object] as [string, SavedObject])
   );

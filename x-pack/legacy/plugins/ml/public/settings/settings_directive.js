@@ -23,7 +23,6 @@ import { timefilter } from 'ui/timefilter';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-settings />
 `;
 
@@ -56,12 +55,7 @@ module.directive('mlSettings', function () {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(
-            Settings, {
-              canGetFilters,
-              canGetCalendars
-            })
-          }
+          <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
         </I18nContext>,
         element[0]
       );

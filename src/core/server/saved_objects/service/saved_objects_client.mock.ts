@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from './saved_objects_client';
+import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
 const create = (): jest.Mocked<SavedObjectsClientContract> => ({

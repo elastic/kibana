@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+export default function({ loadTestFile }: FtrProviderContext) {
   describe('encrypted_saved_objects', function encryptedSavedObjectsSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./encrypted_saved_objects_api'));

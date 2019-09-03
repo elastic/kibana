@@ -387,7 +387,7 @@ describe('ThresholdWatch', () => {
         thresholdComparator: 'thresholdComparator',
         timeWindowSize: 'timeWindowSize',
         timeWindowUnit: 'timeWindowUnit',
-        threshold: 'threshold'
+        threshold: ['threshold']
       };
 
       expect(actual).to.eql(expected);

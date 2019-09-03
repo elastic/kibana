@@ -97,9 +97,10 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
       }
 
       const stateModule = get(hit, '_source.beats_state.state.module');
+      const statsType = get(hit, '_source.beats_state.beat.type');
       if (stateModule !== undefined) {
         const moduleSet = clusterModuleSets[clusterUuid];
-        stateModule.names.forEach(name => moduleSet.add(name));
+        stateModule.names.forEach(name => moduleSet.add(statsType + '.' + name));
         clusters[clusterUuid].module.names = Array.from(moduleSet);
         clusters[clusterUuid].module.count += stateModule.count;
       }
@@ -189,6 +190,7 @@ async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, {
       'hits.hits._source.beats_state.state.module',
       'hits.hits._source.beats_state.state.host',
       'hits.hits._source.beats_state.state.heartbeat',
+      'hits.hits._source.beats_state.beat.type',
     ],
     body: {
       query: createQuery({

@@ -56,17 +56,6 @@ describe('get_action_type', () => {
       expect(type).to.be(ACTION_TYPES.LOGGING);
     });
 
-    it(`correctly calculates ACTION_TYPES.HIPCHAT`, () => {
-      const actionJson = {
-        hipchat: {
-          'foo': 'bar'
-        }
-      };
-      const type = getActionType(actionJson);
-
-      expect(type).to.be(ACTION_TYPES.HIPCHAT);
-    });
-
     it(`correctly calculates ACTION_TYPES.SLACK`, () => {
       const actionJson = {
         slack: {

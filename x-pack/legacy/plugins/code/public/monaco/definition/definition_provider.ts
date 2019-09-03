@@ -4,40 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailSymbolInformation, SymbolLocator } from '@elastic/lsp-extension';
-import { flatten } from 'lodash';
-import { editor, languages } from 'monaco-editor';
-import { kfetch } from 'ui/kfetch';
+import url from 'url';
+import queryString from 'querystring';
+import { DetailSymbolInformation } from '@elastic/lsp-extension';
+
+import { npStart } from 'ui/new_platform';
 import { Location } from 'vscode-languageserver-types';
+import { monaco } from '../monaco';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
+import { parseSchema } from '../../../common/uri_util';
+import { history } from '../../utils/url';
 
-export function provideDefinition(monaco: any, model: editor.ITextModel, position: any) {
-  const lspClient = new LspRestClient('/api/code/lsp');
-  const lspMethods = new TextDocumentMethods(lspClient);
-  function handleLocation(location: Location): languages.Location {
-    return {
-      uri: monaco.Uri.parse(location.uri),
-      range: {
-        startLineNumber: location.range.start.line + 1,
-        startColumn: location.range.start.character + 1,
-        endLineNumber: location.range.end.line + 1,
-        endColumn: location.range.end.character + 1,
-      },
-    };
-  }
-
-  async function handleQname(qname: string) {
-    const res: any = await kfetch({ pathname: `/api/code/lsp/symbol/${qname}` });
-    if (res.symbols) {
-      return res.symbols.map((s: DetailSymbolInformation) =>
-        handleLocation(s.symbolInformation.location)
-      );
+export const definitionProvider: monaco.languages.DefinitionProvider = {
+  async provideDefinition(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    token: monaco.CancellationToken
+  ): Promise<monaco.languages.Location[]> {
+    const lspClient = new LspRestClient('/api/code/lsp');
+    const lspMethods = new TextDocumentMethods(lspClient);
+    function handleLocation(location: Location): monaco.languages.Location {
+      return {
+        uri: monaco.Uri.parse(location.uri),
+        range: {
+          startLineNumber: location.range.start.line + 1,
+          startColumn: location.range.start.character + 1,
+          endLineNumber: location.range.end.line + 1,
+          endColumn: location.range.end.character + 1,
+        },
+      };
     }
-    return [];
-  }
 
-  return lspMethods.edefinition
-    .send({
+    async function handleQname(qname: string): Promise<monaco.languages.Location[]> {
+      const res = await npStart.core.http.get(`/api/code/lsp/symbol/${qname}`);
+      if (res.symbols) {
+        return res.symbols.map((s: DetailSymbolInformation) =>
+          handleLocation(s.symbolInformation.location)
+        );
+      }
+      return [];
+    }
+
+    function openDefinitionsPanel() {
+      if (model && position) {
+        const { uri } = parseSchema(model.uri.toString());
+        const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
+        const queries = url.parse(history.location.search, true).query;
+        const query = queryString.stringify({
+          ...queries,
+          tab: 'definitions',
+          refUrl,
+        });
+        history.push(`${uri}?${query}`);
+      }
+    }
+
+    const result = await lspMethods.edefinition.send({
       position: {
         line: position.lineNumber - 1,
         character: position.column - 1,
@@ -45,24 +67,22 @@ export function provideDefinition(monaco: any, model: editor.ITextModel, positio
       textDocument: {
         uri: model.uri.toString(),
       },
-    })
-    .then(
-      (result: SymbolLocator[]) => {
-        if (result) {
-          const locations = result.filter(l => l.location !== undefined);
-          if (locations.length > 0) {
-            return locations.map(l => handleLocation(l.location!));
-          } else {
-            return Promise.all(
-              result.filter(l => l.qname !== undefined).map(l => handleQname(l.qname!))
-            ).then(flatten);
-          }
-        } else {
-          return [];
+    });
+
+    if (result) {
+      if (result.length > 1) {
+        openDefinitionsPanel();
+        return result.filter(l => l.location !== undefined).map(l => handleLocation(l.location!));
+      } else {
+        const l = result[0];
+        const location = l.location;
+        if (location) {
+          return [handleLocation(location)];
+        } else if (l.qname) {
+          return await handleQname(l.qname);
         }
-      },
-      (_: any) => {
-        return [];
       }
-    );
-}
+    }
+    return [];
+  },
+};

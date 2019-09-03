@@ -7,33 +7,34 @@
 import { i18n } from '@kbn/i18n';
 import { shape } from '../../functions/common/shape';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { SVG } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
   help: i18n.translate('xpack.canvas.functions.shapeHelpText', {
-    defaultMessage: 'Create a shape',
+    defaultMessage: 'Create a shape.',
   }),
   args: {
+    shape: i18n.translate('xpack.canvas.functions.shape.args.shapeHelpText', {
+      defaultMessage: 'Pick a shape.',
+    }),
     border: i18n.translate('xpack.canvas.functions.shape.args.borderHelpText', {
-      defaultMessage: 'Valid {css} color string',
+      defaultMessage: 'An {SVG} color for the border outlining the shape.',
       values: {
-        css: 'CSS',
+        SVG,
       },
     }),
     borderWidth: i18n.translate('xpack.canvas.functions.shape.args.borderWidthHelpText', {
-      defaultMessage: 'Thickness of the border',
-    }),
-    shape: i18n.translate('xpack.canvas.functions.shape.args.shapeHelpText', {
-      defaultMessage: 'Pick a shape',
+      defaultMessage: 'The thickness of the border.',
     }),
     fill: i18n.translate('xpack.canvas.functions.shape.args.fillHelpText', {
-      defaultMessage: 'Valid {css} color string',
+      defaultMessage: 'An {SVG} color to fill the shape.',
       values: {
-        css: 'CSS',
+        SVG,
       },
     }),
     maintainAspect: i18n.translate('xpack.canvas.functions.shape.args.maintainAspectHelpText', {
-      defaultMessage: 'Select true to maintain aspect ratio',
+      defaultMessage: `Maintain the shape's original aspect ratio?`,
     }),
   },
 };

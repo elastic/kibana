@@ -8,7 +8,7 @@ import { Dictionary } from '../../../common/types/common';
 import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
 import { AggName } from './aggregations';
-import { FieldName } from './fields';
+import { EsFieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_AGGS {
   AVG = 'avg',
@@ -18,15 +18,6 @@ export enum PIVOT_SUPPORTED_AGGS {
   SUM = 'sum',
   VALUE_COUNT = 'value_count',
 }
-
-export const pivotSupportedAggs: PIVOT_SUPPORTED_AGGS[] = [
-  PIVOT_SUPPORTED_AGGS.AVG,
-  PIVOT_SUPPORTED_AGGS.CARDINALITY,
-  PIVOT_SUPPORTED_AGGS.MAX,
-  PIVOT_SUPPORTED_AGGS.MIN,
-  PIVOT_SUPPORTED_AGGS.SUM,
-  PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
-];
 
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
@@ -54,20 +45,48 @@ export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
 };
 
-type PivotAgg = {
+export type PivotAgg = {
   [key in PIVOT_SUPPORTED_AGGS]?: {
-    field: FieldName;
-  }
+    field: EsFieldName;
+  };
 };
 
 export type PivotAggDict = { [key in AggName]: PivotAgg };
 
 // The internal representation of an aggregation definition.
-export interface PivotAggsConfig {
+export interface PivotAggsConfigBase {
   agg: PIVOT_SUPPORTED_AGGS;
-  field: FieldName;
   aggName: AggName;
   dropDownName: string;
 }
 
+export interface PivotAggsConfigWithUiSupport extends PivotAggsConfigBase {
+  field: EsFieldName;
+}
+
+export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('aggName') &&
+    arg.hasOwnProperty('dropDownName') &&
+    arg.hasOwnProperty('field') &&
+    Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
+  );
+}
+
+export type PivotAggsConfig = PivotAggsConfigBase | PivotAggsConfigWithUiSupport;
+
+export type PivotAggsConfigWithUiSupportDict = Dictionary<PivotAggsConfigWithUiSupport>;
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
+
+export function getEsAggFromAggConfig(groupByConfig: PivotAggsConfigBase): PivotAgg {
+  const esAgg = { ...groupByConfig };
+
+  delete esAgg.agg;
+  delete esAgg.aggName;
+  delete esAgg.dropDownName;
+
+  return {
+    [groupByConfig.agg]: esAgg,
+  };
+}

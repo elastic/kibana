@@ -35,7 +35,16 @@ export const UI_EXPORT_DEFAULTS = {
     'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone')
   },
 
-  styleSheetPaths: [],
+  styleSheetPaths:
+    ['light', 'dark'].map(theme => ({
+      theme,
+      localPath: resolve(ROOT, 'src/core/public/index.scss'),
+      publicPath: `core.${theme}.css`,
+      urlImports: {
+        urlBase: 'built_assets/css/',
+        publicDir: resolve(ROOT, 'src/core/public'),
+      }
+    })),
 
   appExtensions: {
     fieldFormatEditors: [
@@ -54,8 +63,8 @@ export const UI_EXPORT_DEFAULTS = {
       'ui/vis/editors/default/default',
     ],
     embeddableFactories: [
-      'plugins/kibana/visualize/embeddable/visualize_embeddable_factory_provider',
-      'plugins/kibana/discover/embeddable/search_embeddable_factory_provider',
+      'plugins/kibana/visualize/embeddable/visualize_embeddable_factory',
+      'plugins/kibana/discover/embeddable/search_embeddable_factory',
     ],
     search: [
       'ui/courier/search_strategy/default_search_strategy',

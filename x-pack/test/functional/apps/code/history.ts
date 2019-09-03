@@ -5,13 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function manageRepositoriesFunctionalTests({
   getService,
   getPageObjects,
-}: TestInvoker) {
+}: FtrProviderContext) {
   // const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -23,9 +22,11 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
+  const existsInvisible = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
+
   describe('History', function() {
-    this.tags('skipFirefox');
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
@@ -38,7 +39,7 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
@@ -74,14 +75,14 @@ export default function manageRepositoriesFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'Microsoft/TypeScript-Node-Starter'
+            'elastic/TypeScript-Node-Starter'
           );
         });
 
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
 
-          log.debug('it goes to Microsoft/TypeScript-Node-Starter project page');
+          log.debug('it goes to elastic/TypeScript-Node-Starter project page');
           await testSubjects.click('adminLinkToTypeScript-Node-Starter');
           await retry.try(async () => {
             expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
@@ -94,7 +95,7 @@ export default function manageRepositoriesFunctionalTests({
             const repositoryItems = await testSubjects.findAll(repositoryListSelector);
             expect(repositoryItems).to.have.length(1);
             expect(await repositoryItems[0].getVisibleText()).to.equal(
-              'Microsoft/TypeScript-Node-Starter'
+              'elastic/TypeScript-Node-Starter'
             );
           });
 
@@ -133,50 +134,78 @@ export default function manageRepositoriesFunctionalTests({
 
       it('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&langs=typescript`;
         await browser.get(url);
 
-        const language = await (await find.byCssSelector(
-          '.euiFacetButton--isSelected'
-        )).getVisibleText();
+        await PageObjects.header.awaitKibanaChrome();
 
-        expect(language.indexOf('typescript')).to.equal(0);
+        await retry.tryForTime(300000, async () => {
+          const language = await (await find.byCssSelector(
+            '.euiFacetButton--isSelected'
+          )).getVisibleText();
+
+          expect(language.indexOf('typescript')).to.equal(0);
+        });
 
         const unselectedFilter = (await find.allByCssSelector('.euiFacetButton--unSelected'))[1];
         await unselectedFilter.click();
 
-        const l = await (await find.allByCssSelector(
-          '.euiFacetButton--isSelected'
-        ))[1].getVisibleText();
+        await retry.try(async () => {
+          const l = await (await find.allByCssSelector(
+            '.euiFacetButton--isSelected'
+          ))[1].getVisibleText();
 
-        expect(l.indexOf('javascript')).to.equal(0);
+          expect(l.indexOf('javascript')).to.equal(0);
+        });
 
         await browser.goBack();
 
-        const lang = await (await find.byCssSelector(
-          '.euiFacetButton--isSelected'
-        )).getVisibleText();
+        await retry.try(async () => {
+          const lang = await (await find.byCssSelector(
+            '.euiFacetButton--isSelected'
+          )).getVisibleText();
 
-        expect(lang.indexOf('typescript')).to.equal(0);
+          expect(lang.indexOf('typescript')).to.equal(0);
+        });
 
         await driver.navigate().forward();
 
-        const filter = await (await find.allByCssSelector(
-          '.euiFacetButton--isSelected'
-        ))[1].getVisibleText();
+        await retry.try(async () => {
+          const filter = await (await find.allByCssSelector(
+            '.euiFacetButton--isSelected'
+          ))[1].getVisibleText();
 
-        expect(filter.indexOf('javascript')).to.equal(0);
+          expect(filter.indexOf('javascript')).to.equal(0);
+        });
       });
 
       it('in source view page file line number changed can go back and forward', async () => {
         log.debug('it goes back after line number changed');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter`;
         await browser.get(url);
-        const lineNumber = 20;
-        await testSubjects.click('codeFileTreeNode-File-package.json');
-        const lineNumberElements = await find.allByCssSelector('.line-numbers');
+        await PageObjects.header.awaitKibanaChrome();
 
+        const lineNumber = 20;
+        await retry.try(async () => {
+          const existence = await existsInvisible('codeFileTreeNode-File-tsconfig.json');
+          expect(existence).to.be(true);
+        });
+        await testSubjects.click('codeFileTreeNode-File-tsconfig.json');
+        await retry.try(async () => {
+          const existence = await existsInvisible('codeFileTreeNode-File-package.json');
+          expect(existence).to.be(true);
+        });
+        await testSubjects.click('codeFileTreeNode-File-package.json');
+
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          // click line number should stay in the same file
+          expect(currentUrl.indexOf('package.json')).greaterThan(0);
+        });
+
+        const lineNumberElements = await find.allByCssSelector('.line-numbers');
         await lineNumberElements[lineNumber].click();
+
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
           expect(existence).to.be(true);
@@ -199,10 +228,13 @@ export default function manageRepositoriesFunctionalTests({
 
       it('in source view page, switch side tab can go back and forward', async () => {
         log.debug('it goes back after line number changed');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/controllers/api.ts`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/controllers/api.ts`;
         await browser.get(url);
         // refresh so language server will be initialized.
         await browser.refresh();
+
+        await PageObjects.header.awaitKibanaChrome();
+
         // wait for tab is not disabled
         await PageObjects.common.sleep(5000);
         await testSubjects.click('codeStructureTreeTab');

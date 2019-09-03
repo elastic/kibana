@@ -220,6 +220,7 @@ class AnomaliesTable extends Component {
           itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
           compressed={true}
           rowProps={getRowProps}
+          data-test-subj="mlAnomaliesTable"
         />
       </React.Fragment>
     );

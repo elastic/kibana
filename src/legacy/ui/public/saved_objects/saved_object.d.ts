@@ -26,4 +26,5 @@ export interface SaveOptions {
 export interface SavedObject {
   save: (saveOptions: SaveOptions) => Promise<string>;
   copyOnSave: boolean;
+  id?: string;
 }

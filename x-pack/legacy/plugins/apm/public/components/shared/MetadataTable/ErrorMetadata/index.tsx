@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { MetadataTable } from '..';
 import { ERROR_METADATA_SECTIONS } from './sections';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { MetadataTable } from '..';
 
 interface Props {
   error: APMError;

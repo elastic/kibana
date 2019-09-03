@@ -29,6 +29,7 @@ import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
+import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapColumn } from './mapColumn';
@@ -46,6 +47,9 @@ import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
+import { savedMap } from './saved_map';
+import { savedSearch } from './saved_search';
+import { savedVisualization } from './saved_visualization';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
 import { sort } from './sort';
@@ -86,6 +90,7 @@ export const functions = [
   image,
   lt,
   lte,
+  joinRows,
   mapColumn,
   math,
   metric,
@@ -101,6 +106,9 @@ export const functions = [
   revealImage,
   rounddate,
   rowCount,
+  savedMap,
+  savedSearch,
+  savedVisualization,
   seriesStyle,
   shape,
   sort,

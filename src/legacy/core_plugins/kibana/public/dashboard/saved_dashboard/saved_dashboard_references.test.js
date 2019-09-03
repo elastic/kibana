@@ -82,7 +82,7 @@ Object {
     );
   });
 
-  test('fails when "id" attribute is missing from a panel', () => {
+  test('passes when "id" attribute is missing from a panel', () => {
     const doc = {
       id: '1',
       attributes: {
@@ -95,9 +95,15 @@ Object {
         ]),
       },
     };
-    expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"id\\" attribute is missing from panel \\"0\\""`
-    );
+    expect(extractReferences(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"title\\":\\"Title 1\\"}]",
+  },
+  "references": Array [],
+}
+`);
   });
 });
 

@@ -17,12 +17,23 @@
  * under the License.
  */
 
-import { NavControl } from '../chrome/directives/header_global_nav';
 import { IndexedArray } from '../indexed_array';
 import { uiRegistry, UIRegistry } from './_registry';
 
 interface ChromeHeaderNavControlsRegistryAccessors {
   bySide: { [typeName: string]: IndexedArray<NavControl> };
+}
+
+export enum NavControlSide {
+  Left = 'left',
+  Right = 'right',
+}
+
+export interface NavControl {
+  name: string;
+  order: number;
+  side: NavControlSide;
+  render: (targetDomElement: HTMLDivElement) => () => void;
 }
 
 export type ChromeHeaderNavControlsRegistry = UIRegistry<NavControl> &

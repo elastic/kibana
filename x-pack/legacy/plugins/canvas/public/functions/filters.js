@@ -35,6 +35,7 @@ function getFiltersByGroup(filters, groups = [], ungrouped = false) {
 export const filters = () => ({
   name: 'filters',
   type: 'filter',
+  help: 'Aggregates element filters from the workpad for use elsewhere, usually a data source.',
   context: {
     types: ['null'],
   },
@@ -42,17 +43,16 @@ export const filters = () => ({
     group: {
       aliases: ['_'],
       types: ['string'],
-      help: 'The name of the filter group to use',
+      help: 'The name of the filter group to use.',
       multi: true,
     },
     ungrouped: {
       aliases: ['nogroup', 'nogroups'],
       types: ['boolean'],
-      help: "Don't include filters that belong to groups",
+      help: 'Exclude filters that belong to a filter group?',
       default: false,
     },
   },
-  help: 'Collect element filters on the workpad, usually to provide them to a data source',
   fn: (_, { group, ungrouped }) => {
     const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
 

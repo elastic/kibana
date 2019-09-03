@@ -19,3 +19,19 @@ See <<monitoring-kibana>>.
 include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
 For more {kib} configuration settings, see <<settings>>.
+
+[role="exclude",id="uptime-security"]
+== Uptime security
+
+This page has moved. Please see the new section in the {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
+
+[role="exclude",id="infra-read-only-access"]
+== Configure source read-only access
+
+This page has moved. Please see <<infra-configure-source>>.
+
+[role="exclude",id="logs-read-only-access"]
+== Configure source read-only access
+
+This page has moved. Please see <<xpack-logs-configuring>>.
+

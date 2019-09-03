@@ -59,7 +59,7 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
       message: i18n.translate(
         'xpack.server.checkLicense.errorExpiredMessage',
         {
-          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired',
+          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired.',
           values: { licenseType, pluginName },
         },
       ),

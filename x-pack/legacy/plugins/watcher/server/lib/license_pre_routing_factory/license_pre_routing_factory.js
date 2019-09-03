@@ -7,6 +7,7 @@
 import { once } from 'lodash';
 import { wrapCustomError } from '../error_wrappers';
 import { PLUGIN } from '../../../common/constants';
+import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
 
 export const licensePreRoutingFactory = once((server) => {
   const xpackMainPlugin = server.plugins.xpack_main;
@@ -14,7 +15,9 @@ export const licensePreRoutingFactory = once((server) => {
   // License checking and enable/disable logic
   function licensePreRouting() {
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
-    if (!licenseCheckResults.isAvailable) {
+    const { status } = licenseCheckResults;
+
+    if (status !== LICENSE_STATUS_VALID) {
       const error = new Error(licenseCheckResults.message);
       const statusCode = 403;
       throw wrapCustomError(error, statusCode);

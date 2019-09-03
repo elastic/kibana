@@ -17,6 +17,7 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -46,7 +47,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData
   },
@@ -78,6 +79,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
               nodeSummary={data.nodeSummary}
               metrics={data.metrics}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
             />
           </I18nContext>
         );

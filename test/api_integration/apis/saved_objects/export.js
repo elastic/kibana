@@ -139,7 +139,7 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, index-pattern, visualization, search, dashboard, url]]]',
+                  '["0" must be one of [config, dashboard, index-pattern, query, search, url, visualization]]]',
                 validation: {
                   source: 'payload',
                   keys: ['type.0'],
@@ -196,7 +196,6 @@ export default function ({ getService }) {
                   timeRestore: true,
                   timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
                   title: 'Requests',
-                  uiStateJSON: '{}',
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
@@ -248,7 +247,6 @@ export default function ({ getService }) {
                   timeRestore: true,
                   timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
                   title: 'Requests',
-                  uiStateJSON: '{}',
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
@@ -305,7 +303,6 @@ export default function ({ getService }) {
                   timeRestore: true,
                   timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
                   title: 'Requests',
-                  uiStateJSON: '{}',
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',

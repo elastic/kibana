@@ -28,7 +28,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
     if (isEmpty(val)) {
       return '""';
     }
-    return escapeKuery(val);
+    return val.split(' ').length > 1 ? `"${escapeKuery(val)}"` : escapeKuery(val);
   }
 
   return val;

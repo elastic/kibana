@@ -38,8 +38,6 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
         grow={false}
       >
         <EuiBadge
-          color="default"
-          iconSide="left"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -114,8 +112,6 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
         grow={false}
       >
         <EuiBadge
-          color="default"
-          iconSide="left"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -242,8 +238,6 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
         grow={false}
       >
         <EuiBadge
-          color="default"
-          iconSide="left"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -306,8 +300,6 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
         grow={false}
       >
         <EuiBadge
-          color="default"
-          iconSide="left"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >

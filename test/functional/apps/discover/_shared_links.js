@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
           ':(from:\'2015-09-19T06:31:44.000Z\',to:\'2015-09' +
           '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
           '*\',interval:auto,query:(language:kuery,query:\'\')' +
-          ',sort:!(\'@timestamp\',desc))';
+          ',sort:!(!(\'@timestamp\',desc)))';
         const actualUrl = await PageObjects.share.getSharedUrl();
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(

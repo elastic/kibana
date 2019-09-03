@@ -12,6 +12,7 @@ export const HostOverviewQuery = gql`
     $hostName: String!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -40,6 +41,10 @@ export const HostOverviewQuery = gql`
           }
           provider
           region
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

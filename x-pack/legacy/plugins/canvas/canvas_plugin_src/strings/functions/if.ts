@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { ifFn } from '../../functions/common/if';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { BOOLEAN_TRUE, BOOLEAN_FALSE, CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
   help: i18n.translate('xpack.canvas.functions.ifHelpText', {
@@ -16,16 +17,31 @@ export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
   args: {
     condition: i18n.translate('xpack.canvas.functions.if.args.conditionHelpText', {
       defaultMessage:
-        'A boolean true or false, usually returned by a subexpression. If this is not ' +
-        'supplied then the input context will be used',
+        'A {BOOLEAN_TRUE} or {BOOLEAN_FALSE} indicating whether a condition is met, ' +
+        'usually returned by a sub-expression. When unspecified, the original {CONTEXT} is returned.',
+      values: {
+        BOOLEAN_TRUE,
+        BOOLEAN_FALSE,
+        CONTEXT,
+      },
     }),
     then: i18n.translate('xpack.canvas.functions.if.args.thenHelpText', {
-      defaultMessage: 'The return value if true',
+      defaultMessage:
+        'The return value when the condition is {BOOLEAN_TRUE}. ' +
+        'When unspecified and the condition is met, the original {CONTEXT} is returned.',
+      values: {
+        BOOLEAN_TRUE,
+        CONTEXT,
+      },
     }),
     else: i18n.translate('xpack.canvas.functions.if.args.elseHelpText', {
       defaultMessage:
-        'The return value if false. If else is not specified, and the condition is false ' +
-        'then the input context to the function will be returned',
+        'The return value when the condition is {BOOLEAN_FALSE}. ' +
+        'When unspecified and the condition is not met, the original {CONTEXT} is returned.',
+      values: {
+        BOOLEAN_FALSE,
+        CONTEXT,
+      },
     }),
   },
 };

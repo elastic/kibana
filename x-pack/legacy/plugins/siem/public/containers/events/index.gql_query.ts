@@ -10,10 +10,11 @@ export const eventsQuery = gql`
   query GetEventsQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
-    $pagination: PaginationInput!
+    $pagination: PaginationInputPaginated!
     $sortField: SortField!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -26,11 +27,13 @@ export const eventsQuery = gql`
       ) {
         totalCount
         pageInfo {
-          endCursor {
-            value
-            tiebreaker
-          }
-          hasNextPage
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
         edges {
           node {

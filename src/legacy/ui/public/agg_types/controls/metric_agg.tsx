@@ -34,38 +34,32 @@ function MetricAggParamEditor({
   setValue,
   setValidity,
   setTouched,
-  responseValueAggs,
+  metricAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.metricLabel', {
     defaultMessage: 'Metric',
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (responseValueAggs && value && value !== 'custom') {
-        // ensure that metricAgg is set to a valid agg
-        const respAgg = responseValueAggs
-          .filter(isCompatibleAgg)
-          .find(aggregation => aggregation.id === value);
+  useEffect(() => {
+    if (metricAggs && value && value !== 'custom') {
+      // ensure that metricAgg is set to a valid agg
+      const respAgg = metricAggs
+        .filter(isCompatibleAgg)
+        .find(aggregation => aggregation.id === value);
 
-        if (!respAgg) {
-          setValue();
-        }
+      if (!respAgg) {
+        setValue();
       }
-    },
-    [responseValueAggs]
-  );
+    }
+  }, [metricAggs]);
 
-  const options = responseValueAggs
-    ? responseValueAggs
+  const options = metricAggs
+    ? metricAggs
         .filter(respAgg => respAgg.type.name !== agg.type.name)
         .map(respAgg => ({
           text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {
@@ -92,7 +86,12 @@ function MetricAggParamEditor({
   }
 
   return (
-    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
+    <EuiFormRow
+      label={label}
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      compressed
+    >
       <EuiSelect
         options={options}
         value={value || EMPTY_VALUE}

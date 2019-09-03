@@ -19,8 +19,8 @@ export type TimeSeriesAPIResponse = PromiseReturnType<
 >;
 export async function getTransactionCharts(options: {
   serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
   setup: Setup;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);

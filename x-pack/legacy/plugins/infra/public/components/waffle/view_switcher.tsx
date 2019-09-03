@@ -20,7 +20,7 @@ export const ViewSwitcher = injectI18n(({ view, onChange, intl }: Props) => {
       id: 'map',
       label: intl.formatMessage({
         id: 'xpack.infra.viewSwitcher.mapViewLabel',
-        defaultMessage: 'Map View',
+        defaultMessage: 'Map view',
       }),
       iconType: 'apps',
     },
@@ -28,7 +28,7 @@ export const ViewSwitcher = injectI18n(({ view, onChange, intl }: Props) => {
       id: 'table',
       label: intl.formatMessage({
         id: 'xpack.infra.viewSwitcher.tableViewLabel',
-        defaultMessage: 'Table View',
+        defaultMessage: 'Table view',
       }),
       iconType: 'editorUnorderedList',
     },

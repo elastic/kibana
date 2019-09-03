@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'lodash';
+import { get, take } from 'lodash';
 import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -34,10 +34,17 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
       pings = pings.filter(ping => ping.monitor && ping.monitor.id === monitorId);
     }
 
+    const locations =
+      this.pingsDB
+        .map(ping => {
+          return get<string>(ping, 'observer.geo.name');
+        })
+        .filter(location => !location) || [];
     size = size ? size : 10;
     return {
       total: size,
       pings: take(sort ? pings.sort(sortPings(sort)) : pings, size),
+      locations,
     };
   }
 
@@ -56,7 +63,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null | undefined
+    filters?: string | null | undefined,
+    monitorId?: string | null | undefined
   ): Promise<HistogramDataPoint[]> {
     throw new Error('Method not implemented.');
   }

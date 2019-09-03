@@ -5,7 +5,13 @@
  */
 
 import { createAction } from 'redux-actions';
-import { DocumentSearchResult, Repository, SearchOptions, SearchScope } from '../../model';
+import {
+  DocumentSearchResult,
+  Repository,
+  SearchOptions,
+  SearchScope,
+  RepositorySearchResult,
+} from '../../model';
 
 export interface DocumentSearchPayload {
   query: string;
@@ -26,7 +32,9 @@ export const documentSearchFailed = createAction<Error>('DOCUMENT SEARCH FAILED'
 
 // For repository search page
 export const repositorySearch = createAction<RepositorySearchPayload>('REPOSITORY SEARCH');
-export const repositorySearchSuccess = createAction('REPOSITORY SEARCH SUCCESS');
+export const repositorySearchSuccess = createAction<RepositorySearchResult>(
+  'REPOSITORY SEARCH SUCCESS'
+);
 export const repositorySearchFailed = createAction<Error>('REPOSITORY SEARCH FAILED');
 
 export const changeSearchScope = createAction<SearchScope>('CHANGE SEARCH SCOPE');
@@ -46,5 +54,7 @@ export const turnOnDefaultRepoScope = createAction<Repository>('TURN ON DEFAULT 
 export const turnOffDefaultRepoScope = createAction('TURN OFF DEFAULT REPO SCOPE');
 
 export const searchReposForScope = createAction<RepositorySearchPayload>('SEARCH REPOS FOR SCOPE');
-export const searchReposForScopeSuccess = createAction<any>('SEARCH REPOS FOR SCOPE SUCCESS');
-export const searchReposForScopeFailed = createAction<any>('SEARCH REPOS FOR SCOPE FAILED');
+export const searchReposForScopeSuccess = createAction<RepositorySearchResult>(
+  'SEARCH REPOS FOR SCOPE SUCCESS'
+);
+export const searchReposForScopeFailed = createAction<Error>('SEARCH REPOS FOR SCOPE FAILED');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -20,22 +20,9 @@ export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: b
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiAvatar
-                size="s"
-                type="space"
-                className="codeAvatar"
-                name={blame.committer.name}
-                initialsLength={1}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" className="codeText__blameMessage eui-textTruncate">
-                {blame.commit.message}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiText size="xs" className="codeText__blameMessage eui-textTruncate">
+            {blame.commit.message}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="eui-textTruncate">
           <EuiText size="xs" className="eui-textTruncate code-auto-margin">

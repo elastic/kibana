@@ -8,7 +8,7 @@ import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 
 import template from './main.html';
@@ -36,8 +36,7 @@ if (chrome.getInjected('ccrUiEnabled')) {
   routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
     template,
     resolve: {
-      license(Private) {
-        const xpackInfo = Private(XPackInfoProvider);
+      license() {
         return {
           isAvailable: () => xpackInfo.get('features.crossClusterReplication.isAvailable'),
           isActive: () => xpackInfo.get('features.crossClusterReplication.isActive'),

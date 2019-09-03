@@ -19,7 +19,16 @@ import {
   mockResponseNetwork,
   mockResultHost,
   mockResultNetwork,
+  mockBuildOverviewHostQuery,
+  mockBuildOverviewNetworkQuery,
 } from './mock';
+
+jest.mock('./query.dsl', () => {
+  return {
+    buildOverviewHostQuery: jest.fn(() => mockBuildOverviewHostQuery),
+    buildOverviewNetworkQuery: jest.fn(() => mockBuildOverviewNetworkQuery),
+  };
+});
 
 describe('Siem Overview elasticsearch_adapter', () => {
   describe('Network Stats', () => {
@@ -81,6 +90,10 @@ describe('Siem Overview elasticsearch_adapter', () => {
           mockOptionsNetwork
         );
         expect(data).toEqual({
+          inspect: {
+            dsl: [JSON.stringify(mockBuildOverviewNetworkQuery, null, 2)],
+            response: [JSON.stringify(mockNoDataResponse, null, 2)],
+          },
           auditbeatSocket: 0,
           filebeatCisco: 0,
           filebeatNetflow: 0,
@@ -151,6 +164,10 @@ describe('Siem Overview elasticsearch_adapter', () => {
           mockOptionsHost
         );
         expect(data).toEqual({
+          inspect: {
+            dsl: [JSON.stringify(mockBuildOverviewHostQuery, null, 2)],
+            response: [JSON.stringify(mockNoDataResponse, null, 2)],
+          },
           auditbeatAuditd: 0,
           auditbeatFIM: 0,
           auditbeatLogin: 0,

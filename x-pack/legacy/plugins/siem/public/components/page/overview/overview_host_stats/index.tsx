@@ -37,6 +37,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat Audit"
       />
     ),
+    id: 'auditbeatAuditd',
   },
   {
     description:
@@ -49,6 +50,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat File Integrity Module"
       />
     ),
+    id: 'auditbeatFIM',
   },
   {
     description:
@@ -61,6 +63,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat Login"
       />
     ),
+    id: 'auditbeatLogin',
   },
   {
     description:
@@ -73,6 +76,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat Package"
       />
     ),
+    id: 'auditbeatPackage',
   },
   {
     description:
@@ -85,6 +89,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat Process"
       />
     ),
+    id: 'auditbeatProcess',
   },
   {
     description:
@@ -97,6 +102,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Auditbeat User"
       />
     ),
+    id: 'auditbeatUser',
   },
   {
     description:
@@ -109,6 +115,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         defaultMessage="Filebeat System Module"
       />
     ),
+    id: 'filebeatSystemModule',
   },
   {
     description:
@@ -118,6 +125,7 @@ const overviewHostStats = (data: OverviewHostData) => [
     title: (
       <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
     ),
+    id: 'winlogbeat',
   },
 ];
 
@@ -125,21 +133,27 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   text-align: right;
 `;
 
+DescriptionListDescription.displayName = 'DescriptionListDescription';
+
 const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
   ({ isLoading, value }) => (
     <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
   )
 );
 
+StatValue.displayName = 'StatValue';
+
 export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewHostStats(data).map((item, index) => (
       <React.Fragment key={index}>
         <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription data-test-subj="stat-loader-description">
+        <DescriptionListDescription data-test-subj={`host-stat-${item.id}`}>
           <StatValue isLoading={loading} value={item.description} />
         </DescriptionListDescription>
       </React.Fragment>
     ))}
   </EuiDescriptionList>
 ));
+
+OverviewHostStats.displayName = 'OverviewHostStats';

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
 import { SearchScope } from '../../model';
 
@@ -15,17 +16,33 @@ export enum PathTypes {
 }
 
 export const SearchScopeText = {
-  [SearchScope.DEFAULT]: 'Search Everything',
-  [SearchScope.REPOSITORY]: 'Search Repositories',
-  [SearchScope.SYMBOL]: 'Search Symbols',
-  [SearchScope.FILE]: 'Search Files',
+  [SearchScope.DEFAULT]: i18n.translate('xpack.code.searchScope.defaultDropDownOptionLabel', {
+    defaultMessage: 'Search Everything',
+  }),
+  [SearchScope.REPOSITORY]: i18n.translate('xpack.code.searchScope.repositoryDropDownOptionLabel', {
+    defaultMessage: 'Search Repositories',
+  }),
+  [SearchScope.SYMBOL]: i18n.translate('xpack.code.searchScope.symbolDropDownOptionLabel', {
+    defaultMessage: 'Search Symbols',
+  }),
+  [SearchScope.FILE]: i18n.translate('xpack.code.searchScope.fileDropDownOptionLabel', {
+    defaultMessage: 'Search Files',
+  }),
 };
 
 export const SearchScopePlaceholderText = {
-  [SearchScope.DEFAULT]: 'Type to find anything',
-  [SearchScope.REPOSITORY]: 'Type to find repositories',
-  [SearchScope.SYMBOL]: 'Type to find symbols',
-  [SearchScope.FILE]: 'Type to find files',
+  [SearchScope.DEFAULT]: i18n.translate('xpack.code.searchScope.defaultPlaceholder', {
+    defaultMessage: 'Type to find anything',
+  }),
+  [SearchScope.REPOSITORY]: i18n.translate('xpack.code.searchScope.repositoryPlaceholder', {
+    defaultMessage: 'Type to find repositories',
+  }),
+  [SearchScope.SYMBOL]: i18n.translate('xpack.code.searchScope.symbolPlaceholder', {
+    defaultMessage: 'Type to find symbols',
+  }),
+  [SearchScope.FILE]: i18n.translate('xpack.code.searchScope.filePlaceholder', {
+    defaultMessage: 'Type to find files',
+  }),
 };
 
 export interface MainRouteParams {

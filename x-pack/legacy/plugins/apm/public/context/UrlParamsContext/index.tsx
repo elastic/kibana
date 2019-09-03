@@ -12,19 +12,31 @@ import React, {
   useState
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { uniqueId } from 'lodash';
+import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
 import { UIFilters } from '../../../typings/ui-filters';
+import {
+  localUIFilterNames,
+  LocalUIFilterName
+} from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../utils/pickKeys';
+import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
-  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
+function useUiFilters(params: IUrlParams): UIFilters {
+  const { kuery, environment, ...urlParams } = params;
+  const localUiFilters = mapValues(
+    pickKeys(urlParams, ...localUIFilterNames),
+    val => (val ? val.split(',') : [])
+  ) as Partial<Record<LocalUIFilterName, string[]>>;
+
+  return useDeepObjectIdentity({ kuery, environment, ...localUiFilters });
 }
 
 const defaultRefresh = (time: TimeRange) => {};
@@ -39,17 +51,19 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
+    const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
+
     const [, forceUpdate] = useState('');
 
     const urlParams = useMemo(
       () =>
         resolveUrlParams(location, {
-          start: refUrlParams.current.start,
-          end: refUrlParams.current.end,
-          rangeFrom: refUrlParams.current.rangeFrom,
-          rangeTo: refUrlParams.current.rangeTo
+          start,
+          end,
+          rangeFrom,
+          rangeTo
         }),
-      [location, refUrlParams.current]
+      [location, start, end, rangeFrom, rangeTo]
     );
 
     refUrlParams.current = urlParams;
@@ -69,16 +83,13 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
 
     const uiFilters = useUiFilters(urlParams);
 
-    const contextValue = useMemo(
-      () => {
-        return {
-          urlParams,
-          refreshTimeRange,
-          uiFilters
-        };
-      },
-      [urlParams, refreshTimeRange, uiFilters]
-    );
+    const contextValue = useMemo(() => {
+      return {
+        urlParams,
+        refreshTimeRange,
+        uiFilters
+      };
+    }, [urlParams, refreshTimeRange, uiFilters]);
 
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />

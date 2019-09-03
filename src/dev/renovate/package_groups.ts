@@ -50,6 +50,12 @@ interface PackageGroup {
    * should be ignored.
    */
   readonly enabled?: false;
+
+  /**
+   * A semver range defining allowed versions for a package group
+   * https://renovatebot.com/docs/configuration-options/#allowedversions
+   */
+  readonly allowedVersions?: string;
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -107,7 +113,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
 
   {
     name: 'graphql',
-    packageWords: ['graphql'],
+    packageWords: ['graphql', 'apollo'],
   },
 
   {
@@ -119,6 +125,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'vega',
     packageWords: ['vega'],
+    enabled: false,
   },
 
   {
@@ -142,6 +149,17 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'api-documenter',
     packageNames: ['@microsoft/api-documenter', '@microsoft/api-extractor'],
     enabled: false,
+  },
+
+  {
+    name: 'jsts',
+    packageNames: ['jsts'],
+    allowedVersions: '^1.6.2',
+  },
+
+  {
+    name: 'storybook',
+    packageWords: ['storybook'],
   },
 ];
 

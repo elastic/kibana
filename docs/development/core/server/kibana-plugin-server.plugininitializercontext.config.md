@@ -8,7 +8,7 @@
 
 ```typescript
 config: {
-        create: <Schema>() => Observable<Schema>;
-        createIfExists: <Schema>() => Observable<Schema | undefined>;
+        create: <T = ConfigSchema>() => Observable<T>;
+        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
 ```

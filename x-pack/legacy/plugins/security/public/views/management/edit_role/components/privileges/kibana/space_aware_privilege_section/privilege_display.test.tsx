@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PRIVILEGE_SOURCE } from '../../../../../../../lib/kibana_privilege_calculator';
@@ -26,7 +26,17 @@ describe('PrivilegeDisplay', () => {
 
   it('renders a privilege with tooltip, if provided', () => {
     const wrapper = mountWithIntl(
-      <PrivilegeDisplay privilege={'all'} tooltipContent={<b>ahh</b>} iconType={'asterisk'} />
+      <PrivilegeDisplay privilege={'all'} tooltipContent={<b>ahh</b>} />
+    );
+    expect(wrapper.text().trim()).toEqual('All');
+    expect(wrapper.find(EuiToolTip).props()).toMatchObject({
+      content: <b>ahh</b>,
+    });
+  });
+
+  it('renders a privilege with icon tooltip, if provided', () => {
+    const wrapper = mountWithIntl(
+      <PrivilegeDisplay privilege={'all'} iconTooltipContent={<b>ahh</b>} iconType={'asterisk'} />
     );
     expect(wrapper.text().trim()).toEqual('All');
     expect(wrapper.find(EuiIconTip).props()).toMatchObject({

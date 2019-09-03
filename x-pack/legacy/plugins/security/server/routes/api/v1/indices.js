@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { getClient } from '../../../../../../server/lib/get_client_shield';
-import { wrapError } from '../../../lib/errors';
+import { wrapError } from '../../../../../../../plugins/security/server';
 
 export function initIndicesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;

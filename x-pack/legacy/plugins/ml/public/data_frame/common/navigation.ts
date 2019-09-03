@@ -6,17 +6,15 @@
 
 import rison from 'rison-node';
 
-import chrome from 'ui/chrome';
-
 export function moveToDataFrameWizard() {
-  window.location.href = '#/data_frames/new_job';
+  window.location.href = '#/data_frames/new_transform';
 }
 
-export function moveToDataFrameJobsList() {
+export function moveToDataFrameTransformList() {
   window.location.href = '#/data_frames';
 }
 
-export function moveToDiscover(indexPatternId: string, kbnBaseUrl: string) {
+export function moveToDiscover(indexPatternId: string, baseUrl: string) {
   const _g = rison.encode({});
 
   // Add the index pattern ID to the appState part of the URL.
@@ -24,7 +22,6 @@ export function moveToDiscover(indexPatternId: string, kbnBaseUrl: string) {
     index: indexPatternId,
   });
 
-  const baseUrl = chrome.addBasePath(kbnBaseUrl);
   const hash = `#/discover?_g=${_g}&_a=${_a}`;
 
   window.location.href = `${baseUrl}${hash}`;

@@ -20,7 +20,7 @@ export async function createDefaultSpace({ elasticsearch, savedObjects }: Deps) 
 
   const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
 
-  const savedObjectsRepository = getSavedObjectsRepository(client.callAsInternalUser);
+  const savedObjectsRepository = getSavedObjectsRepository(client.callAsInternalUser, ['space']);
 
   const defaultSpaceExists = await doesDefaultSpaceExist(
     SavedObjectsClient,

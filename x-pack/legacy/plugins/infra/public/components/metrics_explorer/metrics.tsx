@@ -7,7 +7,7 @@
 import { EuiComboBox } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback, useState, useEffect } from 'react';
-import { StaticIndexPatternField } from 'ui/index_patterns';
+import { FieldType } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerMetric,
@@ -20,7 +20,7 @@ interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: StaticIndexPatternField[];
+  fields: FieldType[];
 }
 
 interface SelectedOption {
@@ -34,15 +34,12 @@ export const MetricsExplorerMetrics = injectI18n(
     const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
     const [focusOnce, setFocusState] = useState<boolean>(false);
 
-    useEffect(
-      () => {
-        if (inputRef && autoFocus && !focusOnce) {
-          inputRef.focus();
-          setFocusState(true);
-        }
-      },
-      [inputRef]
-    );
+    useEffect(() => {
+      if (inputRef && autoFocus && !focusOnce) {
+        inputRef.focus();
+        setFocusState(true);
+      }
+    }, [inputRef]);
 
     // I tried to use useRef originally but the EUIComboBox component's type definition
     // would only accept an actual input element or a callback function (with the same type).
@@ -87,7 +84,7 @@ export const MetricsExplorerMetrics = injectI18n(
         options={comboOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
-        isClearable={false}
+        isClearable={true}
         inputRef={handleInputRef}
       />
     );

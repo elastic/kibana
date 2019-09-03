@@ -6,14 +6,14 @@
 import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { Features } from '../features';
 
 export class FeaturesService {
   private readonly axios: AxiosInstance;
 
-  constructor(url: string, private readonly log: LogService) {
+  constructor(url: string, private readonly log: ToolingLog) {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
       baseURL: url,
@@ -47,7 +47,7 @@ export class FeaturesService {
   }
 }
 
-export function FeaturesProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function FeaturesProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));

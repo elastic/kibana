@@ -47,13 +47,29 @@ test('copies file', () => {
   expect(fs.writeFileSync.mock.calls[0][0]).toEqual('/es/config/foo.yml');
 });
 
+test('ignores file which does not exist', () => {
+  fs.existsSync = () => false;
+  extractConfigFiles(['path=/data/foo.yml'], '/es');
+
+  expect(fs.readFileSync).not.toHaveBeenCalled();
+  expect(fs.writeFileSync).not.toHaveBeenCalled();
+});
+
 test('ignores non-paths', () => {
   const config = extractConfigFiles(['foo=bar', 'foo.bar=baz'], '/es');
 
   expect(config).toEqual(['foo=bar', 'foo.bar=baz']);
 });
 
+test('keeps regular expressions intact', () => {
+  fs.existsSync = () => false;
+  const config = extractConfigFiles(['foo=bar', 'foo.bar=/https?://127.0.0.1(:[0-9]+)?/'], '/es');
+
+  expect(config).toEqual(['foo=bar', 'foo.bar=/https?://127.0.0.1(:[0-9]+)?/']);
+});
+
 test('ignores directories', () => {
+  fs.existsSync = () => true;
   const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/bar'], '/es');
 
   expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/bar']);

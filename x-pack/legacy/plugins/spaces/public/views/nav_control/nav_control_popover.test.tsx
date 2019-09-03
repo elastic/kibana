@@ -8,7 +8,8 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { spacesManagerMock } from '../../lib/mocks';
-import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
+import { SpacesManager } from '../../lib';
+import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 import { NavControlPopover } from './nav_control_popover';
 
 describe('NavControlPopover', () => {
@@ -23,9 +24,9 @@ describe('NavControlPopover', () => {
     const wrapper = shallow(
       <NavControlPopover
         activeSpace={activeSpace}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'downRight'}
-        buttonClass={SpacesGlobalNavButton}
+        buttonClass={SpacesHeaderNavButton}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -54,9 +55,9 @@ describe('NavControlPopover', () => {
     const wrapper = mount<any, any>(
       <NavControlPopover
         activeSpace={activeSpace}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'rightCenter'}
-        buttonClass={SpacesGlobalNavButton}
+        buttonClass={SpacesHeaderNavButton}
       />
     );
 

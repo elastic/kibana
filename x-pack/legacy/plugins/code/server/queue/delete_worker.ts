@@ -17,7 +17,7 @@ import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractWorker } from './abstract_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class DeleteWorker extends AbstractWorker {
@@ -41,48 +41,47 @@ export class DeleteWorker extends AbstractWorker {
   public async executeJob(job: Job) {
     const { uri } = job.payload;
 
-    // 1. Cancel running workers
-    this.cancellationService.cancelCloneJob(uri);
-    this.cancellationService.cancelUpdateJob(uri);
-    this.cancellationService.cancelIndexJob(uri);
-
-    // 2. Delete git repository and all related data.
-    const repoService = this.repoServiceFactory.newInstance(
-      this.serverOptions.repoPath,
-      this.serverOptions.credsPath,
-      this.log,
-      this.serverOptions.security.enableGitCertCheck
-    );
-    const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
-
-    const deleteWorkspacePromise = this.deletePromiseWrapper(
-      this.lspService.deleteWorkspace(uri),
-      'workspace',
-      uri
-    );
-
-    // 3. Delete ES indices and aliases
-    const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
-      this.client.indices.delete({ index: `${SymbolIndexName(uri)}*` }),
-      'symbol ES index',
-      uri
-    );
-
-    const deleteReferenceESIndexPromise = this.deletePromiseWrapper(
-      this.client.indices.delete({ index: `${ReferenceIndexName(uri)}*` }),
-      'reference ES index',
-      uri
-    );
-
     try {
-      await Promise.all([
-        deleteWorkspacePromise,
-        deleteSymbolESIndexPromise,
-        deleteReferenceESIndexPromise,
-      ]);
+      // 1. Cancel running clone and update workers
+      await this.cancellationService.cancelCloneJob(uri, CancellationReason.REPOSITORY_DELETE);
+      await this.cancellationService.cancelUpdateJob(uri, CancellationReason.REPOSITORY_DELETE);
 
+      // 2. Delete workspace and index workers. Since the indexing could be
+      // hanging in the initialization stage, we should delete the workspace
+      // to cancel it in the meantime.
+      const deleteWorkspacePromise = this.deletePromiseWrapper(
+        this.lspService.deleteWorkspace(uri),
+        'workspace',
+        uri
+      );
+      const indexJobCancelPromise = this.cancellationService.cancelIndexJob(
+        uri,
+        CancellationReason.REPOSITORY_DELETE
+      );
+      await Promise.all([deleteWorkspacePromise, indexJobCancelPromise]);
+
+      // 3. Delete ES indices and aliases
+      const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
+        this.client.indices.delete({ index: `${SymbolIndexName(uri)}*` }),
+        'symbol ES index',
+        uri
+      );
+
+      const deleteReferenceESIndexPromise = this.deletePromiseWrapper(
+        this.client.indices.delete({ index: `${ReferenceIndexName(uri)}*` }),
+        'reference ES index',
+        uri
+      );
+      await Promise.all([deleteSymbolESIndexPromise, deleteReferenceESIndexPromise]);
+
+      const repoService = this.repoServiceFactory.newInstance(
+        this.serverOptions.repoPath,
+        this.serverOptions.credsPath,
+        this.log,
+        this.serverOptions.security.enableGitCertCheck
+      );
       this.gitOps.cleanRepo(uri);
-      await deleteRepoPromise;
+      await this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
       // 4. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are

@@ -2,42 +2,25 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTitle
-        size="xs"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="hollow"
-        iconSide="left"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiPanel
     grow={true}
     hasShadow={false}
-    paddingSize="s"
+    paddingSize="m"
   >
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiFlexGroup
       justifyContent="spaceBetween"
     >
@@ -52,42 +35,98 @@ exports[`PingList component renders sorted list without errors 1`] = `
               }
             }
           >
-            <EuiComboBox
-              aria-label="Status"
-              compressed={false}
-              fullWidth={false}
-              isClearable={false}
-              onChange={[Function]}
-              options={
-                Array [
-                  Object {
-                    "label": "All",
-                    "value": "",
-                  },
-                  Object {
-                    "label": "Up",
-                    "value": "up",
-                  },
-                  Object {
-                    "label": "Down",
-                    "value": "down",
-                  },
-                ]
-              }
-              selectedOptions={
-                Array [
-                  Object {
-                    "label": "Down",
-                    "value": "down",
-                  },
-                ]
-              }
-              singleSelection={
-                Object {
-                  "asPlainText": true,
-                }
-              }
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Status"
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  label="Status"
+                  labelType="label"
+                >
+                  <EuiComboBox
+                    aria-label="Status"
+                    compressed={false}
+                    fullWidth={false}
+                    isClearable={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "",
+                        },
+                        Object {
+                          "label": "Up",
+                          "value": "up",
+                        },
+                        Object {
+                          "label": "Down",
+                          "value": "down",
+                        },
+                      ]
+                    }
+                    selectedOptions={
+                      Array [
+                        Object {
+                          "label": "Down",
+                          "value": "down",
+                        },
+                      ]
+                    }
+                    singleSelection={
+                      Object {
+                        "asPlainText": true,
+                      }
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Location"
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  label="Location"
+                  labelType="label"
+                >
+                  <EuiComboBox
+                    aria-label="Location"
+                    compressed={false}
+                    fullWidth={false}
+                    isClearable={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "All",
+                        },
+                        Object {
+                          "label": "nyc",
+                          "value": "nyc",
+                        },
+                      ]
+                    }
+                    selectedOptions={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "All",
+                        },
+                      ]
+                    }
+                    singleSelection={
+                      Object {
+                        "asPlainText": true,
+                      }
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -95,7 +134,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
     <EuiSpacer
       size="s"
     />
-    <EuiInMemoryTable
+    <EuiBasicTable
       columns={
         Array [
           Object {
@@ -104,23 +143,28 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
+            "align": "left",
+            "dataType": "number",
+            "field": "observer.geo.name",
+            "name": "Location",
+            "render": [Function],
+          },
+          Object {
+            "align": "left",
             "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",
           },
           Object {
+            "align": "right",
             "field": "monitor.duration.us",
             "name": "Duration",
             "render": [Function],
           },
           Object {
+            "align": "left",
             "field": "error.type",
             "name": "Error type",
-          },
-          Object {
-            "field": "error.message",
-            "name": "Error message",
-            "render": [Function],
           },
           Object {
             "align": "right",
@@ -128,9 +172,16 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "name": "Response code",
             "render": [Function],
           },
+          Object {
+            "align": "right",
+            "isExpander": true,
+            "render": [Function],
+            "width": "40px",
+          },
         ]
       }
-      executeQueryOptions={Object {}}
+      itemId="id"
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           Object {
@@ -139,6 +190,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id1",
             "monitor": Object {
               "duration": Object {
                 "us": 1430,
@@ -158,6 +210,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id2",
             "monitor": Object {
               "duration": Object {
                 "us": 1370,
@@ -174,6 +227,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           Object {
             "error": null,
             "http": null,
+            "id": "id3",
             "monitor": Object {
               "duration": Object {
                 "us": 1452,
@@ -193,6 +247,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id4",
             "monitor": Object {
               "duration": Object {
                 "us": 1094,
@@ -212,6 +267,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id5",
             "monitor": Object {
               "duration": Object {
                 "us": 1597,
@@ -231,6 +287,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id6",
             "monitor": Object {
               "duration": Object {
                 "us": 1699,
@@ -250,6 +307,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id7",
             "monitor": Object {
               "duration": Object {
                 "us": 5384,
@@ -269,6 +327,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id8",
             "monitor": Object {
               "duration": Object {
                 "us": 5397,
@@ -289,6 +348,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 "status_code": 200,
               },
             },
+            "id": "id9",
             "monitor": Object {
               "duration": Object {
                 "us": 127511,
@@ -309,6 +369,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 "status_code": 200,
               },
             },
+            "id": "id10",
             "monitor": Object {
               "duration": Object {
                 "us": 287543,
@@ -325,19 +386,24 @@ exports[`PingList component renders sorted list without errors 1`] = `
         ]
       }
       loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
       pagination={
         Object {
           "initialPageSize": 20,
+          "pageIndex": 0,
+          "pageSize": 30,
           "pageSizeOptions": Array [
             5,
             10,
             20,
+            50,
             100,
           ],
+          "totalItemCount": 30,
         }
       }
       responsive={true}
-      sorting={false}
     />
   </EuiPanel>
 </Fragment>

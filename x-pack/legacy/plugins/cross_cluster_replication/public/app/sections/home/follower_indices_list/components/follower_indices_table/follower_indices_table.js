@@ -23,7 +23,7 @@ import {
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 import routing from '../../../../../services/routing';
-import { trackUiMetric } from '../../../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
 export class FollowerIndicesTable extends PureComponent {
@@ -191,7 +191,7 @@ export class FollowerIndicesTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
               selectFollowerIndex(name);
             }}
             data-test-subj="followerIndexLink"

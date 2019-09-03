@@ -1,6 +1,6 @@
 [role="xpack"]
 [[xpack-monitoring]]
-= Monitoring
+= Stack Monitoring
 
 [partintro]
 --

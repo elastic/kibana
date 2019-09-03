@@ -7,10 +7,13 @@
 import gql from 'graphql-tag';
 
 const ipOverviewSchema = gql`
+  type AutonomousSystemOrganization {
+    name: String
+  }
+
   type AutonomousSystem {
-    as_org: String
-    asn: String
-    ip: String
+    number: Float
+    organization: AutonomousSystemOrganization
   }
 
   type Overview {
@@ -26,6 +29,7 @@ const ipOverviewSchema = gql`
     host: HostEcsFields!
     server: Overview
     source: Overview
+    inspect: Inspect
   }
 
   extend type Source {
@@ -84,7 +88,8 @@ const domainsSchema = gql`
   type DomainsData {
     edges: [DomainsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -92,30 +97,13 @@ const domainsSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: DomainsSortField!
       flowDirection: FlowDirection!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): DomainsData!
-  }
-`;
-
-const firstLastSeenSchema = gql`
-  type FirstLastSeenDomain {
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  extend type Source {
-    DomainFirstLastSeen(
-      id: String
-      ip: String!
-      domainName: String!
-      flowTarget: FlowTarget!
-      defaultIndex: [String!]!
-    ): FirstLastSeenDomain!
   }
 `;
 
@@ -143,14 +131,15 @@ const tlsSchema = gql`
   type TlsData {
     edges: [TlsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
   extend type Source {
     Tls(
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: TlsSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
@@ -192,7 +181,8 @@ const usersSchema = gql`
   type UsersData {
     edges: [UsersEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -200,7 +190,7 @@ const usersSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: UsersSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
@@ -209,10 +199,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [
-  ipOverviewSchema,
-  domainsSchema,
-  firstLastSeenSchema,
-  tlsSchema,
-  usersSchema,
-];
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, tlsSchema, usersSchema];

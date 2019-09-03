@@ -1,8 +1,7 @@
 {
   "monitorChartsData": {
-    "durationArea": [],
-    "durationLine": [],
     "status": [],
+    "locationDurationLines": [],
     "statusMaxCount": 0,
     "durationMaxValue": 0
   }

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function zeekLogsSpecProvider(server, context) {
   const moduleName = 'zeek';
@@ -29,12 +33,13 @@ export function zeekLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.zeekLogs.nameTitle', {
       defaultMessage: 'Zeek logs',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.zeekLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Zeek/Bro.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.zeekLogs.longDescription', {
-      defaultMessage: 'The `zeek` Filebeat module collects the logs from \
+      defaultMessage:
+        'The `zeek` Filebeat module collects the logs from \
 [Zeek](https://www.zeek.org//documentation/index.html). \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -46,20 +51,23 @@ export function zeekLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: '7cbb5410-3700-11e9-aa6d-ff445a78330c',
-          linkLabel: i18n.translate('kbn.server.tutorials.zeekLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Zeek logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.zeekLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Zeek logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-zeek.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-zeek.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/zeek_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

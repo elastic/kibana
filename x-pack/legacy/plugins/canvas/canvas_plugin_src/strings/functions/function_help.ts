@@ -5,8 +5,8 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { CanvasFunction } from '../../functions/types';
-import { UnionToIntersection } from '../../functions/types';
+import { CanvasFunction } from '../../../types';
+import { UnionToIntersection } from '../../../types';
 
 import { help as all } from './all';
 import { help as alterColumn } from './alterColumn';
@@ -38,6 +38,7 @@ import { help as gte } from './gte';
 import { help as head } from './head';
 import { help as ifFn } from './if';
 import { help as image } from './image';
+import { help as joinRows } from './join_rows';
 import { help as location } from './location';
 import { help as lt } from './lt';
 import { help as lte } from './lte';
@@ -58,6 +59,9 @@ import { help as replace } from './replace';
 import { help as revealImage } from './revealImage';
 import { help as rounddate } from './rounddate';
 import { help as rowCount } from './rowCount';
+import { help as savedMap } from './saved_map';
+import { help as savedSearch } from './saved_search';
+import { help as savedVisualization } from './saved_visualization';
 import { help as seriesStyle } from './seriesStyle';
 import { help as shape } from './shape';
 import { help as sort } from './sort';
@@ -181,6 +185,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   gte,
   head,
   if: ifFn,
+  joinRows,
   image,
   location,
   lt,
@@ -202,6 +207,9 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
+  savedMap,
+  savedSearch,
+  savedVisualization,
   seriesStyle,
   shape,
   sort,

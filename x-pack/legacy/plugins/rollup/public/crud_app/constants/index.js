@@ -7,3 +7,7 @@
 export {
   CRUD_APP_BASE_PATH,
 } from './paths';
+
+export {
+  METRICS_CONFIG
+} from './metrics_config';

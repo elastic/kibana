@@ -11,49 +11,61 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import {
+  GetUncommonProcessesQuery,
+  PageInfoPaginated,
+  UncommonProcessesEdges,
+} from '../../graphql/types';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { uncommonProcessesQuery } from './index.gql_query';
 
+const ID = 'uncommonProcessesQuery';
+
 export interface UncommonProcessesArgs {
   id: string;
-  uncommonProcesses: UncommonProcessesEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
+  uncommonProcesses: UncommonProcessesEdges[];
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: UncommonProcessesArgs) => React.ReactNode;
   type: hostsModel.HostsType;
 }
 
 export interface UncommonProcessesComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
 }
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
 
-class UncommonProcessesComponentQuery extends QueryTemplate<
+class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
   UncommonProcessesProps,
   GetUncommonProcessesQuery.Query,
   GetUncommonProcessesQuery.Variables
 > {
   public render() {
     const {
-      id = 'uncommonProcessesQuery',
+      activePage,
       children,
+      endDate,
       filterQuery,
+      id = ID,
+      isInspected,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
     } = this.props;
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
@@ -62,30 +74,24 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          filterQuery: createFilter(filterQuery),
+          inspect: isInspected,
+          pagination: generateTablePaginationOptions(activePage, limit),
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -97,10 +103,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   UncommonProcesses: {
                     ...fetchMoreResult.source.UncommonProcesses,
-                    edges: [
-                      ...prev.source.UncommonProcesses.edges,
-                      ...fetchMoreResult.source.UncommonProcesses.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.UncommonProcesses.edges],
                   },
                 },
               };
@@ -108,12 +111,13 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
             loading,
-            refetch,
-            totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
-            uncommonProcesses,
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
+            uncommonProcesses,
           });
         }}
       </Query>
@@ -123,8 +127,13 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getUncommonProcessesSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getUncommonProcessesSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };

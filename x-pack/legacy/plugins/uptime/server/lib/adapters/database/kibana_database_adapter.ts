@@ -25,4 +25,8 @@ export class UMKibanaDatabaseAdapter implements DatabaseAdapter {
   public async count(request: any, params: any): Promise<any> {
     return this.elasticsearch.callWithRequest(request, 'count', params);
   }
+
+  public async head(request: any, params: { index: string }): Promise<any> {
+    return this.elasticsearch.callWithRequest(request, 'indices.exists', params);
+  }
 }

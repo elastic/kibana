@@ -47,14 +47,9 @@ export class LspService {
    * send a lsp request to language server, will initiate the language server if needed
    * @param method the method name
    * @param params the request params
-   * @param timeoutForInitializeMs When this request triggered an initializing, for how many milliseconds the response will wait for it.
    */
-  public async sendRequest(
-    method: string,
-    params: any,
-    timeoutForInitializeMs?: number
-  ): Promise<ResponseMessage> {
-    const request = { method, params, timeoutForInitializeMs };
+  public async sendRequest(method: string, params: any): Promise<ResponseMessage> {
+    const request = { method, params };
     await this.workspaceHandler.handleRequest(request);
     const response = await this.controller.handleRequest(request);
     return this.workspaceHandler.handleResponse(request, response);
@@ -79,15 +74,25 @@ export class LspService {
   }
 
   public supportLanguage(lang: string) {
-    return this.controller.supportLanguage(lang);
+    return this.controller.getLanguageServerDef(lang).length > 0;
   }
 
-  public languageServerStatus(lang: string): LanguageServerStatus {
-    return this.controller.status(lang);
+  public getLanguageSeverDef(lang: string) {
+    return this.controller.getLanguageServerDef(lang);
+  }
+
+  public languageServerStatus(name: string): LanguageServerStatus {
+    const defs = this.controller.getLanguageServerDef(name);
+    if (defs.length > 0) {
+      const def = defs[0];
+      return this.controller.status(def);
+    } else {
+      return LanguageServerStatus.NOT_INSTALLED;
+    }
   }
 
   public async initializeState(repoUri: string, revision: string) {
     const workspacePath = await this.workspaceHandler.revisionDir(repoUri, revision);
-    return this.controller.initializeState(workspacePath);
+    return await this.controller.initializeState(workspacePath);
   }
 }

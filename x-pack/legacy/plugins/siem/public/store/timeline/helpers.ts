@@ -28,6 +28,7 @@ export const initialTimelineState: TimelineState = {
     timelineId: null,
     newTimelineModel: null,
   },
+  showCallOutUnauthorizedMsg: false,
 };
 
 interface AddTimelineHistoryParams {
@@ -102,12 +103,30 @@ export const addTimelineNoteToEvent = ({
   };
 };
 
+interface AddTimelineParams {
+  id: string;
+  timeline: TimelineModel;
+}
+
+/**
+ * Add a saved object timeline to the store
+ * and default the value to what need to be if values are null
+ */
+export const addTimelineToStore = ({ id, timeline }: AddTimelineParams): TimelineById => ({
+  //  TODO: revisit this when we support multiple timelines
+  [id]: {
+    ...timeline,
+    show: true,
+  },
+});
+
 interface AddNewTimelineParams {
   columns: ColumnHeader[];
   id: string;
   show?: boolean;
   timelineById: TimelineById;
 }
+
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
   columns,

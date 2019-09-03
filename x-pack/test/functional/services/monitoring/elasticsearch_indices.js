@@ -59,7 +59,7 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
 
     async getIndicesAll() {
       const names = await testSubjects.getVisibleTextAll(SUBJ_INDICES_NAMES);
-      const statuses = await testSubjects.getPropertyAll(SUBJ_INDICES_STATUSES, 'alt');
+      const statuses = await testSubjects.getAttributeAll(SUBJ_INDICES_STATUSES, 'alt');
       const documentCounts = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DOCUMENT_COUNTS);
       const dataSizes = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DATA_SIZES);
       const indexRates = await testSubjects.getVisibleTextAll(SUBJ_INDICES_INDEX_RATES);

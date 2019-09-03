@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services } from '../types';
+import { execute } from './execute';
+import { ExecutorError } from './executor_error';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { validateActionTypeConfig } from './validate_action_type_config';
-import { validateActionTypeParams } from './validate_action_type_params';
+import {
+  ActionTaskParams,
+  ActionTypeRegistryContract,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
-  getServices: (basePath: string) => Services;
-  actionType: ActionType;
+  getServices: GetServicesFunction;
+  actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
+  isSecurityEnabled: boolean;
 }
 
 interface TaskRunnerOptions {
@@ -22,30 +31,57 @@ interface TaskRunnerOptions {
 
 export function getCreateTaskRunnerFunction({
   getServices,
-  actionType,
+  actionTypeRegistry,
   encryptedSavedObjectsPlugin,
+  spaceIdToNamespace,
+  getBasePath,
+  isSecurityEnabled,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { namespace, id, actionTypeParams } = taskInstance.params;
-        const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id, {
-          namespace,
-        });
-        const mergedActionTypeConfig = {
-          ...(action.attributes.actionTypeConfig || {}),
-          ...(action.attributes.actionTypeConfigSecrets || {}),
-        };
-        const validatedActionTypeConfig = validateActionTypeConfig(
-          actionType,
-          mergedActionTypeConfig
+        const { spaceId, actionTaskParamsId } = taskInstance.params;
+        const namespace = spaceIdToNamespace(spaceId);
+
+        const {
+          attributes: { actionId, params, apiKey },
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
+          'action_task_params',
+          actionTaskParamsId,
+          { namespace }
         );
-        const validatedActionTypeParams = validateActionTypeParams(actionType, actionTypeParams);
-        await actionType.executor({
-          services: getServices(taskInstance.params.basePath),
-          config: validatedActionTypeConfig,
-          params: validatedActionTypeParams,
+
+        const requestHeaders: Record<string, string> = {};
+        if (isSecurityEnabled && !apiKey) {
+          throw new ExecutorError('API key is required. The attribute "apiKey" is missing.');
+        } else if (isSecurityEnabled) {
+          requestHeaders.authorization = `ApiKey ${apiKey}`;
+        }
+
+        // Since we're using API keys and accessing elasticsearch can only be done
+        // via a request, we're faking one with the proper authorization headers.
+        const fakeRequest: any = {
+          headers: requestHeaders,
+          getBasePath: () => getBasePath(spaceId),
+        };
+
+        const executorResult = await execute({
+          namespace,
+          actionTypeRegistry,
+          encryptedSavedObjectsPlugin,
+          actionId,
+          services: getServices(fakeRequest),
+          params,
         });
+        if (executorResult.status === 'error') {
+          // Task manager error handler only kicks in when an error thrown (at this time)
+          // So what we have to do is throw when the return status is `error`.
+          throw new ExecutorError(
+            executorResult.message,
+            executorResult.data,
+            executorResult.retry == null ? false : executorResult.retry
+          );
+        }
       },
     };
   };

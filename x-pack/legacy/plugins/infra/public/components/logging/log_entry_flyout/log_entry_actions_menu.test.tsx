@@ -161,4 +161,102 @@ describe('LogEntryActionsMenu component', () => {
       ).toEqual(true);
     });
   });
+
+  describe('apm link', () => {
+    it('renders with a trace id filter when present in log entry', () => {
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [{ field: 'trace.id', value: '1234567' }],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+      ).toMatchInlineSnapshot(
+        `"/app/apm#/traces?kuery=${encodeURIComponent(
+          'trace.id:1234567'
+        )}&rangeFrom=now-1y&rangeTo=now"`
+      );
+    });
+
+    it('renders with a trace id filter and timestamp when present in log entry', () => {
+      const timestamp = '2019-06-27T17:44:08.693Z';
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [
+              { field: 'trace.id', value: '1234567' },
+              { field: '@timestamp', value: timestamp },
+            ],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+      ).toMatchInlineSnapshot(
+        `"/app/apm#/traces?kuery=${encodeURIComponent(
+          'trace.id:1234567'
+        )}&rangeFrom=2019-06-27T17:34:08.693Z&rangeTo=2019-06-27T17:54:08.693Z"`
+      );
+    });
+
+    it('renders as disabled when no supported field is present in log entry', () => {
+      const elementWrapper = mountWithIntl(
+        <LogEntryActionsMenu
+          logItem={{
+            fields: [],
+            id: 'ITEM_ID',
+            index: 'INDEX',
+            key: {
+              time: 0,
+              tiebreaker: 0,
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
+        elementWrapper.find(`button${testSubject('apmLogEntryActionsMenuItem')}`).prop('disabled')
+      ).toEqual(true);
+    });
+  });
 });

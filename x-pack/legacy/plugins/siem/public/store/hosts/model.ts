@@ -12,20 +12,30 @@ export enum HostsType {
   details = 'details',
 }
 
-export interface BasicQuery {
+export enum HostsTableType {
+  authentications = 'authentications',
+  hosts = 'hosts',
+  events = 'events',
+  uncommonProcesses = 'uncommonProcesses',
+  anomalies = 'anomalies',
+}
+
+export interface BasicQueryPaginated {
+  activePage: number;
   limit: number;
 }
 
-export interface HostsQuery extends BasicQuery {
+export interface HostsQuery extends BasicQueryPaginated {
   direction: Direction;
   sortField: HostsFields;
 }
 
 interface Queries {
-  authentications: BasicQuery;
-  hosts: HostsQuery;
-  events: BasicQuery;
-  uncommonProcesses: BasicQuery;
+  [HostsTableType.authentications]: BasicQueryPaginated;
+  [HostsTableType.hosts]: HostsQuery;
+  [HostsTableType.events]: BasicQueryPaginated;
+  [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
+  [HostsTableType.anomalies]: null | undefined;
 }
 
 export interface GenericHostsModel {

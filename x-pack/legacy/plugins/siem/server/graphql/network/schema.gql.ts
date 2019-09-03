@@ -19,22 +19,44 @@ export const networkSchema = gql`
   }
 
   type TopNFlowNetworkEcsField {
-    bytes: Float
-    packets: Float
-    transport: String
-    direction: [NetworkDirectionEcs!]
+    bytes_in: Float
+    bytes_out: Float
   }
 
-  type TopNFlowItem {
-    count: Float
+  type GeoItem {
+    geo: GeoEcsFields
+    flowTarget: FlowTarget
+  }
+
+  type AutonomousSystemItem {
+    name: String
+    number: Float
+  }
+
+  type TopNFlowItemSource {
+    autonomous_system: AutonomousSystemItem
     domain: [String!]
     ip: String
+    location: GeoItem
+    flows: Float
+    destination_ips: Float
+  }
+
+  type TopNFlowItemDestination {
+    autonomous_system: AutonomousSystemItem
+    domain: [String!]
+    ip: String
+    location: GeoItem
+    flows: Float
+    source_ips: Float
   }
 
   enum NetworkTopNFlowFields {
-    bytes
-    packets
-    ipCount
+    bytes_in
+    bytes_out
+    flows
+    destination_ips
+    source_ips
   }
 
   input NetworkTopNFlowSortField {
@@ -44,11 +66,8 @@ export const networkSchema = gql`
 
   type NetworkTopNFlowItem {
     _id: String
-    timestamp: Date
-    source: TopNFlowItem
-    destination: TopNFlowItem
-    client: TopNFlowItem
-    server: TopNFlowItem
+    source: TopNFlowItemSource
+    destination: TopNFlowItemDestination
     network: TopNFlowNetworkEcsField
   }
 
@@ -60,7 +79,8 @@ export const networkSchema = gql`
   type NetworkTopNFlowData {
     edges: [NetworkTopNFlowEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   enum NetworkDnsFields {
@@ -82,7 +102,6 @@ export const networkSchema = gql`
     dnsBytesOut: Float
     dnsName: String
     queryCount: Float
-    timestamp: Date
     uniqueDomains: Float
   }
 
@@ -94,7 +113,8 @@ export const networkSchema = gql`
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -102,9 +122,8 @@ export const networkSchema = gql`
     NetworkTopNFlow(
       id: String
       filterQuery: String
-      flowDirection: FlowDirection!
-      flowTarget: FlowTarget!
-      pagination: PaginationInput!
+      flowTarget: FlowTargetNew!
+      pagination: PaginationInputPaginated!
       sort: NetworkTopNFlowSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
@@ -113,7 +132,7 @@ export const networkSchema = gql`
       filterQuery: String
       id: String
       isPtrIncluded: Boolean!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: NetworkDnsSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!

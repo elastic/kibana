@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.timelionLegendCount(0);
     await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
     await dashboardExpect.vegaTextsExist(['5,000']);
-    await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
+    await dashboardExpect.goalAndGuageLabelsExist(['62.925%', '55.625%', '11.915 GB']);
     await dashboardExpect.dataTableRowCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'region map viz'

@@ -6,13 +6,10 @@
 
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 uiModules.get('xpack/graph')
-  .run(Private => {
-    const xpackInfo = Private(XPackInfoProvider);
-
+  .run(() => {
     const navLinkUpdates = {};
     navLinkUpdates.hidden = true;
     const showAppLink = xpackInfo.get('features.graph.showAppLink', false);

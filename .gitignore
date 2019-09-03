@@ -31,7 +31,7 @@ webpackstats.json
 !/config/kibana.yml
 coverage
 selenium
-.babelcache.json
+.babel_register_cache.json
 .webpack.babelcache
 *.swp
 *.swo

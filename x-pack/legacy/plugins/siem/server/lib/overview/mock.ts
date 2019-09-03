@@ -58,7 +58,16 @@ export const mockResponseNetwork = {
   },
 };
 
+export const mockBuildOverviewHostQuery = { buildOverviewHostQuery: 'buildOverviewHostQuery' };
+export const mockBuildOverviewNetworkQuery = {
+  buildOverviewNetworkQuery: 'buildOverviewNetworkQuery',
+};
+
 export const mockResultNetwork = {
+  inspect: {
+    dsl: [JSON.stringify(mockBuildOverviewNetworkQuery, null, 2)],
+    response: [JSON.stringify(mockResponseNetwork, null, 2)],
+  },
   packetbeatFlow: 50243,
   packetbeatDNS: 15000,
   filebeatSuricata: 2375,
@@ -122,6 +131,10 @@ export const mockResponseHost = {
 };
 
 export const mockResultHost = {
+  inspect: {
+    dsl: [JSON.stringify(mockBuildOverviewHostQuery, null, 2)],
+    response: [JSON.stringify(mockResponseHost, null, 2)],
+  },
   auditbeatAuditd: 73847,
   auditbeatFIM: 107307,
   auditbeatLogin: 60015,

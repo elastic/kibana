@@ -4,73 +4,103 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import produce from 'immer';
-import { handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { Hover, TextDocumentPositionParams } from 'vscode-languageserver';
 import {
-  closeReferences,
+  closePanel,
   findReferences,
   findReferencesFailed,
   findReferencesSuccess,
-  GroupedRepoReferences,
+  GroupedRepoResults,
   hoverResult,
   revealPosition,
+  PanelResults,
+  findDefinitions,
+  findDefinitionsSuccess,
+  findDefinitionsFailed,
 } from '../actions';
 
 export interface EditorState {
   loading: boolean;
-  showing: boolean;
-  references: GroupedRepoReferences[];
+  panelShowing: 'references' | 'definitions' | undefined;
+  panelContents: GroupedRepoResults[];
   hover?: Hover;
   currentHover?: Hover;
   refPayload?: TextDocumentPositionParams;
   revealPosition?: Position;
-  referencesTitle: string;
+  panelTitle: string;
 }
 const initialState: EditorState = {
   loading: false,
-  showing: false,
-  references: [],
-  referencesTitle: '',
+  panelShowing: undefined,
+  panelContents: [],
+  panelTitle: '',
 };
 
-export const editor = handleActions(
+type EditorPayload = PanelResults & Hover & TextDocumentPositionParams & Position & string;
+
+function panelInit(draft: EditorState, action: Action<TextDocumentPositionParams>) {
+  draft.refPayload = action.payload!;
+  draft.loading = true;
+  draft.panelContents = initialState.panelContents;
+  draft.panelTitle = initialState.panelTitle;
+}
+
+function panelSuccess(draft: EditorState, action: Action<PanelResults>) {
+  const { title, repos } = action.payload!;
+  draft.panelContents = repos;
+  draft.panelTitle = title;
+  draft.loading = false;
+}
+function panelFailed(draft: EditorState) {
+  draft.panelContents = [];
+  draft.loading = false;
+  delete draft.refPayload;
+}
+
+export const editor = handleActions<EditorState, EditorPayload>(
   {
-    [String(findReferences)]: (state: EditorState, action: any) =>
+    [String(findReferences)]: (state, action: Action<TextDocumentPositionParams>) =>
       produce<EditorState>(state, (draft: EditorState) => {
-        draft.refPayload = action.payload;
-        draft.showing = true;
-        draft.loading = true;
-        draft.references = initialState.references;
-        draft.hover = state.currentHover;
-        draft.referencesTitle = initialState.referencesTitle;
+        panelInit(draft, action);
+        draft.panelShowing = 'references';
       }),
-    [String(findReferencesSuccess)]: (state: EditorState, action: any) =>
-      produce<EditorState>(state, draft => {
-        const { title, repos } = action.payload;
-        draft.references = repos;
-        draft.referencesTitle = title;
+    [String(findReferencesSuccess)]: (state, action: Action<PanelResults>) =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        panelSuccess(draft, action);
+      }),
+    [String(findReferencesFailed)]: state =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        panelFailed(draft);
+      }),
+    [String(findDefinitions)]: (state, action: Action<TextDocumentPositionParams>) =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        panelInit(draft, action);
+        draft.panelShowing = 'definitions';
+      }),
+    [String(findDefinitionsSuccess)]: (state, action: Action<PanelResults>) =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        panelSuccess(draft, action);
+      }),
+    [String(findDefinitionsFailed)]: state =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        panelFailed(draft);
+      }),
+    [String(closePanel)]: state =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        draft.panelShowing = undefined;
         draft.loading = false;
+        delete draft.refPayload;
+        draft.panelContents = [];
+        draft.panelTitle = '';
       }),
-    [String(findReferencesFailed)]: (state: EditorState) =>
-      produce<EditorState>(state, draft => {
-        draft.references = [];
-        draft.loading = false;
-        draft.refPayload = undefined;
+    [String(hoverResult)]: (state, action: Action<Hover>) =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        draft.currentHover = action.payload!;
       }),
-    [String(closeReferences)]: (state: EditorState) =>
-      produce<EditorState>(state, draft => {
-        draft.showing = false;
-        draft.loading = false;
-        draft.refPayload = undefined;
-        draft.references = [];
-      }),
-    [String(hoverResult)]: (state: EditorState, action: any) =>
-      produce<EditorState>(state, draft => {
-        draft.currentHover = action.payload;
-      }),
-    [String(revealPosition)]: (state: EditorState, action: any) =>
-      produce<EditorState>(state, draft => {
-        draft.revealPosition = action.payload;
+    [String(revealPosition)]: (state, action: Action<Position>) =>
+      produce<EditorState>(state, (draft: EditorState) => {
+        draft.revealPosition = action.payload!;
       }),
   },
   initialState

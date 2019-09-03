@@ -1,5 +1,8 @@
 {
   "data_frame.delete_data_frame_transform": {
+    "url_params": {
+      "force": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],

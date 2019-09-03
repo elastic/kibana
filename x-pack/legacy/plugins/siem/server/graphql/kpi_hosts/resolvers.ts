@@ -15,6 +15,11 @@ export type QueryKpiHostsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type QueryKpiHostDetailsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.KpiHostDetailsResolver>,
+  QuerySourceResolver
+>;
+
 export interface KpiHostsResolversDeps {
   kpiHosts: KpiHosts;
 }
@@ -24,12 +29,17 @@ export const createKpiHostsResolvers = (
 ): {
   Source: {
     KpiHosts: QueryKpiHostsResolver;
+    KpiHostDetails: QueryKpiHostDetailsResolver;
   };
 } => ({
   Source: {
     async KpiHosts(source, args, { req }, info) {
       const options = { ...createOptions(source, args, info) };
       return libs.kpiHosts.getKpiHosts(req, options);
+    },
+    async KpiHostDetails(source, args, { req }, info) {
+      const options = { ...createOptions(source, args, info) };
+      return libs.kpiHosts.getKpiHostDetails(req, options);
     },
   },
 });

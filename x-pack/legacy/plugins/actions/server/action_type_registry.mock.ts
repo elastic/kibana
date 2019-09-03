@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeRegistry } from './action_type_registry';
-
-type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
+import { ActionTypeRegistryContract } from './types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {

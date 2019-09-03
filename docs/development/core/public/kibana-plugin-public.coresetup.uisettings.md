@@ -4,10 +4,10 @@
 
 ## CoreSetup.uiSettings property
 
-[UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md)
+[UiSettingsClient](./kibana-plugin-public.uisettingsclient.md)
 
 <b>Signature:</b>
 
 ```typescript
-uiSettings: UiSettingsSetup;
+uiSettings: UiSettingsClientContract;
 ```

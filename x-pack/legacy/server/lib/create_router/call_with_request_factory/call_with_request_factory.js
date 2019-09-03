@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const callWithRequestFactory = (server, request) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  return (...args) => {
-    return callWithRequest(request, ...args);
-  };
+export const callWithRequestFactory = (server, pluginId, config) => {
+  const { callWithRequest } = config
+    ? server.plugins.elasticsearch.createCluster(pluginId, config)
+    : server.plugins.elasticsearch.getCluster('data');
+  return callWithRequest;
 };

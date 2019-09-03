@@ -174,11 +174,12 @@ export class PolicyTable extends Component {
   buildRowCell(fieldName, value) {
     if (fieldName === 'name') {
       return (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
           href={getPolicyPath(value)}
-          onClick={() => trackUiMetric(UIM_EDIT_CLICK)}
+          onClick={() => trackUiMetric('click', UIM_EDIT_CLICK)}
         >
           {value}
         </EuiLink>
@@ -455,7 +456,7 @@ export class PolicyTable extends Component {
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="l">
-                      <h1>
+                      <h1 data-test-subj="sectionHeading">
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
                           defaultMessage="Index Lifecycle Policies"

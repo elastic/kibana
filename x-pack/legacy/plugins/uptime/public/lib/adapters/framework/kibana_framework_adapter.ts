@@ -7,11 +7,12 @@
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { PLUGIN, INTEGRATED_SOLUTIONS } from '../../../../common/constants';
-import { UMBreadcrumb } from '../../../breadcrumbs';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
+import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
@@ -41,12 +42,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
-
-          // configure breadcrumbs
-          let kibanaBreadcrumbs: UMBreadcrumb[] = [];
-          chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
-            kibanaBreadcrumbs = breadcrumbs;
-          });
 
           // set up route with current base path
           const basePath = chrome.getBasePath();
@@ -82,7 +77,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const renderGlobalHelpControls = () =>
             // render Uptime feedback link in global help menu
             chrome.helpExtension.set((element: HTMLDivElement) => {
-              ReactDOM.render(renderUptimeKibanaGlobalHelp(), element);
+              ReactDOM.render(
+                renderUptimeKibanaGlobalHelp(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION),
+                element
+              );
               return () => ReactDOM.unmountComponentAtNode(element);
             });
 
@@ -100,16 +98,17 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderComponent({
               basePath,
-              darkMode,
-              setBreadcrumbs: chrome.breadcrumbs.set,
-              kibanaBreadcrumbs,
-              setBadge: chrome.badge.set,
-              routerBasename,
               client: graphQLClient,
-              renderGlobalHelpControls,
+              darkMode,
               isApmAvailable,
               isInfraAvailable,
               isLogsAvailable,
+              logMonitorPageLoad: getTelemetryMonitorPageLogger(this.xsrfHeader, basePath),
+              logOverviewPageLoad: getTelemetryOverviewPageLogger(this.xsrfHeader, basePath),
+              renderGlobalHelpControls,
+              routerBasename,
+              setBadge: chrome.badge.set,
+              setBreadcrumbs: chrome.breadcrumbs.set,
             }),
             elem
           );

@@ -5,7 +5,7 @@
  */
 
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { Location } from 'vscode-languageserver';
 
 import {
@@ -32,9 +32,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
       if (repoScope && repoScope.length > 0) {
         queryParams.repoScope = repoScope.join(',');
       }
-      const res = await kfetch({
-        pathname: `/api/code/suggestions/symbol`,
-        method: 'get',
+      const res = await npStart.core.http.get(`/api/code/suggestions/symbol`, {
         query: queryParams,
       });
       const suggestions = Array.from(res.symbols as DetailSymbolInformation[])
@@ -44,7 +42,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
             description: this.getSymbolDescription(symbol.symbolInformation.location),
             end: 10,
             start: 1,
-            text: symbol.qname,
+            text: symbol.qname ? symbol.qname : symbol.symbolInformation.name,
             tokenType: this.symbolKindToTokenClass(symbol.symbolInformation.kind),
             selectUrl: this.getSymbolLinkUrl(symbol.symbolInformation.location),
           };

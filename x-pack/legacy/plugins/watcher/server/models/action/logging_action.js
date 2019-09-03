@@ -72,7 +72,7 @@ export class LoggingAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonLogging} property',
           values: {
             actionJsonLogging: 'actionJson.logging'
           }
@@ -86,7 +86,7 @@ export class LoggingAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingTextPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonLoggingText} property',
           values: {
             actionJsonLoggingText: 'actionJson.logging.text'
           }

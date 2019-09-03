@@ -13,10 +13,11 @@ import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionLink } from '../../shared/Links/TransactionLink';
+import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
-const StyledTransactionLink = styled(TransactionLink)`
+const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -34,9 +35,15 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (name: string, group: ITransactionGroup) => (
+    render: (name: string, { sample }: ITransactionGroup) => (
       <EuiToolTip id="trace-transaction-link-tooltip" content={name}>
-        <StyledTransactionLink transaction={group.sample}>
+        <StyledTransactionLink
+          serviceName={sample.service.name}
+          transactionId={sample.transaction.id}
+          traceId={sample.trace.id}
+          transactionName={sample.transaction.name}
+          transactionType={sample.transaction.type}
+        >
           {name}
         </StyledTransactionLink>
       </EuiToolTip>
@@ -97,12 +104,13 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading }: Props) {
-  const noItems = isLoading ? null : noItemsMessage;
+  const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
   return (
     <ManagedTable
       columns={traceListColumns}
       items={items}
-      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialSortField="impact"
+      initialSortDirection="desc"
       noItemsMessage={noItems}
       initialPageSize={25}
     />

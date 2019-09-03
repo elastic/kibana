@@ -1,7 +1,8 @@
 {
   "ilm.explain_lifecycle": {
     "url_params": {
-      "human": "__flag__"
+      "only_managed": "__flag__",
+      "only_errors": "__flag__"
     },
     "methods": [
       "GET"

@@ -98,7 +98,7 @@ export class EmailAction extends BaseAction {
 
     if (!json.email) {
       const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailPropertyMissingBadRequestMessage', {
-        defaultMessage: 'json argument must contain an {actionJsonEmail} property',
+        defaultMessage: 'JSON argument must contain an {actionJsonEmail} property',
         values: {
           actionJsonEmail: 'actionJson.email'
         }
@@ -114,7 +114,7 @@ export class EmailAction extends BaseAction {
 
     if (!json.email.to) {
       const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailToPropertyMissingBadRequestMessage', {
-        defaultMessage: 'json argument must contain an {actionJsonEmailTo} property',
+        defaultMessage: 'JSON argument must contain an {actionJsonEmailTo} property',
         values: {
           actionJsonEmailTo: 'actionJson.email.to'
         }

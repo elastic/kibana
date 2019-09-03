@@ -89,6 +89,8 @@ const HostsFilterComponent = pure<HostsFilterProps>(
   )
 );
 
+HostsFilterComponent.displayName = 'HostsFilterComponent';
+
 const makeMapStateToProps = () => {
   const getHostsFilterQueryDraft = hostsSelectors.hostsFilterQueryDraft();
   const getIsHostFilterQueryDraftValid = hostsSelectors.isHostFilterQueryDraftValid();

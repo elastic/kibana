@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf } from '@elastic/eui';
+import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ReactNode, SFC } from 'react';
@@ -17,6 +17,7 @@ interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
   explanation?: PrivilegeExplanation;
   iconType?: IconType;
+  iconTooltipContent?: ReactNode;
   tooltipContent?: ReactNode;
 }
 
@@ -39,13 +40,19 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
 };
 
 const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
-  const { privilege, iconType, tooltipContent, explanation, ...rest } = props;
+  const { privilege, iconType, iconTooltipContent, explanation, tooltipContent, ...rest } = props;
 
-  return (
+  const text = (
     <EuiText {...rest}>
-      {getDisplayValue(privilege)} {getIconTip(iconType, tooltipContent)}
+      {getDisplayValue(privilege)} {getIconTip(iconType, iconTooltipContent)}
     </EuiText>
   );
+
+  if (tooltipContent) {
+    return <EuiToolTip content={tooltipContent}>{text}</EuiToolTip>;
+  }
+
+  return text;
 };
 
 export const SupersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
@@ -56,7 +63,7 @@ export const SupersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
     <SimplePrivilegeDisplay
       {...props}
       iconType={'lock'}
-      tooltipContent={
+      iconTooltipContent={
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.privilegeSupercededMessage"
           defaultMessage="Original privilege of {supersededPrivilege} has been overriden by {actualPrivilegeSource}"
@@ -75,7 +82,7 @@ export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
 
   const source = getReadablePrivilegeSource(explanation!.actualPrivilegeSource);
 
-  const tooltipContent = (
+  const iconTooltipContent = (
     <FormattedMessage
       id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.effectivePrivilegeMessage"
       defaultMessage="Granted via {source}."
@@ -83,7 +90,9 @@ export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
     />
   );
 
-  return <SimplePrivilegeDisplay {...rest} iconType={'lock'} tooltipContent={tooltipContent} />;
+  return (
+    <SimplePrivilegeDisplay {...rest} iconType={'lock'} iconTooltipContent={iconTooltipContent} />
+  );
 };
 
 PrivilegeDisplay.defaultProps = {

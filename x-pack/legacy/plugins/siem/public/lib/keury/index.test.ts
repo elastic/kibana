@@ -8,6 +8,12 @@ import expect from '@kbn/expect';
 import { escapeKuery } from '.';
 
 describe('Kuery escape', () => {
+  it('should not remove white spaces quotes', () => {
+    const value = ' netcat';
+    const expected = ' netcat';
+    expect(escapeKuery(value)).to.be(expected);
+  });
+
   it('should escape quotes', () => {
     const value = 'I said, "Hello."';
     const expected = 'I said, \\"Hello.\\"';

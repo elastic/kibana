@@ -5,9 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { stub } from 'sinon';
 import url from 'url';
-import { LoginAttempt } from '../../authentication/login_attempt';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -24,26 +22,18 @@ export function requestFixture({
   auth,
   params,
   path = '/wat',
-  basePath = '',
   search = '',
   payload,
 }: RequestFixtureOptions = {}) {
-  const cookieAuth = { clear: stub(), set: stub() };
   return ({
     raw: { req: { headers } },
     auth,
     headers,
     params,
     url: { path, search },
-    cookieAuth,
-    getBasePath: () => basePath,
-    loginAttempt: stub().returns(new LoginAttempt()),
     query: search ? url.parse(search, true /* parseQueryString */).query : {},
     payload,
     state: { user: 'these are the contents of the user client cookie' },
-  } as any) as Request & {
-    cookieAuth: typeof cookieAuth;
-    loginAttempt: () => LoginAttempt;
-    getBasePath: () => string;
-  };
+    route: { settings: {} },
+  } as any) as Request;
 }

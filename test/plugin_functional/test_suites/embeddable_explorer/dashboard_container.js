@@ -22,6 +22,8 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const pieChart = getService('pieChart');
+  const dashboardExpect = getService('dashboardExpect');
 
   describe('dashboard container', () => {
     before(async () => {
@@ -39,17 +41,16 @@ export default function ({ getService }) {
       await testSubjects.existOrFail('embeddablePanelHeading-HelloSue');
     });
 
-    // TODO: uncomment when we add saved searches to the test dashboard.
-    // it('pie charts', async () => {
-    //   await pieChart.expectPieSliceCount(5);
-    // });
+    it('pie charts', async () => {
+      await pieChart.expectPieSliceCount(5);
+    });
 
-    // it('markdown', async () => {
-    //   await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
-    // });
+    it('markdown', async () => {
+      await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    });
 
-    // it('saved search', async () => {
-    //   await dashboardExpect.savedSearchRowCount(50);
-    // });
+    it('saved search', async () => {
+      await dashboardExpect.savedSearchRowCount(50);
+    });
   });
 }

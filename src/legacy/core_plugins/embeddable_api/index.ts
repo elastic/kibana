@@ -25,7 +25,6 @@ export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> 
   return new kibana.Plugin({
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      embeddableActions: ['plugins/embeddable_api/actions/apply_filter_action'],
     },
   });
 }

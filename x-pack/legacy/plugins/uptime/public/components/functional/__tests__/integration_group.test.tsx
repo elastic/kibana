@@ -5,10 +5,24 @@
  */
 
 import React from 'react';
+import { MonitorSummary } from '../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IntegrationGroup } from '../integration_group';
 
 describe('IntegrationGroup', () => {
+  let summary: MonitorSummary;
+
+  beforeEach(() => {
+    summary = {
+      monitor_id: '12345',
+      state: {
+        summary: {},
+        checks: [],
+        timestamp: '123',
+      },
+    };
+  });
+
   it('will not display APM links when APM is unavailable', () => {
     const component = shallowWithIntl(
       <IntegrationGroup
@@ -18,7 +32,7 @@ describe('IntegrationGroup', () => {
         isApmAvailable={false}
         isInfraAvailable={true}
         isLogsAvailable={true}
-        monitor={{ id: { key: '12345' } }}
+        summary={summary}
       />
     );
     expect(component).toMatchSnapshot();
@@ -33,7 +47,7 @@ describe('IntegrationGroup', () => {
         isApmAvailable={true}
         isInfraAvailable={false}
         isLogsAvailable={true}
-        monitor={{ id: { key: '12345' } }}
+        summary={summary}
       />
     );
     expect(component).toMatchSnapshot();
@@ -48,7 +62,7 @@ describe('IntegrationGroup', () => {
         isApmAvailable={true}
         isInfraAvailable={true}
         isLogsAvailable={false}
-        monitor={{ id: { key: '12345' } }}
+        summary={summary}
       />
     );
     expect(component).toMatchSnapshot();

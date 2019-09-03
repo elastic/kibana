@@ -3,7 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Size, ViewZoomWidthHeight } from '../../../types';
+
+import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
+import { LevelLogger } from '../../../server/lib';
+
+export interface ViewZoomWidthHeight {
+  zoom: number;
+  width: number;
+  height: number;
+}
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -12,6 +20,15 @@ export interface PageSizeParams {
   tableBorderWidth: number;
   headingHeight: number;
   subheadingHeight: number;
+}
+
+export interface LayoutSelectorDictionary {
+  screenshot: string;
+  renderComplete: string;
+  itemsCountAttribute: string;
+  timefilterFromAttribute: string;
+  timefilterToAttribute: string;
+  toastHeader: string;
 }
 
 export interface PdfImageSize {
@@ -40,3 +57,20 @@ export abstract class Layout {
 
   public abstract getCssOverridesPath(): string;
 }
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface LayoutParams {
+  id: string;
+  dimensions: Size;
+}
+
+export type LayoutInstance = Layout & {
+  // Fields that are not part of Layout: the instances
+  // independently implement these fields on their own
+  selectors: LayoutSelectorDictionary;
+  positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
+};

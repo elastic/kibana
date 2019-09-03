@@ -7,7 +7,7 @@
 import { flatten, pick, identity, intersection } from 'lodash';
 import Joi from 'joi';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
-import { wrapError } from '../../../../lib/errors';
+import { wrapError } from '../../../../../../../../plugins/security/server';
 import { PrivilegeSerializer, ResourceSerializer } from '../../../../lib/authorization';
 
 export function initPutRolesApi(

@@ -7,27 +7,28 @@
 import { i18n } from '@kbn/i18n';
 import { sort } from '../../functions/common/sort';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   help: i18n.translate('xpack.canvas.functions.sortHelpText', {
-    defaultMessage: 'Sorts a datatable on a column',
+    defaultMessage: 'Sorts a datatable by the specified column.',
   }),
   args: {
     by: i18n.translate('xpack.canvas.functions.sort.args.byHelpText', {
       defaultMessage:
-        'The column to sort on. If column is not specified, the {datatable} ' +
-        'will be sorted on the first column.',
+        'The column to sort by. When unspecified, the `{DATATABLE}` ' +
+        'is sorted by the first column.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
     reverse: i18n.translate('xpack.canvas.functions.sort.args.reverseHelpText', {
       defaultMessage:
-        'Reverse the sort order. If reverse is not specified, the {datatable} ' +
-        'will be sorted in ascending order.',
+        'Reverses the sorting order. When unspecified, the `{DATATABLE}` ' +
+        'is sorted in ascending order.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
   },

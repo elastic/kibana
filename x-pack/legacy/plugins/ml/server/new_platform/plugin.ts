@@ -39,6 +39,8 @@ import { systemRoutes } from '../routes/system';
 // @ts-ignore: could not find declaration file for module
 import { dataFrameRoutes } from '../routes/data_frame';
 // @ts-ignore: could not find declaration file for module
+import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
+// @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
 // @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
@@ -87,6 +89,7 @@ export interface PluginsSetup {
   elasticsearch: ElasticsearchPlugin;
   xpackMain: MlXpackMainPlugin;
   security: any;
+  spaces: any;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -97,6 +100,7 @@ export interface RouteInitialization {
   route(route: ServerRoute | ServerRoute[]): void;
   xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsService;
+  spacesPlugin: any;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
@@ -193,6 +197,7 @@ export class Plugin {
       commonRouteConfig,
       route: http.route,
       elasticsearchPlugin: plugins.elasticsearch,
+      spacesPlugin: plugins.spaces,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
@@ -200,6 +205,7 @@ export class Plugin {
       config: this.config,
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
+      spacesPlugin: plugins.spaces,
     };
 
     const usageInitializationDeps: UsageInitialization = {
@@ -216,6 +222,7 @@ export class Plugin {
     jobRoutes(routeInitializationDeps);
     dataFeedRoutes(routeInitializationDeps);
     dataFrameRoutes(routeInitializationDeps);
+    dataFrameAnalyticsRoutes(routeInitializationDeps);
     indicesRoutes(routeInitializationDeps);
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);

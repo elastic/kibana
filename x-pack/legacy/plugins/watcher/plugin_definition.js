@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+import { i18n } from '@kbn/i18n';
 import { registerFieldsRoutes } from './server/routes/api/fields';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerHistoryRoutes } from './server/routes/api/history';
@@ -12,7 +13,7 @@ import { registerIndicesRoutes } from './server/routes/api/indices';
 import { registerLicenseRoutes } from './server/routes/api/license';
 import { registerWatchesRoutes } from './server/routes/api/watches';
 import { registerWatchRoutes } from './server/routes/api/watch';
-import { registerLicenseChecker } from './server/lib/register_license_checker';
+import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 
 export const pluginDefinition = {
@@ -21,17 +22,18 @@ export const pluginDefinition = {
   publicDir: resolve(__dirname, 'public'),
   require: ['kibana', 'elasticsearch', 'xpack_main'],
   uiExports: {
-    managementSections: [
-      'plugins/watcher/sections/watch_detail',
-      'plugins/watcher/sections/watch_edit',
-      'plugins/watcher/sections/watch_list',
-      'plugins/watcher/sections/watch_history_item',
-    ],
     styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    home: ['plugins/watcher/register_feature']
+    managementSections: ['plugins/watcher'],
+    home: ['plugins/watcher/register_feature'],
   },
   init: function (server) {
-    registerLicenseChecker(server);
+    // Register license checker
+    registerLicenseChecker(
+      server,
+      PLUGIN.ID,
+      PLUGIN.getI18nName(i18n),
+      PLUGIN.MINIMUM_LICENSE_REQUIRED
+    );
 
     registerFieldsRoutes(server);
     registerHistoryRoutes(server);
@@ -40,5 +42,5 @@ export const pluginDefinition = {
     registerSettingsRoutes(server);
     registerWatchesRoutes(server);
     registerWatchRoutes(server);
-  }
+  },
 };

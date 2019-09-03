@@ -11,58 +11,26 @@ import { KpiNetworkESMSearchBody } from './types';
 const getDnsQueryFilter = () => [
   {
     bool: {
-      filter: [
+      should: [
         {
-          bool: {
-            should: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: {
-                        field: 'dns.question.name',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              'suricata.eve.dns.type': 'query',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'zeek.dns.query',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-            minimum_should_match: 1,
+          exists: {
+            field: 'dns.question.name',
+          },
+        },
+        {
+          term: {
+            'suricata.eve.dns.type': {
+              value: 'query',
+            },
+          },
+        },
+        {
+          exists: {
+            field: 'zeek.dns.query',
           },
         },
       ],
+      minimum_should_match: 1,
     },
   },
 ];

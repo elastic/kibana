@@ -137,10 +137,6 @@ exports[`FilterBar component renders the component without errors 1`] = `
                   "value": "https://www.wikipedia.org/",
                   "view": "https://www.wikipedia.org/",
                 },
-                Object {
-                  "value": "https://news.google.com/",
-                  "view": "https://news.google.com/",
-                },
               ],
               "searchThreshold": 2,
               "type": "field_value_selection",
@@ -349,10 +345,6 @@ exports[`FilterBar component renders the component's error state when an error p
                 Object {
                   "value": "https://www.wikipedia.org/",
                   "view": "https://www.wikipedia.org/",
-                },
-                Object {
-                  "value": "https://news.google.com/",
-                  "view": "https://news.google.com/",
                 },
               ],
               "searchThreshold": 2,

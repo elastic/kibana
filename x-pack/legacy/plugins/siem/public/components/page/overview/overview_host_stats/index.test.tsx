@@ -23,16 +23,16 @@ describe('Overview Host Stat Data', () => {
       const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={false} />);
       const loadingWrapper = wrapper
         .dive()
-        .find('[data-test-subj="stat-loader-description"]')
+        .find('[data-test-subj="host-stat-auditbeatAuditd"]')
         .first()
         .childAt(0);
       expect(loadingWrapper.prop('isLoading')).toBe(false);
     });
-    test('it does show loading indicator when not loading', () => {
+    test('it does show loading indicator when loading', () => {
       const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={true} />);
       const loadingWrapper = wrapper
         .dive()
-        .find('[data-test-subj="stat-loader-description"]')
+        .find('[data-test-subj="host-stat-auditbeatAuditd"]')
         .first()
         .childAt(0);
       expect(loadingWrapper.prop('isLoading')).toBe(true);

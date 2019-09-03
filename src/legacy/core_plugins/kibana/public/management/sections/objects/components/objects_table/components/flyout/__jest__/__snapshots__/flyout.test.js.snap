@@ -435,6 +435,17 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             ],
             "newIndexPatternId": undefined,
           },
+          Object {
+            "existingIndexPatternId": "filterIndex",
+            "list": Array [
+              Object {
+                "id": "filterIndex",
+                "title": "MyIndexPattern*",
+                "type": "index-pattern",
+              },
+            ],
+            "newIndexPatternId": undefined,
+          },
         ]
       }
       pagination={
@@ -611,6 +622,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiFilePicker
           compressed={false}
+          display="large"
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"

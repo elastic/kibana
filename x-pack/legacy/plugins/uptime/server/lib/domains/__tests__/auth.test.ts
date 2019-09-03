@@ -66,12 +66,25 @@ describe('Auth domain lib', () => {
     createLibs({
       info: {
         license: {
-          type: 'basic',
+          type: 'oss',
           isActive: true,
         },
       },
     });
     expect(() => libs.auth.requestIsValid(request)).toThrowErrorMatchingSnapshot();
+  });
+
+  it('returns true for authenticated request and valid active basic license', () => {
+    createLibs({
+      info: {
+        license: {
+          type: 'basic',
+          isActive: true,
+        },
+      },
+    });
+    request = { auth: { isAuthenticated: true } };
+    expect(libs.auth.requestIsValid(request)).toBe(true);
   });
 
   it('returns true for authenticated request and valid active license', () => {

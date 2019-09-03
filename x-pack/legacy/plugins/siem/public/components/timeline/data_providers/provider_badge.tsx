@@ -28,7 +28,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     font-weight: 200;
   }
   &.globalFilterItem {
-    line-height: 28px;
+    white-space: nowrap;
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
@@ -36,6 +36,8 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     }
   }
 `;
+
+ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -69,6 +71,8 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     const title = `${field}: "${formattedValue}"`;
 
     return (
+      // Ref: https://github.com/elastic/eui/issues/1655
+      // @ts-ignore
       <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}
@@ -83,7 +87,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
-          tabIndex: '-1',
+          tabIndex: -1,
         }}
         data-test-subj="providerBadge"
       >
@@ -102,3 +106,5 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     );
   }
 );
+
+ProviderBadge.displayName = 'ProviderBadge';

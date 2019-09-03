@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -20,12 +20,28 @@ const Text = styled(EuiText)`
   white-space: nowrap;
 `;
 
-const BadgeHighlighted = styled(EuiBadge)`
-  height: 20px;
-  margin: 0 5px 0 5px;
-  max-width: 70px;
-  min-width: 70px;
-`;
+Text.displayName = 'Text';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// const BadgeHighlighted = styled(EuiBadge)`
+//   height: 20px;
+//   margin: 0 5px 0 5px;
+//   max-width: 70px;
+//   min-width: 70px;
+// `;
+const BadgeHighlighted = (props: EuiBadgeProps) => (
+  <EuiBadge
+    {...props}
+    style={{
+      height: '20px',
+      margin: '0 5px 0 5px',
+      maxWidth: '70px',
+      minWidth: '70px',
+    }}
+  />
+);
+
+BadgeHighlighted.displayName = 'BadgeHighlighted';
 
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   width: ${props => (props.showSmallMsg ? '60px' : 'auto')}
@@ -50,12 +66,16 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   `}
 `;
 
+EmptyContainer.displayName = 'EmptyContainer';
+
 const NoWrap = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
   flex-wrap: no-wrap;
 `;
+
+NoWrap.displayName = 'NoWrap';
 interface Props {
   showSmallMsg?: boolean;
 }
@@ -91,3 +111,5 @@ export const Empty = pure<Props>(({ showSmallMsg = false }) => (
     {showSmallMsg && <AndOrBadge type="or" />}
   </EmptyContainer>
 ));
+
+Empty.displayName = 'Empty';

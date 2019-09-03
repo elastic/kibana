@@ -10,6 +10,7 @@ import * as os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
+
 import { LanguageServerStatus } from '../../common/language_server';
 import { LspRequest } from '../../model';
 import { RepositoryConfigController } from '../repository_config_controller';
@@ -20,7 +21,7 @@ import { InstallManager } from './install_manager';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { JAVA, LanguageServerDefinition, TYPESCRIPT } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
-import { Server } from 'hapi';
+import { createTestHapiServer } from '../test_utils';
 
 const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const workspaceDir = path.join(baseDir, 'workspace');
@@ -31,16 +32,7 @@ const options: ServerOptions = sinon.createStubInstance(ServerOptions);
 options.lsp = { detach: false };
 // @ts-ignore
 options.maxWorkspace = 2;
-const server = new Server();
-// @ts-ignore
-server.config = () => {
-  return {
-    get(key: string) {
-      if (key === 'env.dev') return false;
-      else return true;
-    },
-  };
-};
+const server = createTestHapiServer();
 const installManager = new InstallManager(server, options);
 // @ts-ignore
 installManager.status = (def: LanguageServerDefinition) => {

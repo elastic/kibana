@@ -25,9 +25,10 @@ describe('Overview Network Stat Data', () => {
       const wrapper = shallow(
         <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
       );
+
       const loadingWrapper = wrapper
         .dive()
-        .find('[data-test-subj="stat-loader-description"]')
+        .find('[data-test-subj="network-stat-auditbeatSocket"]')
         .first()
         .childAt(0);
       expect(loadingWrapper.prop('isLoading')).toBe(false);
@@ -38,7 +39,7 @@ describe('Overview Network Stat Data', () => {
       );
       const loadingWrapper = wrapper
         .dive()
-        .find('[data-test-subj="stat-loader-description"]')
+        .find('[data-test-subj="network-stat-auditbeatSocket"]')
         .first()
         .childAt(0);
       expect(loadingWrapper.prop('isLoading')).toBe(true);

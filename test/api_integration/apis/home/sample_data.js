@@ -55,7 +55,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 21 });
+        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 20 });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {

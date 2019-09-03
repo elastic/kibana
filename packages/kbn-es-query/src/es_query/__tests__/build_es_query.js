@@ -60,10 +60,10 @@ describe('build query', function () {
         bool: {
           must: [
             decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions),
-            { match_all: {} },
           ],
           filter: [
             toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
+            { match_all: {} },
           ],
           should: [],
           must_not: [],
@@ -90,9 +90,8 @@ describe('build query', function () {
         bool: {
           must: [
             decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions),
-            { match_all: {} },
           ],
-          filter: [],
+          filter: [{ match_all: {} }],
           should: [],
           must_not: [],
         }
@@ -122,9 +121,11 @@ describe('build query', function () {
         bool: {
           must: [
             decorateQuery(luceneStringToDsl('@timestamp:"2019-03-23T13:18:00"'), config.queryStringOptions, config.dateFormatTZ),
+          ],
+          filter: [
+            toElasticsearchQuery(fromKueryExpression('@timestamp:"2019-03-23T13:18:00"'), indexPattern, config),
             { match_all: {} }
           ],
-          filter: [toElasticsearchQuery(fromKueryExpression('@timestamp:"2019-03-23T13:18:00"'), indexPattern, config)],
           should: [],
           must_not: [],
         }

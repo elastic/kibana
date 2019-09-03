@@ -71,6 +71,48 @@ export function getWorkpadName(state) {
   return get(state, append(workpadRoot, 'name'));
 }
 
+export function getWorkpadHeight(state) {
+  return get(state, append(workpadRoot, 'height'));
+}
+
+export function getWorkpadWidth(state) {
+  return get(state, append(workpadRoot, 'width'));
+}
+
+export function getWorkpadBoundingBox(state) {
+  return getPages(state).reduce(
+    (boundingBox, page) => {
+      page.elements.forEach(({ position }) => {
+        const { left, top, width, height } = position;
+        const right = left + width;
+        const bottom = top + height;
+
+        if (left < boundingBox.left) {
+          boundingBox.left = left;
+        }
+        if (top < boundingBox.top) {
+          boundingBox.top = top;
+        }
+        if (right > boundingBox.right) {
+          boundingBox.right = right;
+        }
+
+        if (bottom > boundingBox.bottom) {
+          boundingBox.bottom = bottom;
+        }
+      });
+
+      return boundingBox;
+    },
+    {
+      left: 0,
+      right: getWorkpadWidth(state),
+      top: 0,
+      bottom: getWorkpadHeight(state),
+    }
+  );
+}
+
 export function getWorkpadColors(state) {
   return get(state, append(workpadRoot, 'colors'));
 }

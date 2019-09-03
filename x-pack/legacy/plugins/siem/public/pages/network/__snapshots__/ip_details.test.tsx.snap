@@ -37,10 +37,12 @@ exports[`Ip Details it matches the snapshot 1`] = `
       "isExact": true,
       "params": Object {
         "ip": "123.456.78.90",
+        "search": "",
       },
       "path": "",
       "url": "",
     }
   }
+  setAbsoluteRangeDatePicker={[MockFunction]}
 />
 `;

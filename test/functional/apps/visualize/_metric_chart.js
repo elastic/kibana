@@ -183,7 +183,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow filtering with buckets', async function () {
-        await PageObjects.visualize.clickMetricEditor();
         log.debug('Bucket = Split Group');
         await PageObjects.visualize.clickBucket('Split group');
         log.debug('Aggregation = Terms');

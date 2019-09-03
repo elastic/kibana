@@ -10,6 +10,7 @@ import { routeChange } from '../actions';
 
 export interface RouteState {
   match: any;
+  previousMatch?: any;
 }
 
 const initialState: RouteState = {
@@ -20,6 +21,7 @@ export const route = handleActions(
   {
     [String(routeChange)]: (state: RouteState, action: Action<any>) =>
       produce<RouteState>(state, draft => {
+        draft.previousMatch = state.match;
         draft.match = action.payload;
       }),
   },

@@ -12,7 +12,7 @@ createAlertRoute(server);
 
 const mockedAlert = {
   alertTypeId: '1',
-  interval: 10000,
+  interval: '10s',
   alertTypeParams: {
     bar: true,
   },
@@ -44,29 +44,7 @@ test('creates an alert with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toMatchInlineSnapshot(`
-Object {
-  "actions": Array [
     Object {
-      "group": "default",
-      "id": "2",
-      "params": Object {
-        "foo": true,
-      },
-    },
-  ],
-  "alertTypeId": "1",
-  "alertTypeParams": Object {
-    "bar": true,
-  },
-  "id": "123",
-  "interval": 10000,
-}
-`);
-  expect(alertsClient.create).toHaveBeenCalledTimes(1);
-  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "data": Object {
       "actions": Array [
         Object {
           "group": "default",
@@ -80,9 +58,56 @@ Array [
       "alertTypeParams": Object {
         "bar": true,
       },
-      "interval": 10000,
-    },
-  },
-]
-`);
+      "id": "123",
+      "interval": "10s",
+    }
+  `);
+  expect(alertsClient.create).toHaveBeenCalledTimes(1);
+  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "data": Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "2",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "1",
+          "alertTypeParams": Object {
+            "bar": true,
+          },
+          "enabled": true,
+          "interval": "10s",
+        },
+      },
+    ]
+  `);
+  expect(alertsClient.create).toHaveBeenCalledTimes(1);
+  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "data": Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "2",
+              "params": Object {
+                "foo": true,
+              },
+            },
+          ],
+          "alertTypeId": "1",
+          "alertTypeParams": Object {
+            "bar": true,
+          },
+          "enabled": true,
+          "interval": "10s",
+        },
+      },
+    ]
+  `);
 });

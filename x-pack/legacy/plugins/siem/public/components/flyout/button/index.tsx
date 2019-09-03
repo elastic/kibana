@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
@@ -28,11 +27,15 @@ const Container = styled.div`
   max-height: 240px;
 `;
 
+Container.displayName = 'Container';
+
 const BadgeButtonContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
 `;
+
+BadgeButtonContainer.displayName = 'BadgeButtonContainer';
 
 export const Button = styled(EuiPanel)`
   display: flex;
@@ -44,12 +47,12 @@ export const Button = styled(EuiPanel)`
   border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
   box-shadow: ${({ theme }) =>
-    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      theme.eui.euiColorLightestShade
-    }`};
+    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${theme.eui.euiColorLightestShade}`};
   background-color: inherit;
   cursor: pointer;
 `;
+
+Button.displayName = 'Button';
 
 export const Text = styled(EuiText)`
   width: 12px;
@@ -57,13 +60,31 @@ export const Text = styled(EuiText)`
   user-select: none;
 `;
 
-export const Badge = styled(EuiBadge)`
-  border-radius: 5px;
-  min-width: 25px;
-  padding: 0px;
-  transform: translateY(10px);
-  z-index: 10;
-`;
+Text.displayName = 'Text';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// export const Badge = styled(EuiBadge)`
+//   border-radius: 5px;
+//   min-width: 25px;
+//   padding: 0px;
+//   transform: translateY(10px);
+//   z-index: 10;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge
+    {...props}
+    style={{
+      borderRadius: '5px',
+      minWidth: '25px',
+      padding: '0px',
+      transform: 'translateY(10px)',
+      zIndex: 10,
+    }}
+  />
+);
+
+Badge.displayName = 'Badge';
+
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
   onOpen: () => void;
@@ -71,29 +92,36 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProviders, timelineId }) =>
-  show ? (
-    <Container>
-      <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-        <BadgeButtonContainer
-          className="flyout-overlay"
-          data-test-subj="flyoutOverlay"
-          onClick={onOpen}
-        >
-          {dataProviders.length !== 0 && (
-            <Badge data-test-subj="badge" color="primary">
-              {dataProviders.length}
-            </Badge>
-          )}
-          <Button>
-            <Text data-test-subj="flyoutButton" size="s">
-              {i18n.TIMELINE.toLocaleUpperCase()
-                .split('')
-                .join(' ')}
-            </Text>
-          </Button>
-        </BadgeButtonContainer>
-      </DroppableWrapper>
-    </Container>
-  ) : null
+export const FlyoutButton = React.memo<FlyoutButtonProps>(
+  ({ onOpen, show, dataProviders, timelineId }) =>
+    show ? (
+      <Container>
+        <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
+          <BadgeButtonContainer
+            className="flyout-overlay"
+            data-test-subj="flyoutOverlay"
+            onClick={onOpen}
+          >
+            {dataProviders.length !== 0 && (
+              <Badge data-test-subj="badge" color="primary">
+                {dataProviders.length}
+              </Badge>
+            )}
+            <Button>
+              <Text data-test-subj="flyoutButton" size="s">
+                {i18n.TIMELINE.toLocaleUpperCase()
+                  .split('')
+                  .join(' ')}
+              </Text>
+            </Button>
+          </BadgeButtonContainer>
+        </DroppableWrapper>
+      </Container>
+    ) : null,
+  (prevProps, nextProps) =>
+    prevProps.show === nextProps.show &&
+    prevProps.dataProviders === nextProps.dataProviders &&
+    prevProps.timelineId === nextProps.timelineId
 );
+
+FlyoutButton.displayName = 'FlyoutButton';

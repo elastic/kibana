@@ -9,6 +9,12 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 // @ts-ignore unconverted local file
 import { getZoomScale } from '../../../state/selectors/app';
+import {
+  getWorkpadBoundingBox,
+  getWorkpadWidth,
+  getWorkpadHeight,
+  // @ts-ignore unconverted local file
+} from '../../../state/selectors/workpad';
 // @ts-ignore unconverted local file
 import { setZoomScale } from '../../../state/actions/transient';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
@@ -18,9 +24,14 @@ interface State {
   transient: { zoomScale: number };
 }
 
-const mapStateToProps = (state: State) => ({
-  zoomScale: getZoomScale(state),
-});
+const mapStateToProps = (state: State) => {
+  return {
+    zoomScale: getZoomScale(state),
+    boundingBox: getWorkpadBoundingBox(state),
+    workpadWidth: getWorkpadWidth(state),
+    workpadHeight: getWorkpadHeight(state),
+  };
+};
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setZoomScale: (scale: number) => dispatch(setZoomScale(scale)),

@@ -15,6 +15,8 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -23,80 +25,149 @@ import { RootState } from '../../reducers';
 
 const steps = [
   {
-    title: 'Check if multiple Kibana instances are used as a cluster',
+    title: i18n.translate('xpack.code.adminPage.setupGuide.checkMultiInstanceTitle', {
+      defaultMessage: 'Check if multiple Kibana instances are used as a clusterURL',
+    }),
     children: (
       <EuiText>
-        <p>If you are using single Kibana instance, you can skip this step.</p>
         <p>
-          If you are using multiple Kibana instances, you need to assign one Kibana instance as
-          `Code node`. To do this, add the following line of code into your kibana.yml file of every
-          Kibana instance and restart the instances:
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.checkMultiInstanceDescription1"
+            defaultMessage="If you are using single Kibana instance, you can skip this step."
+          />
+        </p>
+
+        <p>
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.checkMultiInstanceDescription2"
+            defaultMessage="If you are using multiple Kibana instances, you need to assign one Kibana instance as `Code node`.
+                  To do this, add the following line of code into your kibana.yml file of every
+                  Kibana instance and restart the instances:"
+          />
         </p>
         <pre>
           <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
         </pre>
         <p>
-          Where `$YourCodeNoteAddress` is the URL of your assigned Code node accessible by other
-          Kibana instances.
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.checkMultiInstanceDescription3"
+            defaultMessage="Where `$YourCodeNoteAddress` is the URL of your assigned Code node accessible by other Kibana instances."
+          />
         </p>
       </EuiText>
     ),
   },
   {
-    title: 'Install extra language support optionally',
+    title: i18n.translate('xpack.code.adminPage.setupGuide.installExtraLangSupportTitle', {
+      defaultMessage: 'Install extra language support optionally',
+    }),
     children: (
       <EuiText>
         <p>
-          Look{' '}
-          <EuiLink href={documentationLinks.codeInstallLangServer} target="_blank">
-            here
-          </EuiLink>{' '}
-          to learn more about supported languages and language server installation.
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.installExtraLangSupportDescription1"
+            defaultMessage="Look {link} to learn more about supported languages and language server installation."
+            values={{
+              link: (
+                <EuiLink href={documentationLinks.codeInstallLangServer} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.installExtraLangSupportHereLinkText"
+                    defaultMessage="here"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         </p>
         <p>
-          If you need Java language support, you can manage language server installation{' '}
-          <Link to="/admin?tab=LanguageServers">here</Link>
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.installExtraLangSupportDescription2"
+            defaultMessage="If you need Java language support, you can manage language server installation {link}."
+            values={{
+              link: (
+                <Link to="/admin?tab=LanguageServers">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.installExtraLangSupportHereLinkText"
+                    defaultMessage="here"
+                  />
+                </Link>
+              ),
+            }}
+          />
         </p>
       </EuiText>
     ),
   },
   {
-    title: 'Add a repository to Code',
+    title: i18n.translate('xpack.code.adminPage.setupGuide.addRepositoryTitle', {
+      defaultMessage: 'Add a repository to Code',
+    }),
     children: (
       <EuiText>
         <p>
-          Import{' '}
-          <EuiLink href={documentationLinks.codeGettingStarted} target="_blank">
-            {' '}
-            a sample repo
-          </EuiLink>{' '}
-          or{' '}
-          <EuiLink href={documentationLinks.codeRepoManagement} target="_blank">
-            your own repo
-          </EuiLink>
-          . It is as easy as copy and paste git clone URLs to Code.
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.addRepositoryDescription"
+            defaultMessage="Import {sampleRepoLink} or {ownRepoLink}. It is as easy as copy and paste git clone URLs to Code."
+            values={{
+              sampleRepoLink: (
+                <EuiLink href={documentationLinks.codeGettingStarted} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.addRepositorySampleRepoLinkText"
+                    defaultMessage="a sample repo"
+                  />
+                </EuiLink>
+              ),
+              ownRepoLink: (
+                <EuiLink href={documentationLinks.codeRepoManagement} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.addRepositoryOwnRepoLinkText"
+                    defaultMessage="your own repo"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         </p>
       </EuiText>
     ),
   },
   {
-    title: 'Verify the repo is successfully imported',
+    title: i18n.translate('xpack.code.adminPage.setupGuide.verifyImportTitle', {
+      defaultMessage: 'Verify the repo is successfully imported',
+    }),
     children: (
       <EuiText>
         <p>
-          You can verify your repo is successfully imported by{' '}
-          <EuiLink href={documentationLinks.codeSearch} target="_blank">
-            searching
-          </EuiLink>{' '}
-          and{' '}
-          <EuiLink href={documentationLinks.codeOtherFeatures} target="_blank">
-            navigating
-          </EuiLink>{' '}
-          the repo. If language support is available to the repo, make sure{' '}
-          <EuiLink href={documentationLinks.semanticNavigation} target="_blank">
-            semantic navigation
-          </EuiLink>{' '}
-          is available as well.
+          <FormattedMessage
+            id="xpack.code.adminPage.setupGuide.verifyImportDescription"
+            defaultMessage="You can verify your repo is successfully imported by {searchingLink} and {navigatingLink} the repo. If language support is available to the repo, make sure {semanticNavigationLink} is available as well."
+            values={{
+              searchingLink: (
+                <EuiLink href={documentationLinks.codeSearch} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.verifyImportSearchingLinkText"
+                    defaultMessage="searching"
+                  />
+                </EuiLink>
+              ),
+              navigatingLink: (
+                <EuiLink href={documentationLinks.codeOtherFeatures} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.verifyImportNavigatingLinkText"
+                    defaultMessage="navigating"
+                  />
+                </EuiLink>
+              ),
+              semanticNavigationLink: (
+                <EuiLink href={documentationLinks.semanticNavigation} target="_blank">
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.verifyImportSemanticNavigatingLinkText"
+                    defaultMessage="semantic navigation"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         </p>
       </EuiText>
     ),
@@ -106,11 +177,16 @@ const steps = [
 const toastMessage = (
   <div>
     <p>
-      We’ve made some changes to roles and permissions in Kibana. Read more about how these changes
-      affect your Code implementation below.{' '}
+      <FormattedMessage
+        id="xpack.code.adminPage.setupGuide.permissionChangesDescription"
+        defaultMessage="We’ve made some changes to roles and permissions in Kibana. Read more about how these changes affect your Code implementation below."
+      />
     </p>
     <EuiButton size="s" href={documentationLinks.kibanaRoleManagement}>
-      Learn more
+      <FormattedMessage
+        id="xpack.code.adminPage.setupGuide.learnMoreButtonLabel"
+        defaultMessage="Learn more"
+      />
     </EuiButton>
   </div>
 );
@@ -133,7 +209,9 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             <EuiGlobalToastList
               toasts={[
                 {
-                  title: 'Permission Changes',
+                  title: i18n.translate('xpack.code.adminPage.setupGuide.permissionChangesTitle', {
+                    defaultMessage: 'Permission Changes',
+                  }),
                   color: 'primary',
                   iconType: 'iInCircle',
                   text: toastMessage,
@@ -158,15 +236,25 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             {this.props.setupOk === true && (
               <React.Fragment>
                 <EuiSpacer size="s" />
-                <EuiButton iconType="sortLeft">
-                  <Link to="/admin">Back To project dashboard</Link>
-                </EuiButton>
+                <Link to="/admin">
+                  <EuiButton iconType="sortLeft">
+                    <FormattedMessage
+                      id="xpack.code.adminPage.setupGuide.backToDashboardButtonLabel"
+                      defaultMessage="Back To repository dashboard"
+                    />
+                  </EuiButton>
+                </Link>
                 <EuiSpacer size="s" />
               </React.Fragment>
             )}
             <EuiPanel>
               <EuiTitle>
-                <h3>Getting started in Elastic Code</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.code.adminPage.setupGuide.getStartedTitle"
+                    defaultMessage="Getting started in Elastic Code"
+                  />
+                </h3>
               </EuiTitle>
               <EuiSpacer />
               <EuiSteps steps={steps} />

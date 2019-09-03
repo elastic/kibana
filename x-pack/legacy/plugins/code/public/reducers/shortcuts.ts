@@ -29,23 +29,25 @@ const initialState: ShortcutsState = {
   shortcuts: [helpShortcut],
 };
 
-export const shortcuts = handleActions<ShortcutsState, any>(
+type ShortcutPayload = boolean & null & HotKey;
+
+export const shortcuts = handleActions<ShortcutsState, ShortcutPayload>(
   {
-    [String(toggleHelp)]: (state: ShortcutsState, action: Action<boolean | null>) =>
-      produce<ShortcutsState>(state, (draft: ShortcutsState) => {
+    [String(toggleHelp)]: (state, action: Action<boolean | null>) =>
+      produce<ShortcutsState>(state, draft => {
         if (action.payload === null) {
           draft.showHelp = !state.showHelp;
         } else {
           draft.showHelp = action.payload!;
         }
       }),
-    [String(registerShortcut)]: (state: ShortcutsState, action: Action<HotKey>) =>
-      produce<ShortcutsState>(state, (draft: ShortcutsState) => {
+    [String(registerShortcut)]: (state, action: Action<HotKey>) =>
+      produce<ShortcutsState>(state, draft => {
         const hotKey = action.payload as HotKey;
         draft.shortcuts.push(hotKey);
       }),
-    [String(unregisterShortcut)]: (state: ShortcutsState, action: Action<HotKey>) =>
-      produce<ShortcutsState>(state, (draft: ShortcutsState) => {
+    [String(unregisterShortcut)]: (state, action: Action<HotKey>) =>
+      produce<ShortcutsState>(state, draft => {
         const hotKey = action.payload as HotKey;
         const idx = state.shortcuts.indexOf(hotKey);
         if (idx >= 0) {

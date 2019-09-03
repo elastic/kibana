@@ -5,10 +5,12 @@
     "legacy/common/**/*",
     "legacy/server/**/*",
     "legacy/plugins/**/*",
+    "plugins/**/*",
     "test_utils/**/*"
   ],
   "exclude": [
     "test/**/*",
+    "legacy/plugins/siem/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {

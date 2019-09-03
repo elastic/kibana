@@ -16,7 +16,7 @@ import { resolve } from 'path';
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
 
 import { MyServiceProvider } from './services/my_service';
-import { MyAppPageProvider } from './services/my_app_page;
+import { MyAppPageProvider } from './services/my_app_page';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values

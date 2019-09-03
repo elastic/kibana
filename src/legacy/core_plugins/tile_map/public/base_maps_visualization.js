@@ -24,18 +24,10 @@ import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
-import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
-
-const emsServiceSettings = new Promise((resolve) => {
-  uiModules.get('kibana').run(($injector) => {
-    const serviceSttings = $injector.get('serviceSettings');
-    resolve(serviceSttings);
-  });
-});
 
 export function BaseMapsVisualizationProvider(serviceSettings) {
 
@@ -204,7 +196,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         isDesaturated = true;
       }
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
-      const meta = await (await emsServiceSettings).getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
+      const meta = await serviceSettings.getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;

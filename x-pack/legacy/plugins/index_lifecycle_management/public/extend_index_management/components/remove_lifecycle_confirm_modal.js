@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiOverlayMask,
@@ -12,8 +12,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
+
 import { removeLifecycleForIndex } from '../../services/api';
 import { showApiError } from '../../services/api_errors';
+
 export class RemoveLifecyclePolicyConfirmModal extends Component {
   constructor(props) {
     super(props);
@@ -23,25 +25,10 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
       selectedAlias: null,
     };
   }
-  oneIndexSelected = () => {
-    return this.props.indexNames.length === 1;
-  };
-  getEntity = oneIndexSelected => {
-    return oneIndexSelected ? (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexMessage"
-        defaultMessage="index"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indicesMessage"
-        defaultMessage="indices"
-      />
-    );
-  };
+
   removePolicy = async () => {
     const { indexNames, httpClient, closeModal, reloadIndices } = this.props;
-    const target = this. getTarget();
+
     try {
       await removeLifecycleForIndex(indexNames, httpClient);
       closeModal();
@@ -49,10 +36,10 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
         i18n.translate(
           'xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removePolicySuccess',
           {
-            defaultMessage: 'Removed lifecycle policy from {target}',
+            defaultMessage: 'Removed lifecycle policy from {count, plural, one {index} other {indices}}',
             values: {
-              target
-            },
+              count: indexNames.length,
+            }
           }
         )
       );
@@ -69,25 +56,19 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
       );
     }
   };
-  getTarget() {
-    const { indexNames } = this.props;
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
-    return oneIndexSelected ? (indexNames[0]) : `${indexNames.length} ${entity}`;
-  }
-  render() {
 
-    const { closeModal } = this.props;
-    const target = this. getTarget();
+  render() {
+    const { closeModal, indexNames } = this.props;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.modalTitle"
-              defaultMessage="Remove lifecycle policy from &quot;{target}&quot;"
+              defaultMessage="Remove lifecycle policy from {count, plural, one {index} other {indices}}"
               values={{
-                target
+                count: indexNames.length,
               }}
             />
           }
@@ -107,14 +88,25 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
             />
           }
         >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removeMessage"
-            defaultMessage="You are about to remove the index lifecycle policy from &quot;{target}&quot;.
-              This operation cannot be undone."
-            values={{
-              target
-            }}
-          />
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removeMessage"
+                defaultMessage="You are about to remove the index lifecycle policy from
+                  {count, plural, one {this index} other {these indices}}.
+                  This operation cannot be undone."
+                values={{
+                  count: indexNames.length,
+                }}
+              />
+            </p>
+
+            <ul>
+              {indexNames.map(indexName => (
+                <li key={indexName}>{indexName}</li>
+              ))}
+            </ul>
+          </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );

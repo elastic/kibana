@@ -28,11 +28,11 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
       type="space"
       data-test-subj={`space-avatar-${space.id}`}
       name={spaceName}
-      {...!announceSpaceName && {
+      {...(!announceSpaceName && {
         // provide empty aria-label so EUI doesn't try to provide its own
         'aria-label': '',
         'aria-hidden': true,
-      }}
+      })}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}

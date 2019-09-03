@@ -6,11 +6,11 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
 import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import { useKibanaCore } from '../../../../../../observability/public';
 
 interface MlRisonData {
   ml?: {
@@ -25,6 +25,7 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {} }: Props) {
+  const core = useKibanaCore();
   const location = useLocation();
 
   const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
@@ -36,7 +37,7 @@ export function MLLink({ children, path = '', query = {} }: Props) {
   }
 
   const href = url.format({
-    pathname: chrome.addBasePath('/app/ml'),
+    pathname: core.http.basePath.prepend('/app/ml'),
     hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
   });
 

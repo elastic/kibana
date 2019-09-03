@@ -136,11 +136,6 @@ export class AxisConfig {
         }
       }
 
-      // override axisFormatter (to replicate current behaviour)
-      if (this.isPercentage()) {
-        this._values.labels.axisFormatter = d3.format('%');
-      }
-
       if (this.isLogScale()) {
         this._values.labels.filter = true;
       }

@@ -49,13 +49,34 @@ class TextService {
     };
     this.breadcrumbs = {
       home: i18n.translate('xpack.snapshotRestore.home.breadcrumbTitle', {
-        defaultMessage: 'Snapshot Repositories',
+        defaultMessage: 'Snapshot and Restore',
+      }),
+      snapshots: i18n.translate('xpack.snapshotRestore.snapshots.breadcrumbTitle', {
+        defaultMessage: 'Snapshots',
+      }),
+      repositories: i18n.translate('xpack.snapshotRestore.repositories.breadcrumbTitle', {
+        defaultMessage: 'Repositories',
+      }),
+      policies: i18n.translate('xpack.snapshotRestore.policies.breadcrumbTitle', {
+        defaultMessage: 'Policies',
+      }),
+      restore_status: i18n.translate('xpack.snapshotRestore.restoreStatus.breadcrumbTitle', {
+        defaultMessage: 'Restore Status',
       }),
       repositoryAdd: i18n.translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
         defaultMessage: 'Add repository',
       }),
       repositoryEdit: i18n.translate('xpack.snapshotRestore.editRepository.breadcrumbTitle', {
         defaultMessage: 'Edit repository',
+      }),
+      restoreSnapshot: i18n.translate('xpack.snapshotRestore.restoreSnapshot.breadcrumbTitle', {
+        defaultMessage: 'Restore snapshot',
+      }),
+      policyAdd: i18n.translate('xpack.snapshotRestore.addPolicy.breadcrumbTitle', {
+        defaultMessage: 'Add policy',
+      }),
+      policyEdit: i18n.translate('xpack.snapshotRestore.editPolicy.breadcrumbTitle', {
+        defaultMessage: 'Edit policy',
       }),
     };
   }

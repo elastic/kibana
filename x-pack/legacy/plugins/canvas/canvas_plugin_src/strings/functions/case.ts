@@ -7,29 +7,41 @@
 import { i18n } from '@kbn/i18n';
 import { caseFn } from '../../functions/common/case';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
+
+const IF_ARG = '`if`';
+const WHEN_ARG = '`when`';
 
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
-    defaultMessage: 'Build a case (including a condition/result) to pass to the {switch} function',
+    defaultMessage:
+      'Builds a {case}, including a condition and a result, to pass to the {switchFn} function.',
     values: {
-      switch: 'switch',
+      case: '`case`',
+      switchFn: '`switch`',
     },
   }),
   args: {
-    if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
-      defaultMessage:
-        'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
-    }),
     when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
       defaultMessage:
-        'This value is compared to the context to see if the condition is met. It is overridden by the "{if}" argument if both are provided.',
+        'The value compared to the {CONTEXT} to see if they are equal. The {WHEN_ARG} argument is ignored when the {IF_ARG} argument is also specified.',
       values: {
-        if: 'if',
+        CONTEXT,
+        IF_ARG,
+        WHEN_ARG,
+      },
+    }),
+    if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
+      defaultMessage:
+        'This value indicates whether the condition is met, usually using a sub-expression. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
+      values: {
+        IF_ARG,
+        WHEN_ARG,
       },
     }),
     then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
-      defaultMessage: 'The value to return if the condition is met',
+      defaultMessage: 'The value to return if the condition is met.',
     }),
   },
 };

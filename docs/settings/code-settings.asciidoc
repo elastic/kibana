@@ -40,3 +40,6 @@ Maximal number of workspaces each language server allows to span. Defaults to `5
 
 `xpack.code.codeNodeUrl`::
 URL of the Code node. This config is only needed when multiple Kibana instances are set up as a cluster. Defaults to ``
+
+`xpack.code.verbose`::
+Set this config to `true` to log all events. Defaults to `false`

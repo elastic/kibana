@@ -8,19 +8,16 @@ import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomStri
 
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
+
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',
   breadcrumbs: { set: () => {} },
-}));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
+  getUiSettingsClient: () => ({
+    get: x => x,
+    getUpdate$: () => ({ subscribe: jest.fn() }),
+  }),
 }));
 
 const { setup } = pageHelpers.autoFollowPatternList;
@@ -76,7 +73,7 @@ describe('<AutoFollowPatternList />', () => {
     });
   });
 
-  describe('when there are auto-follow patterns', async () => {
+  describe('when there are auto-follow patterns', () => {
     let find;
     let exists;
     let component;

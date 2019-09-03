@@ -19,6 +19,8 @@
 
 export default function ({ loadTestFile }) {
   describe('core plugins', () => {
+    loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./ui_plugins'));
+    loadTestFile(require.resolve('./server_plugins.js'));
   });
 }

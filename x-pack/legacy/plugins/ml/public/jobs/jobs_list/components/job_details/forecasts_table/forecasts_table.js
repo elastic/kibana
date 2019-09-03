@@ -29,7 +29,7 @@ import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { isTimeSeriesViewJob } from '../../../../../../common/util/job_utils';
+import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -80,9 +80,10 @@ class ForecastsTableUI extends Component {
     // Set the total time range from the start of the job data to the end of the forecast,
     const dataCounts = this.props.job.data_counts;
     const jobEarliest = dataCounts.earliest_record_timestamp;
+    const resultLatest = getLatestDataOrBucketTimestamp(dataCounts.latest_record_timestamp, dataCounts.latest_bucket_timestamp);
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = forecast !== undefined ? new Date(forecast.forecast_end_timestamp).toISOString() :
-      new Date(dataCounts.latest_record_timestamp).toISOString();
+      new Date(resultLatest).toISOString();
 
     const _g = rison.encode({
       ml: {

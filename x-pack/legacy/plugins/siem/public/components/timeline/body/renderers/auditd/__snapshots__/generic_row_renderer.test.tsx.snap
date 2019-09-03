@@ -2,14 +2,12 @@
 
 exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
-      width={100}
-    >
-      <pure(Component)
+    <RowRendererContainer>
+      <AuditdGenericDetails
         browserFields={Object {}}
         contextId="connected-to"
         data={
@@ -121,21 +119,19 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
         }
         text="some text"
       />
-    </styled.div>
-  </styled.div>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
-      width={100}
-    >
-      <pure(Component)
+    <RowRendererContainer>
+      <AuditdGenericFileDetails
         browserFields={Object {}}
         contextId="opened-file"
         data={
@@ -273,7 +269,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         fileIcon="document"
         text="some text"
       />
-    </styled.div>
-  </styled.div>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;

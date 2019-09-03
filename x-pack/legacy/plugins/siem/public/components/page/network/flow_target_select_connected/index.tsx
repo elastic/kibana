@@ -23,6 +23,8 @@ const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
 
+SelectTypeItem.displayName = 'SelectTypeItem';
+
 interface FlowTargetSelectReduxProps {
   flowTarget: FlowTarget;
 }
@@ -49,6 +51,8 @@ const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
     </SelectTypeItem>
   )
 );
+
+FlowTargetSelectComponent.displayName = 'FlowTargetSelectComponent';
 
 const makeMapStateToProps = () => {
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();

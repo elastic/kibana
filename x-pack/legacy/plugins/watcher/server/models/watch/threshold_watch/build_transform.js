@@ -5,7 +5,8 @@
  */
 
 import { singleLineScript } from '../lib/single_line_script';
-
+import { COMPARATORS } from '../../../../common/constants';
+const { BETWEEN } = COMPARATORS;
 /*
 watch.transform.script.inline
  */
@@ -22,7 +23,26 @@ function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
   }
 
   if (aggType === 'count' && hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      HashMap result = new HashMap();
+      ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
+      ArrayList filteredHits = new ArrayList();
+
+      for (int i = 0; i < arr.length; i++) {
+        HashMap filteredHit = new HashMap();
+        filteredHit.key = arr[i].key;
+        filteredHit.value = arr[i].doc_count;
+        if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) {
+          filteredHits.add(filteredHit);
+        }
+      }
+      result.results = filteredHits;
+
+      return result;
+    `;
+    } else {
+      script = `
       HashMap result = new HashMap();
       ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
       ArrayList filteredHits = new ArrayList();
@@ -39,6 +59,8 @@ function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
 
       return result;
     `;
+    }
+
   }
 
   if (aggType !== 'count' && !hasTermsAgg) {
@@ -51,7 +73,26 @@ function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
   }
 
   if (aggType !== 'count' && hasTermsAgg) {
-    script = `
+    if (thresholdComparator === BETWEEN) {
+      script = `
+      HashMap result = new HashMap();
+      ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
+      ArrayList filteredHits = new ArrayList();
+
+      for (int i = 0; i < arr.length; i++) {
+        HashMap filteredHit = new HashMap();
+        filteredHit.key = arr[i].key;
+        filteredHit.value = arr[i]['metricAgg'].value;
+        if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) {
+          filteredHits.add(filteredHit);
+        }
+      }
+      result.results = filteredHits;
+
+      return result;
+    `;
+    } else {
+      script = `
       HashMap result = new HashMap();
       ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets;
       ArrayList filteredHits = new ArrayList();
@@ -68,6 +109,8 @@ function buildInline({ aggType, hasTermsAgg, thresholdComparator }) {
 
       return result;
     `;
+    }
+
   }
 
   return singleLineScript(script);

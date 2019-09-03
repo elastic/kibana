@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../shared/layers/vector_layer', () => {});
-jest.mock('../shared/layers/sources/all_sources', () => {});
-jest.mock('../store/non_serializable_instances', () => ({
+jest.mock('../layers/vector_layer', () => {});
+jest.mock('../layers/heatmap_layer', () => {});
+jest.mock('../layers/vector_tile_layer', () => {});
+jest.mock('../layers/sources/all_sources', () => {});
+jest.mock('../reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};
   }

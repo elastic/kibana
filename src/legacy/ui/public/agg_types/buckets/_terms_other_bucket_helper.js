@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -26,8 +27,16 @@ import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@k
  * @param startFromId: id of an aggregation from where we want to get the nested DSL
  */
 const getNestedAggDSL = (aggNestedDsl, startFromAggId) => {
-  if (aggNestedDsl[startFromAggId]) return aggNestedDsl[startFromAggId];
-  return getNestedAggDSL(_.values(aggNestedDsl)[0].aggs, startFromAggId);
+  if (aggNestedDsl[startFromAggId]) {
+    return aggNestedDsl[startFromAggId];
+  }
+  const nestedAggs = _.values(aggNestedDsl);
+  let aggs;
+  for (let i = 0; i < nestedAggs.length; i++) {
+    if (nestedAggs[i].aggs && (aggs = getNestedAggDSL(nestedAggs[i].aggs, startFromAggId))) {
+      return aggs;
+    }
+  }
 };
 
 /**
@@ -42,19 +51,27 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
   let responseAgg = response;
   for (const i in keyParts) {
     if (keyParts[i]) {
-      const agg = _.values(responseAgg)[0];
-      const aggKey = _.keys(responseAgg)[0];
-      const aggConfig = _.find(aggConfigs, agg => agg.id === aggKey);
-      const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
-        const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
-        return bucketKey === keyParts[i];
-      });
-      if (bucket) {
-        responseAgg = bucket;
+      const responseAggs = _.values(responseAgg);
+      // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
+      // so we need to loop over each agg until we find it.
+      for (let aggId = 0; aggId < responseAggs.length; aggId++) {
+        const agg = responseAggs[aggId];
+        const aggKey = _.keys(responseAgg)[aggId];
+        const aggConfig = _.find(aggConfigs.aggs, agg => agg.id === aggKey);
+        const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
+          const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
+          return bucketKey === keyParts[i];
+        });
+        if (bucket) {
+          responseAgg = bucket;
+          break;
+        }
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg[aggWithOtherBucket.id]) {
+    return responseAgg[aggWithOtherBucket.id].buckets;
+  }
   return [];
 };
 
@@ -100,8 +117,8 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 };
 
 
-const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
-  const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
+export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
+  const bucketAggs = aggConfigs.aggs.filter(agg => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
@@ -110,6 +127,9 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
+    params: {
+      filters: [],
+    },
   }, {
     addToAggConfigs: false,
   });
@@ -120,8 +140,16 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     filters: filterAgg.toDsl(),
   };
 
-  // create filters for all parent aggregation buckets
+  let noAggBucketResults = false;
+
+  // recursively create filters for all parent aggregation buckets
   const walkBucketTree = (aggIndex, aggs, aggId, filters, key) => {
+    // make sure there are actually results for the buckets
+    if (aggs[aggId].buckets.length < 1) {
+      noAggBucketResults = true;
+      return;
+    }
+
     const agg = aggs[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
@@ -154,6 +182,11 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
+  // bail if there were no bucket results
+  if (noAggBucketResults) {
+    return false;
+  }
+
   return () => {
     return {
       'other-filter': resultAgg
@@ -161,7 +194,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   };
 };
 
-const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
+export const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
   const updatedResponse = _.cloneDeep(response);
   _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count) return;
@@ -182,17 +215,11 @@ const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherA
   return updatedResponse;
 };
 
-const updateMissingBucket = (response, aggConfigs, agg) => {
+export const updateMissingBucket = (response, aggConfigs, agg) => {
   const updatedResponse = _.cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
   aggResultBuckets.forEach(bucket => {
     bucket.key = '__missing__';
   });
   return updatedResponse;
-};
-
-export {
-  buildOtherBucketAgg,
-  mergeOtherBucketAggResponse,
-  updateMissingBucket,
 };

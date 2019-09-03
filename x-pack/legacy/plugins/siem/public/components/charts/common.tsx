@@ -15,16 +15,26 @@ import {
   LIGHT_THEME,
   DARK_THEME,
   ScaleType,
+  TickFormatter,
+  SettingSpecProps,
+  Rotation,
+  Rendering,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
 
 const chartHeight = 74;
+const chartDefaultRotation: Rotation = 0;
+const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+
+FlexGroup.displayName = 'FlexGroup';
+
+export type UpdateDateRange = (min: number, max: number) => void;
 
 export const ChartHolder = () => (
   <FlexGroup justifyContent="center" alignItems="center">
@@ -37,6 +47,15 @@ export const ChartHolder = () => (
     </EuiFlexItem>
   </FlexGroup>
 );
+
+export const chartDefaultSettings = {
+  rotation: chartDefaultRotation,
+  rendering: chartDefaultRendering,
+  animatedData: false,
+  showLegend: false,
+  showLegendDisplayValue: false,
+  debug: false,
+};
 
 export interface ChartData {
   x: number | string | null;
@@ -54,6 +73,7 @@ export interface ChartSeriesConfigs {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
   };
+  settings?: Partial<SettingSpecProps>;
 }
 
 export interface ChartConfigsData {
@@ -72,6 +92,8 @@ export const WrappedByAutoSizer = styled.div`
     z-index: 100;
   }
 `;
+
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 export enum SeriesType {
   BAR = 'bar',
@@ -117,10 +139,10 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
-const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
 export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;

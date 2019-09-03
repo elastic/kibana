@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -166,7 +167,14 @@ class SearchPage extends React.PureComponent<Props, State> {
       const statsComp = (
         <EuiTitle size="m">
           <h1>
-            Showing {total > 0 ? from : 0} - {to} of {total} results.
+            <FormattedMessage
+              id="xpack.code.searchPage.showingResultsTitle"
+              defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                one {result}
+                other {results}
+              }."
+              values={{ from: from + 1, to, total }}
+            />
           </h1>
         </EuiTitle>
       );
@@ -186,7 +194,14 @@ class SearchPage extends React.PureComponent<Props, State> {
         const statsComp = (
           <EuiTitle size="m">
             <h1>
-              Showing {total > 0 ? from : 0} - {to} of {total} results.
+              <FormattedMessage
+                id="xpack.code.searchPage.showingResultsTitle"
+                defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                  one {result}
+                  other {results}
+                }."
+                values={{ from: from + 1, to, total }}
+              />
             </h1>
           </EuiTitle>
         );
@@ -195,7 +210,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             {statsComp}
             <EuiSpacer />
             <div className="codeContainer__search--results">
-              <CodeResult results={results!} />
+              <CodeResult results={results!} query={this.props.query} />
             </div>
             <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>

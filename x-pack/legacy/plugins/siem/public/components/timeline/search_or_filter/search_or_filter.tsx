@@ -35,15 +35,7 @@ interface Props {
   isFilterQueryDraftValid: boolean;
   kqlMode: KqlMode;
   timelineId: string;
-  updateKqlMode: (
-    {
-      id,
-      kqlMode,
-    }: {
-      id: string;
-      kqlMode: KqlMode;
-    }
-  ) => void;
+  updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   setKqlFilterQueryDraft: (expression: string) => void;
 }
 
@@ -52,9 +44,13 @@ const SearchOrFilterContainer = styled.div`
   user-select: none;
 `;
 
+SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
+
 const ModeFlexItem = styled(EuiFlexItem)`
   user-select: none;
 `;
+
+ModeFlexItem.displayName = 'ModeFlexItem';
 
 export const SearchOrFilter = pure<Props>(
   ({
@@ -104,3 +100,5 @@ export const SearchOrFilter = pure<Props>(
     </SearchOrFilterContainer>
   )
 );
+
+SearchOrFilter.displayName = 'SearchOrFilter';

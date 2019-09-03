@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
-  describe('full screen mode', async () => {
+  describe('full screen mode', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
@@ -43,14 +43,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides the chrome', async () => {
-      let isChromeVisible = await PageObjects.common.isChromeVisible();
+      const isChromeVisible = await PageObjects.common.isChromeVisible();
       expect(isChromeVisible).to.be(true);
 
       await PageObjects.dashboard.clickFullScreenMode();
 
       await retry.try(async () => {
-        isChromeVisible = await PageObjects.common.isChromeVisible();
-        expect(isChromeVisible).to.be(false);
+        const isChromeHidden = await PageObjects.common.isChromeHidden();
+        expect(isChromeHidden).to.be(true);
       });
     });
 

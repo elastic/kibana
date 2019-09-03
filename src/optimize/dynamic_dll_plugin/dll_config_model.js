@@ -57,10 +57,7 @@ function generateDLL(config) {
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: {
-        ...dllAlias,
-        'dll/set_csp_nonce$': require.resolve('./public/set_csp_nonce')
-      },
+      alias: dllAlias,
       modules: [
         'webpackShims',
         fromRoot('webpackShims'),
@@ -95,19 +92,13 @@ function generateDLL(config) {
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
           use: ((babelLoaderCacheDirPath, loaders) => {
-            // Only deactivate cache-loader and thread-loader on
-            // distributable. It is valid when running from source
-            // both with dev or prod bundles or even when running
-            // kibana for dev only.
-            if (IS_KIBANA_DISTRIBUTABLE) {
-              return loaders;
-            }
-
             return [
               {
                 loader: 'cache-loader',
                 options: {
-                  cacheDirectory: babelLoaderCacheDirPath
+                  cacheContext: fromRoot('.'),
+                  cacheDirectory: babelLoaderCacheDirPath,
+                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
                 }
               },
               ...loaders

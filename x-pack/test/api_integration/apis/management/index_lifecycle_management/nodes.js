@@ -33,7 +33,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('detail', async () => {
+    describe('detail', () => {
       it('should return the node stats when providing a custom node attribute', async () => {
         // Load the stats from ES js client
         const nodeStats = await getNodesStats();

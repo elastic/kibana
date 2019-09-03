@@ -109,21 +109,21 @@ describe('JobSelectorTable', () => {
   describe('Single Selection', () => {
 
     test('Does not render tabs', () => {
-      const singleSelectionProps = { ...props, singleSelection: 'true' };
+      const singleSelectionProps = { ...props, singleSelection: true };
       const { queryByRole } = render(<JobSelectorTable {...singleSelectionProps} />);
       const tabs = queryByRole('tab');
       expect(tabs).toBeNull();
     });
 
     test('incoming selectedId is selected in the table', () => {
-      const singleSelectionProps = { ...props, singleSelection: 'true' };
+      const singleSelectionProps = { ...props, singleSelection: true };
       const { getByTestId } = render(<JobSelectorTable {...singleSelectionProps} />);
       const radioButton = getByTestId('price-by-day-radio-button');
       expect(radioButton.firstChild.checked).toEqual(true);
     });
 
     test('job cannot be selected if it is not a single metric viewer job', () => {
-      const timeseriesOnlyProps = { ...props, singleSelection: 'true', timeseriesOnly: 'true' };
+      const timeseriesOnlyProps = { ...props, singleSelection: true, timeseriesOnly: true };
       const { getByTestId } = render(<JobSelectorTable {...timeseriesOnlyProps} />);
       const radioButton = getByTestId('non-timeseries-job-radio-button');
       expect(radioButton.firstChild.disabled).toEqual(true);
@@ -179,4 +179,3 @@ describe('JobSelectorTable', () => {
   });
 
 });
-

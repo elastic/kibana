@@ -7,7 +7,7 @@
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { UncommonProcesses } from '../../lib/uncommon_processes';
-import { createOptions } from '../../utils/build_query/create_options';
+import { createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryUncommonProcessesResolver = ChildResolverOf<
@@ -28,7 +28,7 @@ export const createUncommonProcessesResolvers = (
 } => ({
   Source: {
     async UncommonProcesses(source, args, { req }, info) {
-      const options = createOptions(source, args, info);
+      const options = createOptionsPaginated(source, args, info);
       return libs.uncommonProcesses.getUncommonProcesses(req, options);
     },
   },

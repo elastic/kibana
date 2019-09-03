@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseToolkit } from 'hapi';
+import { RequestFacade } from '../..';
 import { CodeServerRouter } from '../security';
+import { CodeServices } from '../distributed/code_services';
+import { SetupDefinition } from '../distributed/apis';
 
-export function setupRoute(server: CodeServerRouter) {
-  server.route({
+export function setupRoute(router: CodeServerRouter, codeServices: CodeServices) {
+  const setupService = codeServices.serviceFor(SetupDefinition);
+  router.route({
     method: 'get',
     path: '/api/code/setup',
-    handler(req, h: ResponseToolkit) {
-      return h.response('').code(200);
+    async handler(req: RequestFacade) {
+      const endpoint = await codeServices.locate(req, '');
+      return await setupService.setup(endpoint, {});
     },
   });
 }

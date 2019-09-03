@@ -30,6 +30,7 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
+  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
@@ -49,7 +50,6 @@ import {
   RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileScssTask,
-  TypecheckTypescriptTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
@@ -108,7 +108,6 @@ export async function buildDistributables(options) {
    * run platform-generic build tasks
    */
   await run(CopySourceTask);
-  await run(TypecheckTypescriptTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
@@ -136,6 +135,7 @@ export async function buildDistributables(options) {
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
+  await run(CleanCtagBuildTask);
 
   await run(PathLengthTask);
 

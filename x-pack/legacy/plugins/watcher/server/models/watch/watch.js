@@ -28,7 +28,7 @@ export class Watch {
     if (!json.type) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watch.typePropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {type} property',
+          defaultMessage: 'JSON argument must contain an {type} property',
           values: {
             type: 'type'
           }
@@ -54,7 +54,7 @@ export class Watch {
     if (!json.watchJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watch.watchJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchJson} property',
+          defaultMessage: 'JSON argument must contain a {watchJson} property',
           values: {
             watchJson: 'watchJson'
           }

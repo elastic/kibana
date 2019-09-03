@@ -37,7 +37,6 @@ export function lt(): ExpressionFunction<'lt', Context, Arguments, boolean> {
         return false;
       }
 
-      // @ts-ignore #35433 This is a wonky comparison for nulls
       return context < value;
     },
   };

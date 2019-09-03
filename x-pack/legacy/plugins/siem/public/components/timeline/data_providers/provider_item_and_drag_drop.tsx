@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -29,6 +29,8 @@ const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
   margin: 0px 8px;
 `;
 
+DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersContainer';
+
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   min-width: 230px;
   width: auto;
@@ -49,9 +51,17 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
 `;
 
-const NumberProviderAndBadge = styled(EuiBadge)`
-  margin: 0px 5px;
-`;
+DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// const NumberProviderAndBadge = styled(EuiBadge)`
+//   margin: 0px 5px;
+// `;
+const NumberProviderAndBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ margin: '0px 5px' }} />
+);
+
+NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 
 interface ProviderItemDropProps {
   browserFields: BrowserFields;
@@ -120,3 +130,5 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
     );
   }
 );
+
+ProviderItemAndDragDrop.displayName = 'ProviderItemAndDragDrop';

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import collectBranch from '../../../agg_response/hierarchical/_collect_branch';
+import { collectBranch } from './_collect_branch';
 import numeral from 'numeral';
 import template from './_hierarchical_tooltip.html';
 

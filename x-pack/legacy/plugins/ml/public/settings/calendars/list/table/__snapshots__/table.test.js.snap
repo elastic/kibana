@@ -26,6 +26,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         },
       ]
     }
+    data-test-subj="mlCalendarTable"
     executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="calendar_id"
@@ -69,7 +70,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         "toolsRight": Array [
           <EuiButton
             color="primary"
-            data-testid="new_calendar_button"
+            data-test-subj="mlCalendarButtonCreate"
             fill={false}
             href="undefined/app/ml#/settings/calendars_list/new_calendar"
             iconSide="left"

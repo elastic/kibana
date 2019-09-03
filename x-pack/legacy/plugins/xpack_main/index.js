@@ -7,9 +7,9 @@
 import { resolve } from 'path';
 import dedent from 'dedent';
 import {
-  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
+import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_config_with_deprecated';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
@@ -18,7 +18,6 @@ import {
   featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
-import { i18n } from '@kbn/i18n';
 
 import { registerOssFeatures } from './server/lib/register_oss_features';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
@@ -57,24 +56,19 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
-      uiSettingDefaults: {
-        [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email'
-          }),
-          // TODO: change the description when email address is used for more things?
-          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-            defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
-          }),
-          type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null
-        }
-      },
       hacks: [
         'plugins/xpack_main/hacks/check_xpack_info_change',
       ],
       replaceInjectedVars,
+      injectDefaultVars(server) {
+        const config = server.config();
+
+        return {
+          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+        };
+      },
       __webpackPluginProvider__(webpack) {
         return new webpack.BannerPlugin({
           banner: dedent`
@@ -91,7 +85,9 @@ export const xpackMain = (kibana) => {
 
       setupXPackMain(server);
       const { types: savedObjectTypes } = server.savedObjects;
-      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
+      const config = server.config();
+      const isTimelionUiEnabled = config.get('timelion.enabled') && config.get('timelion.ui.enabled');
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes, isTimelionUiEnabled);
 
       // register routes
       xpackInfoRoute(server);

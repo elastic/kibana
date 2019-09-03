@@ -33,7 +33,7 @@ const MAX_HIT_NUMBER = 5;
 export class DocumentSearchClient extends AbstractSearchClient {
   private HIGHLIGHT_PRE_TAG = '_@-';
   private HIGHLIGHT_POST_TAG = '-@_';
-  private LINE_SEPARATOR = '\n';
+  protected LINE_SEPARATOR = '\n';
 
   constructor(protected readonly client: EsClient, protected readonly log: Logger) {
     super(client, log);
@@ -67,19 +67,13 @@ export class DocumentSearchClient extends AbstractSearchClient {
 
     // The queries to search content and path filter.
     const contentQuery = {
-      term: {
-        content: {
-          value: req.query,
-          boost: 1.0,
-        },
+      match: {
+        content: req.query,
       },
     };
     const pathQuery = {
-      term: {
-        path: {
-          value: req.query,
-          boost: 1.0,
-        },
+      match: {
+        path: req.query,
       },
     };
 
@@ -203,15 +197,16 @@ export class DocumentSearchClient extends AbstractSearchClient {
       const doc: Document = hit._source;
       const { repoUri, path, language } = doc;
 
-      const highlight = hit.highlight;
+      let termContent: string[] = [];
       // Similar to https://github.com/lambdalab/lambdalab/blob/master/services/liaceservice/src/main/scala/com/lambdalab/liaceservice/LiaceServiceImpl.scala#L147
       // Might need refactoring.
-      const highlightContent: string[] = highlight.content;
-      let termContent: string[] = [];
-      if (highlightContent) {
-        highlightContent.forEach((c: string) => {
-          termContent = termContent.concat(this.extractKeywords(c));
-        });
+      if (hit.highlight) {
+        const highlightContent: string[] = hit.highlight.content;
+        if (highlightContent) {
+          highlightContent.forEach((c: string) => {
+            termContent = termContent.concat(this.extractKeywords(c));
+          });
+        }
       }
       const hitsContent = this.termsToHits(doc.content, termContent);
       const sourceContent = this.getSourceContent(hitsContent, doc);
@@ -312,7 +307,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
     };
   }
 
-  private getSourceContent(hitsContent: SourceHit[], doc: Document) {
+  protected getSourceContent(hitsContent: SourceHit[], doc: Document) {
     const docInLines = doc.content.split(this.LINE_SEPARATOR);
     let slicedRanges: LineRange[] = [];
     if (hitsContent.length === 0) {

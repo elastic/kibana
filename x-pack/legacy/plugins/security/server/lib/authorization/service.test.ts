@@ -9,6 +9,7 @@ import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,
   mockCheckPrivilegesWithRequestFactory,
+  mockCheckSavedObjectsPrivilegesWithRequestFactory,
   mockGetClient,
   mockPrivilegesFactory,
 } from './service.test.mocks';
@@ -17,6 +18,7 @@ import { getClient } from '../../../../../server/lib/get_client_shield';
 import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
+import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
 import { createAuthorizationService } from './service';
@@ -45,12 +47,20 @@ test(`returns exposed services`, () => {
   };
   const mockShieldClient = Symbol();
   mockGetClient.mockReturnValue(mockShieldClient);
+
   const mockCheckPrivilegesWithRequest = Symbol();
   mockCheckPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
+
   const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
   mockCheckPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
     mockCheckPrivilegesDynamicallyWithRequest
   );
+
+  const mockCheckSavedObjectsPrivilegesWithRequest = Symbol();
+  mockCheckSavedObjectsPrivilegesWithRequestFactory.mockReturnValue(
+    mockCheckSavedObjectsPrivilegesWithRequest
+  );
+
   const mockActions = Symbol();
   mockActionsFactory.mockReturnValue(mockActions);
   const mockXpackInfoFeature = Symbol();
@@ -83,6 +93,10 @@ test(`returns exposed services`, () => {
     mockCheckPrivilegesWithRequest,
     mockSpaces
   );
+  expect(checkSavedObjectsPrivilegesWithRequestFactory).toHaveBeenCalledWith(
+    mockCheckPrivilegesWithRequest,
+    mockSpaces
+  );
   expect(privilegesFactory).toHaveBeenCalledWith(mockActions, mockXpackMainPlugin);
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockXpackInfoFeature);
 
@@ -91,6 +105,7 @@ test(`returns exposed services`, () => {
     application,
     checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+    checkSavedObjectsPrivilegesWithRequest: mockCheckSavedObjectsPrivilegesWithRequest,
     mode: mockAuthorizationMode,
     privileges: mockPrivilegesService,
   });

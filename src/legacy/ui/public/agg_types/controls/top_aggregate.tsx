@@ -21,40 +21,42 @@ import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
-import { AggParam } from '../agg_param';
-import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggConfig } from '../../vis';
+import { AggParam } from '../agg_params';
+import {
+  OptionedValueProp,
+  OptionedParamEditorProps,
+  OptionedParamType,
+} from '../param_types/optioned';
 
-interface AggregateValueProp extends SelectValueProp {
-  isCompatibleType(filedType: string): boolean;
-  isCompatibleVis(visName: string): boolean;
+export interface AggregateValueProp extends OptionedValueProp {
+  isCompatible(aggConfig: AggConfig): boolean;
 }
 
-function getCompatibleAggs(agg: AggConfig, visName: string): AggregateValueProp[] {
-  const fieldType = agg.params.field && agg.params.field.type;
-  const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
-  return options.filter(
-    (option: AggregateValueProp) =>
-      fieldType && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
-  );
+export type TopAggregateParamEditorProps = AggParamEditorProps<AggregateValueProp> &
+  OptionedParamEditorProps<AggregateValueProp>;
+
+export function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
+  const { options = [] } = agg
+    .getAggParams()
+    .find(({ name }: AggParam) => name === 'aggregate') as OptionedParamType;
+  return options.filter((option: AggregateValueProp) => option.isCompatible(agg));
 }
 
-function TopAggregateParamEditor({
+export function TopAggregateParamEditor({
   agg,
   aggParam,
   value,
-  visName,
   showValidation,
   setValue,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
-}: AggParamEditorProps<AggregateValueProp> & SelectParamEditorProps<AggregateValueProp>) {
+}: TopAggregateParamEditorProps) {
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
   const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
-  const filteredOptions = getCompatibleAggs(agg, visName)
+  const filteredOptions = getCompatibleAggs(agg)
     .map(({ text, value: val }) => ({ text, value: val }))
     .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
   const options = [emptyValue, ...filteredOptions];
@@ -78,40 +80,34 @@ function TopAggregateParamEditor({
     </>
   );
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (isFirstRun.current) {
-        isFirstRun.current = false;
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    if (value) {
+      if (aggParam.options.find(opt => opt.value === value.value)) {
         return;
       }
 
-      if (value) {
-        if (aggParam.options.byValue[value.value]) {
-          return;
-        }
+      setValue();
+    }
 
-        setValue();
-      }
-
-      if (filteredOptions.length === 1) {
-        setValue(aggParam.options.byValue[filteredOptions[0].value]);
-      }
-    },
-    [fieldType, visName]
-  );
+    if (filteredOptions.length === 1) {
+      setValue(aggParam.options.find(opt => opt.value === filteredOptions[0].value));
+    }
+  }, [fieldType]);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (event.target.value === emptyValue.value) {
       setValue();
     } else {
-      setValue(aggParam.options.byValue[event.target.value]);
+      setValue(aggParam.options.find(opt => opt.value === event.target.value));
     }
   };
 
@@ -120,7 +116,7 @@ function TopAggregateParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiSelect
         options={options}
@@ -130,9 +126,8 @@ function TopAggregateParamEditor({
         isInvalid={showValidation ? !isValid : false}
         disabled={disabled}
         onBlur={setTouched}
+        data-test-subj="visDefaultEditorAggregateWith"
       />
     </EuiFormRow>
   );
 }
-
-export { TopAggregateParamEditor, getCompatibleAggs };

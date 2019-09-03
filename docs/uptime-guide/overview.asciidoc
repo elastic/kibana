@@ -1,0 +1,11 @@
+[role="xpack"]
+[[uptime-overview]]
+== Overview
+
+The Elastic Uptime solution built on the Elastic Stack.
+It allows you to monitor the availability and response time of software services and applications in real time.
+
+Based on {heartbeat-ref}/index.html[Heartbeat], an open source uptime monitor, Elastic Uptime is transparent,
+flexible, and developer-friendly.
+It can be deployed both inside and outside your organization's network to understand service uptime and
+response time characteristics from multiple network vantage points.

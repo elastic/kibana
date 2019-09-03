@@ -7,7 +7,6 @@
 import { mount } from 'enzyme';
 import moment from 'moment';
 import React from 'react';
-
 import { toJson } from '../../../../../utils/testHelpers';
 import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
@@ -33,7 +32,6 @@ describe('when response has data', () => {
     onSelectionEnd = jest.fn();
     wrapper = mount(
       <InnerCustomPlot
-        noHits={false}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
@@ -291,7 +289,6 @@ describe('when response has no data', () => {
 
     wrapper = mount(
       <InnerCustomPlot
-        noHits={true}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
@@ -333,8 +330,8 @@ describe('when response has no data', () => {
       expect(wrapper.prop('series').length).toBe(1);
     });
 
-    it('The series is empty and every y-value is 1', () => {
-      expect(wrapper.prop('series')[0].data.every(d => d.y === 1)).toEqual(
+    it('The series is empty and every y-value is null', () => {
+      expect(wrapper.prop('series')[0].data.every(d => d.y === null)).toEqual(
         true
       );
     });

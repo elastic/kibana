@@ -22,7 +22,6 @@ import chrome from '../chrome';
 
 import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
-import { Notifier } from '../notify';
 import { metadata } from '../metadata';
 import { UiSettingsClient } from '../../../../core/public';
 
@@ -66,15 +65,6 @@ function createStubUiSettings() {
 
 createStubUiSettings();
 sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
-
-beforeEach(function () {
-  // ensure that notifications are not left in the notifiers
-  if (Notifier.prototype._notifs.length) {
-    const notifs = JSON.stringify(Notifier.prototype._notifs);
-    Notifier.prototype._notifs.length = 0;
-    throw new Error('notifications were left in the notifier: ' + notifs);
-  }
-});
 
 afterEach(function () {
   createStubUiSettings();

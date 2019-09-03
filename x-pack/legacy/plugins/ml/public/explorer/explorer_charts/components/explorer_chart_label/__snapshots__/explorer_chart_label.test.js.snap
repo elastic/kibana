@@ -26,7 +26,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
       className="ml-explorer-chart-info-icon"
     >
       <EuiIconTip
-        aria-label="Info"
         className="ml-explorer-chart-eui-icon-tip"
         content={
           <InjectIntl(ExplorerChartInfoTooltip)
@@ -45,7 +44,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
         }
         position="top"
         size="s"
-        type="questionInCircle"
       />
     </span>
   </span>
@@ -67,7 +65,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       className="ml-explorer-chart-info-icon"
     >
       <EuiIconTip
-        aria-label="Info"
         className="ml-explorer-chart-eui-icon-tip"
         content={
           <InjectIntl(ExplorerChartInfoTooltip)
@@ -86,7 +83,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
         }
         position="top"
         size="s"
-        type="questionInCircle"
       />
     </span>
   </span>

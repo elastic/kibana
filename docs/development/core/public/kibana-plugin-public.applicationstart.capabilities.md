@@ -4,8 +4,10 @@
 
 ## ApplicationStart.capabilities property
 
+Gets the read-only capabilities.
+
 <b>Signature:</b>
 
 ```typescript
-capabilities: CapabilitiesStart['capabilities'];
+capabilities: RecursiveReadonly<Capabilities>;
 ```

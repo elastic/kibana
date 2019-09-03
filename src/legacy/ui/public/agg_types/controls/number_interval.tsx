@@ -58,12 +58,9 @@ function NumberIntervalParamEditor({
   const min = base || 0;
   const isValid = value !== undefined && value >= min;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const numberValue = parseFloat(event.target.value);
@@ -72,7 +69,7 @@ function NumberIntervalParamEditor({
 
   return (
     <EuiFormRow
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}

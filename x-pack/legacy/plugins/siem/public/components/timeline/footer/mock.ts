@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData } from '../../../graphql/types';
+import { EventsTimelineData } from '../../../graphql/types';
 
-export const mockData: { Events: EventsData } = {
+export const mockData: { Events: EventsTimelineData } = {
   Events: {
     totalCount: 15546,
     pageInfo: {

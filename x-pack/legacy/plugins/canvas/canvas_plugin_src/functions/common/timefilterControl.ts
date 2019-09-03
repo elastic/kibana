@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Render } from '../types';
+import { Render } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
