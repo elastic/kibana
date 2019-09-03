@@ -17,31 +17,9 @@
  * under the License.
  */
 
-import { TmsLayer } from 'ui/vis/map/service_settings';
-import { MapTypes } from './map_types';
-
-export interface WMSOptions {
-  selectedTmsLayer?: TmsLayer;
-  enabled: boolean;
-  url?: string;
-  options: {
-    version?: string;
-    layers?: string;
-    format: string;
-    transparent: boolean;
-    attribution?: string;
-    styles?: string;
-  };
-}
-
-export interface TileMapVisParams {
-  colorSchema: string;
-  mapType: MapTypes;
-  isDesaturated: boolean;
-  addTooltip: boolean;
-  heatClusterSize: number;
-  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
-  mapZoom: number;
-  mapCenter: [number, number];
-  wms: WMSOptions;
+export enum MapTypes {
+  ScaledCircleMarkers = 'Scaled Circle Markers',
+  ShadedCircleMarkers = 'Shaded Circle Markers',
+  ShadedGeohashGrid = 'Shaded Geohash Grid',
+  Heatmap = 'Heatmap',
 }
