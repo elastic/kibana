@@ -23,7 +23,7 @@ import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { Action } from '../../actions';
 import { IEmbeddable } from '../../embeddables';
-import { VisualizeEmbeddable } from       '../../../../../../../kibana/public/visualize/embeddable/visualize_embeddable';
+import { VisualizeEmbeddable } from '../../../../../../../kibana/public/visualize/embeddable/visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../kibana/public/visualize/embeddable/constants';
 
 export interface PanelHeaderProps {
@@ -83,12 +83,14 @@ export function PanelHeader({
     );
   }
 
-  var viewDescr="";
+  let viewDescr = '';
   if (isVisualizeEmbeddable(embeddable)) {
-    var vd=(embeddable as VisualizeEmbeddable).getVisualizationDescription();
-    if (vd) viewDescr=vd;
+    const vd = (embeddable as VisualizeEmbeddable).getVisualizationDescription();
+    if (vd) {
+      viewDescr = vd;
+    }
   } else {
-    viewDescr="";
+    viewDescr = '';
   }
 
   return (
@@ -99,34 +101,25 @@ export function PanelHeader({
       <div
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
-        /*title={title}*/ /* this is redundant - it shows a tooltip with the view title - and clutters the UI */
-        aria-label={i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-          defaultMessage: 'Dashboard panel: {title}',
-          values: {
-            title,
-          },
-        })}
+        /* title={title} */ /* this is redundant - it shows a tooltip with the view title - and clutters the UI */ aria-label={i18n.translate(
+          'embeddableApi.panel.dashboardPanelAriaLabel',
+          {
+            defaultMessage: 'Dashboard panel: {title}',
+            values: {
+              title,
+            },
+          }
+        )}
       >
         {showTitle ? `${title} ` : ''}
         {renderBadges(badges, embeddable)}
-        {/*{(viewDescr!="")?
-        <EuiIconTip
-            content={viewDescr}
-            position="right"
-          />
-        :""
-        }*/}
-        {(viewDescr!="")?<EuiToolTip
-        content={viewDescr}
-        delay="regular"
-        position="right"
-        >
-          <EuiIcon
-            type="iInCircle"
-          />
-        </EuiToolTip>
-        :""
-        }       
+        {viewDescr !== '' ? (
+          <EuiToolTip content={viewDescr} delay="regular" position="right">
+            <EuiIcon type="iInCircle" />
+          </EuiToolTip>
+        ) : (
+          ''
+        )}
       </div>
 
       <PanelOptionsMenu
