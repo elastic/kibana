@@ -17,43 +17,18 @@
  * under the License.
  */
 
-import { FiltersService, FiltersSetup } from './filters';
-import { TypesService, TypesSetup } from './types';
-
-class VisualizationsPlugin {
-  private readonly filters: FiltersService;
-  private readonly types: TypesService;
-
-  constructor() {
-    this.filters = new FiltersService();
-    this.types = new TypesService();
-  }
-
-  public setup() {
-    return {
-      filters: this.filters.setup(),
-      types: this.types.setup(),
-    };
-  }
-
-  public stop() {
-    this.filters.stop();
-    this.types.stop();
-  }
-}
+import { PluginInitializerContext } from 'src/core/public';
+import { VisualizationsPublicPlugin, Setup } from './plugin';
 
 /**
  * We export visualizations here so that users importing from 'plugins/visualizations'
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-export const visualizations = new VisualizationsPlugin().setup();
+export const visualizations = new VisualizationsPublicPlugin({} as any).setup({} as any);
 
 /** @public */
-export interface VisualizationsSetup {
-  filters: FiltersSetup;
-  types: TypesSetup;
-}
+export type VisualizationsSetup = Setup;
 
 /** @public types */
 export {
@@ -69,3 +44,9 @@ export {
   VisTypesRegistry,
   Status,
 } from './types';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new VisualizationsPublicPlugin(initializerContext);
+}
+
+export { VisualizationsPublicPlugin as Plugin };
