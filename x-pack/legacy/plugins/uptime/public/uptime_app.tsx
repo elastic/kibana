@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { capabilities } from 'ui/capabilities';
-import { I18nContext } from 'ui/i18n';
+import { I18nStart, ChromeBreadcrumb } from 'src/core/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
@@ -32,9 +32,11 @@ export interface UptimeAppProps {
   basePath: string;
   client: UMGraphQLClient;
   darkMode: boolean;
+  i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
+  kibanaBreadcrumbs: ChromeBreadcrumb[];
   logMonitorPageLoad: () => void;
   logOverviewPageLoad: () => void;
   routerBasename: string;
@@ -48,6 +50,7 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     client,
     darkMode,
+    i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
     isLogsAvailable,
@@ -131,7 +134,7 @@ const Application = (props: UptimeAppProps) => {
   };
 
   return (
-    <I18nContext>
+    <i18nCore.Context>
       <Router basename={routerBasename}>
         <Route
           path="/"
@@ -191,7 +194,7 @@ const Application = (props: UptimeAppProps) => {
           }}
         />
       </Router>
-    </I18nContext>
+    </i18nCore.Context>
   );
 };
 
