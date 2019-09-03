@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'ui/timefilter';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';

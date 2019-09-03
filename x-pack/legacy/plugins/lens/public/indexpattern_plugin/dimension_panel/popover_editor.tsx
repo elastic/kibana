@@ -355,6 +355,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     currentColumn={state.layers[layerId].columns[columnId]}
                     storage={props.storage}
                     uiSettings={props.uiSettings}
+                    savedObjectsClient={props.savedObjectsClient}
                     layerId={layerId}
                   />
                 )}

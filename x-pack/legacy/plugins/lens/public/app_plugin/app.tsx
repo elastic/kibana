@@ -12,6 +12,7 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { Query, QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -55,6 +56,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
+  savedObjectsClient,
 }: {
   editorFrame: EditorFrameInstance;
   chrome: Chrome;
@@ -62,6 +64,7 @@ export function App({
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
   const timeDefaults = uiSettings.get('timepicker:timeDefaults');
@@ -211,6 +214,7 @@ export function App({
               state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
             }
             uiSettings={uiSettings}
+            savedObjectsClient={savedObjectsClient}
           />
         </div>
 

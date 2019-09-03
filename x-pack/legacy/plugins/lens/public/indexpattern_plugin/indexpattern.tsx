@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import {
   DatasourceDimensionPanelProps,
@@ -152,7 +153,11 @@ export function getIndexPatternDatasource({
   chrome,
   toastNotifications,
   storage,
-}: IndexPatternDatasourcePluginPlugins & { storage: Storage }) {
+  savedObjectsClient,
+}: IndexPatternDatasourcePluginPlugins & {
+  storage: Storage;
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
   const uiSettings = chrome.getUiSettingsClient();
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -267,6 +272,7 @@ export function getIndexPatternDatasource({
                 setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
+                savedObjectsClient={savedObjectsClient}
                 layerId={props.layerId}
                 {...props}
               />

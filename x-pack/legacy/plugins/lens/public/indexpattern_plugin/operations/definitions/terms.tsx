@@ -181,14 +181,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             step={1}
             value={currentColumn.params.size}
             showInput
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(
+              e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
+            ) =>
               setState(
                 updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
                   paramName: 'size',
-                  value: Number(e.target.value),
+                  value: Number((e.target as HTMLInputElement).value),
                 })
               )
             }

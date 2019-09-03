@@ -5,7 +5,7 @@
  */
 
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { termsOperation } from './terms';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
@@ -46,6 +46,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   layerId: string;
   uiSettings: UiSettingsClientContract;
   storage: Storage;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
