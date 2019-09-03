@@ -32,6 +32,12 @@ export default function ({ getService, getPageObjects }) {
   const loadingScreenShown = () =>
     testSubjects.existOrFail('kbnLoadingMessage');
 
+  const getKibanaUrl = path => {
+    const host = process.env.TEST_KIBANA_HOST || 'localhost';
+    const port = process.env.TEST_KIBANA_PORT || '5620';
+    return `http://${host}:${port}/${path}`;
+  };
+
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToApp('foo');
@@ -44,20 +50,20 @@ export default function ({ getService, getPageObjects }) {
     it('navigates to its own pages', async () => {
       // Go to page A
       await testSubjects.click('fooNavPageA');
-      expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
 
       // Go to home page
       await testSubjects.click('fooNavHome');
-      expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/`);
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/'));
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('can use the back button to navigate within an app', async () => {
       await browser.goBack();
-      expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
     });
@@ -66,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('fooNavBarPageB');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('barAppPageB');
-      expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/bar/page-b?query=here`);
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/bar/page-b?query=here'));
     });
 
     it('preserves query parameters across apps', async () => {
@@ -76,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
-      expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/foo/page-a'));
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
     });
