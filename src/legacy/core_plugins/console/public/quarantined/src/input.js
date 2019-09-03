@@ -24,14 +24,7 @@ const utils = require('./utils');
 const es = require('./es');
 
 let input;
-export function initializeInput(
-  $el,
-  $actionsEl,
-  output,
-  history,
-  settings,
-  openDocumentation = () => {}
-) {
+export function initializeInput($el, $actionsEl, history, settings, openDocumentation = () => {}) {
   input = new SenseEditor($el);
 
   input.autocomplete = new Autocomplete(input);
@@ -66,14 +59,16 @@ export function initializeInput(
 
   let CURRENT_REQ_ID = 0;
 
-  function sendCurrentRequestToES(addedToHistoryCb) {
+  function sendCurrentRequestToES(addedToHistoryCb, output) {
     const reqId = ++CURRENT_REQ_ID;
 
     input.getRequestsInRange(requests => {
       if (reqId !== CURRENT_REQ_ID) {
         return;
       }
-      output.update('');
+      if (output) {
+        output.update('');
+      }
 
       if (requests.length === 0) {
         return;
@@ -160,11 +155,15 @@ export function initializeInput(
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            if (isFirstRequest) {
-              output.update(value, mode);
-            } else {
-              output.append('\n' + value);
+
+            if (output) {
+              if (isFirstRequest) {
+                output.update(value, mode);
+              } else {
+                output.append('\n' + value);
+              }
             }
+
             isFirstRequest = false;
             // single request terminate via sendNextRequest as well
             sendNextRequest();
@@ -188,10 +187,12 @@ export function initializeInput(
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            if (isFirstRequest) {
-              output.update(value, mode);
-            } else {
-              output.append('\n' + value);
+            if (output) {
+              if (isFirstRequest) {
+                output.update(value, mode);
+              } else {
+                output.append('\n' + value);
+              }
             }
             finishChain();
           }

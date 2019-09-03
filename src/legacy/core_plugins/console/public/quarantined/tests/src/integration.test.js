@@ -38,7 +38,7 @@ describe('Integration', () => {
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#ConCopyAsCurl'),
+      {},
       {},
       null,
     );

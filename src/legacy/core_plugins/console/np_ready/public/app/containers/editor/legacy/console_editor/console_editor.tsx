@@ -17,8 +17,17 @@
  * under the License.
  */
 
-export function installEditorsResizeChecker(ResizeChecker: any, $el: any, ...editors: any[]) {
-  const checker = new ResizeChecker($el);
-  checker.on('resize', () => editors.forEach(e => e.resize()));
-  return () => checker.destroy();
+import React from 'react';
+
+import { MemoReadOnlyEditor } from './readonly_editor';
+import { MemoEditor, EditorProps } from './editor';
+
+export type ConsoleEditorProps = { readOnly?: boolean } & EditorProps;
+
+export function ConsoleEditor(props: ConsoleEditorProps) {
+  const { readOnly, ...editorProps } = props;
+  if (props.readOnly) {
+    return <MemoReadOnlyEditor {...editorProps} />;
+  }
+  return <MemoEditor {...editorProps} />;
 }

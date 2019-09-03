@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export {
-  ConsoleEditor,
-  ConsoleHistory,
-  MemoConsoleEditor,
-  autoIndent,
-  getDocumentation,
-} from './legacy';
+export function subscribeResizeChecker(ResizeChecker: any, $el: any, ...editors: any[]) {
+  const checker = new ResizeChecker($el);
+  checker.on('resize', () => editors.forEach(e => e.resize()));
+  return () => checker.destroy();
+}

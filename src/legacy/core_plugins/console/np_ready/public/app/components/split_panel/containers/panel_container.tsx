@@ -34,7 +34,7 @@ const pxToPercent = (proportion: number, whole: number) => (proportion / whole) 
 
 // TODO: Write tests for this
 export function PanelsContainer({ children, onPanelWidthChange }: Props) {
-  const [head, ...rest] = Children.toArray(children);
+  const [firstChild, ...rest] = Children.toArray(children);
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
     return containerRef.current!.getBoundingClientRect().width;
   };
 
-  const resizableChildren = rest.reduce(
+  const childrenWithResizer = rest.reduce(
     (acc: ReactNode[], child, idx) => {
       // The target idx is offset by one, we want to target the panel to the left of the resizer
       // for resizing.
@@ -64,7 +64,7 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
         child,
       ]);
     },
-    [head]
+    [firstChild]
   );
 
   return (
@@ -98,7 +98,7 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
           setState(initialState);
         }}
       >
-        {resizableChildren}
+        {childrenWithResizer}
       </div>
     </PanelContextProvider>
   );

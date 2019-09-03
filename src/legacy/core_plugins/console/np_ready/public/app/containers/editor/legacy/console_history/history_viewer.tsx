@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
 import { Settings } from '../../../../services';
-import { installEditorsResizeChecker } from '../install_console_resize_checker';
+import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 // @ts-ignore
 import SenseEditor from '../../../../../../../public/quarantined/src/sense_editor/editor';
@@ -42,7 +42,7 @@ export function HistoryViewer({ settings, ResizeChecker, req }: Props) {
     viewerRef.current = viewer;
     viewer.renderer.setShowPrintMargin(false);
     viewer.$blockScrolling = Infinity;
-    const unsubscribe = installEditorsResizeChecker(ResizeChecker, divRef.current!, viewer);
+    const unsubscribe = subscribeResizeChecker(ResizeChecker, divRef.current!, viewer);
     settings.applyCurrentSettings(viewer);
     return () => unsubscribe();
   }, []);

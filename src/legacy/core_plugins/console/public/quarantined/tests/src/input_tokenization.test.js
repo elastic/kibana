@@ -39,7 +39,7 @@ describe('Input Tokenization', () => {
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#ConCopyAsCurl'),
+      {},
       {},
       null
     );
@@ -47,7 +47,7 @@ describe('Input Tokenization', () => {
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#ConCopyAsCurl'),
+      {},
       {},
       null
     );

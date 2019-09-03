@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 
 // @ts-ignore
 import mappings from '../../../../../public/quarantined/src/mappings';
+// @ts-ignore
+import init from '../../../../../public/quarantined/src/app';
 
-import { MemoConsoleEditor, ConsoleHistory } from '../editor';
+import { ConsoleEditor, ConsoleHistory } from '../editor';
+import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
 import {
   AutocompleteOptions,
@@ -32,6 +36,8 @@ import {
   WelcomePanel,
   DevToolsSettingsModal,
   HelpPanel,
+  PanelsContainer,
+  Panel,
 } from '../../components';
 
 import { useAppContext } from '../../context';
@@ -40,14 +46,19 @@ import { StorageKeys, DevToolsSettings } from '../../services';
 import { getTopNavConfig } from './get_top_nav';
 
 const INITIAL_PANEL_WIDTH = 50;
+const PANEL_MIN_WIDTH = '100px';
 
 export function Main() {
   const {
-    services: { storage, settings },
+    services: { storage, settings, history },
     docLinkVersion,
+    ResizeChecker,
   } = useAppContext();
 
+  const [, forceUpdate] = useState(undefined);
   const [editorReady, setEditorReady] = useState<boolean>(false);
+  const [inputEditor, setInputEditor] = useState<any>(null);
+  const [outputEditor, setOutputEditor] = useState<any>(null);
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
   );
@@ -55,6 +66,24 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  const containerRef = useRef<null | HTMLDivElement>(null);
+
+  // We want to only run certain initialization after we now all our editors have
+  // been instantiated.
+  const inputReadySubject$ = useRef(new BehaviorSubject<any>(null));
+  const outputReadySubject$ = useRef(new BehaviorSubject<any>(null));
+  const editorsReady$ = useRef(
+    combineLatest(inputReadySubject$.current, outputReadySubject$.current)
+  );
+
+  const onInputEditorReady = useCallback((value: any) => {
+    inputReadySubject$.current.next(value);
+  }, []);
+
+  const onOutputEditorReady = useCallback((value: any) => {
+    outputReadySubject$.current.next(value);
+  }, []);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -72,7 +101,12 @@ export function Main() {
     []
   );
 
-  const onEditorReady = useCallback(() => setEditorReady(true), []);
+  const sendCurrentRequest = () => {
+    inputEditor.focus();
+    inputEditor.sendCurrentRequestToES(() => {
+      forceUpdate(undefined);
+    }, outputEditor);
+  };
 
   const renderConsoleHistory = () => {
     return editorReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -129,8 +163,34 @@ export function Main() {
     setShowSettings(false);
   };
 
+  useEffect(() => {
+    let resizerSubscriptions: Array<() => void> = [];
+    const subscription = editorsReady$.current.subscribe(([input, output]) => {
+      settings.registerOutput(output.editor);
+      settings.registerInput(input.editor);
+      history.setEditor(input.editor);
+
+      init(input.editor, output.editor, history);
+
+      resizerSubscriptions = resizerSubscriptions.concat([
+        subscribeResizeChecker(ResizeChecker, containerRef.current!, input.editor, output.editor),
+        subscribeResizeChecker(ResizeChecker, input.element, input.editor),
+        subscribeResizeChecker(ResizeChecker, output.element, output.editor),
+      ]);
+
+      setInputEditor(input.editor);
+      setOutputEditor(output.editor);
+      setEditorReady(true);
+    });
+
+    return () => {
+      resizerSubscriptions.map(done => done());
+      subscription.unsubscribe();
+    };
+  });
+
   return (
-    <>
+    <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
       <EuiFlexGroup
         style={{ height: '100%' }}
         gutterSize="none"
@@ -148,13 +208,28 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <MemoConsoleEditor
-            onEditorsReady={onEditorReady}
-            docLinkVersion={docLinkVersion}
-            onPanelWidthChange={onPanelWidthChange}
-            initialInputPanelWidth={firstPanelWidth}
-            initialOutputPanelWidth={secondPanelWidth}
-          />
+          <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
+            <Panel
+              style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+              initialWidth={firstPanelWidth + '%'}
+            >
+              <ConsoleEditor
+                sendCurrentRequest={sendCurrentRequest}
+                onEditorReady={onInputEditorReady}
+                docLinkVersion={docLinkVersion}
+              />
+            </Panel>
+            <Panel
+              style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+              initialWidth={secondPanelWidth + '%'}
+            >
+              <ConsoleEditor
+                onEditorReady={onOutputEditorReady}
+                docLinkVersion={docLinkVersion}
+                readOnly={true}
+              />
+            </Panel>
+          </PanelsContainer>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -177,6 +252,6 @@ export function Main() {
       ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-    </>
+    </div>
   );
 }

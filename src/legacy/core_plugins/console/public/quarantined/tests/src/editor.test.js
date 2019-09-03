@@ -45,7 +45,7 @@ describe('Editor', () => {
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#ConCopyAsCurl'),
+      {},
       {},
       null
     );
