@@ -6,16 +6,16 @@
 import { i18n } from '@kbn/i18n';
 import { Feature } from './feature';
 
-export interface OSSFeaturesParams {
+export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
   includeTimelion: boolean;
 }
 
-export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFeaturesParams) => {
+export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSSFeaturesParams) => {
   return [
     {
       id: 'discover',
-      name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
+      name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
       }),
       icon: 'discoverApp',
@@ -41,7 +41,7 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
     },
     {
       id: 'visualize',
-      name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
+      name: i18n.translate('xpack.features.visualizeFeatureName', {
         defaultMessage: 'Visualize',
       }),
       icon: 'visualizeApp',
@@ -67,7 +67,7 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
     },
     {
       id: 'dashboard',
-      name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
+      name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
       icon: 'dashboardApp',
@@ -109,7 +109,7 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
     },
     {
       id: 'dev_tools',
-      name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
+      name: i18n.translate('xpack.features.devToolsFeatureName', {
         defaultMessage: 'Dev Tools',
       }),
       icon: 'devToolsApp',
@@ -134,14 +134,14 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
           ui: ['show'],
         },
       },
-      privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+      privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
         defaultMessage:
           'User should also be granted the appropriate Elasticsearch cluster and index privileges',
       }),
     },
     {
       id: 'advancedSettings',
-      name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
+      name: i18n.translate('xpack.features.advancedSettingsFeatureName', {
         defaultMessage: 'Advanced Settings',
       }),
       icon: 'advancedSettingsApp',
@@ -169,7 +169,7 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
     },
     {
       id: 'indexPatterns',
-      name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
+      name: i18n.translate('xpack.features.indexPatternFeatureName', {
         defaultMessage: 'Index Pattern Management',
       }),
       icon: 'indexPatternApp',
@@ -197,7 +197,7 @@ export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFe
     },
     {
       id: 'savedObjectsManagement',
-      name: i18n.translate('xpack.main.featureRegistry.savedObjectsManagementFeatureName', {
+      name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',
       }),
       icon: 'savedObjectsApp',

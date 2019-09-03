@@ -142,7 +142,7 @@ init(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: 'dev_tools',
-    name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
+    name: i18n.translate('xpack.features.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
     }),
     icon: 'devToolsApp',
@@ -167,7 +167,7 @@ init(server) {
         ui: ['show'],
       },
     },
-    privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+    privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
      defaultMessage:
        'User should also be granted the appropriate Elasticsearch cluster and index privileges',
    }),

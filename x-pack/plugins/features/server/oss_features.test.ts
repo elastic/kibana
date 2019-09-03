@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureRegistry } from './feature_registry';
-import { registerOssFeatures } from './register_oss_features';
+import { buildOSSFeatures } from './oss_features';
 
-describe('registerOssFeatures', () => {
-  it('registers features including timelion', () => {
-    const registry = new FeatureRegistry();
-    const savedObjectTypes = ['foo', 'bar'];
-    registerOssFeatures(feature => registry.register(feature), savedObjectTypes, true);
-
-    const features = registry.getAll();
-    expect(features.map(f => f.id)).toMatchInlineSnapshot(`
+describe('buildOSSFeatures', () => {
+  it('returns features including timelion', () => {
+    expect(
+      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: true }).map(f => f.id)
+    ).toMatchInlineSnapshot(`
 Array [
   "discover",
   "visualize",
@@ -28,13 +24,10 @@ Array [
 `);
   });
 
-  it('registers features excluding timelion', () => {
-    const registry = new FeatureRegistry();
-    const savedObjectTypes = ['foo', 'bar'];
-    registerOssFeatures(feature => registry.register(feature), savedObjectTypes, false);
-
-    const features = registry.getAll();
-    expect(features.map(f => f.id)).toMatchInlineSnapshot(`
+  it('returns features excluding timelion', () => {
+    expect(
+      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: false }).map(f => f.id)
+    ).toMatchInlineSnapshot(`
 Array [
   "discover",
   "visualize",

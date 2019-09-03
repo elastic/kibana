@@ -5,24 +5,17 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/server';
-import { ConfigSchema } from './config';
 import { Plugin } from './plugin';
 
-// These exports are part of public Security plugin contract, any change in signature of exported
+// These exports are part of public Features plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change. Ideally we should
 // reduce number of such exports to zero and provide everything we want to expose via Setup/Start
 // run-time contracts.
-export { wrapError } from './errors';
-export {
-  canRedirectRequest,
-  AuthenticationResult,
-  DeauthenticationResult,
-  OIDCAuthenticationFlow,
-  CreateAPIKeyResult,
-} from './authentication';
+export { uiCapabilitiesRegex } from './feature_schema';
 
+export { Feature, FeatureWithAllOrReadPrivileges } from './feature';
+export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 export { PluginSetupContract } from './plugin';
 
-export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);

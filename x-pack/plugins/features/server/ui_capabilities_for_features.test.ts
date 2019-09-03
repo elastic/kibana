@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-
-function getMockXpackMainPlugin(features: Feature[]) {
-  return {
-    getFeatures: () => features,
-  };
-}
 
 function createFeaturePrivilege(key: string, capabilities: string[] = []) {
   return {
@@ -27,44 +20,42 @@ function createFeaturePrivilege(key: string, capabilities: string[] = []) {
 }
 
 describe('populateUICapabilities', () => {
-  it('handles no original uiCapabilites and no registered features gracefully', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({});
+  it('handles no original uiCapabilities and no registered features gracefully', () => {
+    expect(uiCapabilitiesForFeatures([])).toEqual({});
   });
 
   it('handles features with no registered capabilities', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('all'),
+    expect(
+      uiCapabilitiesForFeatures([
+        {
+          id: 'newFeature',
+          name: 'my new feature',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('all'),
+          },
         },
-      },
-    ]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      ])
+    ).toEqual({
       catalogue: {},
       newFeature: {},
     });
   });
 
   it('augments the original uiCapabilities with registered feature capabilities', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        navLinkId: 'newFeatureNavLink',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('all', ['capability1', 'capability2']),
+    expect(
+      uiCapabilitiesForFeatures([
+        {
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('all', ['capability1', 'capability2']),
+          },
         },
-      },
-    ]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      ])
+    ).toEqual({
       catalogue: {},
       newFeature: {
         capability1: true,
@@ -74,22 +65,22 @@ describe('populateUICapabilities', () => {
   });
 
   it('combines catalogue entries from multiple features', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        navLinkId: 'newFeatureNavLink',
-        app: ['bar-app'],
-        catalogue: ['anotherFooEntry', 'anotherBarEntry'],
-        privileges: {
-          ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-          ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          ...createFeaturePrivilege('baz'),
+    expect(
+      uiCapabilitiesForFeatures([
+        {
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          catalogue: ['anotherFooEntry', 'anotherBarEntry'],
+          privileges: {
+            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+            ...createFeaturePrivilege('baz'),
+          },
         },
-      },
-    ]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      ])
+    ).toEqual({
       catalogue: {
         anotherFooEntry: true,
         anotherBarEntry: true,
@@ -104,21 +95,21 @@ describe('populateUICapabilities', () => {
   });
 
   it(`merges capabilities from all feature privileges`, () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        navLinkId: 'newFeatureNavLink',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-          ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
+    expect(
+      uiCapabilitiesForFeatures([
+        {
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+            ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
+          },
         },
-      },
-    ]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      ])
+    ).toEqual({
       catalogue: {},
       newFeature: {
         capability1: true,
@@ -131,45 +122,45 @@ describe('populateUICapabilities', () => {
   });
 
   it('supports merging multiple features with multiple privileges each', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([
-      {
-        id: 'newFeature',
-        name: 'my new feature',
-        navLinkId: 'newFeatureNavLink',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-          ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
+    expect(
+      uiCapabilitiesForFeatures([
+        {
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+            ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
+          },
         },
-      },
-      {
-        id: 'anotherNewFeature',
-        name: 'another new feature',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-          ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+        {
+          id: 'anotherNewFeature',
+          name: 'another new feature',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
+          },
         },
-      },
-      {
-        id: 'yetAnotherNewFeature',
-        name: 'yet another new feature',
-        navLinkId: 'yetAnotherNavLink',
-        app: ['bar-app'],
-        privileges: {
-          ...createFeaturePrivilege('all', ['capability1', 'capability2']),
-          ...createFeaturePrivilege('read', []),
-          ...createFeaturePrivilege('somethingInBetween', [
-            'something1',
-            'something2',
-            'something3',
-          ]),
+        {
+          id: 'yetAnotherNewFeature',
+          name: 'yet another new feature',
+          navLinkId: 'yetAnotherNavLink',
+          app: ['bar-app'],
+          privileges: {
+            ...createFeaturePrivilege('all', ['capability1', 'capability2']),
+            ...createFeaturePrivilege('read', []),
+            ...createFeaturePrivilege('somethingInBetween', [
+              'something1',
+              'something2',
+              'something3',
+            ]),
+          },
         },
-      },
-    ]);
-
-    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      ])
+    ).toEqual({
       anotherNewFeature: {
         capability1: true,
         capability2: true,

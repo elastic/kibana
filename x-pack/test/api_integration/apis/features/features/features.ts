@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
-import { Feature } from '../../../../../legacy/plugins/xpack_main/types';
+import { Feature } from '../../../../../plugins/features/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
     expect(result.response).to.have.property('statusCode', 200);
   };
 
-  describe('/api/features', () => {
+  describe('/features/api', () => {
     describe('with the "global all" privilege', () => {
       it('should return a 200', async () => {
         const username = 'global_all';
@@ -51,7 +51,7 @@ export default function({ getService }: FtrProviderContext) {
           });
 
           const result = await supertestWithoutAuth
-            .get(`/api/features/v1`)
+            .get('/features/api')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
             .then((response: any) => ({ error: undefined, response }))
@@ -89,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
           });
 
           const result = await supertestWithoutAuth
-            .get(`/api/features/v1`)
+            .get('/features/api')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
             .then((response: any) => ({ error: undefined, response }))
@@ -106,7 +106,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('with trial license', () => {
       it('should return a full feature set', async () => {
         const { body } = await supertest
-          .get('/api/features/v1')
+          .get('/features/api')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
