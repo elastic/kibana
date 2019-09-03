@@ -58,7 +58,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return { dataType: type, isBucketed: true, isMetric: false, scale: 'ordinal' };
+      return { dataType: type, isBucketed: true, scale: 'ordinal' };
     }
   },
   isTransferable: (column, newIndexPattern) => {
@@ -84,7 +84,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
-      isMetric: false,
       params: {
         size: DEFAULT_SIZE,
         orderBy: existingMetricColumn

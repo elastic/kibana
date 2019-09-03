@@ -28,7 +28,7 @@ import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 
-const isNumericMetric = (op: OperationMetadata) => op.isMetric && op.dataType === 'number';
+const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -49,7 +49,6 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
     seriesType,
     xAccessor: generateId(),
     accessors: [generateId()],
-    title: '',
     splitAccessor: generateId(),
   };
 }

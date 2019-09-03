@@ -51,6 +51,12 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   /**
+   * The priority of the operation. If multiple operations are possible in
+   * a given scenario (e.g. the user dragged a field into the workspace),
+   * the operation with the highest priority is picked.
+   */
+  priority?: number;
+  /**
    * The name of the operation shown to the user (e.g. in the popover editor).
    * Should be i18n-ified.
    */

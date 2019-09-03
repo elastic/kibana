@@ -19,6 +19,7 @@ export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',
+  priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
@@ -26,7 +27,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
     return {
       dataType: 'number',
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
     };
   },
@@ -37,7 +37,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       operationType: 'count',
       suggestedPriority,
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
     };
   },

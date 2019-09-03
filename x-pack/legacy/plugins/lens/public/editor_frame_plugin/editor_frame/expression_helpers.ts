@@ -63,7 +63,7 @@ export function prependDatasourceExpression(
 }
 
 export function prependKibanaContext(
-  expression: Ast | string | null,
+  expression: Ast | string,
   {
     timeRange,
     query,
@@ -73,8 +73,7 @@ export function prependKibanaContext(
     query?: Query;
     filters?: Filter[];
   }
-): Ast | null {
-  if (!expression) return null;
+): Ast {
   const parsedExpression = typeof expression === 'string' ? fromExpression(expression) : expression;
 
   return {
@@ -131,8 +130,15 @@ export function buildExpression({
         },
       };
 
-  return prependKibanaContext(
-    prependDatasourceExpression(visualizationExpression, datasourceMap, datasourceStates),
-    expressionContext
+  const completeExpression = prependDatasourceExpression(
+    visualizationExpression,
+    datasourceMap,
+    datasourceStates
   );
+
+  if (completeExpression) {
+    return prependKibanaContext(completeExpression, expressionContext);
+  } else {
+    return null;
+  }
 }

@@ -20,4 +20,23 @@ visualizations.types.visTypeAliasRegistry.add({
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
   }),
   icon: 'faceHappy',
+  appExtensions: {
+    visualizations: {
+      docTypes: ['lens'],
+      searchFields: ['title^3'],
+      toListItem(savedObject) {
+        const { id, type, attributes } = savedObject;
+        const { title } = attributes as { title: string };
+        return {
+          id,
+          title,
+          editUrl: `/app/lens#/edit/${id}`,
+          icon: 'faceHappy',
+          isExperimental: true,
+          savedObjectType: type,
+          typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
+        };
+      },
+    },
+  },
 });

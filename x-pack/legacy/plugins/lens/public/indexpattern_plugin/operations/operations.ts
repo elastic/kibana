@@ -62,6 +62,9 @@ export function getOperationTypesForField(field: IndexPatternField) {
         'getPossibleOperationForField' in operationDefinition &&
         operationDefinition.getPossibleOperationForField(field)
     )
+    .sort(
+      (a, b) => (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY)
+    )
     .map(({ type }) => type);
 }
 
@@ -154,6 +157,13 @@ function getPossibleOperationForField(
     : undefined;
 }
 
+function getDefinition(findFunction: (definition: GenericOperationDefinition) => boolean) {
+  const candidates = operationDefinitions.filter(findFunction);
+  return candidates.reduce((a, b) =>
+    (a.priority || Number.NEGATIVE_INFINITY) > (b.priority || Number.NEGATIVE_INFINITY) ? a : b
+  );
+}
+
 /**
  * Changes the field of the passed in colum. To do so, this method uses the `onFieldChange` function of
  * the operation definition of the column. Returns a new column object with the field changed.
@@ -208,12 +218,12 @@ export function buildColumn({
   if (op) {
     operationDefinition = operationDefinitionMap[op];
   } else if (asDocumentOperation) {
-    operationDefinition = operationDefinitions.find(definition =>
-      getPossibleOperationForDocument(definition, indexPattern)
+    operationDefinition = getDefinition(definition =>
+      Boolean(getPossibleOperationForDocument(definition, indexPattern))
     );
   } else if (field) {
-    operationDefinition = operationDefinitions.find(definition =>
-      getPossibleOperationForField(definition, field)
+    operationDefinition = getDefinition(definition =>
+      Boolean(getPossibleOperationForField(definition, field))
     );
   }
 

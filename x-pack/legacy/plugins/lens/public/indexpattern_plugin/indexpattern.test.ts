@@ -153,7 +153,6 @@ describe('IndexPattern Data Source', () => {
               label: 'My Op',
               dataType: 'string',
               isBucketed: true,
-              isMetric: false,
 
               // Private
               operationType: 'terms',
@@ -217,7 +216,6 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of Documents',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'count',
@@ -226,7 +224,6 @@ describe('IndexPattern Data Source', () => {
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
-                isMetric: false,
 
                 // Private
                 operationType: 'date_histogram',
@@ -400,7 +397,6 @@ describe('IndexPattern Data Source', () => {
         const sampleColumn: IndexPatternColumn = {
           dataType: 'number',
           isBucketed: false,
-          isMetric: true,
           label: 'foo',
           operationType: 'max',
           sourceField: 'baz',
@@ -451,7 +447,6 @@ describe('IndexPattern Data Source', () => {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
         } as Operation);
       });
 

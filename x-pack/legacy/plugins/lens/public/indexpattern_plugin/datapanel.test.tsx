@@ -31,7 +31,6 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
           operationType: 'terms',
           sourceField: 'source',
           params: {
@@ -46,7 +45,6 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          isMetric: true,
           operationType: 'avg',
           sourceField: 'memory',
         },
@@ -60,7 +58,6 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
           operationType: 'terms',
           sourceField: 'source',
           params: {
@@ -75,7 +72,6 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          isMetric: true,
           operationType: 'avg',
           sourceField: 'bytes',
         },

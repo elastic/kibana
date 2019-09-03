@@ -8,13 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
 import { ParameterlessIndexPatternColumn } from './column_types';
 
-function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>(
-  type: T['operationType'],
-  displayName: string,
-  ofName: (name: string) => string
-) {
+function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>({
+  type,
+  displayName,
+  ofName,
+  priority,
+}: {
+  type: T['operationType'];
+  displayName: string;
+  ofName: (name: string) => string;
+  priority?: number;
+}) {
   return {
     type,
+    priority,
     displayName,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
@@ -25,7 +32,6 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
         return {
           dataType: 'number',
           isBucketed: false,
-          isMetric: true,
           scale: 'ratio',
         };
       }
@@ -41,13 +47,12 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
       );
     },
     buildColumn: ({ suggestedPriority, field }) => ({
-      label: ofName(field ? field.name : ''),
+      label: ofName(field.name),
       dataType: 'number',
       operationType: type,
       suggestedPriority,
-      sourceField: field ? field.name : '',
+      sourceField: field.name,
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
     }),
     onFieldChange: (oldColumn, indexPattern, field) => {
@@ -74,50 +79,52 @@ export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
 export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
 export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
-export const minOperation = buildMetricOperation<MinIndexPatternColumn>(
-  'min',
-  i18n.translate('xpack.lens.indexPattern.min', {
+export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
+  type: 'min',
+  displayName: i18n.translate('xpack.lens.indexPattern.min', {
     defaultMessage: 'Minimum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.minOf', {
       defaultMessage: 'Minimum of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>(
-  'max',
-  i18n.translate('xpack.lens.indexPattern.max', {
+export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
+  type: 'max',
+  displayName: i18n.translate('xpack.lens.indexPattern.max', {
     defaultMessage: 'Maximum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>(
-  'avg',
-  i18n.translate('xpack.lens.indexPattern.avg', {
+export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
+  type: 'avg',
+  priority: 2,
+  displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const sumOperation = buildMetricOperation<SumIndexPatternColumn>(
-  'sum',
-  i18n.translate('xpack.lens.indexPattern.sum', {
+export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
+  type: 'sum',
+  priority: 1,
+  displayName: i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
       values: { name },
-    })
-);
+    }),
+});

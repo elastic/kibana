@@ -70,9 +70,9 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
 
   return buildExpression(
     stateWithValidAccessors,
-    xyTitles(state.layers[0], frame),
     metadata,
-    frame
+    frame,
+    xyTitles(state.layers[0], frame)
   );
 };
 
@@ -103,9 +103,9 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 
 export const buildExpression = (
   state: State,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string },
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI
+  frame?: FramePublicAPI,
+  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
 ): Ast => ({
   type: 'expression',
   chain: [
@@ -163,7 +163,6 @@ export const buildExpression = (
                 arguments: {
                   layerId: [layer.layerId],
 
-                  title: [layer.title],
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],
