@@ -88,7 +88,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = new ChartLoader(
     kibanaContext.currentIndexPattern,
-    kibanaContext.currentSavedSearch,
     kibanaContext.combinedQuery
   );
 

@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
-const TEST_ANCHOR_TYPE = '_doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
@@ -35,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('context filters', function contextSize() {
     beforeEach(async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID, {
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
     });
