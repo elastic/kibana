@@ -6,7 +6,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import { Redirect, Route, Router, Switch, RouteProps } from 'react-router-dom';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
@@ -15,6 +15,7 @@ import { InfrastructurePage } from './pages/infrastructure';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
+import { InfraRedirect } from './utils/infra_redirect';
 
 interface RouterProps {
   history: History;
@@ -26,40 +27,28 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
     <Router history={history}>
       <Switch>
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/" exact={true} to="/infrastructure/inventory" />
+          <InfraRedirect from="/" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/infrastructure" exact={true} to="/infrastructure/inventory" />
+          <InfraRedirect from="/infrastructure" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/infrastructure/snapshot" exact={true} to="/infrastructure/inventory" />
+          <InfraRedirect
+            from="/infrastructure/snapshot"
+            exact={true}
+            to="/infrastructure/inventory"
+          />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/home" exact={true} to="/infrastructure/inventory" />
+          <InfraRedirect from="/home" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure/metrics/:type/:node" component={MetricDetail} />
         )}
         {uiCapabilities.infrastructure.show && (
-          // This workaround preserves query parameters in the redirect
-          // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
-          <Route
-            path="/metrics"
-            component={({ location }: RouteProps) =>
-              location ? (
-                <Redirect
-                  from="/metrics/:type/:node"
-                  exact={true}
-                  to={{
-                    ...location,
-                    pathname: location.pathname.replace(/metrics/, 'infrastructure/metrics'),
-                  }}
-                />
-              ) : null
-            }
-          />
+          <InfraRedirect from="/metrics" to="/infrastructure/metrics" />
         )}
-        {uiCapabilities.logs.show && <Redirect from="/logs" exact={true} to="/logs/stream" />}
+        {uiCapabilities.logs.show && <InfraRedirect from="/logs" exact={true} to="/logs/stream" />}
         {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure" component={InfrastructurePage} />
