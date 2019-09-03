@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export type FieldParamType = any;
+export * from './ipv4_address';
