@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { PopulationDetectors } from './metric_selection';
+import { PopulationDetectorsSummary } from './metric_selection_summary';
 import { PopulationSettings } from './settings';
 
 interface Props {
@@ -27,11 +28,17 @@ export const PopulationView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      <PopulationDetectors isActive={isActive} setIsValid={setMetricValid} />
-      {metricsValid && isActive && (
+      {isActive === false && <PopulationDetectorsSummary />}
+
+      {isActive === true && (
         <Fragment>
-          <EuiHorizontalRule margin="l" />
-          <PopulationSettings isActive={isActive} setIsValid={setSettingsValid} />
+          <PopulationDetectors setIsValid={setMetricValid} />
+          {metricsValid && (
+            <Fragment>
+              <EuiHorizontalRule margin="l" />
+              <PopulationSettings setIsValid={setSettingsValid} />
+            </Fragment>
+          )}
         </Fragment>
       )}
     </Fragment>

@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
-import { AggType } from './agg_type';
-
-export { AggParam, AggParamOption } from './agg_param';
-export { AggType } from './agg_type';
-export { FieldParamType } from './param_types';
-
-export const aggTypes: IndexedArray<AggType> & {
-  byType: {
-    [key: string]: AggType;
-  };
-};
+export enum MapTypes {
+  ScaledCircleMarkers = 'Scaled Circle Markers',
+  ShadedCircleMarkers = 'Shaded Circle Markers',
+  ShadedGeohashGrid = 'Shaded Geohash Grid',
+  Heatmap = 'Heatmap',
+}
