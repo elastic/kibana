@@ -1,11 +1,23 @@
 [role="xpack"]
 [[maps]]
-= Maps
+= Elastic Maps
 
 [partintro]
 --
 
-The **Maps** application enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
+Elastic Maps enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
+
+With Elastic Maps, you can:
+
+* Upload GeoJSON files into Elasticsearch.
+* Create Maps with multiple layers and indices.
+* <<maps-embedding, Embed>> your Map in Dashboards.
+* Plot <<maps-add-elasticsearch-layer, individual documents>>.
+* Use <<maps-aggregations, aggregations>> to plot any data set, no matter how large.
+* Create <<maps-add-choropleth-layer, choropleth maps>>.
+* <<vector-style, Customize>> your data by property, such as size, color, symbol, and rotation.
+* Use <<maps-vector-style-data-driven, data driven styling>> to symbolize features from property values.
+* Focus the data you want to display with <<maps-search, searches>>.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
