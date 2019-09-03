@@ -46,7 +46,7 @@ describe('Editor', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       {},
-      {},
+      { applyCurrentSettings: () => {} },
       null
     );
     input.$el.show();

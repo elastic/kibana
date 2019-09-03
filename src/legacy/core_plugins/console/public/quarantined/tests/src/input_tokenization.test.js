@@ -40,7 +40,7 @@ describe('Input Tokenization', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       {},
-      {},
+      { applyCurrentSettings: () => {} },
       null
     );
 
@@ -48,7 +48,7 @@ describe('Input Tokenization', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       {},
-      {},
+      { applyCurrentSettings: () => {} },
       null
     );
     input.$el.show();

@@ -39,7 +39,7 @@ describe('Integration', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       {},
-      {},
+      { applyCurrentSettings: () => {} },
       null,
     );
     input.$el.show();
