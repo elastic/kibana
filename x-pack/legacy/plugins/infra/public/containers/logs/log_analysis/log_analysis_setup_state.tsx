@@ -7,9 +7,9 @@ import { useState, useCallback } from 'react';
 import { Moment } from 'moment';
 
 interface Props {
-  setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
+  setupModule: (startTime?: number | undefined, endTime?: number | undefined) => void;
+  retrySetup: (startTime?: number | undefined, endTime?: number | undefined) => void;
 }
-
 function selectedDateToParam(selectedDate: Moment | null) {
   if (selectedDate) {
     return selectedDate.valueOf(); // To ms unix timestamp
@@ -17,17 +17,18 @@ function selectedDateToParam(selectedDate: Moment | null) {
   return undefined;
 }
 
-export const useAnalysisSetupState = ({ setupMlModule }: Props) => {
+export const useAnalysisSetupState = ({ setupModule, retrySetup }: Props) => {
   const [startTime, setStartTime] = useState<Moment | null>(null);
   const [endTime, setEndTime] = useState<Moment | null>(null);
-  const [hasAttemptedSetup, setHasAttemptedSetup] = useState<boolean>(false);
   const setup = useCallback(() => {
-    setHasAttemptedSetup(true);
-    return setupMlModule(selectedDateToParam(startTime), selectedDateToParam(endTime));
-  }, [setupMlModule, setHasAttemptedSetup]);
+    return setupModule(selectedDateToParam(startTime), selectedDateToParam(endTime));
+  }, [setupModule]);
+  const retry = useCallback(() => {
+    return retrySetup(selectedDateToParam(startTime), selectedDateToParam(endTime));
+  }, [retrySetup]);
   return {
-    hasAttemptedSetup,
     setup,
+    retry,
     setStartTime,
     setEndTime,
     startTime,

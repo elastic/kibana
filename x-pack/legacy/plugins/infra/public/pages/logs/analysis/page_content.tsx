@@ -6,14 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState, useCallback } from 'react';
-import chrome from 'ui/chrome';
 
 import { LoadingPage } from '../../../components/loading_page';
-import {
-  LogAnalysisCapabilities,
-  LogAnalysisJobs,
-  useLogAnalysisCleanup,
-} from '../../../containers/logs/log_analysis';
+import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
@@ -23,18 +18,18 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const spaceId = chrome.getInjected('activeSpace').space.id;
-
   const {
     isSetupRequired,
     isLoadingSetupStatus,
-    setupMlModule,
+    setup,
     isSettingUpMlModule,
     didSetupFail,
     hasCompletedSetup,
+    hasAttemptedSetup,
+    retry,
+    isRetrying,
   } = useContext(LogAnalysisJobs.Context);
 
-  const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
   const [isViewingResults, setIsViewingResults] = useState<boolean>(false);
   const viewResults = useCallback(() => setIsViewingResults(true), [setIsViewingResults]);
 
@@ -53,10 +48,11 @@ export const AnalysisPageContent = () => {
       <AnalysisSetupContent
         didSetupFail={didSetupFail}
         isSettingUp={isSettingUpMlModule}
-        setupMlModule={setupMlModule}
-        cleanupFailure={cleanupMLResources}
-        isCleaningUpAFailedSetup={isCleaningUp}
+        setup={setup}
+        retry={retry}
+        isRetrying={isRetrying}
         hasCompletedSetup={hasCompletedSetup}
+        hasAttemptedSetup={hasAttemptedSetup}
         indexPattern={source ? source.configuration.logAlias : ''}
         viewResults={viewResults}
       />

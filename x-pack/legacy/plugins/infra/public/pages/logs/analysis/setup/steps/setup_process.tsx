@@ -5,18 +5,20 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiButton } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
+import { StepText } from './step_text';
 
 interface Props {
   isSettingUp: boolean;
-  isCleaningUp: boolean;
+  isRetrying: boolean;
   didSetupFail: boolean;
   hasCompletedSetup: boolean;
   viewResults: () => void;
   setup: () => void;
-  cleanup: () => void;
+  retry: () => void;
+  indexPattern: string;
 }
 
 export const SetupProcess: React.FunctionComponent<Props> = ({
@@ -25,37 +27,46 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
   hasCompletedSetup,
   viewResults,
   setup,
-  cleanup,
+  retry,
+  isRetrying,
+  indexPattern,
 }: Props) => {
   return (
     <>
-      {isSettingUp ? (
-        <EuiLoadingSpinner size="xl" />
-      ) : didSetupFail ? (
-        <>
-          <FormattedMessage
-            id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
-            defaultMessage="Something went wrong creating the necessary Machine Learning resources"
-          />
-          <EuiButton fill onClick={cleanup}>
+      <StepText>
+        {isSettingUp || isRetrying ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : didSetupFail ? (
+          <>
             <FormattedMessage
-              id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
-              defaultMessage="Try again"
+              id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
+              defaultMessage="Something went wrong creating the necessary Machine Learning resources.
+              Please ensure your configured logs indices ({indexPattern}) exist."
+              values={{
+                indexPattern,
+              }}
+            />
+            <EuiSpacer />
+            <EuiButton fill onClick={retry} disabled={isRetrying}>
+              <FormattedMessage
+                id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          </>
+        ) : hasCompletedSetup ? (
+          <EuiButton fill onClick={viewResults}>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
+              defaultMessage="View results"
             />
           </EuiButton>
-        </>
-      ) : hasCompletedSetup ? (
-        <EuiButton fill onClick={viewResults}>
-          <FormattedMessage
-            id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
-            defaultMessage="View results"
-          />
-        </EuiButton>
-      ) : (
-        <>
-          <CreateMLJobsButton isDisabled={isSettingUp} onClick={setup} />
-        </>
-      )}
+        ) : (
+          <>
+            <CreateMLJobsButton isDisabled={isSettingUp} onClick={setup} />
+          </>
+        )}
+      </StepText>
     </>
   );
 };

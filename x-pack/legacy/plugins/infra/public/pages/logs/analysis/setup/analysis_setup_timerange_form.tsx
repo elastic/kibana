@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import moment, { Moment } from 'moment';
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,6 @@ import {
   EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateMLJobsButton } from './create_ml_jobs_button';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -39,13 +38,12 @@ const endTimeDefaultDescription = i18n.translate(
 );
 
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  setupMlModule: () => Promise<any>;
   hasAttemptedSetup: boolean;
   setStartTime: (startTime: Moment | null) => void;
   setEndTime: (endTime: Moment | null) => void;
   startTime: Moment | null;
   endTime: Moment | null;
-}> = ({ setupMlModule, hasAttemptedSetup, setStartTime, setEndTime, startTime, endTime }) => {
+}> = ({ hasAttemptedSetup, setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || endTime.isSame(now, 'day');
 

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -16,38 +15,34 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup/steps';
 
 interface AnalysisSetupContentProps {
-  setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
+  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
   isSettingUp: boolean;
   didSetupFail: boolean;
-  cleanupFailure: () => Promise<any>;
-  isCleaningUpAFailedSetup: boolean;
+  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
+  isRetrying: boolean;
   indexPattern: string;
   hasCompletedSetup: boolean;
+  hasAttemptedSetup: boolean;
   viewResults: () => void;
 }
 
-const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
-  defaultMessage: 'Sorry, there was an error setting up Machine Learning',
-});
-
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
-  setupMlModule,
+  setup,
   isSettingUp,
   didSetupFail,
-  isCleaningUpAFailedSetup,
+  isRetrying,
   indexPattern,
   hasCompletedSetup,
+  hasAttemptedSetup,
   viewResults,
-  cleanupFailure,
+  retry,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -81,30 +76,16 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             </EuiText>
             <EuiSpacer />
             <AnalysisSetupSteps
-              setupMlModule={setupMlModule}
+              setup={setup}
               isSettingUp={isSettingUp}
               didSetupFail={didSetupFail}
-              cleanupFailure={cleanupFailure}
-              isCleaningUpAFailedSetup={isCleaningUpAFailedSetup}
+              retry={retry}
+              isRetrying={isRetrying}
               hasCompletedSetup={hasCompletedSetup}
+              hasAttemptedSetup={hasAttemptedSetup}
               viewResults={viewResults}
+              indexPattern={indexPattern}
             />
-            {didSetupFail && (
-              <>
-                <EuiSpacer />
-                <EuiCallOut color="danger" iconType="alert" title={errorTitle}>
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.infra.analysisSetup.errorText"
-                      defaultMessage="Please ensure your configured logs indices ({indexPattern}) exist. If your indices do exist, please try again."
-                      values={{
-                        indexPattern,
-                      }}
-                    />
-                  </EuiText>
-                </EuiCallOut>
-              </>
-            )}
           </EuiPageContentBody>
         </AnalysisPageContent>
       </EuiPageBody>

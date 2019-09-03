@@ -6,14 +6,12 @@
 
 import React, { useState } from 'react';
 import { Moment } from 'moment';
-import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnalysisSetupTimerangeForm } from '../analysis_setup_timerange_form';
-import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { CreateMLJobsButton } from '../create_ml_jobs_button';
+import { StepText } from './step_text';
 
 interface InitialConfigurationProps {
-  setupMlModule: () => Promise<any>;
   hasAttemptedSetup: boolean;
   setStartTime: (startTime: Moment | null) => void;
   setEndTime: (endTime: Moment | null) => void;
@@ -22,7 +20,6 @@ interface InitialConfigurationProps {
 }
 
 export const InitialConfiguration: React.FunctionComponent<InitialConfigurationProps> = ({
-  setupMlModule,
   hasAttemptedSetup,
   setStartTime,
   setEndTime,
@@ -36,7 +33,6 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
         <>
           <EuiSpacer size="l" />
           <AnalysisSetupTimerangeForm
-            setupMlModule={setupMlModule}
             hasAttemptedSetup={hasAttemptedSetup}
             setStartTime={setStartTime}
             setEndTime={setEndTime}
@@ -47,7 +43,7 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
       ) : (
         <>
           <EuiSpacer size="m" />
-          <ByDefaultText>
+          <StepText>
             <FormattedMessage
               id="xpack.infra.analysisSetup.timeRangeByDefault"
               defaultMessage="By default, we'll analyze all past and future log messages in your logs indices."
@@ -58,21 +54,9 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
                 defaultMessage="Configure time range?"
               />
             </EuiButtonEmpty>
-          </ByDefaultText>
+          </StepText>
         </>
       )}
     </>
   );
 };
-
-const ByDefaultText = euiStyled(EuiText).attrs({ size: 's' })`
-  & .euiButtonEmpty {
-    font-size: inherit;
-    line-height: inherit;
-    height: initial;
-  }
-
-  & .euiButtonEmpty__content {
-    padding: 0;
-  }
-`;

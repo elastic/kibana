@@ -12,32 +12,32 @@ import { SetupProcess } from './setup_process';
 import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 interface AnalysisSetupStepsProps {
-  setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
+  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
   isSettingUp: boolean;
   didSetupFail: boolean;
-  cleanupFailure: () => void;
-  isCleaningUpAFailedSetup: boolean;
+  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
+  isRetrying: boolean;
   hasCompletedSetup: boolean;
+  hasAttemptedSetup: boolean;
   viewResults: () => void;
+  indexPattern: string;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
-  setupMlModule,
+  setup: setupModule,
+  retry: retrySetup,
   isSettingUp,
   didSetupFail,
-  isCleaningUpAFailedSetup,
+  isRetrying,
   hasCompletedSetup,
+  hasAttemptedSetup,
   viewResults,
-  cleanupFailure,
+  indexPattern,
 }: AnalysisSetupStepsProps) => {
-  const {
-    hasAttemptedSetup,
-    setup,
-    setStartTime,
-    setEndTime,
-    startTime,
-    endTime,
-  } = useAnalysisSetupState({ setupMlModule });
+  const { setup, retry, setStartTime, setEndTime, startTime, endTime } = useAnalysisSetupState({
+    setupModule,
+    retrySetup,
+  });
 
   const steps = [
     {
@@ -46,7 +46,6 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
       }),
       children: (
         <InitialConfiguration
-          setupMlModule={setup}
           hasAttemptedSetup={hasAttemptedSetup}
           setStartTime={setStartTime}
           setEndTime={setEndTime}
@@ -63,21 +62,24 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         <SetupProcess
           isSettingUp={isSettingUp}
           didSetupFail={didSetupFail}
-          isCleaningUp={isCleaningUpAFailedSetup}
+          isRetrying={isRetrying}
           hasCompletedSetup={hasCompletedSetup}
           viewResults={viewResults}
           setup={setup}
-          cleanup={cleanupFailure}
+          retry={retry}
+          indexPattern={indexPattern}
         />
       ),
-      status: isSettingUp
-        ? ('incomplete' as EuiStepStatus)
-        : didSetupFail
-        ? ('danger' as EuiStepStatus)
-        : hasCompletedSetup
-        ? ('success' as EuiStepStatus)
-        : undefined,
+      status:
+        isSettingUp || isRetrying
+          ? ('incomplete' as EuiStepStatus)
+          : didSetupFail
+          ? ('danger' as EuiStepStatus)
+          : hasCompletedSetup
+          ? ('complete' as EuiStepStatus)
+          : undefined,
     },
   ];
+
   return <EuiSteps steps={steps} />;
 };

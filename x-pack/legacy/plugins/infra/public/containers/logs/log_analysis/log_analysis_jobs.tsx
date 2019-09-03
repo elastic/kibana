@@ -5,11 +5,12 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
+import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 
 // combines and abstracts job and datafeed status
 type JobStatus =
@@ -43,15 +44,15 @@ export const useLogAnalysisJobs = ({
   spaceId: string;
   timeField: string;
 }) => {
+  const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
   const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
   const [hasAttemptedSetup, setHasAttemptedSetup] = useState<boolean>(false);
+  const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
-        setJobStatus(getInitialJobStatuses());
-        setHasAttemptedSetup(true);
         return await callSetupMlModuleAPI(
           start,
           end,
@@ -137,15 +138,37 @@ export const useLogAnalysisJobs = ({
     return hasAttemptedSetup && !isSetupRequired;
   }, [isSetupRequired, hasAttemptedSetup]);
 
+  const setup = useCallback(
+    (start, end) => {
+      setHasAttemptedSetup(true);
+      setupMlModule(start, end);
+    },
+    [setHasAttemptedSetup, setupMlModule]
+  );
+
+  const retry = useCallback(
+    (start, end) => {
+      setIsRetrying(true);
+      cleanupMLResources().then(() => {
+        setupMlModule(start, end).then(() => {
+          setIsRetrying(false);
+        });
+      });
+    },
+    [setIsRetrying, cleanupMLResources, setupMlModule]
+  );
+
   return {
     jobStatus,
     isSetupRequired,
     isLoadingSetupStatus,
-    setupMlModule,
-    setupMlModuleRequest,
     isSettingUpMlModule,
     didSetupFail,
     hasCompletedSetup,
+    hasAttemptedSetup,
+    setup,
+    retry,
+    isRetrying,
   };
 };
 
