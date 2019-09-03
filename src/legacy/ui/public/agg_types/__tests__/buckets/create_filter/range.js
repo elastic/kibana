@@ -52,7 +52,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.range[0];
+      const aggConfig = vis.aggs.byName('range')[0];
       const filter = createFilterRange(aggConfig, { gte: 1024, lt: 2048.0 });
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
