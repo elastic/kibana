@@ -7,7 +7,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { ml } from '../../../../services/ml_api_service';
 import { mlJobService } from '../../../../services/job_service';
-import { JobCreator } from '../job_creator';
+import { JobCreatorType } from '../job_creator';
 import { DatafeedId, JobId } from '../job_creator/configs';
 import { DATAFEED_STATE } from '../../../../../common/constants/states';
 
@@ -30,7 +30,7 @@ export class JobRunner {
   };
   private _subscribers: ProgressSubscriber[];
 
-  constructor(jobCreator: JobCreator) {
+  constructor(jobCreator: JobCreatorType) {
     this._jobId = jobCreator.jobId;
     this._datafeedId = jobCreator.datafeedId;
     this._start = jobCreator.start;
