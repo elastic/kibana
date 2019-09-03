@@ -103,7 +103,7 @@ function registerCancelCallback(requestToken, callback, state) {
 }
 
 function unregisterCancelCallback(requestToken, state) {
-  getCancelRequestCallbacks(state).set(requestToken, null);
+  getCancelRequestCallbacks(state).delete(requestToken);
 }
 
 export function cancelAllInFlightRequests() {
