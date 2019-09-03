@@ -96,7 +96,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               />
             }
           >
-            <EuiText>Outlier detection</EuiText>
+            <EuiText>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
+                defaultMessage: 'Outlier detection',
+              })}
+            </EuiText>
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
@@ -123,7 +127,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="Job ID"
+              placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
+                defaultMessage: 'Job ID',
+              })}
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
