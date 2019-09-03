@@ -55,7 +55,7 @@ describe('AggTypeMetricMedianProvider class', function () {
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
-    const aggConfig = vis.aggs[0];
+    const aggConfig = vis.aggs.aggs[0];
     aggDsl = aggConfig.toDsl();
   }));
 
