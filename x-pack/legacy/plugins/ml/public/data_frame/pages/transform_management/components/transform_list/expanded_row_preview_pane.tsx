@@ -25,13 +25,6 @@ import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { TransformTable } from './transform_table';
 
-interface Column {
-  field: string;
-  name: string;
-  sortable: boolean;
-  truncateText: boolean;
-}
-
 interface Props {
   transformConfig: DataFrameTransformPivotConfig;
 }
@@ -79,7 +72,7 @@ function getDataFromTransform(
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-  const [columns, setColumns] = useState<Column[] | []>([]);
+  const [columns, setColumns] = useState<ColumnType[] | []>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>('');
@@ -107,7 +100,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
           const columnKeys = getFlattenedFields(resp.preview[0]);
           columnKeys.sort(sortColumns(groupByArr));
 
-          const tableColumns = columnKeys.map(k => {
+          const tableColumns: ColumnType[] = columnKeys.map(k => {
             const column: ColumnType = {
               field: k,
               name: k,
