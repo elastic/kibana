@@ -54,4 +54,5 @@ right-hand corner.
 . Click *Save & close*
 
 For an example of how to use GeoJSON Upload with sample files, consider trying
-the <<geojson-upload-integrated-example, integrated example>> 
+the 
+<<indexing-geojson-data-tutorial, indexing GeoJSON tutorial>>
