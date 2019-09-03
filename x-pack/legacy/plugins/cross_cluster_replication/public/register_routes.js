@@ -8,6 +8,7 @@ import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 
 import template from './main.html';
@@ -15,7 +16,12 @@ import { BASE_PATH } from '../common/constants';
 import { renderReact } from './app';
 import { setHttpClient } from './app/services/api';
 
-if (chrome.getInjected('ccrUiEnabled')) {
+const isAvailable = xpackInfo.get('features.crossClusterReplication.isAvailable');
+const isActive = xpackInfo.get('features.crossClusterReplication.isActive');
+const isLicenseOK = isAvailable && isActive;
+const isCcrUiEnabled = chrome.getInjected('ccrUiEnabled');
+
+if (isLicenseOK && isCcrUiEnabled) {
   const esSection = management.getSection('elasticsearch');
 
   esSection.register('ccr', {
