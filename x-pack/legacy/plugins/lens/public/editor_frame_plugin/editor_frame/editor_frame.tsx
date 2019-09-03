@@ -219,6 +219,8 @@ export function EditorFrame(props: EditorFrameProps) {
               : true
           }
           dispatch={dispatch}
+          query={props.query}
+          dateRange={props.dateRange}
         />
       }
       configPanel={

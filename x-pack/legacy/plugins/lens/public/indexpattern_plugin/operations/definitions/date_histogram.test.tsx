@@ -23,6 +23,7 @@ describe('date_histogram', () => {
   beforeEach(() => {
     state = {
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       indexPatterns: {
         1: {
           id: '1',

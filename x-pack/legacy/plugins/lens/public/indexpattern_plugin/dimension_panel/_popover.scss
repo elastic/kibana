@@ -16,6 +16,10 @@
   color: $euiColorLightShade;
 }
 
+.lnsConfigPanel__fieldOption--nonExistant {
+  background-color: $euiColorLightestShade;
+}
+
 .lnsConfigPanel__operation {
   padding: $euiSizeXS;
   font-size: 0.875rem;

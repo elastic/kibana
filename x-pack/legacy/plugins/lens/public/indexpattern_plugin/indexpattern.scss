@@ -53,10 +53,7 @@
   background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
   padding: $euiSizeS;
-  display: flex;
-  align-items: center;
   margin-bottom: $euiSizeXS;
-  font-weight: $euiFontWeightMedium;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
 
   &:hover {
@@ -64,6 +61,10 @@
     z-index: 2;
     cursor: grab;
   }
+}
+
+.lnsFieldListPanel__field--missing {
+  background: $euiColorLightestShade;
 }
 
 .lnsFieldListPanel__fieldName {
