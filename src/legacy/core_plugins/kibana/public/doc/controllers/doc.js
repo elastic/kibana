@@ -24,8 +24,8 @@ import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import 'plugins/kibana/doc_viewer';
 import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
+import '../components/doc_directive';
 
 const app = uiModules.get('apps/doc', [
   'kibana/courier',
