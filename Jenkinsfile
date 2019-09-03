@@ -55,7 +55,7 @@ def withWorker(label, closure) {
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
   return {
-    jobRunner('testrunner-xlarge') {
+    jobRunner('tests-xl') {
       try {
         doSetup()
         preWorkerClosure()
