@@ -38,7 +38,9 @@ export class CtagsLauncher extends AbstractLauncher {
 
   startConnect(proxy: LanguageServerProxy) {
     proxy.startServerConnection();
-    this.embed!.start().catch(err => this.log.error(err));
+    if (this.embed) {
+      this.embed.start().catch(err => this.log.error(err));
+    }
   }
 
   async getPort(): Promise<number> {

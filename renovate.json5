@@ -23,14 +23,14 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.4.0',
+    'v7.5.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.4.0',
+      'v7.5.0',
       'renovate:major',
     ],
   },
@@ -210,7 +210,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.4.0',
+          'v7.5.0',
           ':ml',
         ],
       },
@@ -367,6 +367,14 @@
         packageNames: [
           'has-ansi',
           '@types/has-ansi',
+        ],
+      },
+      {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
         ],
       },
       {
@@ -618,14 +626,6 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
-        ],
-      },
-      {
         groupSlug: 'jsdom',
         groupName: 'jsdom related packages',
         packageNames: [
@@ -639,6 +639,14 @@
         packageNames: [
           'jsonwebtoken',
           '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
         ],
       },
       {
