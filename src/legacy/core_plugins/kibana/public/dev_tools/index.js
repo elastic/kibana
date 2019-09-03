@@ -18,8 +18,10 @@
  */
 
 import uiRoutes from 'ui/routes';
+import { i18n } from '@kbn/i18n';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import 'ui/directives/kbn_href';
 import './directives/dev_tools_app';
 
 uiRoutes
@@ -33,9 +35,24 @@ uiRoutes
   });
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
-  k7Breadcrumbs: (i18n) => [
+  badge: uiCapabilities => {
+    if (uiCapabilities.dev_tools.save) {
+      return undefined;
+    }
+
+    return {
+      text: i18n.translate('kbn.devTools.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('kbn.devTools.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save',
+      }),
+      iconType: 'glasses'
+    };
+  },
+  k7Breadcrumbs: () => [
     {
-      text: i18n('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
+      text: i18n.translate('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools'
       }),
       href: '#/dev_tools'
@@ -43,13 +60,13 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
   ]
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
-    title: i18n('kbn.devTools.consoleTitle', {
+    title: i18n.translate('kbn.devTools.consoleTitle', {
       defaultMessage: 'Console'
     }),
-    description: i18n('kbn.devTools.consoleDescription', {
+    description: i18n.translate('kbn.devTools.consoleDescription', {
       defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.'
     }),
     icon: 'consoleApp',

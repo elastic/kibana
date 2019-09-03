@@ -18,14 +18,15 @@
  */
 
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
+import { npStart } from 'ui/new_platform';
 
 export function hideEmptyDevTools(Private) {
   const hasTools = !!Private(DevToolsRegistryProvider).length;
   if (!hasTools) {
-    const navLink = chrome.getNavLinkById('kibana:dev_tools');
-    navLink.hidden = true;
+    npStart.core.chrome.navLinks.update('kibana:dev_tools', {
+      hidden: true
+    });
   }
 }
 

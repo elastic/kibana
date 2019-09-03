@@ -20,14 +20,15 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../../../common/get_last_value';
-import getValueBy from '../lib/get_value_by';
-import GaugeVis from './gauge_vis';
+import classNames from 'classnames';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
+import { getLastValue } from '../../../common/get_last_value';
+import { getValueBy } from '../lib/get_value_by';
+import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
-import calculateCoordinates from '../lib/calculate_coordinates';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
-class Gauge extends Component {
-
+export class Gauge extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -35,7 +36,7 @@ class Gauge extends Component {
       top: 0,
       left: 0,
       translateX: 1,
-      translateY: 1
+      translateY: 1,
     };
 
     this.handleResize = this.handleResize.bind(this);
@@ -70,68 +71,62 @@ class Gauge extends Component {
 
   render() {
     const { metric, type } = this.props;
-    const {
-      scale,
-      translateX,
-      translateY
-    } = this.state;
-    const value = metric && getLastValue(metric.data) || 0;
-    const max = metric && getValueBy('max', metric.data) || 1;
-    const formatter = (metric && (metric.tickFormatter || metric.formatter)) ||
-      this.props.tickFormatter || ((v) => v);
-    const title = metric && metric.label || '';
-    const styles = reactcss({
-      default: {
-        inner: {
-          top: this.state.top || 0,
-          left: this.state.left || 0,
-          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
-        }
+    const { scale, translateX, translateY } = this.state;
+    const value = (metric && getLastValue(metric.data)) || 0;
+    const max = (metric && getValueBy('max', metric.data)) || 1;
+    const formatter =
+      (metric && (metric.tickFormatter || metric.formatter)) ||
+      this.props.tickFormatter ||
+      (v => v);
+    const title = (metric && metric.label) || '';
+    const styles = reactcss(
+      {
+        default: {
+          inner: {
+            top: this.state.top || 0,
+            left: this.state.left || 0,
+            transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
+          },
+        },
+        valueColor: {
+          value: {
+            color: this.props.valueColor,
+          },
+        },
       },
-      valueColor: {
-        value: {
-          color: this.props.valueColor
-        }
-      }
-    }, this.props);
+      this.props
+    );
 
     const gaugeProps = {
-      reversed: this.props.reversed,
       value,
+      reversed: isBackgroundDark(this.props.backgroundColor),
       gaugeLine: this.props.gaugeLine,
       innerLine: this.props.innerLine,
       innerColor: this.props.innerColor,
       max: this.props.max || max,
-      color: metric && metric.color || '#8ac336',
-      type
+      color: (metric && metric.color) || '#8ac336',
+      type,
     };
 
     let metrics;
     let additionalLabel;
     if (this.props.additionalLabel) {
       additionalLabel = (
-        <div className="tvbVisGauge__additionalLabel">
-          {this.props.additionalLabel}
-        </div>
+        <div className="tvbVisGauge__additionalLabel">{this.props.additionalLabel}</div>
       );
     }
     if (type === 'half') {
       metrics = (
         <div
           className="tvbVisHalfGauge__metrics"
-          ref={(el) => this.inner = el}
+          ref={el => (this.inner = el)}
           style={styles.inner}
         >
-          <div
-            className="tvbVisGauge__label"
-            ref="title"
-          >{ title }
+          <div className="tvbVisGauge__label" ref="title">
+            {title}
           </div>
-          <div
-            className="tvbVisGauge__value"
-            style={styles.value}
-            ref="label"
-          >{ formatter(value) }
+          <div className="tvbVisGauge__value" style={styles.value} ref="label">
+            {formatter(value)}
           </div>
           {additionalLabel}
         </div>
@@ -140,45 +135,45 @@ class Gauge extends Component {
       metrics = (
         <div
           className="tvbVisCircleGauge__metrics"
-          ref={(el) => this.inner = el}
+          ref={el => (this.inner = el)}
           style={styles.inner}
         >
-          <div
-            className="tvbVisGauge__value"
-            style={styles.value}
-            ref="label"
-          >{ formatter(value) }
+          <div className="tvbVisGauge__value" style={styles.value} ref="label">
+            {formatter(value)}
           </div>
-          <div
-            className="tvbVisGauge__label"
-            ref="title"
-          >{ title }
+          <div className="tvbVisGauge__label" ref="title">
+            {title}
           </div>
           {additionalLabel}
         </div>
       );
     }
-    let className = type === 'half' ? 'tvbVisHalfGauge' : 'tvbVisCircleGauge';
-    if (this.props.reversed) className = `${className} tvbVisGauge--reversed`;
+
+    const classes = classNames({
+      tvbVisHalfGauge: type === 'half',
+      tvbVisCircleGauge: type === 'circle',
+      'tvbVisGauge--reversed': isBackgroundInverted(this.props.backgroundColor),
+    });
+
     return (
-      <div className={className}>
+      <div className={classes}>
         <div
-          ref={(el) => this.resize = el}
+          ref={el => (this.resize = el)}
           className={`tvbVisGauge__resize`}
+          data-test-subj="tvbVisGaugeContainer"
         >
-          { metrics }
-          <GaugeVis {...gaugeProps}/>
+          {metrics}
+          <GaugeVis {...gaugeProps} />
         </div>
       </div>
     );
   }
-
 }
 
 Gauge.defaultProps = {
   type: 'half',
   innerLine: 2,
-  gaugeLine: 10
+  gaugeLine: 10,
 };
 
 Gauge.propTypes = {
@@ -187,11 +182,8 @@ Gauge.propTypes = {
   innerLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric: PropTypes.object,
-  reversed: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   type: PropTypes.oneOf(['half', 'circle']),
   valueColor: PropTypes.string,
-  additionalLabel: PropTypes.string
+  additionalLabel: PropTypes.string,
 };
-
-export default Gauge;
-

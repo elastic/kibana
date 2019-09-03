@@ -18,31 +18,33 @@
  */
 
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/pager_control';
-import 'ui/pager';
+import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
-
+import { wrapInI18nContext } from 'ui/i18n';
+import { toastNotifications } from 'ui/notify';
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-
+import { visualizations } from 'plugins/visualizations';
 import { i18n } from '@kbn/i18n';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective => reactDirective(injectI18nProvider(VisualizeListingTable)));
-app.directive('newVisModal', reactDirective => reactDirective(injectI18nProvider(NewVisModal)));
+app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
-  const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
+  const savedObjectClient = Private(SavedObjectsClientProvider);
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
+  this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -51,6 +53,15 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
+  };
+
+  this.editItem = ({ editUrl }) => {
+    // for visualizations the edit and view URLs are the same
+    window.location = chrome.addBasePath(editUrl);
+  };
+
+  this.getViewUrl = ({ editUrl }) => {
+    return chrome.addBasePath(editUrl);
   };
 
   this.closeNewVisModal = () => {
@@ -69,22 +80,34 @@ export function VisualizeListingController($injector, createNewVis) {
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
-  const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
     const isLabsEnabled = config.get('visualize:enableLabs');
-    return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
+    return visualizationService.findListItems(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
-        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
-        this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
+
+        return {
+          total: result.total,
+          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+        };
       });
   };
 
-  this.deleteSelectedItems = function deleteSelectedItems(selectedIds) {
-    return visualizationService.delete(selectedIds)
-      .catch(error => notify.error(error));
+  this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
+    return Promise.all(
+      selectedItems.map(item => {
+        return savedObjectClient.delete(item.savedObjectType, item.id);
+      }),
+    ).then(() => {
+      chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+    }).catch(error => {
+      toastNotifications.addError(error, {
+        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+          defaultMessage: 'Error deleting visualization',
+        }),
+      });
+    });
   };
 
   chrome.breadcrumbs.set([{
@@ -92,5 +115,8 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
-  config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
+
+  this.listingLimit = config.get('savedObjects:listingLimit');
+
+  addHelpMenuToAppChrome(chrome);
 }

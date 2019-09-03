@@ -55,6 +55,7 @@ const services = {
   config: {},
   changeUrl: () => {},
   scopeApply: () => {},
+
   indexPatternCreationType: mockIndexPatternCreationType,
 };
 
@@ -183,7 +184,7 @@ describe('CreateIndexPatternWizard', () => {
             get: () => ({
               create,
             }),
-            cache: { clear }
+            clearCache: clear,
           },
           changeUrl,
           indexPatternCreationType: mockIndexPatternCreationType
@@ -196,6 +197,6 @@ describe('CreateIndexPatternWizard', () => {
     expect(get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
-    expect(changeUrl).toBeCalledWith(`/management/kibana/indices/id`);
+    expect(changeUrl).toBeCalledWith(`/management/kibana/index_patterns/id`);
   });
 });

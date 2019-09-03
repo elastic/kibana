@@ -1,0 +1,68 @@
+[role="xpack"]
+[[vector-style]]
+=== Vector styling
+
+When styling a vector layer, you can customize your data by property, such as size and color.
+For each property, you can specify whether to use a constant or data driven value for the style.
+
+[float]
+[[maps-vector-style-static]]
+==== Static styling
+
+Use static styling to specificy a constant value for a style property.
+
+The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The *kibana_sample_data_logs* layer uses static styling for all properties.
+
+[role="screenshot"]
+image::maps/images/vector_style_static.png[]
+
+[float]
+[[maps-vector-style-data-driven]]
+==== Data driven styling
+
+Use data driven styling to symbolize features from a range of numeric property values.
+To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
+This button is only available when vector features contain numeric properties.
+
+When the property value is undefined for a feature:
+
+* *Fill color* and *Border color* are set to transparent and are not visible.
+* *Border width* and *Symbol size* are set to the minimum size.
+* *Symbol orientation* is set to 0.
+
+When the minimum and maximum are the same and there is no range:
+
+* *Fill color* and *Border color* are set to last color in the color ramp.
+* *Border width* and *Symbol size* are set to the maximum size.
+
+The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
+
+* The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
+Light green circles symbolize documents that occur earlier in the day, and dark green circles symbolize documents that occur later in the day.
+
+* The `bytes` property determines the size of each symbol based on where the value fits on a linear scale.
+Smaller circles symbolize documents with smaller payloads, and larger circles symbolize documents with larger payloads.
+
+[role="screenshot"]
+image::maps/images/vector_style_dynamic.png[]
+
+
+[float]
+[[maps-vector-style-class]]
+==== Class styling
+
+Class styling symbolizes features by class and requires multiple layers.
+Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
+
+The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+
+* The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
+The fill color is a static value of green.
+
+* The *Window OS requests* layer applies the filter `machine.os : win*` so the layer only contains Window OS requests.
+The fill color is a static value of red.
+
+[role="screenshot"]
+image::maps/images/vector_style_class.png[]

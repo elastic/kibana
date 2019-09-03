@@ -19,10 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import classNames from 'classnames';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import moment from 'moment';
 import reactcss from 'reactcss';
-import FlotChart from './flot_chart';
-import Annotation from './annotation';
+import { FlotChart } from './flot_chart';
+import { Annotation } from './annotation';
 import { EuiIcon } from '@elastic/eui';
 
 export function scaleUp(value) {
@@ -33,8 +35,7 @@ export function scaleDown(value) {
   return value / window.devicePixelRatio;
 }
 
-class TimeseriesChart extends Component {
-
+export class TimeseriesChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -67,21 +68,22 @@ class TimeseriesChart extends Component {
   handleDraw(plot) {
     if (!plot || !this.props.annotations) return;
     const annotations = this.props.annotations.reduce((acc, anno) => {
-      return acc.concat(anno.series.map(series => {
-        return {
-          series,
-          plot,
-          key: `${anno.id}-${series[0]}`,
-          icon: anno.icon,
-          color: anno.color
-        };
-      }));
+      return acc.concat(
+        anno.series.map(series => {
+          return {
+            series,
+            plot,
+            key: `${anno.id}-${series[0]}`,
+            icon: anno.icon,
+            color: anno.color,
+          };
+        })
+      );
     }, []);
     this.setState({ annotations });
   }
 
   handleMouseOver(e, pos, item, plot) {
-
     if (typeof this.state.mouseHoverTimer === 'number') {
       window.clearTimeout(this.state.mouseHoverTimer);
     }
@@ -89,7 +91,7 @@ class TimeseriesChart extends Component {
     if (item) {
       const plotOffset = plot.getPlotOffset();
       const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
-      const [left, right ] = this.calculateLeftRight(item, plot);
+      const [left, right] = this.calculateLeftRight(item, plot);
       const top = point.top;
       this.setState({
         showTooltip: true,
@@ -97,7 +99,7 @@ class TimeseriesChart extends Component {
         left,
         right,
         top: top + 10,
-        bottom: plotOffset.bottom
+        bottom: plotOffset.bottom,
       });
     }
   }
@@ -115,7 +117,6 @@ class TimeseriesChart extends Component {
         plot={annotation.plot}
         key={annotation.key}
         icon={annotation.icon}
-        reversed={this.props.reversed}
         color={annotation.color}
       />
     );
@@ -126,36 +127,46 @@ class TimeseriesChart extends Component {
     const { series } = this.props;
     let tooltip;
 
-    const styles = reactcss({
-      showTooltip: {
-        tooltipContainer: {
-          top: top - 8,
-          left,
-          right,
+    const styles = reactcss(
+      {
+        showTooltip: {
+          tooltipContainer: {
+            top: top - 8,
+            left,
+            right,
+          },
+        },
+        hideTooltip: {
+          tooltipContainer: { display: 'none' },
         },
       },
-      hideTooltip: {
-        tooltipContainer: { display: 'none' },
+      {
+        showTooltip: this.state.showTooltip,
+        hideTooltip: !this.state.showTooltip,
       }
-    }, {
-      showTooltip: this.state.showTooltip,
-      hideTooltip: !this.state.showTooltip,
-    });
+    );
 
     if (item) {
       const metric = series.find(r => r.id === item.series.id);
-      const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
+      const formatter = (metric && metric.tickFormatter) || this.props.tickFormatter || (v => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
       tooltip = (
-        <div className={`tvbTooltip__container tvbTooltip__container--${right ? 'right' : 'left'}`} style={styles.tooltipContainer}>
-          <span className="tvbTooltip__caret"/>
+        <div
+          className={`tvbTooltip__container tvbTooltip__container--${right ? 'right' : 'left'}`}
+          style={styles.tooltipContainer}
+        >
+          <span className="tvbTooltip__caret" />
           <div className="tvbTooltip">
+            <div className="tvbTooltip__timestamp">
+              {moment(item.datapoint[0]).format(this.props.dateFormat)}
+            </div>
             <div className="tvbTooltip__item">
               <EuiIcon className="tvbTooltip__icon" type="dot" color={item.series.color} />
-              <div className="tvbTooltip__label">{ item.series.label }</div>
-              <div className="tvbTooltip__value">{ formatter(value) }</div>
+              <div className="tvbTooltip__labelContainer">
+                <div className="tvbTooltip__label">{item.series.label}</div>
+                <div className="tvbTooltip__value">{formatter(value)}</div>
+              </div>
             </div>
-            <div className="tvbTooltip__timestamp">{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
           </div>
         </div>
       );
@@ -170,38 +181,35 @@ class TimeseriesChart extends Component {
       onDraw: this.handleDraw,
       options: this.props.options,
       plothover: this.props.plothover,
-      reversed: this.props.reversed,
+      reversed: isBackgroundDark(this.props.backgroundColor),
       series: this.props.series,
       annotations: this.props.annotations,
       showGrid: this.props.showGrid,
       show: this.props.show,
       tickFormatter: this.props.tickFormatter,
       yaxes: this.props.yaxes,
-      xAxisFormatter: this.props.xAxisFormatter
+      xAxisFormatter: this.props.xAxisFormatter,
     };
 
     const annotations = this.state.annotations.map(this.renderAnnotations);
-    let axisLabelClass = 'tvbVisTimeSeries__axisLabel';
-    if (this.props.reversed) {
-      axisLabelClass += ' tvbVisTimeSeries__axisLabel--reversed';
-    }
+    const axisLabelClass = classNames('tvbVisTimeSeries__axisLabel', {
+      'tvbVisTimeSeries__axisLabel--reversed': isBackgroundInverted(this.props.backgroundColor),
+    });
 
     return (
-      <div ref={(el) => this.container = el} className="tvbVisTimeSeries__container">
-        { tooltip }
-        { annotations }
-        <FlotChart {...params}/>
+      <div ref={el => (this.container = el)} className="tvbVisTimeSeries__container">
+        {tooltip}
+        {annotations}
+        <FlotChart {...params} />
         <div className={axisLabelClass}>{this.props.xaxisLabel}</div>
       </div>
     );
   }
-
-
 }
 
 TimeseriesChart.defaultProps = {
   showGrid: true,
-  dateFormat: 'll LTS'
+  dateFormat: 'll LTS',
 };
 
 TimeseriesChart.propTypes = {
@@ -209,7 +217,7 @@ TimeseriesChart.propTypes = {
   onBrush: PropTypes.func,
   options: PropTypes.object,
   plothover: PropTypes.func,
-  reversed: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   series: PropTypes.array,
   annotations: PropTypes.array,
   show: PropTypes.array,
@@ -217,7 +225,5 @@ TimeseriesChart.propTypes = {
   yaxes: PropTypes.array,
   showGrid: PropTypes.bool,
   xaxisLabel: PropTypes.string,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
 };
-
-export default TimeseriesChart;

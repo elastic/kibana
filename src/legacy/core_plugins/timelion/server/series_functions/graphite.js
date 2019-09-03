@@ -41,13 +41,22 @@ export default new Datasource ('graphite', {
       `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
   }),
   fn: function graphite(args, tlConfig) {
-
     const config = args.byName;
 
     const time = {
       min: moment(tlConfig.time.from).format('HH:mm[_]YYYYMMDD'),
       max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD')
     };
+    const allowedUrls = tlConfig.server.config().get('timelion.graphiteUrls');
+    const configuredUrl = tlConfig.settings['timelion:graphite.url'];
+    if (!allowedUrls.includes(configuredUrl)) {
+      throw new Error(i18n.translate('timelion.help.functions.notAllowedGraphiteUrl', {
+        defaultMessage:
+          `This graphite URL is not configured on the kibana.yml file.
+          Please configure your graphite server list in the kibana.yml file under 'timelion.graphiteUrls' and
+          select one from Kibana's Advanced Settings`,
+      }));
+    }
 
     const URL = tlConfig.settings['timelion:graphite.url'] + '/render/' +
       '?format=json' +

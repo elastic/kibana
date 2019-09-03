@@ -28,7 +28,7 @@ export function haproxyMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.haproxyMetrics.nameTitle', {
       defaultMessage: 'HAProxy metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the HAProxy server.',

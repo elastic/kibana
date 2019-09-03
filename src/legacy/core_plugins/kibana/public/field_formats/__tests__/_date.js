@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
 import { fieldFormats } from 'ui/registry/field_formats';
@@ -28,7 +28,7 @@ describe('Date Format', function () {
   let off;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, config, $rootScope) {
+  beforeEach(ngMock.inject(function (config, $rootScope) {
     $scope = $rootScope;
     settings = config;
 

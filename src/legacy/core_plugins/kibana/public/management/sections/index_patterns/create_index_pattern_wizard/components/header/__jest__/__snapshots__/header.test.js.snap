@@ -2,10 +2,7 @@
 
 exports[`Header should render a different name, prompt, and beta tag if provided 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -16,36 +13,25 @@ exports[`Header should render a different name, prompt, and beta tag if provided
           }
         }
       />
-      <React.Fragment>
-         
-        <EuiBetaBadge
-          label="Beta"
-          tooltipPosition="top"
-        />
-      </React.Fragment>
+       
+      <EuiBetaBadge
+        label="Beta"
+      />
     </h1>
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
-        grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
@@ -57,14 +43,12 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <React.Fragment>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      Test prompt
-    </div>
-  </React.Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    Test prompt
+  </div>
   <EuiSpacer
     size="m"
   />
@@ -73,10 +57,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
 
 exports[`Header should render normally 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -91,25 +72,17 @@ exports[`Header should render normally 1`] = `
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
-        grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
@@ -129,10 +102,7 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -147,25 +117,17 @@ exports[`Header should render without including system indices 1`] = `
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
-        grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."

@@ -20,39 +20,59 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+function filterBy(items, key, filter) {
+  const lowercaseFilter = (filter || '').toLowerCase();
+  return items.filter(item => item[key].toLowerCase().includes(lowercaseFilter));
+}
+
+function getCounts(fields, sourceFilters, fieldFilter = '') {
+  const fieldCount = _.countBy(filterBy(fields, 'name', fieldFilter), function (field) {
+    return field.scripted ? 'scripted' : 'indexed';
+  });
+
+  _.defaults(fieldCount, {
+    indexed: 0,
+    scripted: 0,
+    sourceFilters: sourceFilters ? filterBy(sourceFilters, 'value', fieldFilter).length : 0,
+  });
+
+  return fieldCount;
+}
+
 export function IndicesEditSectionsProvider() {
-
-  return function (indexPattern, indexPatternListProvider) {
-    const fieldCount = _.countBy(indexPattern.fields, function (field) {
-      return (field.scripted) ? 'scripted' : 'indexed';
-    });
-
-    _.defaults(fieldCount, {
-      indexed: 0,
-      scripted: 0,
-      sourceFilters: indexPattern.sourceFilters ? indexPattern.sourceFilters.length : 0,
-    });
+  return function (indexPattern, fieldFilter, indexPatternListProvider) {
+    const totalCount = getCounts(indexPattern.fields, indexPattern.sourceFilters);
+    const filteredCount = getCounts(indexPattern.fields, indexPattern.sourceFilters, fieldFilter);
 
     const editSections = [];
 
     editSections.push({
-      title: i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', { defaultMessage: 'Fields' }),
+      title: i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', {
+        defaultMessage: 'Fields',
+      }),
       index: 'indexedFields',
-      count: fieldCount.indexed
+      count: filteredCount.indexed,
+      totalCount: totalCount.indexed,
     });
 
-    if(indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
+    if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
       editSections.push({
-        title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', { defaultMessage: 'Scripted fields' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', {
+          defaultMessage: 'Scripted fields',
+        }),
         index: 'scriptedFields',
-        count: fieldCount.scripted
+        count: filteredCount.scripted,
+        totalCount: totalCount.scripted,
       });
     }
 
     editSections.push({
-      title: i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', { defaultMessage: 'Source filters' }),
+      title: i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', {
+        defaultMessage: 'Source filters',
+      }),
       index: 'sourceFilters',
-      count: fieldCount.sourceFilters
+      count: filteredCount.sourceFilters,
+      totalCount: totalCount.sourceFilters,
     });
 
     return editSections;

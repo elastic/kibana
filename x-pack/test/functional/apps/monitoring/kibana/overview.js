@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -32,11 +32,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have Kibana Cluster Summary Status showing correct info', async () => {
       expect(await kibanaClusterSummaryStatus.getContent()).to.eql({
-        instances: 'Instances:\n1',
-        memory: 'Memory:\n219.6 MB / 1.4 GB',
-        requests: 'Requests:\n174',
-        connections: 'Connections:\n174',
-        maxResponseTime: 'Max. Response Time:\n2203 ms',
+        instances: 'Instances\n1',
+        memory: 'Memory\n219.6 MB / 1.4 GB',
+        requests: 'Requests\n174',
+        connections: 'Connections\n174',
+        maxResponseTime: 'Max. Response Time\n2203 ms',
         health: 'Health: green',
       });
     });

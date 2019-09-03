@@ -6,17 +6,6 @@ All communication from the Kibana UI to the server needs to respect the
 based on the context:
 
 [float]
-==== `<img>` and `<a>` elements
-
-Write the `src` or `href` urls as you would without the base path, but then
-replace `src` or `href` with `kbn-src` or `kbn-href`.
-
-["source","shell"]
------------
-<img kbn-src="plugins/kibana/images/logo.png">
------------
-
-[float]
 ==== Getting a static asset url
 
 Use webpack to import the asset into the build. This will give you a URL in
@@ -76,6 +65,15 @@ To accomplish this the `serve` task does a few things:
   - redirects from `/` to `/{randomBasePath}`
   - redirects from `/{any}/app/{appName}` to `/{randomBasePath}/app/{appName}` so that refreshes should work
   - proxies all requests starting with `/{randomBasePath}/` to the Kibana server
+
+If you're writing scripts that interact with the Kibana API, the base path proxy will likely
+make this difficult. To bypass the base path proxy for a single request, prefix urls with
+`__UNSAFE_bypassBasePath` and the request will be routed to the development Kibana server.
+
+["source","shell"]
+-----------
+curl "http://elastic:changeme@localhost:5601/__UNSAFE_bypassBasePath/api/status"
+-----------
 
 This proxy can sometimes have unintended side effects in development, so when
 needed you can opt out by passing the `--no-base-path` flag to the `serve` task

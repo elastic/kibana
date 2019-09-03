@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -29,11 +31,11 @@ import {
 } from '../../components';
 
 import CollapseButton from './collapse_button';
-const collapseButtonSource = require('!!raw-loader!./collapse_button');
+import collapseButtonSource from '!!raw-loader!./collapse_button';
 const collapseButtonHtml = renderToHtml(CollapseButton);
 
 import CollapseButtonAria from './collapse_button_aria';
-const collapseButtonAriaSource = require('!!raw-loader!./collapse_button_aria');
+import collapseButtonAriaSource from '!!raw-loader!./collapse_button_aria';
 const collapseButtonAriaHtml = renderToHtml(CollapseButtonAria);
 
 export default props => (

@@ -25,13 +25,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiPage,
   Query,
 } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
@@ -43,12 +43,11 @@ import {
 } from './components/default_component_registry';
 import { getSettingsComponent } from './components/component_registry';
 
-import { I18nProvider } from '@kbn/i18n/react';
-
 export class AdvancedSettings extends Component {
   static propTypes = {
     config: PropTypes.object.isRequired,
     query: PropTypes.string,
+    enableSaving: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
@@ -156,38 +155,41 @@ export class AdvancedSettings extends Component {
     const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
-      <I18nProvider>
-        <EuiPage restrictWidth>
-          <div className="mgtAdvancedSettings">
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem>
-                <PageTitle />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Search
-                  query={query}
-                  categories={this.categories}
-                  onQueryChange={this.onQueryChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <PageSubtitle />
-            <EuiSpacer size="m" />
-            <CallOuts />
-            <EuiSpacer size="m" />
-            <Form
-              settings={filteredSettings}
+      <div>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem>
+            <PageTitle />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Search
+              query={query}
               categories={this.categories}
-              categoryCounts={this.categoryCounts}
-              clearQuery={this.clearQuery}
-              save={this.saveConfig}
-              clear={this.clearConfig}
-              showNoResultsMessage={!footerQueryMatched}
+              onQueryChange={this.onQueryChange}
             />
-            <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
-          </div>
-        </EuiPage>
-      </I18nProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <PageSubtitle />
+        <EuiSpacer size="m" />
+        <CallOuts />
+        <EuiSpacer size="m" />
+
+        <AdvancedSettingsVoiceAnnouncement
+          queryText={query.text}
+          settings={filteredSettings}
+        />
+
+        <Form
+          settings={filteredSettings}
+          categories={this.categories}
+          categoryCounts={this.categoryCounts}
+          clearQuery={this.clearQuery}
+          save={this.saveConfig}
+          clear={this.clearConfig}
+          showNoResultsMessage={!footerQueryMatched}
+          enableSaving={this.props.enableSaving}
+        />
+        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} enableSaving={this.props.enableSaving} />
+      </div>
     );
   }
 }

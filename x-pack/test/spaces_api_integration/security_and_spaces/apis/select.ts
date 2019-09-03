@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { selectTestSuiteFactory } from '../../common/suites/select';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function selectSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -20,7 +20,6 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
     createExpectSpaceResponse,
     createExpectRbacForbidden,
     createExpectNotFoundResult,
-    createExpectLegacyForbidden,
   } = selectTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('select', () => {
@@ -35,7 +34,6 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -49,16 +47,13 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
     ].forEach(scenario => {
       selectTest(
-        `user with no access selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `user with no access selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -66,16 +61,14 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+              response: createExpectRbacForbidden(scenario.selectSpaceId),
             },
           },
         }
       );
 
       selectTest(
-        `superuser selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `superuser selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -90,9 +83,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `rbac user with all globally selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        } space`,
+        `rbac user with all globally selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -107,9 +98,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `dual-privileges user selects ${scenario.selectSpaceId} space from the ${
-          scenario.currentSpaceId
-        }`,
+        `dual-privileges user selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -131,8 +120,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           user: scenario.users.legacyAll,
           tests: {
             default: {
-              statusCode: 200,
-              response: createExpectSpaceResponse(scenario.selectSpaceId),
+              statusCode: 403,
+              response: createExpectRbacForbidden(scenario.selectSpaceId),
             },
           },
         }
@@ -161,22 +150,6 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
           user: scenario.users.dualRead,
-          tests: {
-            default: {
-              statusCode: 200,
-              response: createExpectSpaceResponse(scenario.selectSpaceId),
-            },
-          },
-        }
-      );
-
-      selectTest(
-        `legacy readonly user selects ${scenario.selectSpaceId} space
-        from the ${scenario.currentSpaceId} space`,
-        {
-          currentSpaceId: scenario.currentSpaceId,
-          selectSpaceId: scenario.selectSpaceId,
-          user: scenario.users.legacyRead,
           tests: {
             default: {
               statusCode: 200,
@@ -303,9 +276,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `rbac user with all at ${scenario.currentSpaceId} space cannot select ${
-          scenario.selectSpaceId
-        }
+        `rbac user with all at ${scenario.currentSpaceId} space cannot select ${scenario.selectSpaceId}
         from ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,

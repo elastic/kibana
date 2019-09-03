@@ -21,8 +21,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isBoolean } from 'lodash';
 
-function AddDeleteButtons(props) {
+export function AddDeleteButtons(props) {
   const { testSubj } = props;
   const createDelete = () => {
     if (props.disableDelete) {
@@ -59,43 +60,99 @@ function AddDeleteButtons(props) {
       </EuiFlexItem>
     );
   };
+
+  const createClone = () => {
+    let cloneBtn = null;
+
+    if (props.onClone && !props.disableAdd) {
+      cloneBtn = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={props.cloneTooltip}>
+            <EuiButtonIcon
+              data-test-subj={`${testSubj}CloneBtn`}
+              aria-label={props.cloneTooltip}
+              iconType="copy"
+              onClick={props.onClone}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+
+    return cloneBtn;
+  };
+
+  const createActivatePanel = () => {
+    let activatePanelBtn = null;
+
+    if (isBoolean(props.isPanelActive)) {
+      const tooltip = props.isPanelActive
+        ? props.deactivatePanelTooltip
+        : props.activatePanelTooltip;
+      const iconType = props.isPanelActive ? 'eye' : 'eyeClosed';
+
+      activatePanelBtn = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={tooltip}>
+            <EuiButtonIcon
+              data-test-subj={`${testSubj}ActivatePanelBtn`}
+              aria-label={tooltip}
+              iconType={iconType}
+              onClick={props.togglePanelActivation}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+
+    return activatePanelBtn;
+  };
+
   const deleteBtn = createDelete();
   const addBtn = createAdd();
-  let clone;
-  if (props.onClone && !props.disableAdd) {
-    clone = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={props.cloneTooltip}>
-          <EuiButtonIcon
-            data-test-subj={`${testSubj}CloneBtn`}
-            aria-label={props.cloneTooltip}
-            iconType="copy"
-            onClick={props.onClone}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
+  const cloneBtn = createClone();
+  const activatePanelBtn = createActivatePanel();
+
   return (
     <EuiFlexGroup gutterSize="s" responsive={props.responsive} justifyContent="flexEnd">
-      { clone }
-      { addBtn }
-      { deleteBtn }
+      {activatePanelBtn}
+      {cloneBtn}
+      {addBtn}
+      {deleteBtn}
     </EuiFlexGroup>
   );
 }
 
 AddDeleteButtons.defaultProps = {
   testSubj: 'Add',
-  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', { defaultMessage: 'Add' }),
-  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', { defaultMessage: 'Delete' }),
-  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', { defaultMessage: 'Clone' })
+  activeTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', {
+    defaultMessage: 'Add',
+  }),
+  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', {
+    defaultMessage: 'Add',
+  }),
+  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', {
+    defaultMessage: 'Delete',
+  }),
+  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', {
+    defaultMessage: 'Clone',
+  }),
+  activatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.reEnableTooltip', {
+    defaultMessage: 'Re-enable',
+  }),
+  deactivatePanelTooltip: i18n.translate('tsvb.addDeleteButtons.temporarilyDisableTooltip', {
+    defaultMessage: 'Temporarily Disable',
+  }),
 };
 
 AddDeleteButtons.propTypes = {
   addTooltip: PropTypes.string,
   deleteTooltip: PropTypes.string,
   cloneTooltip: PropTypes.string,
+  activatePanelTooltip: PropTypes.string,
+  deactivatePanelTooltip: PropTypes.string,
+  togglePanelActivation: PropTypes.func,
+  isPanelActive: PropTypes.bool,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
   onClone: PropTypes.func,
@@ -103,5 +160,3 @@ AddDeleteButtons.propTypes = {
   onDelete: PropTypes.func,
   responsive: PropTypes.bool,
 };
-
-export default AddDeleteButtons;

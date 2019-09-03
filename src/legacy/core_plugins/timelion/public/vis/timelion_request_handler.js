@@ -18,15 +18,13 @@
  */
 
 import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
-const TimelionRequestHandlerProvider = function (Private, Notifier, $http, config) {
+const TimelionRequestHandlerProvider = function (Private, $http, config) {
   const timezone = Private(timezoneProvider)();
-
-  const notify = new Notifier({
-    location: 'Timelion'
-  });
 
   return {
     name: 'timelion',
@@ -35,10 +33,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, confi
       return new Promise((resolve, reject) => {
         const expression = visParams.expression;
         if (!expression) return;
-        const esQueryConfigs = {
-          allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
-          queryStringOptions: config.get('query:queryString:options'),
-        };
+        const esQueryConfigs = getEsQueryConfig(config);
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
@@ -61,7 +56,11 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, confi
           .catch(function (resp) {
             const err = new Error(resp.message);
             err.stack = resp.stack;
-            notify.error(err);
+            toastNotifications.addError(err, {
+              title: i18n.translate('timelion.requestHandlerErrorTitle', {
+                defaultMessage: 'Timelion request error',
+              }),
+            });
             reject(err);
           });
       });

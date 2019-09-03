@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as geoBoundingBox from '../geo_bounding_box';
 import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
@@ -78,6 +78,14 @@ describe('kuery functions', function () {
       it('should return an ES geo_bounding_box query representing the given node', function () {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.have.property('geo_bounding_box');
+        expect(result.geo_bounding_box.geo).to.have.property('top_left', '73.12, -174.37');
+        expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');
+      });
+
+      it('should return an ES geo_bounding_box query without an index pattern', function () {
+        const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
+        const result = geoBoundingBox.toElasticsearchQuery(node);
         expect(result).to.have.property('geo_bounding_box');
         expect(result.geo_bounding_box.geo).to.have.property('top_left', '73.12, -174.37');
         expect(result.geo_bounding_box.geo).to.have.property('bottom_right', '50.73, -135.35');

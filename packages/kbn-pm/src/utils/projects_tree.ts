@@ -33,10 +33,12 @@ interface ITree {
   name?: string;
   children?: ITreeChildren;
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ITreeChildren extends Array<ITree> {}
 
 type DirOrProjectName = string | typeof projectKey;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
 
 function treeToString(tree: ITree) {

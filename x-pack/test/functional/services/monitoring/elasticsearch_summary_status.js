@@ -28,7 +28,7 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
         unassignedShards: await testSubjects.getVisibleText(SUBJ_SUMMARY_UNASSIGNED_SHARDS),
         documentCount: await testSubjects.getVisibleText(SUBJ_SUMMARY_DOCUMENT_COUNT),
         dataSize: await testSubjects.getVisibleText(SUBJ_SUMMARY_DATA_SIZE),
-        health: await testSubjects.getProperty(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
 

@@ -1,196 +1,186 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
-<I18nProvider>
-  <div>
-    <header
-      addScriptedFieldUrl="#"
-    />
-    <call-outs
-      deprecatedLangsInUse={
-        Array [
-          "somethingElse",
-        ]
+<div>
+  <header
+    addScriptedFieldUrl="#"
+  />
+  <call-outs
+    deprecatedLangsInUse={
+      Array [
+        "somethingElse",
+      ]
+    }
+    painlessDocLink="painlessDocs"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
       }
-      painlessDocLink="painlessDocs"
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
+    }
+    items={
+      Array [
         Object {
-          "getScriptedFields": [Function],
-        }
-      }
-      items={
-        Array [
-          Object {
-            "lang": "painless",
-            "name": "ScriptedField",
-            "script": "x++",
-          },
-          Object {
-            "lang": "painless",
-            "name": "JustATest",
-            "script": "z++",
-          },
-        ]
-      }
-    />
-  </div>
-</I18nProvider>
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
-<I18nProvider>
-  <div>
-    <header
-      addScriptedFieldUrl="#"
-    />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
+<div>
+  <header
+    addScriptedFieldUrl="#"
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
         Object {
-          "getScriptedFields": [Function],
-        }
-      }
-      items={
-        Array [
-          Object {
-            "lang": "painless",
-            "name": "JustATest",
-            "script": "z++",
-          },
-        ]
-      }
-    />
-  </div>
-</I18nProvider>
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
-<I18nProvider>
-  <div>
-    <header
-      addScriptedFieldUrl="#"
-    />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
-        Object {
-          "getScriptedFields": [Function],
-        }
+<div>
+  <header
+    addScriptedFieldUrl="#"
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
       }
-      items={Array []}
-    />
-  </div>
-</I18nProvider>
+    }
+    items={Array []}
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should render normally 1`] = `
-<I18nProvider>
-  <div>
-    <header
-      addScriptedFieldUrl="#"
-    />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
+<div>
+  <header
+    addScriptedFieldUrl="#"
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
         Object {
-          "getScriptedFields": [Function],
-        }
-      }
-      items={
-        Array [
-          Object {
-            "lang": "painless",
-            "name": "ScriptedField",
-            "script": "x++",
-          },
-          Object {
-            "lang": "painless",
-            "name": "JustATest",
-            "script": "z++",
-          },
-        ]
-      }
-    />
-  </div>
-</I18nProvider>
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
-<I18nProvider>
-  <div>
-    <header
-      addScriptedFieldUrl="#"
-    />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
+<div>
+  <header
+    addScriptedFieldUrl="#"
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
         Object {
-          "getScriptedFields": [Function],
-        }
-      }
-      items={
-        Array [
-          Object {
-            "lang": "painless",
-            "name": "ScriptedField",
-            "script": "x++",
-          },
-          Object {
-            "lang": "painless",
-            "name": "JustATest",
-            "script": "z++",
-          },
-        ]
-      }
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+  <eui-overlay-mask>
+    <eui-confirm-modal
+      cancelButtonText="Cancel"
+      confirmButtonText="Delete"
+      onCancel={[Function]}
+      onConfirm={[Function]}
+      title="Delete scripted field 'ScriptedField'?"
     />
-    <eui-overlay-mask>
-      <eui-confirm-modal
-        cancelButtonText="Cancel"
-        confirmButtonText="Delete"
-        onCancel={[Function]}
-        onConfirm={[Function]}
-        title="Delete scripted field 'ScriptedField'?"
-      />
-    </eui-overlay-mask>
-  </div>
-</I18nProvider>
+  </eui-overlay-mask>
+</div>
 `;

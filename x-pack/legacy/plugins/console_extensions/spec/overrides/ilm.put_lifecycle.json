@@ -1,0 +1,157 @@
+{
+  "ilm.put_lifecycle": {
+    "data_autocomplete_rules": {
+      "policy": {
+        "phases": {
+          "warm": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 50
+                },
+                "allocate": {
+                  "number_of_replicas": 1,
+                  "include": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "exclude": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "require": {
+                    "_name": "",
+                    "_ip": ""
+                  }
+                },
+                "shrink": {
+                  "number_of_shards": 1
+                },
+                "forcemerge": {
+                  "max_num_segments": 1
+                }
+              }  
+            },
+            "min_age": "1d",
+            "actions": {
+              "set_priority": {
+                "priority": 50
+              },
+              "allocate": {
+                "number_of_replicas": 1,
+                "include": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "exclude": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "require": {
+                  "_name": "",
+                  "_ip": ""
+                }
+              },
+              "shrink": {
+                "number_of_shards": 1
+              },
+              "forcemerge": {
+                "max_num_segments": 1
+              },
+              "unfollow": {}
+            }
+          },
+          "cold": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 0
+                },
+                "freeze": {},
+                "allocate": {
+                  "number_of_replicas": 1,
+                  "include": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "exclude": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "require": {
+                    "_name": "",
+                    "_ip": ""
+                  }
+                }
+              }  
+            },
+            "min_age": "1d",
+            "actions": {
+              "set_priority": {
+                "priority": 0
+              },
+              "freeze": {},
+              "unfollow": {},
+              "allocate": {
+                "number_of_replicas": 1,
+                "include": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "exclude": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "require": {
+                  "_name": "",
+                  "_ip": ""
+                }
+              }
+            }
+          },
+          "hot": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 100
+                },
+                "rollover": {
+                  "max_age": "7d",
+                  "max_docs": 1000,
+                  "max_size": "5gb"
+                }
+              }  
+            },
+            "min_age": "1d",
+            "actions": {
+              "set_priority": {
+                "priority": 100
+              },
+              "rollover": {
+                "max_age": "7d",
+                "max_docs": 1000,
+                "max_size": "5gb"
+              },
+              "unfollow": {}
+            }
+          },
+          "delete": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "delete": {}
+              }
+            },
+            "min_age": "1d",
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

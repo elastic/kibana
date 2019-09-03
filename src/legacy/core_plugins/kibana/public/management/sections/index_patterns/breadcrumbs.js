@@ -20,14 +20,26 @@
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 
-export function getCreateBreadcrumbs() {
+export function getListBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('kbn.management.indexPatterns.listBreadcrumb', {
+        defaultMessage: 'Index patterns'
+      }),
+      href: '#/management/kibana/index_patterns'
+    }
+  ];
+}
+
+export function getCreateBreadcrumbs() {
+  return [
+    ...getListBreadcrumbs(),
     {
       text: i18n.translate('kbn.management.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern'
       }),
-      href: '#/management/kibana/objects'
+      href: '#/management/kibana/index_pattern'
     }
   ];
 }
@@ -36,10 +48,10 @@ export function getEditBreadcrumbs($route) {
   const { indexPattern } = $route.current.locals;
 
   return [
-    MANAGEMENT_BREADCRUMB,
+    ...getListBreadcrumbs(),
     {
       text: indexPattern.title,
-      href: `#/management/kibana/indices/${indexPattern.id}`
+      href: `#/management/kibana/index_patterns/${indexPattern.id}`
     }
   ];
 }

@@ -42,7 +42,7 @@
           }
         }
       },
-      "savedSearchId": {
+      "savedSearchRefName": {
         "type": "keyword"
       },
       "title": {
@@ -137,9 +137,6 @@
       "title": {
         "type": "text"
       },
-      "uiStateJSON": {
-        "type": "text"
-      },
       "version": {
         "type": "integer"
       }
@@ -180,6 +177,16 @@
         "type": "long"
       },
       "optOutCount": {
+        "type": "long"
+      }
+    }
+  },
+  "sample-data-telemetry": {
+    "properties": {
+      "installCount": {
+        "type": "long"
+      },
+      "unInstallCount": {
         "type": "long"
       }
     }

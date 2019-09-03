@@ -10,15 +10,8 @@ kbn-management-objects-view {
   display: block;
 }
 
-// SASSTODO: Remove when Kibana has a proper background color
-.tab-account, .tab-management {
-  background-color: $euiColorEmptyShade;
-}
-
-// SASSTODO: Remove when Kibana has a proper background color
-kbn-management-objects, kbn-management-app {
-  background: $euiColorLightestShade;
-  min-height: 100vh;
+#management-landing {
+  display: flex;
 }
 
 .kbn-management-tab:first-letter {
@@ -30,17 +23,7 @@ kbn-management-objects-view {
   .ace_editor { height: 300px; }
 }
 
-// SASSTODO: These are some dragula settings.
-.gu-handle {
-  cursor: move;
-  cursor: grab;
-  cursor: -moz-grab;
-  cursor: -webkit-grab;
-}
-
-.gu-mirror,
-.gu-mirror .gu-handle {
-  cursor: grabbing;
-  cursor: -moz-grabbing;
-  cursor: -webkit-grabbing;
+// Hack because the management wrapper is flat HTML and needs a class
+.mgtPage__body {
+  max-width: map-get($euiBreakpoints, 'xl');
 }

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import * as NodeShasumsNS from '../node_shasums';
 import * as NodeDownloadInfoNS from '../node_download_info';

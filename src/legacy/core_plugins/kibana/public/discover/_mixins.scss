@@ -1,0 +1,27 @@
+/**
+*  Style ES document _source in table view <dt>key:<dt><dd>value</dd>
+*  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+*  row in the Context Log.
+*/
+@mixin dscDocSourceStyle {
+  dl.source {
+    margin-bottom: 0;
+    line-height:2em;
+    word-break: break-word;
+
+    dt, dd {
+      display: inline;
+    }
+
+    dt {
+      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
+      color: $euiTextColor;
+      padding: ($euiSizeXS / 2) $euiSizeXS;
+      margin-right: $euiSizeXS;
+      word-break: normal;
+      border-radius: $euiBorderRadius;
+    }
+  }
+}
+
+

@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthenticationStatePage renders 1`] = `
+<div
+  className="secAuthenticationStatePage"
+>
+  <header
+    className="secAuthenticationStatePage__header"
+  >
+    <div
+      className="secAuthenticationStatePage__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="secAuthenticationStatePage__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="secAuthenticationStatePage__title"
+        size="l"
+      >
+        <h1>
+          foo
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="secAuthenticationStatePage__content eui-textCenter"
+  >
+    <span>
+      hello world
+    </span>
+  </div>
+</div>
+`;

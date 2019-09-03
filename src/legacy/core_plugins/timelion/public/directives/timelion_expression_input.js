@@ -56,10 +56,10 @@ import {
 import { comboBoxKeyCodes } from '@elastic/eui';
 import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
-const Parser = PEG.buildParser(grammar);
+const Parser = PEG.generate(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($document, $http, $interval, $timeout, Private) {
+app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {

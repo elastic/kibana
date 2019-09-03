@@ -1,7 +1,0 @@
-[role="xpack"]
-[[spaces-securing]]
-=== Securing spaces
-
-With security enabled, you can control who has access to specific spaces. You can manage access in **Management > Roles**.
-
-image::spaces/images/securing-spaces.png["Securing spaces"]

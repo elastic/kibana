@@ -16,20 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { buildRequestBody } from './build_request_body';
+import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
+import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-import buildRequestBody from './build_request_body';
+export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const request = buildRequestBody(
+    req,
+    panel,
+    series,
+    esQueryConfig,
+    indexPatternObject,
+    capabilities
+  );
+  const esShardTimeout = await getEsShardTimeout(req);
 
-export default (req, panel, series) => {
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const bodies = [];
-
-  bodies.push({
-    index: indexPattern,
-    ignoreUnavailable: true,
-  });
-
-  const body = buildRequestBody(req, panel, series);
-  body.timeout = '90s';
-  bodies.push(body);
-  return bodies;
-};
+  return {
+    index: indexPatternString,
+    body: {
+      ...request,
+      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+  };
+}

@@ -23,8 +23,8 @@ import chrome from 'ui/chrome';
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { IndexPatternsProvider } from 'ui/index_patterns';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { IndexPatternsProvider } from '../../../data/public';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 
 function getHandler(from, type) {
@@ -44,10 +44,7 @@ function getHandler(from, type) {
 export const visualization = () => ({
   name: 'visualization',
   type: 'render',
-  context: {
-    types: [],
-  },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.visualization.help', {
+  help: i18n.translate('interpreter.functions.visualization.help', {
     defaultMessage: 'A simple visualization'
   }),
   args: {
@@ -119,17 +116,21 @@ export const visualization = () => ({
       if (context.columns) {
         // assign schemas to aggConfigs
         context.columns.forEach(column => {
-          column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          if (column.aggConfig) {
+            column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          }
         });
 
         Object.keys(schemas).forEach(key => {
           schemas[key].forEach(i => {
-            context.columns[i].aggConfig.schema = key;
+            if (context.columns[i] && context.columns[i].aggConfig) {
+              context.columns[i].aggConfig.schema = key;
+            }
           });
         });
       }
 
-      context = await responseHandler(context);
+      context = await responseHandler(context, visConfigParams.dimensions);
     }
 
     return {
@@ -137,10 +138,8 @@ export const visualization = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams
-        },
+        visType: args.type,
+        visConfig: visConfigParams
       }
     };
   }

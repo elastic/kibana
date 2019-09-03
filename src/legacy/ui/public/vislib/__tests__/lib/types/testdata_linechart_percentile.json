@@ -1,0 +1,464 @@
+{
+  "cfg": {
+    "addLegend": true,
+    "addTimeMarker": false,
+    "addTooltip": true,
+    "categoryAxes": [
+      {
+        "id": "CategoryAxis-1",
+        "labels": {
+          "show": true,
+          "truncate": 100
+        },
+        "position": "bottom",
+        "scale": {
+          "type": "linear"
+        },
+        "show": true,
+        "style": {},
+        "title": {},
+        "type": "category"
+      }
+    ],
+    "dimensions": {
+      "x": {
+        "accessor": 0,
+        "format": {
+          "id": "date",
+          "params": {
+            "pattern": "YYYY-MM-DD"
+          }
+        },
+        "params": {
+          "date": true,
+          "interval": "P1D",
+          "format": "YYYY-MM-DD",
+          "bounds": {
+            "min": "2019-05-10T04:00:00.000Z",
+            "max": "2019-05-12T10:18:57.342Z"
+          }
+        },
+        "aggType": "date_histogram"
+      },
+      "y": [
+        {
+          "accessor": 1,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.[00]"
+            }
+          },
+          "params": {},
+          "aggType": "percentiles"
+        },
+        {
+          "accessor": 2,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.[00]"
+            }
+          },
+          "params": {},
+          "aggType": "percentiles"
+        }
+      ]
+    },
+    "grid": {
+      "categoryLines": false,
+      "style": {
+        "color": "#eee"
+      }
+    },
+    "legendPosition": "right",
+    "seriesParams": [
+      {
+        "data": {
+          "id": "1",
+          "label": "Percentiles of AvgTicketPrice"
+        },
+        "drawLinesBetweenPoints": true,
+        "interpolate": "cardinal",
+        "mode": "normal",
+        "show": "true",
+        "showCircles": true,
+        "type": "line",
+        "valueAxis": "ValueAxis-1"
+      }
+    ],
+    "times": [],
+    "type": "area",
+    "valueAxes": [
+      {
+        "id": "ValueAxis-1",
+        "labels": {
+          "filter": false,
+          "rotate": 0,
+          "show": true,
+          "truncate": 100
+        },
+        "name": "LeftAxis-1",
+        "position": "left",
+        "scale": {
+          "mode": "normal",
+          "type": "linear"
+        },
+        "show": true,
+        "style": {},
+        "title": {
+          "text": "Percentiles of AvgTicketPrice"
+        },
+        "type": "value"
+      }
+    ]
+  },
+  "data": {
+    "uiState": {},
+    "data": {
+      "xAxisOrderedValues": [
+        1557460800000,
+        1557547200000
+      ],
+      "xAxisFormat": {
+        "id": "date",
+        "params": {
+          "pattern": "YYYY-MM-DD"
+        }
+      },
+      "xAxisLabel": "timestamp per day",
+      "ordered": {
+        "interval": "P1D",
+        "date": true,
+        "min": 1557460800000,
+        "max": 1557656337342
+      },
+      "yAxisFormat": {
+        "id": "number",
+        "params": {
+          "pattern": "$0,0.[00]"
+        }
+      },
+      "yAxisLabel": "",
+      "series": [
+        {
+          "id": "1.1",
+          "rawId": "col-1-1.1",
+          "label": "1st percentile of AvgTicketPrice",
+          "values": [
+            {
+              "x": 1557460800000,
+              "y": 116.33676605224609,
+              "extraMetrics": [],
+              "xRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 0,
+                "row": 0,
+                "value": 1557460800000
+              },
+              "yRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 1,
+                "row": 0,
+                "value": 116.33676605224609
+              },
+              "parent": null,
+              "series": "1st percentile of AvgTicketPrice",
+              "seriesId": "col-1-1.1"
+            },
+            {
+              "x": 1557547200000,
+              "y": 223,
+              "extraMetrics": [],
+              "xRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 0,
+                "row": 1,
+                "value": 1557547200000
+              },
+              "yRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 1,
+                "row": 1,
+                "value": 223
+              },
+              "parent": null,
+              "series": "1st percentile of AvgTicketPrice",
+              "seriesId": "col-1-1.1"
+            }
+          ]
+        },
+        {
+          "id": "1.50",
+          "rawId": "col-2-1.50",
+          "label": "50th percentile of AvgTicketPrice",
+          "values": [
+            {
+              "x": 1557460800000,
+              "y": 658.8453063964844,
+              "extraMetrics": [],
+              "xRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 0,
+                "row": 0,
+                "value": 1557460800000
+              },
+              "yRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 2,
+                "row": 0,
+                "value": 658
+              },
+              "parent": null,
+              "series": "50th percentile of AvgTicketPrice",
+              "seriesId": "col-2-1.50"
+            },
+            {
+              "x": 1557547200000,
+              "y": 756,
+              "extraMetrics": [],
+              "xRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 0,
+                "row": 1,
+                "value": 1557547200000
+              },
+              "yRaw": {
+                "table": {
+                  "columns": [
+                    {
+                      "id": "col-0-2",
+                      "name": "timestamp per day"
+                    },
+                    {
+                      "id": "col-1-1.1",
+                      "name": "1st percentile of AvgTicketPrice"
+                    },
+                    {
+                      "id": "col-2-1.50",
+                      "name": "50th percentile of AvgTicketPrice"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "col-0-2": 1557460800000,
+                      "col-1-1.1": 116,
+                      "col-2-1.50": 658
+                    },
+                    {
+                      "col-0-2": 1557547200000,
+                      "col-1-1.1": 223,
+                      "col-2-1.50": 756
+                    }
+                  ]
+                },
+                "column": 2,
+                "row": 1,
+                "value": 756.2283554077148
+              },
+              "parent": null,
+              "series": "50th percentile of AvgTicketPrice",
+              "seriesId": "col-2-1.50"
+            }
+          ]
+        }
+      ],
+      "hits": 2
+    },
+    "type": "series",
+    "labels": [
+      "1st percentile of AvgTicketPrice",
+      "50th percentile of AvgTicketPrice"
+    ]
+  }
+
+}

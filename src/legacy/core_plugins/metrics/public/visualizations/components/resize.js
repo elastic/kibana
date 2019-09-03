@@ -20,8 +20,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
-class Resize extends Component {
 
+export class Resize extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -33,10 +33,13 @@ class Resize extends Component {
     if (!el) return;
     this.timeout = setTimeout(() => {
       const { currentHeight, currentWidth } = this.state;
-      if (currentHeight !== el.parentNode.clientHeight || currentWidth !== el.parentNode.clientWidth) {
+      if (
+        currentHeight !== el.parentNode.clientHeight ||
+        currentWidth !== el.parentNode.clientWidth
+      ) {
         this.setState({
           currentWidth: el.parentNode.clientWidth,
-          currentHeight: el.parentNode.clientHeight
+          currentHeight: el.parentNode.clientHeight,
         });
         this.handleResize();
       }
@@ -60,26 +63,19 @@ class Resize extends Component {
   render() {
     const style = this.props.style || {};
     const className = this.props.className || '';
-    return(
-      <div
-        style={style}
-        className={className}
-        ref={(el) => this.el = el}
-      >
+    return (
+      <div style={style} className={className} ref={el => (this.el = el)}>
         {this.props.children}
       </div>
     );
   }
-
 }
 
 Resize.defaultProps = {
-  frequency: 500
+  frequency: 500,
 };
 
 Resize.propTypes = {
   frequency: PropTypes.number,
-  onResize: PropTypes.func
+  onResize: PropTypes.func,
 };
-
-export default Resize;

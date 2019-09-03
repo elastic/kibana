@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
-import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
-export default function stdSibling(bucket, panel, series) {
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+
+export function stdSibling(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 
@@ -41,6 +42,4 @@ export default function stdSibling(bucket, panel, series) {
 
     return next(results);
   };
-
-
 }

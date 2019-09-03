@@ -18,11 +18,16 @@
  */
 
 import _ from 'lodash';
-export default function splitByFilter(req, panel, series) {
+import { buildEsQuery } from '@kbn/es-query';
+
+export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
     if (series.split_mode !== 'filter') return next(doc);
-    _.set(doc, `aggs.${series.id}.filter.query_string.query`, series.filter || '*');
-    _.set(doc, `aggs.${series.id}.filter.query_string.analyze_wildcard`, true);
+    _.set(
+      doc,
+      `aggs.${series.id}.filter`,
+      buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)
+    );
     return next(doc);
   };
 }

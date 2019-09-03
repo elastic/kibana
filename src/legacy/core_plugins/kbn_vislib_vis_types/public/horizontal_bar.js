@@ -18,17 +18,19 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import pointSeriesTemplate from './editors/point_series.html';
+import { PointSeriesOptions } from './components/options';
+import { getLegendPositions, LegendPositions } from './utils/legend_positions';
 
-export default function PointSeriesVisType(Private, i18n) {
+export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'horizontal_bar',
-    title: i18n('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),
+    title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),
     icon: 'visBarHorizontal',
-    description: i18n('kbnVislibVisTypes.horizontalBar.horizontalBarDescription',
+    description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription',
       { defaultMessage: 'Assign a continuous variable to each axis' }
     ),
     visConfig: {
@@ -36,9 +38,6 @@ export default function PointSeriesVisType(Private, i18n) {
         type: 'histogram',
         grid: {
           categoryLines: false,
-          style: {
-            color: '#eee'
-          }
         },
         categoryAxes: [
           {
@@ -98,13 +97,15 @@ export default function PointSeriesVisType(Private, i18n) {
         }],
         addTooltip: true,
         addLegend: true,
-        legendPosition: 'right',
+        legendPosition: LegendPositions.RIGHT,
         times: [],
         addTimeMarker: false,
+        labels: {},
       },
     },
     editorConfig: {
       collections: {
+        legendPositions: getLegendPositions(),
         positions: ['top', 'left', 'right', 'bottom'],
         chartTypes: [{
           value: 'line',
@@ -137,13 +138,13 @@ export default function PointSeriesVisType(Private, i18n) {
           editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
           '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },
-        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
+        { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
       ],
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.horizontalBar.metricTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', { defaultMessage: 'Y-axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
@@ -153,7 +154,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'radius',
-          title: i18n('kbnVislibVisTypes.horizontalBar.radiusTitle', { defaultMessage: 'Dot Size' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', { defaultMessage: 'Dot size' }),
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
@@ -161,26 +162,26 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n('kbnVislibVisTypes.horizontalBar.segmentTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.horizontalBar.groupTitle', { defaultMessage: 'Split Series' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', { defaultMessage: 'Split series' }),
           min: 0,
           max: 3,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
           name: 'split',
-          title: i18n('kbnVislibVisTypes.horizontalBar.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     }

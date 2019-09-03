@@ -43,7 +43,7 @@ It collects system wide statistics and statistics per process and filesystem. \
     artifacts: {
       dashboards: [
         {
-          id: 'Metricbeat-system-overview',
+          id: 'Metricbeat-system-overview-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.systemMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'System metrics dashboard',
           }),

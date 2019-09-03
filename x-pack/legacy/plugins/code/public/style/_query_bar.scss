@@ -1,0 +1,10 @@
+.codeQueryBar {
+  max-width: 90%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.codeSearchBar__input {
+  padding-right: 10rem;
+}

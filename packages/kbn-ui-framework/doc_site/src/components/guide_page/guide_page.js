@@ -62,7 +62,7 @@ export class GuidePage extends Component {
         </GuidePageSideNav>
 
         <div className="guidePageBody">
-          <div style={{ marginBottom: 40, backgroundColor: '#ffec9d', padding: 20 }}>
+          <div className="guidePageKillScreen">
             <h1 className="guideTitle">
               The Kibana UI Framework has been DEPRECATED.
             </h1>

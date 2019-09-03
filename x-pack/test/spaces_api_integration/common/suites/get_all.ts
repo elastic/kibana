@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -15,6 +15,7 @@ interface GetAllTest {
 
 interface GetAllTests {
   exists: GetAllTest;
+  copySavedObjectsPurpose: GetAllTest;
 }
 
 interface GetAllTestDefinition {
@@ -24,14 +25,6 @@ interface GetAllTestDefinition {
 }
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectResults = (...spaceIds: string[]) => (resp: { [key: string]: any }) => {
     const expectedBody = [
       {
@@ -39,16 +32,19 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         name: 'Default Space',
         description: 'This is the default space',
         _reserved: true,
+        disabledFeatures: [],
       },
       {
         id: 'space_1',
         name: 'Space 1',
         description: 'This is the first test space',
+        disabledFeatures: [],
       },
       {
         id: 'space_2',
         name: 'Space 2',
         description: 'This is the second test space',
+        disabledFeatures: [],
       },
     ].filter(entry => spaceIds.includes(entry.id));
     expect(resp.body).to.eql(expectedBody);
@@ -56,6 +52,14 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const expectEmptyResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
+  };
+
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      error: 'Forbidden',
+      message: 'Forbidden',
+      statusCode: 403,
+    });
   };
 
   const makeGetAllTest = (describeFn: DescribeFn) => (
@@ -73,6 +77,17 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.exists.statusCode)
           .then(tests.exists.response);
       });
+
+      describe('copySavedObjects purpose', () => {
+        it(`should return ${tests.copySavedObjectsPurpose.statusCode}`, async () => {
+          return supertest
+            .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
+            .query({ purpose: 'copySavedObjectsIntoSpace' })
+            .auth(user.username, user.password)
+            .expect(tests.copySavedObjectsPurpose.statusCode)
+            .then(tests.copySavedObjectsPurpose.response);
+        });
+      });
     });
   };
 
@@ -82,7 +97,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectResults,
-    createExpectLegacyForbidden,
+    expectRbacForbidden,
     getAllTest,
     expectEmptyResult,
   };

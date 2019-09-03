@@ -4,7 +4,6 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h3>
       <FormattedMessage
@@ -14,10 +13,7 @@ exports[`Header should render normally 1`] = `
       />
     </h3>
   </EuiTitle>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <FormattedMessage
         defaultMessage="Source filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level."

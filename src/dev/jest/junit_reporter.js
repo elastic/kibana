@@ -23,7 +23,7 @@ import { writeFileSync } from 'fs';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '../xml';
+import { escapeCdata } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
@@ -39,7 +39,7 @@ export default class JestJUnitReporter {
     } = options;
 
     this._reportName = reportName;
-    this._rootDirectory = rootDirectory;
+    this._rootDirectory = resolve(rootDirectory);
   }
 
   /**
@@ -70,7 +70,7 @@ export default class JestJUnitReporter {
       timestamp: msToIso(results.startTime),
       time: msToSec(Date.now() - results.startTime),
       tests: results.numTotalTests,
-      failures: results.numFailedTests,
+      failures: results.numFailingTests,
       skipped: results.numPendingTests,
     });
 
@@ -81,7 +81,7 @@ export default class JestJUnitReporter {
         timestamp: msToIso(suite.perfStats.start),
         time: msToSec(suite.perfStats.end - suite.perfStats.start),
         tests: suite.testResults.length,
-        failures: suite.numFailedTests,
+        failures: suite.numFailingTests,
         skipped: suite.numPendingTests,
         file: suite.testFilePath
       });

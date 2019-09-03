@@ -35,8 +35,8 @@ import { MAX_SEARCH_SIZE } from './constants';
 import {
   ensureMinimumTime,
   getIndices,
-  getRemoteClusters
 } from './lib';
+import { i18n } from '@kbn/i18n';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
@@ -76,7 +76,7 @@ export class CreateIndexPatternWizard extends Component {
       this.setState(prevState => ({
         toasts: prevState.toasts.concat([{
           title: errorMsg,
-          id: errorMsg,
+          id: errorMsg.props.id,
           color: 'warning',
           iconType: 'alert',
         }])
@@ -104,17 +104,18 @@ export class CreateIndexPatternWizard extends Component {
       defaultMessage="Failed to load remote clusters"
     />);
 
-    const [allIndices, remoteClusters] = await ensureMinimumTime([
-      this.catchAndWarn(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg),
-      this.catchAndWarn(getRemoteClusters(services.$http), [], clustersFailMsg)
-    ]);
+    // query local and remote indices, updating state independently
+    ensureMinimumTime(
+      this.catchAndWarn(
+        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg)
+    ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
 
-    this.setState({
-      allIndices,
-      isInitiallyLoadingIndices: false,
-      remoteClustersExist: remoteClusters.length !== 0
-    });
-  }
+    this.catchAndWarn(
+      // if we get an error from remote cluster query, supply fallback value that allows user entry.
+      // ['a'] is fallback value
+      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1), ['a'], clustersFailMsg
+    ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
+  };
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
     const { services } = this.props;
@@ -130,13 +131,23 @@ export class CreateIndexPatternWizard extends Component {
     });
 
     const createdId = await emptyPattern.create();
+    if (!createdId) {
+      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', { values: { title: this.title },
+        defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
+      try {
+        await services.confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
+        return services.changeUrl(`/management/kibana/index_patterns/${indexPatternId}`);
+      } catch (err) {
+        return false;
+      }
+    }
 
     if (!services.config.get('defaultIndex')) {
       await services.config.set('defaultIndex', createdId);
     }
 
-    services.indexPatterns.cache.clear(createdId);
-    services.changeUrl(`/management/kibana/indices/${createdId}`);
+    services.indexPatterns.clearCache(createdId);
+    services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   }
 
   goToTimeFieldStep = (indexPattern) => {

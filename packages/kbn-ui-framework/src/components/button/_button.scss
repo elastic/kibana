@@ -85,20 +85,6 @@
   @include kuiButtonHoverAndActive {
     background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
   }
-
-  @include darkTheme {
-    color: $buttonBasicTextColor--darkTheme;
-    background-color: $buttonBasicBackgroundColor--darkTheme;
-
-    @include kuiButtonFocus {
-      @include focus($kuiFocusColor, $kuiBackgroundColor--darkTheme);
-      color: $buttonBasicTextColor--darkTheme;
-    }
-
-    @include kuiButtonHoverAndActive {
-      background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
-    }
-  }
 }
 
 /**
@@ -139,19 +125,18 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: $kuiColorRed;
-  background-color: rgba($kuiColorWhite, 0.5);
-  border: solid 1px $kuiColorRed;
+  color: $euiColorDanger;
+  border: solid 1px $euiColorDanger;
 
   @include kuiButtonFocus {
-    @include focus($kuiFocusDangerColor);
-    color: $kuiColorRed;
+    @include focus($euiColorDanger);
+    color: $euiColorDanger;
   }
 
   @include kuiButtonHoverAndActive {
-    color: darken($kuiColorRed, 10%) !important;
-    background-color: rgba(lighten($kuiColorRed, 50%), 0.5);
-    border: solid 1px darken($kuiColorRed, 10%);
+    color: darken($euiColorDanger, 10%) !important;
+    border: solid 1px darken($euiColorDanger, 10%);
+    background-color: transparentize($euiColorDanger, .9);
   }
 }
 
@@ -185,28 +170,20 @@
   color: $kuiLinkColor !important; /* 2 */
   background-color: transparent;
 
-  @include darkTheme {
-    color: $kuiLinkColor--darkTheme !important; /* 2 */
-  }
-
   @include kuiButtonHoverAndActive {
     color: $kuiLinkHoverColor !important; /* 1 */
     text-decoration: underline;
-
-    @include darkTheme {
-      color: $kuiLinkColor-isHover--darkTheme !important; /* 2 */
-    }
   }
 }
 
 .kuiButton--secondary {
-  color: $kuiLinkColor !important; /* 2 */
-  border: solid 1px $kuiColorBlue;
-  background-color: rgba($kuiColorWhite, 0.5);
+  color: $euiColorPrimary !important; /* 2 */
+  border: solid 1px $euiColorPrimary;
 
   @include kuiButtonHoverAndActive {
-    color: darken($kuiLinkColor, 10%) !important; /* 1 */
-    border: solid 1px darken($kuiColorBlue, 10%);
-    background-color: rgba(lighten($kuiLinkColor, 50%), 0.5);
+    color: darken($euiColorPrimary, 10%) !important; /* 1 */
+    border: solid 1px darken($euiColorPrimary, 10%);
+    background-color: transparentize($euiColorPrimary, .9);
+    text-decoration: underline;
   }
 }

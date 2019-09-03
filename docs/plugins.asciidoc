@@ -55,27 +55,6 @@ NOTE: This command creates the specified directory if it does not already exist.
 WARNING: This option is deprecated and will be removed in Kibana 7. It is known to not work with some plugins, including {xpack}.
 
 [float]
-=== Installing Plugins with Linux packages
-
-The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
-want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
-
-[source,shell]
-$ sudo -u kibana bin/kibana-plugin install x-pack
-
-If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
-
-[source,shell]
-$ chown -R kibana:kibana /path/to/kibana/optimize
-
-[float]
-=== Installing plugins while deferring optimization
-
-The majority of the time spent installing a plugin is running the optimizer.  If you're installing multiple plugins it can make sense to omit that step and only run it once.
-This can be done by providing --no-optimize to the plugin installation command. You can then either execute bin/kibana --optimize to run the optimizer,
-or it will be ran the first time Kibana is started.
-
-[float]
 === Proxy support for plugin installation
 
 Kibana supports plugin installation via a proxy. It uses the `http_proxy` and `https_proxy`

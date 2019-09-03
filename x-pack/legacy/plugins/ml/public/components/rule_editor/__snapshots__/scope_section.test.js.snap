@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScopeSection don't render when no partitioning fields 1`] = `""`;
+
+exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut when no filter list IDs 1`] = `
+<Fragment>
+  <EuiTitle>
+    <h2>
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCheckbox
+    checked={true}
+    compressed={false}
+    disabled={false}
+    id="enable_scope_checkbox"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[MockFunction]}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NoPermissionCallOut />
+  <EuiSpacer
+    size="xxl"
+  />
+</Fragment>
+`;
+
+exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
+<Fragment>
+  <EuiTitle>
+    <h2>
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCheckbox
+    checked={true}
+    compressed={false}
+    disabled={false}
+    id="enable_scope_checkbox"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[MockFunction]}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <ScopeExpression
+    enabled={false}
+    fieldName="domain"
+    filterId="web_domains"
+    filterListIds={
+      Array [
+        "web_domains",
+        "safe_domains",
+        "uk_domains",
+      ]
+    }
+    filterType="include"
+    key="0"
+    updateScope={[MockFunction]}
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+</Fragment>
+`;
+
+exports[`ScopeSection renders when enabled with scope supplied 1`] = `
+<Fragment>
+  <EuiTitle>
+    <h2>
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCheckbox
+    checked={true}
+    compressed={false}
+    disabled={false}
+    id="enable_scope_checkbox"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[MockFunction]}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <ScopeExpression
+    enabled={true}
+    fieldName="domain"
+    filterId="uk_domains"
+    filterListIds={
+      Array [
+        "web_domains",
+        "safe_domains",
+        "uk_domains",
+      ]
+    }
+    filterType="include"
+    key="0"
+    updateScope={[MockFunction]}
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+</Fragment>
+`;
+
+exports[`ScopeSection renders when not enabled 1`] = `
+<Fragment>
+  <EuiTitle>
+    <h2>
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCheckbox
+    checked={false}
+    compressed={false}
+    disabled={false}
+    id="enable_scope_checkbox"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[MockFunction]}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+</Fragment>
+`;
+
+exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
+<Fragment>
+  <EuiTitle>
+    <h2>
+      <FormattedMessage
+        defaultMessage="Scope"
+        id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCheckbox
+    checked={true}
+    compressed={false}
+    disabled={false}
+    id="enable_scope_checkbox"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Add a filter list to limit where the rule applies."
+        id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[MockFunction]}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NoFilterListsCallOut />
+  <EuiSpacer
+    size="xxl"
+  />
+</Fragment>
+`;

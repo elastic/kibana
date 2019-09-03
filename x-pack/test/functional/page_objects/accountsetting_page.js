@@ -5,28 +5,31 @@
  */
 
 //import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function AccountSettingProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const userMenu = getService('userMenu');
 
   class AccountSettingsPage {
     async verifyAccountSettings(expectedEmail, expectedUserName) {
-      await testSubjects.click('loggedInUser');
-      const usernameField = await testSubjects.find('usernameField');
+      await userMenu.clickProvileLink();
+
+      const usernameField = await testSubjects.find('username');
       const userName = await usernameField.getVisibleText();
       expect(userName).to.be(expectedUserName);
-      const emailIdField = await testSubjects.find('emailIdField');
+
+      const emailIdField = await testSubjects.find('email');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);
+      await userMenu.closeMenu();
     }
 
     async changePassword(currentPassword, newPassword) {
-      await testSubjects.click('changePasswordLink');
-      await testSubjects.setValue('newPasswordInput', newPassword);
-      await testSubjects.setValue('currentPasswordInput', currentPassword);
-      await testSubjects.setValue('confirmPasswordInput', newPassword);
-      await testSubjects.click('saveChangesButton');
+      await testSubjects.setValue('currentPassword', currentPassword);
+      await testSubjects.setValue('newPassword', newPassword);
+      await testSubjects.setValue('confirmNewPassword', newPassword);
+      await testSubjects.click('changePasswordButton');
       await testSubjects.existOrFail('passwordUpdateSuccess');
     }
   }

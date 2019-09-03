@@ -1,7 +1,7 @@
 [[spaces-api-put]]
 === Update Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Updates an existing {kib} space. To create a new space, use the POST command.
 
@@ -9,7 +9,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-To update a space, issue a PUT request to the 
+To update a space, issue a PUT request to the
 `/api/spaces/space/<space_id>` endpoint.
 
 [source,js]
@@ -27,6 +27,8 @@ The following parameters can be specified in the body of a PUT request to update
 
 `description`:: (string) Optional description for the space.
 
+`disabledFeatures`:: (string array) Optional list of features that are disabled for the space. Use the <<features-api-get, Features API>> to get a list of available features IDs.
+
 `initials`:: (string) Optionally specify the initials shown in the Space Avatar for this space. By default, the initials will be automatically generated from the space name.
 If specified, initials should be either 1 or 2 characters.
 
@@ -42,7 +44,8 @@ PUT /api/spaces/space/marketing
   "name": "Marketing",
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
-  "initials": "MK"
+  "initials": "MK",
+  "disabledFeatures": []
 }
 --------------------------------------------------
 // KIBANA

@@ -33,4 +33,3 @@ export function createXaxisFormatter(interval, rules, dateFormat) {
     return moment(val).format(getFormat(interval, rules, dateFormat));
   };
 }
-

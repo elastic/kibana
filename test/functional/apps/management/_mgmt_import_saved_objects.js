@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'mgmt_import_objects.json'));
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.associateIndexPattern('4c3f3c30-ac94-11e8-a651-614b2788174a', 'logstash-*');
       await PageObjects.settings.clickConfirmChanges();
       await PageObjects.settings.clickImportDone();

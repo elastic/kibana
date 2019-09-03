@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelemetryForm renders as expected 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Usage Data"
+                id="xpack.telemetry.usageDataTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="s"
+      />
+      <InjectIntl(FieldUI)
+        clear={[Function]}
+        enableSaving={true}
+        save={[Function]}
+        setting={
+          Object {
+            "defVal": false,
+            "description": <React.Fragment>
+              <p>
+                Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
+              </p>
+              <p>
+                <EuiLink
+                  color="primary"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="See an example of what we collect"
+                    id="xpack.telemetry.seeExampleOfWhatWeCollectLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>
+              </p>
+              <p>
+                <EuiLink
+                  color="primary"
+                  href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                  target="_blank"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Read our usage data privacy statement"
+                    id="xpack.telemetry.readOurUsageDataPrivacyStatementLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>
+              </p>
+            </React.Fragment>,
+            "type": "boolean",
+            "value": false,
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+</Fragment>
+`;

@@ -17,175 +17,98 @@
  * under the License.
  */
 
-import _  from 'lodash';
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
-import { injectI18n } from '@kbn/i18n/react';
+import { ValidatedDualRange } from 'ui/validated_range';
 
-import {
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiRange,
-} from '@elastic/eui';
-
-const toState = ({ control }) => {
-  const sliderValue = control.hasValue() ?
-    control.value :
-    // InputRange component does not have an "empty state"
-    // Faking an empty state by setting the slider value range to length of zero anchored at the range minimum
-    {
-      min: control.min,
-      max: control.min
-    };
-  const state = {
-    sliderValue,
-    minValue: control.hasValue() ? control.value.min : '',
-    maxValue: control.hasValue() ? control.value.max : '',
-    isRangeValid: true,
-    errorMessage: '',
-  };
-  return state;
-};
-
-class RangeControlUi extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = toState(props);
+function roundWithPrecision(value, decimalPlaces, roundFunction) {
+  if (decimalPlaces <= 0) {
+    return roundFunction(value);
   }
 
-  componentWillReceiveProps = (nextProps) => {
-    this.setState(toState(nextProps));
-  };
+  let results = value;
+  results = results * Math.pow(10, decimalPlaces);
+  results = roundFunction(results);
+  results = results / Math.pow(10, decimalPlaces);
+  return results;
+}
 
-  handleOnChange = (value) => {
-    this.setState({
-      sliderValue: value,
-      minValue: value.min,
-      isRangeValid: true,
-      maxValue: value.max,
-      errorMessage: '',
-    });
-  };
+export function ceilWithPrecision(value, decimalPlaces) {
+  return roundWithPrecision(value, decimalPlaces, Math.ceil);
+}
 
-  handleOnChangeComplete = (value) => {
-    this.props.stageFilter(this.props.controlIndex, value);
-  };
+export function floorWithPrecision(value, decimalPlaces) {
+  return roundWithPrecision(value, decimalPlaces, Math.floor);
+}
 
-  handleMinChange = (evt) => {
-    this.handleChange(parseFloat(evt.target.value), this.state.maxValue);
-  };
+export class RangeControl extends Component {
+  state = {};
 
-  handleMaxChange = (evt) => {
-    this.handleChange(this.state.minValue, parseFloat(evt.target.value));
-  };
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextValue = nextProps.control.hasValue()
+      ? [nextProps.control.value.min, nextProps.control.value.max]
+      : ['', ''];
 
-  handleChange = (min, max) => {
-    min = isNaN(min) ? '' : min;
-    max = isNaN(max) ? '' : max;
-
-    const isMinValid = min !== '';
-    const isMaxValid = max !== '';
-    let isRangeValid = true;
-    let errorMessage = '';
-
-    if ((!isMinValid && isMaxValid) || (isMinValid && !isMaxValid)) {
-      isRangeValid = false;
-      errorMessage = this.props.intl.formatMessage({
-        id: 'inputControl.vis.rangeControl.minMaxValidErrorMessage',
-        defaultMessage: 'both min and max must be set'
-      });
+    if (nextProps.control.hasValue() && nextProps.control.value.min == null) {
+      nextValue[0] = '';
+    }
+    if (nextProps.control.hasValue() && nextProps.control.value.max == null) {
+      nextValue[1] = '';
     }
 
-    if (isMinValid && isMaxValid && max < min) {
-      isRangeValid = false;
-      errorMessage = this.props.intl.formatMessage({
-        id: 'inputControl.vis.rangeControl.maxValidErrorMessage',
-        defaultMessage: 'max must be greater or equal to min'
-      });
+    if (nextValue !== prevState.prevValue) {
+      return {
+        value: nextValue,
+        prevValue: nextValue,
+      };
     }
 
-    this.setState({
-      minValue: min,
-      maxValue: max,
-      isRangeValid,
-      errorMessage,
-    });
+    return null;
+  }
 
-    if (isRangeValid && isMaxValid && isMinValid) {
-      this.handleOnChangeComplete({ min, max });
-    }
-  };
+  onChangeComplete = _.debounce(value => {
+    const controlValue = {
+      min: value[0],
+      max: value[1]
+    };
+    this.props.stageFilter(this.props.controlIndex, controlValue);
+  }, 200);
 
-  formatLabel = (value) => {
-    let formatedValue = value;
-    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces');
-    if (decimalPlaces !== null && decimalPlaces >= 0) {
-      formatedValue = value.toFixed(decimalPlaces);
-    }
-    return formatedValue;
-  };
+
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
       return (
-        <EuiRange
+        <ValidatedDualRange
           disabled
+          showInput
         />
       );
     }
 
+    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);
+    const min = floorWithPrecision(this.props.control.min, decimalPlaces);
+    const max = ceilWithPrecision(this.props.control.max, decimalPlaces);
+
+    const ticks = [
+      { value: min, label: min },
+      { value: max, label: max }
+    ];
+
     return (
-      <EuiFormRow
-        isInvalid={!this.state.isRangeValid}
-        error={this.state.errorMessage ? [this.state.errorMessage] : []}
-        data-test-subj="rangeControlFormRow"
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <input
-              id={`${this.props.control.id}_min`}
-              name="min"
-              type="number"
-              data-test-subj="rangeControlMinInputValue"
-              className="euiFieldNumber"
-              value={this.state.minValue}
-              min={this.props.control.min}
-              max={this.props.control.max}
-              onChange={this.handleMinChange}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="icvInputRange__container">
-            <InputRange
-              maxValue={this.props.control.max}
-              minValue={this.props.control.min}
-              step={this.props.control.options.step}
-              value={this.state.sliderValue}
-              onChange={this.handleOnChange}
-              onChangeComplete={this.handleOnChangeComplete}
-              draggableTrack={true}
-              ariaLabelledby={this.props.control.id}
-              formatLabel={this.formatLabel}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <input
-              id={`${this.props.control.id}_max`}
-              name="max"
-              type="number"
-              className="euiFieldNumber"
-              data-test-subj="rangeControlMaxInputValue"
-              value={this.state.maxValue}
-              min={this.props.control.min}
-              max={this.props.control.max}
-              onChange={this.handleMaxChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+      <ValidatedDualRange
+        id={this.props.control.id}
+        min={min}
+        max={max}
+        value={this.state.value}
+        onChange={this.onChangeComplete}
+        showInput
+        showRange
+        showTicks
+        ticks={ticks}
+      />
     );
   }
 
@@ -203,10 +126,8 @@ class RangeControlUi extends Component {
   }
 }
 
-RangeControlUi.propTypes = {
+RangeControl.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
 };
-
-export const RangeControl = injectI18n(RangeControlUi);

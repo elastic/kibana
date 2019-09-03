@@ -18,7 +18,7 @@
  */
 
 import { buildRangeFilter } from '../range';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
@@ -51,7 +51,7 @@ describe('Filter Manager', function () {
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
         lang: 'expression',
-        inline: '(' + field.script + ')>=gte && (' + field.script + ')<=lte',
+        source: '(' + field.script + ')>=gte && (' + field.script + ')<=lte',
         params: {
           value: '>=1 <=3',
           gte: 1,
@@ -63,12 +63,12 @@ describe('Filter Manager', function () {
 
     it('should wrap painless scripts in comparator lambdas', function () {
       const field = getField(indexPattern, 'script date');
-      const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
-              `boolean lte(Supplier s, def v) {return s.get() <= v}` +
+      const expected = `boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))} ` +
+              `boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}` +
               `gte(() -> { ${field.script} }, params.gte) && ` +
               `lte(() -> { ${field.script} }, params.lte)`;
 
-      const inlineScript = buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern).script.script.inline;
+      const inlineScript = buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern).script.script.source;
       expect(inlineScript).to.be(expected);
     });
 
@@ -89,7 +89,7 @@ describe('Filter Manager', function () {
         params[key] = 5;
         const filter = buildRangeFilter(field, params, indexPattern);
 
-        expect(filter.script.script.inline).to.be(
+        expect(filter.script.script.source).to.be(
           '(' + field.script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);
         expect(filter.script.script.params.value).to.be(operator + 5);
@@ -120,7 +120,7 @@ describe('Filter Manager', function () {
         it('does not contain a script condition for the infinite side', function () {
           const field = getField(indexPattern, 'script number');
           const script = field.script;
-          expect(filter.script.script.inline).to.equal(`(${script})>=gte`);
+          expect(filter.script.script.source).to.equal(`(${script})>=gte`);
         });
       });
     });

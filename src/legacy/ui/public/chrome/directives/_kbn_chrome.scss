@@ -1,0 +1,46 @@
+/**
+ * stretch the root element of the Kibana application to set the base-size that
+ * flexed children should keep. Only works when paired with root styles applied
+ * by core service from new platform
+ */
+// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
+#kibana-body {
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  position: absolute;
+  left: $kbnGlobalNavClosedWidth;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 auto;
+
+  /**
+   * 1. Dirty, but we need to override the .kbnGlobalNav-isOpen state
+   *    when we're looking at the log-in screen.
+   */
+  &.hidden-chrome {
+    left: 0 !important; /* 1 */
+  }
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
+
+.app-wrapper-panel {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}

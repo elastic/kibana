@@ -25,12 +25,12 @@ export function buildNodeParams(child) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern, config) {
   const [ argument ] = node.arguments;
 
   return {
     bool: {
-      must_not: ast.toElasticsearchQuery(argument, indexPattern)
+      must_not: ast.toElasticsearchQuery(argument, indexPattern, config)
     }
   };
 }

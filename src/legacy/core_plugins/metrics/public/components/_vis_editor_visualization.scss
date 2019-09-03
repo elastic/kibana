@@ -15,5 +15,5 @@
 }
 
 .tvbEditorVisualization__draghandle {
-  @include kibana-resizer($size: ($euiSizeM + 2px), $direction: vertical);
+  @include kbnResizer($direction: vertical);
 }

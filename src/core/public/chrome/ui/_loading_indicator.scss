@@ -1,0 +1,50 @@
+$kbnLoadingIndicatorBackgroundSize: $euiSizeXXL * 10;
+$kbnLoadingIndicatorColor1: tint($euiColorAccent, 15%);
+$kbnLoadingIndicatorColor2: tint($euiColorAccent, 60%);
+
+/**
+ * 1. Position this loader on top of the content.
+ * 2. Make sure indicator isn't wider than the screen.
+ */
+.kbnLoadingIndicator {
+  position: fixed; // 1
+  top: 0; // 1
+  left: 0; // 1
+  right: 0; // 1
+  z-index: $euiZLevel1; // 1
+  overflow: hidden; // 2
+  height: $euiSizeXS / 2;
+
+  &.hidden {
+    visibility: hidden;
+    opacity: 0;
+    transition-delay: 0.25s;
+  }
+}
+
+  .kbnLoadingIndicator__bar {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    z-index: $euiZLevel1 + 1;
+    visibility: visible;
+    display: block;
+    animation: kbn-animate-loading-indicator 2s linear infinite;
+    background-color: $kbnLoadingIndicatorColor2;
+    background-image: linear-gradient(to right,
+      $kbnLoadingIndicatorColor1 0%,
+      $kbnLoadingIndicatorColor1 50%,
+      $kbnLoadingIndicatorColor2 50%,
+      $kbnLoadingIndicatorColor2 100%
+      );
+    background-repeat: repeat-x;
+    background-size: $kbnLoadingIndicatorBackgroundSize $kbnLoadingIndicatorBackgroundSize;
+    width: 200%;
+  }
+
+  @keyframes kbn-animate-loading-indicator {
+    from { transform: translateX(0); }
+    to { transform: translateX(-$kbnLoadingIndicatorBackgroundSize); }
+  }

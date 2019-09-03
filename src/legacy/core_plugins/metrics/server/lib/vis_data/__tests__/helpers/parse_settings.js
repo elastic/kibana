@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import parseSettings from '../../helpers/parse_settings';
+import { parseSettings } from '../../helpers/parse_settings';
 
 describe('parseSettings', () => {
   it('returns the true for "true"', () => {
@@ -57,7 +57,7 @@ describe('parseSettings', () => {
       gamma: 0.2,
       period: 5,
       pad: false,
-      type: 'add'
+      type: 'add',
     });
   });
 });

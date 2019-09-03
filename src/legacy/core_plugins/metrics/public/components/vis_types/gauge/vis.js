@@ -20,21 +20,20 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
-import _ from 'lodash';
-import Gauge from '../../../visualizations/components/gauge';
-import getLastValue from '../../../../common/get_last_value';
-import color from 'color';
+import { tickFormatter } from '../../lib/tick_formatter';
+import _, { get, isUndefined, assign, includes } from 'lodash';
+import { Gauge } from '../../../visualizations/components/gauge';
+import { getLastValue } from '../../../../common/get_last_value';
 
 function getColors(props) {
   const { model, visData } = props;
-  const series = _.get(visData, `${model.id}.series`, []);
+  const series = get(visData, `${model.id}.series`, []).filter(s => !isUndefined(s));
   let text;
   let gauge;
   if (model.gauge_color_rules) {
-    model.gauge_color_rules.forEach((rule) => {
+    model.gauge_color_rules.forEach(rule => {
       if (rule.operator && rule.value != null) {
-        const value = series[0] && getLastValue(series[0].data) || 0;
+        const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
@@ -48,22 +47,31 @@ function getColors(props) {
 function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
-  const series = _.get(visData, `${model.id}.series`, [])
+
+  const series = get(visData, `${model.id}.series`, [])
     .filter(row => row)
     .map((row, i) => {
-      const seriesDef = model.series.find(s => _.includes(row.id, s.id));
+      const seriesDef = model.series.find(s => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
+        newProps.formatter = tickFormatter(
+          seriesDef.formatter,
+          seriesDef.value_template,
+          props.getConfig
+        );
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
-      return _.assign({}, row, newProps);
+      return assign({}, row, newProps);
     });
+
+  const panelBackgroundColor = model.background_color || backgroundColor;
+  const style = { backgroundColor: panelBackgroundColor };
+
   const params = {
     metric: series[0],
     type: model.gauge_style || 'half',
-    reversed: props.reversed,
-    additionalLabel: props.additionalLabel
+    additionalLabel: props.additionalLabel,
+    backgroundColor: panelBackgroundColor,
   };
 
   if (colors.text) {
@@ -74,13 +82,6 @@ function GaugeVisualization(props) {
   if (model.gauge_inner_color) params.innerColor = model.gauge_inner_color;
   if (model.gauge_inner_width) params.innerLine = model.gauge_inner_width;
   if (model.gauge_max != null) params.max = model.gauge_max;
-
-  const panelBackgroundColor = model.background_color || backgroundColor;
-
-  if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
-  }
-  const style = { backgroundColor: panelBackgroundColor };
 
   return (
     <div className="tvbVis" style={style}>
@@ -96,8 +97,8 @@ GaugeVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  getConfig: PropTypes.func,
 };
 
-export default visWithSplits(GaugeVisualization);
+export const gauge = visWithSplits(GaugeVisualization);

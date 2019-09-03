@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const inspector = getService('inspector');
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
+    this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
@@ -34,43 +36,26 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
-    });
-
-    it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct data', async function () {
@@ -99,11 +84,9 @@ export default function ({ getService, getPageObjects }) {
       ];
 
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
-      await PageObjects.visualize.closeInspector();
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
+      await inspector.close();
     });
 
     it('should show 4 color ranges as default colorNumbers param', async function () {
@@ -147,6 +130,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.addCustomRange(600, 700);
       await PageObjects.visualize.clickAddRange();
       await PageObjects.visualize.addCustomRange(700, 800);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
       const legends = await PageObjects.visualize.getLegendEntries();
       const expectedLegends = [

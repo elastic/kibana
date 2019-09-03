@@ -21,13 +21,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import uuid from 'uuid';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
 
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import Vars from './vars';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { CalculationVars } from './vars';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class MathAgg extends Component {
+export class MathAgg extends Component {
   componentWillMount() {
     if (!this.props.model.variables) {
       this.props.onChange(
@@ -69,14 +69,12 @@ class MathAgg extends Component {
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('aggregation')}>
-              <FormattedMessage
-                id="tsvb.math.aggregationLabel"
-                defaultMessage="Aggregation"
-              />
+              <FormattedMessage id="tsvb.math.aggregationLabel" defaultMessage="Aggregation" />
             </EuiFormLabel>
             <AggSelect
               id={htmlId('aggregation')}
@@ -88,12 +86,9 @@ class MathAgg extends Component {
 
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage
-                id="tsvb.math.variablesLabel"
-                defaultMessage="Variables"
-              />
+              <FormattedMessage id="tsvb.math.variablesLabel" defaultMessage="Variables" />
             </EuiFormLabel>
-            <Vars
+            <CalculationVars
               id={htmlId('variables')}
               metrics={siblings}
               onChange={handleChange}
@@ -106,38 +101,40 @@ class MathAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id="mathExpressionInput"
-              label={(<FormattedMessage
-                id="tsvb.math.expressionLabel"
-                defaultMessage="Expression"
-              />)}
+              label={
+                <FormattedMessage id="tsvb.math.expressionLabel" defaultMessage="Expression" />
+              }
               fullWidth
-              helpText={(<FormattedMessage
-                id="tsvb.math.expressionDescription"
-                defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
+              helpText={
+                <FormattedMessage
+                  id="tsvb.math.expressionDescription"
+                  defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
                 i.e. {paramsName} To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
-                an array of the timestamps. {paramsTimestamp} is available for the current bucket&apos;s timestamp,
-                {paramsIndex} is available for the current bucket&apos;s index, and {paramsInterval}s available for
+                an array of the timestamps. {paramsTimestamp} is available for the current bucket's timestamp,
+                {paramsIndex} is available for the current bucket's index, and {paramsInterval}s available for
                 the interval in milliseconds."
-                values={{
-                  link: (
-                    <EuiLink
-                      href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="tsvb.math.expressionDescription.tinyMathLinkText"
-                        defaultMessage="TinyMath"
-                      />
-                    </EuiLink>),
-                  params: (<EuiCode>params</EuiCode>),
-                  paramsName: (<EuiCode>params.&lt;name&gt;</EuiCode>),
-                  paramsValues: (<EuiCode>params._all.&lt;name&gt;.values</EuiCode>),
-                  paramsTimestamps: (<EuiCode>params._all.&lt;name&gt;.timestamps</EuiCode>),
-                  paramsTimestamp: (<EuiCode>params._timestamp</EuiCode>),
-                  paramsIndex: (<EuiCode>params._index</EuiCode>),
-                  paramsInterval: (<EuiCode>params._interval</EuiCode>)
-                }}
-              />)}
+                  values={{
+                    link: (
+                      <EuiLink
+                        href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="tsvb.math.expressionDescription.tinyMathLinkText"
+                          defaultMessage="TinyMath"
+                        />
+                      </EuiLink>
+                    ),
+                    params: <EuiCode>params</EuiCode>,
+                    paramsName: <EuiCode>params.&lt;name&gt;</EuiCode>,
+                    paramsValues: <EuiCode>params._all.&lt;name&gt;.values</EuiCode>,
+                    paramsTimestamps: <EuiCode>params._all.&lt;name&gt;.timestamps</EuiCode>,
+                    paramsTimestamp: <EuiCode>params._timestamp</EuiCode>,
+                    paramsIndex: <EuiCode>params._index</EuiCode>,
+                    paramsInterval: <EuiCode>params._interval</EuiCode>,
+                  }}
+                />
+              }
             >
               <EuiTextArea
                 data-test-subj="mathExpression"
@@ -164,5 +161,3 @@ MathAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default MathAgg;

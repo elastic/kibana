@@ -2,12 +2,21 @@
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -16,74 +25,55 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -92,21 +82,15 @@ exports[`home directories should not render directory entry when showOnHomePage 
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -124,6 +108,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -140,12 +125,21 @@ exports[`home directories should not render directory entry when showOnHomePage 
 
 exports[`home directories should render ADMIN directory entry in "Manage" panel 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -154,84 +148,59 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           >
             <EuiFlexItem
-              component="div"
-              grow={true}
+              className="homHome__synopsisItem"
               key="index_patterns"
-              style={
-                Object {
-                  "minHeight": 64,
-                }
-              }
             >
               <Synopsis
                 description="Manage the index patterns that help retrieve your data from Elasticsearch."
@@ -249,21 +218,15 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -281,6 +244,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -297,12 +261,21 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
 
 exports[`home directories should render DATA directory entry in "Explore Data" panel 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -311,53 +284,34 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           >
             <EuiFlexItem
-              component="div"
-              grow={true}
+              className="homHome__synopsisItem"
               key="dashboard"
-              style={
-                Object {
-                  "minHeight": 64,
-                }
-              }
             >
               <Synopsis
                 description="Display and share a collection of visualizations and saved searches."
@@ -370,34 +324,28 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           </EuiFlexGrid>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -406,21 +354,15 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -438,6 +380,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -454,12 +397,21 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -468,74 +420,55 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -544,21 +477,15 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -576,6 +503,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -592,12 +520,21 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -606,74 +543,55 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -682,21 +600,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -714,6 +626,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -730,12 +643,21 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
@@ -744,74 +666,55 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -820,21 +723,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -852,144 +749,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
-          type="button"
-        >
-          <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.notFound.viewFullButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPageBody>
-</EuiPage>
-`;
-
-exports[`home should not contain RecentlyAccessed panel when there is no recentlyAccessed history 1`] = `
-<EuiPage
-  className="homPage"
-  restrictWidth={false}
->
-  <EuiPageBody
-    restrictWidth={false}
-  >
-    <InjectIntl(AddDataUi)
-      apmUiEnabled={true}
-      isNewKibanaInstance={false}
-      mlEnabled={true}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
-        >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
-            <h3>
-              <FormattedMessage
-                defaultMessage="Visualize and Explore Data"
-                id="kbn.home.directories.visualize.nameTitle"
-                values={Object {}}
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer
-            size="m"
-          />
-          <EuiFlexGrid
-            columns={2}
-            gutterSize="l"
-            responsive={true}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
-        >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
-            <h3>
-              <FormattedMessage
-                defaultMessage="Manage and Administer the Elastic Stack"
-                id="kbn.home.directories.manage.nameTitle"
-                values={Object {}}
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer
-            size="m"
-          />
-          <EuiFlexGrid
-            columns={2}
-            gutterSize="l"
-            responsive={true}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="l"
-    />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="center"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiText
-          grow={true}
           size="m"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.description"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer
-          size="s"
-        />
-        <EuiButton
-          color="primary"
-          fill={false}
-          href="#/home/feature_directory"
-          iconSide="left"
           type="button"
         >
           <FormattedMessage
@@ -1006,28 +766,21 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
 
 exports[`home should render home component 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
-    <React.Fragment>
-      <RecentlyAccessed
-        recentlyAccessed={
-          Array [
-            Object {
-              "id": "1",
-              "label": "my vis",
-              "link": "link_to_my_vis",
-            },
-          ]
-        }
-      />
-      <EuiSpacer
-        size="l"
-      />
-    </React.Fragment>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1036,74 +789,55 @@ exports[`home should render home component 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1112,21 +846,15 @@ exports[`home should render home component 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1144,6 +872,7 @@ exports[`home should render home component 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1160,12 +889,21 @@ exports[`home should render home component 1`] = `
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1174,74 +912,55 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1250,21 +969,15 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1282,6 +995,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1298,12 +1012,21 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1312,74 +1035,55 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1388,21 +1092,15 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1420,6 +1118,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1436,19 +1135,31 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
 <Welcome
+  fetchTelemetry={[MockFunction]}
+  getTelemetryBannerId={[MockFunction]}
   onSkip={[Function]}
+  setOptIn={[MockFunction]}
   urlBasePath="goober"
 />
 `;
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
 <EuiPage
-  className="homPage"
-  restrictWidth={false}
+  restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
@@ -1457,74 +1168,55 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
+            gutterSize="s"
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
-            textTransform="none"
+            size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1533,21 +1225,15 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
+        className="eui-textCenter"
         grow={false}
       >
         <EuiText
-          grow={true}
-          size="m"
+          color="subdued"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1565,6 +1251,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage

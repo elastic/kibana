@@ -27,8 +27,8 @@ import { first, mapTo, filter, map, take } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
-import { Config } from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { Config } from '../../legacy/server/config/config';
+import { transformDeprecations } from '../../legacy/server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -116,7 +116,8 @@ export default class ClusterManager {
               resolve(path, 'target'),
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
-              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+              resolve(path, 'legacy/plugins/siem/cypress'),
+              resolve(path, 'x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
             ),
           []
         );
@@ -160,17 +161,17 @@ export default class ClusterManager {
 
   setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../utils');
+    const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
+      fromRoot('src/core'),
       fromRoot('src/legacy/core_plugins'),
-      fromRoot('src/server'),
-      fromRoot('src/ui'),
-      fromRoot('src/utils'),
-      fromRoot('x-pack/common'),
-      fromRoot('x-pack/plugins'),
-      fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
+      fromRoot('src/legacy/server'),
+      fromRoot('src/legacy/ui'),
+      fromRoot('src/legacy/utils'),
+      fromRoot('x-pack/legacy/common'),
+      fromRoot('x-pack/legacy/plugins'),
+      fromRoot('x-pack/legacy/server'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));
@@ -181,6 +182,7 @@ export default class ClusterManager {
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
         ...extraIgnores,
+        'plugins/java_languageserver'
       ],
     });
 
@@ -251,9 +253,13 @@ export default class ClusterManager {
   }
 
   shouldRedirectFromOldBasePath(path) {
+    // strip `s/{id}` prefix when checking for need to redirect
+    if (path.startsWith('s/')) {
+      path = path.split('/').slice(2).join('/');
+    }
+
     const isApp = path.startsWith('app/');
     const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
-
     return isApp || isKnownShortPath;
   }
 

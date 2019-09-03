@@ -11,7 +11,7 @@
   $scrollBarWidth: 20px;
 
   background-color: $guidePanelBackgroundColor;
-  border: 1px solid #CCCCCC;
+  border: $euiBorderThin;
   border-radius: 4px;
   flex: 1 1 auto;
   padding: 40px 60px;
@@ -33,4 +33,10 @@
       width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth + $guideCodeViewerSmallWidth});
     }
   }
+}
+
+.guidePageKillScreen {
+  background-color: tintOrShade($euiColorDanger, 90%, 70%);
+  padding: $euiSizeL;
+  margin-bottom: $euiSizeL;
 }

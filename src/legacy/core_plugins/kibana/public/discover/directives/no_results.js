@@ -33,18 +33,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+// eslint-disable-next-line react/prefer-stateless-function
 export class DiscoverNoResults extends Component {
   static propTypes = {
     shardFailures: PropTypes.array,
     timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
-    isTimePickerOpen: PropTypes.bool.isRequired,
     getDocLink: PropTypes.func.isRequired,
-    topNavToggle: PropTypes.func.isRequired,
-  };
-
-  onClickTimePickerButton = () => {
-    this.props.topNavToggle('filter');
   };
 
   render() {
@@ -53,7 +48,6 @@ export class DiscoverNoResults extends Component {
       timeFieldName,
       queryLanguage,
       getDocLink,
-      isTimePickerOpen,
     } = this.props;
 
     let shardFailuresMessage;
@@ -125,7 +119,7 @@ export class DiscoverNoResults extends Component {
           <EuiSpacer size="xl" />
 
           <EuiText>
-            <h3>
+            <h3 data-test-subj="discoverNoResultsTimefilter">
               <FormattedMessage
                 id="kbn.discover.noResults.expandYourTimeRangeTitle"
                 defaultMessage="Expand your time range"
@@ -137,21 +131,7 @@ export class DiscoverNoResults extends Component {
                 id="kbn.discover.noResults.queryMayNotMatchTitle"
                 defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
                   not match anything in the current time range, or there may not be any data at all in
-                  the currently selected time range. You can try {timepickerLink} and changing the time range to one which contains data."
-                values={{
-                  timepickerLink: (
-                    <EuiLink
-                      data-test-subj="discoverNoResultsTimefilter"
-                      onClick={this.onClickTimePickerButton}
-                      aria-expanded={isTimePickerOpen}
-                    >
-                      <FormattedMessage
-                        id="kbn.discover.noResults.openingTimepickerLinkText"
-                        defaultMessage="opening the time picker"
-                      />
-                    </EuiLink>
-                  )
-                }}
+                  the currently selected time range. You can try changing the time range to one which contains data."
               />
             </p>
 

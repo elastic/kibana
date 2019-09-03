@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { highlightTags } from '../highlight_tags';
 import { htmlTags } from '../html_tags';
 import { getHighlightHtml } from '../highlight_html';

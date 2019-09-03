@@ -6,11 +6,13 @@
 
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
   describe('spaces api without security', function() {
     this.tags('ciGroup5');
 
+    loadTestFile(require.resolve('./copy_to_space'));
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));

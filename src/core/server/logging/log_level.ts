@@ -26,7 +26,7 @@ import { assertNever } from '../../utils';
 export type LogLevelId = 'all' | 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'off';
 
 /**
- * Represents the log level, manages string -> `LogLevel` conversion and comparison of log level
+ * Represents the log level, manages string to `LogLevel` conversion and comparison of log level
  * priorities between themselves.
  * @internal
  */
@@ -42,7 +42,7 @@ export class LogLevel {
 
   /**
    * Converts string representation of log level into `LogLevel` instance.
-   * @param level String representation of log level.
+   * @param level - String representation of log level.
    * @returns Instance of `LogLevel` class.
    */
   public static fromId(level: LogLevelId): LogLevel {
@@ -72,7 +72,7 @@ export class LogLevel {
 
   /**
    * Indicates whether current log level covers the one that is passed as an argument.
-   * @param level Instance of `LogLevel` to compare to.
+   * @param level - Instance of `LogLevel` to compare to.
    * @returns True if specified `level` is covered by this log level.
    */
   public supports(level: LogLevel) {

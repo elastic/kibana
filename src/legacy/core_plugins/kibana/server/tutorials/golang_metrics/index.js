@@ -45,7 +45,7 @@ export function golangMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'f2dc7320-f519-11e6-a3c9-9d1f7c42b045',
+          id: 'f2dc7320-f519-11e6-a3c9-9d1f7c42b045-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.golangMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Golang metrics dashboard',
           }),

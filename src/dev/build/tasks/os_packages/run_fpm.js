@@ -89,7 +89,6 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     // scripts, also causes scripts to be processed with erb
     '--template-value', `user=kibana`,
     '--template-value', `group=kibana`,
-    '--template-value', `optimizeDir=/usr/share/kibana/optimize`,
     '--template-value', `configDir=/etc/kibana`,
     '--template-value', `pluginsDir=/usr/share/kibana/plugins`,
     '--template-value', `dataDir=/var/lib/kibana`,

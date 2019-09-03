@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('line charts', function () {
     const vizName1 = 'Visualization LineChart';
@@ -36,23 +38,22 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = Split Chart');
-      await PageObjects.visualize.clickBucket('Split Chart');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = Split chart');
+      await PageObjects.visualize.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = extension');
       await PageObjects.visualize.selectField('extension.raw');
       log.debug('switch from Rows to Columns');
-      await PageObjects.visualize.clickColumns();
+      await PageObjects.visualize.clickSplitDirection('Columns');
       await PageObjects.visualize.clickGo();
     };
 
     before(initLineChart);
 
     afterEach(async () => {
-      await PageObjects.visualize.closeInspector();
+      await inspector.close();
     });
 
     it('should show correct chart', async function () {
@@ -77,8 +78,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart order by Term', async function () {
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
       const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       log.debug('Order By = Term');
-      await PageObjects.visualize.selectOrderBy('_key');
+      await PageObjects.visualize.selectOrderByMetric(2, '_key');
       await PageObjects.visualize.clickGo();
       await retry.try(async function () {
         const data = await PageObjects.visualize.getLineChartData();
@@ -104,20 +104,44 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data, ordered by Term', async function () {
-
       const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
+    });
+
+    it('should request new data when autofresh is enabled', async () => {
+      // enable autorefresh
+      const interval = 3;
+      await PageObjects.timePicker.openQuickSelectTimeMenu();
+      await PageObjects.timePicker.inputValue('superDatePickerRefreshIntervalInput', interval.toString());
+      await testSubjects.click('superDatePickerToggleRefreshButton');
+      await PageObjects.timePicker.closeQuickSelectTimeMenu();
+
+      // check inspector panel request stats for timestamp
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
+      const requestStatsBefore = await inspector.getTableData();
+      const requestTimestampBefore = requestStatsBefore.filter(r => r[0].includes('Request timestamp'))[0][1];
+
+      // pause to allow time for autorefresh to fire another request
+      await PageObjects.common.sleep(interval * 1000 * 1.5);
+
+      // get the latest timestamp from request stats
+      const requestStatsAfter = await inspector.getTableData();
+      const requestTimestampAfter = requestStatsAfter.filter(r => r[0].includes('Request timestamp'))[0][1];
+      log.debug(`Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`);
+
+      // cleanup
+      await inspector.close();
+      await PageObjects.timePicker.pauseAutoRefresh();
+
+      // if autorefresh is working, timestamps should be different
+      expect(requestTimestampBefore).not.to.equal(requestTimestampAfter);
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();

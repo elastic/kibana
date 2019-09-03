@@ -18,44 +18,37 @@
  */
 
 import handlebars from 'handlebars/dist/handlebars';
-import { durationInputOptions } from './durations';
-import { capitalize, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { fieldFormats } from 'ui/registry/field_formats';
+import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 
-const durationsLookup = durationInputOptions.reduce((acc, row) => {
-  acc[row.value] = row.label;
-  return acc;
-}, {});
-
-export default (format = '0,0.[00]', template, getConfig = null) => {
+export const tickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template, { knownHelpersOnly: true });
-  const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
   let formatter;
-  if (durationFormatTest.test(format)) {
+
+  if (isDuration(format)) {
     const [from, to, decimals] = format.split(',');
-    const inputFormat = durationsLookup[from];
-    const outputFormat = `as${capitalize(durationsLookup[to])}`;
     const DurationFormat = fieldFormats.getType('duration');
+
     formatter = new DurationFormat({
-      inputFormat,
-      outputFormat,
-      outputPrecision: decimals
+      inputFormat: inputFormats[from],
+      outputFormat: outputFormats[to],
+      outputPrecision: decimals,
     });
   } else {
     let FieldFormat = fieldFormats.getType(format);
     if (FieldFormat) {
       formatter = new FieldFormat(null, getConfig);
-    }
-    else {
+    } else {
       FieldFormat = fieldFormats.getType('number');
       formatter = new FieldFormat({ pattern: format }, getConfig);
     }
   }
-  return (val) => {
+  return val => {
     let value;
     if (!isNumber(val)) {
-      value = 0;
+      value = val;
     } else {
       try {
         value = formatter.convert(val, 'text');

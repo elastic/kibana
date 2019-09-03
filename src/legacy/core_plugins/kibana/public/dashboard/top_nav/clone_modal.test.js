@@ -54,14 +54,14 @@ test('renders DashboardCloneModal', () => {
 
 test('onClone', () => {
   createComponent();
-  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
+  findTestSubject(component, 'cloneConfirmButton').simulate('click');
   sinon.assert.calledWith(onClone, 'dash title');
   sinon.assert.notCalled(onClose);
 });
 
 test('onClose', () => {
   createComponent();
-  findTestSubject(component, 'cloneCancelButton', false).simulate('click');
+  findTestSubject(component, 'cloneCancelButton').simulate('click');
   sinon.assert.calledOnce(onClose);
   sinon.assert.notCalled(onClone);
 });
@@ -70,6 +70,6 @@ test('title', () => {
   createComponent();
   const event = { target: { value: 'a' } };
   component.find('input').simulate('change', event);
-  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
+  findTestSubject(component, 'cloneConfirmButton').simulate('click');
   sinon.assert.calledWith(onClone, 'a');
 });

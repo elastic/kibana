@@ -1,0 +1,14 @@
+{
+  "data_frame.start_data_frame_transform": {
+    "url_params": {
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_data_frame/transforms/{transform_id}/_start"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-data-frame-transform.html"
+  }
+}

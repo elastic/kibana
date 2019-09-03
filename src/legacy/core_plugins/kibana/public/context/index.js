@@ -19,34 +19,44 @@
 
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 
 import './app';
 import contextAppRouteTemplate from './index.html';
 import { getRootBreadcrumbs } from '../discover/breadcrumbs';
+import { npStart } from 'ui/new_platform';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+
+const k7Breadcrumbs = $route => {
+  const { indexPattern } = $route.current.locals;
+  const { id } = $route.current.params;
+
+  return [
+    ...getRootBreadcrumbs(),
+    {
+      text: i18n.translate('kbn.context.breadcrumb', {
+        defaultMessage: 'Context of {indexPatternTitle}#{docId}',
+        values: {
+          indexPatternTitle: indexPattern.title,
+          docId: id,
+        },
+      }),
+    },
+  ];
+};
+
 
 uiRoutes
+  // deprecated route, kept for compatibility
+  // should be removed in the future
   .when('/context/:indexPatternId/:type/:id*', {
+    redirectTo: '/context/:indexPatternId/:id'
+  })
+  .when('/context/:indexPatternId/:id*', {
     controller: ContextAppRouteController,
-    k7Breadcrumbs($route) {
-      const { indexPattern } = $route.current.locals;
-      const { id } = $route.current.params;
-
-      return [
-        ...getRootBreadcrumbs(),
-        {
-          text: i18n.translate('kbn.context.breadcrumb', {
-            defaultMessage: 'Context of {indexPatternTitle}#{docId}',
-            values: {
-              indexPatternTitle: indexPattern.title,
-              docId: id
-            }
-          })
-        }
-      ];
-    },
+    k7Breadcrumbs,
     controllerAs: 'contextAppRoute',
     resolve: {
       indexPattern: function ($route, indexPatterns) {
@@ -56,35 +66,33 @@ uiRoutes
     template: contextAppRouteTemplate,
   });
 
-
-function ContextAppRouteController(
-  $routeParams,
-  $scope,
-  AppState,
-  chrome,
-  config,
-  indexPattern,
-  Private,
-) {
+function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));
   this.state.save(true);
 
-  $scope.$watchGroup([
-    'contextAppRoute.state.columns',
-    'contextAppRoute.state.predecessorCount',
-    'contextAppRoute.state.successorCount',
-  ], () => this.state.save(true));
+  $scope.$watchGroup(
+    [
+      'contextAppRoute.state.columns',
+      'contextAppRoute.state.predecessorCount',
+      'contextAppRoute.state.successorCount',
+    ],
+    () => this.state.save(true)
+  );
 
-  $scope.$listen(queryFilter, 'update', () => {
-    this.filters = _.cloneDeep(queryFilter.getFilters());
+  const updateSubsciption = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+    next: () => {
+      this.filters = _.cloneDeep(queryFilter.getFilters());
+    },
   });
 
-  this.anchorType = $routeParams.type;
+  $scope.$on('$destroy', function () {
+    updateSubsciption.unsubscribe();
+  });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = chrome.getNavLinkById('kibana:discover').lastSubUrl;
+  this.discoverUrl = npStart.core.chrome.navLinks.get('kibana:discover').url;
   this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 

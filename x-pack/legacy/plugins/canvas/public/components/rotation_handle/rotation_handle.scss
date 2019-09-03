@@ -1,0 +1,25 @@
+.canvasRotationHandle--connector {
+  transform-origin: center center; /* the default, only for clarity */
+  transform-style: preserve-3d;
+  display: block;
+  position: absolute;
+  height: 24px;
+  width: 0;
+  margin-left: -1px;
+  margin-top: -12px;
+  border-top: 1px dashed $euiColorLightShade;
+  border-left: 1px dashed $euiColorLightShade;
+}
+
+.canvasRotationHandle--handle {
+  transform-origin: center center; /* the default, only for clarity */
+  transform-style: preserve-3d;
+  display: block;
+  position: absolute;
+  height: 9px;
+  width: 9px;
+  margin-left: -5px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background-color: $euiColorMediumShade;
+}

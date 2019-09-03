@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HostWorkingDir renders correctly against snapshot 1`] = `
+<Component
+  contextId="test"
+  eventId="1"
+  hostName="[hostname-123]"
+  workingDirectory="[working-directory-123]"
+/>
+`;

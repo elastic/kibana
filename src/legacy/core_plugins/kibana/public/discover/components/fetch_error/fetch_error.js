@@ -20,8 +20,9 @@
 import 'ngreact';
 import React, { Fragment } from 'react';
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
+import { wrapInI18nContext } from 'ui/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { npStart } from 'ui/new_platform';
 
 import {
   EuiFlexGroup,
@@ -39,8 +40,8 @@ const DiscoverFetchError = ({ fetchError }) => {
   let body;
 
   if (fetchError.lang === 'painless') {
-    const managementUrl = chrome.getNavLinkById('kibana:management').url;
-    const url = `${managementUrl}/kibana/indices`;
+    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
+    const url = `${managementUrl}/kibana/index_patterns`;
 
     body = (
       <p>
@@ -95,4 +96,4 @@ const DiscoverFetchError = ({ fetchError }) => {
 
 const app = uiModules.get('apps/discover', ['react']);
 
-app.directive('discoverFetchError', reactDirective => reactDirective(injectI18nProvider(DiscoverFetchError)));
+app.directive('discoverFetchError', reactDirective => reactDirective(wrapInI18nContext(DiscoverFetchError)));

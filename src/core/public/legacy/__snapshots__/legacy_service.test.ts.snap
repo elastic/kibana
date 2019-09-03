@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() load order useLegacyTestHarness = false loads ui/modules before ui/chrome, and both before legacy files 1`] = `
+Array [
+  "ui/new_platform",
+  "ui/chrome",
+  "legacy files",
+]
+`;
+
+exports[`#start() load order useLegacyTestHarness = true loads ui/modules before ui/test_harness, and both before legacy files 1`] = `
+Array [
+  "ui/new_platform",
+  "ui/test_harness",
+  "legacy files",
+]
+`;
+
+exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement 1`] = `
+<div
+  class="ng-scope"
+/>
+`;
+
+exports[`#stop() does nothing if angular was not bootstrapped to targetDomElement 1`] = `
+<div>
+  
+      
+  <h1>
+    this should not be removed
+  </h1>
+  
+    
+</div>
+`;

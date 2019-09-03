@@ -20,6 +20,8 @@
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { capabilities } from 'ui/capabilities';
+import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
@@ -39,10 +41,13 @@ function updateAdvancedSettings($scope, config, query) {
     }
 
     render(
-      <AdvancedSettings
-        config={config}
-        query={query}
-      />,
+      <I18nContext>
+        <AdvancedSettings
+          config={config}
+          query={query}
+          enableSaving={capabilities.get().advancedSettings.save}
+        />
+      </I18nContext>,
       node,
     );
   });
@@ -56,7 +61,23 @@ function destroyAdvancedSettings() {
 uiRoutes
   .when('/management/kibana/settings/:setting?', {
     template: indexTemplate,
-    k7Breadcrumbs: getBreadcrumbs
+    k7Breadcrumbs: getBreadcrumbs,
+    requireUICapability: 'management.kibana.settings',
+    badge: uiCapabilities => {
+      if (uiCapabilities.advancedSettings.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save advanced settings',
+        }),
+        iconType: 'glasses'
+      };
+    }
   });
 
 uiModules.get('apps/management')
@@ -85,13 +106,13 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
-    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+    title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
       defaultMessage: 'Advanced Settings',
     }),
-    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+    description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
       defaultMessage: 'Directly edit settings that control behavior in Kibana.',
     }),
     icon: 'advancedSettingsApp',

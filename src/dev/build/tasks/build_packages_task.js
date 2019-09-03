@@ -68,13 +68,13 @@ import { mkdirp } from '../lib';
  */
 
 export const BuildPackagesTask = {
-  global: true,
   description: 'Building distributable versions of packages',
-  async run(config, log, builds) {
+  async run(config, log, build) {
     await mkdirp(config.resolveFromRepo('target'));
     await buildProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
-      buildRoots: builds.map(build => build.resolvePath()),
+      buildRoot: build.resolvePath(),
+      onlyOSS: build.isOss(),
     });
   },
 };

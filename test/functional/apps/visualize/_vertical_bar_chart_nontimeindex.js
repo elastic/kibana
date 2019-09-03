@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
   describe.skip('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
@@ -35,34 +37,27 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.common.sleep(500);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setCustomInterval('3h');
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     };
 
 
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart', async function () {
@@ -106,10 +101,8 @@ export default function ({ getService, getPageObjects }) {
         [ '2015-09-22 09:00', '1,408' ],
       ];
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
     });
 
     describe.skip('switch between Y axis scale types', () => {
@@ -191,8 +184,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -212,15 +204,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');
         await PageObjects.header.waitUntilLoadingHasFinished();

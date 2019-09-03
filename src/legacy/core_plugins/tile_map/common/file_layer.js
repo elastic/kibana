@@ -19,14 +19,26 @@
 
 
 import { ORIGIN } from './origin';
+import url from 'url';
 
 export class FileLayer {
 
-  constructor(config, emsClient) {
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
+    this._proxyPath = proxyPath;
   }
 
+  getAttributions() {
+    return this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      return {
+        url: url,
+        label: label
+      };
+    });
+  }
 
   getHTMLAttribution() {
     const attributions = this._config.attribution.map(attribution => {
@@ -73,8 +85,14 @@ export class FileLayer {
   }
 
   getEMSHotLink() {
-    const id = `file/${this.getId()}`;
-    return `${this._emsClient.getLandingPageUrl()}#${id}`;
+    const landingPageString = this._emsClient.getLandingPageUrl();
+    const urlObject = url.parse(landingPageString);
+    urlObject.hash = `file/${this.getId()}`;
+    urlObject.query = {
+      ...urlObject.query,
+      locale: this._emsClient.getLocale()
+    };
+    return url.format(urlObject);
   }
 
   getDefaultFormatType() {
@@ -89,7 +107,8 @@ export class FileLayer {
 
   getDefaultFormatUrl() {
     const format = this._getDefaultFormat();
-    return this._emsClient.extendUrlWithParams(format.url);
+    const url = this._emsClient.extendUrlWithParams(format.url);
+    return this._proxyPath + url;
   }
 
   getCreatedAt() {

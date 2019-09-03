@@ -5,16 +5,17 @@
 <titleabbrev>Job tips</titleabbrev>
 ++++
 
-When you are creating a job in {kib}, the job creation wizards can provide
-advice based on the characteristics of your data. By heeding these suggestions,
-you can create jobs that are more likely to produce insightful {ml} results.
+When you create an {anomaly-job} in {kib}, the job creation wizards can
+provide advice based on the characteristics of your data. By heeding these
+suggestions, you can create jobs that are more likely to produce insightful {ml}
+results.
 
 [[bucket-span]]
 ==== Bucket span
 
 The bucket span is the time interval that {ml} analytics use to summarize and
-model data for your job. When you create a job in {kib}, you can choose to
-estimate a bucket span value based on your data characteristics. 
+model data for your job. When you create an {anomaly-job} in {kib}, you can
+choose to estimate a bucket span value based on your data characteristics. 
 
 NOTE: The bucket span must contain a valid time interval. For more information, 
 see {ref}/ml-job-resource.html#ml-analysisconfig[Analysis configuration objects].
@@ -22,7 +23,7 @@ see {ref}/ml-job-resource.html#ml-analysisconfig[Analysis configuration objects]
 If you choose a value that is larger than one day or is significantly different 
 than the estimated value, you receive an informational message. For more 
 information about choosing an appropriate bucket span, see 
-{xpack-ref}/ml-buckets.html[Buckets].
+{stack-ov}/ml-buckets.html[Buckets].
 
 [[cardinality]]
 ==== Cardinality
@@ -40,14 +41,14 @@ job uses more memory resources. In particular, if the cardinality of the
 Likewise if you are performing population analysis and the cardinality of the
 `over_field_name` is below 10, you are advised that this might not be a suitable
 field to use. For more information, see
-{xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+{stack-ov}/ml-configuring-pop.html[Performing Population Analysis].
 
 [[detectors]]
 ==== Detectors
 
-Each job must have one or more _detectors_. A detector applies an analytical 
-function to specific fields in your data. If your job does not contain a 
-detector or the detector does not contain a 
+Each {anomaly-job} must have one or more _detectors_. A detector applies an
+analytical function to specific fields in your data. If your job does not
+contain a  detector or the detector does not contain a 
 {stack-ov}/ml-functions.html[valid function], you receive an error.
 
 If a job contains duplicate detectors, you also receive an error. Detectors are 
@@ -57,9 +58,9 @@ duplicates if they have the same `function`, `field_name`, `by_field_name`,
 [[influencers]]
 ==== Influencers
 
-When you create a job, you can specify _influencers_, which are also sometimes
-referred to as _key fields_. Picking an influencer is strongly recommended for
-the following reasons:
+When you create an {anomaly-job}, you can specify _influencers_, which are also 
+sometimes referred to as _key fields_. Picking an influencer is strongly
+recommended for the following reasons:
 
 * It allows you to more easily assign blame for the anomaly
 * It simplifies and aggregates the results
@@ -78,11 +79,11 @@ The job creation wizards in {kib} can suggest which fields to use as influencers
 [[model-memory-limits]]
 ==== Model memory limits
 
-For each job, you can optionally specify a `model_memory_limit`, which is the 
-approximate maximum amount of memory resources that are required for analytical 
-processing. The default value is 1 GB. Once this limit is approached, data 
-pruning becomes more aggressive. Upon exceeding this limit, new entities are not 
-modeled. 
+For each {anomaly-job}, you can optionally specify a `model_memory_limit`, which
+is the approximate maximum amount of memory resources that are required for
+analytical processing. The default value is 1 GB. Once this limit is approached,
+data pruning becomes more aggressive. Upon exceeding this limit, new entities
+are not modeled. 
 
 You can also optionally specify the `xpack.ml.max_model_memory_limit` setting. 
 By default, it's not set, which means there is no upper bound on the acceptable 
@@ -92,9 +93,9 @@ TIP: If you set the `model_memory_limit` too high, it will be impossible to open
 the job; jobs cannot be allocated to nodes that have insufficient memory to run 
 them.
 
-If the estimated model memory limit for a job is greater than the model memory 
-limit for the job or the maximum model memory limit for the cluster, the job 
-creation wizards in {kib} generate a warning. If the estimated memory 
+If the estimated model memory limit for an {anomaly-job} is greater than the
+model memory limit for the job or the maximum model memory limit for the cluster,
+the job creation wizards in {kib} generate a warning. If the estimated memory 
 requirement is only a little higher than the `model_memory_limit`, the job will 
 probably produce useful results. Otherwise, the actions you take to address 
 these warnings vary depending on the resources available in your cluster:

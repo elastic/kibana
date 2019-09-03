@@ -28,7 +28,7 @@ export function memcachedMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.memcachedMetrics.nameTitle', {
       defaultMessage: 'Memcached metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Memcached server.',

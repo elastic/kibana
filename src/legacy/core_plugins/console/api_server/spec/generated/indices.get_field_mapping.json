@@ -1,6 +1,7 @@
 {
   "indices.get_field_mapping": {
     "url_params": {
+      "include_type_name": "__flag__",
       "include_defaults": "__flag__",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
@@ -21,6 +22,6 @@
       "_mapping/{type}/field/{fields}",
       "{indices}/_mapping/{type}/field/{fields}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html"
   }
 }

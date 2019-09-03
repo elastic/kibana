@@ -22,11 +22,13 @@ import {
   FeatureCatalogueCategory,
 } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'timelion',
     title: 'Timelion',
-    description: i18n('timelion.registerFeatureDescription', {
+    description: i18n.translate('timelion.registerFeatureDescription', {
       defaultMessage:
         'Use an expression language to analyze time series data and visualize the results.',
     }),

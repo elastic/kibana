@@ -18,9 +18,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import sinon from 'sinon';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { renderWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   DiscoverNoResults,
@@ -43,8 +41,6 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
-            isTimePickerOpen={false}
-            topNavToggle={() => {}}
             getDocLink={() => ''}
           />
         );
@@ -58,8 +54,6 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
-            isTimePickerOpen={false}
-            topNavToggle={() => {}}
             getDocLink={() => ''}
           />
         );
@@ -68,45 +62,11 @@ describe('DiscoverNoResults', () => {
       });
     });
 
-    describe('isTimePickerOpen', () => {
-      test('false is reflected in the aria-expanded state of the button', () => {
-        const component = renderWithIntl(
-          <DiscoverNoResults
-            timeFieldName="awesome_time_field"
-            isTimePickerOpen={false}
-            topNavToggle={() => {}}
-            getDocLink={() => ''}
-          />
-        );
-
-        expect(
-          component.find('[data-test-subj="discoverNoResultsTimefilter"]')[0].attribs['aria-expanded']
-        ).toBe('false');
-      });
-
-      test('true is reflected in the aria-expanded state of the button', () => {
-        const component = renderWithIntl(
-          <DiscoverNoResults
-            timeFieldName="awesome_time_field"
-            isTimePickerOpen={true}
-            topNavToggle={() => {}}
-            getDocLink={() => ''}
-          />
-        );
-
-        expect(
-          component.find('[data-test-subj="discoverNoResultsTimefilter"]')[0].attribs['aria-expanded']
-        ).toBe('true');
-      });
-    });
-
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
-            isTimePickerOpen={false}
-            topNavToggle={() => {}}
             getDocLink={() => ''}
           />
         );
@@ -120,30 +80,11 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             queryLanguage="lucene"
-            isTimePickerOpen={false}
-            topNavToggle={() => {}}
             getDocLink={() => 'documentation-link'}
           />
         );
 
         expect(component).toMatchSnapshot();
-      });
-    });
-
-    describe('topNavToggle', () => {
-      test('is called whe time picker button is clicked', () => {
-        const topNavToggleSpy = sinon.stub();
-        const component = mountWithIntl(
-          <DiscoverNoResults
-            timeFieldName="awesome_time_field"
-            isTimePickerOpen={false}
-            topNavToggle={topNavToggleSpy}
-            getDocLink={() => ''}
-          />
-        );
-
-        findTestSubject(component, 'discoverNoResultsTimefilter').simulate('click');
-        sinon.assert.calledOnce(topNavToggleSpy);
       });
     });
   });

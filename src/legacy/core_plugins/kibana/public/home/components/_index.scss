@@ -5,9 +5,10 @@
 //   homChart__legend--small
 //   homChart__legend-isLoading
 
-@import 'add_data';
-@import 'recently_accessed';
-@import 'synopsis';
-@import 'welcome';
+@import './add_data';
+@import './home';
+@import './sample_data_set_cards';
+@import './synopsis';
+@import './welcome';
 
-@import 'tutorial/tutorial';
+@import './tutorial/tutorial';

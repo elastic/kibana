@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlyoutService FlyoutRef#close() can be called multiple times on the same FlyoutRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
+Array [
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
+Array [
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content 1
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+  Array [
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content 2
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
+    <div />,
+  ],
+]
+`;

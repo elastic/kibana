@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
@@ -27,11 +26,6 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 const extendUrl = (url, props) => (
   modifyUrlLocal(url, parsed => _.merge(parsed, props))
 );
-
-const markdownIt = new MarkdownIt({
-  html: false,
-  linkify: true
-});
 
 /**
  * plugins cannot have upstream dependencies on core/*-kibana.
@@ -89,47 +83,97 @@ const unescapeTemplateVars = url => {
 };
 
 
+//this is not the default locale from Kibana, but the default locale supported by the Elastic Maps Service
 const DEFAULT_LANGUAGE = 'en';
 
+export class EMSClient {
 
-export class EMSClientV66 {
+  EMS_LOAD_TIMEOUT = 32000;
 
+  constructor({
+    kbnVersion,
+    manifestServiceUrl,
+    htmlSanitizer,
+    language,
+    landingPageUrl,
+    fetchFunction,
+    proxyPath
+  }) {
 
-  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
 
     this._queryParams = {
-      my_app_version: kbnVersion
+      elastic_tile_service_tos: 'agree',
+      my_app_name: 'kibana',
+      my_app_version: kbnVersion,
     };
 
     this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
     this._manifestServiceUrl = manifestServiceUrl;
-    this._loadCatalogue = null;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
-    this._emsLandingPageUrl = landingPageUrl;
+    this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
-    this._invalidateSettings();
+    this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : fetch;
+    this._proxyPath = typeof proxyPath === 'string' ? proxyPath : '';
 
+    this._invalidateSettings();
   }
 
+  getDefaultLocale() {
+    return DEFAULT_LANGUAGE;
+  }
+
+  getLocale() {
+    return this._language;
+  }
 
   getValueInLanguage(i18nObject) {
     if (!i18nObject) {
       return '';
     }
-    return i18nObject[this._language] ? i18nObject[this._language] : i18nObject[DEFAULT_LANGUAGE];
+    return i18nObject[this._language] ? i18nObject[this._language]  : i18nObject[DEFAULT_LANGUAGE];
   }
 
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
-  async _getManifest(manifestUrl) {
-    const url = extendUrl(manifestUrl, { query: this._queryParams });
-    const result = await fetch(url);
-    return await result.json();
+  async getManifest(manifestUrl) {
+    try {
+      const url = extendUrl(manifestUrl, { query: this._queryParams });
+      const result = await this._fetchWithTimeout(url);
+      return result ? await result.json() : null;
+    } catch (e) {
+      if (!e) {
+        e = new Error('Unknown error');
+      }
+      if (!(e instanceof Error)) {
+        e = new Error(e.data || `status ${e.statusText || e.status}`);
+      }
+      throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
+    }
   }
 
+  _fetchWithTimeout(url) {
+    return new Promise(
+      (resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error(`Request to ${url} timed out`)),
+          this.EMS_LOAD_TIMEOUT
+        );
+        this._fetchFunction(url)
+          .then(
+            response => {
+              clearTimeout(timer);
+              resolve(response);
+            },
+            err => {
+              clearTimeout(timer);
+              reject(err);
+            }
+          );
+      });
+  }
 
   /**
    * Add optional query-parameters to all requests
@@ -149,64 +193,71 @@ export class EMSClientV66 {
     }
   }
 
+  async _getManifestWithParams(url) {
+    const extendedUrl = this.extendUrlWithParams(url);
+    return await this.getManifest(extendedUrl);
+  }
+
   _invalidateSettings() {
 
-    this._loadCatalogue = _.once(async () => {
-
-      try {
-        const url = this.extendUrlWithParams(this._manifestServiceUrl);
-        return await this._getManifest(url);
-      } catch (e) {
-        if (!e) {
-          e = new Error('Unknown error');
-        }
-        if (!(e instanceof Error)) {
-          e = new Error(e.data || `status ${e.statusText || e.status}`);
-        }
-        throw new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
-      }
+    this._getMainCatalog = _.once(async () => {
+      return await this._getManifestWithParams(this._manifestServiceUrl);
     });
 
+    this._getDefaultTMSCatalog = _.once(async () => {
+      const catalogue = await this._getMainCatalog();
+      const firstService = catalogue.services.find(service => service.type === 'tms');
+      if (!firstService) {
+        return [];
+      }
+      const url = this._proxyPath + firstService.manifest;
+      return await this.getManifest(url);
+    });
+
+    this._getDefaultFileCatalog = _.once(async () => {
+      const catalogue = await this._getMainCatalog();
+      const firstService = catalogue.services.find(service => service.type === 'file');
+      if (!firstService) {
+        return [];
+      }
+      const url = this._proxyPath + firstService.manifest;
+      return await this.getManifest(url);
+    });
+
+    //Cache the actual instances of TMSService as these in turn cache sub-manifests for the style-files
+    this._loadTMSServices = _.once(async () => {
+      const tmsManifest = await this._getDefaultTMSCatalog();
+      return tmsManifest.services.map(serviceConfig => new TMSService(serviceConfig, this, this._proxyPath));
+    });
 
     this._loadFileLayers = _.once(async () => {
-
-      const catalogue = await this._loadCatalogue();
-      const fileService = catalogue.services.find(service => service.type === 'file');
-      if (!fileService) {
-        return [];
-      }
-
-      const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-
-      return manifest.layers.map(layerConfig => {
-        return new FileLayer(layerConfig, this);
-      });
+      const fileManifest = await this._getDefaultFileCatalog();
+      return fileManifest.layers.map(layerConfig => new FileLayer(layerConfig, this, this._proxyPath));
     });
+  }
 
-    this._loadTMSServices = _.once(async () => {
+  async getMainManifest() {
+    return await this._getMainCatalog();
+  }
 
-      const catalogue = await this._loadCatalogue();
-      const tmsService = catalogue.services.find((service) => service.type === 'tms');
-      if (!tmsService) {
-        return [];
-      }
-      const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
+  async getDefaultFileManifest() {
+    return await this._getDefaultFileCatalog();
+  }
 
+  async getDefaultTMSManifest() {
+    return await this._getDefaultTMSCatalog();
+  }
 
-      return tmsManifest.services.map(serviceConfig => {
-        return new TMSService(serviceConfig, this);
-      });
+  async getFileLayers() {
+    return await this._loadFileLayers();
+  }
 
-    });
-
+  async getTMSServices() {
+    return await this._loadTMSServices();
   }
 
   getLandingPageUrl() {
     return this._emsLandingPageUrl;
-  }
-
-  sanitizeMarkdown(markdown) {
-    return this._sanitizer(markdownIt.render(markdown));
   }
 
   sanitizeHtml(html) {
@@ -217,14 +268,6 @@ export class EMSClientV66 {
     return unescapeTemplateVars(extendUrl(url, {
       query: this._queryParams
     }));
-  }
-
-  async getFileLayers() {
-    return await this._loadFileLayers();
-  }
-
-  async getTMSServices() {
-    return await this._loadTMSServices();
   }
 
   async findFileLayerById(id) {

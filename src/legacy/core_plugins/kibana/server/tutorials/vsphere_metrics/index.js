@@ -40,6 +40,7 @@ export function vSphereMetricsSpecProvider(server, context) {
       },
     }),
     //euiIconType: 'logoVSphere',
+    isBeta: true,
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.vsphereMetrics.artifacts.application.label', {

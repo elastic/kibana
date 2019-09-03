@@ -1,0 +1,181 @@
+[{
+  "isSupported": true,
+  "cluster_uuid": "lfhHkgqfTy2Vy3SvlPSvXg",
+  "cluster_name": "monitoring",
+  "version": "7.0.0",
+  "license": {
+    "status": "active",
+    "type": "basic"
+  },
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {
+        "count": 5,
+        "docs": {
+          "count": 522,
+          "deleted": 122
+        },
+        "shards": {
+          "total": 7,
+          "primaries": 7,
+          "replication": 0,
+          "index": {
+            "shards": {
+              "min": 1,
+              "max": 3,
+              "avg": 1.4
+            },
+            "primaries": {
+              "min": 1,
+              "max": 3,
+              "avg": 1.4
+            },
+            "replication": {
+              "min": 0,
+              "max": 0,
+              "avg": 0
+            }
+          }
+        },
+        "store": {
+          "size_in_bytes": 1245010
+        }
+      },
+      "nodes": {
+        "fs": {
+          "total_in_bytes": 499963174912,
+          "free_in_bytes": 107874111488,
+          "available_in_bytes": 101780008960
+        },
+        "count": {
+          "total": 1
+        },
+        "jvm": {
+          "max_uptime_in_millis": 190457,
+          "mem": {
+            "heap_used_in_bytes": 341382816,
+            "heap_max_in_bytes": 1038876672
+          }
+        }
+      },
+      "status": "yellow"
+    }
+  },
+  "logstash": {
+    "node_count": 0,
+    "events_in_total": 0,
+    "events_out_total": 0,
+    "avg_memory": 0,
+    "avg_memory_used": 0,
+    "max_uptime": 0,
+    "pipeline_count": 0,
+    "queue_types": {
+      "memory": 0,
+      "persisted": 0
+    },
+    "versions": []
+  },
+  "kibana": {
+    "status": "green",
+    "requests_total": 42,
+    "concurrent_connections": 0,
+    "response_time_max": 864,
+    "memory_size": 127283200,
+    "memory_limit": 8564343808,
+    "count": 1
+  },
+  "beats": {
+    "totalEvents": 0,
+    "bytesSent": 0,
+    "beats": {
+      "total": 0,
+      "types": []
+    }
+  },
+  "apm": {
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
+    "apms": {
+      "total": 0
+    }
+  },
+  "alerts": {
+    "alertsMeta": {
+      "enabled": true
+    },
+    "clusterMeta": {
+      "enabled": false,
+      "message": "Cluster [monitoring] license type [basic] does not support Cluster Alerts"
+    }
+  },
+  "isPrimary": true,
+  "status": "yellow",
+  "isCcrEnabled": false
+}, {
+  "isSupported": true,
+  "cluster_uuid": "__standalone_cluster__",
+  "license": {},
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {},
+      "nodes": {
+        "count": {},
+        "jvm": {}
+      }
+    }
+  },
+  "logstash": {
+    "node_count": 0,
+    "events_in_total": 0,
+    "events_out_total": 0,
+    "avg_memory": 0,
+    "avg_memory_used": 0,
+    "max_uptime": 0,
+    "pipeline_count": 0,
+    "queue_types": {
+      "memory": 0,
+      "persisted": 0
+    },
+    "versions": []
+  },
+  "kibana": {
+    "status": null,
+    "requests_total": 0,
+    "concurrent_connections": 0,
+    "response_time_max": 0,
+    "memory_size": 0,
+    "memory_limit": 0,
+    "count": 0
+  },
+  "beats": {
+    "totalEvents": 348,
+    "bytesSent": 319913,
+    "beats": {
+      "total": 1,
+      "types": [{
+        "type": "Packetbeat",
+        "count": 1
+      }]
+    }
+  },
+  "apm": {
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
+    "apms": {
+      "total": 0
+    }
+  },
+  "alerts": {
+    "alertsMeta": {
+      "enabled": true
+    },
+    "clusterMeta": {
+      "enabled": false,
+      "message": "Cluster [] license type [undefined] does not support Cluster Alerts"
+    }
+  },
+  "isPrimary": false,
+  "isCcrEnabled": false
+}]

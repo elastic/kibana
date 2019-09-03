@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -26,70 +25,51 @@ import {
   OptionsTab,
 } from './options_tab';
 
-const scopeMock = {
-  editorState: {
-    params: {
-      updateFiltersOnChange: false,
-      useTimeFilter: false
-    }
-  }
-};
-let stageEditorParams;
+describe('OptionsTab', () => {
+  let props;
 
-beforeEach(() => {
-  stageEditorParams = sinon.spy();
-});
+  beforeEach(() => {
+    props = {
+      vis: {},
+      stateParams: {
+        updateFiltersOnChange: false,
+        useTimeFilter: false
+      },
+      setValue: jest.fn()
+    };
+  });
 
-test('renders OptionsTab', () => {
-  const component = shallow(<OptionsTab
-    scope={scopeMock}
-    editorState={scopeMock.editorState}
-    stageEditorParams={stageEditorParams}
-  />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+  it('should renders OptionsTab', () => {
+    const component = shallow(<OptionsTab {...props} />);
 
-test('updateFiltersOnChange', () => {
-  const component = mountWithIntl(<OptionsTab
-    scope={scopeMock}
-    editorState={scopeMock.editorState}
-    stageEditorParams={stageEditorParams}
-  />);
-  const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] input[type="checkbox"]');
-  checkbox.simulate('change', { target: { checked: true } });
-  const expectedParams = {
-    updateFiltersOnChange: true
-  };
-  sinon.assert.calledOnce(stageEditorParams);
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
-});
+    expect(component).toMatchSnapshot();
+  });
 
-test('useTimeFilter', () => {
-  const component = mountWithIntl(<OptionsTab
-    scope={scopeMock}
-    editorState={scopeMock.editorState}
-    stageEditorParams={stageEditorParams}
-  />);
-  const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] input[type="checkbox"]');
-  checkbox.simulate('change', { target: { checked: true } });
-  const expectedParams = {
-    useTimeFilter: true
-  };
-  sinon.assert.calledOnce(stageEditorParams);
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
-});
+  it('should update updateFiltersOnChange', () => {
+    const component = mountWithIntl(<OptionsTab {...props} />);
+    const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] input[type="checkbox"]');
+    checkbox.simulate('change', { target: { checked: true } });
 
-test('pinFilters', () => {
-  const component = mountWithIntl(<OptionsTab
-    scope={scopeMock}
-    editorState={scopeMock.editorState}
-    stageEditorParams={stageEditorParams}
-  />);
-  const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] input[type="checkbox"]');
-  checkbox.simulate('change', { target: { checked: true } });
-  const expectedParams = {
-    pinFilters: true
-  };
-  sinon.assert.calledOnce(stageEditorParams);
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+    expect(props.setValue).toHaveBeenCalledTimes(1);
+    expect(props.setValue).toHaveBeenCalledWith('updateFiltersOnChange', true);
+  });
+
+  it('should update useTimeFilter', () => {
+    const component = mountWithIntl(<OptionsTab {...props} />);
+    const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] input[type="checkbox"]');
+    checkbox.simulate('change', { target: { checked: true } });
+
+    expect(props.setValue).toHaveBeenCalledTimes(1);
+    expect(props.setValue).toHaveBeenCalledWith('useTimeFilter', true);
+  });
+
+  it('should update pinFilters', () => {
+    const component = mountWithIntl(<OptionsTab {...props} />);
+    const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] input[type="checkbox"]');
+    checkbox.simulate('change', { target: { checked: true } });
+
+    expect(props.setValue).toHaveBeenCalledTimes(1);
+    expect(props.setValue).toHaveBeenCalledWith('pinFilters', true);
+  });
+
 });

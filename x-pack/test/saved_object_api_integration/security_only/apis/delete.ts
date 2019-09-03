@@ -5,23 +5,23 @@
  */
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
 
-// tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
     const {
-      createExpectLegacyForbidden,
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,
       expectRbacSpaceAwareForbidden,
       expectRbacNotSpaceAwareForbidden,
       expectRbacInvalidIdForbidden,
+      expectRbacHiddenTypeForbidden: expectRbacSpaceTypeForbidden,
+      expectGenericNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`user with no access`, {
@@ -29,15 +29,19 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectRbacSpaceAwareForbidden,
         },
         notSpaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectRbacNotSpaceAwareForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectRbacInvalidIdForbidden,
         },
       },
     });
@@ -53,6 +57,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
+        hiddenType: {
+          statusCode: 404,
+          response: expectGenericNotFound,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(),
@@ -64,40 +72,20 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(),
-        },
-      },
-    });
-
-    deleteTest(`legacy readonly user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectRbacSpaceAwareForbidden,
         },
         notSpaceAware: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectRbacNotSpaceAwareForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
-          ),
+          response: expectRbacInvalidIdForbidden,
         },
       },
     });
@@ -112,6 +100,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 404,
@@ -131,6 +123,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -148,6 +144,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 404,
@@ -167,6 +167,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -184,6 +188,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -203,6 +211,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -221,6 +233,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -238,6 +254,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,

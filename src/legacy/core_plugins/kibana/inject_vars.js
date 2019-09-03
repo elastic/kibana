@@ -19,60 +19,19 @@
 
 export function injectVars(server) {
   const serverConfig = server.config();
-  const mapConfig = serverConfig.get('map');
-  const legacyWarning = (server => legacyMap =>
-    server.log(
-      ['warning', 'deprecated'],
-      `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
-        `Use "map.${legacyMap}" instead`
-    ))(server);
-  const conflictingConfigsError = (server => legacyMap => {
-    server.log(
-      ['error', 'init'],
-      `Both legacy "${legacyMap}" and current "map.${legacyMap}" configurations ` +
-      `detected. Please use only current map configurations: "map.${legacyMap}".`
-    );
-    throw new Error(`Competing legacy and current ${legacyMap} ` +
-      `map configurations detected`);
-  })(server);
 
-  let regionmap = mapConfig.regionmap;
-  let tilemap = mapConfig.tilemap;
-  const legacyTilemap = serverConfig.get('tilemap');
-  const legacyRegionmap = serverConfig.get('regionmap');
-
-  // DEPRECATED SETTINGS
-  // For both tile & region maps:
-  // If no layers have been specified, try legacy. If both modified, throw error
-  if (!tilemap.url || tilemap.options.default) {
-    (legacyTilemap.url || !legacyTilemap.options.default)
-      && (tilemap = legacyTilemap)
-      && legacyWarning('tilemap');
-  } else {
-    (legacyTilemap.url || !legacyTilemap.options.default)
-      && conflictingConfigsError('tilemap');
-  }
-  if (!regionmap.layers.length) {
-    legacyRegionmap.layers.length
-      && (regionmap = legacyRegionmap)
-      && legacyWarning('regionmap');
-  } else {
-    legacyRegionmap.layers.length
-      && conflictingConfigsError('regionmap');
-  }
-
-  // If url is set, old settings must be used for backward compatibility
-  const isOverridden = typeof tilemap.url === 'string' && tilemap.url !== '';
+  // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
+  const { types: allTypes } = server.savedObjects;
+  const savedObjectsManagement = server.getSavedObjectsManagement();
+  const importAndExportableTypes = allTypes.filter(type =>
+    savedObjectsManagement.isImportAndExportable(type)
+  );
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-    regionmapsConfig: regionmap,
-    mapConfig: mapConfig,
-    tilemapsConfig: {
-      deprecated: {
-        isOverridden: isOverridden,
-        config: tilemap,
-      },
-    },
+    disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
+    importAndExportableTypes,
+    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
+    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
   };
 }

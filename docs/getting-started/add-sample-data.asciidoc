@@ -1,0 +1,28 @@
+[[add-sample-data]]
+== Add sample data
+
+{kib} has several sample data sets that you can use to explore {kib} before loading your own data.
+These sample data sets showcase a variety of use cases:
+
+* *eCommerce orders* includes visualizations for product-related information,
+such as cost, revenue, and price.
+* *Flight data* enables you to view and interact with flight routes.
+* *Web logs* lets you analyze website traffic.
+
+To get started, go to the {kib} home page and click the link underneath *Add sample data*.
+
+Once you've loaded a data set, click *View data* to view prepackaged 
+visualizations, dashboards, Canvas workpads, Maps, and Machine Learning jobs.
+
+[role="screenshot"]
+image::images/add-sample-data.png[]
+
+NOTE: The timestamps in the sample data sets are relative to when they are installed.
+If you uninstall and reinstall a data set, the timestamps will change to reflect the most recent installation.
+
+[float]
+=== Next steps
+
+* Explore {kib} by following the <<tutorial-sample-data, sample data tutorial>>.
+
+* Learn how to load data, define index patterns, and build visualizations by <<tutorial-build-dashboard, building your own dashboard>>.

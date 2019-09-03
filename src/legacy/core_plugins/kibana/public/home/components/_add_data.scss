@@ -1,6 +1,5 @@
 .homAddData__card {
-  width: 250px;
-  min-width: 200px;
+  max-width: 250px;
   border: none;
   box-shadow: none;
 }
@@ -17,4 +16,22 @@
 
 .homAddData__footerItem {
   text-align: center;
+}
+
+@include euiBreakpoint('xs') {
+  .homAddData__card {
+    max-width: none;
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .homeAddData__flexGroup {
+    flex-wrap: wrap;
+  }
+}
+
+@include euiBreakpoint('l', 'xl') {
+  .homeAddData__flexGroup {
+    flex-wrap: nowrap;
+  }
 }

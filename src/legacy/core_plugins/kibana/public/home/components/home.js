@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
-import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -35,6 +35,7 @@ import {
   EuiFlexGrid,
   EuiText,
   EuiPageBody,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import { Welcome } from './welcome';
@@ -46,7 +47,7 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
+    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -116,7 +117,7 @@ export class Home extends Component {
       })
       .map(directory => {
         return (
-          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
               description={directory.description}
               iconType={directory.icon}
@@ -129,22 +130,20 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { apmUiEnabled, recentlyAccessed, mlEnabled } = this.props;
-
-    let recentlyAccessedPanel;
-    if (recentlyAccessed.length > 0) {
-      recentlyAccessedPanel = (
-        <Fragment>
-          <RecentlyAccessed recentlyAccessed={recentlyAccessed} />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
+    const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage className="homPage">
-        <EuiPageBody>
-          {recentlyAccessedPanel}
+      <EuiPage restrictWidth={1200}>
+        <EuiPageBody className="eui-displayBlock">
+
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="kbn.home.welcomeHomePageHeader"
+                defaultMessage="Kibana home"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
 
           <AddData
             apmUiEnabled={apmUiEnabled}
@@ -157,29 +156,29 @@ export class Home extends Component {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
-                  <h3>
+                <EuiTitle size="s">
+                  <h2>
                     <FormattedMessage
                       id="kbn.home.directories.visualize.nameTitle"
                       defaultMessage="Visualize and Explore Data"
                     />
-                  </h3>
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
+                <EuiFlexGrid columns={2} gutterSize="s">
                   {this.renderDirectories(FeatureCatalogueCategory.DATA)}
                 </EuiFlexGrid>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
-                  <h3>
+                <EuiTitle size="s">
+                  <h2>
                     <FormattedMessage
                       id="kbn.home.directories.manage.nameTitle"
                       defaultMessage="Manage and Administer the Elastic Stack"
                     />
-                  </h3>
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
@@ -192,8 +191,8 @@ export class Home extends Component {
           <EuiSpacer size="l" />
 
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
+            <EuiFlexItem grow={false} className="eui-textCenter">
+              <EuiText size="s" color="subdued">
                 <p>
                   <FormattedMessage
                     id="kbn.home.directories.notFound.description"
@@ -226,6 +225,10 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
+        shouldShowTelemetryOptIn={this.props.shouldShowTelemetryOptIn}
+        fetchTelemetry={this.props.fetchTelemetry}
+        setOptIn={this.props.setOptIn}
+        getTelemetryBannerId={this.props.getTelemetryBannerId}
       />
     );
   }
@@ -248,6 +251,10 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  fetchTelemetry: PropTypes.func.isRequired,
+  getTelemetryBannerId: PropTypes.func.isRequired,
+  setOptIn: PropTypes.func.isRequired,
+  shouldShowTelemetryOptIn: PropTypes.bool.isRequired,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -260,7 +267,6 @@ Home.propTypes = {
     })
   ),
   apmUiEnabled: PropTypes.bool.isRequired,
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,

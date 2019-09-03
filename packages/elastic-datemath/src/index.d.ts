@@ -26,7 +26,7 @@ declare const datemath: {
       weight: number;
       type: 'calendar' | 'fixed' | 'mixed';
       base: number;
-    }
+    };
   };
   units: Unit[];
   unitsAsc: Unit[];
@@ -47,4 +47,5 @@ declare const datemath: {
   ): moment.Moment | undefined;
 };
 
+// eslint-disable-next-line import/no-default-export
 export default datemath;

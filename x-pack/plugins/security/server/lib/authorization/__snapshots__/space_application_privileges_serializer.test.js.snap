@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`#privilege #deserialize throws error if privilege doesn't start with space_ 1`] = `"Space privilege should have started with space_"`;
-
-exports[`#resource #deserialize throws error if resource doesn't start with space: 1`] = `"Resource should have started with space:"`;

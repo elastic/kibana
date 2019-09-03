@@ -40,7 +40,7 @@ module.exports = function({ name }) {
       },
       kbnVersion: {
         message: 'What Kibana version are you targeting?',
-        default: kibanaPkg.branch,
+        default: kibanaPkg.version,
       },
       generateApp: {
         type: 'confirm',
@@ -102,7 +102,7 @@ module.exports = function({ name }) {
         cwd: KBN_DIR,
         stdio: 'inherit',
       }).then(() => {
-        const dir = relative(process.cwd(), resolve(KBN_DIR, `../kibana-extra`, snakeCase(name)));
+        const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
 
         log.success(chalk`🎉
 

@@ -4,7 +4,6 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h2>
       <FormattedMessage
@@ -19,8 +18,6 @@ exports[`Header should render normally 1`] = `
   />
   <EuiText
     color="subdued"
-    grow={true}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="You've defined {indexPattern} as your {indexPatternName}. Now you can specify some settings before we create it."

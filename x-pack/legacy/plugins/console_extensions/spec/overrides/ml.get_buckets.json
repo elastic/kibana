@@ -1,0 +1,17 @@
+{
+  "ml.get_buckets": {
+    "data_autocomplete_rules": {
+      "desc": { "__one_of": ["true", "false"] },
+      "exclude_interim": { "__one_of": ["true", "false"] },
+      "expand": { "__one_of": ["true", "false"] },
+      "anomaly_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  }
+}

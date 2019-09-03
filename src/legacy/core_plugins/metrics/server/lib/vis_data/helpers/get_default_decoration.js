@@ -17,26 +17,40 @@
  * under the License.
  */
 
-export default series => {
-  const pointSize = series.point_size != null ? Number(series.point_size) : Number(series.line_width);
+export const getDefaultDecoration = series => {
+  const pointSize =
+    series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;
+  let stack;
+  switch (series.stacked) {
+    case 'stacked':
+    case 'percent':
+      stack = true;
+      break;
+    case 'stacked_within_series':
+      stack = series.id;
+      break;
+    default:
+      stack = false;
+  }
+
   return {
-    stack: series.stacked && series.stacked !== 'none' || false,
+    stack,
     lines: {
       show: series.chart_type === 'line' && series.line_width !== 0,
       fill: Number(series.fill),
       lineWidth: Number(series.line_width),
-      steps: series.steps || false
+      steps: series.steps || false,
     },
     points: {
       show: showPoints,
       radius: 1,
-      lineWidth: showPoints ? pointSize : 5
+      lineWidth: showPoints ? pointSize : 5,
     },
     bars: {
       show: series.chart_type === 'bar',
       fill: Number(series.fill),
-      lineWidth: Number(series.line_width)
-    }
+      lineWidth: Number(series.line_width),
+    },
   };
 };

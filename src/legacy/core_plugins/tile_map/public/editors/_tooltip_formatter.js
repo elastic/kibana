@@ -18,15 +18,20 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 
-export function TileMapTooltipFormatterProvider($compile, $rootScope, i18n) {
+import template from './_tooltip.html';
+
+export function TileMapTooltipFormatterProvider($injector) {
+  const $rootScope = $injector.get('$rootScope');
+  const $compile = $injector.get('$compile');
 
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(require('./_tooltip.html'));
+  const $el = $('<div>').html(template);
+
   $compile($el)($tooltipScope);
 
   return function tooltipFormatter(aggConfig, metricAgg, feature) {
-
     if (!feature) {
       return '';
     }
@@ -37,11 +42,11 @@ export function TileMapTooltipFormatterProvider($compile, $rootScope, i18n) {
         value: metricAgg.fieldFormatter()(feature.properties.value)
       },
       {
-        label: i18n('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
+        label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
         value: feature.geometry.coordinates[1]
       },
       {
-        label: i18n('tileMap.tooltipFormatter.longitudeLabel', { defaultMessage: 'Longitude' }),
+        label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', { defaultMessage: 'Longitude' }),
         value: feature.geometry.coordinates[0]
       }
     ];

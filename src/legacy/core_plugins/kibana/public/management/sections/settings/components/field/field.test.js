@@ -25,9 +25,12 @@ import { Field } from './field';
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
-    addDanger: () => {}
+    addDanger: () => {},
+    add: jest.fn(),
   }
 }));
+
+import { toastNotifications } from 'ui/notify';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
@@ -122,6 +125,11 @@ const settings = {
     isCustom: false,
     isOverridden: false,
     options: ['apple', 'orange', 'banana'],
+    optionLabels: {
+      apple: 'Apple',
+      orange: 'Orange',
+      // Deliberately left out `banana` to test if it also works with missing labels
+    }
   },
   string: {
     name: 'string:test:setting',
@@ -160,6 +168,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -176,6 +185,20 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      it('should render as read only if saving is disabled', async () => {
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={false}
           />
         );
 
@@ -191,6 +214,7 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -206,12 +230,49 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
         expect(component).toMatchSnapshot();
       });
     });
+
+    if(type === 'select') {
+      it('should use options for rendering values', () => {
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
+        );
+        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        const labels = select.find('option').map(option => option.prop('value'));
+        expect(labels).toEqual(['apple', 'orange', 'banana']);
+      });
+
+      it('should use optionLabels for rendering labels', () => {
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
+        );
+        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        const labels = select.find('option').map(option => option.text());
+        expect(labels).toEqual(['Apple', 'Orange', 'banana']);
+      });
+    }
 
     if(type === 'image') {
       describe(`for changing ${type} setting`, () => {
@@ -220,6 +281,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -276,6 +338,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -322,6 +385,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -354,5 +418,29 @@ describe('Field', () => {
         });
       });
     }
+  });
+
+  it('should show a reload toast when saving setting requiring a page reload', async () => {
+    const setting = {
+      ...settings.string,
+      requiresPageReload: true,
+    };
+    const wrapper = mountWithIntl(
+      <Field.WrappedComponent
+        setting={setting}
+        save={save}
+        clear={clear}
+      />
+    );
+    wrapper.instance().onFieldChange({ target: { value: 'a new value' } });
+    wrapper.update();
+    findTestSubject(wrapper, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
+    expect(save).toHaveBeenCalled();
+    await save();
+    expect(toastNotifications.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining('Please reload the page'),
+      }),
+    );
   });
 });

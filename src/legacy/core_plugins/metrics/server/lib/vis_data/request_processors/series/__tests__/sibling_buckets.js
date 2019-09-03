@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import siblingBuckets from '../sibling_buckets';
+import { siblingBuckets } from '../sibling_buckets';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -27,7 +27,7 @@ describe('siblingBuckets(req, panel, series)', () => {
   let req;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       id: 'test',
@@ -38,22 +38,22 @@ describe('siblingBuckets(req, panel, series)', () => {
         {
           id: 'metric-1',
           type: 'avg',
-          field: 'cpu'
+          field: 'cpu',
         },
         {
           id: 'metric-2',
           type: 'avg_bucket',
-          field: 'metric-1'
-        }
-      ]
+          field: 'metric-1',
+        },
+      ],
     };
     req = {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z'
-        }
-      }
+          max: '2017-01-01T01:00:00Z',
+        },
+      },
     };
   });
 
@@ -72,12 +72,12 @@ describe('siblingBuckets(req, panel, series)', () => {
           aggs: {
             'metric-2': {
               extended_stats_bucket: {
-                buckets_path: 'timeseries>metric-1'
-              }
-            }
-          }
-        }
-      }
+                buckets_path: 'timeseries>metric-1',
+              },
+            },
+          },
+        },
+      },
     });
   });
 });

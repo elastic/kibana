@@ -14,7 +14,6 @@ const MOCHA_OPTIONS = {
   ui: 'bdd',
   reporter: createAutoJUnitReporter({
     reportName: 'X-Pack Mocha Tests',
-    rootDirectory: __dirname,
   }),
 };
 
@@ -31,7 +30,6 @@ export default (gulp, { mocha }) => {
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
     ].concat(forPluginServerTests());
-
     return gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));
   });

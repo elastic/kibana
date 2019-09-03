@@ -1,23 +1,11 @@
 [[kuery-query]]
-=== Kibana Query Language Enhancements
+=== Kibana Query Language
 
-experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+In Kibana 6.3, we introduced a number of exciting experimental query language enhancements. These
+features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a 
+simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled. 
 
-[NOTE]
-============
-In 6.0 we introduced an experimental query language called Kuery. We've taken what we learned from that experiment
-and applied it to the standard Kibana query language. As a result, Kuery is no longer available as a standalone 
-option. Saved searches using Kuery will automatically be opted in to using the language enhancements described on 
-this page. However, some breaking changes have been made to the query syntax, so read on for the full details on 
-what's new.
-============
-
-Starting in 6.3, you can choose to opt-in to a number of exciting experimental query language enhancements under the
-options menu in the query bar. Currently, opting in will enable scripted field support and a simplified, easier to 
-use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled. We're hard at 
-work building even more features for you to try out. Take these features for a spin and let us know what you think!
-
-==== New Simplified Syntax
+==== Language Syntax
 
 If you're familiar with Kibana's old lucene query syntax, you should feel right at home with the new syntax. The basics
 stay the same, we've simply refined things to make the query language easier to use. Read about the changes below.

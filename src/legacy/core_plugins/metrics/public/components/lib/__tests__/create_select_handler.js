@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import createSelectHandler from '../create_select_handler';
+import { createSelectHandler } from '../create_select_handler';
 
 describe('createSelectHandler()', () => {
   let handleChange;
@@ -35,8 +35,7 @@ describe('createSelectHandler()', () => {
   it('calls handleChange() function with partial', () => {
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
-      test: 'foo'
+      test: 'foo',
     });
   });
 });
-

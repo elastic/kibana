@@ -19,27 +19,30 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import aggToComponent from '../lib/agg_to_component';
-import { sortable } from 'react-anything-sortable';
+import { aggToComponent } from '../lib/agg_to_component';
 import { UnsupportedAgg } from './unsupported_agg';
+import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 
-function Agg(props) {
-  const { model } = props;
+import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+
+export function Agg(props) {
+  const { model, uiRestrictions } = props;
+
   let Component = aggToComponent[model.type];
+
   if (!Component) {
     Component = UnsupportedAgg;
+  } else if (!isMetricEnabled(model.type, uiRestrictions)) {
+    Component = TemporaryUnsupportedAgg;
   }
+
   const style = {
     cursor: 'default',
     ...props.style,
   };
+
   return (
-    <div
-      className={props.className}
-      style={style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
-    >
+    <div className={props.className} style={style}>
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -50,6 +53,8 @@ function Agg(props) {
         panel={props.panel}
         series={props.series}
         siblings={props.siblings}
+        uiRestrictions={props.uiRestrictions}
+        dragHandleProps={props.dragHandleProps}
       />
     </div>
   );
@@ -62,14 +67,9 @@ Agg.propTypes = {
   onAdd: PropTypes.func,
   onChange: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
-  sortData: PropTypes.string,
+  uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
-
-export default sortable(Agg);

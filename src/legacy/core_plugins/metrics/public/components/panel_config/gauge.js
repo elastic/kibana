@@ -19,14 +19,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -38,15 +38,15 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { QueryBarWrapper } from '../query_bar_wrapper';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
 class GaugePanelConfigUi extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -55,8 +55,10 @@ class GaugePanelConfigUi extends Component {
   componentWillMount() {
     const { model } = this.props;
     const parts = {};
-    if (!model.gauge_color_rules ||
-      (model.gauge_color_rules && model.gauge_color_rules.length === 0)) {
+    if (
+      !model.gauge_color_rules ||
+      (model.gauge_color_rules && model.gauge_color_rules.length === 0)
+    ) {
       parts.gauge_color_rules = [{ id: uuid.v1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
@@ -74,10 +76,10 @@ class GaugePanelConfigUi extends Component {
     const { intl } = this.props;
     const defaults = {
       gauge_max: '',
-      filter: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
       gauge_inner_width: '',
-      gauge_width: ''
+      gauge_width: '',
     };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -85,14 +87,18 @@ class GaugePanelConfigUi extends Component {
     const styleOptions = [
       {
         label: intl.formatMessage({
-          id: 'tsvb.gauge.styleOptions.circleLabel', defaultMessage: 'Circle' }),
-        value: 'circle'
+          id: 'tsvb.gauge.styleOptions.circleLabel',
+          defaultMessage: 'Circle',
+        }),
+        value: 'circle',
       },
       {
         label: intl.formatMessage({
-          id: 'tsvb.gauge.styleOptions.halfCircleLabel', defaultMessage: 'Half Circle' }),
-        value: 'half'
-      }
+          id: 'tsvb.gauge.styleOptions.halfCircleLabel',
+          defaultMessage: 'Half Circle',
+        }),
+        value: 'half',
+      },
     ];
     const htmlId = htmlIdGenerator();
     const selectedGaugeStyleOption = styleOptions.find(option => {
@@ -116,10 +122,7 @@ class GaugePanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.gauge.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.gauge.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -136,16 +139,21 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.gauge.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarWrapper
+                    query={{
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -171,10 +179,7 @@ class GaugePanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.gauge.optionsTab.styleLabel"
-                  defaultMessage="Style"
-                />
+                <FormattedMessage id="tsvb.gauge.optionsTab.styleLabel" defaultMessage="Style" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -183,10 +188,12 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('gaugeMax')}
-                  label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.gaugeMaxLabel"
-                    defaultMessage="Gauge max (empty for auto)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.gauge.optionsTab.gaugeMaxLabel"
+                      defaultMessage="Gauge max (empty for auto)"
+                    />
+                  }
                 >
                   {/*
                     EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -204,10 +211,12 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('gaugeStyle')}
-                  label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.gaugeStyleLabel"
-                    defaultMessage="Gauge style"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.gauge.optionsTab.gaugeStyleLabel"
+                      defaultMessage="Gauge style"
+                    />
+                  }
                 >
                   <EuiComboBox
                     isClearable={false}
@@ -221,10 +230,12 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('innerLine')}
-                  label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.innerLineWidthLabel"
-                    defaultMessage="Inner line width"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.gauge.optionsTab.innerLineWidthLabel"
+                      defaultMessage="Inner line width"
+                    />
+                  }
                 >
                   <EuiFieldNumber
                     onChange={handleTextChange('gauge_inner_width')}
@@ -235,10 +246,12 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('gaugeLine')}
-                  label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.gaugeLineWidthLabel"
-                    defaultMessage="Gauge line width"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.gauge.optionsTab.gaugeLineWidthLabel"
+                      defaultMessage="Gauge line width"
+                    />
+                  }
                 >
                   <EuiFieldNumber
                     onChange={handleTextChange('gauge_width')}
@@ -310,19 +323,10 @@ class GaugePanelConfigUi extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.gauge.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.gauge.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
-          >
+          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage
               id="tsvb.gauge.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -333,7 +337,6 @@ class GaugePanelConfigUi extends Component {
       </div>
     );
   }
-
 }
 
 GaugePanelConfigUi.propTypes = {
@@ -342,5 +345,4 @@ GaugePanelConfigUi.propTypes = {
   onChange: PropTypes.func,
 };
 
-const GaugePanelConfig = injectI18n(GaugePanelConfigUi);
-export default GaugePanelConfig;
+export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

@@ -1,0 +1,34 @@
+{
+    "series": [
+        {
+            "id": "1",
+            "rawId": "Thursday-col-2-1",
+            "label": "Thursday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Friday-col-2-1",
+            "label": "Friday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Tuesday-col-2-1",
+            "label": "Tuesday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Wednesday-col-2-1",
+            "label": "Wednesday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Saturday-col-2-1",
+            "label": "Saturday",
+            "values": []
+        }
+    ]
+}

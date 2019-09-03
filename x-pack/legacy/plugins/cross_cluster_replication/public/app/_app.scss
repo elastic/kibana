@@ -1,0 +1,14 @@
+.ccrFollowerIndicesFormRow {
+  padding-bottom: 0;
+}
+
+.ccrFollowerIndicesHelpText {
+  transform: translateY(-3px);
+}
+
+/**
+ * 1. Prevent context menu popover appearing above confirmation modal
+ */
+.ccrFollowerIndicesDetailPanel {
+  z-index: $euiZMask - 1; /* 1 */
+}

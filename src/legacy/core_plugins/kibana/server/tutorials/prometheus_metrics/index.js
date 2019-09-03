@@ -28,7 +28,7 @@ export function prometheusMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.prometheusMetrics.nameTitle', {
       defaultMessage: 'Prometheus metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from a Prometheus exporter.',

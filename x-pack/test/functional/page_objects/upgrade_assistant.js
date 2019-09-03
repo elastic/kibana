@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function UpgradeAssistantProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -45,10 +45,9 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectDeprecationLoggingLabel(labelText) {
       return await retry.try(async () => {
         log.debug('expectDeprecationLoggingLabel()');
-        const toggle = await testSubjects.find('upgradeAssistantDeprecationToggle');
-        const div = await toggle.getProperty('parentElement');
-        const label = await div.findByCssSelector('label');
-        expect(await label.getVisibleText()).to.eql(labelText);
+        const label = await find.byCssSelector('[data-test-subj="upgradeAssistantDeprecationToggle"] ~ label');
+        const value = await label.getVisibleText();
+        expect(value).to.equal(labelText);
       });
     }
 
@@ -66,6 +65,14 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
         const summaryEl = await testSubjects.find('upgradeAssistantIssueSummary');
         const summaryElText = await summaryEl.getVisibleText();
         expect(summaryElText).to.eql(summary);
+      });
+    }
+
+    async expectTelemetryHasFinish() {
+      return await retry.try(async () => {
+        log.debug('expectTelemetryHasFinish');
+        const isTelemetryFinished = !(await testSubjects.exists('upgradeAssistantTelemetryRunning'));
+        expect(isTelemetryFinished).to.equal(true);
       });
     }
   }

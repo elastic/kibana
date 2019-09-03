@@ -19,10 +19,37 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../../../common/get_last_value';
+import { getLastValue } from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
-class TopN extends Component {
+export class TopN extends Component {
+  constructor(props) {
+    super(props);
+
+    this.tableRef = React.createRef();
+    this.state = {
+      labelMaxWidth: 150,
+    };
+  }
+
+  get labelMaxWidth() {
+    // calculate max-width of a label column as 35% of the table
+    return this.tableRef.current.offsetWidth * 0.35;
+  }
+
+  componentDidMount() {
+    this.setState({
+      labelMaxWidth: this.labelMaxWidth,
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.labelMaxWidth !== this.labelMaxWidth) {
+      this.setState({
+        labelMaxWidth: this.labelMaxWidth,
+      });
+    }
+  }
 
   handleClick(item) {
     return () => {
@@ -40,33 +67,36 @@ class TopN extends Component {
       const value = formatter(lastValue);
       const width = `${100 * (lastValue / maxValue)}%`;
       const backgroundColor = item.color;
-      const styles = reactcss({
-        default: {
-          innerBar: {
-            width,
-            backgroundColor
-          }
+      const styles = reactcss(
+        {
+          default: {
+            innerBar: {
+              width,
+              backgroundColor,
+            },
+            label: {
+              maxWidth: this.state.labelMaxWidth,
+            },
+          },
+          onClick: {
+            row: {
+              cursor: 'pointer',
+            },
+          },
         },
-        onClick: {
-          row: {
-            cursor: 'pointer'
-          }
-        }
-      }, this.props);
+        this.props
+      );
       return (
-        <tr
-          key={key}
-          onClick={this.handleClick({ lastValue, ...item })}
-          style={styles.row}
-        >
-          <td width="1*" className="tvbVisTopN__label">{ item.label }</td>
-          <td width="100%" className="tvbVisTopN__bar">
-            <div
-              className="tvbVisTopN__innerBar"
-              style={styles.innerBar}
-            />
+        <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
+          <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
+            {item.label}
           </td>
-          <td width="1*" className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
+          <td width="100%" className="tvbVisTopN__bar">
+            <div className="tvbVisTopN__innerBar" style={styles.innerBar} />
+          </td>
+          <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
+            {value}
+          </td>
         </tr>
       );
     };
@@ -87,21 +117,18 @@ class TopN extends Component {
 
     return (
       <div className={className}>
-        <table className="tvbVisTopN__table">
-          <tbody>
-            { rows }
-          </tbody>
+        <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
+          <tbody>{rows}</tbody>
         </table>
       </div>
     );
   }
-
 }
 
 TopN.defaultProps = {
   tickFormatter: n => n,
   onClick: i => i,
-  direction: 'desc'
+  direction: 'desc',
 };
 
 TopN.propTypes = {
@@ -109,7 +136,5 @@ TopN.propTypes = {
   onClick: PropTypes.func,
   series: PropTypes.array,
   reversed: PropTypes.bool,
-  direction: PropTypes.string
+  direction: PropTypes.string,
 };
-
-export default TopN;

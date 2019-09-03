@@ -46,7 +46,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       dateAgg.time_buckets.aggs[metric] = {
         bucket_script: {
           buckets_path: '_count',
-          script: { inline: '_value', lang: 'expression' }
+          script: { source: '_value', lang: 'expression' }
         }
       };
     } else if (metric[0] && metric[1]) {

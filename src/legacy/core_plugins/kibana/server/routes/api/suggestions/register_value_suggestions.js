@@ -18,9 +18,11 @@
  */
 
 import { get, map } from 'lodash';
-import handleESError from '../../../lib/handle_es_error';
 
 export function registerValueSuggestions(server) {
+  const serverConfig = server.config();
+  const autocompleteTerminateAfter = serverConfig.get('kibana.autocompleteTerminateAfter');
+  const autocompleteTimeout = serverConfig.get('kibana.autocompleteTimeout');
   server.route({
     path: '/api/kibana/suggestions/values/{index}',
     method: ['POST'],
@@ -28,26 +30,26 @@ export function registerValueSuggestions(server) {
       const { index } = req.params;
       const { field, query, boolFilter } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const body = getBody({ field, query, boolFilter });
+      const body = getBody(
+        { field, query, boolFilter },
+        autocompleteTerminateAfter,
+        autocompleteTimeout
+      );
       try {
         const response = await callWithRequest(req, 'search', { index, body });
         const buckets = get(response, 'aggregations.suggestions.buckets') || [];
         const suggestions = map(buckets, 'key');
         return suggestions;
       } catch (error) {
-        throw handleESError(error);
+        throw server.plugins.elasticsearch.handleESError(error);
       }
-    }
+    },
   });
 }
 
-function getBody({ field, query, boolFilter = [] }) {
+function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
-
-  // Helps keep the number of buckets that need to be tracked at the shard level contained in case
-  // this is a high cardinality field
-  const terminateAfter = 100000;
 
   // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
   // the amount of information that needs to be transmitted to the coordinating node
@@ -55,12 +57,12 @@ function getBody({ field, query, boolFilter = [] }) {
 
   return {
     size: 0,
-    timeout: '1s',
+    timeout: `${timeout}ms`,
     terminate_after: terminateAfter,
     query: {
       bool: {
         filter: boolFilter,
-      }
+      },
     },
     aggs: {
       suggestions: {
@@ -68,14 +70,14 @@ function getBody({ field, query, boolFilter = [] }) {
           field,
           include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
-          shard_size: shardSize
-        }
-      }
-    }
+          shard_size: shardSize,
+        },
+      },
+    },
   };
 }
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
+  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
 }

@@ -19,8 +19,8 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import timeShift from '../time_shift';
-import stdMetric from '../std_metric';
+import { timeShift } from '../time_shift';
+import { stdMetric } from '../std_metric';
 
 describe('timeShift(resp, panel, series)', () => {
   let panel;
@@ -28,7 +28,7 @@ describe('timeShift(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -40,7 +40,7 @@ describe('timeShift(resp, panel, series)', () => {
       color: '#F00',
       id: 'test',
       split_mode: 'everything',
-      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }]
+      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }],
     };
     resp = {
       aggregations: {
@@ -49,16 +49,16 @@ describe('timeShift(resp, panel, series)', () => {
             buckets: [
               {
                 key: 1483225200000,
-                avgmetric: { value: 1 }
+                avgmetric: { value: 1 },
               },
               {
                 key: 1483225210000,
-                avgmetric: { value: 2 }
-              }
-            ]
-          }
-        }
-      }
+                avgmetric: { value: 2 },
+              },
+            ],
+          },
+        },
+      },
     };
   });
 
@@ -72,18 +72,13 @@ describe('timeShift(resp, panel, series)', () => {
     const next = timeShift(resp, panel, series)(results => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).to.have.length(1);
-    expect(results[0]).to.have.property('color', '#FF0000');
+    expect(results[0]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[0]).to.have.property('id', 'test');
     expect(results[0]).to.have.property('label', 'Average of cpu');
     expect(results[0]).to.have.property('lines');
     expect(results[0]).to.have.property('stack');
     expect(results[0]).to.have.property('bars');
     expect(results[0]).to.have.property('points');
-    expect(results[0].data).to.eql([
-      [1483225200000 + 3600000, 1],
-      [1483225210000 + 3600000, 2]
-    ]);
+    expect(results[0].data).to.eql([[1483225200000 + 3600000, 1], [1483225210000 + 3600000, 2]]);
   });
-
 });
-

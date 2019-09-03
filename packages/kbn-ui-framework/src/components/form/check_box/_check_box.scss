@@ -1,11 +1,3 @@
-$checkboxBackgroundColor: #FFF;
-$checkboxBorderColor: #BEBEBE;
-$checkboxIconColor: #FFF;
-$checkboxDisabledColor: #D3DAE6;
-$checkboxCheckedBackgroundColor: $kuiColorBlue;
-$checkboxDisabledOpacity: 0.3;
-
-
 /**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
  *    ugly default appearance which we can't customize, so our best option is to give Firefox
@@ -53,15 +45,6 @@ $checkboxDisabledOpacity: 0.3;
     background-color: $checkboxDisabledColor !important;
     border-color: $checkboxDisabledColor !important;
     cursor: not-allowed !important;
-  }
-
-  @include darkTheme {
-    background-color: $kuiInputBackgroundColor--darkTheme;
-    border-color: $kuiInputBackgroundColor--darkTheme;
-
-    &:checked {
-      background-color: $checkboxCheckedBackgroundColor;
-    }
   }
 }
 

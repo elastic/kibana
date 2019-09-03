@@ -32,7 +32,7 @@ const options = {
     arg: '<snapshot|source>',
     choices: ['snapshot', 'source'],
     desc: 'Build Elasticsearch from source or run from snapshot.',
-    default: 'snapshot',
+    defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
   },
   'kibana-install-dir': {
     arg: '<dir>',
@@ -71,7 +71,7 @@ export function displayHelp() {
       return {
         ...option,
         usage: `${name} ${option.arg || ''}`,
-        default: option.default ? `Default: ${option.default}` : '',
+        default: option.defaultHelp || '',
       };
     })
     .map(option => {
@@ -104,6 +104,10 @@ export function processOptions(userOptions, defaultConfigPaths) {
     } else {
       configs = defaultConfigPaths;
     }
+  }
+
+  if (!userOptions.esFrom) {
+    userOptions.esFrom = process.env.TEST_ES_FROM || 'snapshot';
   }
 
   if (userOptions['kibana-install-dir']) {

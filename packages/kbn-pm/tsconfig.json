@@ -5,6 +5,11 @@
   ],
   "include": [
     "./src/**/*.ts",
-    "./types/index.d.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "types": [
+      "jest",
+      "node"
+    ]
+  }
 }

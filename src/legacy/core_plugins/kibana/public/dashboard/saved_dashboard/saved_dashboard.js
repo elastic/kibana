@@ -18,15 +18,20 @@
  */
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import {
+  extractReferences,
+  injectReferences,
+} from './saved_dashboard_references';
 
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function (Private, config, i18n) {
+module.factory('SavedDashboard', function (Private) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);
@@ -37,18 +42,19 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
       type: SavedDashboard.type,
       mapping: SavedDashboard.mapping,
       searchSource: SavedDashboard.searchsource,
+      extractReferences: extractReferences,
+      injectReferences: injectReferences,
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
 
       // default values that will get assigned if the doc is new
       defaults: {
-        title: i18n('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
+        title: i18n.translate('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
         hits: 0,
         description: '',
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
-          darkTheme: config.get('dashboard:defaultDarkTheme'),
           // for BWC reasons we can't default dashboards that already exist without this setting to true.
           useMargins: id ? false : true,
           hidePanelTitles: false,
@@ -65,7 +71,6 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
       clearSavedIndexPattern: true
     });
 
-
     this.showInRecentlyAccessed = true;
   }
 
@@ -79,10 +84,6 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
     description: 'text',
     panelsJSON: 'text',
     optionsJSON: 'text',
-    // Note: this field is no longer used for dashboards created or saved in version 6.2 onward.  We keep it around
-    // due to BWC, until we can ensure a migration step for all old dashboards saved in an index, as well as
-    // migration steps for importing.  See https://github.com/elastic/kibana/issues/15204 for more info.
-    uiStateJSON: 'text',
     version: 'integer',
     timeRestore: 'boolean',
     timeTo: 'keyword',
@@ -106,6 +107,16 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
   SavedDashboard.prototype.getFullPath = function () {
     return `/app/kibana#${createDashboardEditUrl(this.id)}`;
   };
+
+  SavedDashboard.prototype.getQuery = function () {
+    return this.searchSource.getOwnField('query') ||
+      { query: '', language: 'kuery' };
+  };
+
+  SavedDashboard.prototype.getFilters = function () {
+    return this.searchSource.getOwnField('filter') || [];
+  };
+
 
   return SavedDashboard;
 });

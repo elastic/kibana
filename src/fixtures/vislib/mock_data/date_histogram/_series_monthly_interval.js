@@ -66,6 +66,20 @@ export const seriesMonthlyInterval = {
     }
   ],
   'hits': 533,
+  'xAxisOrderedValues': [
+    1451631600000,
+    1454310000000,
+    1456815600000,
+    1459490400000,
+    1462082400000,
+    1464760800000,
+    1467352800000,
+    1470031200000,
+    1472709600000,
+    1475301600000,
+    1477980000000,
+    1480575600000,
+  ],
   'xAxisFormatter': function (thing) {
     return moment(thing);
   },

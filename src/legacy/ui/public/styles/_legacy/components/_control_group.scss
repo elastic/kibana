@@ -1,0 +1,67 @@
+.control-group {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding: $euiSizeXS $euiSize;
+
+  > * {
+    padding-right: $euiSize;
+    flex: 0 0 auto;
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  // horizontal group of buttons/form elements
+  .inline-form .input-group {
+    margin-bottom: 0;
+    display: flex;
+
+    > * {
+      border-radius: 0;
+    }
+
+    > :first-child {
+      border-bottom-left-radius: $euiBorderRadius;
+      border-top-left-radius: $euiBorderRadius;
+    }
+
+    > :last-child {
+      border-bottom-right-radius: $euiBorderRadius;
+      border-top-right-radius: $euiBorderRadius;
+    }
+  }
+
+  .inline-form {
+    @include flex-parent(0, 0, auto);
+    display: flex;
+
+    > .typeahead {
+      @include flex-parent();
+
+      > .input-group {
+        display: flex;
+        flex: 1 0 auto;
+
+        > * {
+          float: none;
+          height: auto;
+          width: auto;
+          flex: 0 0 auto;
+        }
+
+        input[type="text"] {
+          flex: 1 1 100%;
+        }
+      }
+    }
+  }
+
+  // the element should take up an even share of available space
+  > .fill {
+    flex: 1 1 1%;
+  }
+}

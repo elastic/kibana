@@ -1,0 +1,15 @@
+{
+  "saved-object-with-secret": {
+    "properties": {
+      "publicProperty": {
+        "type": "keyword"
+      },
+      "publicPropertyExcludedFromAAD": {
+        "type": "keyword"
+      },
+      "privateProperty": {
+        "type": "binary"
+      }
+    }
+  }
+}

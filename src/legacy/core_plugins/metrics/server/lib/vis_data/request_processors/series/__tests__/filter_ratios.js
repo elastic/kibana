@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import ratios from '../filter_ratios';
+import { ratios } from '../filter_ratios';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('ratios(req, panel, series)', () => {
-
   let panel;
   let series;
   let req;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       id: 'test',
@@ -42,17 +41,17 @@ describe('ratios(req, panel, series)', () => {
           numerator: 'errors',
           denominator: '*',
           metric_agg: 'avg',
-          field: 'cpu'
-        }
-      ]
+          field: 'cpu',
+        },
+      ],
     };
     req = {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z'
-        }
-      }
+          max: '2017-01-01T01:00:00Z',
+        },
+      },
     };
   });
 
@@ -77,47 +76,47 @@ describe('ratios(req, panel, series)', () => {
                       denominator: 'metric-1-denominator>metric',
                       numerator: 'metric-1-numerator>metric',
                     },
-                    script: 'params.numerator != null && params.denominator != null &&' +
-                    ' params.denominator > 0 ? params.numerator / params.denominator : 0'
-                  }
+                    script:
+                      'params.numerator != null && params.denominator != null &&' +
+                      ' params.denominator > 0 ? params.numerator / params.denominator : 0',
+                  },
                 },
                 'metric-1-denominator': {
                   aggs: {
                     metric: {
                       avg: {
-                        field: 'cpu'
-                      }
-                    }
+                        field: 'cpu',
+                      },
+                    },
                   },
                   filter: {
                     query_string: {
                       analyze_wildcard: true,
-                      query: '*'
-                    }
+                      query: '*',
+                    },
                   },
                 },
                 'metric-1-numerator': {
                   aggs: {
                     metric: {
                       avg: {
-                        field: 'cpu'
-                      }
-                    }
+                        field: 'cpu',
+                      },
+                    },
                   },
                   filter: {
                     query_string: {
                       analyze_wildcard: true,
-                      query: 'errors'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      query: 'errors',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
-
   });
 
   it('returns empty object when field is not set', () => {
@@ -136,17 +135,18 @@ describe('ratios(req, panel, series)', () => {
                       denominator: 'metric-1-denominator>metric',
                       numerator: 'metric-1-numerator>metric',
                     },
-                    script: 'params.numerator != null && params.denominator != null &&' +
-                    ' params.denominator > 0 ? params.numerator / params.denominator : 0'
-                  }
+                    script:
+                      'params.numerator != null && params.denominator != null &&' +
+                      ' params.denominator > 0 ? params.numerator / params.denominator : 0',
+                  },
                 },
                 'metric-1-denominator': {
                   aggs: { metric: {} },
                   filter: {
                     query_string: {
                       analyze_wildcard: true,
-                      query: '*'
-                    }
+                      query: '*',
+                    },
                   },
                 },
                 'metric-1-numerator': {
@@ -154,19 +154,15 @@ describe('ratios(req, panel, series)', () => {
                   filter: {
                     query_string: {
                       analyze_wildcard: true,
-                      query: 'errors'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      query: 'errors',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
-
   });
 });
-
-
-

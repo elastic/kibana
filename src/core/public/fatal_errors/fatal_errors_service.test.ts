@@ -24,34 +24,31 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
-const mockRender = jest.fn();
-jest.mock('react-dom', () => {
-  return {
-    render: mockRender,
-  };
-});
+import { mockRender } from './fatal_errors_service.test.mocks';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
 import { FatalErrorsService } from './fatal_errors_service';
 
-function setup() {
+function setupService() {
   const rootDomElement = document.createElement('div');
 
-  const injectedMetadata = {
-    getKibanaBuildNumber: jest.fn().mockReturnValue('kibanaBuildNumber'),
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-  };
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
 
   const stopCoreSystem = jest.fn();
+
+  const i18n: any = {
+    Context: function I18nContext() {
+      return '';
+    },
+  };
+
+  const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
 
   return {
     rootDomElement,
     injectedMetadata,
     stopCoreSystem,
-    fatalErrors: new FatalErrorsService({
-      injectedMetadata: injectedMetadata as any,
-      rootDomElement,
-      stopCoreSystem,
-    }),
+    fatalErrors: fatalErrorsService.setup({ injectedMetadata, i18n }),
   };
 }
 
@@ -61,7 +58,7 @@ afterEach(() => {
 
 describe('#add()', () => {
   it('calls stopCoreSystem() param', () => {
-    const { stopCoreSystem, fatalErrors } = setup();
+    const { stopCoreSystem, fatalErrors } = setupService();
 
     expect(stopCoreSystem).not.toHaveBeenCalled();
     expect(() => {
@@ -72,7 +69,7 @@ describe('#add()', () => {
   });
 
   it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
-    const { fatalErrors, rootDomElement } = setup();
+    const { fatalErrors, rootDomElement } = setupService();
 
     rootDomElement.innerHTML = `
       <h1>Loading...</h1>
@@ -89,30 +86,12 @@ describe('#add()', () => {
   });
 });
 
-describe('start.add()', () => {
-  it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
-    const { fatalErrors } = setup();
-
-    jest.spyOn(fatalErrors, 'add').mockImplementation(() => {
-      /* noop */
-    });
-
-    expect(fatalErrors.add).not.toHaveBeenCalled();
-    const { add } = fatalErrors.start();
-    add('foo', 'bar');
-    expect(fatalErrors.add).toHaveBeenCalledTimes(1);
-    expect(fatalErrors.add).toHaveBeenCalledWith('foo', 'bar');
-  });
-});
-
-describe('start.get$()', () => {
+describe('setup.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
-    const { fatalErrors } = setup();
-
-    const startContract = fatalErrors.start();
+    const { fatalErrors } = setupService();
 
     const onError = jest.fn();
-    startContract.get$().subscribe(onError);
+    fatalErrors.get$().subscribe(onError);
 
     expect(onError).not.toHaveBeenCalled();
     expect(() => {

@@ -14,13 +14,13 @@ modules. The sole purpose of these modules is to extend the environment with
 certain components. Here is a breakdown of those modules:
 
 - *`import 'ui/autoload/styles'`*
-    Imports all styles at the root of `src/ui/public/styles`
+    Imports all styles at the root of `src/legacy/ui/public/styles`
 
 - *`import 'ui/autoload/directives'`*
-    Imports all directives in `src/ui/public/directives`
+    Imports all directives in `src/legacy/ui/public/directives`
 
 - *`import 'ui/autoload/filters'`*
-    Imports all filters in `src/ui/public/filters`
+    Imports all filters in `src/legacy/ui/public/filters`
 
 - *`import 'ui/autoload/modules'`*
     Imports angular and several ui services and "components" which Kibana
@@ -38,7 +38,7 @@ Kibana uses Webpack to bundle Kibana's dependencies.
 
 Here is how import/require statements are resolved to a file:
 
-. Check the beginning of the module path  
+. Check the beginning of the module path
   * if the path starts with a '.'
     ** append it the directory of the current file
     ** proceed to *3*

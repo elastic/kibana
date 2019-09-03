@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { FilterManager } from './filter_manager';
 
 describe('FilterManager', function () {

@@ -20,7 +20,7 @@
 import { duration as momentDuration } from 'moment';
 import { schema } from '..';
 
-const { duration } = schema;
+const { duration, object, contextRef, siblingRef } = schema;
 
 test('returns value by default', () => {
   expect(duration().validate('123s')).toMatchSnapshot();
@@ -57,6 +57,70 @@ describe('#defaultValue', () => {
         defaultValue: 600,
       }).validate(undefined)
     ).toMatchSnapshot();
+  });
+
+  test('can be a function that returns compatible type', () => {
+    expect(
+      duration({
+        defaultValue: () => 600,
+      }).validate(undefined)
+    ).toMatchInlineSnapshot(`"PT0.6S"`);
+
+    expect(
+      duration({
+        defaultValue: () => '1h',
+      }).validate(undefined)
+    ).toMatchInlineSnapshot(`"PT1H"`);
+
+    expect(
+      duration({
+        defaultValue: () => momentDuration(1, 'hour'),
+      }).validate(undefined)
+    ).toMatchInlineSnapshot(`"PT1H"`);
+  });
+
+  test('can be a reference to a moment.Duration', () => {
+    expect(
+      object({
+        source: duration({ defaultValue: 600 }),
+        target: duration({ defaultValue: siblingRef('source') }),
+        fromContext: duration({ defaultValue: contextRef('val') }),
+      }).validate(undefined, { val: momentDuration(700, 'ms') })
+    ).toMatchInlineSnapshot(`
+Object {
+  "fromContext": "PT0.7S",
+  "source": "PT0.6S",
+  "target": "PT0.6S",
+}
+`);
+
+    expect(
+      object({
+        source: duration({ defaultValue: '1h' }),
+        target: duration({ defaultValue: siblingRef('source') }),
+        fromContext: duration({ defaultValue: contextRef('val') }),
+      }).validate(undefined, { val: momentDuration(2, 'hour') })
+    ).toMatchInlineSnapshot(`
+Object {
+  "fromContext": "PT2H",
+  "source": "PT1H",
+  "target": "PT1H",
+}
+`);
+
+    expect(
+      object({
+        source: duration({ defaultValue: momentDuration(1, 'hour') }),
+        target: duration({ defaultValue: siblingRef('source') }),
+        fromContext: duration({ defaultValue: contextRef('val') }),
+      }).validate(undefined, { val: momentDuration(2, 'hour') })
+    ).toMatchInlineSnapshot(`
+Object {
+  "fromContext": "PT2H",
+  "source": "PT1H",
+  "target": "PT1H",
+}
+`);
   });
 });
 

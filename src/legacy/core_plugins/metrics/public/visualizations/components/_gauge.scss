@@ -26,13 +26,13 @@
 
 .tvbVisHalfGauge__metrics {
   height: 70px;
-  padding: 0px $euiSizeM $euiSizeS;
+  padding: 0 $euiSizeM $euiSizeS;
   justify-content: flex-end;
 }
 
 .tvbVisGauge__label {
   color: $tvbTextColor;
-  font-size: 0.5em; /* 1 */
+  font-size: .5em; /* 1 */
   line-height: 1em; /* 1 */
   text-align: center;
   padding: 0 $euiSizeS $euiSizeXS;
@@ -55,7 +55,7 @@
 
 .tvbVisGauge__additionalLabel {
   @include euiTextTruncate;
-  font-size: 0.4em; /* 1 */
+  font-size: .4em; /* 1 */
   line-height: 1.2em; /* 1 */
   width: 100%;
   padding: 2px $euiSizeXS;

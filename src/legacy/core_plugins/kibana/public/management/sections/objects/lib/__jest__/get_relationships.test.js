@@ -24,7 +24,7 @@ describe('getRelationships', () => {
     const $http = jest.fn();
     const basePath = 'test';
 
-    await getRelationships('dashboard', 1, $http, basePath);
+    await getRelationships('dashboard', 1, ['search', 'index-pattern'], $http, basePath);
     expect($http.mock.calls.length).toBe(1);
   });
 
@@ -32,7 +32,7 @@ describe('getRelationships', () => {
     const $http = jest.fn().mockImplementation(() => ({ data: [1, 2] }));
     const basePath = 'test';
 
-    const response = await getRelationships('dashboard', 1, $http, basePath);
+    const response = await getRelationships('dashboard', 1, ['search', 'index-pattern'], $http, basePath);
     expect(response).toEqual([1, 2]);
   });
 
@@ -48,7 +48,7 @@ describe('getRelationships', () => {
     const basePath = 'test';
 
     try {
-      await getRelationships('dashboard', 1, $http, basePath);
+      await getRelationships('dashboard', 1, ['search', 'index-pattern'], $http, basePath);
     } catch (e) {
       // There isn't a great way to handle throwing exceptions
       // with async/await but this seems to work :shrug:

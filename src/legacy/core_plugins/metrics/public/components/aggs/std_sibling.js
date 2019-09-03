@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggRow from './agg_row';
-import MetricSelect from './metric_select';
-import AggSelect from './agg_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggRow } from './agg_row';
+import { MetricSelect } from './metric_select';
+import { AggSelect } from './agg_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -52,36 +52,42 @@ const StandardSiblingAggUi = props => {
       <EuiFlexItem grow={false}>
         <EuiFormRow
           id={htmlId('sigma')}
-          label={(<FormattedMessage
-            id="tsvb.stdSibling.sigmaLabel"
-            defaultMessage="Sigma"
-          />)}
+          label={<FormattedMessage id="tsvb.stdSibling.sigmaLabel" defaultMessage="Sigma" />}
         >
-          <EuiFieldText
-            value={model.sigma}
-            onChange={handleTextChange('sigma')}
-          />
+          <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
         </EuiFormRow>
       </EuiFlexItem>
     );
 
     const modeOptions = [
       {
-        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.rawLabel', defaultMessage: 'Raw' }),
-        value: 'raw'
+        label: intl.formatMessage({
+          id: 'tsvb.stdSibling.modeOptions.rawLabel',
+          defaultMessage: 'Raw',
+        }),
+        value: 'raw',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
-        value: 'upper'
+        label: intl.formatMessage({
+          id: 'tsvb.stdSibling.modeOptions.upperBoundLabel',
+          defaultMessage: 'Upper Bound',
+        }),
+        value: 'upper',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
-        value: 'lower'
+        label: intl.formatMessage({
+          id: 'tsvb.stdSibling.modeOptions.lowerBoundLabel',
+          defaultMessage: 'Lower Bound',
+        }),
+        value: 'lower',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
-        value: 'band'
-      }
+        label: intl.formatMessage({
+          id: 'tsvb.stdSibling.modeOptions.boundsBandLabel',
+          defaultMessage: 'Bounds Band',
+        }),
+        value: 'band',
+      },
     ];
     const selectedModeOption = modeOptions.find(option => {
       return model.mode === option.value;
@@ -91,10 +97,7 @@ const StandardSiblingAggUi = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('mode')}
-          label={(<FormattedMessage
-            id="tsvb.stdSibling.modeLabel"
-            defaultMessage="Mode"
-          />)}
+          label={<FormattedMessage id="tsvb.stdSibling.modeLabel" defaultMessage="Mode" />}
         >
           <EuiComboBox
             options={modeOptions}
@@ -114,30 +117,26 @@ const StandardSiblingAggUi = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.stdSibling.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.stdSibling.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
+            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.stdSibling.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.stdSibling.metricLabel" defaultMessage="Metric" />}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -148,8 +147,8 @@ const StandardSiblingAggUi = props => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        { stdDev.sigma }
-        { stdDev.mode }
+        {stdDev.sigma}
+        {stdDev.mode}
       </EuiFlexGroup>
     </AggRow>
   );
@@ -165,6 +164,7 @@ StandardSiblingAggUi.propTypes = {
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
+  uiRestrictions: PropTypes.object,
 };
 
 export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);

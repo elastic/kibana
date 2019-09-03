@@ -28,7 +28,7 @@ export function couchbaseMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.couchbaseMetrics.nameTitle', {
       defaultMessage: 'Couchbase metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Couchbase.',

@@ -28,7 +28,7 @@ export function elasticsearchMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.nameTitle', {
       defaultMessage: 'Elasticsearch metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Elasticsearch.',

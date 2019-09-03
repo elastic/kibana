@@ -26,6 +26,7 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -45,10 +46,10 @@ const termsAgg = ({ field, size, direction, query }) => {
 
   if (field.scripted) {
     terms.script = {
-      inline: field.script,
+      source: field.script,
       lang: field.lang
     };
-    terms.valueType = field.type === 'number' ? 'float' : field.type;
+    terms.value_type = field.type === 'number' ? 'float' : field.type;
   } else {
     terms.field = field.name;
   }
@@ -58,8 +59,8 @@ const termsAgg = ({ field, size, direction, query }) => {
   }
 
   return {
-    'termsAgg': {
-      'terms': terms
+    termsAgg: {
+      terms: terms
     }
   };
 };
@@ -67,6 +68,12 @@ const termsAgg = ({ field, size, direction, query }) => {
 class ListControl extends Control {
 
   fetch = async (query) => {
+    // Abort any in-progress fetch
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -85,19 +92,21 @@ class ListControl extends Control {
       }
 
       const ancestorValues = this.getAncestorValues();
-      if (_.isEqual(ancestorValues, this.lastAncestorValues)) {
+      if (_.isEqual(ancestorValues, this.lastAncestorValues)
+        && _.isEqual(query, this.lastQuery)) {
         // short circuit to avoid fetching options list for same ancestor values
         return;
       }
       this.lastAncestorValues = ancestorValues;
+      this.lastQuery = query;
 
       ancestorFilters = this.getAncestorFilters();
     }
 
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {
-      timeout: '1s',
-      terminate_after: 100000
+      timeout: `${chrome.getInjected('autocompleteTimeout')}ms`,
+      terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
       field: indexPattern.fields.byName[fieldName],
@@ -111,13 +120,18 @@ class ListControl extends Control {
       indexPattern,
       aggs,
       this.useTimeFilter,
-      ancestorFilters);
+      ancestorFilters
+    );
+    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 
     this.lastQuery = query;
     let resp;
     try {
       resp = await searchSource.fetch();
     } catch(error) {
+      // If the fetch was aborted then no need to surface this error in the UI
+      if (error.name === 'AbortError') return;
+
       this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
@@ -139,9 +153,14 @@ class ListControl extends Control {
       return;
     }
 
+    this.partialResults = resp.terminated_early || resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';
+  }
+
+  destroy() {
+    if (this.abortController) this.abortController.abort();
   }
 
   hasValue() {

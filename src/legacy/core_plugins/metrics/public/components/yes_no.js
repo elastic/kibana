@@ -23,8 +23,8 @@ import _ from 'lodash';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-function YesNo(props) {
-  const { name, value } = props;
+export function YesNo(props) {
+  const { name, value, disabled } = props;
   const handleChange = value => {
     const { name } = props;
     return () => {
@@ -38,30 +38,36 @@ function YesNo(props) {
     <div>
       <EuiRadio
         id={htmlId('yes')}
-        label={(<FormattedMessage
-          id="tsvb.yesButtonLabel"
-          defaultMessage="Yes"
-        />)}
+        label={
+          <FormattedMessage
+            id="tsvb.yesButtonLabel"
+            defaultMessage="Yes"
+            description="The 'yes' in a yes/no answer choice."
+          />
+        }
         className="eui-displayInlineBlock"
         name={inputName}
         checked={Boolean(value)}
         value="yes"
         onChange={handleChange(1)}
+        disabled={disabled}
       />
-
       &emsp;
-
       <EuiRadio
         id={htmlId('no')}
-        label={(<FormattedMessage
-          id="tsvb.noButtonLabel"
-          defaultMessage="No"
-        />)}
+        label={
+          <FormattedMessage
+            id="tsvb.noButtonLabel"
+            defaultMessage="No"
+            description="The 'no' in a yes/no answer choice."
+          />
+        }
         className="eui-displayInlineBlock"
         name={inputName}
         checked={!Boolean(value)}
         value="no"
         onChange={handleChange(0)}
+        disabled={disabled}
       />
     </div>
   );
@@ -69,7 +75,9 @@ function YesNo(props) {
 
 YesNo.propTypes = {
   name: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
-export default YesNo;
+YesNo.defaultProps = {
+  disabled: false,
+};

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-const $ = require('jquery');
 require('brace');
 require('brace/ext/searchbox');
 import  Autocomplete from './autocomplete';
+import mappings from './mappings';
 const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
 const utils = require('./utils');
@@ -66,44 +66,13 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
     }
   });
 
-
-  /**
-   * COPY AS CURL
-   */
-  (function setupClipboard() {
-    function copyText(text) {
-      const node = $(`<textarea style="height:1px"></textarea`)
-        .val(text)
-        .appendTo(document.body)
-        .select();
-      document.execCommand('copy');
-      node.remove();
-    }
-
-    if (!document.queryCommandSupported('copy')) {
-      $copyAsCurlEl.hide();
-      return;
-    }
-
-    $copyAsCurlEl.click(() => {
-      copyText($copyAsCurlEl.attr('data-clipboard-text'));
-    });
-
-    input.$actions.on('mouseenter', function () {
-      if ($(this).hasClass('open')) return;
-      input.getRequestsAsCURL(text => {
-        $copyAsCurlEl.attr('data-clipboard-text', text);
-      });
-    });
-  }());
-
   /**
    * Setup the "send" shortcut
    */
 
   let CURRENT_REQ_ID = 0;
 
-  function sendCurrentRequestToES() {
+  function sendCurrentRequestToES(addedToHistoryCb) {
 
     const reqId = ++CURRENT_REQ_ID;
 
@@ -142,13 +111,9 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
           if (reqId !== CURRENT_REQ_ID) {
             return;
           }
-          let xhr;
-          if (dataOrjqXHR.promise) {
-            xhr = dataOrjqXHR;
-          }
-          else {
-            xhr = jqXhrORerrorThrown;
-          }
+
+          const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
+
           function modeForContentType(contentType) {
             if (contentType.indexOf('text/plain') >= 0) {
               return 'ace/mode/text';
@@ -159,18 +124,30 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             return null;
           }
 
-          if (typeof xhr.status === 'number' &&
-          // things like DELETE index where the index is not there are OK.
-            ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404)
-          ) {
+          const isSuccess = typeof xhr.status === 'number' &&
+            // Things like DELETE index where the index is not there are OK.
+            ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
+
+          if (isSuccess) {
+            if (xhr.status !== 404 && settings.getPolling()) {
+              // If the user has submitted a request against ES, something in the fields, indices, aliases,
+              // or templates may have changed, so we'll need to update this data. Assume that if
+              // the user disables polling they're trying to optimize performance or otherwise
+              // preserve resources, so they won't want this request sent either.
+              mappings.retrieveAutoCompleteInfo();
+            }
+
             // we have someone on the other side. Add to history
             history.addToHistory(esPath, esMethod, esData);
-
+            if (addedToHistoryCb) {
+              addedToHistoryCb();
+            }
 
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
 
-            if (mode === null || mode === 'application/json') {
+            // Apply triple quotes to output.
+            if (settings.getTripleQuotes() && (mode === null || mode === 'application/json')) {
               // assume json - auto pretty
               try {
                 value = utils.expandLiteralStrings(value);
@@ -198,8 +175,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             isFirstRequest = false;
             // single request terminate via sendNextRequest as well
             sendNextRequest();
-          }
-          else {
+          } else {
             let value;
             let mode;
             if (xhr.responseText) {
@@ -239,7 +215,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
   input.commands.addCommand({
     name: 'send to elasticsearch',
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: sendCurrentRequestToES
+    exec: () => sendCurrentRequestToES()
   });
   input.commands.addCommand({
     name: 'open documentation',

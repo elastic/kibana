@@ -1,0 +1,87 @@
+{
+  "job_id": "mock-job-id",
+  "job_type": "anomaly_detector",
+  "job_version": "7.0.0-alpha1",
+  "description": "",
+  "create_time": 1532692299663,
+  "finished_time": 1532692304364,
+  "established_model_memory": 560894,
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "mean(responsetime)",
+        "function": "mean",
+        "field_name": "responsetime",
+        "partition_field_name": "airline",
+        "detector_index": 0
+      }
+    ],
+    "influencers": [
+      "airline"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "13mb",
+    "categorization_examples_limit": 4
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "model_snapshot_retention_days": 1,
+  "custom_settings": {
+    "created_by": "multi-metric-wizard"
+  },
+  "model_snapshot_id": "1532692303",
+  "model_snapshot_min_version": "6.4.0",
+  "results_index_name": "shared",
+  "data_counts": {
+    "job_id": "mock-job-id",
+    "processed_record_count": 86274,
+    "processed_field_count": 172548,
+    "input_bytes": 6744642,
+    "input_field_count": 172548,
+    "invalid_date_count": 0,
+    "missing_field_count": 0,
+    "out_of_order_timestamp_count": 0,
+    "empty_bucket_count": 0,
+    "sparse_bucket_count": 0,
+    "bucket_count": 479,
+    "earliest_record_timestamp": 1486425600000,
+    "latest_record_timestamp": 1486857594000,
+    "last_data_time": 1532692303844,
+    "input_record_count": 86274
+  },
+  "model_size_stats": {
+    "job_id": "mock-job-id",
+    "result_type": "model_size_stats",
+    "model_bytes": 560894,
+    "total_by_field_count": 21,
+    "total_over_field_count": 0,
+    "total_partition_field_count": 20,
+    "bucket_allocation_failures_count": 0,
+    "memory_status": "ok",
+    "log_time": 1532692303000,
+    "timestamp": 1486855800000
+  },
+  "datafeed_config": {
+    "datafeed_id": "datafeed-mock-job-id",
+    "job_id": "mock-job-id",
+    "query_delay": "86658ms",
+    "indices": [
+      "farequote-2017"
+    ],
+    "query": {
+      "match_all": {
+        "boost": 1
+      }
+    },
+    "scroll_size": 1000,
+    "chunking_config": {
+      "mode": "auto"
+    },
+    "state": "stopped"
+  },
+  "state": "closed"
+}

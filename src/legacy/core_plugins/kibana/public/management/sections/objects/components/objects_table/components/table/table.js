@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
+import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -28,9 +30,14 @@ import {
   EuiLink,
   EuiSpacer,
   EuiToolTip,
-  EuiFormErrorText
+  EuiFormErrorText,
+  EuiPopover,
+  EuiSwitch,
+  EuiFormRow,
+  EuiText
 } from '@elastic/eui';
-import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableUI extends PureComponent {
@@ -42,10 +49,10 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
+    canDelete: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
-    getEditUrl: PropTypes.func.isRequired,
-    goInApp: PropTypes.func.isRequired,
+    goInspectObject: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -65,6 +72,14 @@ class TableUI extends PureComponent {
   state = {
     isSearchTextValid: true,
     parseErrorMessage: null,
+    isExportPopoverOpen: false,
+    isIncludeReferencesDeepChecked: true,
+    activeAction: null,
+  }
+
+  constructor(props) {
+    super(props);
+    this.extraActions = SavedObjectsManagementActionRegistry.get();
   }
 
   onChange = ({ query, error }) => {
@@ -83,6 +98,29 @@ class TableUI extends PureComponent {
     this.props.onQueryChange({ query });
   }
 
+  closeExportPopover = () => {
+    this.setState({ isExportPopoverOpen: false });
+  }
+
+  toggleExportPopoverVisibility = () => {
+    this.setState(state => ({
+      isExportPopoverOpen: !state.isExportPopoverOpen
+    }));
+  }
+
+  toggleIsIncludeReferencesDeepChecked = () => {
+    this.setState(state => ({
+      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
+    }));
+  }
+
+  onExportClick = () => {
+    const { onExport } = this.props;
+    const { isIncludeReferencesDeepChecked } = this.state;
+    onExport(isIncludeReferencesDeepChecked);
+    this.setState({ isExportPopoverOpen: false });
+  }
+
   render() {
     const {
       pageIndex,
@@ -94,11 +132,9 @@ class TableUI extends PureComponent {
       filterOptions,
       selectionConfig: selection,
       onDelete,
-      onExport,
       selectedSavedObjects,
       onTableChange,
-      goInApp,
-      getEditUrl,
+      goInspectObject,
       onShowRelationships,
       intl,
     } = this.props;
@@ -139,7 +175,7 @@ class TableUI extends PureComponent {
             id: 'kbn.management.objects.objectsTable.table.columnTypeDescription', defaultMessage: 'Type of the saved object'
           }),
         sortable: false,
-        render: type => {
+        render: (type, object) => {
           return (
             <EuiToolTip
               position="top"
@@ -147,7 +183,7 @@ class TableUI extends PureComponent {
             >
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
-                type={getSavedObjectIcon(type)}
+                type={object.meta.icon || 'apps'}
                 size="s"
               />
             </EuiToolTip>
@@ -155,7 +191,7 @@ class TableUI extends PureComponent {
         },
       },
       {
-        field: 'title',
+        field: 'meta.title',
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnTitleName', defaultMessage: 'Title' }),
         description:
         intl.formatMessage({
@@ -163,25 +199,36 @@ class TableUI extends PureComponent {
         }),
         dataType: 'string',
         sortable: false,
-        render: (title, object) => (
-          <EuiLink href={getEditUrl(object.id, object.type)}>{title}</EuiLink>
-        ),
+        render: (title, object) => {
+          const { path } = object.meta.inAppUrl || {};
+          const canGoInApp = this.props.canGoInApp(object);
+          if (!canGoInApp) {
+            return (
+              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
+            );
+          }
+          return (
+            <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
+          );
+        },
       },
       {
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnActionsName', defaultMessage: 'Actions' }),
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionName', defaultMessage: 'In app'
+              id: 'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
+              defaultMessage: 'Inspect'
             }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionDescription',
-                defaultMessage: 'View this saved object within Kibana'
+                id: 'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
+                defaultMessage: 'Inspect this saved object'
               }),
             type: 'icon',
-            icon: 'eye',
-            onClick: object => goInApp(object.id, object.type),
+            icon: 'inspect',
+            onClick: object => goInspectObject(object),
+            available: object => !!object.meta.editUrl,
           },
           {
             name:
@@ -196,9 +243,26 @@ class TableUI extends PureComponent {
               }),
             type: 'icon',
             icon: 'kqlSelector',
-            onClick: object =>
-              onShowRelationships(object.id, object.type, object.title),
+            onClick: object => onShowRelationships(object),
           },
+          ...this.extraActions.map(action => {
+            return {
+              ...action.euiAction,
+              onClick: (object) => {
+                this.setState({
+                  activeAction: action
+                });
+
+                action.registerOnFinishCallback(() => {
+                  this.setState({
+                    activeAction: null,
+                  });
+                });
+
+                action.euiAction.onClick(object);
+              }
+            };
+          })
         ],
       },
     ];
@@ -216,8 +280,25 @@ class TableUI extends PureComponent {
       );
     }
 
+    const button = (
+      <EuiButton
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.toggleExportPopoverVisibility}
+        isDisabled={selectedSavedObjects.length === 0}
+      >
+        <FormattedMessage
+          id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+          defaultMessage="Export"
+        />
+      </EuiButton>
+    );
+
+    const activeActionContents = this.state.activeAction ? this.state.activeAction.render() : null;
+
     return (
       <Fragment>
+        {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters}
@@ -228,24 +309,65 @@ class TableUI extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0}
+              isDisabled={
+                selectedSavedObjects.length === 0 ||
+                !this.props.canDelete
+              }
+              title={
+                this.props.canDelete
+                  ? undefined
+                  : i18n.translate(
+                    'kbn.management.objects.objectsTable.table.deleteButtonTitle',
+                    { defaultMessage: 'Unable to delete saved objects' }
+                  )
+              }
+              data-test-subj="savedObjectsManagementDelete"
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
             </EuiButton>,
-            <EuiButton
-              key="exportSO"
-              iconType="exportAction"
-              onClick={onExport}
-              isDisabled={selectedSavedObjects.length === 0}
+            <EuiPopover
+              key="exportSOOptions"
+              button={button}
+              isOpen={this.state.isExportPopoverOpen}
+              closePopover={this.closeExportPopover}
             >
-              <FormattedMessage
-                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
-                defaultMessage="Export"
-              />
-            </EuiButton>,
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                    defaultMessage="Options"
+                  />
+                )}
+              >
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={(
+                    <FormattedMessage
+                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include related objects"
+                    />
+                  )}
+                  checked={this.state.isIncludeReferencesDeepChecked}
+                  onChange={this.toggleIsIncludeReferencesDeepChecked}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
+                  <FormattedMessage
+                    id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                    defaultMessage="Export"
+                  />
+                </EuiButton>
+              </EuiFormRow>
+            </EuiPopover>,
           ]}
         />
         {queryParseError}

@@ -175,6 +175,7 @@ export class SourceFiltersTable extends Component {
             id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
             defaultMessage="Cancel"
           />}
+          buttonColor="danger"
           confirmButtonText={<FormattedMessage
             id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
             defaultMessage="Delete"

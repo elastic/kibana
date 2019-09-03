@@ -33,6 +33,19 @@ export default async function ({ readConfigFile }) {
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/embedding_visualizations'),
       require.resolve('./test_suites/panel_actions'),
+
+      /**
+       * @todo Work on re-enabling this test suite after this is merged. These tests pass
+       * locally but on CI they fail. The error on CI says "TypeError: Cannot read
+       * property 'overlays' of null". Possibly those are `overlays` from
+       * `npStart.core.overlays`, possibly `npStart.core` is `null` on CI, but
+       * available when this test suite is executed locally.
+       *
+       * See issue: https://github.com/elastic/kibana/issues/43087
+       */
+      // require.resolve('./test_suites/embeddable_explorer'),
+
+      require.resolve('./test_suites/core_plugins'),
     ],
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
@@ -51,6 +64,8 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
+        // Required to load new platform plugins via `--plugin-path` flag.
+        '--env.name=development',
       ],
     },
   };

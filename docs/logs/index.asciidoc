@@ -4,23 +4,26 @@
 
 [partintro]
 --
+The Logs app in Kibana enables you to explore logs for common servers, containers, and services.
 
-beta[]
-Use the Logs UI to explore logs for common servers, containers, and services.  
-{kib} provides a compact, console-like display that you can customize.
+The Logs app has a compact, console-like display that you can customize.
+You can filter the logs by various fields, start and stop live streaming, and highlight text of interest.
+
+You can open the Logs app from the *Logs* tab in Kibana.
+You can also open the Logs app directly from a component in the Infrastructure app.
+In this case, you will only see the logs for the selected component.
+
+* <<xpack-logs-getting-started>>
+* <<xpack-logs-using>>
+* <<xpack-logs-configuring>>
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]
 
-
-[float]
-== Add data sources
-
-Kibana provides step-by-step instructions to help you add your data sources.
-The {infra-guide}[Infrastructure Monitoring Guide] is good source for more detailed information and
-instructions.
-
-
 --
 
-include::logs-ui.asciidoc[]
+include::getting-started.asciidoc[]
+
+include::using.asciidoc[]
+
+include::configuring.asciidoc[]

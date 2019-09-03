@@ -20,9 +20,11 @@
 import './_saved_vis';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { visualizations } from 'plugins/visualizations';
+import { createVisualizeEditUrl } from '../visualize_constants';
+import { findListItems } from './find_list_items';
 
 const app = uiModules.get('app/visualize');
 
@@ -33,11 +35,10 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
+app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
   const visTypes = Private(VisTypesRegistryProvider);
-
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;
@@ -55,12 +56,31 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
     }
 
     source.type = visTypes.byName[typeName];
+    source.savedObjectType = 'visualization';
     source.icon = source.type.icon;
+    source.image = source.type.image;
+    source.typeTitle = source.type.title;
+    source.isExperimental = source.type.shouldMarkAsExperimentalInUI();
+    source.editUrl = `#${createVisualizeEditUrl(id)}`;
+
     return source;
   };
 
   saveVisualizationLoader.urlFor = function (id) {
     return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
+
+  // This behaves similarly to find, except it returns visualizations that are
+  // defined as appExtensions and which may not conform to type: visualization
+  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+    return findListItems({
+      search,
+      size,
+      mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
+      savedObjectsClient: this.savedObjectsClient,
+      visTypes: visualizations.types.visTypeAliasRegistry.get(),
+    });
+  };
+
   return saveVisualizationLoader;
 });

@@ -29,7 +29,7 @@ export const kibanaContext = () => ({
       'null',
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.kibana_context.help', {
+  help: i18n.translate('interpreter.functions.kibana_context.help', {
     defaultMessage: 'Updates kibana global context'
   }),
   args: {
@@ -71,7 +71,7 @@ export const kibanaContext = () => ({
     }
 
     if (context.filters) {
-      filters = filters.concat(context.filters);
+      filters = filters.concat(context.filters).filter(f => !f.meta.disabled);
     }
 
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;

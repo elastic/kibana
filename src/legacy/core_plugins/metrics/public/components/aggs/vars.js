@@ -20,21 +20,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AddDeleteButtons from '../add_delete_buttons';
-import * as collectionActions from '../lib/collection_actions';
-import MetricSelect from './metric_select';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { collectionActions } from '../lib/collection_actions';
+import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
 class CalculationVarsUi extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -46,14 +45,20 @@ class CalculationVarsUi extends Component {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
     const { intl } = this.props;
-    return  (
+    return (
       <EuiFlexItem key={row.id} data-test-subj="varRow">
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
               className="tvbAggs__varName"
-              aria-label={intl.formatMessage({ id: 'tsvb.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
-              placeholder={intl.formatMessage({ id: 'tsvb.vars.variableNamePlaceholder', defaultMessage: 'Variable name' })}
+              aria-label={intl.formatMessage({
+                id: 'tsvb.vars.variableNameAriaLabel',
+                defaultMessage: 'Variable name',
+              })}
+              placeholder={intl.formatMessage({
+                id: 'tsvb.vars.variableNamePlaceholder',
+                defaultMessage: 'Variable name',
+              })}
               onChange={this.handleChange(row, 'name')}
               value={row.name}
             />
@@ -82,20 +87,19 @@ class CalculationVarsUi extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
-        { rows }
+        {rows}
       </EuiFlexGroup>
     );
   }
-
 }
 
 CalculationVarsUi.defaultProps = {
   name: 'variables',
-  includeSiblings: false
+  includeSiblings: false,
 };
 
 CalculationVarsUi.propTypes = {
@@ -103,8 +107,7 @@ CalculationVarsUi.propTypes = {
   model: PropTypes.object,
   name: PropTypes.string,
   onChange: PropTypes.func,
-  includeSiblings: PropTypes.bool
+  includeSiblings: PropTypes.bool,
 };
 
-const CalculationVars = injectI18n(CalculationVarsUi);
-export default CalculationVars;
+export const CalculationVars = injectI18n(CalculationVarsUi);

@@ -30,7 +30,6 @@ import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 import './locales.js';
 
 const EN_LOCALE = 'en';
-const LOCALE_DELIMITER = '-';
 const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
@@ -55,7 +54,7 @@ function getMessageById(id: string): string | undefined {
  * @param locale
  */
 function normalizeLocale(locale: string) {
-  return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
+  return locale.toLowerCase();
 }
 
 /**
@@ -165,8 +164,8 @@ export function getRegisteredLocales() {
 }
 
 interface TranslateArguments {
-  values?: { [key: string]: string | number | Date };
-  defaultMessage?: string;
+  values?: Record<string, string | number | boolean | Date | null | undefined>;
+  defaultMessage: string;
   description?: string;
 }
 
@@ -177,13 +176,7 @@ interface TranslateArguments {
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
  */
-export function translate(
-  id: string,
-  { values = {}, defaultMessage = '' }: TranslateArguments = {
-    values: {},
-    defaultMessage: '',
-  }
-) {
+export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments) {
   const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
 
   if (!id || !isString(id)) {
@@ -240,4 +233,22 @@ export function init(newTranslation?: Translation) {
   if (newTranslation.formats) {
     setFormats(newTranslation.formats);
   }
+}
+
+/**
+ * Loads JSON with translations from the specified URL and initializes i18n engine with them.
+ * @param translationsUrl URL pointing to the JSON bundle with translations.
+ */
+export async function load(translationsUrl: string) {
+  // Once this package is integrated into core Kibana we should switch to an abstraction
+  // around `fetch` provided by the platform, e.g. `kfetch`.
+  const response = await fetch(translationsUrl, {
+    credentials: 'same-origin',
+  });
+
+  if (response.status >= 300) {
+    throw new Error(`Translations request failed with status code: ${response.status}`);
+  }
+
+  init(await response.json());
 }

@@ -1,3 +1,13 @@
+@import 'node_modules/@elastic/eui/src/components/panel/mixins';
+
+discover-app {
+  flex-grow: 1;
+
+  .sidebar-container {
+    background-color: transparent;
+  }
+}
+
 // SASSTODO: replace the margin-top value with a variable
 .dscSidebar__listHeader {
   margin-top: 5px;
@@ -10,14 +20,20 @@
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {
-  padding-right: 0;
+  padding-right: $euiSizeS;
   padding-left: 21px;
-  z-index: 1
+  z-index: 1;
 }
 
+@include euiPanel('dscWrapper__content');
+
 .dscWrapper__content {
-  padding-right: $euiSize;
-  clear: both;
+  padding-top: $euiSizeXS;
+  background-color: $euiColorEmptyShade;
+
+  .kbn-table {
+    margin-bottom: 0;
+  }
 }
 
 .dscTimechart {
@@ -28,6 +44,20 @@
   .series > rect {
     fill-opacity: 0.5;
     stroke-width: 1;
+  }
+}
+
+.dscResultCount {
+  text-align: center;
+  padding-top: $euiSizeXS;
+  padding-left: $euiSizeM;
+
+  .dscResultHits {
+    padding-left: $euiSizeXS;
+  }
+
+  > .kuiLink {
+    padding-left: $euiSizeM;
   }
 }
 
@@ -58,6 +88,7 @@
   // SASSTODO: add a monospace modifier to the doc-table component
   .kbnDocTable__row {
     font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
   }
 }
 
@@ -117,17 +148,15 @@
 // SASSTODO: replace the padding value with a variable
 .dscFieldDetails {
   padding: 10px;
-  background-color: shade($euiColorLightestShade, 5%);
-  color: shade($euiColorEmptyShade, 65%);
+  background-color: $euiColorLightestShade;
+  color: $euiTextColor;
 }
 
 // SASSTODO: replace the padding and margin values with variables
 .dscFieldDetails__progress {
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 3px;
-  border-radius: $euiBorderRadius;
-  margin-left: 3px;
-  margin-right: 3px;
+  background-color: $euiColorEmptyShade;
+  color: $euiColorDarkShade;
+  padding: $euiSizeXS;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -164,9 +193,8 @@
   color: $euiColorDarkShade;
 }
 
-// SASSTODO: replace the margin-right value with a variables
 .dscField__icon {
-  margin-right: 5px;
+  margin-right: $euiSizeS;
   text-align: center;
   display: inline-block;
   width: $euiSizeM;
@@ -174,6 +202,7 @@
 }
 
 .dscResults {
+
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;

@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
+<KpiNetworkComponent
+  data={
+    Object {
+      "dnsQueries": 278,
+      "networkEvents": 16,
+      "tlsHandshakes": 10000,
+      "uniqueDestinationPrivateIps": 18,
+      "uniqueDestinationPrivateIpsHistogram": Array [
+        Object {
+          "x": 1549728000000,
+          "y": 8,
+        },
+        Object {
+          "x": 1549738800000,
+          "y": 0,
+        },
+      ],
+      "uniqueFlowId": 10277307,
+      "uniqueSourcePrivateIps": 383,
+      "uniqueSourcePrivateIpsHistogram": Array [
+        Object {
+          "x": 1549728000000,
+          "y": 8,
+        },
+        Object {
+          "x": 1549738800000,
+          "y": 0,
+        },
+      ],
+    }
+  }
+  from={1560578400000}
+  id="kpiNetwork"
+  loading={true}
+  narrowDateRange={[MockFunction]}
+  to={1560837600000}
+/>
+`;
+
+exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
+<KpiNetworkComponent
+  data={
+    Object {
+      "dnsQueries": 278,
+      "networkEvents": 16,
+      "tlsHandshakes": 10000,
+      "uniqueDestinationPrivateIps": 18,
+      "uniqueDestinationPrivateIpsHistogram": Array [
+        Object {
+          "x": 1549728000000,
+          "y": 8,
+        },
+        Object {
+          "x": 1549738800000,
+          "y": 0,
+        },
+      ],
+      "uniqueFlowId": 10277307,
+      "uniqueSourcePrivateIps": 383,
+      "uniqueSourcePrivateIpsHistogram": Array [
+        Object {
+          "x": 1549728000000,
+          "y": 8,
+        },
+        Object {
+          "x": 1549738800000,
+          "y": 0,
+        },
+      ],
+    }
+  }
+  from={1560578400000}
+  id="kpiNetwork"
+  loading={false}
+  narrowDateRange={[MockFunction]}
+  to={1560837600000}
+/>
+`;

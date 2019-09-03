@@ -20,6 +20,8 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import vislibSeriesTemplate from './series.html';
+import { safeMakeLabel } from 'ui/agg_types/agg_utils';
+
 const module = uiModules.get('kibana');
 
 module.directive('vislibSeries', function () {
@@ -48,13 +50,13 @@ module.directive('vislibSeries', function () {
 
       $scope.series = $scope.editorState.params.seriesParams;
       $scope.$watch(() => {
-        return $scope.editorState.aggs.map(agg => {
-          return agg.makeLabel();
+        return $scope.editorState.aggs.aggs.map(agg => {
+          return safeMakeLabel(agg);
         }).join();
       }, () => {
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;
 
-        const metrics = $scope.editorState.aggs.filter(agg => {
+        const metrics = $scope.editorState.aggs.aggs.filter(agg => {
           const isMetric = agg.type && agg.type.type === 'metrics';
           return isMetric && agg.schema.title === schemaTitle;
         });

@@ -1,1 +1,0 @@
-<div class="progress" ng-transclude></div>

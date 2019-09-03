@@ -17,55 +17,41 @@
  * under the License.
  */
 
-import offsetTime from '../../offset_time';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
-export default function query(req, panel, series) {
+import { offsetTime } from '../../offset_time';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import { buildEsQuery } from '@kbn/es-query';
+
+export function query(req, panel, series, esQueryConfig, indexPatternObject) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel, series);
+    const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
-    doc.query = {
-      bool: {
-        must: []
-      }
-    };
+    const queries = !panel.ignore_global_filter ? req.payload.query : [];
+    const filters = !panel.ignore_global_filter ? req.payload.filters : [];
+    doc.query = buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
         [timeField]: {
-          gte: from.valueOf(),
-          lte: to.valueOf(),
-          format: 'epoch_millis',
-        }
-      }
+          gte: from.toISOString(),
+          lte: to.toISOString(),
+          format: 'strict_date_optional_time',
+        },
+      },
     };
     doc.query.bool.must.push(timerange);
 
-    const globalFilters = req.payload.filters;
-    if (globalFilters && !panel.ignore_global_filter) {
-      doc.query.bool.must = doc.query.bool.must.concat(globalFilters);
-    }
-
     if (panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true
-        }
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     if (series.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: series.filter,
-          analyze_wildcard: true
-        }
-      });
+      doc.query.bool.must.push(
+        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+      );
     }
 
     return next(doc);
-
   };
 }

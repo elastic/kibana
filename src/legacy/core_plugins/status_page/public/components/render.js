@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import StatusApp from './status_app';
 
@@ -33,12 +33,12 @@ export function renderStatusPage(buildNum, buildSha) {
   }
 
   render(
-    <I18nProvider>
+    <I18nContext>
       <StatusApp
         buildNum={buildNum}
         buildSha={buildSha}
       />
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }

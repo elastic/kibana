@@ -1,4 +1,6 @@
 #indexPatternListReact {
+  display: flex;
+
   .indexPatternList__headerWrapper {
     padding-bottom: $euiSizeS;
   }
@@ -12,4 +14,12 @@
       overflow: hidden;
     }
   }
+
+  .indexPatternListPrompt__descList {
+    text-align: left;
+  }
+}
+
+.indexPatternList__badge {
+  margin-left: $euiSizeS;
 }

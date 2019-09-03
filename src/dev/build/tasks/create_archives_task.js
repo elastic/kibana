@@ -18,26 +18,14 @@
  */
 
 import path from 'path';
-import { createWriteStream } from 'fs';
-import archiver from 'archiver';
-
-import { mkdirp } from '../lib';
-
-function compress(type, options = {}, source, destination) {
-  const output = createWriteStream(destination);
-  const archive = archiver(type, options);
-  const name = source.split(path.sep).slice(-1)[0];
-
-  archive.pipe(output);
-
-  return archive.directory(source, name).finalize();
-}
+import { mkdirp, compress } from '../lib';
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
-    await Promise.all(config.getTargetPlatforms().map(async platform => {
+    // archive one at a time, parallel causes OOM sometimes
+    for (const platform of config.getTargetPlatforms()) {
       const source = build.resolvePathForPlatform(platform, '.');
       const destination = build.getPlatformArchivePath(platform);
 
@@ -47,16 +35,41 @@ export const CreateArchivesTask = {
 
       switch (path.extname(destination)) {
         case '.zip':
-          await compress('zip', { zlib: { level: 9 } }, source, destination);
+          await compress(
+            'zip',
+            {
+              archiverOptions: {
+                zlib: {
+                  level: 9
+                }
+              },
+              createRootDirectory: true
+            },
+            source,
+            destination
+          );
           break;
 
         case '.gz':
-          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination);
+          await compress(
+            'tar',
+            {
+              archiverOptions: {
+                gzip: true,
+                gzipOptions: {
+                  level: 9
+                }
+              },
+              createRootDirectory: true
+            },
+            source,
+            destination
+          );
           break;
 
         default:
           throw new Error(`Unexpected extension for archive destination: ${destination}`);
       }
-    }));
+    }
   }
 };

@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import './_saved_sheet.js';
 
@@ -33,9 +32,9 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function (Private, Promise, SavedSheet, kbnIndex, kbnUrl, $http, chrome) {
+module.service('savedSheets', function (Private, SavedSheet, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
+  const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnUrl, chrome, savedObjectClient);
   savedSheetLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
   };

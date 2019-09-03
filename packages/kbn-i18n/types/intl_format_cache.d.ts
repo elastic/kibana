@@ -21,7 +21,7 @@ declare module 'intl-format-cache' {
   import IntlMessageFormat from 'intl-messageformat';
 
   interface Message {
-    format: (values: { [key: string]: string | number | Date }) => string;
+    format: (values: Record<string, string | number | boolean | Date | null | undefined>) => string;
   }
 
   function memoizeIntlConstructor(

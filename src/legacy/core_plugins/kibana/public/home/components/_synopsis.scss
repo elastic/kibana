@@ -1,27 +1,12 @@
-// SASSTODO: Move out of being specifically in home
-// ML uses these classes as well
-.synopsis {
-  display: flex;
-  flex-grow: 1;
-  cursor: pointer;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-
-    .synopsisTitle {
-      text-decoration: underline;
-    }
+.homSynopsis__card {
+  &.homSynopsis__card--noPanel {
+    // SASSTODO: Add a prop to EuiCard to allow for no "panel" style
+    border: none;
+    box-shadow: none;
   }
-}
 
-
-.synopsisTitle {
-  font-size: $euiSize;
-  font-weight: normal;
-  color: $euiColorPrimary;
-}
-
-.synopsisIcon {
-  padding-top: $euiSizeS;
+  // SASSTODO: Fix in EUI
+  .euiCard__content {
+    padding-top: 0 !important;
+  }
 }

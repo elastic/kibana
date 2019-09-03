@@ -29,13 +29,16 @@ exports.help = (defaults = {}) => {
   return dedent`
     Options:
 
-      --license       Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
-      --version       Version of ES to download [default: ${defaults.version}]
-      --base-path     Path containing cache/installations [default: ${basePath}]
-      --install-path  Installation path, defaults to 'source' within base-path
-      --password      Sets password for elastic user [default: ${password}]
-      -E              Additional key=value settings to pass to Elasticsearch
-      --download-only Download the snapshot but don't actually start it
+      --license         Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
+      --version         Version of ES to download [default: ${defaults.version}]
+      --base-path       Path containing cache/installations [default: ${basePath}]
+      --install-path    Installation path, defaults to 'source' within base-path
+      --data-archive    Path to zip or tarball containing an ES data directory to seed the cluster with.
+      --password        Sets password for elastic user [default: ${password}]
+      --password.[user] Sets password for native realm user [default: ${password}]
+      -E                Additional key=value settings to pass to Elasticsearch
+      --download-only   Download the snapshot but don't actually start it
+      --ssl             Sets up SSL on Elasticsearch
 
     Example:
 
@@ -49,19 +52,29 @@ exports.run = async (defaults = {}) => {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
+      dataArchive: 'data-archive',
       esArgs: 'E',
     },
+
+    string: ['version'],
 
     boolean: ['download-only'],
 
     default: defaults,
   });
 
-  const cluster = new Cluster();
+  const cluster = new Cluster({ ssl: options.ssl });
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
     const { installPath } = await cluster.installSnapshot(options);
-    await cluster.run(installPath, { esArgs: options.esArgs });
+
+    if (options.dataArchive) {
+      await cluster.extractDataDirectory(installPath, options.dataArchive);
+    }
+
+    options.bundledJDK = true;
+
+    await cluster.run(installPath, options);
   }
 };

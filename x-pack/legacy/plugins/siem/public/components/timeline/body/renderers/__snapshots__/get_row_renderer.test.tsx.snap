@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get_column_renderer renders correctly against snapshot 1`] = `
+<span>
+  <Row>
+    <span>
+      some child
+    </span>
+  </Row>
+</span>
+`;

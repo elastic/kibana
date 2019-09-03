@@ -31,7 +31,7 @@ import {
   KIBANA_FTR_SCRIPT,
 } from './lib';
 
-import { readConfigFile } from '../../../../src/functional_test_runner/lib';
+import { readConfigFile } from '../functional_test_runner/lib';
 
 const SUCCESS_MESSAGE = `
 
@@ -109,7 +109,10 @@ export async function startServers(options) {
       config,
       options: {
         ...opts,
-        extraKbnOpts: [...options.extraKbnOpts, ...(options.installDir ? [] : ['--dev'])],
+        extraKbnOpts: [
+          ...options.extraKbnOpts,
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+        ],
       },
     });
 

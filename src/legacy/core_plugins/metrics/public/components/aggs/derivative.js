@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import MetricSelect from './metric_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { MetricSelect } from './metric_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -54,14 +54,12 @@ export const DerivativeAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.derivative.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.derivative.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -75,10 +73,7 @@ export const DerivativeAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.derivative.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.derivative.metricLabel" defaultMessage="Metric" />}
             fullWidth
           >
             <MetricSelect
@@ -93,18 +88,16 @@ export const DerivativeAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('units')}
-            label={(<FormattedMessage
-              id="tsvb.derivative.unitsLabel"
-              defaultMessage="Units (1s, 1m, etc)"
-              description="1s and 1m are required values and must not be translated."
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.derivative.unitsLabel"
+                defaultMessage="Units (1s, 1m, etc)"
+                description="1s and 1m are required values and must not be translated."
+              />
+            }
             fullWidth
           >
-            <EuiFieldText
-              onChange={handleTextChange('unit')}
-              value={model.unit}
-              fullWidth
-            />
+            <EuiFieldText onChange={handleTextChange('unit')} value={model.unit} fullWidth />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

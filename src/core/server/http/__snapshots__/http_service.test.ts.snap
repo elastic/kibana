@@ -1,49 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logs error if already started 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [
-    Array [
-      "Received new HTTP config after server was started. Config will **not** be applied.",
-    ],
+exports[`logs error if already set up 1`] = `
+Array [
+  Array [
+    "Received new HTTP config after server was started. Config will **not** be applied.",
   ],
-}
+]
 `;
 
-exports[`register route handler 1`] = `
+exports[`spins up notReady server until started if configured with \`autoListen:true\`: 503 response 1`] = `
 Object {
-  "debug": Array [
+  "body": Array [
     Array [
-      "registering route handler for [/foo]",
+      "Kibana server is not ready yet",
     ],
   ],
-  "error": Array [],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [],
-}
-`;
-
-exports[`throws if registering route handler after http server is started 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [
+  "code": Array [
     Array [
-      "Received new router [/foo] after server was started. Router will **not** be applied.",
+      503,
     ],
   ],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [],
+  "header": Array [
+    Array [
+      "Retry-After",
+      "30",
+    ],
+  ],
 }
 `;

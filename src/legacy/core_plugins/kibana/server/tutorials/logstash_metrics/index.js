@@ -28,7 +28,7 @@ export function logstashMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.logstashMetrics.nameTitle', {
       defaultMessage: 'Logstash metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from a Logstash server.',

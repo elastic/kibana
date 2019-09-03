@@ -29,7 +29,7 @@ export function postgresqlMetricsSpecProvider(server, context) {
       defaultMessage: 'PostgreSQL metrics',
     }),
     category: TUTORIAL_CATEGORY.METRICS,
-    isBeta: true,
+    isBeta: false,
     shortDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from PostgreSQL.',
     }),

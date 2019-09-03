@@ -28,7 +28,7 @@ export function aerospikeMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.aerospikeMetrics.nameTitle', {
       defaultMessage: 'Aerospike metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Aerospike server.',

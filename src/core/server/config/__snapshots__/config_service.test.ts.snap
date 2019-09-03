@@ -1,18 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`correctly passes context 1`] = `
-ExampleClassWithSchema {
-  "value": Object {
-    "branchRef": "feature-v1",
-    "buildNumRef": 100,
-    "buildShaRef": "feature-v1-build-sha",
-    "devRef": true,
-    "prodRef": false,
-    "versionRef": "v1",
-  },
+Object {
+  "branchRef": "feature-v1",
+  "buildNumRef": 100,
+  "buildShaRef": "feature-v1-build-sha",
+  "devRef": true,
+  "prodRef": false,
+  "versionRef": "v1",
 }
 `;
-
-exports[`throws error if config class does not implement 'schema' 1`] = `[Error: The config class [ExampleClass] did not contain a static 'schema' field, which is required when creating a config instance]`;
-
-exports[`throws if config at path does not match schema 1`] = `"[key]: expected value of type [string] but got [number]"`;

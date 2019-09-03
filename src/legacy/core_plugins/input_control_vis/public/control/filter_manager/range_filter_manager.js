@@ -59,6 +59,7 @@ export class RangeFilterManager extends FilterManager {
       this.indexPattern.fields.byName[this.fieldName],
       toRange(value),
       this.indexPattern);
+    newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;
     return newFilter;
   }

@@ -30,7 +30,7 @@ jest.mock('../../tasks', () => ({
 
 describe('run tests CLI', () => {
   describe('options', () => {
-    const originalObjects = {};
+    const originalObjects = { process, console };
     const exitMock = jest.fn();
     const logMock = jest.fn(); // mock logging so we don't send output to the test results
     const argvMock = ['foo', 'foo'];
@@ -40,11 +40,13 @@ describe('run tests CLI', () => {
       argv: argvMock,
       stdout: new Writable(),
       cwd: jest.fn(),
+      env: {
+        ...originalObjects.process.env,
+        TEST_ES_FROM: 'snapshot',
+      },
     };
 
     beforeAll(() => {
-      originalObjects.process = process;
-      originalObjects.console = console;
       global.process = processMock;
       global.console = { log: logMock };
     });
@@ -56,6 +58,10 @@ describe('run tests CLI', () => {
 
     beforeEach(() => {
       global.process.argv = [...argvMock];
+      global.process.env = {
+        ...originalObjects.process.env,
+        TEST_ES_FROM: 'snapshot',
+      };
       jest.resetAllMocks();
     });
 

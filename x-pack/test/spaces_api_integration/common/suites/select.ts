@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -33,14 +33,6 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql('');
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
@@ -63,17 +55,20 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         id: 'default',
         name: 'Default Space',
         description: 'This is the default space',
+        disabledFeatures: [],
         _reserved: true,
       },
       {
         id: 'space_1',
         name: 'Space 1',
         description: 'This is the first test space',
+        disabledFeatures: [],
       },
       {
         id: 'space_2',
         name: 'Space 2',
         description: 'This is the second test space',
+        disabledFeatures: [],
       },
     ];
     expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
@@ -119,7 +114,6 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectEmptyResult,
-    createExpectLegacyForbidden,
     createExpectNotFoundResult,
     createExpectRbacForbidden,
     createExpectResults,

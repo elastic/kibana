@@ -34,10 +34,13 @@ export function validateInterval(bounds, panel, maxBuckets) {
     const span = max.valueOf() - min.valueOf();
     const buckets = Math.floor(span / duration.asMilliseconds());
     if (buckets > maxBuckets) {
-      throw new Error(i18n.translate('tsvb.validateInterval.notifier.maxBucketsExceededErrorMessage', {
-        defaultMessage: 'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
-        values: { buckets, maxBuckets }
-      }));
+      throw new Error(
+        i18n.translate('tsvb.validateInterval.notifier.maxBucketsExceededErrorMessage', {
+          defaultMessage:
+            'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
+          values: { buckets, maxBuckets },
+        })
+      );
     }
   }
 }

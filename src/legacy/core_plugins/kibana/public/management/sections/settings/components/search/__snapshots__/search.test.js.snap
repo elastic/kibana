@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Search should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSearchBar
     box={
       Object {
@@ -45,6 +45,7 @@ exports[`Search should render normally 1`] = `
           "_clauses": Array [],
           "_indexedClauses": Object {
             "field": Object {},
+            "group": Array [],
             "is": Object {},
             "term": Array [],
           },
@@ -52,10 +53,11 @@ exports[`Search should render normally 1`] = `
         "syntax": Object {
           "parse": [Function],
           "print": [Function],
+          "printClause": [Function],
         },
         "text": "",
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

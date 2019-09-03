@@ -1,5 +1,5 @@
-$guideVerticalRhythm: 20px;
-$guideLineHeight: 24px;
+$guideVerticalRhythm: $euiSize;
+$guideLineHeight: $euiSizeL;
 $guideNavHeight: 60px;
 $guideSideNavWidth: 400px;
 $guideSideNavSmallWidth: 220px;
@@ -9,11 +9,11 @@ $guideCodeViewerTransition: 0.2s ease;
 $guideChromeTransition: 0.3s ease;
 
 // Colors
-$guideBaseBackgroundColor: #f7f7f7;
-$guidePanelBackgroundColor: #ffffff;
-$guideTextColor: #444;
-$guideLinkColor: #00a9e5;
-$guideLinkHoverColor: #00a9e5;
+$guideBaseBackgroundColor: $euiColorLightestShade;
+$guidePanelBackgroundColor: $euiColorEmptyShade;
+$guideTextColor: $euiColorDarkestShade;
+$guideLinkColor: $euiColorPrimary;
+$guideLinkHoverColor: darken($euiColorPrimary, 10%);
 
 // Breakpoints
 $guideMinWidth: 840px;
@@ -31,7 +31,7 @@ $guideNormalBreakpoint: 1900px;
   }
 }
 
-@mixin scrollbar($color: rgba(#454D58, 0.4)) {
+@mixin scrollbar($color: $euiBorderColor) {
   &::-webkit-scrollbar {
     width: 16px;
     height: 16px;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPatternsService } from '../../../../../server/index_patterns/service';
+import { IndexPatternsService } from '../../../../server/index_patterns/service';
 export const getIndexPatternService = {
   assign: 'indexPatternsService',
   method(req) {
@@ -26,5 +26,5 @@ export const getIndexPatternService = {
       return dataCluster.callWithRequest(req, ...args);
     };
     return new IndexPatternsService(callDataCluster);
-  }
+  },
 };

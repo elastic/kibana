@@ -3,26 +3,17 @@
 exports[`render 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
-  gutterSize="l"
   justifyContent="spaceBetween"
-  responsive={true}
   style={
     Object {
       "flexGrow": 0,
     }
   }
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <FormattedMessage
           defaultMessage="Kibana status is {kibanaStatus}"
@@ -31,7 +22,6 @@ exports[`render 1`] = `
             Object {
               "kibanaStatus": <EuiBadge
                 color="secondary"
-                iconSide="left"
               >
                 Green
               </EuiBadge>,
@@ -42,13 +32,9 @@ exports[`render 1`] = `
     </EuiTitle>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         My Computer
       </p>

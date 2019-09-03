@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
+import mkdirp from 'mkdirp';
 
-import { copy, untar } from '../../lib';
+import { untar } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
+
+const statAsync = promisify(fs.stat);
+const mkdirpAsync = promisify(mkdirp);
+const copyFileAsync = promisify(fs.copyFile);
 
 export const ExtractNodeBuildsTask = {
   global: true,
@@ -29,17 +36,22 @@ export const ExtractNodeBuildsTask = {
     await Promise.all(
       config.getNodePlatforms().map(async platform => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
-
-        // windows executable is not extractable, it's just a .exe file
+        // windows executable is not extractable, it's just an .exe file
         if (platform.isWindows()) {
-          return await copy(downloadPath, resolve(extractDir, 'node.exe'));
+          const destination = resolve(extractDir, 'node.exe');
+          return this.copyWindows(downloadPath, destination);
         }
 
         // all other downloads are tarballs
-        await untar(downloadPath, extractDir, {
-          strip: 1
-        });
-      })
+        return untar(downloadPath, extractDir, { strip: 1 });
+      }),
     );
+  },
+  async copyWindows(source, destination) {
+    // ensure source exists before creating destination directory
+    await statAsync(source);
+    await mkdirpAsync(dirname(destination));
+    // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
+    return await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
   },
 };

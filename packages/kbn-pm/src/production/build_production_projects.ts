@@ -35,12 +35,14 @@ import {
 
 export async function buildProductionProjects({
   kibanaRoot,
-  buildRoots,
+  buildRoot,
+  onlyOSS,
 }: {
   kibanaRoot: string;
-  buildRoots: string[];
+  buildRoot: string;
+  onlyOSS?: boolean;
 }) {
-  const projects = await getProductionProjects(kibanaRoot);
+  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
@@ -51,9 +53,7 @@ export async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-      for (const buildRoot of buildRoots) {
-        await copyToBuild(project, kibanaRoot, buildRoot);
-      }
+      await copyToBuild(project, kibanaRoot, buildRoot);
     }
   }
 }
@@ -62,18 +62,32 @@ export async function buildProductionProjects({
  * Returns the subset of projects that should be built into the production
  * bundle. As we copy these into Kibana's `node_modules` during the build step,
  * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies.
+ * we only include Kibana's transitive _production_ dependencies. If onlyOSS
+ * is supplied, we omit projects with build.oss in their package.json set to false.
  */
-async function getProductionProjects(rootPath: string) {
+async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   const projectPaths = getProjectPaths(rootPath, {});
   const projects = await getProjects(rootPath, projectPaths);
+  const projectsSubset = [projects.get('kibana')!];
 
-  const productionProjects = includeTransitiveProjects([projects.get('kibana')!], projects, {
+  if (projects.has('x-pack')) {
+    projectsSubset.push(projects.get('x-pack')!);
+  }
+
+  const productionProjects = includeTransitiveProjects(projectsSubset, projects, {
     onlyProductionDependencies: true,
   });
 
   // We remove Kibana, as we're already building Kibana
   productionProjects.delete('kibana');
+
+  if (onlyOSS) {
+    productionProjects.forEach(project => {
+      if (project.getBuildConfig().oss === false) {
+        productionProjects.delete(project.json.name);
+      }
+    });
+  }
 
   return productionProjects;
 }

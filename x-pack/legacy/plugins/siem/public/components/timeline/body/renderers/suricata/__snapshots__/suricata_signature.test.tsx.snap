@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuricataSignature rendering it renders the default SuricataSignature 1`] = `
+<Component
+  contextId="test"
+  id="doc-id-123"
+  signature="ET SCAN ATTACK Hello"
+  signatureId={123}
+/>
+`;

@@ -9,6 +9,20 @@
     "totalShards": 10,
     "status": "green"
   },
+  "logs": {
+    "enabled": false,
+    "limit": 10,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "nodeExists": null,
+      "indexExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  },
   "metrics": {
     "index_search_request_rate": [
       {
@@ -901,103 +915,6 @@
         },
         "metric": {
           "app": "elasticsearch",
-          "field": "index_stats.primaries.segments.count",
-          "metricAgg": "max",
-          "label": "Primaries",
-          "title": "Segment Count",
-          "description": "Number of segments for primary shards.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": false
-        },
-        "data": [
-          [
-            1507235520000,
-            30
-          ],
-          [
-            1507235530000,
-            30
-          ],
-          [
-            1507235540000,
-            30
-          ],
-          [
-            1507235550000,
-            30
-          ],
-          [
-            1507235560000,
-            30
-          ],
-          [
-            1507235570000,
-            30
-          ],
-          [
-            1507235580000,
-            30
-          ],
-          [
-            1507235590000,
-            30
-          ],
-          [
-            1507235600000,
-            30
-          ],
-          [
-            1507235610000,
-            30
-          ],
-          [
-            1507235620000,
-            30
-          ],
-          [
-            1507235630000,
-            30
-          ],
-          [
-            1507235640000,
-            30
-          ],
-          [
-            1507235650000,
-            30
-          ],
-          [
-            1507235660000,
-            30
-          ],
-          [
-            1507235670000,
-            30
-          ],
-          [
-            1507235680000,
-            30
-          ],
-          [
-            1507235690000,
-            30
-          ],
-          [
-            1507235700000,
-            30
-          ]
-        ]
-      },
-      {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
-        },
-        "metric": {
-          "app": "elasticsearch",
           "field": "index_stats.total.segments.count",
           "metricAgg": "max",
           "label": "Total",
@@ -1084,6 +1001,103 @@
           [
             1507235700000,
             60
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.segments.count",
+          "metricAgg": "max",
+          "label": "Primaries",
+          "title": "Segment Count",
+          "description": "Number of segments for primary shards.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            30
+          ],
+          [
+            1507235530000,
+            30
+          ],
+          [
+            1507235540000,
+            30
+          ],
+          [
+            1507235550000,
+            30
+          ],
+          [
+            1507235560000,
+            30
+          ],
+          [
+            1507235570000,
+            30
+          ],
+          [
+            1507235580000,
+            30
+          ],
+          [
+            1507235590000,
+            30
+          ],
+          [
+            1507235600000,
+            30
+          ],
+          [
+            1507235610000,
+            30
+          ],
+          [
+            1507235620000,
+            30
+          ],
+          [
+            1507235630000,
+            30
+          ],
+          [
+            1507235640000,
+            30
+          ],
+          [
+            1507235650000,
+            30
+          ],
+          [
+            1507235660000,
+            30
+          ],
+          [
+            1507235670000,
+            30
+          ],
+          [
+            1507235680000,
+            30
+          ],
+          [
+            1507235690000,
+            30
+          ],
+          [
+            1507235700000,
+            30
           ]
         ]
       }

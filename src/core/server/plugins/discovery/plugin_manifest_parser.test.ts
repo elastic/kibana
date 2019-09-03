@@ -19,9 +19,7 @@
 
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 
-const mockReadFile = jest.fn();
-const mockStat = jest.fn();
-jest.mock('fs', () => ({ readFile: mockReadFile, stat: mockStat }));
+import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
 import { resolve } from 'path';
 import { parseManifest } from './plugin_manifest_parser';
@@ -33,6 +31,7 @@ const packageInfo = {
   buildNum: 1,
   buildSha: '',
   version: '7.0.0-alpha1',
+  dist: false,
 };
 
 afterEach(() => {

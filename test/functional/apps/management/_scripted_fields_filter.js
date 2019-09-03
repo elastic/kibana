@@ -18,7 +18,7 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -34,21 +34,21 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('management');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'f1e4c910-a2e6-11e7-bb30-233be9be6a15'
       });
     });
 
     after(async function () {
       await esArchiver.unload('management');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.replace({});
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';
 
     it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');

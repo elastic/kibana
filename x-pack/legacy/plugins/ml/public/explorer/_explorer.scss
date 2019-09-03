@@ -1,0 +1,308 @@
+.ml-explorer {
+  width: 100%;
+  display: inline-block;
+  color: $euiColorDarkShade;
+
+  .visError {
+    h4 {
+      margin-top: 50px;
+    }
+  }
+
+  .no-results-container {
+    text-align: center;
+    font-size: $euiFontSizeL;
+
+    // SASSTODO: Use a proper calc
+    padding-top: 60px;
+
+    .no-results {
+      background-color: $euiFocusBackgroundColor;
+      padding: $euiSize;
+      border-radius: $euiBorderRadius;
+      display: inline-block;
+
+    // SASSTODO: Make a proper selector
+      i {
+        color: $euiColorPrimary;
+        margin-right: $euiSizeXS;
+      }
+
+
+      // SASSTODO: Make a proper selector
+      div:nth-child(2) {
+        margin-top: $euiSizeXS;
+        font-size: $euiFontSizeXS;
+      }
+    }
+  }
+
+  .mlAnomalyExplorer__filterBar {
+    margin-bottom: $euiSize;
+    padding-right: $euiSize;
+    padding-left: $euiSize;
+  }
+
+  .results-container {
+    padding: 0px 0px $euiSize 0px;
+
+      // SASSTODO: Overwrite of bootstrap
+    .col-xs-12 {
+      width: calc(100% - #{$euiSizeXL});
+      padding-left: $euiSize;
+    }
+
+    .no-influencers-warning {
+      float: left;
+      padding-top: $euiSizeXS;
+      padding-left: $euiSize;
+      color: $euiColorDarkShade;
+      font-size: $euiFontSizeS;
+    }
+
+    .panel-title {
+      color: $euiColorDarkShade;
+      display: inline-block;
+      padding-bottom: $euiSizeXS;
+    }
+
+    .panel-sub-title {
+      color: $euiColorDarkShade;
+      font-size: $euiFontSizeXS;
+    }
+  }
+
+  .ml-controls {
+    padding-bottom: $euiSizeS;
+
+      // SASSTODO: Make a proper selector
+    label {
+      font-size: $euiFontSizeXS;
+      padding: $euiSizeXS;
+      padding-top: 0;
+    }
+
+    .kuiButtonGroup {
+      padding: 0px $euiSizeXS 0px 0px;
+      position: relative;
+      display: inline-block;
+    }
+  }
+
+  .ml-anomalies-controls {
+    padding-top: $euiSizeXS;
+
+    #show_charts_checkbox_control {
+      padding-top: $euiSizeL;
+    }
+  }
+
+  // SASSTODO: This entire selector needs to be rewritten.
+  // It looks extremely brittle with very specific sizing units
+  .ml-explorer-swimlane {
+    user-select: none;
+    padding: 0;
+    margin-bottom: $euiSizeS;
+
+    div.ml-swimlanes {
+      margin: 0px 0px 0px 10px;
+
+      div.cells-marker-container {
+        margin-left: 176px;
+        height: 22px;
+        white-space: nowrap;
+        // background-color: #CCC;
+        .sl-cell {
+          height: 10px;
+          display: inline-block;
+          vertical-align: top;
+          margin-top: 16px;
+          text-align: center;
+          visibility: hidden;
+          cursor: default;
+
+          i {
+            color: $euiColorDarkShade;
+          }
+        }
+        .sl-cell-hover {
+          visibility: visible;
+          i {
+            display: block;
+            margin-top: -6px;
+          }
+        }
+        .sl-cell-active-hover {
+          visibility: visible;
+          .floating-time-label {
+            display: inline-block;
+          }
+        }
+      }
+
+      div.lane {
+        height: 30px;
+        border-bottom: 0px;
+        border-radius: 2px;
+        margin-top: -1px;
+        white-space: nowrap;
+
+        div.lane-label {
+          display: inline-block;
+          font-size: 13px;
+          height: 30px;
+          text-align: right;
+          vertical-align: middle;
+          border-radius: 2px;
+          padding-right: 5px;
+          margin-right: 5px;
+          border: 1px solid transparent;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        div.lane-label.lane-label-masked {
+          opacity: 0.3;
+        }
+
+        div.cells-container {
+          border: $euiBorderThin;
+          border-right: 0px;
+          display: inline-block;
+          height: 30px;
+          vertical-align: middle;
+          background-color: $euiColorEmptyShade;
+
+          .sl-cell {
+            color: $euiColorEmptyShade;
+            cursor: default;
+            display: inline-block;
+            height: 29px;
+            border-right: $euiBorderThin;
+            vertical-align: top;
+            position: relative;
+            .sl-cell-inner, .sl-cell-inner-dragselect {
+              height: 26px;
+              margin: 1px;
+              border-radius: 2px;
+              text-align: center;
+            }
+            .sl-cell-inner.sl-cell-inner-masked {
+              opacity: 0.2;
+            }
+            .sl-cell-inner.sl-cell-inner-selected,
+            .sl-cell-inner-dragselect.sl-cell-inner-selected {
+              border: 2px solid $euiColorDarkShade;
+            }
+
+            .sl-cell-inner.sl-cell-inner-selected.sl-cell-inner-masked,
+            .sl-cell-inner-dragselect.sl-cell-inner-selected.sl-cell-inner-masked {
+              border: 2px solid $euiColorFullShade;
+              opacity: 0.4;
+            }
+          }
+          .sl-cell:hover {
+            .sl-cell-inner {
+              opacity: 0.8;
+              cursor: pointer;
+            }
+          }
+          .sl-cell.ds-selected {
+            .sl-cell-inner,
+            .sl-cell-inner-dragselect {
+              border: 2px solid $euiColorDarkShade;
+              border-radius: 2px;
+              opacity: 1;
+            }
+          }
+
+        }
+      }
+
+      div.lane:last-child {
+        div.cells-container {
+          .sl-cell {
+            border-bottom: $euiBorderThin;
+          }
+        }
+      }
+
+      .time-tick-labels {
+        height: 25px;
+        margin-top: $euiSizeXS / 2;
+        margin-left: 175px;
+        /* hide d3's domain line */
+        path.domain {
+          display: none;
+        }
+        /* hide d3's tick line */
+        g.tick line {
+          display: none;
+        }
+        /* override d3's default tick styles */
+        g.tick text {
+          font-size: 11px;
+          fill: $euiColorMediumShade;
+        }
+      }
+    }
+
+    line.gridLine {
+      stroke: $euiBorderColor;
+      fill: none;
+      shape-rendering : crispEdges;
+      stroke-width : 1px;
+    }
+
+    rect.gridCell {
+      shape-rendering : crispEdges;
+    }
+
+    rect.hovered {
+      stroke: $euiColorDarkShade;
+      stroke-width: 2px;
+    }
+
+    text.laneLabel {
+      font-size: 9pt;
+      font-family: $euiFontFamily;
+      fill: $euiColorDarkShade;
+    }
+
+    text.timeLabel {
+      font-size: 8pt;
+      font-family: $euiFontFamily;
+      fill: $euiColorDarkShade;
+    }
+  }
+}
+
+/* using !important in the following rule because other related legacy rules have more specifity. */
+.mlDragselectDragging {
+  .sl-cell-inner,
+  .sl-cell-inner-dragselect {
+    opacity: 0.6 !important;
+  }
+}
+
+/* using !important in the following rule because other related legacy rules have more specifity. */
+.mlHideRangeSelection {
+  div.ml-swimlanes {
+    div.lane {
+      div.cells-container {
+        .sl-cell.ds-selected {
+          .sl-cell-inner,
+          .sl-cell-inner-dragselect {
+            border-width: 0px !important;
+            opacity: 1 !important;
+          }
+          .sl-cell-inner.sl-cell-inner-selected {
+            border-width: $euiSizeXS / 2 !important;
+          }
+          .sl-cell-inner.sl-cell-inner-masked {
+            opacity: 0.6 !important;
+          }
+        }
+      }
+    }
+  }
+}

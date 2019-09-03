@@ -1,0 +1,34 @@
+{
+    "job_type": "anomaly_detector",
+    "description": "Metricbeat outages: Detect unusual decreases in metricbeat documents (ECS)",
+    "groups": ["metricbeat"],
+    "analysis_config": {
+      "bucket_span": "10m",
+      "detectors": [
+        {
+          "detector_description": "low_count",
+          "function": "low_count",
+          "partition_field_name": "event.dataset"
+        }
+      ],
+      "influencers": [
+        "event.dataset"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "15mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    },
+    "custom_settings": {
+      "created_by": "ml-module-metricbeat-system",
+      "custom_urls": [
+        {
+          "url_name": "Raw data",
+          "url_value": "kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))"
+        }
+      ]
+    }
+  }

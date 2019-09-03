@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "types/**/*",
+    "src/functional_test_runner/**/*",
+    "src/mocha/xml.ts"
+  ]
+}

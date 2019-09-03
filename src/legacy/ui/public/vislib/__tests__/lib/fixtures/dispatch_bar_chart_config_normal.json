@@ -1,0 +1,31 @@
+{
+    "seriesParams": [
+        {
+            "data": {
+                "id": "1",
+                "label": "Count"
+            },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "cardinal",
+            "mode": "stacked",
+            "show": "true",
+            "showCircles": true,
+            "type": "histogram",
+            "valueAxis": "ValueAxis-1"
+        }
+    ],
+    "valueAxes": [
+        {
+            "id": "ValueAxis-1",
+            "name": "LeftAxis-1",
+            "position": "left",
+            "scale": {
+                "type": "linear",
+                "mode": "normal"
+            },
+            "show": true,
+            "style": {},
+            "type": "value"
+        }
+    ]
+}

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { createDurationFormat } from '../duration';
-import { FieldFormat } from '../../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
 
 const DurationFormat = createDurationFormat(FieldFormat);
 

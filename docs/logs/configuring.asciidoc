@@ -1,0 +1,50 @@
+[role="xpack"]
+[[xpack-logs-configuring]]
+
+:ecs-link: {ecs-ref}[Elastic Common Schema (ECS)]
+
+== Configuring the Logs data
+
+The default source configuration for logs is specified in the {kibana-ref}/logs-ui-settings-kb.html[Logs app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+The default configuration uses the `filebeat-*` index pattern to query the data.
+The default configuration also defines field settings for things like timestamps and container names, and the default columns to show in the logs pane.
+
+If your logs have custom index patterns, or use non-default field settings, or contain parsed fields which you want to expose as individual columns, you can override the default settings.
+Click *Configuration* to change the settings.
+This opens the *Configure source* fly-out dialog.
+
+NOTE: These settings are shared with metrics. Changes you make here may also affect the settings used by the *Metrics* app.
+
+TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make here are specific to the current space.
+You can make different subsets of data available by creating multiple spaces with different data source configurations.
+
+TIP: If you don't see the *Configuration* option, you may not have sufficient privileges to change the source configuration.
+For more information see <<xpack-security-authorization>>.
+
+[float]
+=== Indices and fields tab
+
+In the *Indices and fields* tab, you can change the following values:
+
+* *Name*: the name of the source configuration
+* *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data from
+* *Fields*: the names of specific fields in the indices that are used to query and interpret the data correctly
+
+[float]
+==== Log columns configuration
+
+In the *Log columns* tab you can change the columns that are displayed in the Logs app.
+By default the following columns are shown:
+
+* *Timestamp*: The timestamp of the log entry from the `timestamp` field.
+* *Message*: The message extracted from the document.
+The content of this field depends on the type of log message.
+If no special log message type is detected, the {ecs-link} field `message` is used.
+// ++ add a better link. The actual page location is ecs-base
+
+To add a new column, click *Add column*.
+In the list of available fields, select the field you want to add.
+You can start typing a field name in the search box to filter the field list by that name.
+
+To remove an existing column, click the *Remove this column* icon
+image:logs/images/logs-configure-source-dialog-remove-column-button.png[Remove column].

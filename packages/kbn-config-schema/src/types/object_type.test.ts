@@ -199,3 +199,59 @@ test('includes namespace in failure when wrong value type', () => {
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
+
+test('individual keys can validated', () => {
+  const type = schema.object({
+    foo: schema.boolean(),
+  });
+
+  const value = false;
+  expect(() => type.validateKey('foo', value)).not.toThrowError();
+  expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
+    `"bar is not a valid part of this schema"`
+  );
+});
+
+test('allow unknown keys when allowUnknowns = true', () => {
+  const type = schema.object(
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { allowUnknowns: true }
+  );
+
+  expect(
+    type.validate({
+      bar: 'baz',
+    })
+  ).toEqual({
+    foo: 'test',
+    bar: 'baz',
+  });
+});
+
+test('allowUnknowns = true affects only own keys', () => {
+  const type = schema.object(
+    { foo: schema.object({ bar: schema.string() }) },
+    { allowUnknowns: true }
+  );
+
+  expect(() =>
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toThrowErrorMatchingSnapshot();
+});
+
+test('does not allow unknown keys when allowUnknowns = false', () => {
+  const type = schema.object(
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { allowUnknowns: false }
+  );
+  expect(() =>
+    type.validate({
+      bar: 'baz',
+    })
+  ).toThrowErrorMatchingSnapshot();
+});

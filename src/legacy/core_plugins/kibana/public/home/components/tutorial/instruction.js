@@ -91,7 +91,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
         </EuiFlexItem>
 
         <EuiFlexItem
-          style={{ minWidth: 114 }}
+          className="homTutorial__instruction"
           grow={false}
         >
           {copyButton}

@@ -1,4 +1,4 @@
-@import 'src/ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 // Prefix all styles with "tvb" to avoid conflicts.
 // Examples
@@ -10,11 +10,8 @@
 @import './variables';
 @import './mixins';
 
-// Hacks (mostly todo's)
-@import './hacks';
-
 // Library overrides
-@import './ui_sortable';
+@import './tvb_editor';
 
 // Components
 @import './components/index';

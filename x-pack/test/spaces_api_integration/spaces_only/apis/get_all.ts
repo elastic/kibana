@@ -8,7 +8,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -31,6 +31,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },

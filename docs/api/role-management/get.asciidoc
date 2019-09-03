@@ -1,11 +1,11 @@
 [[role-management-api-get]]
 === Get Role
 
-experimental[This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental.]
+experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
 
 Retrieves all {kib} roles, or a specific role.
 
-Note: You cannot access this endpoint via the Console in Kibana.
+NOTE: You cannot access this endpoint via the Console in Kibana.
 
 ==== Authorization
 
@@ -26,7 +26,7 @@ GET /api/security/role
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the roles.
 
 [source,js]
@@ -45,9 +45,15 @@ representation of the roles.
       "cluster": [ ],
       "run_as": [ ]
     },
-    "kibana": [ {
-        "privileges": [ "all" ]
-    } ],
+    "kibana": [{
+      "base": [
+        "all"
+      ],
+      "feature": {},
+      "spaces": [
+        "*"
+      ]
+    }]
   },
   {
     "name": "my_admin_role",
@@ -82,19 +88,19 @@ the `/api/security/role/<rolename>` endpoint:
 
 [source,js]
 --------------------------------------------------
-GET /api/security/role/my_kibana_role
+GET /api/security/role/my_restricted_kibana_role
 --------------------------------------------------
 // KIBANA
 
 ===== Response
 
-A successful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON
 representation of the role.
 
 [source,js]
 --------------------------------------------------
 {
-  "name": "my_kibana_role",
+  "name": "my_restricted_kibana_role",
   "metadata" : {
     "version" : 1
   },
@@ -106,8 +112,67 @@ representation of the role.
     "indices": [ ],
     "run_as": [ ]
   },
-  "kibana": [ {
-      "privileges": [ "all" ]
-  } ],
+   "kibana": [
+    {
+      "base": [
+        "read"
+      ],
+      "feature": {},
+      "spaces": [
+        "marketing"
+      ]
+    },
+    {
+      "base": [],
+      "feature": {
+        "discover": [
+          "all"
+        ],
+        "visualize": [
+          "all"
+        ],
+        "dashboard": [
+          "all"
+        ],
+        "dev_tools": [
+          "read"
+        ],
+        "advancedSettings": [
+          "read"
+        ],
+        "indexPatterns": [
+          "read"
+        ],
+        "timelion": [
+          "all"
+        ],
+        "graph": [
+          "all"
+        ],
+        "apm": [
+          "read"
+        ],
+        "maps": [
+          "read"
+        ],
+        "canvas": [
+          "read"
+        ],
+        "infrastructure": [
+          "all"
+        ],
+        "logs": [
+          "all"
+        ],
+        "uptime": [
+          "all"
+        ]
+      },
+      "spaces": [
+        "sales",
+        "default"
+      ]
+    }
+  ]
 }
 --------------------------------------------------

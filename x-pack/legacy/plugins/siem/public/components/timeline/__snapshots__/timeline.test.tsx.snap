@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline rendering renders correctly against snapshot 1`] = `
+<AutoSizer
+  content={true}
+  detectAnyWindowResize={true}
+>
+  <Component />
+</AutoSizer>
+`;

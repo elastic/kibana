@@ -21,6 +21,7 @@ import { fieldFormats } from 'ui/registry/field_formats';
 import { createUrlFormat } from '../../common/field_formats/types/url';
 import { createBytesFormat } from '../../common/field_formats/types/bytes';
 import { createDateFormat } from '../../common/field_formats/types/date';
+import { createDateNanosFormat } from '../../common/field_formats/types/date_nanos';
 import { createRelativeDateFormat } from '../../common/field_formats/types/relative_date';
 import { createDurationFormat } from '../../common/field_formats/types/duration';
 import { createIpFormat } from '../../common/field_formats/types/ip';
@@ -36,6 +37,7 @@ import { createStaticLookupFormat } from '../../common/field_formats/types/stati
 fieldFormats.register(createUrlFormat);
 fieldFormats.register(createBytesFormat);
 fieldFormats.register(createDateFormat);
+fieldFormats.register(createDateNanosFormat);
 fieldFormats.register(createRelativeDateFormat);
 fieldFormats.register(createDurationFormat);
 fieldFormats.register(createIpFormat);

@@ -34,15 +34,17 @@ export function ContextPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
 
   class ContextPage {
-    async navigateTo(indexPattern, anchorType, anchorId, overrideInitialState = {}) {
+    async navigateTo(indexPattern, anchorId, overrideInitialState = {}) {
       const initialState = rison.encode({
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         ...config.get('apps.context'),
-        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
+        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
       });
+
+      log.debug(`browser.get(${appUrl})`);
 
       await browser.get(appUrl);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
@@ -91,8 +93,8 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
-        if (!(successorLoadMoreButton.isEnabled() && successorLoadMoreButton.isDisplayed() &&
-              predecessorLoadMoreButton.isEnabled() && predecessorLoadMoreButton.isDisplayed())) {
+        if (!(await successorLoadMoreButton.isEnabled() && await successorLoadMoreButton.isDisplayed() &&
+              await predecessorLoadMoreButton.isEnabled() && await predecessorLoadMoreButton.isDisplayed())) {
           throw new Error('loading context rows');
         }
       });

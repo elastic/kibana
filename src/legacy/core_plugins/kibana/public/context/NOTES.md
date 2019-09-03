@@ -90,7 +90,7 @@ directive including its respective styles.
 **api/anchor.js**: Exports `fetchAnchor()` that creates and executes the
 query for the anchor document.
 
-**api/context.js**: Exports `fetchPredecessors()` and `fetchSuccessors()` that
+**api/context.js**: Exports `fetchPredecessors()`, `fetchSuccessors()`, `fetchSurroundingDocs()` that
 create and execute the queries for the preceeding and succeeding documents.
 
 **api/utils**: Exports various functions used to create and transform

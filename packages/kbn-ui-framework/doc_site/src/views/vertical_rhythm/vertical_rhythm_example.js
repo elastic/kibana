@@ -27,10 +27,10 @@ import {
   GuideText,
 } from '../../components';
 
-const verticalRhythmHtml = require('./vertical_rhythm.html');
-const verticalRhythmSmallHtml = require('./vertical_rhythm_small.html');
-const verticalRhythmAsWrapperHtml = require('./vertical_rhythm_as_wrapper.html');
-const verticalRhythmOnComponentHtml = require('./vertical_rhythm_on_component.html');
+import verticalRhythmHtml from './vertical_rhythm.html';
+import verticalRhythmSmallHtml from './vertical_rhythm_small.html';
+import verticalRhythmAsWrapperHtml from './vertical_rhythm_as_wrapper.html';
+import verticalRhythmOnComponentHtml from './vertical_rhythm_on_component.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

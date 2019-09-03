@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default panel => error => {
+export const handleErrorResponse = panel => error => {
   if (error.isBoom && error.status === 401) throw error;
   const result = {};
   let errorResponse;
@@ -26,17 +26,23 @@ export default panel => error => {
   } catch (e) {
     errorResponse = error.response;
   }
-  if (!errorResponse) {
+  if (!errorResponse && !(error.name === 'KQLSyntaxError')) {
     errorResponse = {
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
+    };
+  }
+  if (error.name === 'KQLSyntaxError') {
+    errorResponse = {
+      message: error.shortMessage,
+      stack: error.stack,
     };
   }
   result[panel.id] = {
     id: panel.id,
     statusCode: error.statusCode,
     error: errorResponse,
-    series: []
+    series: [],
   };
   return result;
 };

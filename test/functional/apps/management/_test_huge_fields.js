@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields', function () {
@@ -30,15 +29,11 @@ export default function ({ getService, getPageObjects }) {
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
     it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
-      //default : maxPayloadBytes is 1048576
-      log.info('if there is a failure, start the server with "node scripts/functional_tests_server -- --server.maxPayloadBytes=1648576"');
       expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
     });
 

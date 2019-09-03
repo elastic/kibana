@@ -26,9 +26,9 @@ import { assert } from 'chai';
 import {
   DocumentMigrator,
   IndexMigrator,
-} from '../../../../src/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema';
+} from '../../../../src/core/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');
@@ -66,7 +66,42 @@ export default ({ getService }) => {
       await createIndex({ callCluster, index });
       await createDocs({ callCluster, index, docs: originalDocs });
 
-      const result = await migrateIndex({ callCluster, index, migrations, mappingProperties });
+      // Test that unrelated index templates are unaffected
+      await callCluster('indices.putTemplate', {
+        name: 'migration_test_a_template',
+        body: {
+          index_patterns: 'migration_test_a',
+          mappings: {
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
+          },
+        },
+      });
+
+      // Test that obsolete index templates get removed
+      await callCluster('indices.putTemplate', {
+        name: 'migration_a_template',
+        body: {
+          index_patterns: index,
+          mappings: {
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
+          },
+        },
+      });
+
+      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
+
+      const result = await migrateIndex({
+        callCluster,
+        index,
+        migrations,
+        mappingProperties,
+        obsoleteIndexTemplatePattern: 'migration_a*',
+      });
+
+      assert.isFalse(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
+      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' }));
 
       assert.deepEqual(_.omit(result, 'elapsedMs'), {
         destIndex: '.migration-a_2',
@@ -85,11 +120,11 @@ export default ({ getService }) => {
 
       // The docs in the alias have been migrated
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
-        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 } },
-        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
+        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 }, references: [] },
+        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 }, references: [] },
+        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' }, references: [] },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' }, references: [] },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' }, references: [] },
       ]);
     });
 
@@ -131,10 +166,10 @@ export default ({ getService }) => {
 
       // The index for the initial migration has not been destroyed...
       assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_2` }), [
-        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
-        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 } },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
+        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 }, references: [] },
+        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 }, references: [] },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' }, references: [] },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' }, references: [] },
       ]);
 
       // The docs were migrated again...
@@ -144,15 +179,17 @@ export default ({ getService }) => {
           type: 'bar',
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 68, name: 'NAME i' },
+          references: [],
         },
         {
           id: 'bar:o',
           type: 'bar',
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 6, name: 'NAME o' },
+          references: [],
         },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' } },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' }, references: [] },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' }, references: [] },
       ]);
     });
 
@@ -203,7 +240,7 @@ export default ({ getService }) => {
 
       // The docs in the alias have been migrated
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'foo:lotr', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'LOTR' } },
+        { id: 'foo:lotr', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'LOTR' }, references: [] },
       ]);
     });
   });
@@ -219,14 +256,14 @@ async function createIndex({ callCluster, index }) {
   };
   await callCluster('indices.create', {
     index,
-    body: { mappings: { doc: { dynamic: 'strict', properties } } },
+    body: { mappings: { dynamic: 'strict', properties } },
   });
 }
 
 async function createDocs({ callCluster, index, docs }) {
   await callCluster('bulk', {
     body: docs.reduce((acc, doc) => {
-      acc.push({ index: { _id: doc.id, _index: index, _type: 'doc' } });
+      acc.push({ index: { _id: doc.id, _index: index } });
       acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
@@ -234,7 +271,7 @@ async function createDocs({ callCluster, index, docs }) {
   await callCluster('indices.refresh', { index });
 }
 
-async function migrateIndex({ callCluster, index, migrations, mappingProperties, validateDoc }) {
+async function migrateIndex({ callCluster, index, migrations, mappingProperties, validateDoc, obsoleteIndexTemplatePattern }) {
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
     migrations,
@@ -242,15 +279,16 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
   });
 
   const migrator = new IndexMigrator({
-    batchSize: 10,
     callCluster,
     documentMigrator,
     index,
-    log: _.noop,
+    obsoleteIndexTemplatePattern,
     mappingProperties,
+    batchSize: 10,
+    log: _.noop,
     pollInterval: 50,
     scrollDuration: '5m',
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema())
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
   });
 
   return await migrator.migrate();
@@ -259,7 +297,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
 async function fetchDocs({ callCluster, index }) {
   const {
     hits: { hits },
-  } = await callCluster('search', { index, type: 'doc' });
+  } = await callCluster('search', { index });
   return hits.map(h => ({
     ...h._source,
     id: h._id,

@@ -14,7 +14,7 @@ answers for frequently asked questions related to the {kib} {monitor-features}.
 *Symptoms:*
 
 The following error appears in a banner at the top of the screen in {kib} on the 
-*Monitoring > Clusters* page:
+*Stack Monitoring > Clusters* page:
 `You can't view the "<my_cluster>" cluster because the license information is invalid.`
 
 *Resolution:*
@@ -28,7 +28,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 
 *Symptoms:*
 
-The *Monitoring* page in {kib} is empty. 
+The *Stack Monitoring* page in {kib} is empty. 
 
 *Resolution:*
 

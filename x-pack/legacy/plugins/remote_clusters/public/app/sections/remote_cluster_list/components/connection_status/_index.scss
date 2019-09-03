@@ -1,0 +1,6 @@
+/**
+ * 1. Prevent inherited flexbox layout from compressing this element on IE.
+ */
+ .remoteClustersConnectionStatus__message {
+  flex-basis: auto !important; /* 1 */
+}

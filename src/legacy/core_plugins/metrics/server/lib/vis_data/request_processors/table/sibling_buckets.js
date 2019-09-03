@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
-import getBucketSize from '../../helpers/get_bucket_size';
-import bucketTransform from '../../helpers/bucket_transform';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { bucketTransform } from '../../helpers/bucket_transform';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
-export default function siblingBuckets(req, panel) {
+
+export function siblingBuckets(req, panel, esQueryConfig, indexPatternObject) {
   return next => doc => {
-    const { interval } = getIntervalAndTimefield(panel);
+    const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { bucketSize } = getBucketSize(req, interval);
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);

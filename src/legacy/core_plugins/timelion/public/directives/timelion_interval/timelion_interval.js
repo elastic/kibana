@@ -23,7 +23,7 @@ import $ from 'jquery';
 const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';
 
-app.directive('timelionInterval', function ($compile, $timeout) {
+app.directive('timelionInterval', function ($timeout) {
   return {
     restrict: 'E',
     scope: {

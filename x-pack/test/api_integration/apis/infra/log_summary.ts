@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { pairs } from 'd3-array';
-import expect from 'expect.js';
 import gql from 'graphql-tag';
 
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const EARLIEST_TIME_WITH_DATA = new Date('2018-10-17T19:42:22.000Z').valueOf();
 const LATEST_TIME_WITH_DATA = new Date('2018-10-17T19:57:21.611Z').valueOf();
@@ -41,13 +41,13 @@ const logSummaryBetweenQuery = gql`
   }
 `;
 
-const logSummaryTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
   describe('logSummaryBetween', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {
       const start = EARLIEST_TIME_WITH_DATA;
@@ -80,7 +80,4 @@ const logSummaryTests: KbnTestProvider = ({ getService }) => {
       ).to.equal(true);
     });
   });
-};
-
-// tslint:disable-next-line no-default-export
-export default logSummaryTests;
+}

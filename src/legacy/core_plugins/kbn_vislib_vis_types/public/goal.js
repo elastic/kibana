@@ -18,18 +18,19 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
 
-export default function GoalVisType(Private, i18n) {
+export default function GoalVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'goal',
-    title: i18n('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+    title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
     icon: 'visGoal',
-    description: i18n('kbnVislibVisTypes.goal.goalDescription', {
+    description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
     visConfig: {
@@ -60,12 +61,12 @@ export default function GoalVisType(Private, i18n) {
           scale: {
             show: false,
             labels: false,
-            color: '#333',
+            color: 'rgba(105,112,125,0.2)',
             width: 2
           },
           type: 'meter',
           style: {
-            bgFill: '#000',
+            bgFill: 'rgba(105,112,125,0.2)',
             bgColor: false,
             labelColor: false,
             subText: '',
@@ -79,17 +80,41 @@ export default function GoalVisType(Private, i18n) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        gaugeTypes: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+              defaultMessage: 'Arc',
+            }),
+            value: 'Arc',
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+              defaultMessage: 'Circle',
+            }),
+            value: 'Circle',
+          },
+        ],
+        alignments: [
+          {
+            value: 'automatic',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+          },
+          {
+            value: 'horizontal',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+          },
+          {
+            value: 'vertical',
+            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+        ],
+        colorSchemas,
       },
-      optionsTemplate: gaugeTemplate,
+      optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
@@ -101,10 +126,10 @@ export default function GoalVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     },

@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
+<Fragment>
+  <span
+    className="ml-explorer-chart-label"
+  >
+    <span
+      className="ml-explorer-chart-label-detector"
+    >
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+       – 
+    </span>
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        }
+      }
+      key="nginx.access.remote_ip 72.57.0.53"
+    />
+     
+    <span
+      className="ml-explorer-chart-info-icon"
+    >
+      <EuiIconTip
+        className="ml-explorer-chart-eui-icon-tip"
+        content={
+          <InjectIntl(ExplorerChartInfoTooltip)
+            aggregationInterval="1h"
+            chartFunction="sum nginx.access.body_sent.bytes"
+            entityFields={
+              Array [
+                Object {
+                  "fieldName": "nginx.access.remote_ip",
+                  "fieldValue": "72.57.0.53",
+                },
+              ]
+            }
+            jobId="population-03"
+          />
+        }
+        position="top"
+        size="s"
+      />
+    </span>
+  </span>
+</Fragment>
+`;
+
+exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
+<Fragment>
+  <span
+    className="ml-explorer-chart-label"
+  >
+    <span
+      className="ml-explorer-chart-label-detector"
+    >
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+       
+    </span>
+    <span
+      className="ml-explorer-chart-info-icon"
+    >
+      <EuiIconTip
+        className="ml-explorer-chart-eui-icon-tip"
+        content={
+          <InjectIntl(ExplorerChartInfoTooltip)
+            aggregationInterval="1h"
+            chartFunction="sum nginx.access.body_sent.bytes"
+            entityFields={
+              Array [
+                Object {
+                  "fieldName": "nginx.access.remote_ip",
+                  "fieldValue": "72.57.0.53",
+                },
+              ]
+            }
+            jobId="population-03"
+          />
+        }
+        position="top"
+        size="s"
+      />
+    </span>
+  </span>
+  <span
+    className="ml-explorer-chart-label-badges"
+  >
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        }
+      }
+      key="nginx.access.remote_ip 72.57.0.53"
+    />
+  </span>
+</Fragment>
+`;

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded'];
+const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
 const KIBANA_INDEX = '.kibana';
 
-export function extendEsArchiver({ esArchiver, kibanaServer, defaults }) {
+export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) {
   // only extend the esArchiver if there are default uiSettings to restore
   if (!defaults) {
     return;
@@ -35,8 +35,10 @@ export function extendEsArchiver({ esArchiver, kibanaServer, defaults }) {
 
       // if the kibana index was created by the esArchiver then update the uiSettings
       // with the defaults to make sure that they are always in place initially
-      if (stats[KIBANA_INDEX] && stats[KIBANA_INDEX].created) {
-        await kibanaServer.uiSettings.update(defaults);
+      if (stats[KIBANA_INDEX] && (stats[KIBANA_INDEX].created || stats[KIBANA_INDEX].deleted)) {
+        await retry.try(async () => {
+          await kibanaServer.uiSettings.update(defaults);
+        });
       }
 
       return stats;

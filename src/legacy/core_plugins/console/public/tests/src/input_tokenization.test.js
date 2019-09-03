@@ -322,7 +322,7 @@ describe('Input Tokenization', () => {
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
   '{\n' +
-  '  "script": { "inline": "" }\n' +
+  '  "script": { "source": "" }\n' +
   '}'
   );
 

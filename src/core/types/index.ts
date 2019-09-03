@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { CoreContext } from './core_context';
-export { CoreService } from './core_service';
+/**
+ * Use * syntax so that these exports do not break when internal
+ * types are stripped.
+ */
+export * from './core_service';
