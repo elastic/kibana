@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { unsafeGet } from './builtin_action_types/lib/result_type';
+import { isErr } from './builtin_action_types/lib/result_type';
 import {
   ActionsKibanaConfig,
   getActionsConfigurationUtilities,
   WhitelistedHosts,
 } from './actions_config';
+
+function unsafeGet<T, E>(result: Result<T, E>): T {
+  if (isErr(result)) {
+    throw new Error(`${result.error}`);
+  }
+  return result.value;
+}
 
 describe('isWhitelistedHostname', () => {
   test('returns true when "any" hostnames are allowed', () => {
