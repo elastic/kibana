@@ -47,12 +47,6 @@ Here, you can set the scale to use for the minimap timeline, choose whether to w
 === Stream or pause logs
 Click *Stream live* to start streaming live log data, or click *Stop streaming* to focus on historical data.
 
-[role="screenshot"]
-image::logs/images/logs-usage-start-streaming.png[Logs start streaming]
-
-[role="screenshot"]
-image::logs/images/logs-usage-stop-streaming.png[Logs stop streaming]
-
 When you are viewing historical data, you can scroll back through the entries as far as there is data available.
 
 When you are streaming live data, the most recent log appears at the bottom of the page.
