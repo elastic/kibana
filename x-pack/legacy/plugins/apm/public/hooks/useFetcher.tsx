@@ -15,12 +15,13 @@ import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetc
 export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
-  FAILURE = 'failure'
+  FAILURE = 'failure',
+  PENDING = 'pending'
 }
 
 interface Result<Data> {
   data: Data;
-  status?: FETCH_STATUS;
+  status: FETCH_STATUS;
   error?: Error;
 }
 
@@ -32,6 +33,7 @@ export function useFetcher<TState>(
   }
 ): Result<TState> & { refresh: () => void };
 
+// To avoid infinite rescursion when infering the type of `TState` `initialState` must be given if `prevResult` is consumed
 export function useFetcher<TState>(
   fn: (prevResult: Result<TState>) => Promise<TState> | TState | undefined,
   fnDeps: any[],
@@ -53,7 +55,8 @@ export function useFetcher(
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<Result<unknown>>({
-    data: options.initialState
+    data: options.initialState,
+    status: FETCH_STATUS.PENDING
   });
   const [counter, setCounter] = useState(0);
 
