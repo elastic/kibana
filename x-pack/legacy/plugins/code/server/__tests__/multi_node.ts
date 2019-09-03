@@ -89,7 +89,13 @@ describe.skip('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: { ...xpackOption, code: { codeNodeUrl: `http://localhost:${codePort}` } },
+          xpack: {
+            ...xpackOption,
+            code: {
+              codeNodeUrl: `http://localhost:${codePort}`,
+              ui: { enabled: true },
+            },
+          },
           logging: { silent: false },
         },
       },
@@ -109,7 +115,10 @@ describe.skip('code in multiple nodes', () => {
       plugins: { paths: [pluginPaths] },
       xpack: {
         ...xpackOption,
-        code: { codeNodeUrl: `http://localhost:${codePort}` },
+        code: {
+          ui: { enabled: true },
+          codeNodeUrl: `http://localhost:${codePort}`,
+        },
       },
       logging: { silent: true },
     };
