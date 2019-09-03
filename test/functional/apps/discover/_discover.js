@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -142,28 +142,24 @@ export default function ({ getService, getPageObjects }) {
         }
       });
 
-      it.skip('should modify the time range when a bar is clicked', async function () {
+      it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
-        await PageObjects.discover.clickHistogramBar(0);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.discover.clickHistogramBar();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
-        expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
+        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
         const rowData = await PageObjects.discover.getDocTableIndex(1);
-        expect(rowData).to.have.string('Sep 20, 2015 @ 02:57:03.761');
+        expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
       });
 
-      it.skip('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
-        await PageObjects.discover.brushHistogram(0, 1);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(3);
+        expect(Math.round(newDurationHours)).to.be(108);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
-        expect(rowData).to.have.string('Sep 20, 2015 @ 02:56:02.323');
+        expect(rowData).to.have.string('Sep 22, 2015 @ 23:50:13.253');
       });
 
       it('should show correct initial chart interval of Auto', async function () {

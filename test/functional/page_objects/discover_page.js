@@ -116,16 +116,17 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async clickHistogramBar(i) {
-      const bars = await find.allByCssSelector(`.series.histogram rect`);
-      await bars[i].click();
+    async clickHistogramBar() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+
+      await browser.clickMouseButton(el, 200, 20);
     }
 
-    async brushHistogram(from, to) {
-      const bars = await find.allByCssSelector('.series.histogram rect');
+    async brushHistogram() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
       await browser.dragAndDrop(
-        { location: bars[from], offset: { x: 0, y: -5 } },
-        { location: bars[to], offset: { x: 0, y: -5 } }
+        { location: el, offset: { x: 200, y: 20 } },
+        { location: el, offset: { x: 400, y: 30 } }
       );
     }
 
