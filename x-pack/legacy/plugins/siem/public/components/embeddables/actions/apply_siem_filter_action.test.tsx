@@ -6,7 +6,11 @@
 
 import { get } from 'lodash/fp';
 
-import { ApplySiemFilterAction, getExpressionFromArray } from './apply_siem_filter_action';
+import {
+  ApplySiemFilterAction,
+  getExpressionFromArray,
+  getFilterExpression,
+} from './apply_siem_filter_action';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
 import { Action } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
@@ -176,6 +180,23 @@ describe('ApplySiemFilterAction', () => {
         throw new Error('Invalid embeddable/triggerContext in unit test');
       }
     });
+  });
+});
+
+describe('#getFilterExpression', () => {
+  test('it returns an empty expression if no filterValue is provided', () => {
+    const layerList = getFilterExpression('host.id', undefined);
+    expect(layerList).toEqual('(NOT host.id:*)');
+  });
+
+  test('it returns a valid expression when provided single filterValue', () => {
+    const layerList = getFilterExpression('host.id', 'aa8df15');
+    expect(layerList).toEqual('host.id: "aa8df15"');
+  });
+
+  test('it returns a valid expression when provided array filterValue', () => {
+    const layerList = getFilterExpression('host.id', ['xavier', 'angela', 'frank']);
+    expect(layerList).toEqual('(host.id: "xavier" OR host.id: "angela" OR host.id: "frank")');
   });
 });
 
