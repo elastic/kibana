@@ -136,4 +136,6 @@ export {
   getPreviousAxisNumbers,
   mapPositionOpposite,
   mapPosition,
+  AXIS_PREFIX,
+  RADIX,
 };

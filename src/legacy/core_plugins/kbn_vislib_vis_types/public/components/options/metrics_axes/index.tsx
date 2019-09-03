@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, uniq, get } from 'lodash';
+import { capitalize, cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
@@ -36,6 +36,8 @@ import {
   AxesNumbers,
   mapPositionOpposite,
   mapPosition,
+  AXIS_PREFIX,
+  RADIX,
 } from './utils';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
@@ -177,11 +179,20 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       stateParams.valueAxes.forEach((axis, index) => {
         if (isAxisHorizontal(axis.position) === isChartHorizontal) {
           const position = mapPosition(axis.position);
-          onValueAxisPositionChanged(index, position);
+          const newName =
+            capitalize(position) + AXIS_PREFIX + parseInt(axis.name.split(AXIS_PREFIX)[1], RADIX);
+
+          const valueAxes = [...stateParams.valueAxes];
+          valueAxes[index] = {
+            ...valueAxes[index],
+            name: newName,
+            position,
+          };
+          setValue('valueAxes', valueAxes);
         }
       });
     },
-    [stateParams.valueAxes, onValueAxisPositionChanged]
+    [stateParams.valueAxes, setValue]
   );
 
   const addValueAxis = useCallback(() => {
