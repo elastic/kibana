@@ -11,7 +11,7 @@ import {
   EuiProgress,
   EuiPopover,
   EuiLoadingSpinner,
-  EuiButtonIcon,
+  EuiKeyboardAccessible,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -200,121 +200,128 @@ export function FieldItem({
         field.type
       } lnsFieldListPanel__field--${exists ? 'exists' : 'missing'}`}
     >
-      <div className="lnsFieldListPanel__fieldInfo">
-        <FieldIcon type={field.type as DataType} />
+      <EuiPopover
+        id="lnsFieldListPanel__field"
+        button={
+          <EuiKeyboardAccessible>
+            <div
+              className="lnsFieldListPanel__fieldInfo"
+              onClick={() => {
+                if (exists) {
+                  setOpen(!infoIsOpen);
+                }
+              }}
+              onKeyPress={event => {
+                if (exists && event.key === 'ENTER') {
+                  setOpen(!infoIsOpen);
+                }
+              }}
+              title={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
+                defaultMessage: 'Click or Enter for more information about {fieldName}',
+                values: { fieldName: field.name },
+              })}
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
+                defaultMessage: 'Click or Enter for more information about {fieldName}',
+                values: { fieldName: field.name },
+              })}
+            >
+              <FieldIcon type={field.type as DataType} />
 
-        <span className="lnsFieldListPanel__fieldName" title={field.name}>
-          {wrappableHighlightableFieldName}
-        </span>
+              <span className="lnsFieldListPanel__fieldName" title={field.name}>
+                {wrappableHighlightableFieldName}
+              </span>
+            </div>
+          </EuiKeyboardAccessible>
+        }
+        isOpen={infoIsOpen}
+        closePopover={() => setOpen(false)}
+        anchorPosition="rightUp"
+      >
+        <div>
+          {state.isLoading && <EuiLoadingSpinner />}
 
-        {exists && (
-          <EuiPopover
-            id="lnsFieldListPanel__field"
-            button={
-              <EuiButtonIcon
-                iconType="magnifyWithPlus"
-                onClick={() => setOpen(true)}
-                title={i18n.translate('xpack.lens.indexPattern.fieldStatsButtton', {
-                  defaultMessage: 'See more information about {fieldName}',
-                  values: { fieldName: field.name },
-                })}
-                aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtton', {
-                  defaultMessage: 'See more information about {fieldName}',
-                  values: { fieldName: field.name },
-                })}
+          {state.histogram && (
+            <Chart className="lnsDistributionChart">
+              <Settings rotation={90} />
+
+              <Axis
+                id={getAxisId('key')}
+                position={Position.Left}
+                tickFormat={d => formatter.convert(d)}
               />
-            }
-            isOpen={infoIsOpen}
-            closePopover={() => setOpen(false)}
-            anchorPosition="rightUp"
-          >
+              <Axis id={getAxisId('doc_count')} position={Position.Bottom} />
+
+              <BarSeries
+                data={state.histogram.buckets}
+                id={specId}
+                xAccessor={'key'}
+                yAccessors={['doc_count']}
+                xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                customSeriesColors={seriesColors}
+              />
+            </Chart>
+          )}
+
+          {state.topValues && (
             <div>
-              {state.isLoading && <EuiLoadingSpinner />}
-
-              {state.histogram && (
-                <Chart className="lnsDistributionChart">
-                  <Settings rotation={90} />
-
-                  <Axis
-                    id={getAxisId('key')}
-                    position={Position.Left}
-                    tickFormat={d => formatter.convert(d)}
-                  />
-                  <Axis id={getAxisId('doc_count')} position={Position.Bottom} />
-
-                  <BarSeries
-                    data={state.histogram.buckets}
-                    id={specId}
-                    xAccessor={'key'}
-                    yAccessors={['doc_count']}
-                    xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
-                    yScaleType={ScaleType.Linear}
-                    customSeriesColors={seriesColors}
-                  />
-                </Chart>
-              )}
-
-              {state.topValues && (
+              {state.doc_count && (
                 <div>
-                  {state.doc_count && (
-                    <div>
-                      <div>
-                        {state.topValues.buckets.map(topValue => (
-                          <EuiFlexGroup gutterSize="xs" alignItems="center" key={topValue.key}>
-                            <EuiFlexItem
-                              grow={false}
-                              style={{ width: 100 }}
-                              className="eui-textTruncate"
-                            >
-                              <EuiToolTip content={formatter.convert(topValue.key)}>
-                                <EuiText size="s" textAlign="right">
-                                  {formatter.convert(topValue.key)}
-                                </EuiText>
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={1}>
-                              <EuiProgress
-                                value={topValue.doc_count / state.doc_count!}
-                                max={1}
-                                size="l"
-                                color={
-                                  field.type === 'string'
-                                    ? 'accent'
-                                    : field.type === 'number'
-                                    ? 'secondary'
-                                    : 'primary'
-                                }
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              grow={false}
-                              style={{ width: 70 }}
-                              className="eui-textTruncate"
-                            >
-                              <EuiText size="s" textAlign="left">
-                                {((topValue.doc_count / state.doc_count!) * 100).toFixed(1)}%
-                              </EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    {state.topValues.buckets.map(topValue => (
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" key={topValue.key}>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ width: 100 }}
+                          className="eui-textTruncate"
+                        >
+                          <EuiToolTip content={formatter.convert(topValue.key)}>
+                            <EuiText size="s" textAlign="right">
+                              {formatter.convert(topValue.key)}
+                            </EuiText>
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={1}>
+                          <EuiProgress
+                            value={topValue.doc_count / state.doc_count!}
+                            max={1}
+                            size="l"
+                            color={
+                              field.type === 'string'
+                                ? 'accent'
+                                : field.type === 'number'
+                                ? 'secondary'
+                                : 'primary'
+                            }
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ width: 70 }}
+                          className="eui-textTruncate"
+                        >
+                          <EuiText size="s" textAlign="left">
+                            {((topValue.doc_count / state.doc_count!) * 100).toFixed(1)}%
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ))}
+                  </div>
                 </div>
               )}
-
-              {state.doc_count && (
-                <EuiText size="s">
-                  {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
-                    defaultMessage: 'Sampled from {sampleCount} documents',
-                    values: { sampleCount: state.doc_count },
-                  })}
-                </EuiText>
-              )}
             </div>
-          </EuiPopover>
-        )}
-      </div>
+          )}
+
+          {state.doc_count && (
+            <EuiText size="s">
+              {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
+                defaultMessage: 'Sampled from {sampleCount} documents',
+                values: { sampleCount: state.doc_count },
+              })}
+            </EuiText>
+          )}
+        </div>
+      </EuiPopover>
     </DragDrop>
   );
 }

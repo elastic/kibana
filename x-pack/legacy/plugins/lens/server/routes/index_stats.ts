@@ -277,8 +277,10 @@ export function recursiveFlatten(
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
-  field: { name: string; type: string }
+  aggSearchWithBody: (
+    body: unknown
+  ) => Promise<AggregationSearchResponse<unknown, { body: { aggs: unknown } }>>,
+  field: { name: string; type: string; esTypes?: string[] }
 ) {
   const minMaxResult: AggregationSearchResponse<
     unknown,
@@ -320,10 +322,13 @@ export async function getNumberHistogram(
   const maxValue = minMaxResult.aggregations.sample.max_value.value;
   const terms = minMaxResult.aggregations.sample.top_values;
 
-  const histogramInterval = (maxValue - minValue) / 10;
+  let histogramInterval = (maxValue - minValue) / 10;
+
+  if (Number.isInteger(minValue) && Number.isInteger(maxValue)) {
+    histogramInterval = Math.ceil(histogramInterval);
+  }
 
   if (histogramInterval === 0) {
-    // return { buckets: [] };
     return {
       top_values: terms,
       histogram: { buckets: [], doc_count: minMaxResult.aggregations.sample.doc_count },
