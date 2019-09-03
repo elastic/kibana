@@ -31,10 +31,11 @@ import {
   Rotates,
   getConfigCollections,
 } from './utils/collections';
-import { getAreaOptionTabs } from './utils/common_config';
+import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const countLabel = getCountLabel();
 
   return VisFactory.createVislibVisualization({
     name: 'horizontal_bar',
@@ -89,7 +90,7 @@ export default function PointSeriesVisType(Private) {
               truncate: 100
             },
             title: {
-              text: 'Count'
+              text: countLabel,
             }
           }
         ],
@@ -98,7 +99,7 @@ export default function PointSeriesVisType(Private) {
           type: ChartTypes.HISTOGRAM,
           mode: ChartModes.NORMAL,
           data: {
-            label: 'Count',
+            label: countLabel,
             id: '1'
           },
           valueAxis: 'ValueAxis-1',

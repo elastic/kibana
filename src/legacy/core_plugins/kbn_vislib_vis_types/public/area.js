@@ -33,11 +33,12 @@ import {
   ThresholdLineStyles,
   getConfigCollections,
 } from './utils/collections';
-import { getAreaOptionTabs } from './utils/common_config';
+import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
 import { palettes } from '@elastic/eui/lib/services';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const countLabel = getCountLabel();
 
   return VisFactory.createVislibVisualization({
     name: 'area',
@@ -88,7 +89,7 @@ export default function PointSeriesVisType(Private) {
               truncate: 100
             },
             title: {
-              text: 'Count'
+              text: countLabel
             }
           }
         ],
@@ -98,7 +99,7 @@ export default function PointSeriesVisType(Private) {
             type: ChartTypes.AREA,
             mode: ChartModes.STACKED,
             data: {
-              label: 'Count',
+              label: countLabel,
               id: '1'
             },
             drawLinesBetweenPoints: true,
