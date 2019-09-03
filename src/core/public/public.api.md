@@ -37,6 +37,9 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
+    getUrlForApp(appId: string, options?: {
+        path?: string;
+    }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
         state?: any;
