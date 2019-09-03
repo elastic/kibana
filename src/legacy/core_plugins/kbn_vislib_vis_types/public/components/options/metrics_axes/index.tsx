@@ -93,7 +93,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       stateParams.seriesParams.forEach((series, seriesIndex) => {
         if ((axisNumber === 0 && !series.valueAxis) || series.valueAxis === axis.id) {
-          const aggByIndex = aggs.bySchemaName.metric[seriesIndex];
+          const aggByIndex = aggs.bySchemaName('metric')[seriesIndex];
           matchingSeries.push(aggByIndex);
         }
       });
@@ -251,7 +251,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
-    return aggs.bySchemaName[schemaName];
+    return aggs.bySchemaName(schemaName);
   }, [vis.type.schemas.metrics[0].name, aggs, aggsLabels]);
 
   const firstValueAxesId = stateParams.valueAxes[0].id;

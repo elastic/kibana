@@ -83,7 +83,7 @@ uiModules
         $scope.aggsLabels = '';
 
         $scope.$watch(() => {
-          return $scope.editorState.aggs.map(agg => {
+          return $scope.editorState.aggs.aggs.map(agg => {
             return safeMakeLabel(agg);
           }).join();
         }, value => {
