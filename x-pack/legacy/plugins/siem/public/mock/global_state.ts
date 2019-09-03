@@ -19,6 +19,12 @@ import {
 import { State } from '../store';
 
 import { defaultHeaders } from './header';
+import {
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  DEFAULT_INTERVAL_TYPE,
+  DEFAULT_INTERVAL_VALUE,
+} from '../../common/constants';
 
 export const mockGlobalState: State = {
   app: {
@@ -111,16 +117,16 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['timeline'],
       query: [],
-      policy: { kind: 'manual', duration: 300000 },
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
     timeline: {
-      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['global'],
       query: [],
-      policy: { kind: 'manual', duration: 300000 },
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },

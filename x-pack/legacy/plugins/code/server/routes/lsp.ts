@@ -52,16 +52,15 @@ export function lspRoute(
             const requestPromise = lspService.sendRequest(endpoint, {
               method: `textDocument/${method}`,
               params: req.payload,
-              timeoutForInitializeMs: 1000,
             });
             return await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
           } catch (error) {
             if (error instanceof ResponseError) {
               // hide some errors;
               if (
-                error.code !== UnknownFileLanguage ||
-                error.code !== ServerNotInitialized ||
-                error.code !== LanguageServerStartFailed
+                error.code === UnknownFileLanguage ||
+                error.code === ServerNotInitialized ||
+                error.code === LanguageServerStartFailed
               ) {
                 log.debug(error);
               }
@@ -102,7 +101,6 @@ export function lspRoute(
         lspService.sendRequest(endpoint, {
           method: `textDocument/edefinition`,
           params: { textDocument: { uri }, position },
-          timeoutForInitializeMs: 1000,
         })
       );
       const hover = await lspService.sendRequest(endpoint, {
@@ -149,7 +147,6 @@ export function lspRoute(
           lspService.sendRequest(endpoint, {
             method: `textDocument/references`,
             params: { textDocument: { uri }, position },
-            timeoutForInitializeMs: 1000,
           })
         );
         const hover = await lspService.sendRequest(endpoint, {

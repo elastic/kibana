@@ -20,7 +20,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { Anomaly } from '../../components/ml/types';
 
 const HostsBodyComponent = pure<HostsComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker, children }) => {
+  ({ filterQuery, kqlQueryExpression, setAbsoluteRangeDatePicker, children }) => {
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
@@ -31,6 +31,7 @@ const HostsBodyComponent = pure<HostsComponentProps>(
                   {children({
                     endDate: to,
                     filterQuery,
+                    kqlQueryExpression,
                     skip: isInitializing,
                     setQuery,
                     startDate: from,
@@ -59,8 +60,10 @@ HostsBodyComponent.displayName = 'HostsBodyComponent';
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
+  const hostsFilterQueryExpression = hostsSelectors.hostsFilterQueryExpression();
   const mapStateToProps = (state: State) => ({
     filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
+    kqlQueryExpression: hostsFilterQueryExpression(state, hostsModel.HostsType.page) || '',
   });
   return mapStateToProps;
 };
