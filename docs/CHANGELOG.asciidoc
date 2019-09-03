@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.3>>
 * <<release-notes-6.8.2>>
 * <<release-notes-6.8.1>>
 * <<release-notes-6.8.0>>
@@ -89,6 +90,14 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.8.3]]
+== {kib} 6.8.3
+
+[float]
+[[bug-6.8.3]]
+=== Bug fixes
+Monitoring::
+* Fixes the inability to complete a single `date_histogram` aggregation for `get_nodes` calls {pull}43481[#43481]
 
 [[release-notes-6.8.2]]
 == {kib} 6.8.2
