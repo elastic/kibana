@@ -17,22 +17,17 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import { AggConfig, VisState } from 'src/legacy/ui/public/vis';
+import { EditorConfig } from 'src/legacy/ui/public/vis/editors/config/types';
+import { SubAggParamsProp } from 'src/legacy/ui/public/vis/editors/default';
+import { AggParam } from '../../../../agg_types';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
-
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
-}
+export const aggParamCommonPropsMock = {
+  agg: {} as AggConfig,
+  aggParam: {} as AggParam,
+  editorConfig: {} as EditorConfig,
+  metricAggs: [] as AggConfig[],
+  subAggParams: {} as SubAggParamsProp,
+  state: {} as VisState,
+  showValidation: false,
+};
