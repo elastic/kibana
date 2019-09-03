@@ -30,7 +30,7 @@ visualizations.types.visTypeAliasRegistry.add({
         return {
           id,
           title,
-          editUrl: `/app/lens#/edit/${id}`,
+          editUrl: `${BASE_APP_URL}#/edit/${id}`,
           icon: 'faceHappy',
           isExperimental: true,
           savedObjectType: type,
