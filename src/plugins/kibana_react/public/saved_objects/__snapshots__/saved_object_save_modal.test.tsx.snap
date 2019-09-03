@@ -50,6 +50,27 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
               value="Saved Object title"
             />
           </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Description"
+                id="kibana-react.savedObjects.saveModal.descriptionLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiTextArea
+              data-test-subj="viewDescription"
+              fullWidth={false}
+              onChange={[Function]}
+              resize="vertical"
+              value=""
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
