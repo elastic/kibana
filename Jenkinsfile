@@ -17,14 +17,14 @@ timeout(time: 180, unit: 'MINUTES') {
           getOssCiGroupWorker(4),
           getOssCiGroupWorker(5),
           getOssCiGroupWorker(6),
-          getOssCiGroupWorkers(7),
+          getOssCiGroupWorker(7),
           getOssCiGroupWorker(8),
           getOssCiGroupWorker(9),
           getOssCiGroupWorker(10),
           getOssCiGroupWorker(11),
           getOssCiGroupWorker(12),
-          getPostBuildWorker("visualRegression", { bash "./test/scripts/jenkins_visual_regression.sh" }),
-          getPostBuildWorker("firefoxSmoke", { bash "./test/scripts/jenkins_firefox_smoke.sh" }),
+          getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+          getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
         ]),
         'kibana-xpack-tests-1': withWorkers('kibana-xpack-tests', { buildXpack() }, [
           getXpackCiGroupWorker(1),
@@ -37,18 +37,12 @@ timeout(time: 180, unit: 'MINUTES') {
           getXpackCiGroupWorker(8),
           getXpackCiGroupWorker(9),
           getXpackCiGroupWorker(10),
-          getPostBuildWorker('xpack-firefoxSmoke', { bash './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-          getPostBuildWorker('xpack-visualRegression', { bash './test/scripts/jenkins_xpack_visual_regression.sh' }),
+          getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+          getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
         ]),
         // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
       ])
     }
-  }
-}
-
-def withWorker(label, closure) {
-  node(label) {
-    closure()
   }
 }
 
@@ -73,22 +67,16 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
         workerClosures.eachWithIndex { workerClosure, i -> workers["worker-${i+1}"] = worker(workerClosure) }
 
         parallel(workers)
-      } catch(ex) {
-        // input "Waiting" // TODO remove
       } finally {
-        uploadAllGcsArtifacts(name) // TODO fix name
+        uploadAllGcsArtifacts(name)
         publishJunit()
       }
     }
   }
 }
 
-def getOssCiGroupWorkers(ciGroups = []) {
-  return ciGroups.collect { getOssCiGroupWorker(it) }
-}
-
 def getPostBuildWorker(name, closure) {
-  return { workerNumber -> 
+  return { workerNumber ->
     stage(name) {
       def kibanaPort = "61${workerNumber}1"
       def esPort = "61${workerNumber}2"
@@ -115,7 +103,7 @@ def getOssCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
-      runbld "./test/scripts/jenkins_ci_group.sh" // TODO runbld
+      runbld "./test/scripts/jenkins_ci_group.sh"
     }
   })
 }
@@ -126,13 +114,9 @@ def getXpackCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
-      runbld "./test/scripts/jenkins_xpack_ci_group.sh" // TODO runbld
+      runbld "./test/scripts/jenkins_xpack_ci_group.sh"
     }
   })
-}
-
-def ossTestRunner(ciGroups) {
-  withWorkers('oss-ciGroups-' + ciGroups.join('.'), { buildOss() }, ciGroups.collect{ getOssCiGroupWorker(it) })
 }
 
 def legacyJobRunner(name) {
@@ -146,7 +130,7 @@ def legacyJobRunner(name) {
             runbld '.ci/run.sh'
           }
         } finally {
-          uploadAllGcsArtifacts(name) // TODO fix name
+          uploadAllGcsArtifacts(name)
           publishJunit()
         }
       }
@@ -168,7 +152,7 @@ def jobRunner(label, closure) {
       string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
       string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
     ]) {
-      withWorker(label) {
+      node(label) {
         withVaultSecret(secret: 'secret/kibana-issues/dev/kibanamachine', secret_field: 'github_token', variable_name: 'GITHUB_TOKEN') {
           withVaultSecret(secret: 'secret/kibana-issues/dev/kibanamachine-reporter', secret_field: 'value', variable_name: 'KIBANA_CI_REPORTER_KEY') {
             withVaultSecret(secret: 'secret/kibana-issues/dev/percy', secret_field: 'value', variable_name: 'PERCY_TOKEN') {
@@ -243,13 +227,13 @@ def bash(script) {
 }
 
 def doSetup() {
-  runbld "./test/scripts/jenkins_setup.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_setup.sh"
 }
 
 def buildOss() {
-  runbld "./test/scripts/jenkins_build_kibana.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_build_kibana.sh"
 }
 
 def buildXpack() {
-  runbld "./test/scripts/jenkins_xpack_build_kibana.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_xpack_build_kibana.sh"
 }
