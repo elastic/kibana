@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  Feature,
-  FeatureKibanaPrivileges,
-  uiCapabilitiesRegex,
-} from './server/lib/feature_registry';
+export default function ({ loadTestFile }) {
+  describe('xpack_main', () => {
+    loadTestFile(require.resolve('./features'));
+  });
+}

@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Feature } from './feature_registry';
+import { Feature } from './feature';
 
-const buildKibanaFeatures = (savedObjectTypes: string[]) => {
+export interface OSSFeaturesParams {
+  savedObjectTypes: string[];
+  includeTimelion: boolean;
+}
+
+export const buildKibanaFeatures = ({ savedObjectTypes, includeTimelion }: OSSFeaturesParams) => {
   return [
     {
       id: 'discover',
@@ -220,6 +225,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
         },
       },
     },
+    ...(includeTimelion ? [timelionFeature] : []),
   ];
 };
 
@@ -247,17 +253,3 @@ const timelionFeature: Feature = {
     },
   },
 };
-
-export function registerOssFeatures(
-  registerFeature: (feature: Feature) => void,
-  savedObjectTypes: string[],
-  includeTimelion: boolean
-) {
-  for (const feature of buildKibanaFeatures(savedObjectTypes)) {
-    registerFeature(feature);
-  }
-
-  if (includeTimelion) {
-    registerFeature(timelionFeature);
-  }
-}
