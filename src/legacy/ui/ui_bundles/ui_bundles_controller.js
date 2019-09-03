@@ -81,6 +81,13 @@ export class UiBundlesController {
     this._postLoaders = [];
     this._bundles = [];
 
+    // create a bundle for core-only with no modules
+    this.add({
+      id: 'core',
+      modules: [],
+      template: appEntryTemplate
+    });
+
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
       this.add({
