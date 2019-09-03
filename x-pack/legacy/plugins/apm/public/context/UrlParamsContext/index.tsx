@@ -22,7 +22,7 @@ import {
   LocalUIFilterName
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../utils/pickKeys';
-import { usePreserveIdentity } from '../../hooks/usePreserveIdentity';
+import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 
 interface TimeRange {
   rangeFrom: string;
@@ -36,7 +36,7 @@ function useUiFilters(params: IUrlParams): UIFilters {
     val => (val ? val.split(',') : [])
   ) as Partial<Record<LocalUIFilterName, string[]>>;
 
-  return usePreserveIdentity({ kuery, environment, ...localUiFilters });
+  return useDeepObjectIdentity({ kuery, environment, ...localUiFilters });
 }
 
 const defaultRefresh = (time: TimeRange) => {};
