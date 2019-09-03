@@ -29,30 +29,31 @@ import { LabelOptions } from './label_options';
 import { Positions } from '../../../utils/collections';
 
 interface CategoryAxisPanelProps extends VisOptionsProps<BasicVislibParams> {
+  axis: Axis;
   onPositionChanged: (position: Positions) => void;
+  setCategoryAxis: (value: Axis) => void;
 }
 
 function CategoryAxisPanel(props: CategoryAxisPanelProps) {
-  const { onPositionChanged, stateParams, setValue, vis } = props;
+  const { axis, onPositionChanged, vis, setCategoryAxis } = props;
 
-  const setCategoryAxis = useCallback(
+  const setAxis = useCallback(
     <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
-      const categoryAxes = [...stateParams.categoryAxes];
-      categoryAxes[0] = {
-        ...categoryAxes[0],
+      const updatedAxis = {
+        ...axis,
         [paramName]: value,
       };
-      setValue('categoryAxes', categoryAxes);
+      setCategoryAxis(updatedAxis);
     },
-    [setValue, stateParams.categoryAxes]
+    [setCategoryAxis]
   );
 
   const setPosition = useCallback(
     (paramName: 'position', value: Axis['position']) => {
-      setCategoryAxis(paramName, value);
+      setAxis(paramName, value);
       onPositionChanged(value);
     },
-    [setCategoryAxis, onPositionChanged]
+    [setAxis, onPositionChanged]
   );
 
   return (
@@ -72,8 +73,8 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
           defaultMessage: 'Show',
         })}
         paramName="show"
-        value={stateParams.categoryAxes[0].show}
-        setValue={setCategoryAxis}
+        value={axis.show}
+        setValue={setAxis}
       />
 
       <SelectOption
@@ -83,7 +84,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
         })}
         options={vis.type.editorConfig.collections.positions}
         paramName="position"
-        value={stateParams.categoryAxes[0].position}
+        value={axis.position}
         setValue={setPosition}
       />
 
@@ -107,12 +108,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       >
         <>
           <EuiSpacer size="m" />
-          <LabelOptions
-            axis={stateParams.categoryAxes[0]}
-            axesName="categoryAxes"
-            index={0}
-            {...props}
-          />
+          <LabelOptions axis={axis} axesName="categoryAxes" index={0} {...props} />
         </>
       </EuiAccordion>
     </EuiPanel>

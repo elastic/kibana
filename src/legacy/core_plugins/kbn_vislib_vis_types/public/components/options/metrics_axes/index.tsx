@@ -74,6 +74,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [stateParams, setValue]
   );
 
+  const setCategoryAxis = useCallback(
+    (value: Axis) => {
+      const categoryAxes = [...stateParams.categoryAxes];
+      categoryAxes[0] = value;
+      setValue('categoryAxes', categoryAxes);
+    },
+    [setValue, stateParams.categoryAxes]
+  );
+
   // stores previous aggs' custom labels
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   // stores previous aggs' field and type
@@ -310,7 +319,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         {...props}
       />
       <EuiSpacer size="s" />
-      <CategoryAxisPanel {...props} onPositionChanged={onCategoryAxisPositionChanged} />
+      <CategoryAxisPanel
+        {...props}
+        axis={stateParams.categoryAxes[0]}
+        onPositionChanged={onCategoryAxisPositionChanged}
+        setCategoryAxis={setCategoryAxis}
+      />
     </>
   );
 }
