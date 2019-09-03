@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { SingleMetricDetectors } from './metric_selection';
+import { SingleMetricDetectorsSummary } from './metric_selection_summary';
 import { SingleMetricSettings } from './settings';
 
 interface Props {
@@ -27,11 +28,17 @@ export const SingleMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      <SingleMetricDetectors isActive={isActive} setIsValid={setMetricValid} />
-      {metricsValid && isActive && (
+      {isActive === false && <SingleMetricDetectorsSummary />}
+
+      {isActive === true && (
         <Fragment>
-          <EuiHorizontalRule margin="l" />
-          <SingleMetricSettings isActive={isActive} setIsValid={setSettingsValid} />
+          <SingleMetricDetectors setIsValid={setMetricValid} />
+          {metricsValid && (
+            <Fragment>
+              <EuiHorizontalRule margin="l" />
+              <SingleMetricSettings setIsValid={setSettingsValid} />
+            </Fragment>
+          )}
         </Fragment>
       )}
     </Fragment>

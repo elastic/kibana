@@ -33,12 +33,15 @@ import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_netw
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { EmbeddedMap } from '../../components/embeddables/embedded_map';
+import { NetworkFilter } from '../../containers/network';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
+  queryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -70,7 +73,7 @@ export const getFlexDirection = () => {
 };
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker }) => {
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => {
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
@@ -88,6 +91,17 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <NetworkFilter indexPattern={indexPattern} type={networkModel.NetworkType.page}>
+                      {({ applyFilterQueryFromKueryExpression }) => (
+                        <EmbeddedMap
+                          applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+                          queryExpression={queryExpression}
+                          startDate={from}
+                          endDate={to}
+                          setQuery={setQuery}
+                        />
+                      )}
+                    </NetworkFilter>
                     <KpiNetworkQuery
                       endDate={to}
                       filterQuery={filterQuery}
@@ -277,8 +291,10 @@ NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
+  const getNetworkFilterExpression = networkSelectors.networkFilterExpression();
   const mapStateToProps = (state: State) => ({
     filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
+    queryExpression: getNetworkFilterExpression(state, networkModel.NetworkType.page) || '',
   });
   return mapStateToProps;
 };

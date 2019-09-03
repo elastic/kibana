@@ -26,18 +26,18 @@ interface SnapshotQueryResult {
 export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQueryResult>) =>
   data && data.snapshot ? (
     <React.Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.endpointStatusTitle"
-            defaultMessage="Current status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup direction="column">
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.endpointStatusTitle"
+              defaultMessage="Current status"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">

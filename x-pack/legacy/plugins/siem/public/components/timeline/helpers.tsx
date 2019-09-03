@@ -95,11 +95,17 @@ export const combineQueries = (
   kqlQuery: string,
   kqlMode: string,
   start: number,
-  end: number
+  end: number,
+  isEventViewer?: boolean
 ): { filterQuery: string } | null => {
   let kuery: string;
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery) && !isEventViewer) {
     return null;
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery) && isEventViewer) {
+    kuery = `@timestamp >= ${start} and @timestamp <= ${end}`;
+    return {
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+    };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
     kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {
