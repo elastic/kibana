@@ -34,7 +34,6 @@ export interface State {
     jobIdEmpty: boolean;
     jobIdValid: boolean;
     sourceIndex: EsIndexName;
-    sourceIndexNameExists: boolean;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
   };
@@ -68,7 +67,6 @@ export const getInitialState = (): State => ({
     jobIdEmpty: true,
     jobIdValid: false,
     sourceIndex: '',
-    sourceIndexNameExists: false,
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
   },
@@ -98,6 +96,9 @@ export const getJobConfigFromFormState = (
     },
     dest: {
       index: formState.destinationIndex,
+    },
+    analyzed_fields: {
+      excludes: [],
     },
     analysis: {
       outlier_detection: {},

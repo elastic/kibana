@@ -18,11 +18,11 @@
  */
 
 // @ts-ignore
-import { ObjDefine } from 'ui/utils/obj_define';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { ObjDefine } from './obj_define';
 // @ts-ignore
 import { getKbnFieldType } from '../../../../../utils/kbn_field_types';
 // @ts-ignore

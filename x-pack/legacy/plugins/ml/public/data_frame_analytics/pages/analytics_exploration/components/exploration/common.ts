@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const del = require('del');
-const { DLL_OUTPUT } = require('../.storybook/constants');
+import { DataFrameAnalyticsConfig } from '../../../../common';
 
-del.sync([DLL_OUTPUT], { force: true });
+const OUTLIER_SCORE = 'outlier_score';
+
+export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
+  `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;

@@ -17,32 +17,22 @@
  * under the License.
  */
 
-import { createLegacyClass } from '../../utils/legacy_class';
+import { AggConfig } from 'ui/vis';
 import { StringParamEditor } from '../controls/string';
 import { BaseParamType } from './base';
 
-createLegacyClass(StringParamType).inherits(BaseParamType);
-function StringParamType(config) {
-  StringParamType.Super.call(this, config);
-}
+export class StringParamType extends BaseParamType {
+  editorComponent = StringParamEditor;
 
-StringParamType.prototype.editorComponent = StringParamEditor;
+  constructor(config: Record<string, any>) {
+    super(config);
 
-/**
- * Write the aggregation parameter.
- *
- * @param  {AggConfig} aggConfig - the entire configuration for this agg
- * @param  {object} output - the result of calling write on all of the aggregations
- *                         parameters.
- * @param  {object} output.params - the final object that will be included as the params
- *                               for the agg
- * @return {undefined}
- */
-StringParamType.prototype.write = function (aggConfig, output) {
-  if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-    output.params[this.name] = aggConfig.params[this.name];
+    if (!config.write) {
+      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
+          output.params[this.name] = aggConfig.params[this.name];
+        }
+      };
+    }
   }
-};
-
-export { StringParamType };
-
+}
