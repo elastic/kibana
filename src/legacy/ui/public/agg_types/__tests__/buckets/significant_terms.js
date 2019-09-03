@@ -32,7 +32,7 @@ describe('Significant Terms Agg', function () {
       function init({ aggParams = {} }) {
         ngMock.module('kibana');
         ngMock.inject(function (_$rootScope_) {
-          const significantTerms = aggTypes.byName.significant_terms;
+          const significantTerms = aggTypes.buckets.find(agg => agg.name === 'significant_terms');
 
           $rootScope = _$rootScope_;
           $rootScope.agg = {
@@ -44,8 +44,8 @@ describe('Significant Terms Agg', function () {
       }
 
       function testSerializeAndWrite(aggConfig) {
-        const includeArg = $rootScope.agg.type.params.byName.include;
-        const excludeArg = $rootScope.agg.type.params.byName.exclude;
+        const includeArg = $rootScope.agg.type.paramByName('include');
+        const excludeArg = $rootScope.agg.type.paramByName('exclude');
 
         expect(includeArg.serialize(aggConfig.params.include, aggConfig)).to.equal('404');
         expect(excludeArg.serialize(aggConfig.params.exclude, aggConfig)).to.equal('400');
