@@ -41,7 +41,7 @@ import {
 } from '../../components';
 
 import { useAppContext } from '../../context';
-import { StorageKeys, DevToolsSettings } from '../../services';
+import { StorageKeys, DevToolsSettings } from '../../../services';
 
 import { getTopNavConfig } from './get_top_nav';
 

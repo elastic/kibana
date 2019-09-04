@@ -21,7 +21,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../core/public';
 import { XCoreSetup, XPluginSet } from './legacy';
-import { boot } from './app';
+import { boot } from './application';
 
 export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
@@ -34,9 +34,9 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
     application.register({
       id: 'console',
-      async mount(ctx, targetElement) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker }), targetElement);
-        return () => unmountComponentAtNode(targetElement);
+      async mount(ctx, { element }) {
+        render(boot({ docLinkVersion, I18nContext, ResizeChecker }), element);
+        return () => unmountComponentAtNode(element);
       },
     });
   }

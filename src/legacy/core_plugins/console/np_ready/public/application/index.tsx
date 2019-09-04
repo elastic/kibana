@@ -20,7 +20,7 @@
 import React from 'react';
 import { AppContextProvider } from './context';
 import { Main } from './containers';
-import { createStorage, createHistory, createSettings, Settings } from './services';
+import { createStorage, createHistory, createSettings, Settings } from '../services';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {

@@ -18,7 +18,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { History, Storage, Settings } from '../services';
+import { History, Storage, Settings } from '../../services';
 
 interface ContextValue {
   services: {

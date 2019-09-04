@@ -38,7 +38,7 @@ import { CoreSetup } from '../../../../../core/public';
 
 interface SetupRegisterAppArgs {
   id: string;
-  mount: (ctx: any, targetElement: HTMLDivElement) => Promise<any>;
+  mount: (ctx: any, opts: { element: HTMLDivElement }) => Promise<any>;
 }
 
 export interface XCoreSetup extends CoreSetup {
@@ -77,7 +77,7 @@ uiRoutes.when('/dev_tools/console', {
         ...npSetup.core,
         application: {
           register(args: SetupRegisterAppArgs): void {
-            args.mount({}, targetElement).catch(err => {
+            args.mount({}, { element: targetElement }).catch(err => {
               npSetup.core.fatalErrors.add(err);
             });
           },

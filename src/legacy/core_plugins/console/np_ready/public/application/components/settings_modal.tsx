@@ -36,7 +36,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { DevToolsSettings } from '../services';
+import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 

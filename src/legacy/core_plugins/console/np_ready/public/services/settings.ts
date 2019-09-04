@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Storage } from '.';
+import { Storage } from './index';
 
 export interface DevToolsSettings {
   fontSize: number;
