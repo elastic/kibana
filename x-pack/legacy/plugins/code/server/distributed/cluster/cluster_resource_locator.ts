@@ -59,6 +59,8 @@ export class ClusterResourceLocator implements ResourceLocator {
    * Return undefined to let NodeRepositoriesService enqueue the clone job in cluster mode.
    */
   async allocate(req: Request, resource: string): Promise<Endpoint | undefined> {
+    // make the cluster service synchronize the meta data and allocate new resources to nodes
+    await this.clusterService.pollClusterState();
     return undefined;
   }
 }

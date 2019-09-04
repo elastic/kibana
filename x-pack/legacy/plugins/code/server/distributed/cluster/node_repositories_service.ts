@@ -11,6 +11,7 @@ import { ClusterMembershipService } from './cluster_membership_service';
 import { CloneWorker } from '../../queue';
 import { Repository, RepositoryUri } from '../../../model';
 import { Logger } from '../../log';
+import { RepoState } from '../../../public/actions';
 
 export class NodeRepositoriesService implements ClusterStateListener {
   // visible for test
@@ -49,7 +50,7 @@ export class NodeRepositoriesService implements ClusterStateListener {
       await this.cloneWorker.enqueueJob({ url: localNewRepo.url }, {});
       this.localRepos.set(localNewRepo.uri, {
         metadata: localNewRepo,
-        currentState: RepositoryState.CLONING,
+        currentState: RepoState.CLONING,
       });
     }
     for (const localRemovedRepo of localRemovedRepos) {
@@ -65,11 +66,5 @@ export class NodeRepositoriesService implements ClusterStateListener {
 
 interface LocalRepository {
   metadata: Repository;
-  currentState: RepositoryState;
-}
-
-enum RepositoryState {
-  CLONING,
-  CLONED,
-  DELETING,
+  currentState: RepoState;
 }
