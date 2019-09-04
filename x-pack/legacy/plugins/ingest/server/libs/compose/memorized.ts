@@ -16,14 +16,13 @@ import { PolicyLib } from '../policy';
 import { PolicyAdapter } from '../adapters/policy/default';
 import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
-import { Root } from '../../../../../../../data/.update_prs/src/core/server/root/index';
 import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
 import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
 
 export function compose(servers?: {
   shutdown: () => Promise<void>;
   kbnServer: KibanaLegacyServer;
-  root: Root;
+  root: any;
 }): ServerLibs {
   let realPolicyAdapter: PolicyAdapter;
   let realFrameworkAdapter: BackendFrameworkAdapter;
