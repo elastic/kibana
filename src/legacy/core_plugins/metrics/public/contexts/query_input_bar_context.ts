@@ -19,14 +19,15 @@
 
 import React from 'react';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 
-export interface ICoreSetupContext {
+export interface ICoreStartContext {
   appName: string;
   uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   store: Storage;
 }
 
-export const CoreSetupContext = React.createContext<ICoreSetupContext | null>(null);
+export const CoreStartContext = React.createContext<ICoreStartContext | null>(null);
 
-export const CoreSetupContextProvider = CoreSetupContext.Provider;
+export const CoreStartContextProvider = CoreStartContext.Provider;

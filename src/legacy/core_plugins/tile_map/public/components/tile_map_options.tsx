@@ -30,6 +30,7 @@ import {
 } from '../../../kbn_vislib_vis_types/public/components';
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
+import { MapTypes } from '../map_types';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 
@@ -55,17 +56,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
           setValue={setValue}
         />
 
-        <SelectOption
-          label={i18n.translate('tileMap.visParams.colorSchemaLabel', {
-            defaultMessage: 'Color schema',
-          })}
-          options={vis.type.editorConfig.collections.colorSchemas}
-          paramName="colorSchema"
-          value={stateParams.colorSchema}
-          setValue={setValue}
-        />
-
-        {stateParams.mapType === 'Heatmap' && (
+        {stateParams.mapType === MapTypes.Heatmap ? (
           <RangeOption
             label={i18n.translate('tileMap.visParams.clusterSizeLabel', {
               defaultMessage: 'Cluster size',
@@ -75,6 +66,16 @@ function TileMapOptions(props: TileMapOptionsProps) {
             paramName="heatClusterSize"
             step={0.1}
             value={stateParams.heatClusterSize}
+            setValue={setValue}
+          />
+        ) : (
+          <SelectOption
+            label={i18n.translate('tileMap.visParams.colorSchemaLabel', {
+              defaultMessage: 'Color schema',
+            })}
+            options={vis.type.editorConfig.collections.colorSchemas}
+            paramName="colorSchema"
+            value={stateParams.colorSchema}
             setValue={setValue}
           />
         )}
