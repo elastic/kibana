@@ -47,7 +47,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.histogram[0];
+      const aggConfig = vis.aggs.byName('histogram')[0];
       const filter = createFilterHistogram(aggConfig, 2048);
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

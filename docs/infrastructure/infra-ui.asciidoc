@@ -41,14 +41,15 @@ Examples of grouping options include *Availability Zone*, *Machine Type*, *Proje
 [[infra-search]]
 === Use the power of search
 
-Use the search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
+Use the search bar to perform ad hoc searches for specific text.
+You can also create structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language].
 For example, enter `host.hostname : "host1"` to see only the information for `host1`.
 
 [float]
 [[infra-date]]
 === Specify the time and date
 
-Click the time selector to choose the timeframe for the metrics.
+Click the time selector image:infrastructure/images/infra-time-selector.png[time selector icon] to choose the timeframe for the metrics.
 The values shown are the values for the last minute at the specified time and date.
 
 [float]
@@ -69,14 +70,14 @@ If your metrics have custom index patterns, or use non-default field settings, y
 Click *Configuration* to change the settings.
 This opens the *Configure source* fly-out dialog.
 
-NOTE: These settings are shared with logs. Changes you make here may also affect the settings used in the *Logs* tab.
+NOTE: These settings are shared with logs. Changes you make here may also affect the settings used by the *Logs* app.
 
 In the *Configure source* dialog, you can change the following values:
 
 * *Name*: the name of the source configuration
 * *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data
   from
-* *Fields*: the names of specific fields in the indices that need are used to query and interpret the data correctly
+* *Fields*: the names of specific fields in the indices that are used to query and interpret the data correctly
 
 TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make here are specific to the current space.
 You can make different subsets of data available by creating multiple spaces with different data source configurations.

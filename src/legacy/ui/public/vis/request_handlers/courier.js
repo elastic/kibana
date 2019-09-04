@@ -24,7 +24,7 @@ import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 import { buildTabularInspectorData } from '../../inspector/build_tabular_inspector_data';
-import { getTime } from '../../timefilter/get_time';
+import { getTime } from '../../timefilter';
 
 const CourierRequestHandlerProvider = function () {
 
@@ -40,7 +40,8 @@ const CourierRequestHandlerProvider = function () {
       partialRows,
       metricsAtAllLevels,
       inspectorAdapters,
-      queryFilter
+      queryFilter,
+      abortSignal,
     }) {
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -101,6 +102,11 @@ const CourierRequestHandlerProvider = function () {
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         try {
+          // Abort any in-progress requests before fetching again
+          if (abortSignal) {
+            abortSignal.addEventListener('abort', () => requestSearchSource.cancelQueued());
+          }
+
           const response = await requestSearchSource.fetch();
 
           searchSource.lastQuery = queryHash;
@@ -126,14 +132,15 @@ const CourierRequestHandlerProvider = function () {
       // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
       // response data incorrectly in the inspector.
       let resp = searchSource.rawResponse;
-      for (const agg of aggs) {
+      for (const agg of aggs.aggs) {
         if (has(agg, 'type.postFlightRequest')) {
           resp = await agg.type.postFlightRequest(
             resp,
             aggs,
             agg,
             requestSearchSource,
-            inspectorAdapters
+            inspectorAdapters,
+            abortSignal,
           );
         }
       }

@@ -363,6 +363,40 @@ describe('Saved Object', function () {
           });
       });
 
+      it('when index in searchSourceJSON is not found', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setFields({ 'index': 'non-existant-index' });
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                  id: 'non-existant-index',
+                });
+              });
+          });
+      });
+
       it('when indexes exists in filter of searchSourceJSON', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
