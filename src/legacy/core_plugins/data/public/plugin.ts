@@ -22,6 +22,7 @@ import { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expres
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
+import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
 import {
@@ -54,6 +55,7 @@ export interface DataSetup {
   filter: FilterSetup;
   query: QuerySetup;
   search: SearchSetup;
+  timefilter: TimefilterSetup;
 }
 
 export interface DataStart {
@@ -78,6 +80,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
+  private readonly timefilter: TimefilterService = new TimefilterService();
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
@@ -87,15 +90,22 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
       uiSettings,
       savedObjectsClient,
     });
+
+    const timefilterService = this.timefilter.setup({
+      uiSettings,
+    });
+
     return {
       expressions: this.expressions.setup(),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
+        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
+      timefilter: timefilterService,
     };
   }
 
@@ -111,5 +121,6 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
     this.filter.stop();
     this.query.stop();
     this.search.stop();
+    this.timefilter.stop();
   }
 }

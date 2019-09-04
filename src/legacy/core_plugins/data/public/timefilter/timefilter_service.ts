@@ -18,25 +18,30 @@
  */
 
 import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPatterns } from '../index_patterns';
-import { FilterManager } from './filter_manager';
-import { Timefilter } from '../timefilter';
+import { Timefilter } from './timefilter';
+import { TimeHistory } from './index';
 
 /**
  * Filter Service
  * @internal
  */
 
-export interface FilterServiceDependencies {
-  indexPatterns: IndexPatterns;
+export interface TimeFilterServiceDependencies {
   uiSettings: UiSettingsClientContract;
-  timefilter: Timefilter;
 }
 
-export class FilterService {
-  public setup({ indexPatterns, uiSettings, timefilter }: FilterServiceDependencies) {
+export class TimefilterService {
+  public setup({ uiSettings }: TimeFilterServiceDependencies) {
+    const timefilterConfig = {
+      timeDefaults: uiSettings.get('timepicker:timeDefaults'),
+      refreshIntervalDefaults: uiSettings.get('timepicker:refreshIntervalDefaults'),
+    };
+    const history = new TimeHistory();
+    const timefilter = new Timefilter(timefilterConfig, history);
+
     return {
-      filterManager: new FilterManager(indexPatterns, uiSettings, timefilter),
+      timefilter,
+      history,
     };
   }
 
@@ -50,4 +55,4 @@ export class FilterService {
 }
 
 /** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
+export type TimefilterSetup = ReturnType<TimefilterService['setup']>;
