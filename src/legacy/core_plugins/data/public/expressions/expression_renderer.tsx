@@ -61,7 +61,14 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
         }
       });
     }
-  }, [expression, options, mountpoint.current]);
+  }, [
+    expression,
+    options.searchContext,
+    options.context,
+    options.variables,
+    options.disableCaching,
+    mountpoint.current,
+  ]);
 
   return (
     <div
