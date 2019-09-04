@@ -98,8 +98,6 @@ This section summarizes the changes in each release.
 === Bug fixes
 Monitoring::
 * Fixes the inability to complete a single `date_histogram` aggregation for `get_nodes` calls {pull}43481[#43481]
-Operations::
-* Adds the `"org.label-schema.license"` Docker image label to override the license field from the baseimage {pull}42836[#42836]
 
 
 [[release-notes-6.8.2]]
