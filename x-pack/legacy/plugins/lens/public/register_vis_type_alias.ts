@@ -7,11 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
 
-const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
-
 visualizations.types.visTypeAliasRegistry.add({
   aliasUrl: '/app/lens',
-  name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+  name: 'lens',
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens Visualizations',
   }),

@@ -42,7 +42,7 @@ export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) 
 
   return (
     <DragDrop
-      dataTestSubj="lnsFieldListPanelField"
+      data-test-subj="lnsFieldListPanelField"
       value={{ field, indexPatternId } as DraggedField}
       draggable
       className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
