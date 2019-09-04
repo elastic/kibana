@@ -28,7 +28,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { visualizations } from '../../../../visualizations/public/np_ready/public';
+import { setup } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
@@ -66,9 +66,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
         createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
       };
 
-      visualizations.types.registerVisualization(() =>
-        createTableVisTypeDefinition(legacyDependencies)
-      );
+      setup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

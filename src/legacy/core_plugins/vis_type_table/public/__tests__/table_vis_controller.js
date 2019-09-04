@@ -28,7 +28,7 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 import { createTableVisTypeDefinition } from '../table_vis_type';
-import { visualizations } from '../../../visualizations/public/np_ready/public';
+import { setup as setupVisualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - Controller', async function () {
   let $rootScope;
@@ -52,7 +52,7 @@ describe('Table Vis - Controller', async function () {
         createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
       };
 
-      visualizations.types.registerVisualization(() =>
+      setupVisualizations.types.registerVisualization(() =>
         createTableVisTypeDefinition(legacyDependencies)
       );
 

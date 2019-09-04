@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public';
+import { setup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
-visualizations.types.visTypeAliasRegistry.add({
+setup.types.visTypeAliasRegistry.add({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {

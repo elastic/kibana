@@ -30,7 +30,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { visualizations } from '../../../../visualizations/public/np_ready/public';
+import { setup } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
@@ -46,7 +46,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
-  this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
+  this.visTypeAliases = setup.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
