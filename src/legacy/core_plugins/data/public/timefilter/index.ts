@@ -17,33 +17,6 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from '../../query/types';
-
-const name = 'kibana_context';
-
-export interface KibanaContext {
-  type: typeof name;
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
-export const kibanaContext = () => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: name,
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  },
-});
+export { Timefilter } from './timefilter';
+export { TimeHistory } from './time_history';
+export { getTime } from './get_time';
