@@ -53,12 +53,6 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
         doSetup()
         preWorkerClosure()
 
-        try {
-          sh 'yarn run github-checks-reporter "Test-Check" echo 1'
-        } catch (ex) {
-          print "github-checks-reporter error: ${ex}"
-        }
-
         def nextWorker = 1
         def worker = { workerClosure ->
           def workerNumber = nextWorker
@@ -69,6 +63,7 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
           }
         }
 
+        // TODO update workerClosures to be a map, and use key for parallel key?
         def workers = [:]
         workerClosures.eachWithIndex { workerClosure, i -> workers["worker-${i+1}"] = worker(workerClosure) }
 
