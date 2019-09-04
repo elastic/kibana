@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { AdvancedSettings } from '../../types';
@@ -183,9 +183,15 @@ export function AdvancedSettingsForm({
           max={500000}
           value={advancedSettings.timeoutMillis}
           onChange={getNumberUpdater('timeoutMillis')}
-          append={i18n.translate('xpack.graph.settings.advancedSettings.timeoutUnit', {
-            defaultMessage: 'ms',
-          })}
+          append={
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate('xpack.graph.settings.advancedSettings.timeoutUnit', {
+                  defaultMessage: 'ms',
+                })}
+              </strong>
+            </EuiText>
+          }
         />
       </EuiFormRow>
     </EuiForm>

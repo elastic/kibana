@@ -13,6 +13,9 @@ import {
   EuiButton,
   EuiCallOut,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UrlTemplate } from '../../types';
@@ -23,17 +26,35 @@ import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../se
 
 const encoders = getOutlinkEncoders();
 
-export interface DrilldownFormProps {
-  initialTemplate: UrlTemplate;
+export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
 }
 
-export function DrilldownForm({ initialTemplate, onSubmit }: DrilldownFormProps) {
-  const [currentTemplate, setCurrentTemplate] = useState(initialTemplate);
+export interface UpdateFormProps {
+  onSubmit: (template: UrlTemplate) => void;
+  initialTemplate: UrlTemplate;
+  onRemove: () => void;
+}
 
-  function setValue<K extends keyof UrlTemplate>(key: K, value: UrlTemplate[K]) {
-    setCurrentTemplate({ ...currentTemplate, [key]: value });
-  }
+export type DrilldownFormProps = NewFormProps | UpdateFormProps;
+
+function isUpdateForm(props: DrilldownFormProps): props is UpdateFormProps {
+  return 'initialTemplate' in props;
+}
+
+export function DrilldownForm(props: DrilldownFormProps) {
+  const { onSubmit } = props;
+  const getInitialTemplate = () =>
+    'initialTemplate' in props
+      ? props.initialTemplate
+      : {
+          encoder: encoders[0],
+          icon: null,
+          description: '',
+          url: '',
+        };
+
+  const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
 
   const [touched, setTouched] = useState({
     description: false,
@@ -42,10 +63,14 @@ export function DrilldownForm({ initialTemplate, onSubmit }: DrilldownFormProps)
 
   const [autoformatUrl, setAutoformatUrl] = useState(false);
 
+  function setValue<K extends keyof UrlTemplate>(key: K, value: UrlTemplate[K]) {
+    setCurrentTemplate({ ...currentTemplate, [key]: value });
+  }
+
   const urlPlaceholderMissing = Boolean(
-    initialTemplate.url && !isUrlTemplateValid(initialTemplate.url)
+    currentTemplate.url && !isUrlTemplateValid(currentTemplate.url)
   );
-  const formIncomplete = !Boolean(initialTemplate.description && initialTemplate.url);
+  const formIncomplete = !Boolean(currentTemplate.description && currentTemplate.url);
 
   return (
     <form
@@ -184,11 +209,51 @@ export function DrilldownForm({ initialTemplate, onSubmit }: DrilldownFormProps)
           ))}
         </div>
       </EuiFormRow>
-      <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
-        {i18n.translate('xpack.graph.settings.drillDowns.saveButtonLabel', {
-          defaultMessage: 'Save',
-        })}
-      </EuiButton>
+      <EuiFlexGroup justifyContent="flexEnd">
+        {isUpdateForm(props) && (
+          <>
+            <EuiFlexItem grow={null}>
+              {
+                <EuiButtonEmpty
+                  color="danger"
+                  onClick={() => {
+                    props.onRemove();
+                  }}
+                >
+                  {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
+                    defaultMessage: 'Remove',
+                  })}
+                </EuiButtonEmpty>
+              }
+            </EuiFlexItem>
+            <EuiFlexItem></EuiFlexItem>
+          </>
+        )}
+        <EuiFlexItem grow={null}>
+          {
+            <EuiButtonEmpty
+              onClick={() => {
+                setCurrentTemplate(getInitialTemplate());
+              }}
+            >
+              {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
+                defaultMessage: 'Reset',
+              })}
+            </EuiButtonEmpty>
+          }
+        </EuiFlexItem>
+        <EuiFlexItem grow={null}>
+          <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
+            {isUpdateForm(props)
+              ? i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
+                  defaultMessage: 'Add template',
+                })
+              : i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
+                  defaultMessage: 'Update template',
+                })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </form>
   );
 }

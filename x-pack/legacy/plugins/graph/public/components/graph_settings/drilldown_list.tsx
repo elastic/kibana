@@ -5,13 +5,10 @@
  */
 
 import React from 'react';
-import { EuiListGroup, EuiText, EuiAccordion, EuiButtonIcon } from '@elastic/eui';
+import { EuiText, EuiAccordion, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
-import { getOutlinkEncoders } from '../../services/outlink_encoders';
 import { DrilldownForm } from './drilldown_form';
-
-const encoders = getOutlinkEncoders();
 
 export function DrilldownList({
   removeUrlTemplate,
@@ -28,23 +25,16 @@ export function DrilldownList({
       </EuiText>
       {urlTemplates.map((template, index) => (
         <EuiAccordion
-          id={`accordion-${index}`}
+          id={`accordion-${index}-${template.description}`}
           buttonContent={template.description}
-          extraAction={
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              size="s"
-              onClick={() => {
-                removeUrlTemplate(template);
-              }}
-            />
-          }
         >
           <DrilldownForm
             initialTemplate={template}
             onSubmit={newTemplate => {
               saveUrlTemplate(index, newTemplate);
+            }}
+            onRemove={() => {
+              removeUrlTemplate(template);
             }}
           />
         </EuiAccordion>
@@ -56,12 +46,6 @@ export function DrilldownList({
         })}
       >
         <DrilldownForm
-          initialTemplate={{
-            encoder: encoders[0],
-            icon: null,
-            description: '',
-            url: '',
-          }}
           onSubmit={newTemplate => {
             saveUrlTemplate(-1, newTemplate);
           }}
