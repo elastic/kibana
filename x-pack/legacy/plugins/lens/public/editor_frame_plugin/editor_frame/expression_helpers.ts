@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';

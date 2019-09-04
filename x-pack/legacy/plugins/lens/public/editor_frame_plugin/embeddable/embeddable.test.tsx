@@ -5,7 +5,7 @@
  */
 
 import { Embeddable } from './embeddable';
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query, ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { Document } from '../../persistence';
