@@ -20,7 +20,6 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 
 import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup } from './types';
-import { VisTypeAliasRegistry } from './types/vis_type_alias_registry';
 
 /**
  * Interface for any dependencies on other plugins' contracts.
@@ -35,7 +34,6 @@ interface VisualizationsPluginSetupDependencies {
     Vis: any;
     VisFactoryProvider: any;
     VisTypesRegistryProvider: any;
-    visTypeAliasRegistry: VisTypeAliasRegistry;
   };
 }
 
@@ -83,7 +81,6 @@ export class VisualizationsPlugin
       Vis,
       VisFactoryProvider,
       VisTypesRegistryProvider,
-      visTypeAliasRegistry,
     } = __LEGACY;
 
     return {
@@ -91,12 +88,7 @@ export class VisualizationsPlugin
         VisFiltersProvider,
         createFilter,
       }),
-      types: this.types.setup({
-        Vis,
-        VisFactoryProvider,
-        VisTypesRegistryProvider,
-        visTypeAliasRegistry,
-      }),
+      types: this.types.setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }),
     };
   }
 

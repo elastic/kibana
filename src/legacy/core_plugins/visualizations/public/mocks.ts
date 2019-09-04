@@ -31,7 +31,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 jest.mock('./types/vis_type_alias_registry');
 import { PluginInitializerContext } from 'src/core/public';
-import { visTypeAliasRegistry } from './np_ready/types/vis_type_alias_registry';
 
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './np_ready/plugin';
@@ -66,7 +65,6 @@ const createInstance = () => {
       Vis,
       VisFactoryProvider,
       VisTypesRegistryProvider,
-      visTypeAliasRegistry,
     },
   });
   const doStart = () => plugin.start(coreMock.createStart(), {});

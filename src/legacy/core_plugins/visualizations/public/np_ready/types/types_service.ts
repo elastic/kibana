@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { VisTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
 interface SetupDependencies {
   Vis: any;
   VisFactoryProvider: any;
   VisTypesRegistryProvider: any;
-  visTypeAliasRegistry: VisTypeAliasRegistry;
 }
 
 /**
@@ -32,12 +31,7 @@ interface SetupDependencies {
  * @internal
  */
 export class TypesService {
-  public setup({
-    Vis,
-    VisFactoryProvider,
-    VisTypesRegistryProvider,
-    visTypeAliasRegistry,
-  }: SetupDependencies) {
+  public setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }: SetupDependencies) {
     return {
       Vis,
       VisFactoryProvider,
@@ -53,10 +47,11 @@ export class TypesService {
   }
 }
 
-/** @public types */
+/** @internal */
 export type TypesSetup = ReturnType<TypesService['setup']>;
+
+/** @public types */
 export type VisTypeAlias = VisTypeAlias;
-// TODO once items are moved from ui/vis into this service
 
 /** @public static code */
 // TODO once items are moved from ui/vis into this service
