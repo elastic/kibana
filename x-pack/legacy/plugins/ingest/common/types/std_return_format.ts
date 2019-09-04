@@ -84,7 +84,7 @@ export interface ReturnTypeBulkGet<T> extends BaseReturnType {
   items: T[];
 }
 
-// action -- e.g. validate config block. Like ES simulate endpoint
+// action -- e.g. validate policy block. Like ES simulate endpoint
 export interface ReturnTypeAction extends BaseReturnType {
   result: {
     [key: string]: any;

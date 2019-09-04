@@ -7,4 +7,4 @@
 export const PLUGIN = {
   ID: 'ingest',
 };
-export const CONFIG_PREFIX = 'xpack.ingest-do-not-disable';
+export const CONFIG_PREFIX = 'xpack.ingest';

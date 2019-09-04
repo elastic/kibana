@@ -8,7 +8,7 @@ import { Request } from 'src/legacy/server/kbn_server';
 import Slapshot from '@mattapperson/slapshot';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
-import { internalUser, KibanaUser } from './adapter_types';
+import { internalUser, KibanaUser, FrameworkInfo } from './adapter_types';
 import { BackendFrameworkAdapter } from './default';
 
 export class MemorizedBackendFrameworkAdapter {
@@ -17,7 +17,7 @@ export class MemorizedBackendFrameworkAdapter {
   public get info() {
     return Slapshot.memorize(
       `get info`,
-      async () => {
+      () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
@@ -26,7 +26,7 @@ export class MemorizedBackendFrameworkAdapter {
       {
         pure: false,
       }
-    );
+    ) as FrameworkInfo | null;
   }
 
   constructor(private readonly adapter?: BackendFrameworkAdapter) {}

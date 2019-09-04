@@ -5,24 +5,24 @@
  */
 
 import { memorize } from '@mattapperson/slapshot/lib/memorize';
-import { NewConfigurationFile } from './adapter_types';
-import { ConfigurationFile, DatasourceInput, BackupConfigurationFile } from './adapter_types';
-import { ConfigAdapter } from './default';
+import { NewPolicyFile } from './adapter_types';
+import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
+import { PolicyAdapter } from './default';
 
-export class MemorizedConfigAdapter {
-  constructor(private readonly adapter?: ConfigAdapter) {}
+export class MemorizedPolicyAdapter {
+  constructor(private readonly adapter?: PolicyAdapter) {}
 
   public async create(
-    configuration: NewConfigurationFile
+    newPolicy: NewPolicyFile
   ): Promise<{ id: string; shared_id: string; version: number }> {
-    const { shared_id, ...config } = configuration;
+    const { shared_id, ...policy } = newPolicy;
     return await memorize(
-      `create - ${JSON.stringify({ ...config, shared_id: 'string' })}`,
+      `create - ${JSON.stringify({ ...policy, shared_id: 'string' })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.create(configuration);
+        return await this.adapter.create(newPolicy);
       },
       {
         pure: false,
@@ -30,7 +30,7 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async get(id: string): Promise<ConfigurationFile> {
+  public async get(id: string): Promise<PolicyFile> {
     return await memorize(
       `get - ${JSON.stringify(id)}`,
       async () => {
@@ -45,7 +45,7 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async list(page: number = 1, perPage: number = 25): Promise<ConfigurationFile[]> {
+  public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {
     return await memorize(
       `list - ${JSON.stringify({ page, perPage })}`,
       async () => {
@@ -65,7 +65,7 @@ export class MemorizedConfigAdapter {
     activeOnly = true,
     page: number = 1,
     perPage: number = 25
-  ): Promise<ConfigurationFile[]> {
+  ): Promise<PolicyFile[]> {
     return await memorize(
       `listVersions - ${JSON.stringify({ sharedID, activeOnly, page, perPage })}`,
       async () => {
@@ -80,17 +80,14 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async update(
-    id: string,
-    configuration: ConfigurationFile
-  ): Promise<{ id: string; version: number }> {
+  public async update(id: string, policy: PolicyFile): Promise<{ id: string; version: number }> {
     return await memorize(
-      `update - ${JSON.stringify({ id, configuration })}`,
+      `update - ${JSON.stringify({ policy })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.update(id, configuration);
+        return await this.adapter.update(id, policy);
       },
       {
         pure: false,
@@ -98,14 +95,14 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async delete(id: string): Promise<{ success: boolean }> {
+  public async deleteVersion(sharedId: string): Promise<{ success: boolean }> {
     return await memorize(
-      `delete - ${JSON.stringify(id)}`,
+      `deleteVersion - ${JSON.stringify(sharedId)}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.delete(id);
+        return await this.adapter.deleteVersion(sharedId);
       },
       {
         pure: false,
@@ -114,15 +111,15 @@ export class MemorizedConfigAdapter {
   }
 
   public async createBackup(
-    configuration: BackupConfigurationFile
+    policy: BackupPolicyFile
   ): Promise<{ success: boolean; id?: string; error?: string }> {
     return await memorize(
-      `createBackup - ${JSON.stringify(configuration)}`,
+      `createBackup - ${JSON.stringify(policy)}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.createBackup(configuration);
+        return await this.adapter.createBackup(policy);
       },
       {
         pure: false,
@@ -130,7 +127,7 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async getBackup(id: string): Promise<BackupConfigurationFile> {
+  public async getBackup(id: string): Promise<BackupPolicyFile> {
     return await memorize(
       `getBackup - ${JSON.stringify(id)}`,
       async () => {
@@ -167,18 +164,18 @@ export class MemorizedConfigAdapter {
     );
   }
 
-  public async listInputsforConfiguration(
-    configurationId: string,
+  public async listInputsforPolicy(
+    policyId: string,
     page: number = 1,
     perPage: number = 25
   ): Promise<DatasourceInput[]> {
     return await memorize(
-      `listInputsforConfiguration - ${JSON.stringify({ configurationId, page, perPage })}`,
+      `listInputsforPolicy - ${JSON.stringify({ policyId, page, perPage })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.listInputsforConfiguration(configurationId, page, perPage);
+        return await this.adapter.listInputsforPolicy(policyId, page, perPage);
       },
       {
         pure: false,

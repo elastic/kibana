@@ -12,12 +12,12 @@ import { ESDatabaseAdapter } from '../adapters/es_database/default';
 import { BackendFrameworkAdapter } from '../adapters/framework/default';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
-import { ConfigurationLib } from '../configuration';
-import { ConfigAdapter } from '../adapters/configurations/default';
+import { PolicyLib } from '../policy';
+import { PolicyAdapter } from '../adapters/policy/default';
 import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { Root } from '../../../../../../../data/.update_prs/src/core/server/root/index';
-import { MemorizedConfigAdapter } from '../adapters/configurations/memorized';
+import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
 import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
 
 export function compose(servers?: {
@@ -25,7 +25,7 @@ export function compose(servers?: {
   kbnServer: KibanaLegacyServer;
   root: Root;
 }): ServerLibs {
-  let realConfigAdapter: ConfigAdapter;
+  let realPolicyAdapter: PolicyAdapter;
   let realFrameworkAdapter: BackendFrameworkAdapter;
 
   callWhenOnline(() => {
@@ -38,7 +38,7 @@ export function compose(servers?: {
       servers.kbnServer.savedObjects,
       servers.kbnServer.plugins.elasticsearch
     );
-    realConfigAdapter = new ConfigAdapter(soAdapter);
+    realPolicyAdapter = new PolicyAdapter(soAdapter);
     realFrameworkAdapter = new BackendFrameworkAdapter(
       camelCase(PLUGIN.ID),
       servers.kbnServer,
@@ -51,11 +51,11 @@ export function compose(servers?: {
   ) as BackendFrameworkAdapter;
   const framework = new BackendFrameworkLib(memorizedFrameworkAdapter);
 
-  const memorizedConfigAdapter = new MemorizedConfigAdapter(realConfigAdapter!) as ConfigAdapter;
-  const configuration = new ConfigurationLib(memorizedConfigAdapter, { framework });
+  const memorizedPolicyAdapter = new MemorizedPolicyAdapter(realPolicyAdapter!) as PolicyAdapter;
+  const policy = new PolicyLib(memorizedPolicyAdapter, { framework });
 
   const libs: ServerLibs = {
-    configuration,
+    policy,
     framework,
     database: new Proxy(
       {},

@@ -10,7 +10,7 @@ export const RuntimeDatasourceInput = t.interface(
   {
     id: t.string,
     meta: t.union([t.undefined, t.string]),
-    config_id: t.string,
+    policy_id: t.string,
   },
   'DatasourceInput'
 );
@@ -20,13 +20,13 @@ const RuntimeDatasource = t.interface(
     uuid: t.string,
     ref_source: t.union([t.undefined, t.string]),
     ref: t.union([t.undefined, t.string]),
-    config: t.union([t.undefined, t.string]),
+    policy: t.union([t.undefined, t.string]),
     inputs: t.array(t.string),
   },
   'Datasource'
 );
 
-export const NewRuntimeConfigurationFile = t.interface(
+export const NewRuntimePolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
@@ -42,10 +42,10 @@ export const NewRuntimeConfigurationFile = t.interface(
     updated_on: t.string,
     updated_by: t.union([t.undefined, t.string]),
   },
-  'ConfigurationFile'
+  'PolicyFile'
 );
 
-export const NewRuntimeBackupConfigurationFile = t.interface(
+export const NewRuntimeBackupPolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
@@ -54,7 +54,7 @@ export const NewRuntimeBackupConfigurationFile = t.interface(
     agent_version: t.string,
     flat_data_sources: t.string,
   },
-  'BackupConfigurationFile'
+  'BackupPolicyFile'
 );
 
 const ExistingDocument = t.interface({
@@ -63,19 +63,16 @@ const ExistingDocument = t.interface({
   updated_by: t.union([t.undefined, t.string]),
 });
 
-export const RuntimeBackupConfigurationFile = t.intersection([
-  NewRuntimeBackupConfigurationFile,
+export const RuntimeBackupPolicyFile = t.intersection([
+  NewRuntimeBackupPolicyFile,
   ExistingDocument,
 ]);
 
-export const RuntimeConfigurationFile = t.intersection([
-  NewRuntimeConfigurationFile,
-  ExistingDocument,
-]);
+export const RuntimePolicyFile = t.intersection([NewRuntimePolicyFile, ExistingDocument]);
 
-export type NewBackupConfigurationFile = t.TypeOf<typeof NewRuntimeBackupConfigurationFile>;
-export type BackupConfigurationFile = t.TypeOf<typeof RuntimeBackupConfigurationFile>;
-export type ConfigurationFile = t.TypeOf<typeof RuntimeConfigurationFile>;
-export type NewConfigurationFile = t.TypeOf<typeof NewRuntimeConfigurationFile>;
+export type NewBackupPolicyFile = t.TypeOf<typeof NewRuntimeBackupPolicyFile>;
+export type BackupPolicyFile = t.TypeOf<typeof RuntimeBackupPolicyFile>;
+export type PolicyFile = t.TypeOf<typeof RuntimePolicyFile>;
+export type NewPolicyFile = t.TypeOf<typeof NewRuntimePolicyFile>;
 export type Datasource = t.TypeOf<typeof RuntimeDatasource>;
 export type DatasourceInput = t.TypeOf<typeof RuntimeDatasourceInput>;

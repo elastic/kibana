@@ -6,27 +6,24 @@
 import * as t from 'io-ts';
 import { DateFromString } from './io_ts';
 
-// Here we create the runtime check for a generic, unknown beat config type.
+// Here we create the runtime check for a generic, unknown beat policy type.
 // We can also pass in optional params to create spacific runtime checks that
 // can be used to validate blocs on the API and UI
-export const createConfigurationInterface = (beatConfigInterface: t.Mixed = t.Dictionary) =>
+export const createPolicyInterface = (beatPolicyInterface: t.Mixed = t.Dictionary) =>
   t.interface(
     {
       id: t.union([t.undefined, t.string]),
       name: t.string,
       description: t.union([t.undefined, t.string]),
-      config: beatConfigInterface,
+      policy: beatPolicyInterface,
       last_updated_by: t.union([t.undefined, t.string]),
       last_updated: t.union([t.undefined, t.number]),
     },
-    'Config'
+    'Policy'
   );
-const BaseConfiguration = createConfigurationInterface();
-export interface ConfigurationBlock
-  extends Pick<
-    t.TypeOf<typeof BaseConfiguration>,
-    Exclude<keyof t.TypeOf<typeof BaseConfiguration>, 'id'>
-  > {
+const BasePolicy = createPolicyInterface();
+export interface PolicyBlock
+  extends Pick<t.TypeOf<typeof BasePolicy>, Exclude<keyof t.TypeOf<typeof BasePolicy>, 'id'>> {
   id: string;
 }
 

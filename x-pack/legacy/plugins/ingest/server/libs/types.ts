@@ -5,10 +5,10 @@
  */
 
 import { BackendFrameworkLib } from './framework';
-import { ConfigurationLib } from './configuration';
+import { PolicyLib } from './policy';
 import { ESDatabaseAdapter } from './adapters/es_database/default';
 export interface ServerLibs {
-  configuration: ConfigurationLib;
+  policy: PolicyLib;
   framework: BackendFrameworkLib;
   database?: ESDatabaseAdapter;
 }
