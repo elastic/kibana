@@ -55,6 +55,7 @@ export function BlacklistForm({
               'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
                 defaultMessage: 'Remove',
               }),
+              color: 'danger',
               alwaysShow: true,
               onClick: () => {
                 unblacklistNode(node);
@@ -66,6 +67,7 @@ export function BlacklistForm({
       <EuiSpacer />
       {blacklistedNodes.length > 0 && (
         <EuiButton
+          color="danger"
           iconType="trash"
           onClick={() => {
             blacklistedNodes.forEach(node => {
@@ -74,7 +76,7 @@ export function BlacklistForm({
           }}
         >
           {i18n.translate('xpack.graph.settings.blacklist.clearButtonLabel', {
-            defaultMessage: 'Clear',
+            defaultMessage: 'Clear all',
           })}
         </EuiButton>
       )}

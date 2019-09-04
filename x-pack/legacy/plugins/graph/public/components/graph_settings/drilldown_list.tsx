@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { EuiListGroup, EuiListGroupItem, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiListGroup, EuiText, EuiAccordion, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
-import { UrlTemplate } from '../../types';
-import { LegacyIcon } from './legacy_icon';
 import { getOutlinkEncoders } from '../../services/outlink_encoders';
 import { DrilldownForm } from './drilldown_form';
 
@@ -20,78 +18,55 @@ export function DrilldownList({
   saveUrlTemplate,
   urlTemplates,
 }: Pick<GraphSettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
-  const [selectedTemplate, setSelectedTemplate] = useState<
-    undefined | { index: number; template: UrlTemplate }
-  >(undefined);
-
-  if (selectedTemplate) {
-    const { index, template } = selectedTemplate;
-    function setValue<K extends keyof UrlTemplate>(key: K, value: UrlTemplate[K]) {
-      setSelectedTemplate({ index, template: { ...template, [key]: value } });
-    }
-    return (
-      <DrilldownForm
-        template={template}
-        setValue={setValue}
-        onSubmit={() => {
-          saveUrlTemplate(index, template);
-          setSelectedTemplate(undefined);
-        }}
-        onGoBack={() => {
-          setSelectedTemplate(undefined);
-        }}
-      />
-    );
-  } else {
-    return (
-      <>
-        <EuiText size="s">
-          {i18n.translate('xpack.graph.drilldowns.description', {
-            defaultMessage:
-              'Drilldown links configured here can be used to link to other applications and carry over the selected nodes as part of the URL',
-          })}
-        </EuiText>
-        <EuiListGroup>
-          {urlTemplates.map((template, index) => (
-            <EuiListGroupItem
-              icon={template.icon ? <LegacyIcon icon={template.icon} asListIcon /> : undefined}
-              iconType={template.icon ? undefined : 'empty'}
+  return (
+    <>
+      <EuiText size="s">
+        {i18n.translate('xpack.graph.drilldowns.description', {
+          defaultMessage:
+            'Drilldown links configured here can be used to link to other applications and carry over the selected nodes as part of the URL',
+        })}
+      </EuiText>
+      {urlTemplates.map((template, index) => (
+        <EuiAccordion
+          id={`accordion-${index}`}
+          buttonContent={template.description}
+          extraAction={
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              size="s"
               onClick={() => {
-                setSelectedTemplate({ index, template: { ...template, isDefault: false } });
-              }}
-              key={index}
-              label={template.description}
-              extraAction={{
-                iconType: 'trash',
-                'aria-label': i18n.translate('xpack.graph.templates.removeLabel', {
-                  defaultMessage: 'Remove',
-                }),
-                alwaysShow: true,
-                onClick: () => {
-                  removeUrlTemplate(template);
-                },
+                removeUrlTemplate(template);
               }}
             />
-          ))}
-          <EuiListGroupItem
-            onClick={() => {
-              setSelectedTemplate({
-                index: -1,
-                template: {
-                  encoder: encoders[0],
-                  icon: null,
-                  description: '',
-                  url: '',
-                },
-              });
+          }
+        >
+          <DrilldownForm
+            initialTemplate={template}
+            onSubmit={newTemplate => {
+              saveUrlTemplate(index, newTemplate);
             }}
-            iconType="plusInCircle"
-            label={i18n.translate('xpack.graph.templates.addLabel', {
-              defaultMessage: 'Create new template',
-            })}
           />
-        </EuiListGroup>
-      </>
-    );
-  }
+        </EuiAccordion>
+      ))}
+      <EuiAccordion
+        id={`accordion--1`}
+        buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
+          defaultMessage: 'Create new template',
+        })}
+      >
+        <DrilldownForm
+          initialTemplate={{
+            encoder: encoders[0],
+            icon: null,
+            description: '',
+            url: '',
+          }}
+          onSubmit={newTemplate => {
+            saveUrlTemplate(-1, newTemplate);
+          }}
+        />
+      </EuiAccordion>
+    </>
+  );
 }

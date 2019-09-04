@@ -39,17 +39,15 @@ export function AdvancedSettingsForm({
   return (
     <EuiForm>
       <EuiFormRow
-        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputHelpText', {
           defaultMessage:
-            'Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant.',
+            'Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputLabel', {
           defaultMessage: 'Sample size',
         })}
       >
         <EuiFieldNumber
-          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.sampleSize}
@@ -58,12 +56,10 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
-        fullWidth
         helpText={i18n.translate(
           'xpack.graph.settings.advancedSettings.significantLinksCheckboxHelpText',
           {
-            defaultMessage:
-              'Identify terms that are &quot;significant&quot; rather than simply popular',
+            defaultMessage: 'Identify terms that are "significant" rather than simply popular.',
           }
         )}
         label=""
@@ -80,7 +76,6 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
-        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.certaintyInputHelpText', {
           defaultMessage:
             'The min number of documents that are required as evidence before introducing a related term',
@@ -90,7 +85,6 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
-          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.minDocCount}
@@ -99,7 +93,6 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
-        fullWidth
         helpText={
           <>
             {i18n.translate('xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1', {
@@ -111,7 +104,7 @@ export function AdvancedSettingsForm({
                 'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText2',
                 {
                   defaultMessage:
-                    'This must be a single-term field or searches will be rejected with an error.',
+                    'This must be a single-term field or searches will be rejected with an error',
                 }
               )}
             </em>
@@ -122,7 +115,6 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiComboBox
-          fullWidth
           placeholder={i18n.translate(
             'xpack.graph.settings.advancedSettings.diversityFieldInputOptionLabel',
             { defaultMessage: '[No diversification]' }
@@ -150,7 +142,6 @@ export function AdvancedSettingsForm({
 
       {advancedSettings.sampleDiversityField && (
         <EuiFormRow
-          fullWidth
           helpText={
             <>
               {i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
@@ -171,7 +162,6 @@ export function AdvancedSettingsForm({
           })}
         >
           <EuiFieldNumber
-            fullWidth
             min={1}
             max={500000}
             value={advancedSettings.maxValuesPerDoc}
@@ -181,20 +171,21 @@ export function AdvancedSettingsForm({
       )}
 
       <EuiFormRow
-        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputHelpText', {
           defaultMessage: 'Max time in milliseconds a request can run',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputLabel', {
-          defaultMessage: 'Timeout (ms)',
+          defaultMessage: 'Timeout',
         })}
       >
         <EuiFieldNumber
-          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.timeoutMillis}
           onChange={getNumberUpdater('timeoutMillis')}
+          append={i18n.translate('xpack.graph.settings.advancedSettings.timeoutUnit', {
+            defaultMessage: 'ms',
+          })}
         />
       </EuiFormRow>
     </EuiForm>
