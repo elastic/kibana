@@ -27,7 +27,7 @@ import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
-import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
+import { IndexPattern, Query, QueryBar, FilterBar, TimeHistory } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
@@ -57,6 +57,7 @@ export interface SearchBarProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
+  timeHistory: TimeHistory;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -377,6 +378,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          timeHistory={this.props.timeHistory}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}
