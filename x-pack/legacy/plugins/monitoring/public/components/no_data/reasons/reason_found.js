@@ -14,6 +14,7 @@ import {
   ExplainCollectionEnabled,
   ExplainCollectionInterval,
   ExplainExporters,
+  ExplainExportersCloud,
   ExplainPluginEnabled
 } from '../explanations';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,6 +28,8 @@ const ExplainWhyNoData = ({ reason, ...props }) => {
       return <ExplainCollectionInterval {...reason} {...props} />;
     case 'xpack.monitoring.exporters':
       return <ExplainExporters {...reason} {...props} />;
+    case  'xpack.monitoring.exporters.cloud_enabled':
+      return <ExplainExportersCloud {...reason} {...props}/>;
     case 'xpack.monitoring.enabled':
       return <ExplainPluginEnabled {...reason} {...props} />;
     default:

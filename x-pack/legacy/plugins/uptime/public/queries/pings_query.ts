@@ -28,10 +28,17 @@ query PingList(
       total
       locations
       pings {
+        id
         timestamp
         http {
           response {
-            status_code
+            status_code 
+            body {
+              bytes
+              hash
+              content
+              content_bytes
+            }
           }
         }
         error {

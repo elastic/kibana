@@ -37,7 +37,7 @@ export function TableVisParams() {
       $scope.percentageColumns = [noCol];
 
       $scope.$watchMulti([
-        '[]editorState.aggs',
+        '[]editorState.aggs.aggs',
         'editorState.params.percentageCol',
         '=editorState.params.dimensions.buckets',
         '=editorState.params.dimensions.metrics',

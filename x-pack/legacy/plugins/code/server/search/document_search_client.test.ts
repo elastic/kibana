@@ -13,7 +13,7 @@ import { DocumentSearchClient } from './document_search_client';
 let docSearchClient: DocumentSearchClient;
 let esClient;
 
-// Setup the entire RepositorySearchClient.
+// Setup the entire DocumentSearchClient.
 function initSearchClient() {
   const log: Logger = (sinon.stub() as any) as Logger;
   esClient = initEsClient();
@@ -186,7 +186,7 @@ test('Document search', async () => {
 });
 
 test('Document suggest', async () => {
-  // 1. The first response should have 1 result.
+  // 1. The first response should have 2 docs.
   const responseWithResult = await docSearchClient.suggest({ query: 'string', page: 1 });
   expect(responseWithResult).toEqual(
     expect.objectContaining({

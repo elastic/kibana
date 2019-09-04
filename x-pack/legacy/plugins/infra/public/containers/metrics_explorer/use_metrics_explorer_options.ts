@@ -20,6 +20,7 @@ export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
 export enum MetricsExplorerChartType {
   line = 'line',
   area = 'area',
+  bar = 'bar',
 }
 
 export enum MetricsExplorerYAxisMode {

@@ -23,8 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
-import { RangeOption } from '../../kbn_vislib_vis_types/public/controls/range';
+import { RangeOption, SwitchOption } from '../../kbn_vislib_vis_types/public/components';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
