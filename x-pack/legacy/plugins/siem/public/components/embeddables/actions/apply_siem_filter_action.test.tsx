@@ -198,6 +198,11 @@ describe('#getFilterExpression', () => {
     const layerList = getFilterExpression('host.id', ['xavier', 'angela', 'frank']);
     expect(layerList).toEqual('(host.id: "xavier" OR host.id: "angela" OR host.id: "frank")');
   });
+
+  test('it returns a valid expression when provided array filterValue with a single value', () => {
+    const layerList = getFilterExpression('host.id', ['xavier']);
+    expect(layerList).toEqual('(host.id: "xavier")');
+  });
 });
 
 describe('#getExpressionFromArray', () => {
