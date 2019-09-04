@@ -2,8 +2,9 @@
 [[maps-search]]
 == Searching your data
 
-The **Maps** application embeds the query bar for real-time ad hoc search.
+Elastic Maps embeds the search bar for real-time ad hoc search.
 Only layers requesting data from {es} are filtered when you submit a search request.
+Layers narrowed by the search context contain image:maps/images/filter_icon.png[] to the right of layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
@@ -13,13 +14,49 @@ You can create a layer that requests data from {es} from the following:
 
 ** Grid aggregation source
 
-** <<terms-join>>
+** <<terms-join>>. The search context is applied to both the terms join and the vector source when the vector source is provided by Elasticsearch documents.
 
 * <<heatmap-layer>> with Grid aggregation source
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
 
+[role="xpack"]
+[[maps-create-filter-from-map]]
+=== Creating filters from your map
+
+You can create filters by interacting with your map.
+Filters are applied to all layers in your map and other panels when your map is <<maps-embedding, embedded in a dashboard>>
+
+[float]
+[[maps-create-spatial-filters]]
+==== Create spatial filters
+
+Spatial filters narrow search results to documents that either intersect, are within, or do not intersect with the specified geometry.
+
+You can create spatial filters by:
+
+* Clicking image:maps/images/tools_icon.png[] to define the spatial fitler by drawing a polygon or a bounding box on the map.
+* Clicking *Filter by geometry* in a feature tooltip to use a feature's geometry for the spatial filter.
++
+[role="screenshot"]
+image::maps/images/create_spatial_filter.png[]
+
+You can configure the following spatial filter properties:
+
+* Use *Geometry label* to provide a distinguishable and meaningful name for your spatial filter.
+* *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations.html[spatial relation operator] used at search time. Spatial relation selection is only available when the selected Spatial field is geo_shape.
+
+[float]
+[[maps-create-phrase-filter]]
+==== Create phrase filters
+
+Phrase filters narrow search results to documents that contain the phrase.
+You can create a phrase filter by clicking image:maps/images/gs_plus_icon.png[] in a feature tooltip.
+
+[role="screenshot"]
+image::maps/images/create_phrase_filter.png[]
 
 [role="xpack"]
 [[maps-layer-based-filtering]]
@@ -43,6 +80,18 @@ This can also occur with a single layer with an {es} source and a <<terms-join>>
 
 Searching across multiple indices might sometimes result in empty layers.
 The most common cause for empty layers are searches for a field that exists in one index, but does not exist in other indices.
+
+[float]
+[[maps-disable-search-for-layer]]
+==== Disable search for layer
+
+You can disable the globar search bar from applying search context to a layer by unchecking *Apply global filter to layer* in Layer settings.
+Disabling the search context applies to the layer source and all <<terms-join, term joins>> configured for the layer.
+
+[float]
+[[maps-add-index-search]]
+==== Use _index in your search
+
 Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 
 For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents
