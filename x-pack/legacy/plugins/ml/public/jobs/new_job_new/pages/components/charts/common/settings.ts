@@ -8,9 +8,7 @@ import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  PopulationJobCreator,
+  JobCreatorType,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
@@ -59,10 +57,7 @@ export const seriesStyle = {
   },
 };
 
-export function getChartSettings(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator,
-  chartInterval: MlTimeBuckets
-) {
+export function getChartSettings(jobCreator: JobCreatorType, chartInterval: MlTimeBuckets) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
