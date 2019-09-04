@@ -22,6 +22,8 @@ export class InMemoryAgentAdapter implements AgentAdapter {
       id: (options && options.id) || `agent-${this.id++}`,
       last_updated: undefined,
       last_checkin: undefined,
+      events: [],
+      actions: [],
     };
 
     this.agents[newAgent.id] = newAgent;

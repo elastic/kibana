@@ -43,6 +43,30 @@ export const mappings = {
       last_checkin: {
         type: 'date',
       },
+      actions: {
+        type: 'nested',
+        properties: {
+          id: { type: 'keyword' },
+          type: { type: 'keyword' },
+          data: { type: 'text' },
+          sent_at: { type: 'date' },
+          created_at: { type: 'date' },
+        },
+      },
+      events: {
+        type: 'nested',
+        properties: {
+          type: { type: 'keyword' },
+          timestamp: { type: 'date' },
+          event: {
+            type: 'object',
+            properties: {
+              type: { type: 'keyword' },
+              message: { type: 'text' },
+            },
+          },
+        },
+      },
     },
   },
   tokens: {

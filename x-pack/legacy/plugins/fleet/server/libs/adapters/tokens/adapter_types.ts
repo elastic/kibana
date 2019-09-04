@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface TokenData {
+export interface EnrollmentTokenData {
+  config: { id: string; sharedId: string };
+}
+
+export interface AccessTokenData {
   config: { id: string; sharedId: string };
 }
 
 export type TokenVerificationResponse =
   | {
       valid: true;
-      token: TokenData;
+      type: TokenType;
+      token: AccessTokenData;
     }
   | {
       valid: false;
@@ -19,8 +24,8 @@ export type TokenVerificationResponse =
     };
 
 export enum TokenType {
-  ENROLMENT_TOKEN,
-  ACCESS_TOKEN,
+  ENROLMENT_TOKEN = 'ENROLMENT_TOKEN',
+  ACCESS_TOKEN = 'ACCESS_TOKEN',
 }
 
 export interface Token {

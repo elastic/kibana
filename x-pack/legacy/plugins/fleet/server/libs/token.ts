@@ -35,6 +35,7 @@ export class TokenLib {
 
       return {
         valid: true,
+        type: decodedToken.type,
         token: {
           config: decodedToken.config,
         },
@@ -107,10 +108,6 @@ export class TokenLib {
   private _verifyJWTToken(token: string): JWTToken {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
     const decodedToken = verifyToken(token, encryptionKey) as JWTToken;
-
-    if (decodedToken.type !== TokenType.ENROLMENT_TOKEN) {
-      throw new Error('Not a valid token type');
-    }
 
     return decodedToken;
   }

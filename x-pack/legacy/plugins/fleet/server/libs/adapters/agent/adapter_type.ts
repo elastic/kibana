@@ -5,13 +5,52 @@
  */
 
 import * as t from 'io-ts';
-import { DateFromString } from '../../../../common/types/io_ts';
 
 const RuntimeAgentType = t.union([
   t.literal('PERMANENT'),
   t.literal('EPHEMERAL'),
   t.literal('EPHEMERAL_INSTANCE'),
   t.literal('TEMPORARY'),
+]);
+
+export const RuntimeAgentEvent = t.interface(
+  {
+    type: t.union([t.literal('STATE'), t.literal('ERROR'), t.literal('ACTION_RESULT')]),
+    timestamp: t.string,
+    event: t.type({
+      type: t.union([
+        t.literal('RUNNING'),
+        t.literal('STARTING'),
+        t.literal('IN_PROGRESS'),
+        t.literal('CONFIG'),
+        t.literal('FAILED'),
+        t.literal('STOPPED'),
+        t.literal('DATA_DUMP'),
+      ]),
+      message: t.string,
+    }),
+  },
+  'AgentEvent'
+);
+
+export const RuntimeAgentAction = t.intersection([
+  t.interface(
+    {
+      id: t.string,
+      type: t.union([
+        t.literal('DATA_DUMP'),
+        t.literal('RESUME'),
+        t.literal('PAUSE'),
+        t.literal('UNENROLL'),
+      ]),
+      created_at: t.string,
+    },
+    'AgentAction'
+  ),
+  t.partial({
+    data: t.string,
+    sent_at: t.string,
+  }),
 ]);
 
 export type AgentType = t.TypeOf<typeof RuntimeAgentType>;
@@ -42,6 +81,8 @@ export const RuntimeAgent = t.intersection([
   t.interface({
     ...newAgentProperties,
     id: t.string,
+    events: t.array(RuntimeAgentEvent),
+    actions: t.array(RuntimeAgentAction),
   }),
   t.partial({
     last_updated: t.string,
@@ -65,6 +106,8 @@ export const RuntimeSavedObjectAgentAttributes = t.intersection([
     id: t.string,
     user_provided_metadata: t.string,
     local_metadata: t.string,
+    events: t.array(RuntimeAgentEvent),
+    actions: t.array(RuntimeAgentAction),
   }),
 ]);
 
@@ -72,35 +115,8 @@ export type SavedObjectAgentAttributes = t.TypeOf<typeof RuntimeSavedObjectAgent
 export type Agent = t.TypeOf<typeof RuntimeAgent>;
 export type NewAgent = t.TypeOf<typeof NewRuntimeAgent>;
 
-export const RuntimeAgentEvent = t.interface(
-  {
-    type: t.union([t.literal('STATE'), t.literal('ERROR'), t.literal('ACTION_RESULT')]),
-    beat: t.union([t.undefined, t.string]),
-    timestamp: DateFromString,
-    event: t.type({
-      type: t.union([
-        t.literal('RUNNING'),
-        t.literal('STARTING'),
-        t.literal('IN_PROGRESS'),
-        t.literal('CONFIG'),
-        t.literal('FAILED'),
-        t.literal('STOPPED'),
-        t.literal('DATA_DUMP'),
-      ]),
-      message: t.string,
-      uuid: t.union([t.undefined, t.string]),
-    }),
-  },
-  'AgentEvent'
-);
-export interface AgentEvent
-  extends Pick<
-    t.TypeOf<typeof RuntimeAgentEvent>,
-    Exclude<keyof t.TypeOf<typeof RuntimeAgentEvent>, 'timestamp'>
-  > {
-  agent: string;
-  timestamp: Date;
-}
+export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
+export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
 
 export enum SortOptions {
   EnrolledAtASC,

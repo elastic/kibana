@@ -1740,3 +1740,350 @@ exports['Token Adapter delete allow to update a token - find:{"type":"tokens","p
     "saved_objects": []
   }
 }
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fb7cd2a0-d030-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "created_at": "2019-09-05T23:00:40.770Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "config_id": "configId",
+      "config_shared_id": "sharedId",
+      "active": true
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:40.778Z",
+    "version": "WzAsMV0="
+  }
+}
+
+exports['Token Adapter create allow to create a token - get:tokens:fb7cd2a0-d030-11e9-a60d-673487ffae4d:{} (2)'] = {
+  "results": {
+    "id": "fb7cd2a0-d030-11e9-a60d-673487ffae4d",
+    "type": "tokens",
+    "updated_at": "2019-09-05T23:00:40.778Z",
+    "version": "WzAsMV0=",
+    "attributes": {
+      "created_at": "2019-09-05T23:00:40.770Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "config_id": "configId",
+      "config_shared_id": "sharedId",
+      "active": true
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fb7cd2a0-d030-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "created_at": "2019-09-05T23:00:40.770Z",
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "config_id": "configId",
+          "config_shared_id": "sharedId",
+          "active": true
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:40.778Z",
+        "version": "WzAsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter create allow to create a token - delete:tokens:fb7cd2a0-d030-11e9-a60d-673487ffae4d:{} (4)'] = {
+  "results": {}
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fc745200-d030-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "config_id": "configId",
+      "config_shared_id": "sharedId"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:42.400Z",
+    "version": "WzMsMV0="
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:fc745200-d030-11e9-a60d-673487ffae4d:{"active":false}:{} (2)'] = {
+  "results": {
+    "id": "fc745200-d030-11e9-a60d-673487ffae4d",
+    "type": "tokens",
+    "updated_at": "2019-09-05T23:00:43.409Z",
+    "version": "WzQsMV0=",
+    "references": [],
+    "attributes": {
+      "active": false
+    }
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:fc745200-d030-11e9-a60d-673487ffae4d:{} (3)'] = {
+  "results": {
+    "id": "fc745200-d030-11e9-a60d-673487ffae4d",
+    "type": "tokens",
+    "updated_at": "2019-09-05T23:00:43.409Z",
+    "version": "WzQsMV0=",
+    "attributes": {
+      "active": false,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "config_id": "configId",
+      "config_shared_id": "sharedId"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fc745200-d030-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": false,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "config_id": "configId",
+          "config_shared_id": "sharedId"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:43.409Z",
+        "version": "WzQsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter update allow to update a token - delete:tokens:fc745200-d030-11e9-a60d-673487ffae4d:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fe46c810-d030-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:45.457Z",
+    "version": "WzcsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fe471630-d030-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:45.459Z",
+    "version": "WzgsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fe471630-d030-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:45.459Z",
+        "version": "WzgsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fe46c810-d030-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:45.457Z",
+        "version": "WzcsMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "fe471630-d030-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:45.459Z",
+        "version": "WzgsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:fe46c810-d030-11e9-a60d-673487ffae4d:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:fe471630-d030-11e9-a60d-673487ffae4d:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "001bfd40-d031-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:48.532Z",
+    "version": "WzEyLDFd"
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "001d35c0-d031-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:48.540Z",
+    "version": "WzExLDFd"
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "001bfd40-d031-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:48.532Z",
+        "version": "WzEyLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "001d35c0-d031-11e9-a60d-673487ffae4d",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-05T23:00:48.540Z",
+        "version": "WzExLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:001bfd40-d031-11e9-a60d-673487ffae4d:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:001d35c0-d031-11e9-a60d-673487ffae4d:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "0205f2f0-d031-11e9-a60d-673487ffae4d",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-05T23:00:51.743Z",
+    "version": "WzE1LDFd"
+  }
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:0205f2f0-d031-11e9-a60d-673487ffae4d:{} (2)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - get:tokens:0205f2f0-d031-11e9-a60d-673487ffae4d:{} (3)'] = {
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
