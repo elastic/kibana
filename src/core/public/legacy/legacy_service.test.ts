@@ -61,7 +61,7 @@ import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
-const applicationSetup = applicationServiceMock.createSetupContract();
+const applicationSetup = applicationServiceMock.createInternalSetupContract();
 const contextSetup = contextServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
@@ -88,7 +88,7 @@ const defaultSetupDeps = {
   plugins: {},
 };
 
-const applicationStart = applicationServiceMock.createStartContract();
+const applicationStart = applicationServiceMock.createInternalStartContract();
 const docLinksStart = docLinksServiceMock.createStartContract();
 const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
@@ -98,6 +98,7 @@ const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
 const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 const savedObjectsStart = savedObjectsMock.createStartContract();
+const mockStorage = { getItem: jest.fn() } as any;
 
 const defaultStartDeps = {
   core: {
@@ -112,6 +113,7 @@ const defaultStartDeps = {
     uiSettings: uiSettingsStart,
     savedObjects: savedObjectsStart,
   },
+  lastSubUrlStorage: mockStorage,
   targetDomElement: document.createElement('div'),
   plugins: {},
 };
@@ -132,12 +134,29 @@ describe('#setup()', () => {
       legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockUiNewPlatformSetup).toHaveBeenCalledTimes(1);
-      expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(defaultSetupDeps.core, {});
+      expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(expect.any(Object), {});
     });
   });
 });
 
 describe('#start()', () => {
+  it('fetches and sets legacy lastSubUrls', () => {
+    chromeStart.navLinks.getAll.mockReturnValue([
+      { id: 'link1', baseUrl: 'http://wowza.com/app1', legacy: true } as any,
+    ]);
+    mockStorage.getItem.mockReturnValue('http://wowza.com/app1/subUrl');
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+    });
+
+    legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start({ ...defaultStartDeps, lastSubUrlStorage: mockStorage });
+
+    expect(chromeStart.navLinks.update).toHaveBeenCalledWith('link1', {
+      url: 'http://wowza.com/app1/subUrl',
+    });
+  });
+
   it('initializes ui/new_platform with core APIs', () => {
     const legacyPlatform = new LegacyPlatformService({
       ...defaultParams,
@@ -147,7 +166,7 @@ describe('#start()', () => {
     legacyPlatform.start(defaultStartDeps);
 
     expect(mockUiNewPlatformStart).toHaveBeenCalledTimes(1);
-    expect(mockUiNewPlatformStart).toHaveBeenCalledWith(defaultStartDeps.core, {});
+    expect(mockUiNewPlatformStart).toHaveBeenCalledWith(expect.any(Object), {});
   });
 
   describe('useLegacyTestHarness = false', () => {

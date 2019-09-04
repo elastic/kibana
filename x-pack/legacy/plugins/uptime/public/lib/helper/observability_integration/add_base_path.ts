@@ -5,4 +5,4 @@
  */
 
 export const addBasePath = (basePath: string, url: string) =>
-  `${basePath.length > 0 ? `/${basePath}` : ''}${url}`;
+  `${basePath.length > 0 ? `${basePath}` : ''}${url}`;
