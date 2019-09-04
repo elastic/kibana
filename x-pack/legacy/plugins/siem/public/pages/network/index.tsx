@@ -9,37 +9,17 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { pure } from 'recompose';
 
-import { i18n } from '@kbn/i18n';
 import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { PageRoute } from '../../components/page_route/pageroute';
 
 const networkPath = `/:pageName(network)`;
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
   <>
     <Switch>
-      <Route
-        strict
-        exact
-        path={networkPath}
-        render={props => (
-          <PageRoute
-            {...props}
-            component={Network}
-            title={i18n.translate('xpack.siem.pages.network.networkTitle', {
-              defaultMessage: 'Network',
-            })}
-          />
-        )}
-      />
-      <Route
-        path={`${networkPath}/ip/:detailName`}
-        render={props => (
-          <PageRoute {...props} component={IPDetails} title={props.match.params.ip} />
-        )}
-      />
+      <Route strict exact path={networkPath} render={props => <Network {...props} />} />
+      <Route path={`${networkPath}/ip/:detailName`} render={props => <IPDetails {...props} />} />
       <Redirect from="/network/" to="/network" />
     </Switch>
   </>

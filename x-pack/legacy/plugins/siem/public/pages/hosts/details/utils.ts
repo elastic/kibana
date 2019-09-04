@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -13,11 +13,11 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { hostsModel, hostsSelectors } from '../../../store/hosts';
 import { HostsTableType } from '../../../store/hosts/model';
 import { State } from '../../../store';
-import { NavigationParams } from '../../../components/navigation/breadcrumbs';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../../lib/keury';
+import { RouteSpyState } from '../../../utils/route/spy_routes';
 
 export const type = hostsModel.HostsType.details;
 
@@ -36,29 +36,27 @@ const TabNameMappedToI18nKey = {
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const getBreadcrumbs = (params: NavigationParams): Breadcrumb[] => {
-  const hostName = get('detailName', params);
-  const tabName = get('tabName', params);
+export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getHostsUrl(),
+      href: `${getHostsUrl()}${search && search[0] ? search[0] : ''}`,
     },
   ];
-  if (hostName) {
+  if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: hostName,
-        href: getHostDetailsUrl(hostName),
+        text: params.detailName,
+        href: `${getHostDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
       },
     ];
   }
-  if (tabName) {
+  if (params.tabName != null) {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: TabNameMappedToI18nKey[tabName],
+        text: TabNameMappedToI18nKey[params.tabName],
         href: '',
       },
     ];

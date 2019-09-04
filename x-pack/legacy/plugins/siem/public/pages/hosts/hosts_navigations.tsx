@@ -25,9 +25,9 @@ import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/link-to/hosts/${tabName}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
-  return `#/link-to/hosts/${hostName}/${tabName}`;
+  return `#/hosts/${hostName}/${tabName}`;
 };
 
 export type KeyHostsNavTab =

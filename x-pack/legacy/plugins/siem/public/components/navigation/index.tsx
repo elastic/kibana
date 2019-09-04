@@ -7,8 +7,8 @@
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import { isEqual } from 'lodash/fp';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps, SiemNavigationComponentProps } from './type';
@@ -22,14 +22,19 @@ import {
   networkModel,
 } from '../../store';
 import { CONSTANTS } from '../url_state/constants';
+import { RouteSpyState, useRouteSpy } from '../../utils/route/spy_routes';
 
-export class SiemNavigationComponent extends React.Component<
-  RouteComponentProps & TabNavigationProps
-> {
-  public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
+export class SiemNavigationComponent extends React.Component<TabNavigationProps & RouteSpyState> {
+  public shouldComponentUpdate(nextProps: Readonly<TabNavigationProps & RouteSpyState>): boolean {
     if (
-      this.props.location.pathname === nextProps.location.pathname &&
-      this.props.location.search === nextProps.location.search
+      this.props.pathName === nextProps.pathName &&
+      this.props.search === nextProps.search &&
+      isEqual(this.props.hosts, nextProps.hosts) &&
+      isEqual(this.props.hostDetails, nextProps.hostDetails) &&
+      isEqual(this.props.network, nextProps.network) &&
+      isEqual(this.props.navTabs, nextProps.navTabs) &&
+      isEqual(this.props.timerange, nextProps.timerange) &&
+      isEqual(this.props.timelineId, nextProps.timelineId)
     ) {
       return false;
     }
@@ -38,40 +43,99 @@ export class SiemNavigationComponent extends React.Component<
 
   public componentWillMount(): void {
     const {
-      location,
-      match: { params },
+      detailName,
+      hosts,
+      hostDetails,
+      navTabs,
+      network,
+      pageName,
+      pathName,
+      search,
+      tabName,
+      timerange,
+      timelineId,
     } = this.props;
-    if (location.pathname) {
-      setBreadcrumbs(location.pathname, params);
+    if (pathName) {
+      setBreadcrumbs({
+        detailName,
+        hosts,
+        hostDetails,
+        navTabs,
+        network,
+        pageName,
+        pathName,
+        search,
+        tabName,
+        timerange,
+        timelineId,
+      });
     }
   }
 
-  public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
-    if (this.props.location.pathname !== nextProps.location.pathname) {
-      setBreadcrumbs(nextProps.location.pathname, nextProps.match.params);
+  public componentWillReceiveProps(nextProps: Readonly<RouteSpyState & TabNavigationProps>): void {
+    if (
+      this.props.pathName !== nextProps.pathName ||
+      this.props.search !== nextProps.search ||
+      !isEqual(this.props.hosts, nextProps.hosts) ||
+      !isEqual(this.props.hostDetails, nextProps.hostDetails) ||
+      !isEqual(this.props.network, nextProps.network) ||
+      !isEqual(this.props.navTabs, nextProps.navTabs) ||
+      !isEqual(this.props.timerange, nextProps.timerange) ||
+      !isEqual(this.props.timelineId, nextProps.timelineId)
+    ) {
+      const {
+        detailName,
+        hosts,
+        hostDetails,
+        navTabs,
+        network,
+        pageName,
+        pathName,
+        search,
+        tabName,
+        timerange,
+        timelineId,
+      } = nextProps;
+      if (pathName) {
+        setBreadcrumbs({
+          detailName,
+          hosts,
+          hostDetails,
+          navTabs,
+          network,
+          pageName,
+          pathName,
+          search,
+          tabName,
+          timerange,
+          timelineId,
+        });
+      }
     }
   }
 
   public render() {
     const {
       display,
-      location,
+      pageName,
+      pathName,
       hosts,
       hostDetails,
-      match,
       navTabs,
       network,
       showBorder,
+      tabName,
       timerange,
       timelineId,
     } = this.props;
     return (
       <TabNavigation
         display={display}
-        location={location}
+        pageName={pageName}
+        pathName={pathName}
         hosts={hosts}
         hostDetails={hostDetails}
-        match={match}
+        tabName={tabName}
         navTabs={navTabs}
         network={network}
         showBorder={showBorder}
@@ -132,7 +196,15 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const SiemNavigation = compose<React.ComponentClass<SiemNavigationComponentProps>>(
-  withRouter,
-  connect(makeMapStateToProps)
-)(SiemNavigationComponent);
+export const SiemNavigationRedux = compose<
+  React.ComponentClass<SiemNavigationComponentProps & RouteSpyState>
+>(connect(makeMapStateToProps))(SiemNavigationComponent);
+
+export const SiemNavigation = React.memo<SiemNavigationComponentProps>(props => {
+  const [routeProps] = useRouteSpy();
+  const stateNavReduxProps: RouteSpyState & SiemNavigationComponentProps = {
+    ...routeProps,
+    ...props,
+  };
+  return <SiemNavigationRedux {...stateNavReduxProps} />;
+});
