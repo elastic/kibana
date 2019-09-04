@@ -243,7 +243,7 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
-    if (options.charByChar === true) {
+    if (options.charByChar === true || this.browserType === Browsers.InternetExplorer) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
@@ -295,7 +295,6 @@ export class WebElementWrapper {
         });
       }
     } else {
-      debugger;
       await this.retryCall(async function type(wrapper) {
         await wrapper._webElement.sendKeys(...value);
       });
