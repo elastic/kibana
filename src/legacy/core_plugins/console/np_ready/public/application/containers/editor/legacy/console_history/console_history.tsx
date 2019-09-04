@@ -21,26 +21,36 @@ import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
-import { keyCodes } from '@elastic/eui';
+import { keyCodes, EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../../context';
 import { HistoryViewer } from './history_viewer';
 
 interface Props {
   close: () => void;
+  reqs: any[];
 }
 
-export function ConsoleHistory({ close }: Props) {
+const CHILD_ELEMENT_PREFIX = 'historyReq';
+
+export function ConsoleHistory({ close, reqs }: Props) {
   const {
     services: { history, settings },
     ResizeChecker,
   } = useAppContext();
 
-  const [reqs, setReqs] = useState<any[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
+  const [viewingReq, setViewingReq] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const selectedReq = useRef<any>(null);
-  const viewingReq = useRef<any>(null);
+
+  const scrollIntoView = (idx: number) => {
+    const activeDescendant = listRef.current!.querySelector(`#${CHILD_ELEMENT_PREFIX}${idx}`);
+    if (activeDescendant) {
+      activeDescendant.scrollIntoView();
+    }
+  };
 
   const [describeReq] = useState(() => {
     const _describeReq = (req: any) => {
@@ -61,12 +71,12 @@ export function ConsoleHistory({ close }: Props) {
   });
 
   const initialize = () => {
-    const nextReqs = history.getHistory();
     const nextSelectedIndex = 0;
-    selectedReq.current = viewingReq.current = nextReqs[nextSelectedIndex];
     (describeReq as any).cache = new WeakMap();
+    setViewingReq(reqs[nextSelectedIndex]);
+    selectedReq.current = reqs[nextSelectedIndex];
     setSelectedIndex(nextSelectedIndex);
-    setReqs(nextReqs);
+    scrollIntoView(nextSelectedIndex);
   };
 
   const clear = () => {
@@ -80,115 +90,118 @@ export function ConsoleHistory({ close }: Props) {
 
   useEffect(() => {
     initialize();
-  }, []);
+  }, [reqs]);
 
   /* eslint-disable */
   return (
-    <div className="conHistory">
-      <h2 className="kuiLocalDropdownTitle">
-        {i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}
-      </h2>
-      <div className="conHistory__body">
-        <ul
-          onKeyDown={(ev: React.KeyboardEvent) => {
-            if (ev.keyCode === keyCodes.ENTER) {
-              restore();
-              return;
-            }
+    <>
+      <div className="conHistory">
+        <h2 className="kuiLocalDropdownTitle">
+          {i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}
+        </h2>
+        <div className="conHistory__body">
+          <ul
+            ref={listRef}
+            onKeyDown={(ev: React.KeyboardEvent) => {
+              if (ev.keyCode === keyCodes.ENTER) {
+                restore();
+                return;
+              }
 
-            let currentIdx = selectedIndex;
+              let currentIdx = selectedIndex;
 
-            if (ev.keyCode === keyCodes.UP) {
-              ev.preventDefault();
-              --currentIdx;
-            } else if (ev.keyCode === keyCodes.DOWN) {
-              ev.preventDefault();
-              ++currentIdx;
-            }
+              if (ev.keyCode === keyCodes.UP) {
+                ev.preventDefault();
+                --currentIdx;
+              } else if (ev.keyCode === keyCodes.DOWN) {
+                ev.preventDefault();
+                ++currentIdx;
+              }
 
-            const nextSelectedIndex = Math.min(Math.max(0, currentIdx), reqs.length - 1);
+              const nextSelectedIndex = Math.min(Math.max(0, currentIdx), reqs.length - 1);
 
-            selectedReq.current = reqs[nextSelectedIndex];
-            viewingReq.current = reqs[nextSelectedIndex];
-            setSelectedIndex(nextSelectedIndex);
-          }}
-          role="listbox"
-          className="list-group conHistory__reqs"
-          tabIndex={0}
-          aria-activedescendant={`historyReq${selectedIndex}`}
-          scrollto-activedescendant="true"
-          aria-label={i18n.translate('console.historyPage.requestListAriaLabel', {
-            defaultMessage: 'History of sent requests',
-          })}
-        >
-          {reqs.map((req, idx) => {
-            const reqDescription = describeReq(req);
-            const isSelected = viewingReq.current === req;
-            return (
-              // Ignore a11y issues on li's
-              // eslint-disable-next-line
-              <li
-                key={idx}
-                id={`historyReq${idx}`}
-                className={`list-group-item conHistory__req ${
-                  isSelected ? 'conHistory__req-selected' : ''
-                }`}
-                onClick={() => {
-                  selectedReq.current = req;
-                  viewingReq.current = req;
-                  setSelectedIndex(idx);
-                }}
-                role="option"
-                onMouseEnter={() => (viewingReq.current = req)}
-                onMouseLeave={() => (viewingReq.current = selectedReq.current)}
-                onDoubleClick={() => restore(req)}
-                aria-label={i18n.translate('console.historyPage.itemOfRequestListAriaLabel', {
-                  defaultMessage: 'Request: {historyItem}',
-                  values: { historyItem: reqDescription },
-                })}
-                aria-selected={isSelected}
-              >
-                {reqDescription}
-                <span className="conHistory__reqIcon">
-                  <i className="fa fa-chevron-right" />
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <HistoryViewer
-          settings={settings}
-          req={viewingReq.current!}
-          ResizeChecker={ResizeChecker}
-        />
-      </div>
-
-      <div className="conHistory__footer">
-        <button className="kuiButton kuiButton--danger" onClick={() => clear()}>
-          {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
-            defaultMessage: 'Clear',
-          })}
-        </button>
-
-        <div className="conHistory__footerButtonsRight">
-          <button className="kuiButton kuiButton--hollow" onClick={() => close()}>
-            {i18n.translate('console.historyPage.closehistoryButtonLabel', {
-              defaultMessage: 'Close',
+              setViewingReq(reqs[nextSelectedIndex]);
+              selectedReq.current = reqs[nextSelectedIndex];
+              setSelectedIndex(nextSelectedIndex);
+              scrollIntoView(nextSelectedIndex);
+            }}
+            role="listbox"
+            className="list-group conHistory__reqs"
+            tabIndex={0}
+            aria-activedescendant={`${CHILD_ELEMENT_PREFIX}${selectedIndex}`}
+            aria-label={i18n.translate('console.historyPage.requestListAriaLabel', {
+              defaultMessage: 'History of sent requests',
             })}
-          </button>
-
-          <button
-            className="kuiButton kuiButton--primary"
-            disabled={!selectedReq}
-            onClick={() => restore()}
           >
-            {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
-              defaultMessage: 'Apply',
+            {reqs.map((req, idx) => {
+              const reqDescription = describeReq(req);
+              const isSelected = viewingReq === req;
+              return (
+                // Ignore a11y issues on li's
+                // eslint-disable-next-line
+                <li
+                  key={idx}
+                  id={`${CHILD_ELEMENT_PREFIX}${idx}`}
+                  className={`list-group-item conHistory__req ${
+                    isSelected ? 'conHistory__req-selected' : ''
+                  }`}
+                  onClick={() => {
+                    setViewingReq(req);
+                    selectedReq.current = req;
+                    setSelectedIndex(idx);
+                    scrollIntoView(idx);
+                  }}
+                  role="option"
+                  onMouseEnter={() => setViewingReq(req)}
+                  onMouseLeave={() => setViewingReq(selectedReq.current)}
+                  onDoubleClick={() => restore(req)}
+                  aria-label={i18n.translate('console.historyPage.itemOfRequestListAriaLabel', {
+                    defaultMessage: 'Request: {historyItem}',
+                    values: { historyItem: reqDescription },
+                  })}
+                  aria-selected={isSelected}
+                >
+                  {reqDescription}
+                  <span className="conHistory__reqIcon">
+                    <i className="fa fa-chevron-right" />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="conHistory__body__spacer" />
+
+          <HistoryViewer settings={settings} req={viewingReq} ResizeChecker={ResizeChecker} />
+        </div>
+
+        <div className="conHistory__footer">
+          <button className="kuiButton kuiButton--danger" onClick={() => clear()}>
+            {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
+              defaultMessage: 'Clear',
             })}
           </button>
+
+          <div className="conHistory__footerButtonsRight">
+            <button className="kuiButton kuiButton--hollow" onClick={() => close()}>
+              {i18n.translate('console.historyPage.closehistoryButtonLabel', {
+                defaultMessage: 'Close',
+              })}
+            </button>
+
+            <button
+              className="kuiButton kuiButton--primary"
+              disabled={!selectedReq}
+              onClick={() => restore()}
+            >
+              {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
+                defaultMessage: 'Apply',
+              })}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      <EuiSpacer size="s" />
+    </>
   );
 }

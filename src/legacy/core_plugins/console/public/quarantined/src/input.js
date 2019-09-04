@@ -24,34 +24,12 @@ const utils = require('./utils');
 const es = require('./es');
 
 let input;
-export function initializeInput($el, $actionsEl, history, settings, openDocumentation = () => {}) {
+export function initializeInput($el, $actionsEl, history, settings) {
   input = new SenseEditor($el);
 
   input.autocomplete = new Autocomplete(input);
 
   input.$actions = $actionsEl;
-
-  input.commands.addCommand({
-    name: 'auto indent request',
-    bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
-    exec: () => {
-      input.autoIndent();
-    },
-  });
-  input.commands.addCommand({
-    name: 'move to previous request start or end',
-    bindKey: { win: 'Ctrl-Up', mac: 'Command-Up' },
-    exec: () => {
-      input.moveToPreviousRequestEdge();
-    },
-  });
-  input.commands.addCommand({
-    name: 'move to next request start or end',
-    bindKey: { win: 'Ctrl-Down', mac: 'Command-Down' },
-    exec: () => {
-      input.moveToNextRequestEdge();
-    },
-  });
 
   /**
    * Setup the "send" shortcut
@@ -202,19 +180,6 @@ export function initializeInput($el, $actionsEl, history, settings, openDocument
       sendNextRequest();
     });
   }
-
-  input.commands.addCommand({
-    name: 'send to elasticsearch',
-    bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: () => sendCurrentRequestToES(),
-  });
-  input.commands.addCommand({
-    name: 'open documentation',
-    bindKey: { win: 'Ctrl-/', mac: 'Command-/' },
-    exec: () => {
-      openDocumentation();
-    },
-  });
 
   /**
    * Init the editor

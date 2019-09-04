@@ -27,6 +27,7 @@ import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
+import { registerCommands } from './keyboard_shortcuts';
 
 // @ts-ignore
 import { initializeInput } from '../../../../../../../public/quarantined/src/input';
@@ -57,6 +58,14 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
 
+  const openDocumentation = async () => {
+    const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
+    if (!documentation) {
+      return;
+    }
+    window.open(documentation, '_blank');
+  };
+
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
@@ -73,6 +82,14 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
 
     setTextArea(editorRef.current!.querySelector('textarea'));
   }, []);
+
+  useEffect(() => {
+    registerCommands({
+      input: editorInstanceRef.current,
+      sendCurrentRequestToES: sendCurrentRequest,
+      openDocumentation,
+    });
+  }, [sendCurrentRequest]);
 
   return (
     <div style={abs} className="conApp">

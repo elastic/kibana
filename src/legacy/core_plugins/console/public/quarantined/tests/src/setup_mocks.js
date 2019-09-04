@@ -36,7 +36,7 @@ import 'brace/ext/searchbox';
 import 'brace/mode/json';
 import 'brace/mode/text';
 
-jest.mock('../../../../np_ready/public/app', () => ({ legacyBackDoorToSettings: () => {} }));
+jest.mock('../../../../np_ready/public/application', () => ({ legacyBackDoorToSettings: () => {}, }));
 
 document.queryCommandSupported = () => true;
 
