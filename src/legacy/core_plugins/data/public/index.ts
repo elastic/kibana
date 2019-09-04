@@ -66,4 +66,4 @@ export {
   mockIndexPattern,
 } from './index_patterns';
 
-export { Timefilter, TimeHistory, getTime } from './timefilter';
+export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';
