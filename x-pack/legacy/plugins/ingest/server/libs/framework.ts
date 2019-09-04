@@ -41,8 +41,8 @@ export class BackendFrameworkLib {
   public getSetting(setting: 'defaultUserRoles') {
     return this.adapter.getSetting(`xpack.ingest-do-not-disable.${setting}`);
   }
-  public exposeMethod(name: string, method: () => any) {
-    return this.adapter.exposeMethod(name, method);
+  public expose(name: string, thing: any) {
+    return this.adapter.expose(name, thing);
   }
   public async waitForStack() {
     return await this.adapter.waitForStack();

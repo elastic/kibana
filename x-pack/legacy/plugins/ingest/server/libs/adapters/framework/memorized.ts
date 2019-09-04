@@ -48,7 +48,7 @@ export class MemorizedBackendFrameworkAdapter {
 
   public log(text: string) {}
 
-  public exposeMethod(name: string, method: () => any) {}
+  public expose(name: string, thing: any) {}
 
   public async getUser(request: Request): Promise<KibanaUser | null> {
     return await Slapshot.memorize(`getUser - ${JSON.stringify(request)}`, async () => {
