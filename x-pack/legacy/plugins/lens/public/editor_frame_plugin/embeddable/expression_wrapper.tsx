@@ -61,7 +61,7 @@ export function ExpressionWrapper({
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
           }}
-          getInitialContext={() => context}
+          context={context}
         />
       )}
     </I18nProvider>

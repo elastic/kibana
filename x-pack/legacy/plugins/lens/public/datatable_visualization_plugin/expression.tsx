@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
 import { LensMultiTable } from '../types';
-import { RenderFunction } from '../interpreter_types';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export interface DatatableColumns {
@@ -109,7 +109,7 @@ export const datatableColumns: ExpressionFunction<
 
 export const getDatatableRenderer = (
   formatFactory: FormatFactory
-): RenderFunction<DatatableProps> => ({
+): IInterpreterRenderFunction<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',

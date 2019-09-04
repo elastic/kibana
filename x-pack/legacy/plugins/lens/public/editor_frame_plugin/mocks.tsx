@@ -93,13 +93,15 @@ export function createExpressionRendererMock(): jest.Mock<
 
 export function createMockDependencies() {
   return ({
-    data: {
+    dataSetup: {
+      indexPatterns: {
+        indexPatterns: {},
+      },
+    },
+    dataStart: {
       expressions: {
         ExpressionRenderer: createExpressionRendererMock(),
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
-      },
-      indexPatterns: {
-        indexPatterns: {},
       },
     },
     embeddables: {

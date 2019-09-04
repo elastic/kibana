@@ -120,7 +120,7 @@ describe('embeddable', () => {
     );
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer.mock.calls[0][0].getInitialContext!()).toEqual({
+    expect(expressionRenderer.mock.calls[0][0].context).toEqual({
       timeRange,
       query,
       filters,

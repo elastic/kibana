@@ -12,7 +12,10 @@ import { CoreSetup } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import {
+  setup as dataSetup,
+  start as dataStart,
+} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
@@ -22,7 +25,8 @@ import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
-  data: typeof data;
+  dataSetup: typeof dataSetup;
+  dataStart: typeof dataStart;
   chrome: Chrome;
   embeddables: ReturnType<EmbeddablePlugin['setup']>;
   interpreter: InterpreterSetup;
@@ -48,8 +52,8 @@ export class EditorFramePlugin {
       'lens',
       new EmbeddableFactory(
         plugins.chrome,
-        plugins.data.expressions.ExpressionRenderer,
-        plugins.data.indexPatterns.indexPatterns
+        plugins.dataStart.expressions.ExpressionRenderer,
+        plugins.dataSetup.indexPatterns.indexPatterns
       )
     );
 
@@ -72,7 +76,7 @@ export class EditorFramePlugin {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
-                ExpressionRenderer={plugins.data.expressions.ExpressionRenderer}
+                ExpressionRenderer={plugins.dataStart.expressions.ExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
@@ -110,7 +114,8 @@ const editorFrame = new EditorFramePlugin();
 
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
-    data,
+    dataSetup,
+    dataStart,
     chrome,
     embeddables: embeddablePlugin,
     interpreter: {
