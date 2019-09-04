@@ -57,6 +57,9 @@ class FilterBarUI extends Component<Props, State> {
 
   public render() {
     const classes = classNames('globalFilterBar', this.props.className);
+    if (!this.props.uiSettings) {
+      return null;
+    }
 
     return (
       <EuiFlexGroup
@@ -109,7 +112,7 @@ class FilterBarUI extends Component<Props, State> {
   }
 
   private renderAddFilter() {
-    const isPinned = this.props.uiSettings && this.props.uiSettings.get('filters:pinnedByDefault');
+    const isPinned = this.props.uiSettings.get('filters:pinnedByDefault');
     const [indexPattern] = this.props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
