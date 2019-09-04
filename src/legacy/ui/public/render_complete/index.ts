@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './directive';
-
 const dispatchCustomEvent = (el: HTMLElement, eventName: string) => {
   // we're using the native events so that we aren't tied to the jQuery custom events,
   // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
