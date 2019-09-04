@@ -7,7 +7,12 @@ import { merge, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
 import { BackendFrameworkLib } from './framework';
-import { PolicyFile, Datasource, NewPolicyFile } from './adapters/policy/adapter_types';
+import {
+  PolicyFile,
+  Datasource,
+  NewPolicyFile,
+  FullPolicyFile,
+} from './adapters/policy/adapter_types';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 
 export class PolicyLib {
@@ -47,6 +52,35 @@ export class PolicyLib {
   public async get(id: string): Promise<PolicyFile> {
     const policy = await this.adapter.get(id);
     return policy;
+  }
+
+  public async getFull(id: string): Promise<FullPolicyFile> {
+    const policy = await this.adapter.get(id);
+    for (let i = 0; policy.data_sources; i++) {
+      // TODO page through vs one large query as this will break if there are more then 10k inputs
+      // a likely case for uptime
+      // const fullInputs = await this.adapter.getInputsById(policy.data_sources[i].inputs, 1, 10000);
+
+      // hard coded to mock data for now
+      (policy.data_sources[i] as any).inputs = {
+        id: uuidv4(),
+        meta: {},
+        output: {
+          elasticsearch: {
+            hosts: ['127.0.0.1:9200'],
+          },
+        },
+        queue: {
+          spool: {
+            file: '/some/path',
+          },
+        },
+        other: {}, // JSON, gets flattened to top level when returned via REST API
+        policy_id: id,
+      };
+    }
+
+    return policy as FullPolicyFile;
   }
 
   public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {

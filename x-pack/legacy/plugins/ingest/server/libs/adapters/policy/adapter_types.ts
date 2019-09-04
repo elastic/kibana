@@ -10,6 +10,9 @@ export const RuntimeDatasourceInput = t.interface(
   {
     id: t.string,
     meta: t.union([t.undefined, t.string]),
+    output: t.string,
+    queue: t.union([t.undefined, t.string]),
+    other: t.string, // JSON, gets flattened to top level when returned via REST API
     policy_id: t.string,
   },
   'DatasourceInput'
@@ -69,6 +72,17 @@ export const RuntimeBackupPolicyFile = t.intersection([
 ]);
 
 export const RuntimePolicyFile = t.intersection([NewRuntimePolicyFile, ExistingDocument]);
+export const FullRuntimePolicyFile = t.intersection([
+  RuntimePolicyFile,
+  t.interface({
+    data_sources: t.intersection([
+      RuntimeDatasource,
+      t.interface({
+        inputs: t.array(RuntimeDatasourceInput),
+      }),
+    ]),
+  }),
+]);
 
 export type NewBackupPolicyFile = t.TypeOf<typeof NewRuntimeBackupPolicyFile>;
 export type BackupPolicyFile = t.TypeOf<typeof RuntimeBackupPolicyFile>;
@@ -76,3 +90,4 @@ export type PolicyFile = t.TypeOf<typeof RuntimePolicyFile>;
 export type NewPolicyFile = t.TypeOf<typeof NewRuntimePolicyFile>;
 export type Datasource = t.TypeOf<typeof RuntimeDatasource>;
 export type DatasourceInput = t.TypeOf<typeof RuntimeDatasourceInput>;
+export type FullPolicyFile = t.TypeOf<typeof FullRuntimePolicyFile>;
