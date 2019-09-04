@@ -271,7 +271,7 @@ async function getLiveElasticsearchCollectionEnabled(req) {
   });
   const sources = ['persistent', 'transient', 'defaults'];
   for (const source of sources) {
-    const collectionSettings = get(response[source], 'xpack.monitoring.collection');
+    const collectionSettings = get(response[source], 'xpack.monitoring.elasticsearch.collection');
     if (collectionSettings && collectionSettings.enabled === 'true') {
       return true;
     }
