@@ -4219,7 +4219,6 @@
     "xpack.canvas.functions.timefilter.invalidStringErrorMessage": "無効な日付/時刻文字列: 「{str}」",
     "xpack.canvas.functions.timefilterControl.args.columnHelpText": "フィルターを添付する列またはフィールドです",
     "xpack.canvas.functions.timefilterControl.args.compactHelpText": "時間フィルターを、ポップオーバーを実行するボタンとして表示します",
-    "xpack.canvas.sampleDataLinkLabel": "Canvas",
     "xpack.code.featureRegistry.codeFeatureName": "コード",
     "xpack.crossClusterReplication.addAutoFollowPatternButtonLabel": "自動フォローパターンを作成",
     "xpack.crossClusterReplication.addBreadcrumbTitle": "追加",
