@@ -33,6 +33,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  isEventViewer?: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
@@ -105,6 +106,8 @@ export const EmptyRow = styled.div`
 `;
 
 export class StatefulEvent extends React.Component<Props, State> {
+  private _isMounted: boolean = false;
+
   public readonly state: State = {
     expanded: {},
     showNotes: {},
@@ -120,14 +123,20 @@ export class StatefulEvent extends React.Component<Props, State> {
    * its initialRender to true.
    */
   public componentDidMount() {
+    this._isMounted = true;
+
     requestIdleCallbackViaScheduler(
       () => {
-        if (!this.state.initialRender) {
+        if (!this.state.initialRender && this._isMounted) {
           this.setState({ initialRender: true });
         }
       },
       { timeout: this.props.maxDelay ? this.props.maxDelay : 0 }
     );
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   public render() {
@@ -140,6 +149,7 @@ export class StatefulEvent extends React.Component<Props, State> {
       event,
       eventIdToNoteIds,
       getNotesByIds,
+      isEventViewer = false,
       onColumnResized,
       onPinEvent,
       onUpdateColumns,
@@ -201,6 +211,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                           data={event.data}
                           eventIdToNoteIds={eventIdToNoteIds}
                           getNotesByIds={getNotesByIds}
+                          isEventViewer={isEventViewer}
                           loading={loading}
                           onColumnResized={onColumnResized}
                           onToggleExpanded={this.onToggleExpanded}
