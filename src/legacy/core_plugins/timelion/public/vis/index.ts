@@ -21,9 +21,6 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-// we also need to load the controller and directive used by the template
-import './timelion_vis_controller';
-import '../directives/timelion_expression_input';
 import { getTimelionRequestProvider } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';

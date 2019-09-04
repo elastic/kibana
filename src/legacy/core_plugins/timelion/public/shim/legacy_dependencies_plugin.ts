@@ -22,6 +22,7 @@ import 'ui/es'; // required for $injector.get('es') below
 import { Plugin } from 'kibana/public';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { initTimelionLegacyModule } from './timelion_legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
@@ -41,6 +42,9 @@ export class LegacyDependenciesPlugin
   implements
     Plugin<Promise<LegacyDependenciesPluginSetup>, Promise<LegacyDependenciesPluginStart>> {
   public async setup() {
+    // Init kibana/timelion_vis AngularJS module.
+    initTimelionLegacyModule();
+
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
 
