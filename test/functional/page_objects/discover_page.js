@@ -134,12 +134,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await globalNav.getLastBreadcrumb();
     }
 
-    async getBarChartXTicks() {
-      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
-      const $ = await xAxis.parseDomContent();
-      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
-    }
-
     async getBarChartData() {
       let yAxisLabel = 0;
 
