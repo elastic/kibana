@@ -51,6 +51,7 @@ export interface InjectedMetadataParams {
       plugin: DiscoveredPlugin;
     }>;
     capabilities: Capabilities;
+    legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
       translations: unknown;
@@ -112,6 +113,10 @@ export class InjectedMetadataService {
         return this.state.uiPlugins;
       },
 
+      getLegacyMode: () => {
+        return this.state.legacyMode;
+      },
+
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
       },
@@ -156,6 +161,8 @@ export interface InjectedMetadataSetup {
     id: string;
     plugin: DiscoveredPlugin;
   }>;
+  /** Indicates whether or not we are rendering a known legacy app. */
+  getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
     translations: unknown;
