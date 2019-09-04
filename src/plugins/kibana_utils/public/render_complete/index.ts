@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { RenderCompleteHelper } from '../../../../plugins/kibana_utils/public';
+const dispatchCustomEvent = (el: HTMLElement, eventName: string) => {
+  // we're using the native events so that we aren't tied to the jQuery custom events,
+  // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
+  // of the native events per https://github.com/jquery/jquery/issues/2476
+  el.dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
+};
 
-uiModules.get('kibana').directive('renderComplete', () => ({
-  controller($scope, $element) {
-    const el = $element[0];
-    const renderCompleteHelper = new RenderCompleteHelper(el);
+export function dispatchRenderComplete(el: HTMLElement) {
+  dispatchCustomEvent(el, 'renderComplete');
+}
 
-    $scope.$on('$destroy', renderCompleteHelper.destroy);
-  },
-}));
+export function dispatchRenderStart(el: HTMLElement) {
+  dispatchCustomEvent(el, 'renderStart');
+}
+
+export * from './render_complete_helper';

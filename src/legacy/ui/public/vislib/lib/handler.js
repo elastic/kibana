@@ -28,13 +28,12 @@ import { Alerts } from './alerts';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { visTypes as chartTypes } from '../visualizations/vis_types';
-import { dispatchRenderComplete } from '../../render_complete';
+import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
 const markdownIt = new MarkdownIt({
   html: false,
-  linkify: true
+  linkify: true,
 });
-
 
 /**
  * Handles building all the components of the visualization
@@ -55,7 +54,9 @@ export class Handler {
     this.visConfig = visConfig;
     this.data = visConfig.data;
 
-    this.categoryAxes = visConfig.get('categoryAxes').map(axisArgs => new Axis(visConfig, axisArgs));
+    this.categoryAxes = visConfig
+      .get('categoryAxes')
+      .map(axisArgs => new Axis(visConfig, axisArgs));
     this.valueAxes = visConfig.get('valueAxes').map(axisArgs => new Axis(visConfig, axisArgs));
     this.chartTitle = new ChartTitle(visConfig);
     this.alerts = new Alerts(this, visConfig.get('alerts'));
@@ -71,11 +72,7 @@ export class Handler {
 
     this.layout = new Layout(visConfig);
     this.binder = new Binder();
-    this.renderArray = _.filter([
-      this.layout,
-      this.chartTitle,
-      this.alerts
-    ], Boolean);
+    this.renderArray = _.filter([this.layout, this.chartTitle, this.alerts], Boolean);
 
     this.renderArray = this.renderArray
       .concat(this.valueAxes)
@@ -193,7 +190,10 @@ export class Handler {
    * child element removed
    */
   removeAll(el) {
-    return d3.select(el).selectAll('*').remove();
+    return d3
+      .select(el)
+      .selectAll('*')
+      .remove();
   }
 
   /**
@@ -206,7 +206,8 @@ export class Handler {
   error(message) {
     this.removeAll(this.el);
 
-    const div = d3.select(this.el)
+    const div = d3
+      .select(this.el)
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize

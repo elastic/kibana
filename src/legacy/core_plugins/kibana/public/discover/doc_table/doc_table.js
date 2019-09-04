@@ -22,14 +22,15 @@ import html from './doc_table.html';
 import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { uiModules } from 'ui/modules';
 import './components/pager';
 import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
-uiModules.get('app/discover')
+uiModules
+  .get('app/discover')
   .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',
@@ -52,13 +53,13 @@ uiModules.get('app/discover')
         inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
-        $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
+        $scope.$watch('minimumVisibleRows', minimumVisibleRows => {
           $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
         });
 
         $scope.persist = {
           sorting: $scope.sorting,
-          columns: $scope.columns
+          columns: $scope.columns,
         };
 
         const limitTo = $filter('limitTo');
@@ -67,7 +68,9 @@ uiModules.get('app/discover')
           $scope.pageOfItems = limitTo($scope.hits, $scope.pager.pageSize, $scope.pager.startIndex);
         };
 
-        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(config.get('discover:sampleSize'));
+        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
+          config.get('discover:sampleSize')
+        );
 
         $scope.addRows = function () {
           $scope.limit += 50;
@@ -116,9 +119,8 @@ uiModules.get('app/discover')
           calculateItemsOnPage();
         };
 
-        $scope.shouldShowLimitedResultsWarning = () => (
-          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
-        );
-      }
+        $scope.shouldShowLimitedResultsWarning = () =>
+          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount;
+      },
     };
   });
