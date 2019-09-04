@@ -1,6 +1,11 @@
 [role="xpack"]
 [[logstash-configuration-management-api-create]]
-=== Create Pipeline
+=== Create Logstash pipeline API
+++++
+<titleabbrev>Create pipeline</titleabbrev>
+++++
+
+Create a centrally-managed Logstash pipeline, or update an existing pipeline.
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
@@ -48,5 +53,3 @@ PUT api/logstash/pipeline/hello-world
 }
 --------------------------------------------------
 // KIBANA
-
-A successful call returns an HTTP `204 No Content` response.

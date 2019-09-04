@@ -6,6 +6,8 @@
 
 Check the status of the reindex operation.
 
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+
 [[check-reindex-status-request]]
 ==== Request
 

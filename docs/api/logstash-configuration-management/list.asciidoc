@@ -1,6 +1,11 @@
 [role="xpack"]
 [[logstash-configuration-management-api-list]]
-=== List Pipelines
+=== List Logstash pipeline API
+++++
+<titleabbrev>List pipeline</titleabbrev>
+++++
+
+List all centrally-managed Logstash pipelines.
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
@@ -33,4 +38,4 @@ The API returns the following:
 }
 --------------------------------------------------
 
-<1> The `username` property may or may not be present, depending on if the Elastic Security was enabled when the pipeline was created or last updated.
+<1> The `username` property may or may not be present, depending on if security was enabled when the pipeline was created or last updated.
