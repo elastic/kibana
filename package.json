@@ -395,7 +395,7 @@
     "has-ansi": "^3.0.0",
     "image-diff": "1.6.3",
     "intl-messageformat-parser": "^1.4.0",
-    "is-path-inside": "^2.0.0",
+    "is-path-inside": "^2.1.0",
     "istanbul-instrumenter-loader": "3.0.1",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
