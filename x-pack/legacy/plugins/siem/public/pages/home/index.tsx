@@ -140,7 +140,7 @@ export const HomePage = pure(() => (
                     </EuiFlexGroup>
                   </NavGlobal>
                   <Switch>
-                    <Redirect from="/" exact={true} to="/:pageName(overview)" />
+                    <Redirect from="/" exact={true} to="/overview" />
                     <Route path="/:pageName(overview)" render={() => <Overview />} />
                     <Route path="/:pageName(hosts)" component={HostsContainer} />
                     <Route path="/:pageName(network)" component={NetworkContainer} />

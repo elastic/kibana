@@ -52,14 +52,17 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
             <Route
               path={hostsPagePath}
               render={() => (
-                <HostsBody
-                  from={from}
-                  to={to}
-                  setQuery={setQuery}
-                  isInitializing={isInitializing}
-                  {...props}
-                  children={HostsQueryTabBody}
-                />
+                <>
+                  <Hosts from={from} to={to} setQuery={setQuery} isInitializing={isInitializing} />
+                  <HostsBody
+                    from={from}
+                    to={to}
+                    setQuery={setQuery}
+                    isInitializing={isInitializing}
+                    {...props}
+                    children={HostsQueryTabBody}
+                  />
+                </>
               )}
             />
           )}
@@ -224,7 +227,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
           from={`${match.url}/:detailName`}
           to={`${match.url}/:detailName/${HostsTableType.authentications}`}
         />
-        <Redirect from="/hosts/" to="/hosts" />
+        <Redirect from="/hosts/" to={`/hosts/${HostsTableType.hosts}`} />
       </Switch>
     )}
   </GlobalTime>

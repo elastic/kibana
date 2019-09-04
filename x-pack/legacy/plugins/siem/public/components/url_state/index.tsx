@@ -33,7 +33,9 @@ export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
     return null;
   },
   (prevProps, nextProps) =>
-    prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
+    prevProps.pageName === nextProps.pageName &&
+    prevProps.pathName === nextProps.pathName &&
+    isEqual(prevProps.urlState, nextProps.urlState)
 );
 
 UrlStateContainer.displayName = 'UrlStateContainer';

@@ -265,6 +265,7 @@ export const useUrlStateHooks = ({
       search,
       state: '',
     };
+
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(location, type);
       setIsInitializing(false);

@@ -5,7 +5,15 @@
  */
 
 import * as H from 'history';
-import React, { createContext, memo, useContext, useEffect, Dispatch, useReducer } from 'react';
+import React, {
+  createContext,
+  memo,
+  useContext,
+  useEffect,
+  Dispatch,
+  useReducer,
+  useState,
+} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { noop } from 'redux-saga/utils';
 import { isEqual } from 'lodash/fp';
@@ -28,10 +36,19 @@ const initRouteSpy: RouteSpyState = {
   pathName: '/',
 };
 
-export interface RouteSpyAction {
-  type: 'updateRoute';
-  route: RouteSpyState;
-}
+export type RouteSpyAction =
+  | {
+      type: 'updateSearch';
+      search: string;
+    }
+  | {
+      type: 'updateRouteWithOutSearch';
+      route: Pick<RouteSpyState, 'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history'>;
+    }
+  | {
+      type: 'updateRoute';
+      route: RouteSpyState;
+    };
 
 export const RouterSpyStateContext = createContext<[RouteSpyState, Dispatch<RouteSpyAction>]>([
   initRouteSpy,
@@ -49,6 +66,10 @@ export const ManageRoutesSpy = ({ children }: ManageRoutesSpyProps) => {
     switch (action.type) {
       case 'updateRoute':
         return action.route;
+      case 'updateRouteWithOutSearch':
+        return { ...state, ...action.route };
+      case 'updateSearch':
+        return { ...state, search: action.search };
       default:
         return state;
     }
@@ -76,20 +97,45 @@ const SpyRouteComponent = memo<SpyRouteProps & { location: Location }>(
       params: { pageName, detailName, tabName },
     },
   }) => {
+    const [isInitializing, setIsnitializing] = useState(true);
     const [route, dispatch] = useRouteSpy();
+
+    useEffect(() => {
+      if (isInitializing && search !== '') {
+        dispatch({
+          type: 'updateSearch',
+          search,
+        });
+        setIsnitializing(false);
+      }
+    }, [search]);
     useEffect(() => {
       if (pageName && !isEqual(route.pathName, pathname)) {
-        dispatch({
-          type: 'updateRoute',
-          route: {
-            pageName,
-            detailName,
-            tabName,
-            search,
-            pathName: pathname,
-            history,
-          },
-        });
+        if (isInitializing) {
+          dispatch({
+            type: 'updateRouteWithOutSearch',
+            route: {
+              pageName,
+              detailName,
+              tabName,
+              pathName: pathname,
+              history,
+            },
+          });
+          setIsnitializing(false);
+        } else {
+          dispatch({
+            type: 'updateRoute',
+            route: {
+              pageName,
+              detailName,
+              tabName,
+              search,
+              pathName: pathname,
+              history,
+            },
+          });
+        }
       }
     }, [pathname, search, pageName, detailName, tabName]);
     return null;
