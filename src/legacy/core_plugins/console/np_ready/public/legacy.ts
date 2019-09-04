@@ -34,18 +34,7 @@ import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import template from '../../public/quarantined/index.html';
-import { CoreSetup } from '../../../../../core/public';
-
-interface SetupRegisterAppArgs {
-  id: string;
-  mount: (ctx: any, opts: { element: HTMLDivElement }) => Promise<any>;
-}
-
-export interface XCoreSetup extends CoreSetup {
-  application: {
-    register(args: SetupRegisterAppArgs): void;
-  };
-}
+import { App } from '../../../../../core/public';
 
 export interface XPluginSet {
   __LEGACY: {
@@ -73,18 +62,20 @@ uiRoutes.when('/dev_tools/console', {
         throw new Error(message);
       }
 
-      const xNpSetupCore: XCoreSetup = {
+      const mockedSetupCore = {
         ...npSetup.core,
         application: {
-          register(args: SetupRegisterAppArgs): void {
-            args.mount({}, { element: targetElement }).catch(err => {
-              npSetup.core.fatalErrors.add(err);
-            });
+          registerApp(app: App): void {
+            try {
+              app.mount(targetElement);
+            } catch (e) {
+              npSetup.core.fatalErrors.add(e);
+            }
           },
         },
       };
 
-      pluginInstance.setup(xNpSetupCore, {
+      pluginInstance.setup(mockedSetupCore, {
         ...npSetup.plugins,
         __LEGACY: {
           I18nContext,
