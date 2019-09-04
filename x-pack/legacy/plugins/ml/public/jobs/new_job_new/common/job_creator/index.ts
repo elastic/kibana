@@ -9,6 +9,7 @@ export { SingleMetricJobCreator } from './single_metric_job_creator';
 export { MultiMetricJobCreator } from './multi_metric_job_creator';
 export { PopulationJobCreator } from './population_job_creator';
 export {
+  JobCreatorType,
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
