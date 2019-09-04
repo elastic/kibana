@@ -30,7 +30,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { visTypeAliasRegistry } from './np_ready/public/types/vis_type_alias_registry';
+import { visTypeAliasRegistry } from './np_ready/types/vis_type_alias_registry';
 
 import { plugin } from '.';
 

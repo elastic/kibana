@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './np_ready/public';
+export * from './np_ready';
