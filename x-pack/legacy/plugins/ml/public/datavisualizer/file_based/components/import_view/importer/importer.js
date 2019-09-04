@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-const CHUNK_SIZE = 10000;
+const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
 const IMPORT_RETRIES = 5;
 
@@ -60,22 +60,7 @@ export class Importer {
       };
     }
 
-    const tempChunks = chunk(this.docArray, CHUNK_SIZE);
-    let chunks = [];
-
-    for (let i = 0; i < tempChunks.length; i++) {
-      const docs = tempChunks[i];
-      const numberOfDocs = docs.length;
-
-      const charCountOfDocs = JSON.stringify(docs).length;
-      if (charCountOfDocs > MAX_CHUNK_CHAR_COUNT) {
-        const adjustedChunkSize = Math.floor(MAX_CHUNK_CHAR_COUNT / charCountOfDocs * numberOfDocs);
-        const smallerChunks = chunk(docs, adjustedChunkSize);
-        chunks.push(...smallerChunks);
-      } else {
-        chunks = tempChunks;
-      }
-    }
+    const chunks = this.createDocumentChunks();
 
     const ingestPipeline = {
       id: pipelineId,
@@ -143,6 +128,35 @@ export class Importer {
     }
 
     return result;
+  }
+
+  createDocumentChunks() {
+    let chunks = [];
+    // chop docArray into 5000 doc chunks
+    const tempChunks = chunk(this.docArray, CHUNK_SIZE);
+
+    // loop over tempChunks and check that the total character length
+    // for each chunk is within the MAX_CHUNK_CHAR_COUNT.
+    // if the length is too long, split the chunk into smaller chunks
+    // based on how much larger it is than MAX_CHUNK_CHAR_COUNT
+    // note, each document is a different size, so dividing by charCountOfDocs
+    // only produces an average chunk size that should be smaller than the max length
+    for (let i = 0; i < tempChunks.length; i++) {
+      const docs = tempChunks[i];
+      const numberOfDocs = docs.length;
+
+      const charCountOfDocs = JSON.stringify(docs).length;
+      if (charCountOfDocs > MAX_CHUNK_CHAR_COUNT) {
+        // calculate new chunk size which should produce a chunk
+        // who's length is on average around MAX_CHUNK_CHAR_COUNT
+        const adjustedChunkSize = Math.floor((MAX_CHUNK_CHAR_COUNT / charCountOfDocs) * numberOfDocs);
+        const smallerChunks = chunk(docs, adjustedChunkSize);
+        chunks.push(...smallerChunks);
+      } else {
+        chunks = tempChunks;
+      }
+    }
+    return chunks;
   }
 }
 
