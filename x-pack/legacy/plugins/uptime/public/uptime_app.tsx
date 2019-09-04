@@ -14,7 +14,6 @@ import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
-import { UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
@@ -36,7 +35,6 @@ export interface UptimeAppProps {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  kibanaBreadcrumbs: UMBreadcrumb[];
   logMonitorPageLoad: () => void;
   logOverviewPageLoad: () => void;
   routerBasename: string;

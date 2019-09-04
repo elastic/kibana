@@ -67,7 +67,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
     date_histogram: () => ({
       id: 'date',
       params: {
-        pattern: agg.buckets.getScaledDateFormat(),
+        pattern: (agg as any).buckets.getScaledDateFormat(),
       },
     }),
     terms: () => ({

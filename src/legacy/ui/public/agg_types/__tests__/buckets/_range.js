@@ -58,7 +58,7 @@ describe('Range Agg', function () {
         ]
       });
 
-      const agg = vis.aggs.byTypeName.range[0];
+      const agg = vis.aggs.byName('range')[0];
       const format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };

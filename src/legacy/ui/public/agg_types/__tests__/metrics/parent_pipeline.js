@@ -84,7 +84,7 @@ describe('parent pipeline aggs', function () {
           });
 
           // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
-          aggConfig = vis.aggs[1];
+          aggConfig = vis.aggs.aggs[1];
           aggDsl = aggConfig.toDsl(vis.aggs);
         });
       }
