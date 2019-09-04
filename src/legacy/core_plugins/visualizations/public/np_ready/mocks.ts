@@ -37,7 +37,7 @@ jest.mock('./types/vis_type_alias_registry');
 import { visTypeAliasRegistry } from './types/vis_type_alias_registry';
 
 import { Plugin } from '.';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
