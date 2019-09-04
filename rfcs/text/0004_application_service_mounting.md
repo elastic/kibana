@@ -266,15 +266,9 @@ export class MyPlugin {
   setup({ application }) {
     application.register({
       id: 'my-app',
-<<<<<<< HEAD
-      async mount(context, targetDomElem) {
-        const { renderApp } = await import('./application');
-        return renderApp(context, targetDomElement);
-=======
       async mount(context, params) {
-        const { renderApp } = await import('./applcation');
+        const { renderApp } = await import('./application');
         return renderApp(context, params);
->>>>>>> 4f09de749afb2a6fd56e51bfa83db5549a55c675
       }
     });
   }
