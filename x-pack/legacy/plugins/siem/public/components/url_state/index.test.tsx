@@ -19,6 +19,8 @@ import { defaultProps, getMockPropsObj, mockHistory, testCases } from './test_de
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { CONSTANTS } from './constants';
+import { RouteSpyState } from '../../utils/route/spy_routes';
+import { SiemPageName } from '../../pages/home/home_navigations';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -33,6 +35,19 @@ const indexPattern: StaticIndexPattern = {
     },
   ],
 };
+
+// const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
+const mockRouteSpy: RouteSpyState = {
+  pageName: SiemPageName.network,
+  detailName: undefined,
+  tabName: undefined,
+  search: '',
+  pathName: '/network',
+};
+jest.mock('../../utils/route/spy_routes', () => ({
+  useRouteSpy: () => [mockRouteSpy],
+}));
+
 describe('UrlStateContainer', () => {
   const state: State = mockGlobalState;
 
@@ -62,53 +77,64 @@ describe('UrlStateContainer', () => {
   describe('handleInitialize', () => {
     describe('URL state updates redux', () => {
       describe('relative timerange actions are called with correct data on component mount', () => {
-        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
-          mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).relativeTimeSearch
-            .undefinedQuery;
-          mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+        test.each(testCases)(
+          '%o',
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({
+              page,
+              examplePath,
+              namespaceLower,
+              pageName,
+              detailName,
+            }).relativeTimeSearch.undefinedQuery;
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-          // @ts-ignore property mock does not exists
-          expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
-            from: 1558591200000,
-            fromStr: 'now-1d/d',
-            kind: 'relative',
-            to: 1558677599999,
-            toStr: 'now-1d/d',
-            id: 'global',
-          });
-          // @ts-ignore property mock does not exists
-          expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
-            from: 1558732849370,
-            fromStr: 'now-15m',
-            kind: 'relative',
-            to: 1558733749370,
-            toStr: 'now',
-            id: 'timeline',
-          });
-        });
+            // @ts-ignore property mock does not exists
+            expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
+              from: 1558591200000,
+              fromStr: 'now-1d/d',
+              kind: 'relative',
+              to: 1558677599999,
+              toStr: 'now-1d/d',
+              id: 'global',
+            });
+            // @ts-ignore property mock does not exists
+            expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
+              from: 1558732849370,
+              fromStr: 'now-15m',
+              kind: 'relative',
+              to: 1558733749370,
+              toStr: 'now',
+              id: 'timeline',
+            });
+          }
+        );
       });
 
       describe('absolute timerange actions are called with correct data on component mount', () => {
-        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
-          mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).absoluteTimeSearch
-            .undefinedQuery;
-          mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+        test.each(testCases)(
+          '%o',
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
+              .absoluteTimeSearch.undefinedQuery;
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-          // @ts-ignore property mock does not exists
-          expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
-            from: 1556736012685,
-            kind: 'absolute',
-            to: 1556822416082,
-            id: 'global',
-          });
-          // @ts-ignore property mock does not exists
-          expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
-            from: 1556736012685,
-            kind: 'absolute',
-            to: 1556822416082,
-            id: 'timeline',
-          });
-        });
+            // @ts-ignore property mock does not exists
+            expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
+              from: 1556736012685,
+              kind: 'absolute',
+              to: 1556822416082,
+              id: 'global',
+            });
+            // @ts-ignore property mock does not exists
+            expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
+              from: 1556736012685,
+              kind: 'absolute',
+              to: 1556822416082,
+              id: 'timeline',
+            });
+          }
+        );
       });
 
       describe('kqlQuery action is called with correct data on component mount', () => {
@@ -122,9 +148,9 @@ describe('UrlStateContainer', () => {
         };
         test.each(testCases.slice(0, 4))(
           ' %o',
-          (page, namespaceLower, namespaceUpper, examplePath, type) => {
-            mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).relativeTimeSearch
-              .undefinedQuery;
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
+              .relativeTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
             const functionName =
               namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
@@ -138,36 +164,53 @@ describe('UrlStateContainer', () => {
       });
 
       describe('kqlQuery action is not called called when the queryLocation does not match the router location', () => {
-        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
-          mockProps = getMockPropsObj({ page, examplePath, namespaceLower })
-            .oppositeQueryLocationSearch.undefinedQuery;
-          mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
-          const functionName =
-            namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
-          // @ts-ignore property mock does not exists
-          expect(functionName.mock.calls.length).toEqual(0);
-        });
+        test.each(testCases)(
+          '%o',
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({
+              page,
+              examplePath,
+              namespaceLower,
+              pageName,
+              detailName,
+            }).oppositeQueryLocationSearch.undefinedQuery;
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            const functionName =
+              namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
+            // @ts-ignore property mock does not exists
+            expect(functionName.mock.calls.length).toEqual(0);
+          }
+        );
       });
     });
 
     describe('Redux updates URL state', () => {
       describe('kqlQuery url state is set from redux data on component mount', () => {
-        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
-          mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).noSearch.definedQuery;
-          mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+        test.each(testCases)(
+          '%o',
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({
+              page,
+              examplePath,
+              namespaceLower,
+              pageName,
+              detailName,
+            }).noSearch.definedQuery;
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-          // @ts-ignore property mock does not exists
-          expect(
-            mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-          ).toEqual({
-            hash: '',
-            pathname: examplePath,
-            search: [CONSTANTS.overviewPage, CONSTANTS.timelinePage].includes(page)
-              ? '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
-              : `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
-            state: '',
-          });
-        });
+            // @ts-ignore property mock does not exists
+            expect(
+              mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
+            ).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search: [CONSTANTS.overviewPage, CONSTANTS.timelinePage].includes(page)
+                ? '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
+                : `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+              state: '',
+            });
+          }
+        );
       });
     });
   });

@@ -87,7 +87,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
   return 'overview';
 };
 
-export const getTitle = (pageName: string): string => {
+export const getTitle = (pageName: string, detailName: string | undefined): string => {
+  if (detailName != null) return detailName;
   if (pageName === SiemPageName.hosts) {
     return i18n.HOSTS;
   } else if (pageName === SiemPageName.network) {

@@ -279,7 +279,7 @@ export const useUrlStateHooks = ({
   });
 
   useEffect(() => {
-    document.title = `${getTitle(pageName)} - Kibana`;
+    document.title = `${getTitle(pageName, detailName)} - Kibana`;
   }, [pageName]);
 
   return null;

@@ -297,11 +297,11 @@ export const IPDetails = connect(
   }
 )(IPDetailsComponent);
 
-export const getBreadcrumbs = (ip: string): Breadcrumb[] => {
+export const getBreadcrumbs = (ip: string | undefined, search: string[]): Breadcrumb[] => {
   const breadcrumbs = [
     {
       text: i18n.PAGE_TITLE,
-      href: getNetworkUrl(),
+      href: `${getNetworkUrl()}${search && search[0] ? search[0] : ''}`,
     },
   ];
   if (ip) {

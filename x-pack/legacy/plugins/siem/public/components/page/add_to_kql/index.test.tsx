@@ -90,7 +90,7 @@ describe('AddToKql Component', () => {
           activePage: 0,
           limit: 10,
         },
-        hosts: {
+        allHosts: {
           activePage: 0,
           limit: 10,
           direction: 'desc',
