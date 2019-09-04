@@ -106,7 +106,8 @@ export const TopNav: FC = () => {
             onRefresh={() => {
               // This check is a workaround to catch a bug in EuiSuperDatePicker which
               // might not have disabled the refresh interval after a props change.
-              if (!refreshInterval.pause) {
+              const newRefreshInterval = timefilter.getRefreshInterval();
+              if (!newRefreshInterval.pause) {
                 mlTimefilterRefresh$.next();
               }
             }}
