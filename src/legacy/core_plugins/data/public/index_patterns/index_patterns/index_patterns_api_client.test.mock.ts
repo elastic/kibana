@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { setup } from '../../../../../../test_utils/public/http_test_setup';
 
 export const { http } = setup(injectedMetadata => {
