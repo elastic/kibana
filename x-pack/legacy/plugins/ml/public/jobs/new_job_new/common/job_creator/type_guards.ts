@@ -9,20 +9,22 @@ import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { JOB_TYPE } from './util/constants';
 
+export type JobCreatorType = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
+
 export function isSingleMetricJobCreator(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator
+  jobCreator: JobCreatorType
 ): jobCreator is SingleMetricJobCreator {
   return jobCreator.type === JOB_TYPE.SINGLE_METRIC;
 }
 
 export function isMultiMetricJobCreator(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator
+  jobCreator: JobCreatorType
 ): jobCreator is MultiMetricJobCreator {
   return jobCreator.type === JOB_TYPE.MULTI_METRIC;
 }
 
 export function isPopulationJobCreator(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator
+  jobCreator: JobCreatorType
 ): jobCreator is PopulationJobCreator {
   return jobCreator.type === JOB_TYPE.POPULATION;
 }
