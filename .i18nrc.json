@@ -26,7 +26,8 @@
     "tsvb": "src/legacy/core_plugins/metrics",
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector",
-    "kibana-react": "src/plugins/kibana_react"
+    "kibana-react": "src/plugins/kibana_react",
+    "esUi": "src/plugins/es_ui_shared"
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": []

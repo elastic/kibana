@@ -15,16 +15,33 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, formState }) => {
+// based on code used by `ui/index_patterns` internally
+// remove the space character from the list of illegal characters
+INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
+const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
+
+export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
+
+  const {
+    form,
+    indexPatternsWithNumericFields,
+    indexPatternTitles,
+    isJobCreated,
+    requestMessages,
+  } = state;
+
   const {
     createIndexPattern,
     destinationIndex,
@@ -32,22 +49,17 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
     destinationIndexNameExists,
     destinationIndexNameValid,
     destinationIndexPatternTitleExists,
-    indexPatternsWithNumericFields,
-    indexPatternTitles,
-    isJobCreated,
     jobId,
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
-    requestMessages,
     sourceIndex,
     sourceIndexNameEmpty,
-    sourceIndexNameExists,
     sourceIndexNameValid,
-  } = formState;
+  } = form;
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
@@ -64,8 +76,35 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
       {!isJobCreated && (
         <Fragment>
           <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
+              defaultMessage: 'Job type',
+            })}
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
+                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
+                values={{
+                  advancedEditorButton: (
+                    <EuiLink onClick={actions.switchToAdvancedEditor}>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
+                        defaultMessage="advanced editor"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          >
+            <EuiText>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
+                defaultMessage: 'Outlier detection',
+              })}
+            </EuiText>
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-              defaultMessage: 'Analytics job id',
+              defaultMessage: 'Job ID',
             })}
             isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             error={[
@@ -80,7 +119,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               ...(jobIdExists
                 ? [
                     i18n.translate('xpack.ml.dataframe.analytics.create.jobIdExistsError', {
-                      defaultMessage: 'An analytics job with this id already exists.',
+                      defaultMessage: 'An analytics job with this ID already exists.',
                     }),
                   ]
                 : []),
@@ -88,19 +127,20 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="analytics job id"
+              placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
+                defaultMessage: 'Job ID',
+              })}
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel',
                 {
-                  defaultMessage: 'Choose a unique analytics job id.',
+                  defaultMessage: 'Choose a unique analytics job ID.',
                 }
               )}
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             />
           </EuiFormRow>
-
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',
@@ -108,44 +148,23 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
             helpText={
               !sourceIndexNameEmpty &&
               !indexPatternsWithNumericFields.includes(sourceIndex) &&
-              i18n.translate('xpack.ml.dataframe.stepDetailsForm.sourceIndexHelpText', {
+              i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
             }
-            isInvalid={!sourceIndexNameEmpty && (!sourceIndexNameValid || !sourceIndexNameExists)}
+            isInvalid={!sourceIndexNameEmpty && !sourceIndexNameValid}
             error={
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameValid && [
-                  <Fragment>
-                    {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-                      defaultMessage: 'Invalid source index name.',
-                    })}
-                    <br />
-                    <EuiLink
-                      href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-create-index.html#indices-create-index`}
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.ml.dataframe.stepDetailsForm.sourceIndexInvalidErrorLink',
-                        {
-                          defaultMessage: 'Learn more about index name limitations.',
-                        }
-                      )}
-                    </EuiLink>
-                  </Fragment>,
-                ]) ||
-              (!sourceIndexNameEmpty &&
-                !sourceIndexNameExists && [
-                  <Fragment>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.sourceIndexDoesNotExistError',
-                      {
-                        defaultMessage: 'An index with this name does not exist.',
-                      }
-                    )}
-                  </Fragment>,
-                ])
+              !sourceIndexNameEmpty &&
+              !sourceIndexNameValid && [
+                <Fragment>
+                  {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
+                    defaultMessage:
+                      'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
+                    values: { characterList },
+                  })}
+                </Fragment>,
+              ]
             }
           >
             <Fragment>
@@ -180,7 +199,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               )}
             </Fragment>
           </EuiFormRow>
-
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
               defaultMessage: 'Destination index',
@@ -233,7 +251,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
-
           <EuiFormRow
             isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
             error={

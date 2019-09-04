@@ -19,20 +19,27 @@
 
 import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
+import { LegacyApp } from '../../application';
 
 const mockAppService = {
-  availableApps: [],
-  availableLegacyApps: [
-    { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
-    {
-      id: 'legacyApp2',
-      order: -10,
-      title: 'Legacy App 2',
-      euiIconType: 'canvasApp',
-      appUrl: '/app2',
-    },
-    { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' },
-  ],
+  availableApps: new Map(),
+  availableLegacyApps: new Map<string, LegacyApp>([
+    [
+      'legacyApp1',
+      { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
+    ],
+    [
+      'legacyApp2',
+      {
+        id: 'legacyApp2',
+        order: -10,
+        title: 'Legacy App 2',
+        euiIconType: 'canvasApp',
+        appUrl: '/app2',
+      },
+    ],
+    ['legacyApp3', { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' }],
+  ]),
 } as any;
 
 const mockHttp = {

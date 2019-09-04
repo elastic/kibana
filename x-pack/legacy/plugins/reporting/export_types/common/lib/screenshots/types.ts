@@ -6,9 +6,11 @@
 
 import { ElementPosition, ConditionalHeaders } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
+  logger: LevelLogger;
   url: string;
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;

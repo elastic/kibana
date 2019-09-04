@@ -33,4 +33,4 @@ export interface Ast {
 }
 
 export declare function fromExpression(expression: string): Ast;
-export declare function toExpression(ast: Ast): string;
+export declare function toExpression(astObj: Ast, type?: string): string;

@@ -42,7 +42,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services',
-    component: Home,
+    component: () => <Home tab="services" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
       defaultMessage: 'Services'
     }),
@@ -51,7 +51,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/traces',
-    component: Home,
+    component: () => <Home tab="traces" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
       defaultMessage: 'Traces'
     }),
@@ -88,7 +88,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services/:serviceName/errors',
-    component: ServiceDetails,
+    component: () => <ServiceDetails tab="errors" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     }),
@@ -99,11 +99,21 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services/:serviceName/transactions',
-    component: ServiceDetails,
+    component: () => <ServiceDetails tab="transactions" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions'
     }),
     name: RouteName.TRANSACTIONS
+  },
+  // metrics
+  {
+    exact: true,
+    path: '/services/:serviceName/metrics',
+    component: () => <ServiceDetails tab="metrics" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
+      defaultMessage: 'Metrics'
+    }),
+    name: RouteName.METRICS
   },
   {
     exact: true,
@@ -114,16 +124,5 @@ export const routes: BreadcrumbRoute[] = [
       return query.transactionName as string;
     },
     name: RouteName.TRANSACTION_NAME
-  },
-
-  // metrics
-  {
-    exact: true,
-    path: '/services/:serviceName/metrics',
-    component: ServiceDetails,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
-      defaultMessage: 'Metrics'
-    }),
-    name: RouteName.METRICS
   }
 ];
