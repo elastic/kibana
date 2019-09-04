@@ -20,10 +20,10 @@
 import React, { useEffect } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { AggParamEditorProps } from '..';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isValidJson } from '../../../../agg_types/utils';
+import { AggParamEditorProps } from '..';
 
 function RawJsonParamEditor({
   agg,

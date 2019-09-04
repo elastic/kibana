@@ -21,11 +21,11 @@ import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { AggParamEditorProps } from '..';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamOption } from '../../../../agg_types/agg_params';
 import { isValidInterval } from '../../../../agg_types/utils';
+import { AggParamEditorProps } from '..';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;

@@ -19,8 +19,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
-import { AggParamEditorProps, DefaultEditorAggParams } from '..';
 import { AggConfig } from '../../..';
+import { AggParamEditorProps, DefaultEditorAggParams } from '..';
 
 function OrderAggParamEditor({
   agg,

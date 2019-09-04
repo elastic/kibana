@@ -21,12 +21,12 @@ import { get } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggConfig } from 'src/legacy/ui/public/vis';
-import { Field } from 'src/legacy/ui/public/index_patterns';
-import { AggParamEditorProps, ComboBoxGroupedOptions } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
+import { AggConfig } from '../../..';
+import { Field } from '../../../../index_patterns';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../../../utils';
 import { AggParam, FieldParamType } from '../../../../agg_types';
+import { AggParamEditorProps, ComboBoxGroupedOptions } from '..';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 

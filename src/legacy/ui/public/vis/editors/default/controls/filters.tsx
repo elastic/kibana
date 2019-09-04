@@ -20,11 +20,11 @@
 import React, { useState, useEffect } from 'react';
 import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import chrome from 'src/legacy/ui/public/chrome';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Query } from 'plugins/data';
+import chrome from '../../../../chrome';
 import { FilterRow } from './filter';
+import { AggParamEditorProps } from '..';
 
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();

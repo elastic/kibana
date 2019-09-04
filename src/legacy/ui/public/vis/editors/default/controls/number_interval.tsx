@@ -21,8 +21,8 @@ import { get } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from '..';
 
 const label = (

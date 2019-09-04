@@ -18,11 +18,11 @@
  */
 
 import React from 'react';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { Field } from 'src/legacy/ui/public/index_patterns';
-import { AggParamEditorProps } from '..';
+import { i18n } from '@kbn/i18n';
+import { Field } from '../../../../index_patterns';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
+import { AggParamEditorProps } from '..';
 
 function TopFieldParamEditor(props: AggParamEditorProps<Field>) {
   const compatibleAggs = getCompatibleAggs(props.agg);

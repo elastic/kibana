@@ -19,9 +19,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { AggParamEditorProps } from '..';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AggConfig } from '../../..';
 import { AggParam } from '../../../../agg_types/agg_params';
 import {
@@ -29,6 +28,7 @@ import {
   OptionedParamEditorProps,
   OptionedParamType,
 } from '../../../../agg_types/param_types/optioned';
+import { AggParamEditorProps } from '..';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: AggConfig): boolean;

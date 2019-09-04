@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
+import { AggParamEditorProps } from '..';
 
 function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
   return (

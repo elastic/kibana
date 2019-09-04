@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'src/test_utils/public/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DateRangesParamEditor } from './date_ranges';
 
-jest.mock('../../documentation_links', () => ({
+jest.mock('../../../../documentation_links', () => ({
   getDocLink: jest.fn(),
 }));
 

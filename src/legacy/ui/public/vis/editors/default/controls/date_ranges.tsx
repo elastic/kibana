@@ -32,12 +32,12 @@ import {
   EuiText,
   EuiFormRow,
 } from '@elastic/eui';
-import dateMath from 'packages/elastic-datemath/target';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import dateMath from '@elastic/datemath';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
 import { getDocLink } from '../../../../documentation_links';
+import { AggParamEditorProps } from '..';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';

@@ -27,7 +27,7 @@ import {
   htmlIdGenerator,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface InputListConfig {
   defaultValue: InputItemModel;

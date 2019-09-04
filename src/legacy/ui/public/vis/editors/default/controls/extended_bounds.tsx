@@ -20,9 +20,9 @@
 import React, { useEffect, ChangeEvent } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
+import { AggParamEditorProps } from '..';
 
 interface Bounds {
   min: number | '';

@@ -19,9 +19,9 @@
 
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
 import { safeMakeLabel, isCompatibleAggregation } from '../../../../agg_types/agg_utils';
+import { AggParamEditorProps } from '..';
 
 const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
 const isCompatibleAgg = isCompatibleAggregation(aggFilter);

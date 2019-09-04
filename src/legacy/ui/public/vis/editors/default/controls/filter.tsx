@@ -26,11 +26,11 @@ import {
   EuiFieldText,
   EuiFormRow,
 } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggConfig } from 'src/legacy/ui/public/vis';
+import { i18n } from '@kbn/i18n';
 import { Query, QueryBarInput } from 'plugins/data';
-import { npStart } from 'src/legacy/ui/public/new_platform';
-import { Storage } from 'src/legacy/ui/public/storage';
+import { AggConfig } from '../../..';
+import { npStart } from '../../../../new_platform';
+import { Storage } from '../../../../storage';
 const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {

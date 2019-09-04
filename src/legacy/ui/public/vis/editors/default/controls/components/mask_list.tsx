@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { CidrMask } from '../../../../../utils/cidr_mask';
 import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
 

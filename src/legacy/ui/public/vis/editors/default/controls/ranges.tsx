@@ -30,8 +30,8 @@ import {
   EuiButtonEmpty,
   EuiFormRow,
 } from '@elastic/eui';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';

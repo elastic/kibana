@@ -18,10 +18,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
 import { isStringType } from '../../../../agg_types/buckets/migrate_include_exclude_format';
+import { AggParamEditorProps } from '..';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
   const fieldTypeIsNotString = !isStringType(props.agg);

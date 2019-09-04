@@ -19,14 +19,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
-import {
-  AggParamEditorProps,
-  DefaultEditorAggParams,
-  AggGroupNames,
-} from '..';
 import { AggConfig } from '../../..';
+import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
 
 function SubMetricParamEditor({
   agg,

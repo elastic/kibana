@@ -20,8 +20,8 @@
 import React from 'react';
 
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from '..';
 
 function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
   const label = i18n.translate('common.ui.aggTypes.changePrecisionLabel', {

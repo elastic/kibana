@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { EuiSwitch, EuiToolTip, EuiSpacer } from '@elastic/eui';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { AggParamEditorProps } from '..';
 
 interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
   dataTestSubj?: string;

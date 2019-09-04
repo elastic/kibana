@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'src/test_utils/public/enzyme_helpers';
-import { AggConfig } from 'src/legacy/ui/public/vis';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { AggConfig } from '../../..';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,

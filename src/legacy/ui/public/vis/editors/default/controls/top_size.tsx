@@ -18,11 +18,11 @@
  */
 
 import React from 'react';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
 import { EuiIconTip } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { SizeParamEditor } from './size';
 import { getCompatibleAggs } from './top_aggregate';
+import { AggParamEditorProps } from '..';
 
 function TopSizeParamEditor(props: AggParamEditorProps<number | ''>) {
   const iconTip = (

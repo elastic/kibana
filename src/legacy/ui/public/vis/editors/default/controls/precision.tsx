@@ -20,9 +20,9 @@
 import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import chrome from 'src/legacy/ui/public/chrome';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
+import { i18n } from '@kbn/i18n';
+import chrome from '../../../../chrome';
+import { AggParamEditorProps } from '..';
 
 const config = chrome.getUiSettingsClient();
 

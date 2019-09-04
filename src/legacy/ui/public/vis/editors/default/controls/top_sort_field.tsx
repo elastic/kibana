@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import { i18n } from 'packages/kbn-i18n/target/types';
-import { Field } from 'src/legacy/ui/public/index_patterns';
-import { AggParamEditorProps } from '..';
+import { i18n } from '@kbn/i18n';
+import { Field } from '../../../../index_patterns';
 import { FieldParamEditor } from './field';
+import { AggParamEditorProps } from '..';
 
 function TopSortFieldParamEditor(props: AggParamEditorProps<Field>) {
   const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {

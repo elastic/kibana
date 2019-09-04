@@ -19,9 +19,9 @@
 
 import React, { useEffect } from 'react';
 import { isUndefined } from 'lodash';
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AggParamEditorProps } from '..';
 
 export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;

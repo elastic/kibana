@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
 

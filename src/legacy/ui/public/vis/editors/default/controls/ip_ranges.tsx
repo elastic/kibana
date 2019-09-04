@@ -20,10 +20,10 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import { AggParamEditorProps } from 'src/legacy/ui/public/vis/editors/default';
 import { FromToList, FromToObject } from './components/from_to_list';
 import { MaskList, MaskObject } from './components/mask_list';
 import { IpRangeTypes } from './ip_range_type';
+import { AggParamEditorProps } from '..';
 interface IpRange {
   fromTo: FromToObject[];
   mask: MaskObject[];
