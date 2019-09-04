@@ -197,7 +197,7 @@
     "mustache": "2.3.2",
     "ngreact": "0.5.1",
     "node-fetch": "1.7.3",
-    "opn": "^5.4.0",
+    "opn": "^5.5.0",
     "oppsy": "^2.0.0",
     "pegjs": "0.10.0",
     "postcss-loader": "3.0.0",
