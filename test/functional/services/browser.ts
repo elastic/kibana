@@ -155,24 +155,25 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Moves the remote environment’s mouse cursor to the specified pointer {x, y}
+     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
+     * offset to browser page top left corner.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
-     * @param {x: number, y: number} pointer
+     * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
      */
-    public async moveMouseTo(pointer: { x: number; y: number }): Promise<void> {
+    public async moveMouseTo(point: { x: number; y: number }): Promise<void> {
       if (this.isW3CEnabled) {
         await this.getActions()
           .move({ x: 0, y: 0 })
           .perform();
         await this.getActions()
-          .move({ origin: { x: pointer.x, y: pointer.y } })
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
           .perform();
       } else {
         await this.getActions()
           .pause(this.getActions().mouse)
-          .move({ x: pointer.x, y: pointer.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
           .perform();
       }
     }
@@ -273,29 +274,27 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Inserts an action for moving the mouse x and y pixels relative to the specified origin.
-     * The origin may be defined as the mouse's current position, the viewport, or the center
-     * of a specific WebElement. Then adds an action for left-click (down/up) with the mouse.
+     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
+     * offset to browser page top left corner.
+     * Then adds an action for left-click (down/up) with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
      *
-     * @param {WebElementWrapper} element Optional
-     * @param {number} xOffset Optional
-     * @param {number} yOffset Optional
+     * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
      */
-    public async clickMouseButton(pointer: { x: number; y: number }): Promise<void> {
+    public async clickMouseButton(point: { x: number; y: number }): Promise<void> {
       if (this.isW3CEnabled) {
         await this.getActions()
           .move({ x: 0, y: 0 })
           .perform();
         await this.getActions()
-          .move({ origin: { x: pointer.x, y: pointer.y } })
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
           .click()
           .perform();
       } else {
         await this.getActions()
           .pause(this.getActions().mouse)
-          .move({ x: pointer.x, y: pointer.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: 'pointer' })
           .click()
           .perform();
       }
