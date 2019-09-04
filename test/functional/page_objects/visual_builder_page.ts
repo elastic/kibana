@@ -239,7 +239,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
       const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
-      await comboBox.setElement(formatterEl, formatter);
+      await comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
     }
 
     /**
@@ -260,11 +260,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }) {
       if (from) {
         const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await comboBox.setElement(fromCombobox, from);
+        await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
       }
       if (to) {
         const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
-        await comboBox.setElement(toCombobox, to);
+        await comboBox.setElement(toCombobox, to, { clickWithMouse: true });
       }
       if (decimalPlaces) {
         const decimalPlacesInput = await find.byCssSelector('[id$="decimal"]');
