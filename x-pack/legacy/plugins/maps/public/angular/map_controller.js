@@ -192,7 +192,6 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
       $scope.$evalAsync(() => {
         $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
       });
     });
   });
