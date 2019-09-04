@@ -132,7 +132,8 @@ export function ActionBar({
           title={
             <FormattedMessage
               id="kbn.context.olderDocumentsWarning"
-              defaultMessage="Only 1 documents older than the anchor could be found."
+              defaultMessage="Only {warningDocCount} documents older than the anchor could be found."
+              values={{ warningDocCount }}
             />
           }
         />
