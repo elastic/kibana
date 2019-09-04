@@ -92,7 +92,7 @@ export const getJobConfigFromFormState = (
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   return {
     source: {
-      index: formState.sourceIndex,
+      index: formState.sourceIndex.split(','),
     },
     dest: {
       index: formState.destinationIndex,
