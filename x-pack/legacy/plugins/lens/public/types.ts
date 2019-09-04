@@ -215,10 +215,23 @@ export interface VisualizationProps<T = unknown> {
   setState: (newState: T) => void;
 }
 
+/**
+ * Object passed to `getSuggestions` of a visualization.
+ * It contains a possible table the current datasource could
+ * provide and the state of the visualization if it is currently active.
+ *
+ * If the current datasource suggests multiple tables, `getSuggestions`
+ * is called multiple times with separate `SuggestionRequest` objects.
+ */
 export interface SuggestionRequest<T = unknown> {
-  // It is up to the Visualization to rank these tables
+  /**
+   * A table configuration the datasource could provide.
+   */
   table: TableSuggestion;
-  state?: T; // State is only passed if the visualization is active
+  /**
+   * State is only passed if the visualization is active.
+   */
+  state?: T;
 }
 
 /**
@@ -304,5 +317,5 @@ export interface Visualization<T = unknown, P = unknown> {
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data
-  getSuggestions: (options: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
+  getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 }
