@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { validateIndexPattern } from 'ui/index_patterns';
 
+import { COMMA_SEPARATOR } from '../../../../../../common/constants/index_patterns';
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { isAnalyticsIdValid } from '../../../../common';
@@ -16,13 +17,29 @@ import { isAnalyticsIdValid } from '../../../../common';
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 
-const validateAdvancedEditor = (state: State): State => {
+const getSourceIndexString = (state: State) => {
+  const { jobConfig } = state;
+
+  const sourceIndex = idx(jobConfig, _ => _.source.index);
+
+  if (typeof sourceIndex === 'string') {
+    return sourceIndex;
+  }
+
+  if (Array.isArray(sourceIndex)) {
+    return sourceIndex.join(COMMA_SEPARATOR);
+  }
+
+  return '';
+};
+
+export const validateAdvancedEditor = (state: State): State => {
   const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
 
-  const sourceIndexName = idx(jobConfig, _ => _.source.index) || '';
+  const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
   const sourceIndexNameValid = validateIndexPattern(sourceIndexName);
 

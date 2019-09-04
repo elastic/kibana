@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { COMMA_SEPARATOR } from '../../../../../../common/constants/index_patterns';
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
@@ -86,8 +87,6 @@ export const getInitialState = (): State => ({
   jobIds: [],
   requestMessages: [],
 });
-
-const COMMA_SEPARATOR = ',';
 
 export const getJobConfigFromFormState = (
   formState: State['form']
