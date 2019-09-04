@@ -6,10 +6,9 @@
 
 import { getActionType, executor } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionsConfigurationUtilities, NotWhitelistedError } from '../actions_config';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { Services, ActionTypeExecutorOptions } from '../types';
-import { asOk, asErr } from './lib/result_type';
 
 const NO_OP_FN = () => {};
 const servicesMock: Services = {
@@ -19,9 +18,8 @@ const servicesMock: Services = {
 };
 
 const configUtilsMock: ActionsConfigurationUtilities = {
-  isWhitelistedHostname(uri) {
-    return asOk(uri);
-  },
+  isWhitelistedUri: _ => _,
+  isWhitelistedHostname: _ => _,
 };
 
 describe('actionType', () => {
@@ -149,9 +147,8 @@ describe('config validation', () => {
 
   test('config validation passes when kibana config whitelists the url', () => {
     const actionType = getActionType({
-      isWhitelistedHostname(uri) {
-        return asOk(uri);
-      },
+      isWhitelistedUri: _ => _,
+      isWhitelistedHostname: _ => _,
     });
 
     const config: Record<string, any> = {
@@ -169,9 +166,8 @@ describe('config validation', () => {
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     const actionType = getActionType({
-      isWhitelistedHostname(uri) {
-        return asErr(`target url is not whitelisted`);
-      },
+      isWhitelistedUri: _ => new NotWhitelistedError(`target url is not whitelisted`),
+      isWhitelistedHostname: _ => _,
     });
 
     const config: Record<string, any> = {
@@ -219,10 +215,11 @@ describe('executor', () => {
     const params: Record<string, any> = {};
     const result = await executor(
       {
-        isWhitelistedHostname(uri) {
+        isWhitelistedUri(uri) {
           expect(uri).toEqual(config.url);
-          return asErr(`${uri}`);
+          return new NotWhitelistedError(`${uri}`);
         },
+        isWhitelistedHostname: _ => _,
       },
       {
         id: 'webhook',

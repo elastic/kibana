@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromNullable } from 'fp-ts/lib/Option';
+import { tryCatch } from 'fp-ts/lib/Option';
 import { URL } from 'url';
-import { asOk, asErr, Result } from './builtin_action_types/lib/result_type';
+import { curry } from 'lodash';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -17,28 +17,54 @@ export interface ActionsKibanaConfig {
   whitelistedHosts: WhitelistedHosts.Any | string[];
 }
 
-export interface ActionsConfigurationUtilities {
-  isWhitelistedHostname: (uri: string) => Result<string, string>;
+export class NotWhitelistedError extends Error {
+  constructor(message: string) {
+    super(message); // 'Error' breaks prototype chain here
+    Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
+  }
 }
 
-const whitelistingError = asErr('target url not in whitelist');
+export interface ActionsConfigurationUtilities {
+  isWhitelistedHostname: (hostname: string) => string | NotWhitelistedError;
+  isWhitelistedUri: (uri: string) => string | NotWhitelistedError;
+}
+
+const whitelistingErrorMessage = 'target url not in whitelist';
+function isWhitelisted(
+  config: ActionsKibanaConfig,
+  hostname: string
+): string | NotWhitelistedError {
+  switch (config.whitelistedHosts) {
+    case WhitelistedHosts.Any:
+      return hostname;
+    default:
+      if (
+        Array.isArray(config.whitelistedHosts) &&
+        config.whitelistedHosts.find(whitelistedHostname => whitelistedHostname === hostname)
+      ) {
+        return hostname;
+      }
+      return new NotWhitelistedError(whitelistingErrorMessage);
+  }
+}
 export function getActionsConfigurationUtilities(
   config: ActionsKibanaConfig
 ): ActionsConfigurationUtilities {
+  const isWhitelistedHostname = curry(isWhitelisted)(config);
   return {
-    isWhitelistedHostname(uri: string): Result<string, string> {
-      const urlHostname = new URL(uri).hostname;
-      switch (config.whitelistedHosts) {
-        case WhitelistedHosts.Any:
-          return asOk(uri);
-        default:
-          if (Array.isArray(config.whitelistedHosts)) {
-            return fromNullable(config.whitelistedHosts.find(hostname => hostname === urlHostname))
-              .map(_ => asOk(uri) as Result<string, string>)
-              .getOrElse(whitelistingError as Result<string, string>);
+    isWhitelistedUri(uri: string): string | NotWhitelistedError {
+      return tryCatch(() => new URL(uri))
+        .map(url => url.hostname)
+        .map(hostname => {
+          const result = isWhitelistedHostname(hostname);
+          if (result instanceof NotWhitelistedError) {
+            return result;
+          } else {
+            return uri;
           }
-          return whitelistingError;
-      }
+        })
+        .getOrElse(new NotWhitelistedError(whitelistingErrorMessage));
     },
+    isWhitelistedHostname,
   };
 }

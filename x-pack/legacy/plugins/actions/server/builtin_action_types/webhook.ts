@@ -9,9 +9,9 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
-import { isOk, isErr, promiseResult, Result } from './lib/result_type';
+import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionsConfigurationUtilities, NotWhitelistedError } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -64,12 +64,12 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   const { url } = configObject;
-  const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
-  if (isErr(whitelistValidation)) {
+  const whitelistValidation = configurationUtilities.isWhitelistedUri(url);
+  if (whitelistValidation instanceof NotWhitelistedError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
       values: {
-        message: whitelistValidation.error,
+        message: whitelistValidation.message,
       },
     });
   }
@@ -87,10 +87,10 @@ export async function executor(
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
-  const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
-  if (isErr(whitelistValidation)) {
+  const whitelistValidation = configurationUtilities.isWhitelistedUri(url);
+  if (whitelistValidation instanceof NotWhitelistedError) {
     log(`warn`, `error on webhook action "${id}": The target "${url}" has not been whitelisted`);
-    return errorRequestInvalid(id, whitelistValidation.error);
+    return errorRequestInvalid(id, whitelistValidation.message);
   }
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(

@@ -8,7 +8,6 @@ jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { asOk } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -22,7 +21,8 @@ import { ActionParamsType, ActionTypeConfigType } from './es_index';
 const ACTION_TYPE_ID = '.index';
 const NO_OP_FN = () => {};
 const MOCK_KIBANA_CONFIG = {
-  isWhitelistedHostname: uri => asOk(uri),
+  isWhitelistedUri: _ => _,
+  isWhitelistedHostname: _ => _,
 } as ActionsConfigurationUtilities;
 
 const services = {

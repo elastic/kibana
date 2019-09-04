@@ -8,7 +8,6 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
-import { asOk } from './lib/result_type';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -24,7 +23,8 @@ const postPagerdutyMock = postPagerduty as jest.Mock;
 const ACTION_TYPE_ID = '.pagerduty';
 const NO_OP_FN = () => {};
 const MOCK_KIBANA_CONFIG = {
-  isWhitelistedHostname: uri => asOk(uri),
+  isWhitelistedUri: _ => _,
+  isWhitelistedHostname: _ => _,
 } as ActionsConfigurationUtilities;
 
 const services: Services = {
