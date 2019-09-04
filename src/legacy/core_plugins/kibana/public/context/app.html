@@ -62,9 +62,7 @@
   ng-if="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.FAILED"
 >
   <!-- Controls -->
-  <div class="kuiBar kuiVerticalRhythm">
-    <div class="kuiBarSection">
-      <context-action-bar
+  <context-action-bar
         count="contextApp.state.queryParameters.predecessorCount"
         default-step-size="contextApp.state.queryParameters.defaultStepSize"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
@@ -73,22 +71,13 @@
         contextApp.constants.LOADING_STATUS.FAILED,
         ].includes(contextApp.state.loadingStatus.predecessors.status)"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
-        on-button-click="contextApp.actions.fetchMorePredecessorRows"
+        on-load-more-click="contextApp.actions.fetchMorePredecessorRows"
         type="'predecessor'"
-      ></context-action-bar>
-      <span
-        class="kuiStatusText kuiStatusText--warning"
-        ng-if="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
-          && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
-      >
-        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.predecessors.length }} documents newer than the anchor could be found."></span>
-      </span>
-    </div>
-
-    <div class="kuiBarSection">
-    </div>
-  </div>
+        warning="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
+        && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
+        warningDocCount="contextApp.state.rows.predecessors.length"
+  ></context-action-bar>
+   
 
   <!-- Loading feedback -->
   <div
@@ -124,31 +113,19 @@
   </div>
 
   <!-- Controls -->
-  <div class="kuiBar kuiVerticalRhythm">
-    <div class="kuiBarSection">
-      <context-action-bar
-        count="contextApp.state.queryParameters.successorCount"
-        default-step-size="contextApp.state.queryParameters.defaultStepSize"
-        is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
-        is-loading="![
-        contextApp.constants.LOADING_STATUS.LOADED,
-        contextApp.constants.LOADING_STATUS.FAILED,
-        ].includes(contextApp.state.loadingStatus.successors.status)"
-        on-change-count="contextApp.actions.fetchGivenSuccessorRows"
-        on-button-click="contextApp.actions.fetchMoreSuccessorRows"
-        type="'successor'"
-      ></context-action-bar>
-      <span
-        class="kuiStatusText kuiStatusText--warning"
-        ng-if="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)
-          && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
-      >
-        <span class="kuiStatusText__icon kuiIcon fa-bolt"></span>
-        <span ng-bind-template="Only {{ contextApp.state.rows.successors.length }} documents older than the anchor could be found."></span>
-      </span>
-    </div>
-
-    <div class="kuiBarSection">
-    </div>
-  </div>
+  <context-action-bar
+    count="contextApp.state.queryParameters.successorCount"
+    default-step-size="contextApp.state.queryParameters.defaultStepSize"
+    is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
+    is-loading="![
+    contextApp.constants.LOADING_STATUS.LOADED,
+    contextApp.constants.LOADING_STATUS.FAILED,
+    ].includes(contextApp.state.loadingStatus.successors.status)"
+    on-change-count="contextApp.actions.fetchGivenSuccessorRows"
+    on-load-more-click="contextApp.actions.fetchMoreSuccessorRows"
+    type="'successor'"
+    warning="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)
+    && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
+    warningDocCount="contextApp.state.rows.successors.length"
+  ></context-action-bar>
 </main>

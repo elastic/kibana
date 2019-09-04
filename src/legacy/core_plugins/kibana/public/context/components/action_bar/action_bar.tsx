@@ -19,13 +19,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldNumber,
-  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export function ActionBar({
@@ -33,75 +34,110 @@ export function ActionBar({
   defaultStepSize = 5,
   isDisabled,
   isLoading,
-  onButtonClick,
   onChangeCount,
+  onLoadMoreClick,
   type,
+  warning,
+  warningDocCount = 0,
 }: {
   count: number;
   defaultStepSize: number;
-  isLoading: boolean;
   isDisabled: boolean;
-  onButtonClick: () => void;
+  isLoading: boolean;
   onChangeCount: (count: number) => void;
+  onLoadMoreClick: () => void;
   type: string;
+  warning: boolean;
+  warningDocCount?: number;
 }) {
-  const arialLabel =
-    type === 'successor'
-      ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
-          defaultMessage: 'Number of older documents',
-        })
-      : i18n.translate('kbn.context.newerDocumentsAriaLabel', {
-          defaultMessage: 'Number of newer documents',
-        });
-
   return (
-    <EuiFlexGroup component="span">
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj={
-            type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
-          }
-          isLoading={isLoading}
-          iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
-          onClick={onButtonClick}
-        >
-          <FormattedMessage
-            id="kbn.context.loadMoreDescription"
-            defaultMessage="Load {defaultStepSize} more"
-            values={{ defaultStepSize }}
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFormRow>
-          <EuiFieldNumber
-            aria-label={arialLabel}
-            className="cxtSizePicker"
-            data-test-subj={
-              type === 'successor' ? 'successorCountPicker' : 'predecessorCountPicker'
+    <>
+      {type === 'successor' && <EuiSpacer size="s" />}
+      {type === 'successor' && warning && (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="bolt"
+            title={
+              <FormattedMessage
+                id="kbn.context.newerDocumentsWarning"
+                defaultMessage="Only {warningDocCount} documents newer than the anchor could be found."
+                values={{ warningDocCount }}
+              />
             }
-            disabled={isDisabled}
-            onChange={ev => onChangeCount(Number(ev.target.value))}
-            type="number"
-            value={count}
           />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiFormRow displayOnly>
-          {type === 'successor' ? (
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiFlexGroup direction="row" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj={
+              type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
+            }
+            isLoading={isLoading}
+            iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
+            onClick={onLoadMoreClick}
+          >
             <FormattedMessage
-              id="kbn.context.olderDocumentsDescription"
-              defaultMessage="Older documents"
+              id="kbn.context.loadMoreDescription"
+              defaultMessage="Load {defaultStepSize} more"
+              values={{ defaultStepSize }}
             />
-          ) : (
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow>
+            <EuiFieldNumber
+              aria-label={
+                type === 'successor'
+                  ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
+                      defaultMessage: 'Number of older documents',
+                    })
+                  : i18n.translate('kbn.context.newerDocumentsAriaLabel', {
+                      defaultMessage: 'Number of newer documents',
+                    })
+              }
+              className="cxtSizePicker"
+              data-test-subj={
+                type === 'successor' ? 'successorCountPicker' : 'predecessorCountPicker'
+              }
+              disabled={isDisabled}
+              onChange={ev => onChangeCount(Number(ev.target.value))}
+              type="number"
+              value={count}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow displayOnly>
+            {type === 'successor' ? (
+              <FormattedMessage
+                id="kbn.context.olderDocumentsDescription"
+                defaultMessage="Older documents"
+              />
+            ) : (
+              <FormattedMessage
+                id="kbn.context.newerDocumentsDescription"
+                defaultMessage="Newer documents"
+              />
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {type === 'predecessor' && warning && (
+        <EuiCallOut
+          color="warning"
+          iconType="bolt"
+          title={
             <FormattedMessage
-              id="kbn.context.newerDocumentsDescription"
-              defaultMessage="Newer documents"
+              id="kbn.context.olderDocumentsWarning"
+              defaultMessage="Only 1 documents older than the anchor could be found."
             />
-          )}
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          }
+        />
+      )}
+      {type === 'predecessor' && <EuiSpacer size="s" />}
+    </>
   );
 }
