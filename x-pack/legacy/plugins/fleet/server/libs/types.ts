@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from './libs/compose/kibana';
-import { initRestApi } from './rest_api/init_api';
+import { AgentLib } from './agent';
+import { TokenLib } from './token';
 
-export const initServerWithKibana = (hapiServer: any) => {
-  const libs = compose(hapiServer);
-  initRestApi(hapiServer, libs);
-};
+export interface FleetServerLib {
+  agents: AgentLib;
+  tokens: TokenLib;
+}

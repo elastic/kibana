@@ -29,7 +29,9 @@ export class TokenLib {
     try {
       const decodedToken = this._verifyJWTToken(token);
 
-      await this._verifyPersistedToken(token);
+      if (decodedToken.type === TokenType.ENROLMENT_TOKEN) {
+        await this._verifyPersistedToken(token);
+      }
 
       return {
         valid: true,
@@ -45,8 +47,21 @@ export class TokenLib {
     }
   }
 
-  public async generateAccessToken(token: any): Promise<string> {
-    throw new Error('Not implemented');
+  public async generateAccessToken(
+    agentId: string,
+    config: { id: string; sharedId: string }
+  ): Promise<string> {
+    const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
+    const token = signToken(
+      {
+        type: TokenType.ACCESS_TOKEN,
+        agentId,
+        config,
+      },
+      encryptionKey
+    );
+
+    return token;
   }
 
   /**
@@ -69,7 +84,7 @@ export class TokenLib {
         expiresIn: expire,
       }
     );
-    const tokenHash = await this._hashJWTToken(token);
+    const tokenHash = await this.hashToken(token);
 
     await this.adapter.create({
       active: true,
@@ -79,6 +94,14 @@ export class TokenLib {
     });
 
     return token;
+  }
+
+  public async hashToken(token: string): Promise<string> {
+    const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
+
+    const hmac = createHmac('sha512', encryptionKey);
+
+    return hmac.update(token).digest('hex');
   }
 
   private _verifyJWTToken(token: string): JWTToken {
@@ -93,7 +116,7 @@ export class TokenLib {
   }
 
   private async _verifyPersistedToken(token: string) {
-    const tokenHash = await this._hashJWTToken(token);
+    const tokenHash = await this.hashToken(token);
     const persistedToken = await this.adapter.getByTokenHash(tokenHash);
     if (!persistedToken) {
       throw new Error('Token not found');
@@ -102,13 +125,5 @@ export class TokenLib {
     if (persistedToken.active === false) {
       throw new Error('Token is not active');
     }
-  }
-
-  private async _hashJWTToken(token: string): Promise<string> {
-    const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
-
-    const hmac = createHmac('sha512', encryptionKey);
-
-    return hmac.update(token).digest('hex');
   }
 }
