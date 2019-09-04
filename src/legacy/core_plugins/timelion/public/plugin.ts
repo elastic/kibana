@@ -19,7 +19,7 @@
 import {
   CoreSetup,
   CoreStart,
-  InternalCoreStart,
+  LegacyCoreStart,
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
@@ -70,10 +70,7 @@ export class TimelionPlugin
     );
   }
 
-  public async start(
-    core: CoreStart & InternalCoreStart,
-    plugins: TimelionPluginStartDependencies
-  ) {
+  public async start(core: CoreStart & LegacyCoreStart, plugins: TimelionPluginStartDependencies) {
     const dependencies: LegacyDependenciesPluginStart = await plugins.__LEGACY.start();
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
