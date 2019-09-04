@@ -143,6 +143,11 @@ export class JobRunner {
       // adjust the refresh interval so that it produces a change in percentage
       // that is close to the target
       this._refreshInterval = this._refreshInterval * (TARGET_PROGRESS_DELTA / progressDelta);
+
+      // don't let the interval fall below the initial default.
+      if (this._refreshInterval < REFRESH_INTERVAL_MS) {
+        this._refreshInterval = REFRESH_INTERVAL_MS;
+      }
     }
   }
 
