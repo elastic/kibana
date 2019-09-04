@@ -17,26 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
 
-/**
- * Vis Filters Service
- *
- * @internal
- */
-export class FiltersService {
-  public setup() {
-    return {
-      VisFiltersProvider,
-      createFilter,
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type FiltersSetup = ReturnType<FiltersService['setup']>;
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
