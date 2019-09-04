@@ -82,6 +82,7 @@ describe('get_column_renderer', () => {
     suricata.event = { ...suricata.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer(suricata, rowRenderers);
     const row = rowRenderer.renderRow({
+      width: 100,
       browserFields: mockBrowserFields,
       data: suricata,
       children: <span>{'some child '}</span>,
@@ -100,6 +101,7 @@ describe('get_column_renderer', () => {
     zeek.event = { ...zeek.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer(zeek, rowRenderers);
     const row = rowRenderer.renderRow({
+      width: 100,
       browserFields: mockBrowserFields,
       data: zeek,
       children: <span>{'some child '}</span>,
@@ -118,6 +120,7 @@ describe('get_column_renderer', () => {
     system.event = { ...system.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer(system, rowRenderers);
     const row = rowRenderer.renderRow({
+      width: 100,
       browserFields: mockBrowserFields,
       data: system,
       children: <span>{'some child '}</span>,
@@ -136,6 +139,7 @@ describe('get_column_renderer', () => {
     auditd.event = { ...auditd.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer(auditd, rowRenderers);
     const row = rowRenderer.renderRow({
+      width: 100,
       browserFields: mockBrowserFields,
       data: auditd,
       children: <span>{'some child '}</span>,
