@@ -313,7 +313,7 @@ const getFilterQuery = (
       : ''
     : convertKueryToElasticSearchQuery(
         `${filterQueryExpression} ${
-          hostName ? `and host.name: "${escapeQueryValue(hostName)}"` : ''
+          hostName ? `and host.name: ${escapeQueryValue(hostName)}` : ''
         }`,
         indexPattern
       );
