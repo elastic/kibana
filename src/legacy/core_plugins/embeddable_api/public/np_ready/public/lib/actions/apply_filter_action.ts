@@ -45,6 +45,9 @@ export class ApplyFilterAction extends Action<ActionContext> {
   }
 
   public async isCompatible(context: ActionContext) {
+    if (context.embeddable === undefined) {
+      return false;
+    }
     const root = context.embeddable.getRoot() as RootEmbeddable;
     return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
   }
