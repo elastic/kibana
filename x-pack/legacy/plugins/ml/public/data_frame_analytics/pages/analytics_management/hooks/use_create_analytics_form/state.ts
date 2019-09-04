@@ -87,12 +87,19 @@ export const getInitialState = (): State => ({
   requestMessages: [],
 });
 
+const COMMA_SEPARATOR = ',';
+
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   return {
     source: {
-      index: formState.sourceIndex.split(','),
+      // If a Kibana index patterns includes commas, we need to split
+      // the into an array of indices to be in the correct format for
+      // the data frame analytics API.
+      index: formState.sourceIndex.includes(COMMA_SEPARATOR)
+        ? formState.sourceIndex.split(COMMA_SEPARATOR)
+        : formState.sourceIndex,
     },
     dest: {
       index: formState.destinationIndex,
