@@ -17,32 +17,27 @@
  * under the License.
  */
 
-import './brush_event.test.mocks';
-
-jest.mock('ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
-  }), { virtual: true });
 
 import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { onBrushEvent } from './brush_event';
-import { timefilter } from 'ui/timefilter';
+
+import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+const dataSetupMock = dataPluginMock.createSetup();
+const { timefilter } = dataSetupMock.timefilter;
+
+let _time = undefined;
+timefilter.setTime.mockImplementation((time) => {
+  _time = {
+    from: time.from.toISOString(),
+    to: time.to.toISOString(),
+  };
+});
+timefilter.getTime.mockImplementation(() => {
+  return _time;
+});
+
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -98,7 +93,7 @@ describe('brushEvent', () => {
 
   test('ignores event when data.xAxisField not provided', () => {
     const event = _.cloneDeep(baseEvent);
-    onBrushEvent(event, $state);
+    onBrushEvent(timefilter, event, $state);
     expect($state)
       .not.have.property('$newFilters');
   });
@@ -120,7 +115,7 @@ describe('brushEvent', () => {
       test('by ignoring the event when range spans zero time', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014];
-        onBrushEvent(event, $state);
+        onBrushEvent(timefilter, event, $state);
         expect($state)
           .not.have.property('$newFilters');
       });
@@ -128,7 +123,7 @@ describe('brushEvent', () => {
       test('by updating the timefilter', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
-        onBrushEvent(event, $state);
+        onBrushEvent(timefilter, event, $state);
         const { from, to } = timefilter.getTime();
         // Set to a baseline timezone for comparison.
         expect(from).to.be(new Date(JAN_01_2014).toISOString());
@@ -155,7 +150,7 @@ describe('brushEvent', () => {
         const rangeBegin = JAN_01_2014;
         const rangeEnd = rangeBegin + DAY_IN_MS;
         event.range = [rangeBegin, rangeEnd];
-        onBrushEvent(event, $state);
+        onBrushEvent(timefilter, event, $state);
         expect($state)
           .to.have.property('$newFilters');
         expect($state.filters.length)
@@ -189,14 +184,14 @@ describe('brushEvent', () => {
     test('by ignoring the event when range does not span at least 2 values', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1];
-      onBrushEvent(event, $state);
+      onBrushEvent(timefilter, event, $state);
       expect($state).not.have.property('$newFilters');
     });
 
     test('by creating a new filter', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [1, 2, 3, 4];
-      onBrushEvent(event, $state);
+      onBrushEvent(timefilter, event, $state);
       expect($state)
         .to.have.property('$newFilters');
       expect($state.filters.length)
@@ -219,7 +214,7 @@ describe('brushEvent', () => {
         },
         range: { gte: 1, lt: 4 }
       });
-      onBrushEvent(event, $state);
+      onBrushEvent(timefilter, event, $state);
       expect($state)
         .not.have.property('$newFilters');
       expect($state.filters.length)
@@ -247,7 +242,7 @@ describe('brushEvent', () => {
           }
         }
       });
-      onBrushEvent(event, $state);
+      onBrushEvent(timefilter, event, $state);
       expect($state)
         .not.have.property('$newFilters');
       expect($state.filters.length)

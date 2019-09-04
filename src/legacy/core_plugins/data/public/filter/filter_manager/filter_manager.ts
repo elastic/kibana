@@ -35,7 +35,7 @@ import { changeTimeFilter } from './lib/change_time_filter';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './partitioned_filters';
 import { IndexPatterns } from '../../index_patterns';
-import { Timefilter } from '../../timefilter';
+import { TimefilterContract } from '../../timefilter';
 
 export class FilterManager {
   private indexPatterns: IndexPatterns;
@@ -43,12 +43,12 @@ export class FilterManager {
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
-  private timefilter: Timefilter;
+  private timefilter: TimefilterContract;
 
   constructor(
     indexPatterns: IndexPatterns,
     uiSettings: UiSettingsClientContract,
-    timefilter: Timefilter
+    timefilter: TimefilterContract
   ) {
     this.indexPatterns = indexPatterns;
     this.uiSettings = uiSettings;

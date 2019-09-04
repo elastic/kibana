@@ -36,7 +36,7 @@ import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
-import { TimeHistory } from '../../../timefilter';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -66,7 +66,7 @@ interface Props {
   isDirty: boolean;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
-  timeHistory: TimeHistory;
+  timeHistory: TimeHistoryContract;
 }
 
 interface State {

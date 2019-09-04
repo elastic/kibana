@@ -47,7 +47,7 @@ module.directive('kbnTopNav', () => {
       // Pass in storage
       const localStorage = new Storage(window.localStorage);
       child.setAttribute('store', 'store');
-      child.setAttribute('history', 'history');
+      child.setAttribute('time-history', 'timeHistory');
       child.setAttribute('ui-settings', 'uiSettings');
       child.setAttribute('saved-objects-client', 'savedObjectsClient');
 
@@ -56,7 +56,7 @@ module.directive('kbnTopNav', () => {
 
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
-        $scope.history = data.timefilter.history;
+        $scope.timeHistory = data.timefilter.history;
         $scope.uiSettings = chrome.getUiSettingsClient();
         $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
@@ -102,7 +102,7 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       ['uiSettings', { watchDepth: 'reference' }],
       ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
-      ['history', { watchDepth: 'reference' }],
+      ['timeHistory', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],

@@ -52,3 +52,5 @@ export class TimeHistory {
     return this.history.get();
   }
 }
+
+export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;

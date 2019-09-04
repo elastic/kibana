@@ -19,9 +19,9 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-import { Timefilter } from '../../../timefilter';
+import { TimefilterContract } from '../../../timefilter';
 
-export function changeTimeFilter(timefilter: Timefilter, filter: any) {
+export function changeTimeFilter(timefilter: TimefilterContract, filter: any) {
   const key = _.keys(filter.range)[0];
   const values = filter.range[key];
   timefilter.setTime({

@@ -27,12 +27,13 @@ import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
-import { IndexPattern, Query, QueryBar, FilterBar, TimeHistory } from '../../../../../data/public';
+import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -57,7 +58,7 @@ export interface SearchBarProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
-  timeHistory: TimeHistory;
+  timeHistory: TimeHistoryContract;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];

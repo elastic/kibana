@@ -16,50 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './change_time_filter.test.mocks';
-
-jest.mock('ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch(key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
-  }), { virtual: true });
-
 import expect from '@kbn/expect';
 import { changeTimeFilter } from '../change_time_filter';
-import { timefilter } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 
-describe('changeTimeFilter()', function () {
+import { timefilterServiceMock } from '../../../../timefilter/timefilter_service.mock';
+const timefilterMock = timefilterServiceMock.createSetupContract();
+const timefilter = timefilterMock.timefilter;
+
+let _time: TimeRange | undefined;
+timefilter.setTime.mockImplementation((time: any) => {
+  _time = {
+    from: time.from.toISOString(),
+    to: time.to.toISOString(),
+  };
+});
+timefilter.getTime.mockImplementation(() => {
+  return _time!;
+});
+
+describe('changeTimeFilter()', function() {
   const gt = 1388559600000;
   const lt = 1388646000000;
 
-  test('should change the timefilter to match the range gt/lt', function () {
+  test('should change the timefilter to match the range gt/lt', function() {
     const filter = { range: { '@timestamp': { gt, lt } } };
-    changeTimeFilter(filter);
+    changeTimeFilter(timefilter, filter);
     const { to, from } = timefilter.getTime();
     expect(to).to.be(new Date(lt).toISOString());
     expect(from).to.be(new Date(gt).toISOString());
   });
 
-  test('should change the timefilter to match the range gte/lte', function () {
+  test('should change the timefilter to match the range gte/lte', function() {
     const filter = { range: { '@timestamp': { gte: gt, lte: lt } } };
-    changeTimeFilter(filter);
+    changeTimeFilter(timefilter, filter);
     const { to, from } = timefilter.getTime();
     expect(to).to.be(new Date(lt).toISOString());
     expect(from).to.be(new Date(gt).toISOString());
   });
-
 });

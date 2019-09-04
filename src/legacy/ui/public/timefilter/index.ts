@@ -18,11 +18,18 @@
  */
 
 import uiRoutes from 'ui/routes';
+import { TimefilterContract, TimeHistoryContract } from 'src/legacy/core_plugins/data/public';
 import { registerTimefilterWithGlobalState } from './setup_router';
-
 import { setup as data } from '../../../core_plugins/data/public/legacy';
 
-export { getTime } from '../../../core_plugins/data/public';
+export {
+  getTime,
+  InputTimeRange,
+  TimeHistoryContract,
+  TimefilterContract,
+} from '../../../core_plugins/data/public';
+export type Timefilter = TimefilterContract;
+export type TimeHistory = TimeHistoryContract;
 export const timeHistory = data.timefilter.history;
 export const timefilter = data.timefilter.timefilter;
 
