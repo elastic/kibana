@@ -8,9 +8,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
-import { RenderFunction } from './plugin';
 import { AutoScale } from './auto_scale';
 
 export interface MetricChartProps {
@@ -73,7 +73,7 @@ export const metricChart: ExpressionFunction<
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory
-): RenderFunction<MetricChartProps> => ({
+): IInterpreterRenderFunction<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric Chart',
   help: 'Metric Chart Renderer',

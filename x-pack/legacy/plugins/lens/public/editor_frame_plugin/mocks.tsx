@@ -110,10 +110,5 @@ export function createMockDependencies() {
     chrome: {
       getSavedObjectsClient: () => {},
     },
-    interpreter: {
-      functionsRegistry: {
-        register: jest.fn(),
-      },
-    },
   } as unknown) as MockedDependencies;
 }

@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
@@ -16,8 +15,6 @@ import {
   setup as dataSetup,
   start as dataStart,
 } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
@@ -29,14 +26,6 @@ export interface EditorFrameSetupPlugins {
   dataStart: typeof dataStart;
   chrome: Chrome;
   embeddables: ReturnType<EmbeddablePlugin['setup']>;
-  interpreter: InterpreterSetup;
-}
-
-export interface InterpreterSetup {
-  functionsRegistry: Registry<
-    ExpressionFunction<string, unknown, unknown, unknown>,
-    ExpressionFunction<string, unknown, unknown, unknown>
-  >;
 }
 
 export class EditorFramePlugin {
@@ -46,7 +35,7 @@ export class EditorFramePlugin {
   private readonly visualizations: Record<string, Visualization> = {};
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
-    plugins.interpreter.functionsRegistry.register(() => mergeTables);
+    plugins.dataSetup.expressions.registerFunction(() => mergeTables);
 
     plugins.embeddables.registerEmbeddableFactory(
       'lens',
@@ -118,9 +107,6 @@ export const editorFrameSetup = () =>
     dataStart,
     chrome,
     embeddables: embeddablePlugin,
-    interpreter: {
-      functionsRegistry,
-    },
   });
 
 export const editorFrameStop = () => editorFrame.stop();

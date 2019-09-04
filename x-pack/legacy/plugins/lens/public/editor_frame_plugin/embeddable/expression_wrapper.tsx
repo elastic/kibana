@@ -61,7 +61,7 @@ export function ExpressionWrapper({
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
           }}
-          context={context}
+          searchContext={{ ...context, type: 'kibana_context' }}
         />
       )}
     </I18nProvider>
