@@ -17,66 +17,65 @@
  * under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { IndexPatterns } from './index_patterns';
+import { SavedObjectsClientContract, UiSettingsClientContract } from 'kibana/public';
 
 jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
 }));
 
-
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
-  }
+  },
 }));
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
-  }
+  },
 }));
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
       return this;
-    }
+    };
   }
 
   return {
-    IndexPattern
+    IndexPattern,
   };
 });
 
 jest.mock('./index_patterns_api_client', () => {
   class IndexPatternsApiClient {
-    getFieldsForWildcard = async () => ({})
+    getFieldsForWildcard = async () => ({});
   }
 
   return {
-    IndexPatternsApiClient
+    IndexPatternsApiClient,
   };
 });
 
-const savedObjectsClient = {
-  create: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn()
-};
-
-const config = {
-  get: jest.fn(),
-};
-
-
 describe('IndexPatterns', () => {
-  const indexPatterns = new IndexPatterns(config, savedObjectsClient);
+  let indexPatterns: IndexPatterns;
 
-  it('does not cache gets without an id', function () {
+  beforeEach(() => {
+    const savedObjectsClient = {} as SavedObjectsClientContract;
+    const uiSettings = {} as UiSettingsClientContract;
+
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient);
+  });
+
+  test('does not cache gets without an id', () => {
     expect(indexPatterns.get()).not.toBe(indexPatterns.get());
   });
 
-  it('does cache gets for the same id', function () {
-    expect(indexPatterns.get(1)).toBe(indexPatterns.get(1));
+  test('does cache gets for the same id', () => {
+    const id = '1';
+
+    expect(indexPatterns.get(id)).toBe(indexPatterns.get(id));
   });
 });
