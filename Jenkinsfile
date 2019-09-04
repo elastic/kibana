@@ -151,10 +151,9 @@ def jobRunner(label, closure) {
       string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
       string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
       string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
-      string(credentialsId: 'sdjfiosdjfiklsdjdfklsdjfklsdjfklsd', variable: 'NON_EXISTENT_CREDENTIAL'),
     ]) {
       node(label) {
-        sh "echo ${env.NON_EXISTENT_CREDENTIAL}"
+        sh "echo ${env.VAULT_ROLE_ID}"
 
         catchError {
           checkout scm
