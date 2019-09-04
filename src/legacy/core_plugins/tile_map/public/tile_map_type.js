@@ -29,6 +29,7 @@ import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
+import { MapTypes } from './map_types';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -87,25 +88,25 @@ export function createTileMapTypeDefinition(dependencies) {
         }],
         mapTypes: [
           {
-            value: 'Scaled Circle Markers',
+            value: MapTypes.ScaledCircleMarkers,
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.scaledCircleMarkersText', {
               defaultMessage: 'Scaled circle markers',
             }),
           },
           {
-            value: 'Shaded Circle Markers',
+            value: MapTypes.ShadedCircleMarkers,
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedCircleMarkersText', {
               defaultMessage: 'Shaded circle markers',
             }),
           },
           {
-            value: 'Shaded Geohash Grid',
+            value: MapTypes.ShadedGeohashGrid,
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedGeohashGridText', {
               defaultMessage: 'Shaded geohash grid',
             }),
           },
           {
-            value: 'Heatmap',
+            value: MapTypes.Heatmap,
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.heatmapText', {
               defaultMessage: 'Heatmap',
             }),
