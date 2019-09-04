@@ -19,21 +19,57 @@
 
 import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, IFieldFormat, FieldFormatConvertFunction } from './types';
+import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
 
 import { htmlContentTypeSetup, textContentTypeSetup } from './content_types';
 
 const DEFAULT_CONTEXT_TYPE = 'text';
 
-export type FieldFormatConvert = { [key: string]: Function } | FieldFormatConvertFunction;
+export abstract class FieldFormat {
+  /**
+   * @property {string} - Field Format Id
+   * @static
+   * @public
+   */
+  static id: string;
+  /**
+   * @property {string} -  Field Format Title
+   * @static
+   * @public
+   */
+  static title: string;
 
-export abstract class FieldFormat implements IFieldFormat {
+  /**
+   * @property {string} - Field Format Type
+   * @private
+   */
+  static fieldType: string;
+
+  /**
+   * @property {FieldFormatConvert}
+   * @private
+   */
   _convert: FieldFormatConvert = FieldFormat.setupContentType(this, get(this, '_convert', {}));
-  type = this.constructor;
+
+  /**
+   * @property {Function} - ref to child class
+   * @private
+   */
+  type: any = this.constructor;
 
   constructor(public _params: any = {}) {}
 
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE) {
+  /**
+   * Convert a raw value to a formatted string
+   * @param  {any} value
+   * @param  {string} [contentType=text] - optional content type, the only two contentTypes
+   *                                currently supported are "html" and "text", which helps
+   *                                formatters adjust to different contexts
+   * @return {string} - the formatted string, which is assumed to be html, safe for
+   *                    injecting into the DOM or a DOM attribute
+   * @public
+   */
+  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
@@ -43,7 +79,15 @@ export abstract class FieldFormat implements IFieldFormat {
     return value;
   }
 
-  getConverterFor(contentType: ContentType = DEFAULT_CONTEXT_TYPE) {
+  /**
+   * Get a convert function that is bound to a specific contentType
+   * @param  {string} [contentType=text]
+   * @return {function} - a bound converter function
+   * @public
+   */
+  getConverterFor(
+    contentType: ContentType = DEFAULT_CONTEXT_TYPE
+  ): FieldFormatConvertFunction | null {
     if (this._convert) {
       return this._convert[contentType];
     }
@@ -51,11 +95,23 @@ export abstract class FieldFormat implements IFieldFormat {
     return null;
   }
 
-  getParamDefaults() {
+  /**
+   * Get parameter defaults
+   * @return {object} - parameter defaults
+   * @public
+   */
+  getParamDefaults(): Record<string, any> {
     return {};
   }
 
-  param(name: string) {
+  /**
+   * Get the value of a param. This value may be a default value.
+   *
+   * @param  {string} name - the param name to fetch
+   * @return {any}
+   * @public
+   */
+  param(name: string): any {
     const val = get(this._params, name);
 
     if (val || val === false || val === 0) {
@@ -67,10 +123,22 @@ export abstract class FieldFormat implements IFieldFormat {
     return get(this.getParamDefaults(), name);
   }
 
-  params() {
+  /**
+   * Get all of the params in a single object
+   * @return {object}
+   * @public
+   */
+  params(): Record<string, any> {
     return cloneDeep(defaults({}, this._params, this.getParamDefaults()));
   }
 
+  /**
+   * Serialize this format to a simple POJO, with only the params
+   * that are not default
+   *
+   * @return {object}
+   * @public
+   */
   toJSON() {
     const id = get(this.type, 'id');
     const defaultsParams = this.getParamDefaults() || {};
@@ -118,3 +186,6 @@ export abstract class FieldFormat implements IFieldFormat {
     return convert;
   }
 }
+
+export type FieldFormatConvert = { [key: string]: Function } | FieldFormatConvertFunction;
+export type IFieldFormat = PublicMethodsOf<FieldFormat>;

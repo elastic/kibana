@@ -21,10 +21,9 @@ import { has } from 'lodash';
 import { Legacy } from 'kibana';
 import { FieldFormatsService } from './field_formats_service';
 import { FieldFormat } from '../field_format';
-import { IFieldFormat } from '../types';
 
 export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
-  const fieldFormatClasses: IFieldFormat[] = [];
+  const fieldFormatClasses: FieldFormat[] = [];
 
   // for use outside of the request context, for special cases
   server.decorate('server', 'fieldFormatServiceFactory', async function(uiSettings) {

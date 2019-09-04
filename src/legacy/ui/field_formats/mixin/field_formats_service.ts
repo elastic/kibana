@@ -18,7 +18,7 @@
  */
 
 import { indexBy, Dictionary } from 'lodash';
-import { IFieldFormat } from '../types';
+import { FieldFormat } from '../field_format';
 
 interface FieldFormatConfig {
   id: string;
@@ -27,9 +27,9 @@ interface FieldFormatConfig {
 
 export class FieldFormatsService {
   getConfig: any;
-  _fieldFormats: Dictionary<IFieldFormat>;
+  _fieldFormats: Dictionary<FieldFormat>;
 
-  constructor(fieldFormatClasses: IFieldFormat[], getConfig: Function) {
+  constructor(fieldFormatClasses: FieldFormat[], getConfig: Function) {
     this._fieldFormats = indexBy(fieldFormatClasses, 'id');
     this.getConfig = getConfig;
   }
@@ -52,7 +52,7 @@ export class FieldFormatsService {
    * @param  {String} fieldType
    * @return {FieldFormat}
    */
-  getDefaultInstance(fieldType: string): IFieldFormat {
+  getDefaultInstance(fieldType: string): FieldFormat {
     return this.getInstance(this.getDefaultConfig(fieldType));
   }
 
@@ -62,11 +62,9 @@ export class FieldFormatsService {
    * @param  {FieldFormatConfig} field format config
    * @return {FieldFormat}
    */
-  getInstance(conf: FieldFormatConfig): IFieldFormat {
-    const FieldFormat = this._fieldFormats[conf.id];
-
+  getInstance(conf: FieldFormatConfig): FieldFormat {
     // @ts-ignore
-    return new FieldFormat(conf.params, this.getConfig);
+    return new this._fieldFormats[conf.id](conf.params, this.getConfig);
   }
 
   /**
@@ -75,7 +73,7 @@ export class FieldFormatsService {
    * @param  {String} fieldFormatId - the FieldFormat id
    * @return {FieldFormat}
    */
-  getType(fieldFormatId: string): IFieldFormat {
+  getType(fieldFormatId: string): any {
     return this._fieldFormats[fieldFormatId];
   }
 }
