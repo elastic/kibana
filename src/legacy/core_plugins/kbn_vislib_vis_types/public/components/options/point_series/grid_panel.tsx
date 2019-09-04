@@ -54,7 +54,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
     if (hasHistogramAgg) {
       setGrid('categoryLines', false);
     }
-  }, [hasHistogramAgg, setGrid]);
+  }, [hasHistogramAgg]);
 
   return (
     <EuiPanel paddingSize="s">
