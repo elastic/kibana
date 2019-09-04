@@ -50,6 +50,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
           arguments: {
             title: [''],
             accessor: [col.columnId],
+            mode: ['reduced'],
           },
         },
       ],

@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface State {
-  layerId: string;
-  accessor: string;
-}
+import { LensServer } from './plugin';
 
-export interface MetricConfig extends State {
-  title: string;
-  mode: 'reduced' | 'full';
-}
+export * from './plugin';
 
-export type PersistableState = State;
+export const lensServerPlugin = () => new LensServer();

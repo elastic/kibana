@@ -16,7 +16,15 @@ describe('calculate_filter_ratio', () => {
     };
 
     expect(calculateFilterRatio.fn(input, { id: 'bucket' }, {})).toEqual({
-      columns: [{ id: 'bucket', name: 'A' }],
+      columns: [
+        {
+          id: 'bucket',
+          name: 'A',
+          formatHint: {
+            id: 'percent',
+          },
+        },
+      ],
       rows: [{ bucket: 0.5 }],
       type: 'kibana_datatable',
     });
@@ -30,7 +38,15 @@ describe('calculate_filter_ratio', () => {
     };
 
     expect(calculateFilterRatio.fn(input, { id: 'bucket' }, {})).toEqual({
-      columns: [{ id: 'bucket', name: 'A' }],
+      columns: [
+        {
+          id: 'bucket',
+          name: 'A',
+          formatHint: {
+            id: 'percent',
+          },
+        },
+      ],
       rows: [{ bucket: 0 }],
       type: 'kibana_datatable',
     });
@@ -44,7 +60,15 @@ describe('calculate_filter_ratio', () => {
     };
 
     expect(calculateFilterRatio.fn(input, { id: 'bucket' }, {})).toEqual({
-      columns: [{ id: 'bucket', name: 'A' }],
+      columns: [
+        {
+          id: 'bucket',
+          name: 'A',
+          formatHint: {
+            id: 'percent',
+          },
+        },
+      ],
       rows: [{ bucket: 0 }],
       type: 'kibana_datatable',
     });
@@ -65,9 +89,39 @@ describe('calculate_filter_ratio', () => {
     };
 
     expect(calculateFilterRatio.fn(input, { id: 'bucket' }, {})).toEqual({
-      columns: [{ id: 'bucket', name: 'A' }, { id: 'extra', name: 'C' }],
-      rows: [{ bucket: 0.5, extra: 'first' }],
+      columns: [
+        {
+          id: 'bucket',
+          name: 'A',
+          formatHint: {
+            id: 'percent',
+          },
+        },
+        { id: 'extra', name: 'C' },
+      ],
+      rows: [
+        {
+          bucket: 0.5,
+          extra: 'first',
+        },
+      ],
       type: 'kibana_datatable',
+    });
+  });
+
+  it('should attach a percentage format hint to the ratio column', () => {
+    const input: KibanaDatatable = {
+      type: 'kibana_datatable',
+      columns: [{ id: 'bucket', name: 'A' }, { id: 'filter-ratio', name: 'B' }],
+      rows: [{ bucket: 'a', 'filter-ratio': 5 }, { bucket: 'b', 'filter-ratio': 10 }],
+    };
+
+    expect(calculateFilterRatio.fn(input, { id: 'bucket' }, {}).columns[0]).toEqual({
+      id: 'bucket',
+      name: 'A',
+      formatHint: {
+        id: 'percent',
+      },
     });
   });
 });

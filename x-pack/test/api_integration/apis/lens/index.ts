@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface State {
-  layerId: string;
-  accessor: string;
-}
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export interface MetricConfig extends State {
-  title: string;
-  mode: 'reduced' | 'full';
+export default function lensApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
+  describe('Lens', () => {
+    loadTestFile(require.resolve('./index_stats'));
+  });
 }
-
-export type PersistableState = State;

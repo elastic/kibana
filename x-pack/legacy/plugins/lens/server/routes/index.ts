@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface State {
-  layerId: string;
-  accessor: string;
-}
+import { CoreSetup } from 'src/core/server';
+import { initStatsRoute } from './index_stats';
 
-export interface MetricConfig extends State {
-  title: string;
-  mode: 'reduced' | 'full';
+export function setupRoutes(setup: CoreSetup) {
+  initStatsRoute(setup);
 }
-
-export type PersistableState = State;
