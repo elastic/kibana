@@ -26,15 +26,14 @@ export const emptyColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
-    width,
+    truncate,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeader;
-    width?: string;
+    truncate?: boolean;
   }) => (
     <DraggableWrapper
-      key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}`}
       dataProvider={{
         enabled: true,
         id: escapeDataProviderId(
@@ -51,6 +50,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
         kqlQuery: '',
         and: [],
       }}
+      key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}`}
       render={(dataProvider, _, snapshot) =>
         snapshot.isDragging ? (
           <DragEffects>
@@ -60,7 +60,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           <span>{getEmptyValue()}</span>
         )
       }
-      width={width}
+      truncate={truncate}
     />
   ),
 };

@@ -32,9 +32,9 @@ export const FormattedFieldValue = pure<{
   fieldFormat?: string;
   fieldName: string;
   fieldType: string;
+  truncate?: boolean;
   value: string | number | undefined | null;
-  width?: string;
-}>(({ eventId, contextId, fieldFormat, fieldName, fieldType, value, width }) => {
+}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -72,22 +72,45 @@ export const FormattedFieldValue = pure<{
     );
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
-      <EuiToolTip
-        position="left"
-        data-test-subj="message-tool-tip"
-        content={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <span>{fieldName}</span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{value}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <>{value}</>
-      </EuiToolTip>
+      <>
+        {truncate ? (
+          <TruncatableText data-test-subj="truncatable-message">
+            <EuiToolTip
+              position="left"
+              data-test-subj="message-tool-tip"
+              content={
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <span>{fieldName}</span>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <span>{value}</span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <>{value}</>
+            </EuiToolTip>
+          </TruncatableText>
+        ) : (
+          <EuiToolTip
+            position="left"
+            data-test-subj="message-tool-tip"
+            content={
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <span>{fieldName}</span>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>{value}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <>{value}</>
+          </EuiToolTip>
+        )}
+      </>
     );
   } else {
     return getOrEmptyTagFromValue(value);

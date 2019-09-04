@@ -36,12 +36,12 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,
                 eventId: _id,
+                field: header,
+                truncate: true,
                 values: getMappedNonEcsValue({
                   data,
                   fieldName: header.id,
                 }),
-                field: header,
-                width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
               })}
 
               {/* <Resizeable

@@ -147,9 +147,9 @@ export class Header extends React.PureComponent<Props> {
                       <FieldNameContainer>
                         <TruncatableHeaderText
                           data-test-subj={`header-text-${header.id}`}
-                          size="xs"
-                          width={`${header.width -
-                            (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
+                          // size="xs"
+                          // width={`${header.width -
+                          //   (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
                         >
                           {header.id}
                         </TruncatableHeaderText>

@@ -180,9 +180,7 @@ export const getFieldColumns = () => [
     name: i18n.DESCRIPTION,
     render: (description: string) => (
       <EuiToolTip position="top" content={description}>
-        <TruncatableText size="s" width="390px">
-          {description}
-        </TruncatableText>
+        <TruncatableText>{description}</TruncatableText>
       </EuiToolTip>
     ),
     sortable: true,

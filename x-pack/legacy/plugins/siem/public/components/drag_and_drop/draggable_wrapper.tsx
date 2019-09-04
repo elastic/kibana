@@ -131,7 +131,7 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
-  width?: string;
+  truncate?: boolean;
 }
 
 interface DispatchProps {
@@ -150,12 +150,8 @@ type Props = OwnProps & DispatchProps;
  * data provider associated with the item being dropped
  */
 class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
-    isEqual(dataProvider, this.props.dataProvider) &&
-    render !== this.props.render &&
-    width === this.props.width
-      ? false
-      : true;
+  public shouldComponentUpdate = ({ dataProvider, render }: Props) =>
+    isEqual(dataProvider, this.props.dataProvider) && render !== this.props.render;
 
   public componentDidMount() {
     const { dataProvider, registerProvider } = this.props;
@@ -170,7 +166,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
   }
 
   public render() {
-    const { dataProvider, render, width } = this.props;
+    const { dataProvider, render, truncate } = this.props;
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -194,7 +190,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
                         ...provided.draggableProps.style,
                       }}
                     >
-                      {width != null && !snapshot.isDragging ? (
+                      {truncate && !snapshot.isDragging ? (
                         <TruncatableText data-test-subj="draggable-truncatable-content">
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
