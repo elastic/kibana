@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { TimeRange } from 'src/plugins/data/public';
-import { PersistedLog } from '../persisted_log';
+import { PersistedLog } from 'ui/persisted_log';
 
 export class TimeHistory {
   private history: PersistedLog;
@@ -52,5 +52,3 @@ export class TimeHistory {
     return this.history.get();
   }
 }
-
-export const timeHistory = new TimeHistory();
