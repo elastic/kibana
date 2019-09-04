@@ -97,6 +97,10 @@ export function createMockDependencies() {
       indexPatterns: {
         indexPatterns: {},
       },
+      expressions: {
+        registerFunction: jest.fn(),
+        registerRenderer: jest.fn(),
+      },
     },
     dataStart: {
       expressions: {

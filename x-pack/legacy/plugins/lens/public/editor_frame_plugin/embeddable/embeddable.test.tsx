@@ -104,7 +104,7 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
-  it('should pass context in getInitialContext handler', () => {
+  it('should pass context to embeddable', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
@@ -120,7 +120,8 @@ describe('embeddable', () => {
     );
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer.mock.calls[0][0].context).toEqual({
+    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
+      type: 'kibana_context',
       timeRange,
       query,
       filters,
