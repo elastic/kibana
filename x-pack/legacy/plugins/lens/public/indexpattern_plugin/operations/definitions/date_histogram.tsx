@@ -190,6 +190,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       );
     }
 
+    const autoIntervalSelected = currentColumn.params.interval === autoInterval;
+
     return (
       <EuiForm>
         {fieldAllowsAutoInterval && (
@@ -198,54 +200,57 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize level of detail',
               })}
-              checked={currentColumn.params.interval !== autoInterval}
+              checked={!autoIntervalSelected}
               onChange={onChangeAutoInterval}
             />
           </EuiFormRow>
         )}
-        {currentColumn.params.interval !== autoInterval && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Level of detail',
-            })}
-          >
-            {intervalIsRestricted ? (
-              <FormattedMessage
-                id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
-                defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
-                values={{
-                  intervalValue: currentColumn.params.interval,
-                }}
-              />
-            ) : (
-              <FixedEuiRange
-                min={0}
-                max={supportedIntervals.length - 1}
-                step={1}
-                value={intervalToNumeric(currentColumn.params.interval)}
-                showTicks
-                ticks={supportedIntervals.map((interval, index) => ({
-                  label: interval,
-                  value: index,
-                }))}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setState(
-                    updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
-                      paramName: 'interval',
-                      value: numericToInterval(Number(e.target.value)),
-                    })
-                  )
-                }
-                aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-                  defaultMessage: 'Level of detail',
-                })}
-              />
-            )}
-          </EuiFormRow>
-        )}
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+            defaultMessage: 'Level of detail',
+          })}
+        >
+          {intervalIsRestricted ? (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
+              defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
+              values={{
+                intervalValue: currentColumn.params.interval,
+              }}
+            />
+          ) : (
+            <FixedEuiRange
+              min={0}
+              max={supportedIntervals.length - 1}
+              step={1}
+              disabled={autoIntervalSelected}
+              value={
+                autoIntervalSelected
+                  ? supportedIntervals[0]
+                  : intervalToNumeric(currentColumn.params.interval)
+              }
+              showTicks
+              ticks={supportedIntervals.map((interval, index) => ({
+                label: interval,
+                value: index,
+              }))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn,
+                    paramName: 'interval',
+                    value: numericToInterval(Number(e.target.value)),
+                  })
+                )
+              }
+              aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+                defaultMessage: 'Level of detail',
+              })}
+            />
+          )}
+        </EuiFormRow>
       </EuiForm>
     );
   },

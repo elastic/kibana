@@ -346,7 +346,7 @@ describe('date_histogram', () => {
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
     });
 
-    it('should render disabled switch and no level of detail control for auto interval', () => {
+    it('should render disabled switch and disabled level of detail control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
           state={state}
@@ -358,7 +358,7 @@ describe('date_histogram', () => {
           uiSettings={{} as UiSettingsClientContract}
         />
       );
-      expect(instance.find(EuiRange).exists()).toBe(false);
+      expect(instance.find(EuiRange).prop('disabled')).toBe(true);
       expect(instance.find(EuiSwitch).prop('checked')).toBe(false);
     });
 
