@@ -65,3 +65,5 @@ export {
   mockFields,
   mockIndexPattern,
 } from './index_patterns';
+
+export { Timefilter, TimeHistory, getTime } from './timefilter';
