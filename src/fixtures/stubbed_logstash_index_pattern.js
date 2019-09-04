@@ -42,6 +42,7 @@ export default function stubbedLogstashIndexPatternService(Private) {
 
   const indexPattern = new StubIndexPattern('logstash-*', cfg => cfg, 'time', fields);
   indexPattern.id = 'logstash-*';
+  indexPattern.isTimeNanosBased = () => false;
 
   return indexPattern;
 
