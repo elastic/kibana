@@ -13,7 +13,10 @@ import {
 
 describe('isWhitelistedUri', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: WhitelistedHosts.Any };
+    const config: ActionsKibanaConfig = {
+      enabled: false,
+      whitelistedHosts: [WhitelistedHosts.Any],
+    };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
     ).toEqual('https://github.com/elastic/kibana');
@@ -43,7 +46,10 @@ describe('isWhitelistedUri', () => {
 
 describe('isWhitelistedHostname', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: WhitelistedHosts.Any };
+    const config: ActionsKibanaConfig = {
+      enabled: false,
+      whitelistedHosts: [WhitelistedHosts.Any],
+    };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
       'github.com'
     );

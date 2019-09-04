@@ -31,8 +31,7 @@ export function actions(kibana: any) {
             .try(
               Joi.array()
                 .items(Joi.string().hostname())
-                .sparse(false),
-              Joi.string().valid('*')
+                .sparse(false)
             )
             .default([]),
         })

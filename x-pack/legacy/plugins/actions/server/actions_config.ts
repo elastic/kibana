@@ -14,7 +14,7 @@ export enum WhitelistedHosts {
 
 export interface ActionsKibanaConfig {
   enabled: boolean;
-  whitelistedHosts: WhitelistedHosts.Any | string[];
+  whitelistedHosts: string[];
 }
 
 export class NotWhitelistedError extends Error {
@@ -30,22 +30,23 @@ export interface ActionsConfigurationUtilities {
 }
 
 const whitelistingErrorMessage = 'target url not in whitelist';
+const doesValueWhitelistAnyHostname = (whitelistedHostname: string): boolean =>
+  whitelistedHostname === WhitelistedHosts.Any;
+
 function isWhitelisted(
   config: ActionsKibanaConfig,
   hostname: string
 ): string | NotWhitelistedError {
-  switch (config.whitelistedHosts) {
-    case WhitelistedHosts.Any:
-      return hostname;
-    default:
-      if (
-        Array.isArray(config.whitelistedHosts) &&
-        config.whitelistedHosts.find(whitelistedHostname => whitelistedHostname === hostname)
-      ) {
-        return hostname;
-      }
-      return new NotWhitelistedError(whitelistingErrorMessage);
+  if (
+    Array.isArray(config.whitelistedHosts) &&
+    config.whitelistedHosts.find(
+      whitelistedHostname =>
+        doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+    )
+  ) {
+    return hostname;
   }
+  return new NotWhitelistedError(whitelistingErrorMessage);
 }
 export function getActionsConfigurationUtilities(
   config: ActionsKibanaConfig
