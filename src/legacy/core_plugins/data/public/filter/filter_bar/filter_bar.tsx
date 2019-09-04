@@ -56,10 +56,10 @@ class FilterBarUI extends Component<Props, State> {
   };
 
   public render() {
-    const classes = classNames('globalFilterBar', this.props.className);
     if (!this.props.uiSettings) {
       return null;
     }
+    const classes = classNames('globalFilterBar', this.props.className);
 
     return (
       <EuiFlexGroup
