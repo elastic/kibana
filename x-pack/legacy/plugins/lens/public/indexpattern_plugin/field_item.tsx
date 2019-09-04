@@ -94,6 +94,7 @@ export function FieldItem({
   dateRange,
 }: FieldItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
+  const [showingHistogram, setShowingHistogram] = useState(true);
 
   const [state, setState] = useState<State>({
     isLoading: false,
@@ -202,6 +203,7 @@ export function FieldItem({
     >
       <EuiPopover
         id="lnsFieldListPanel__field"
+        display="block"
         button={
           <EuiKeyboardAccessible>
             <div
