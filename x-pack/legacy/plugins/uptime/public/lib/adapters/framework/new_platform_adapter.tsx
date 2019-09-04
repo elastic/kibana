@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreStart, ChromeBreadcrumb } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CreateGraphQLClient } from './framework_adapter_types';
@@ -16,7 +16,7 @@ import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
 import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
 
-export const getKibanaFrameworkAdapter = (core: InternalCoreStart): UMFrameworkAdapter => {
+export const getKibanaFrameworkAdapter = (core: CoreStart): UMFrameworkAdapter => {
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
@@ -25,8 +25,8 @@ export const getKibanaFrameworkAdapter = (core: InternalCoreStart): UMFrameworkA
     i18n,
   } = core;
   let breadcrumbs: ChromeBreadcrumb[] = [];
-  core.chrome.getBreadcrumbs$().subscribe(nextBreadcrumbs => {
-    breadcrumbs = nextBreadcrumbs;
+  core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
+    breadcrumbs = nextBreadcrumbs || [];
   });
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
