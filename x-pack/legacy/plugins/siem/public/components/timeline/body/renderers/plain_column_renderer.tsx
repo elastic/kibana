@@ -84,7 +84,6 @@ export const plainColumnRenderer: ColumnRenderer = {
             if (width != null) {
               return (
                 <TruncatableText
-                  size="s"
                   width={width}
                   key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
                 >

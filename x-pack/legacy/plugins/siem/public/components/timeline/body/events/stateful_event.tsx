@@ -4,26 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import uuid from 'uuid';
-
 import VisibilitySensor from 'react-visibility-sensor';
 import styled from 'styled-components';
+import uuid from 'uuid';
+
+import { StatefulEventChild } from './stateful_event_child';
+
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { getRowRenderer } from '../renderers/get_row_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import { ExpandableEvent } from '../../expandable_event';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem } from '../../../../graphql/types';
-import { Note } from '../../../../lib/note';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
-import { ExpandableEvent } from '../../expandable_event';
-import { ColumnHeader } from '../column_headers/column_header';
-
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
-import { getRowRenderer } from '../renderers/get_row_renderer';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
-import { StatefulEventChild } from './stateful_event_child';
+import { Note } from '../../../../lib/note';
 
 interface Props {
   actionsColumnWidth: number;
@@ -223,7 +222,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                         />
                       ),
                     })}
-                    <EuiFlexItem data-test-subj="event-details" grow={true}>
+                    <div data-test-subj="event-details">
                       <ExpandableEvent
                         browserFields={browserFields}
                         columnHeaders={columnHeaders}
@@ -234,7 +233,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
                       />
-                    </EuiFlexItem>
+                    </div>
                   </div>
                 )}
               </TimelineDetailsComponentQuery>

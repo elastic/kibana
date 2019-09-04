@@ -5,16 +5,17 @@
  */
 
 import * as React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import uuid from 'uuid';
+
 import { EventColumnView } from './event_column_view';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
+
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
+import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { NoteCards } from '../../../notes/note_cards';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
-import { NoteCards } from '../../../notes/note_cards';
 
 interface Props {
   id: string;
@@ -70,8 +71,8 @@ export const StatefulEventChild = React.memo<Props>(
     onToggleShowNotes,
     updateNote,
   }) => (
-    <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
-      <EuiFlexItem data-test-subj="event-column-data" grow={false}>
+    <div data-test-subj="event-rows">
+      <div data-test-subj="event-column-data">
         <EventColumnView
           id={id}
           actionsColumnWidth={actionsColumnWidth}
@@ -93,9 +94,9 @@ export const StatefulEventChild = React.memo<Props>(
           toggleShowNotes={onToggleShowNotes(id)}
           updateNote={updateNote}
         />
-      </EuiFlexItem>
+      </div>
 
-      <EuiFlexItem data-test-subj="event-notes-flex-item" grow={false}>
+      <div data-test-subj="event-notes-flex-item">
         <NoteCards
           associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
           data-test-subj="note-cards"
@@ -106,8 +107,8 @@ export const StatefulEventChild = React.memo<Props>(
           toggleShowAddNote={onToggleShowNotes(id)}
           updateNote={updateNote}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </div>
   )
 );
 

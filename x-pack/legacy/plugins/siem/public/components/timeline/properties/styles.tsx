@@ -47,13 +47,6 @@ export const DescriptionContainer = styled.div`
 
 DescriptionContainer.displayName = 'DescriptionContainer';
 
-export const SmallNotesButtonContainer = styled.div`
-  cursor: pointer;
-  width: 35px;
-`;
-
-SmallNotesButtonContainer.displayName = 'SmallNotesButtonContainer';
-
 export const ButtonContainer = styled.div<{ animate: boolean }>`
   animation: ${fadeInEffect} ${({ animate }) => (animate ? '0.3s' : '0s')};
 `;

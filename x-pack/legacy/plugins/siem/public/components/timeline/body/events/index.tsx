@@ -4,31 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
-
-import { BrowserFields } from '../../../../containers/source';
-import { TimelineItem } from '../../../../graphql/types';
-import { Note } from '../../../../lib/note';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
-import { ColumnHeader } from '../column_headers/column_header';
 
 import { StatefulEvent } from './stateful_event';
+
+import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import { EventsContainer } from '../../styles';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { BrowserFields } from '../../../../containers/source';
+import { TimelineItem } from '../../../../graphql/types';
 import { maxDelay } from '../../../../lib/helpers/scheduler';
-
-const EventsContainer = styled.div<{
-  minWidth: number;
-}>`
-  display: block;
-  overflow: hidden;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-`;
-
-EventsContainer.displayName = 'EventsContainer';
+import { Note } from '../../../../lib/note';
 
 interface Props {
   actionsColumnWidth: number;
@@ -75,9 +64,9 @@ export const Events = React.memo<Props>(
     updateNote,
   }) => (
     <EventsContainer data-test-subj="events" minWidth={minWidth}>
-      <EuiFlexGroup data-test-subj="events-flex-group" direction="column" gutterSize="none">
+      <div data-test-subj="events-flex-group">
         {data.map((event, i) => (
-          <EuiFlexItem data-test-subj="event-flex-item" key={event._id}>
+          <div data-test-subj="event-flex-item" key={event._id}>
             <StatefulEvent
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
@@ -99,9 +88,9 @@ export const Events = React.memo<Props>(
               updateNote={updateNote}
               maxDelay={maxDelay(i)}
             />
-          </EuiFlexItem>
+          </div>
         ))}
-      </EuiFlexGroup>
+      </div>
     </EventsContainer>
   )
 );

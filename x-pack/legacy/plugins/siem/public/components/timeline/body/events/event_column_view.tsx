@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
 
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { Note } from '../../../../lib/note';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
+import { TimelineRow, TimelineRowGroup } from '../../styles';
+import { AssociateNote, UpdateNote } from '../../../notes/helpers';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { Note } from '../../../../lib/note';
 
 interface Props {
   id: string;
@@ -66,8 +66,8 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => (
-    <EuiFlexGroup data-test-subj="event-column-view" gutterSize="none">
-      <EuiFlexItem data-test-subj="actions-column-item" grow={false}>
+    <TimelineRow data-test-subj="event-column-view">
+      <TimelineRowGroup data-test-subj="actions-column-item">
         <Actions
           actionsColumnWidth={actionsColumnWidth}
           associateNote={associateNote}
@@ -96,9 +96,9 @@ export const EventColumnView = React.memo<Props>(
           toggleShowNotes={toggleShowNotes}
           updateNote={updateNote}
         />
-      </EuiFlexItem>
+      </TimelineRowGroup>
 
-      <EuiFlexItem data-test-subj="event-columns-item" grow={false}>
+      <TimelineRowGroup data-test-subj="event-columns-item">
         <DataDrivenColumns
           _id={id}
           columnHeaders={columnHeaders}
@@ -106,8 +106,8 @@ export const EventColumnView = React.memo<Props>(
           data={data}
           onColumnResized={onColumnResized}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </TimelineRowGroup>
+    </TimelineRow>
   ),
   (prevProps, nextProps) => {
     return (

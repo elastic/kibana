@@ -3,24 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import styled from 'styled-components';
 
-import { Note } from '../../../../lib/note';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { Pin } from '../../../pin';
-import { NotesButton } from '../../properties/helpers';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
+import { NotesButton } from '../../properties/helpers';
+import { TimelineCell, TimelineCellContent, TimelineRowGroupActions } from '../../styles';
+import { AssociateNote, UpdateNote } from '../../../notes/helpers';
+import { Pin } from '../../../pin';
+import { Note } from '../../../../lib/note';
 
 interface Props {
   actionsColumnWidth: number;
@@ -40,51 +33,6 @@ interface Props {
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
-
-const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  overflow: hidden;
-  padding-top: 4px;
-  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
-`;
-
-ActionsContainer.displayName = 'ActionsContainer';
-
-const ExpandEventContainer = styled.div`
-  height: 25px;
-  width: 25px;
-`;
-
-ExpandEventContainer.displayName = 'ExpandEventContainer';
-
-const ActionLoading = styled(EuiLoadingSpinner)`
-  margin-top: 3px;
-  margin-left: 6px;
-`;
-
-ActionLoading.displayName = 'ActionLoading';
-
-const PinContainer = styled.div`
-  position: relative;
-  top: -1px;
-  width: 27px;
-`;
-
-PinContainer.displayName = 'PinContainer';
-
-const SelectEventContainer = styled(EuiFlexItem)`
-  padding: 4px 0 0 7px;
-`;
-
-SelectEventContainer.displayName = 'SelectEventContainer';
-
-const NotesButtonContainer = styled(EuiFlexItem)`
-  margin-left: 5px;
-  position: relative;
-  top: -3px;
-`;
-
-NotesButtonContainer.displayName = 'NotesButtonContainer';
 
 const emptyNotes: string[] = [];
 
@@ -107,47 +55,43 @@ export const Actions = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => (
-    <ActionsContainer
+    <TimelineRowGroupActions
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
-      <EuiFlexGroup
-        alignItems="flexStart"
-        data-test-subj="event-actions"
-        direction="row"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-      >
-        {showCheckboxes && (
-          <SelectEventContainer data-test-subj="select-event-container" grow={false}>
+      {showCheckboxes && (
+        <TimelineCell data-test-subj="select-event-container">
+          <TimelineCellContent textAlign="center">
             <EuiCheckbox
               data-test-subj="select-event"
               id={eventId}
               checked={checked}
               onChange={noop}
             />
-          </SelectEventContainer>
-        )}
+          </TimelineCellContent>
+        </TimelineCell>
+      )}
 
-        <EuiFlexItem grow={false}>
-          <ExpandEventContainer>
-            {loading && <ActionLoading size="m" />}
-            {!loading && (
-              <EuiButtonIcon
-                aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-                color="subdued"
-                iconType={expanded ? 'arrowDown' : 'arrowRight'}
-                data-test-subj="expand-event"
-                id={eventId}
-                onClick={onEventToggled}
-              />
-            )}
-          </ExpandEventContainer>
-        </EuiFlexItem>
+      <TimelineCell>
+        <TimelineCellContent textAlign="center">
+          {loading && <EuiLoadingSpinner size="m" />}
 
-        {!isEventViewer && (
-          <>
-            <EuiFlexItem grow={false}>
+          {!loading && (
+            <EuiButtonIcon
+              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              data-test-subj="expand-event"
+              iconType={expanded ? 'arrowDown' : 'arrowRight'}
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          )}
+        </TimelineCellContent>
+      </TimelineCell>
+
+      {!isEventViewer && (
+        <>
+          <TimelineCell>
+            <TimelineCellContent textAlign="center">
               <EuiToolTip
                 data-test-subj="timeline-action-pin-tool-tip"
                 content={getPinTooltip({
@@ -155,18 +99,18 @@ export const Actions = React.memo<Props>(
                   eventHasNotes: eventHasNotes(noteIds),
                 })}
               >
-                <PinContainer>
-                  <Pin
-                    allowUnpinning={!eventHasNotes(noteIds)}
-                    pinned={eventIsPinned}
-                    data-test-subj="pin-event"
-                    onClick={onPinClicked}
-                  />
-                </PinContainer>
+                <Pin
+                  allowUnpinning={!eventHasNotes(noteIds)}
+                  data-test-subj="pin-event"
+                  onClick={onPinClicked}
+                  pinned={eventIsPinned}
+                />
               </EuiToolTip>
-            </EuiFlexItem>
+            </TimelineCellContent>
+          </TimelineCell>
 
-            <NotesButtonContainer grow={false}>
+          <TimelineCell>
+            <TimelineCellContent textAlign="center">
               <NotesButton
                 animate={false}
                 associateNote={associateNote}
@@ -179,11 +123,11 @@ export const Actions = React.memo<Props>(
                 toolTip={i18n.NOTES_TOOLTIP}
                 updateNote={updateNote}
               />
-            </NotesButtonContainer>
-          </>
-        )}
-      </EuiFlexGroup>
-    </ActionsContainer>
+            </TimelineCellContent>
+          </TimelineCell>
+        </>
+      )}
+    </TimelineRowGroupActions>
   ),
   (nextProps, prevProps) => {
     return (

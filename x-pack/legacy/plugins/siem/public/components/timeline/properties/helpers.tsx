@@ -156,25 +156,6 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
-const NotesButtonIcon = styled(EuiButtonIcon)`
-  svg {
-    height: 24px;
-    width: 24px;
-  }
-`;
-
-const NotesIcon = pure<{ count: number }>(({ count }) => (
-  <NotesButtonIcon
-    aria-label={i18n.NOTES}
-    color={count > 0 ? 'primary' : 'subdued'}
-    data-test-subj="timeline-notes-icon"
-    size="l"
-    iconType="editorComment"
-  />
-));
-
-NotesIcon.displayName = 'NotesIcon';
-
 const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
   ({ noteIds, text, toggleShowNotes }) => (
     <EuiButton
@@ -203,13 +184,12 @@ LargeNotesButton.displayName = 'LargeNotesButton';
 
 const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
   ({ noteIds, toggleShowNotes }) => (
-    <SmallNotesButtonContainer
+    <EuiButtonIcon
+      aria-label={i18n.NOTES}
       data-test-subj="timeline-notes-button-small"
+      iconType="editorComment"
       onClick={() => toggleShowNotes()}
-      role="button"
-    >
-      <NotesIcon count={noteIds.length} />
-    </SmallNotesButtonContainer>
+    />
   )
 );
 

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
-import { BrowserFields } from '../../../containers/source';
-import { TimelineItem } from '../../../graphql/types';
-import { Note } from '../../../lib/note';
-import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
+import { ColumnHeaders } from './column_headers';
+import { ColumnHeader } from './column_headers/column_header';
+import { Events } from './events';
+import { getActionsColumnWidth } from './helpers';
+import { ColumnRenderer } from './renderers/column_renderer';
+import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
+
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -21,15 +23,11 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { footerHeight } from '../footer';
-
-import { ColumnHeaders } from './column_headers';
-import { ColumnHeader } from './column_headers/column_header';
-import { Events } from './events';
-import { getActionsColumnWidth } from './helpers';
-import { Sort } from './sort';
-import { ColumnRenderer } from './renderers/column_renderer';
-import { RowRenderer } from './renderers/row_renderer';
+import { HorizontalScroll, VerticalScrollContainer } from '../styles';
+import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
+import { BrowserFields } from '../../../containers/source';
+import { TimelineItem } from '../../../graphql/types';
+import { Note } from '../../../lib/note';
 
 interface Props {
   addNoteToEvent: AddNoteToEvent;
@@ -56,31 +54,6 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
 }
-
-const HorizontalScroll = styled.div<{
-  height: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height}px`};
-  overflow: hidden;
-  overflow-x: auto;
-  min-height: 0px;
-`;
-
-HorizontalScroll.displayName = 'HorizontalScroll';
-
-const VerticalScrollContainer = styled.div<{
-  height: number;
-  minWidth: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height - footerHeight - 12}px`};
-  overflow: hidden;
-  overflow-y: auto;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-`;
-
-VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
 export const Body = React.memo<Props>(
@@ -115,52 +88,50 @@ export const Body = React.memo<Props>(
 
     return (
       <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
-        <EuiText size="s">
-          <ColumnHeaders
+        <ColumnHeaders
+          actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          isEventViewer={isEventViewer}
+          onColumnRemoved={onColumnRemoved}
+          onColumnResized={onColumnResized}
+          onColumnSorted={onColumnSorted}
+          onFilterChange={onFilterChange}
+          onUpdateColumns={onUpdateColumns}
+          showEventsSelect={false}
+          sort={sort}
+          timelineId={id}
+          toggleColumn={toggleColumn}
+          minWidth={columnWidths}
+        />
+
+        <VerticalScrollContainer
+          data-test-subj="vertical-scroll-container"
+          height={height}
+          minWidth={columnWidths}
+        >
+          <Events
             actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+            addNoteToEvent={addNoteToEvent}
             browserFields={browserFields}
             columnHeaders={columnHeaders}
+            columnRenderers={columnRenderers}
+            data={data}
+            eventIdToNoteIds={eventIdToNoteIds}
+            getNotesByIds={getNotesByIds}
+            id={id}
             isEventViewer={isEventViewer}
-            onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
-            onColumnSorted={onColumnSorted}
-            onFilterChange={onFilterChange}
+            onPinEvent={onPinEvent}
             onUpdateColumns={onUpdateColumns}
-            showEventsSelect={false}
-            sort={sort}
-            timelineId={id}
+            onUnPinEvent={onUnPinEvent}
+            pinnedEventIds={pinnedEventIds}
+            rowRenderers={rowRenderers}
             toggleColumn={toggleColumn}
+            updateNote={updateNote}
             minWidth={columnWidths}
           />
-
-          <VerticalScrollContainer
-            data-test-subj="vertical-scroll-container"
-            height={height}
-            minWidth={columnWidths}
-          >
-            <Events
-              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={data}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              id={id}
-              isEventViewer={isEventViewer}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              rowRenderers={rowRenderers}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-              minWidth={columnWidths}
-            />
-          </VerticalScrollContainer>
-        </EuiText>
+        </VerticalScrollContainer>
       </HorizontalScroll>
     );
   }

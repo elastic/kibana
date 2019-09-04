@@ -28,17 +28,14 @@ export const DragEffects = styled.div``;
 DragEffects.displayName = 'DragEffects';
 
 const Wrapper = styled.div`
-  .euiPageBody & {
-    display: inline-block;
-  }
+  display: inline-block;
+  max-width: 100%;
 `;
 
 Wrapper.displayName = 'Wrapper';
 
 const ProviderContainer = styled.div<{ isDragging: boolean }>`
   ${({ theme, isDragging }) => css`
-    // ALL DRAGGABLES
-
     &,
     &::before,
     &::after {
@@ -46,11 +43,9 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
 
-    // PAGE DRAGGABLES
-
     ${!isDragging &&
       `
-      .euiPageBody & {
+      & {
         border-radius: 2px;
         padding: 0 4px 0 8px;
         position: relative;
@@ -77,7 +72,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody tr:hover & {
+      tr:hover & {
         background-color: ${theme.eui.euiColorLightShade};
 
         &::before {
@@ -92,14 +87,15 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
-      .euiPageBody &:hover,
-      .euiPageBody &:focus,
-      .euiPageBody tr:hover &:hover,
-      .euiPageBody tr:hover &:focus {
+      &:hover,
+      &:focus,
+      tr:hover &:hover,
+      tr:hover &:focus {
         background-color: ${theme.eui.euiColorPrimary};
 
         &,
-        & a {
+        & a,
+        & a:hover {
           color: ${theme.eui.euiColorEmptyShade};
         }
 
@@ -118,15 +114,10 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
 
     ${isDragging &&
       `
-      .euiPageBody & {
+      & {
         z-index: ${theme.eui.euiZLevel9} !important;
-      `}
-
-    // TIMELINE DRAGGABLES
-
-    .timeline-flyout &:hover {
-      background-color: ${theme.eui.euiColorLightShade};
-    }
+      }
+    `}
   `}
 `;
 
@@ -204,11 +195,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
                       }}
                     >
                       {width != null && !snapshot.isDragging ? (
-                        <TruncatableText
-                          data-test-subj="draggable-truncatable-content"
-                          size="s"
-                          width={width}
-                        >
+                        <TruncatableText data-test-subj="draggable-truncatable-content">
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
                       ) : (

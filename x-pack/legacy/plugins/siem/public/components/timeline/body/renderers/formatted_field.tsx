@@ -86,13 +86,7 @@ export const FormattedFieldValue = pure<{
           </EuiFlexGroup>
         }
       >
-        <TruncatableText
-          data-test-subj="truncatable-message"
-          size="s"
-          width={width != null ? width : `${DEFAULT_COLUMN_MIN_WIDTH}px`}
-        >
-          {value}
-        </TruncatableText>
+        <>{value}</>
       </EuiToolTip>
     );
   } else {

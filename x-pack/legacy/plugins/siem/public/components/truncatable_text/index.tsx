@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
@@ -14,11 +13,16 @@ import styled from 'styled-components';
  * Width is required, because CSS will not truncate the text unless a width is
  * specified.
  */
-export const TruncatableText = styled(EuiText)<{ width: string }>`
+
+export const TruncatableText = styled.span<{ width?: string }>`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: ${({ width }) => width};
+  // width: ${({ width }) => width};
+
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
 `;
 
 TruncatableText.displayName = 'TruncatableText';
