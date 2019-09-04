@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import {
   SortDirection,
   SORT_DIRECTION,
-  ColumnType,
+  FieldDataColumnType,
 } from '../../../../../../common/types/eui/in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
@@ -72,7 +72,7 @@ function getDataFromTransform(
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-  const [columns, setColumns] = useState<ColumnType[] | []>([]);
+  const [columns, setColumns] = useState<FieldDataColumnType[] | []>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>('');
@@ -100,8 +100,8 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
           const columnKeys = getFlattenedFields(resp.preview[0]);
           columnKeys.sort(sortColumns(groupByArr));
 
-          const tableColumns: ColumnType[] = columnKeys.map(k => {
-            const column: ColumnType = {
+          const tableColumns: FieldDataColumnType[] = columnKeys.map(k => {
+            const column: FieldDataColumnType = {
               field: k,
               name: k,
               sortable: true,
