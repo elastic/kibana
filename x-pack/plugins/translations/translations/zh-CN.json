@@ -3850,7 +3850,6 @@
     "xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel": "在 Discover 中查看跨度",
     "xpack.apm.transactionDetails.timestampLabel": "时间戳",
     "xpack.apm.transactionDetails.transactionLabel": "事务",
-    "xpack.apm.transactionDetails.transactionSampleTitle": "事务样例",
     "xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip": "此存储桶没有可用样例",
     "xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel": "{transCount, plural, =0 {# 个请求} one {# 个请求} other {# 个请求}}",
     "xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel": "{transCount, plural, =0 {# 个事务} one {# 个事务} other {# 个事务}}",

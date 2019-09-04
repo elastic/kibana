@@ -20,7 +20,6 @@
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './_bucket_agg_type';
-import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
@@ -126,16 +125,10 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'orderAgg',
-      type: AggConfig,
+      type: 'agg',
       default: null,
       editorComponent: OrderAggParamEditor,
-      serialize: function (orderAgg) {
-        return orderAgg.toJSON();
-      },
-      deserialize: function (state, agg) {
-        return this.makeOrderAgg(agg, state);
-      },
-      makeOrderAgg: function (termsAgg, state) {
+      makeAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
         const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
@@ -171,7 +164,7 @@ export const termsBucketAgg = new BucketAggType({
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = aggs.byId[orderAgg.parentId];
+          orderAgg = aggs.byId(orderAgg.parentId);
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);
