@@ -17,29 +17,16 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import 'ui/render_complete';
+import { uiModules } from '../modules';
+import { RenderCompleteHelper } from '../../../../plugins/kibana_utils/public';
 
-import { DiscoverNoResults } from './no_results';
+uiModules
+  .get('kibana')
+  .directive('renderComplete', () => ({
+    controller($scope, $element) {
+      const el = $element[0];
+      const renderCompleteHelper = new RenderCompleteHelper(el);
 
-import { DiscoverUninitialized } from './uninitialized';
-
-import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
-
-import './timechart';
-
-const app = uiModules.get('apps/discover', ['react']);
-
-app.directive('discoverNoResults', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverNoResults))
-);
-
-app.directive('discoverUninitialized', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUninitialized))
-);
-
-app.directive('discoverUnsupportedIndexPattern', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
-);
+      $scope.$on('$destroy', renderCompleteHelper.destroy);
+    }
+  }));

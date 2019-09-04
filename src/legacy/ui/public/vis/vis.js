@@ -39,6 +39,7 @@ import { SavedObjectsClientProvider } from '../saved_objects';
 
 import { timefilter } from '../timefilter';
 import '../directives/bind';
+import 'ui/render_complete';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);

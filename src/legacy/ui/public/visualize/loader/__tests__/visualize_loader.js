@@ -32,7 +32,7 @@ import { VisProvider } from '../../../vis';
 import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
-import { dispatchRenderComplete } from '../../../render_complete';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { PipelineDataLoader } from '../pipeline_data_loader';
 import { VisualizeDataLoader } from '../visualize_data_loader';
 import { PersistedState } from '../../../persisted_state';

@@ -49,6 +49,7 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { getSort } from '../doc_table/lib/get_sort';
 import { SortOrder } from '../doc_table/components/table_header/helpers';
+import 'ui/render_complete';
 
 const config = chrome.getUiSettingsClient();
 

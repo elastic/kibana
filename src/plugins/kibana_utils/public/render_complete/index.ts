@@ -17,29 +17,19 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import 'ui/render_complete';
+export * from './render_complete_helper';
 
-import { DiscoverNoResults } from './no_results';
+const dispatchCustomEvent = (el: HTMLElement, eventName: string) => {
+  // we're using the native events so that we aren't tied to the jQuery custom events,
+  // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
+  // of the native events per https://github.com/jquery/jquery/issues/2476
+  el.dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
+};
 
-import { DiscoverUninitialized } from './uninitialized';
+export function dispatchRenderComplete(el: HTMLElement) {
+  dispatchCustomEvent(el, 'renderComplete');
+}
 
-import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
-
-import './timechart';
-
-const app = uiModules.get('apps/discover', ['react']);
-
-app.directive('discoverNoResults', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverNoResults))
-);
-
-app.directive('discoverUninitialized', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUninitialized))
-);
-
-app.directive('discoverUnsupportedIndexPattern', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
-);
+export function dispatchRenderStart(el: HTMLElement) {
+  dispatchCustomEvent(el, 'renderStart');
+}
