@@ -2,6 +2,7 @@
     "id": "visualizations",
     "version": "kibana",
     "requiredPlugins": [
+      "data"
     ],
     "server": false,
     "ui": true
