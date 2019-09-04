@@ -96,3 +96,5 @@ function checks-reporter-with-killswitch() {
 }
 
 export -f checks-reporter-with-killswitch
+
+source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"

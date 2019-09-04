@@ -2,7 +2,7 @@
 
 // properties([durabilityHint('PERFORMANCE_OPTIMIZED')]) // TODO put this in JJB?
 
-library 'kibana-pipeline-library'
+// library 'kibana-pipeline-library'
 
 timeout(time: 180, unit: 'MINUTES') {
   timestamps {
@@ -153,18 +153,14 @@ def jobRunner(label, closure) {
       string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
     ]) {
       node(label) {
-        withVaultSecret(secret: 'secret/kibana-issues/dev/kibanamachine', secret_field: 'github_token', variable_name: 'GITHUB_TOKEN') {
-          withVaultSecret(secret: 'secret/kibana-issues/dev/kibanamachine-reporter', secret_field: 'value', variable_name: 'KIBANA_CI_REPORTER_KEY') {
-            withVaultSecret(secret: 'secret/kibana-issues/dev/percy', secret_field: 'value', variable_name: 'PERCY_TOKEN') {
-              catchError {
-                checkout scm
+        sh "echo ${env.VAULT_ROLE_ID}"
 
-                // scm is configured to check out to the ./kibana directory
-                dir('kibana') {
-                  closure()
-                }
-              }
-            }
+        catchError {
+          checkout scm
+
+          // scm is configured to check out to the ./kibana directory
+          dir('kibana') {
+            closure()
           }
         }
 
