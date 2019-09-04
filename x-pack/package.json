@@ -121,7 +121,7 @@
     "commander": "3.0.0",
     "copy-webpack-plugin": "^5.0.4",
     "cypress": "^3.4.1",
-    "del": "^4.0.0",
+    "del": "^4.1.1",
     "dotenv": "2.0.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
