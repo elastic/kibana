@@ -73,14 +73,12 @@ export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfuncti
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 
 
-export CHECKS_REPORTER_ACTIVE=true
+export CHECKS_REPORTER_ACTIVE=false
 
-### only run on pr jobs
-if [[ -z "$ghprbPullId" ]] ; then
-  export CHECKS_REPORTER_ACTIVE=false
+### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
+if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then
+  export CHECKS_REPORTER_ACTIVE=true
 fi
-
-# export CHECKS_REPORTER_ACTIVE=false # TODO
 
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
