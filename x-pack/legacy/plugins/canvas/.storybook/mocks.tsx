@@ -4,21 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-import moment from 'moment';
-import 'moment-timezone';
-
-import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
-import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
-import { addSerializer } from 'jest-specific-snapshot';
-
-// Set our default timezone to UTC for tests so we can generate predictable snapshots
-moment.tz.setDefault('UTC');
-
-// Freeze time for the tests for predictable snapshots
-const testTime = new Date(Date.UTC(2019, 5, 1)); // June 1 2019
-Date.now = jest.fn(() => testTime);
-
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
@@ -44,19 +29,3 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 jest.mock('plugins/interpreter/registries', () => ({}));
-
-// Disabling this test due to https://github.com/elastic/eui/issues/2242
-jest.mock(
-  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.examples',
-  () => {
-    return 'Disabled Panel';
-  }
-);
-
-addSerializer(styleSheetSerializer);
-
-// Initialize Storyshots and build the Jest Snapshots
-initStoryshots({
-  configPath: path.resolve(__dirname, './../.storybook'),
-  test: multiSnapshotWithOptions({}),
-});

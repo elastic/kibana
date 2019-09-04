@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Export/DisabledPanel default 1`] = `
+<div
+  className="euiPanel"
+>
+  <div
+    className="canvasWorkpadExport__panelContent"
+  >
+    <div
+      className="euiText euiText--small"
+    >
+      <p>
+        Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add this to your 
+        <span
+          className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          style={Object {}}
+        >
+          <code
+            className="euiCodeBlock__code"
+          >
+            kibana.yml
+          </code>
+        </span>
+         file.
+      </p>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+    <div
+      className="canvasClipboard"
+      onClick={[Function]}
+      onKeyPress={[Function]}
+      role="button"
+      tabIndex={0}
+    >
+      <div
+        className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall canvasWorkpadExport__reportingConfig"
+        style={Object {}}
+      >
+        <pre
+          className="euiCodeBlock__pre"
+        >
+          <code
+            className="euiCodeBlock__code yml"
+          >
+            xpack.reporting:
+  enabled: true
+  capture.browser.type: chromium
+          </code>
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+`;
