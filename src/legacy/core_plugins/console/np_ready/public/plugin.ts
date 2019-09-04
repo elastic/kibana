@@ -32,11 +32,11 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
     } = pluginSet;
 
-    application.registerApp({
+    application.register({
       id: 'console',
       order: 1,
       title: 'Console',
-      mount(element) {
+      mount(ctx, { element }) {
         render(boot({ docLinkVersion, I18nContext, ResizeChecker }), element);
         return () => {
           unmountComponentAtNode(element);

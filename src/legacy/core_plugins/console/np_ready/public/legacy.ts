@@ -48,6 +48,8 @@ import { plugin } from '.';
 
 const pluginInstance = plugin({} as any);
 
+const anyObject = {} as any;
+
 uiRoutes.when('/dev_tools/console', {
   requireUICapability: 'dev_tools.show',
   controller: function RootController($scope) {
@@ -65,13 +67,14 @@ uiRoutes.when('/dev_tools/console', {
       const mockedSetupCore = {
         ...npSetup.core,
         application: {
-          registerApp(app: App): void {
+          register(app: App): void {
             try {
-              app.mount(targetElement);
+              app.mount(anyObject, { element: targetElement, appBasePath: '' });
             } catch (e) {
               npSetup.core.fatalErrors.add(e);
             }
           },
+          registerMountContext() {},
         },
       };
 
