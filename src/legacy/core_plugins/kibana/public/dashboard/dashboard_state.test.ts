@@ -27,6 +27,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+import { InputTimeRange } from 'ui/timefilter';
 const dataSetupMock = dataPluginMock.createSetup();
 
 describe('DashboardState', function() {
@@ -36,11 +37,8 @@ describe('DashboardState', function() {
   let mockTime: TimeRange = { to: 'now', from: 'now-15m' };
   const mockTimefilter = dataSetupMock.timefilter!.timefilter;
 
-  mockTimefilter.setTime.mockImplementation((time: any) => {
-    mockTime = {
-      from: time.from.toISOString(),
-      to: time.to.toISOString(),
-    };
+  mockTimefilter.setTime.mockImplementation((time: InputTimeRange) => {
+    mockTime = time as TimeRange;
   });
   mockTimefilter.getTime.mockImplementation(() => {
     return mockTime;
