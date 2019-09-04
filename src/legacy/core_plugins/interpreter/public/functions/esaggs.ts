@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 // @ts-ignore
-import { AggConfigs } from 'ui/vis/agg_configs.js';
+import { AggConfigs } from 'ui/vis/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 

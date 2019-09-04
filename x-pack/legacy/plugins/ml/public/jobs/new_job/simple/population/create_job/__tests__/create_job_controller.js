@@ -15,13 +15,21 @@ import * as indexUtils from 'plugins/ml/util/index_utils';
 import * as utils from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 
 describe('ML - Population Wizard - Create Job Controller', () => {
+  let stub1;
+  let stub2;
+
   beforeEach(() => {
     ngMock.module('kibana');
   });
 
+  afterEach(() => {
+    stub1.restore();
+    stub2.restore();
+  });
+
   it('Initialize Create Job Controller', (done) => {
-    const stub1 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    const stub2 = sinon.stub(utils, 'createFields').callsFake(() => false);
+    stub1 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    stub2 = sinon.stub(utils, 'createFields').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller, $route) {
       // Set up the $route current props required for the tests.
       $route.current = {
@@ -38,8 +46,7 @@ describe('ML - Population Wizard - Create Job Controller', () => {
       }).to.not.throwError();
 
       expect(typeof scope.ui).to.eql('object');
-      stub1.restore();
-      stub2.restore();
+
       done();
     });
   });
