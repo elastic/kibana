@@ -26,16 +26,19 @@ import chrome from 'ui/chrome';
 
 // need to get rid of angular from these
 // @ts-ignore
-import { SearchSource, SearchSourceProvider } from 'ui/courier/search_source';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { SearchSource, SearchSourceProvider } from '../../../../ui/public/courier/search_source';
+import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
 
-import { buildTabularInspectorData } from 'ui/inspector/build_tabular_inspector_data';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier';
-import { calculateObjectHash } from 'ui/vis/lib/calculate_object_hash';
-import { getTime, TimeRange } from 'ui/timefilter';
-import { RequestHandlerParams } from 'ui/visualize/loader/embedded_visualize_handler';
+import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../ui/public/courier/utils/courier_inspector_utils';
+import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
+import { getTime, TimeRange } from '../../../../ui/public/timefilter';
+import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/embedded_visualize_handler';
 // @ts-ignore
-import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
+import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
 import { IndexPatternsProvider } from '../../../data/public';
@@ -117,14 +120,17 @@ const handleCourierRequest = async ({
   if (shouldQuery) {
     inspectorAdapters.requests.reset();
     const request = inspectorAdapters.requests.start(
-      i18n.translate('common.ui.vis.courier.inspector.dataRequest.title', {
+      i18n.translate('interpreter.functions.esaggs.inspector.dataRequest.title', {
         defaultMessage: 'Data',
       }),
       {
-        description: i18n.translate('common.ui.vis.courier.inspector.dataRequest.description', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the data for the visualization.',
-        }),
+        description: i18n.translate(
+          'interpreter.functions.esaggs.inspector.dataRequest.description',
+          {
+            defaultMessage:
+              'This request queries Elasticsearch to fetch the data for the visualization.',
+          }
+        ),
       }
     );
     request.stats(getRequestInspectorStats(requestSearchSource));
