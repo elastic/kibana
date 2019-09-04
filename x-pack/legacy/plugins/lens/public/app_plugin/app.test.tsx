@@ -7,7 +7,6 @@
 import React from 'react';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-
 import { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
@@ -47,6 +46,8 @@ function makeDefaultArgs(): jest.Mocked<{
   return ({
     editorFrame: createMockFrame(),
     chrome: {
+      addBasePath: (s: string) => `/testbasepath/${s}`,
+      breadcrumbs: { set: jest.fn() },
       getUiSettingsClient() {
         return {
           get: jest.fn(type => {
@@ -117,6 +118,46 @@ describe('Lens App', () => {
         ],
       ]
     `);
+  });
+
+  it('sets breadcrumbs when the document title changes', async () => {
+    const mockSet = jest.fn();
+    const defaultArgs = makeDefaultArgs();
+    const args = {
+      ...defaultArgs,
+      chrome: ({
+        ...defaultArgs.chrome,
+        addBasePath: jest.fn(s => `/testbasepath${s}`),
+        breadcrumbs: {
+          ...defaultArgs.chrome.breadcrumbs,
+          set: mockSet,
+        },
+      } as unknown) as Chrome,
+    };
+
+    const instance = mount(<App {...args} />);
+
+    expect(mockSet).toHaveBeenCalledWith([
+      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Create' },
+    ]);
+
+    (args.docStorage.load as jest.Mock).mockResolvedValue({
+      id: '1234',
+      title: 'Daaaaaaadaumching!',
+      state: {
+        query: 'fake query',
+        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+      },
+    });
+
+    instance.setProps({ docId: '1234' });
+    await waitForPromises();
+
+    expect(mockSet).toHaveBeenCalledWith([
+      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Daaaaaaadaumching!' },
+    ]);
   });
 
   describe('persistence', () => {

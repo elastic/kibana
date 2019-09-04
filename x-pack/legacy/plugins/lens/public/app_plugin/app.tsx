@@ -90,6 +90,23 @@ export function App({
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
 
+  // Sync Kibana breadcrumbs any time the saved document's title changes
+  useEffect(() => {
+    chrome.breadcrumbs.set([
+      {
+        href: chrome.addBasePath(`/app/kibana#/visualize`),
+        text: i18n.translate('xpack.lens.breadcrumbsTitle', {
+          defaultMessage: 'Visualize',
+        }),
+      },
+      {
+        text: state.persistedDoc
+          ? state.persistedDoc.title
+          : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
+      },
+    ]);
+  }, [state.persistedDoc && state.persistedDoc.title]);
+
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
       setState({ ...state, isLoading: true });
