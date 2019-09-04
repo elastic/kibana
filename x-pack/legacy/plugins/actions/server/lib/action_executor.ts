@@ -15,6 +15,8 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { IEvent, IEventLogger } from '../../../../../plugins/event_log/server/types';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -22,6 +24,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  eventLogger: IEventLogger;
 }
 
 export interface ExecuteOptions {
@@ -59,6 +62,7 @@ export class ActionExecutor {
       getServices,
       encryptedSavedObjectsPlugin,
       actionTypeRegistry,
+      eventLogger,
     } = this.actionExecutorContext!;
 
     const spacesPlugin = spaces();
@@ -104,6 +108,24 @@ export class ActionExecutor {
     let result: ActionTypeExecutorResult | null = null;
     const actionLabel = `${actionId} - ${actionTypeId} - ${name}`;
 
+    const loggedEvent: IEvent = {
+      event: {
+        action: EVENT_LOG_ACTIONS.execute,
+      },
+      kibana: {
+        namespace,
+        saved_objects: [
+          {
+            type: 'action',
+            id: actionId,
+          },
+        ],
+      },
+    };
+
+    eventLogger.startTiming(loggedEvent);
+    let error: any;
+
     try {
       result = await actionType.executor({
         actionId,
@@ -112,9 +134,18 @@ export class ActionExecutor {
         config: validatedConfig,
         secrets: validatedSecrets,
       });
+      loggedEvent.message = `action executed successfully: ${actionLabel}`;
     } catch (err) {
-      logger.warn(`action executed unsuccessfully: ${actionLabel} - ${err.message}`);
-      throw err;
+      error = err;
+      loggedEvent.message = `action executed unsuccessfully: ${actionLabel} - ${err.message}`;
+      logger.warn(loggedEvent.message);
+    }
+
+    eventLogger.stopTiming(loggedEvent);
+    eventLogger.logEvent(loggedEvent);
+
+    if (error != null) {
+      throw error;
     }
 
     logger.debug(`action executed successfully: ${actionLabel}`);
