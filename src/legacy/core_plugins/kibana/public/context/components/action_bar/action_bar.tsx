@@ -57,6 +57,7 @@ export function ActionBar({
         <>
           <EuiCallOut
             color="warning"
+            data-test-subj="successorWarningMsg"
             iconType="bolt"
             title={
               <FormattedMessage
@@ -76,6 +77,7 @@ export function ActionBar({
               type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
             }
             isLoading={isLoading}
+            disabled={isDisabled}
             iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
             onClick={onLoadMoreClick}
           >
@@ -128,6 +130,7 @@ export function ActionBar({
       {type === 'predecessor' && warning && (
         <EuiCallOut
           color="warning"
+          data-test-subj="predecessorWarningMsg"
           iconType="bolt"
           title={
             <FormattedMessage
