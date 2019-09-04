@@ -178,7 +178,7 @@ describe('Policies Lib', () => {
     });
   });
 
-  describe('createNewPolicyFrom', () => {
+  describe.skip('createNewPolicyFrom', () => {
     it('Should duplicate policy but with a new shared_id', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
@@ -201,8 +201,8 @@ describe('Policies Lib', () => {
       //
     });
   });
-  describe('requestDeleteDataSource', () => {});
-  describe('listDataSources', () => {});
+  describe.skip('requestDeleteDataSource', () => {});
+  describe.skip('listDataSources', () => {});
 
   describe.skip('update / change hooks', () => {});
 });

@@ -3325,3 +3325,879 @@ exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new
     }
   ]
 }
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "43d99c40-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "acb0a45e-c14c-4eb6-90b6-ac262abc4cf7",
+    "version": 0
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "43d99c40-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "43d99c40-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "acb0a45e-c14c-4eb6-90b6-ac262abc4cf7",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "44140d30-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "7fb382d0-5ed8-4198-919c-65e674625b56",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "44ae0340-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "79652d2f-7fc8-4c65-8e34-69a6bdb35151",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "454ab870-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "2adb8a18-3468-40ca-b836-009fdc2ef936",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "44140d30-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "7fb382d0-5ed8-4198-919c-65e674625b56",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "44ae0340-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "79652d2f-7fc8-4c65-8e34-69a6bdb35151",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "454ab870-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "2adb8a18-3468-40ca-b836-009fdc2ef936",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib list should not list inactive policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "45e6d160-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "8615c2c0-e68f-4b2e-a174-327b3649e307",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get - "45e6d160-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "45e6d160-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "8615c2c0-e68f-4b2e-a174-327b3649e307",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "46873010-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "8615c2c0-e68f-4b2e-a174-327b3649e307",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - update - {"policy":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"8615c2c0-e68f-4b2e-a174-327b3649e307","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (7)'] = {
+  "results": {
+    "id": "47bfd720-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "fa3b9e15-1755-4684-aab3-bdff6ac64386",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should not list inactive policies - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (9)'] = {
+  "results": {
+    "id": "4859f440-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "d435dbde-813f-47c2-ac5f-2e5117e3bfc0",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list should not list inactive policies - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "46873010-cf32-11e9-a954-8bdfba8d521f",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "8615c2c0-e68f-4b2e-a174-327b3649e307",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "47bfd720-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "fa3b9e15-1755-4684-aab3-bdff6ac64386",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "4859f440-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "d435dbde-813f-47c2-ac5f-2e5117e3bfc0",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "48f6f790-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4fb26711-1bf8-447c-a321-5c07c3ca88ab",
+    "version": 0
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "48f6f790-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "48f6f790-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4fb26711-1bf8-447c-a321-5c07c3ca88ab",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "4996e110-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4fb26711-1bf8-447c-a321-5c07c3ca88ab",
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"policy":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"4fb26711-1bf8-447c-a321-5c07c3ca88ab","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "4996e110-cf32-11e9-a954-8bdfba8d521f" (6)'] = {
+  "results": {
+    "id": "4996e110-cf32-11e9-a954-8bdfba8d521f",
+    "name": "foo",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4fb26711-1bf8-447c-a321-5c07c3ca88ab",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "48f6f790-cf32-11e9-a954-8bdfba8d521f" (7)'] = {
+  "results": {
+    "id": "48f6f790-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "4fb26711-1bf8-447c-a321-5c07c3ca88ab",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4ad63ee0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4cdf7ae8-4575-469b-89cd-20cad9d3e5d7",
+    "version": 0
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - get - "4ad63ee0-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "4ad63ee0-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4cdf7ae8-4575-469b-89cd-20cad9d3e5d7",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "4b71e2a0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4cdf7ae8-4575-469b-89cd-20cad9d3e5d7",
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - update - {"policy":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"4cdf7ae8-4575-469b-89cd-20cad9d3e5d7","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib list versions Should list past locked versions of a policy - listVersions - {"sharedID":"4cdf7ae8-4575-469b-89cd-20cad9d3e5d7","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "4b71e2a0-cf32-11e9-a954-8bdfba8d521f",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "4cdf7ae8-4575-469b-89cd-20cad9d3e5d7",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "4ad63ee0-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "4cdf7ae8-4575-469b-89cd-20cad9d3e5d7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4caafee0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4c1d8866-fa28-4d69-bbd1-7d391e881822",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - get - "4caafee0-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "4caafee0-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4c1d8866-fa28-4d69-bbd1-7d391e881822",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "4d48c580-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "4c1d8866-fa28-4d69-bbd1-7d391e881822",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - update - {"policy":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"4c1d8866-fa28-4d69-bbd1-7d391e881822","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - deleteVersion - "4caafee0-cf32-11e9-a954-8bdfba8d521f" (6)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the version by the versions ID - listVersions - {"sharedID":"4c1d8866-fa28-4d69-bbd1-7d391e881822","activeOnly":false,"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "4d48c580-cf32-11e9-a954-8bdfba8d521f",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "4c1d8866-fa28-4d69-bbd1-7d391e881822",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4f206bb0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "a893befc-d5fd-44af-8b81-e38d555a3163",
+    "version": 0
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - get - "4f206bb0-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "4f206bb0-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "a893befc-d5fd-44af-8b81-e38d555a3163",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "4fbc84a0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "a893befc-d5fd-44af-8b81-e38d555a3163",
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - update - {"policy":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"a893befc-d5fd-44af-8b81-e38d555a3163","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "version": 1
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - listVersions - {"sharedID":"a893befc-d5fd-44af-8b81-e38d555a3163","activeOnly":false,"page":1,"perPage":10000} (6)'] = {
+  "results": [
+    {
+      "id": "4fbc84a0-cf32-11e9-a954-8bdfba8d521f",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "a893befc-d5fd-44af-8b81-e38d555a3163",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "4f206bb0-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "a893befc-d5fd-44af-8b81-e38d555a3163",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "4fbc84a0-cf32-11e9-a954-8bdfba8d521f" (7)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - deleteVersion - "4f206bb0-cf32-11e9-a954-8bdfba8d521f" (8)'] = {
+  "results": {
+    "success": true
+  }
+}
+
+exports['Policies Lib delete Should delete the all versions when deleting the shared ID - list - {"page":1,"perPage":25} (9)'] = {
+  "results": []
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1570204804049
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "5230b8f0-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "1916997a-23c4-4bf3-84ae-5fbe558cf443",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - get - "5230b8f0-cf32-11e9-a954-8bdfba8d521f" (3)'] = {
+  "results": {
+    "id": "5230b8f0-cf32-11e9-a954-8bdfba8d521f",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "1916997a-23c4-4bf3-84ae-5fbe558cf443",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Wed Sep 04 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Wed Sep 04 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","data_sources":[],"shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "52caaf00-cf32-11e9-a954-8bdfba8d521f",
+    "shared_id": "1916997a-23c4-4bf3-84ae-5fbe558cf443",
+    "version": 0
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - update - {"policy":{"name":"foo","description":"description","output":"defaut","status":"active","monitoring_enabled":true,"shared_id":"23a47abf-aefa-4b09-a01f-6eb37c88785f","version":0,"agent_version":"8.0.0","created_on":"Wed Sep 04 2019","created_by":"mattapperson","updated_on":"Wed Sep 04 2019","updated_by":"mattapperson","id":"52caaf00-cf32-11e9-a954-8bdfba8d521f","data_sources":[]}} (5)'] = {
+  "results": {
+    "id": "52caaf00-cf32-11e9-a954-8bdfba8d521f",
+    "version": 1
+  }
+}
+
+exports['Policies Lib createNewPolicyFrom Should duplicate policy but with a new shared_id - list - {"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "5230b8f0-cf32-11e9-a954-8bdfba8d521f",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "1916997a-23c4-4bf3-84ae-5fbe558cf443",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "52caaf00-cf32-11e9-a954-8bdfba8d521f",
+      "name": "foo",
+      "description": "description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "23a47abf-aefa-4b09-a01f-6eb37c88785f",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "created_on": "Wed Sep 04 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Wed Sep 04 2019",
+      "updated_by": "mattapperson",
+      "data_sources": []
+    }
+  ]
+}
