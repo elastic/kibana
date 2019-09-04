@@ -17,13 +17,13 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting lens before method');
       browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.loadIfNeeded('lens/basic');
     });
 
     describe('', function() {
       this.tags(['ciGroup4', 'skipFirefox']);
 
-      loadTestFile(require.resolve('./indexpattern_datapanel'));
+      loadTestFile(require.resolve('./smokescreen'));
     });
   });
 }

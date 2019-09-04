@@ -110,8 +110,12 @@ export function MetricChart({
       }}
     >
       <AutoScale>
-        <div style={{ fontSize: '60pt', fontWeight: 600 }}>{value}</div>
-        <div style={{ fontSize: '24pt' }}>{title}</div>
+        <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
+          {value}
+        </div>
+        <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
+          {title}
+        </div>
       </AutoScale>
     </div>
   );

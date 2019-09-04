@@ -161,7 +161,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug('DashboardAddPanel.addVisualizations');
       const vizList = [];
       for (const vizName of visualizations) {
-        await this.addVisualization(vizName);
+        if (typeof vizName === 'string') {
+          await this.addVisualization(vizName);
+        } else {
+          await this.addEmbeddable(vizName.name, vizName.embeddableType);
+        }
         vizList.push(vizName);
       }
       return vizList;
