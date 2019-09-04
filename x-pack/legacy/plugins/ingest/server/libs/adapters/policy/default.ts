@@ -32,10 +32,6 @@ export class PolicyAdapter {
       throw new Error(policySO.error.message);
     }
 
-    if (!policySO.attributes) {
-      throw new Error(`No policy found with ID of ${id}`);
-    }
-
     const policy = {
       id: policySO.id,
       ...policySO.attributes,
