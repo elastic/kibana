@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CANVAS as canvas } from './constants';
 
 export const AngularStrings = {
   CanvasRootController: {
@@ -14,7 +15,10 @@ export const AngularStrings = {
       }),
     getReadOnlyBadgeTooltip: () =>
       i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save Canvas workpads',
+        defaultMessage: 'Unable to save {canvas} workpads',
+        values: {
+          canvas,
+        },
       }),
   },
 };
