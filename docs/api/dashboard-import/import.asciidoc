@@ -97,7 +97,3 @@ POST api/kibana/dashboards/import?exclude=index-pattern
 }
 --------------------------------------------------
 // KIBANA
-
-A response code of `200` will be returned even if there are errors importing
-individual saved objects. In that case, error information will be returned in
-the response body on an object-by-object basis.
