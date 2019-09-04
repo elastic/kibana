@@ -549,7 +549,6 @@ describe('workspace_panel', () => {
 
     it('should immediately transition if exactly one suggestion is returned', () => {
       const expectedTable: TableSuggestion = {
-        datasourceSuggestionId: 0,
         isMultiRow: true,
         layerId: '1',
         columns: [],
@@ -566,7 +565,6 @@ describe('workspace_panel', () => {
           score: 0.5,
           title: 'my title',
           state: {},
-          datasourceSuggestionId: 0,
           previewIcon: 'empty',
         },
       ]);
@@ -577,7 +575,7 @@ describe('workspace_panel', () => {
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
-          tables: [expectedTable],
+          table: expectedTable,
         })
       );
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -594,7 +592,6 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             layerId: '1',
             columns: [],
@@ -607,7 +604,6 @@ describe('workspace_panel', () => {
           score: 0.5,
           title: 'my title',
           state: {},
-          datasourceSuggestionId: 0,
           previewIcon: 'empty',
         },
       ]);
@@ -622,7 +618,6 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             layerId: '1',
             columns: [],
@@ -635,7 +630,6 @@ describe('workspace_panel', () => {
           score: 0.5,
           title: 'my title',
           state: {},
-          datasourceSuggestionId: 0,
           previewIcon: 'empty',
         },
       ]);
@@ -650,7 +644,6 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             layerId: '1',
             columns: [],
@@ -663,7 +656,6 @@ describe('workspace_panel', () => {
           score: 0.5,
           title: 'my title',
           state: {},
-          datasourceSuggestionId: 0,
           previewIcon: 'empty',
         },
       ]);
@@ -681,7 +673,6 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             columns: [],
             layerId: '1',
@@ -691,7 +682,6 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: {
-            datasourceSuggestionId: 1,
             isMultiRow: true,
             columns: [],
             layerId: '1',
@@ -701,19 +691,19 @@ describe('workspace_panel', () => {
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
         {
+          score: 0.5,
+          title: 'second suggestion',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
           score: 0.8,
           title: 'first suggestion',
           state: {
             isFirst: true,
           },
-          datasourceSuggestionId: 1,
-          previewIcon: 'empty',
-        },
-        {
-          score: 0.5,
-          title: 'second suggestion',
-          state: {},
-          datasourceSuggestionId: 0,
           previewIcon: 'empty',
         },
       ]);
