@@ -17,24 +17,38 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+/**
+ * New Platform Shim
+ *
+ * In this file, we import any legacy dependencies we have, and shim them into
+ * our plugin by manually constructing the values that the new platform will
+ * eventually be passing to the `setup/start` method of our plugin definition.
+ *
+ * The idea is that our `plugin.ts` can stay "pure" and not contain any legacy
+ * world code. Then when it comes time to migrate to the new platform, we can
+ * simply delete this shim file.
+ *
+ * We are also calling `setup/start` here and exporting our public contract so that
+ * other legacy plugins are able to import from '../core_plugins/visualizations/legacy'
+ * and receive the response value of the `setup/start` contract, mimicking the
+ * data that will eventually be injected by the new platform.
+ */
+
+import { PluginInitializerContext } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore
 import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-// @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
 import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { visTypeAliasRegistry } from './np_ready/types/vis_type_alias_registry';
 
 import { plugin } from '.';
 
-const pluginInstance = plugin({} as any);
+const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {
   __LEGACY: {
@@ -44,8 +58,7 @@ export const setup = pluginInstance.setup(npSetup.core, {
     Vis,
     VisFactoryProvider,
     VisTypesRegistryProvider,
-    defaultFeedbackMessage,
     visTypeAliasRegistry,
   },
 });
-export const start = pluginInstance.start(npStart.core);
+export const start = pluginInstance.start(npStart.core, {});
