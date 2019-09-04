@@ -24,6 +24,7 @@ import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 import { Storage } from 'ui/storage';
 import chrome from 'ui/chrome';
 import { npSetup } from 'ui/new_platform';
+import { setup as data } from '../../../core_plugins/data/public/legacy';
 
 
 const module = uiModules.get('kibana');
@@ -48,6 +49,7 @@ module.directive('kbnTopNav', () => {
       const localStorage = new Storage(window.localStorage);
       child.setAttribute('http', 'http');
       child.setAttribute('store', 'store');
+      child.setAttribute('history', 'history');
       child.setAttribute('ui-settings', 'uiSettings');
       child.setAttribute('saved-objects-client', 'savedObjectsClient');
 
@@ -58,6 +60,7 @@ module.directive('kbnTopNav', () => {
         $scope.store = localStorage;
         $scope.http = npSetup.core.http;
         $scope.uiSettings = npSetup.core.uiSettings;
+        $scope.history = data.timefilter.history;
         $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
         // Watch config changes
@@ -102,6 +105,7 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       ['uiSettings', { watchDepth: 'reference' }],
       ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
+      ['history', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['http', { watchDepth: 'reference' }],
 

@@ -32,7 +32,7 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
+import { IndexPattern, Query, FilterBar, TimeHistory } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
@@ -64,6 +64,7 @@ export interface SearchBarProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
+  timeHistory: TimeHistory;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -375,6 +376,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryBar = (
         <QueryBarTopRow
           http={this.props.http}
+          timeHistory={this.props.timeHistory}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}
