@@ -71,6 +71,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     async function buildGraph() {
       log.debug('select index pattern secrepo*');
       await PageObjects.graph.selectIndexPattern('secrepo*');
+      // wait for the saved object to be loaded
+      // TODO this race condition will be removed with eui-ification
+      // of graph bar
+      await PageObjects.common.sleep(1000);
       // select fields url.parts, url, params and src
       await PageObjects.graph.addField('url.parts');
       await PageObjects.graph.addField('url');
