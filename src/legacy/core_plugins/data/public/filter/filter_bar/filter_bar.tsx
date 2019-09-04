@@ -109,7 +109,7 @@ class FilterBarUI extends Component<Props, State> {
   }
 
   private renderAddFilter() {
-    const isPinned = this.props.uiSettings.get('filters:pinnedByDefault');
+    const isPinned = this.props.uiSettings && this.props.uiSettings.get('filters:pinnedByDefault');
     const [indexPattern] = this.props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
