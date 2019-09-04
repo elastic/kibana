@@ -13,7 +13,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe.only('graph', function() {
+  describe('graph', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
@@ -136,7 +136,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
           sourceNode.label === 'wordpress' && targetNode.label === 'admin'
       )!;
 
-      await PageObjects.graph.selectEdge(wordpressAdminEdge);
+      await PageObjects.graph.isolateEdge(wordpressAdminEdge);
+
+      await PageObjects.graph.clickEdge(wordpressAdminEdge);
 
       const vennTerm1 = await PageObjects.graph.getVennTerm1();
       log.debug('vennTerm1 = ' + vennTerm1);
@@ -152,12 +154,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       const smallVennTerm2 = await PageObjects.graph.getSmallVennTerm2();
       log.debug('smallVennTerm2 = ' + smallVennTerm2);
-
-      const vennEllipse1 = await PageObjects.graph.getVennEllipse1();
-      log.debug('JSON.stringify(vennEllipse1) = ' + JSON.stringify(vennEllipse1));
-
-      const vennEllipse2 = await PageObjects.graph.getVennEllipse2();
-      log.debug('JSON.stringify(vennEllipse2) = ' + JSON.stringify(vennEllipse2));
 
       expect(vennTerm1).to.be('wordpress');
       expect(vennTerm2).to.be('admin');

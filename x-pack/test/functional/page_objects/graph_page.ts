@@ -13,11 +13,11 @@ interface Node {
 }
 
 interface Edge {
-        sourceNode: Node;
-        targetNode: Node;
-        width: number;
-        element: WebElementWrapper;
-      }
+  sourceNode: Node;
+  targetNode: Node;
+  width: number;
+  element: WebElementWrapper;
+}
 
 export function GraphPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -78,29 +78,58 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
     }
 
-    async selectEdge(edge: Edge) {
-      // TODO: select all nodes, then delesect everything but source and target
-      // by clicking the icons in the side bar.
-      // Then click the edge itself
-      await edge.sourceNode.circle.click();
-      await testSubjects.click('graphLinkedSelection');
+    async isolateEdge(edge: Edge) {
+      const from = edge.sourceNode.label;
+      const to = edge.targetNode.label;
+
+      // select all nodes
+      await testSubjects.click('graphSelectAll');
+
+      // go through all nodes and remove every node not source or target
+      const selections = await find.allByCssSelector('.gphSelectionList__field');
+      for (const selection of selections) {
+        const labelElement = await selection.findByTagName('span');
+        const selectionLabel = await labelElement.getVisibleText();
+        log.debug('Looking at selection ' + selectionLabel);
+        if (selectionLabel !== from && selectionLabel !== to) {
+          (await selection.findByClassName('gphNode__text')).click();
+          await PageObjects.common.sleep(1000);
+        }
+      }
+
+      // invert selection to select all nodes not source or target
       await testSubjects.click('graphInvertSelection');
+
+      // remove all other nodes
       await testSubjects.click('graphRemoveSelection');
-      await edge.targetNode.circle.click();
-      await testSubjects.click('graphLinkedSelection');
-      await testSubjects.click('graphInvertSelection');
-      await testSubjects.click('graphRemoveSelection');
-      await edge.element.click();
+    }
+
+    async clickEdge(edge: Edge) {
+      await this.stopLayout();
+      const { height, width } = await edge.element.getPosition();
+      log.debug(`Clicking ${width / 2}, ${height} relative to edge element`);
+      await browser.clickMouseButton(edge.element, width / 2, height / 2);
+      await this.startLayout();
     }
 
     async selectLinkedNodes() {
       await testSubjects.click('graphLinkedSelection');
     }
 
-    async getGraphObjects() {
+    async stopLayout() {
       if (await testSubjects.exists('graphPauseLayout')) {
         await testSubjects.click('graphPauseLayout');
       }
+    }
+
+    async startLayout() {
+      if (await testSubjects.exists('graphResumeLayout')) {
+        await testSubjects.click('graphResumeLayout');
+      }
+    }
+
+    async getGraphObjects() {
+      await this.stopLayout();
       const graphElements = await find.allByCssSelector(
         '#svgRootGroup line, #svgRootGroup circle, text.gphNode__label'
       );
@@ -143,41 +172,12 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         }
       }
 
-      if (await testSubjects.exists('graphResumeLayout')) {
-        await testSubjects.click('graphResumeLayout');
-      }
+      await this.startLayout();
 
       return {
         nodes,
         edges,
       };
-    }
-
-    async getGraphCircleText() {
-      const chartTypes = await find.allByCssSelector('text.gphNode__label');
-
-      async function getCircleText(circle: WebElementWrapper) {
-        return circle.getVisibleText();
-      }
-
-      const getChartTypesPromises = chartTypes.map(getCircleText);
-      return Promise.all(getChartTypesPromises);
-    }
-
-    async getGraphConnectingLines() {
-      const chartTypes = await find.allByCssSelector('line.edge');
-
-      async function getLineStyle(line: WebElementWrapper) {
-        return line.getAttribute('style');
-      }
-
-      const getChartTypesPromises = chartTypes.map(getLineStyle);
-      return Promise.all(getChartTypesPromises);
-    }
-
-    // click the line which matches the style
-    async clickGraphConnectingLine(style: string) {
-      await find.clickByCssSelector('line.edge[style="' + style + '"]');
     }
 
     async createWorkspace() {
@@ -249,44 +249,28 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async getVennTerm1() {
-      const el = await find.byCssSelector('span.vennTerm1');
+      const el = await find.byCssSelector('span.gphLinkSummary__term--1');
       return await el.getVisibleText();
     }
 
     async getVennTerm2() {
-      const el = await find.byCssSelector('span.vennTerm2');
+      const el = await find.byCssSelector('span.gphLinkSummary__term--2');
       return await el.getVisibleText();
     }
 
     async getSmallVennTerm1() {
-      const el = await find.byCssSelector('small.vennTerm1');
+      const el = await find.byCssSelector('small.gphLinkSummary__term--1');
       return await el.getVisibleText();
     }
 
     async getSmallVennTerm12() {
-      const el = await find.byCssSelector('small.vennTerm12');
+      const el = await find.byCssSelector('small.gphLinkSummary__term--1-2');
       return await el.getVisibleText();
     }
 
     async getSmallVennTerm2() {
-      const el = await find.byCssSelector('small.vennTerm2');
+      const el = await find.byCssSelector('small.gphLinkSummary__term--2');
       return await el.getVisibleText();
-    }
-
-    async getVennEllipse1() {
-      const el = await find.byCssSelector('ellipse.venn1');
-      const cx = await el.getAttribute('cx');
-      const cy = await el.getAttribute('cy');
-      const rx = await el.getAttribute('rx');
-      return { cx, cy, rx };
-    }
-
-    async getVennEllipse2() {
-      const el = await find.byCssSelector('ellipse.venn2');
-      const cx = await el.getAttribute('cx');
-      const cy = await el.getAttribute('cy');
-      const rx = await el.getAttribute('rx');
-      return { cx, cy, rx };
     }
   }
   return new GraphPage();
