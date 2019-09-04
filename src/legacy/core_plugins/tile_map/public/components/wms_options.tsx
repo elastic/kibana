@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { toastNotifications } from 'ui/notify';
 import { TmsLayer } from 'ui/vis/map/service_settings';
 import { SelectOption, SwitchOption } from '../../../kbn_vislib_vis_types/public/components';
 import { RegionMapOptionsProps } from '../../../region_map/public/components/region_map_options';
@@ -30,25 +29,12 @@ import { WmsInternalOptions } from './wms_internal_options';
 import { TileMapOptionsProps } from './tile_map_options';
 import { TileMapVisParams } from '../types';
 
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useMount } from '../../../../../plugins/kibana_react/public/util/use_mount';
-
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions({
-  forceUpdateVis,
-  serviceSettings,
-  stateParams,
-  setValue,
-  vis,
-}: TileMapOptionsProps | RegionMapOptionsProps) {
+function WmsOptions({ stateParams, setValue, vis }: TileMapOptionsProps | RegionMapOptionsProps) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
-  const [tmsLayerOptions, setTmsLayersOptions] = useState<Array<{ text: string; value: string }>>(
-    tmsLayers.map(mapLayerForOption)
-  );
-  const [layers, setLayers] = useState<TmsLayer[]>([]);
+  const tmsLayerOptions = useMemo(() => tmsLayers.map(mapLayerForOption), [tmsLayers]);
 
   const setWmsOption = <T extends keyof TileMapVisParams['wms']>(
     paramName: T,
@@ -60,38 +46,11 @@ function WmsOptions({
     });
 
   const selectTmsLayer = (id: string) => {
-    const layer = layers.find(l => l.id === id);
+    const layer = tmsLayers.find((l: TmsLayer) => l.id === id);
     if (layer) {
       setWmsOption('selectedTmsLayer', layer);
     }
   };
-
-  const onMount = () => {
-    serviceSettings
-      .getTMSServices()
-      .then(services => {
-        const newBaseLayers: TmsLayer[] = [
-          ...tmsLayers,
-          ...services.filter(service => !tmsLayers.some(({ id }: TmsLayer) => service.id === id)),
-        ];
-
-        setLayers(newBaseLayers);
-        setTmsLayersOptions(newBaseLayers.map(mapLayerForOption));
-
-        if (!wms.selectedTmsLayer && newBaseLayers.length) {
-          setWmsOption('selectedTmsLayer', newBaseLayers[0]);
-
-          // apply default changes directly to visualization
-          // without it, these values will be reset after visualization loading
-          // caused by vis state watcher at line 138 in src/legacy/ui/public/vis/editors/default/default.js
-          // the approach could be revised after removing angular
-          forceUpdateVis();
-        }
-      })
-      .catch((error: Error) => toastNotifications.addWarning(error.message));
-  };
-
-  useMount(onMount);
 
   return (
     <EuiPanel paddingSize="s">

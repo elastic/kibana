@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { toastNotifications } from 'ui/notify';
 import { FileLayerField, VectorLayer, ServiceSettings } from 'ui/vis/map/service_settings';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import {
@@ -30,15 +29,8 @@ import {
   SelectOption,
   SwitchOption,
 } from '../../../kbn_vislib_vis_types/public/components';
-import { ORIGIN } from '../../../tile_map/common/origin';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
-import { mapToLayerWithId } from '../util';
 import { RegionMapVisParams } from '../types';
-import { RegionMapsConfig } from '../plugin';
-
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useMount } from '../../../../../plugins/kibana_react/public/util/use_mount';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -52,22 +44,14 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 
 export type RegionMapOptionsProps = {
   serviceSettings: ServiceSettings;
-  includeElasticMapsService: RegionMapsConfig['includeElasticMapsService'];
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const {
-    includeElasticMapsService,
-    serviceSettings,
-    stateParams,
-    vis,
-    setValue,
-    forceUpdateVis,
-  } = props;
-  const [vectorLayers, setVectorLayers] = useState<VectorLayer[]>(
-    vis.type.editorConfig.collections.vectorLayers
+  const { serviceSettings, stateParams, vis, setValue } = props;
+  const vectorLayerOptions = useMemo(
+    () => vis.type.editorConfig.collections.vectorLayers.map(mapLayerForOption),
+    [vis.type.editorConfig.collections.vectorLayers]
   );
-  const [vectorLayerOptions, setVectorLayerOptions] = useState(vectorLayers.map(mapLayerForOption));
   const fieldOptions = useMemo(
     () =>
       ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
@@ -86,7 +70,9 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   const setLayer = useCallback(
     async (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
-      const newLayer = vectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
+      const newLayer = vis.type.editorConfig.collections.vectorLayers.find(
+        ({ layerId }: VectorLayer) => layerId === value
+      );
 
       if (newLayer) {
         setValue(paramName, newLayer);
@@ -94,7 +80,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setEmsHotLink(newLayer);
       }
     },
-    [vectorLayers, setEmsHotLink, setValue]
+    [vis.type.editorConfig.collections.vectorLayers, setEmsHotLink, setValue]
   );
 
   const setField = useCallback(
@@ -105,58 +91,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     },
     [setValue, stateParams.selectedLayer]
   );
-
-  const onMount = () => {
-    async function setDefaultValues() {
-      try {
-        const layers = await serviceSettings.getFileLayers();
-        const newLayers = layers
-          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
-          .filter(
-            layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
-          );
-
-        // backfill v1 manifest for now
-        newLayers.forEach(layer => {
-          if (layer.format === 'geojson') {
-            layer.format = {
-              type: 'geojson',
-            };
-          }
-        });
-
-        const newVectorLayers = [...vectorLayers, ...newLayers];
-
-        setVectorLayers(newVectorLayers);
-        setVectorLayerOptions(newVectorLayers.map(mapLayerForOption));
-
-        const [newLayer] = newVectorLayers;
-
-        if (newLayer && !stateParams.selectedLayer) {
-          setValue('selectedLayer', newLayer);
-          setValue('selectedJoinField', newLayer.fields[0]);
-
-          if (newLayer.isEMS) {
-            setEmsHotLink(newLayer);
-          }
-
-          // apply default changes directly to visualization
-          // without it, these values will be reset after visualization loading
-          // caused by vis state watcher at line 138 in src/legacy/ui/public/vis/editors/default/default.js
-          // the approach could be revised after removing angular
-          forceUpdateVis();
-        }
-      } catch (error) {
-        toastNotifications.addWarning(error.message);
-      }
-    }
-
-    if (includeElasticMapsService) {
-      setDefaultValues();
-    }
-  };
-
-  useMount(onMount);
 
   return (
     <>

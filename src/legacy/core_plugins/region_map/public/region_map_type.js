@@ -20,22 +20,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
-import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { RegionMapOptions } from './components/region_map_options';
 
 import { visFactory } from '../../visualizations/public';
 
-// TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../tile_map/common/origin';
-
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
+  const { uiSettings, serviceSettings, visConfig, collections } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
-  const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+  const wms = uiSettings.get('visualization:tileMap:WMSdefaults');
+  if (!wms.selectedTmsLayer && collections.tmsLayers.length) {
+    wms.selectedTmsLayer = collections.tmsLayers[0];
+  }
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
@@ -48,11 +45,11 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        emsHotLink: '',
-        selectedLayer,
-        selectedJoinField,
+        emsHotLink: visConfig.emsHotLink,
+        selectedLayer: visConfig.selectedLayer,
+        selectedJoinField: visConfig.selectedJoinField,
         isDisplayWarning: true,
-        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
+        wms,
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
@@ -66,12 +63,11 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         (<RegionMapOptions
           {...props}
           serviceSettings={serviceSettings}
-          includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
         />),
       collections: {
         colorSchemas,
-        vectorLayers,
-        tmsLayers: []
+        vectorLayers: collections.vectorLayers,
+        tmsLayers: collections.tmsLayers,
       },
       schemas: new Schemas([
         {

@@ -21,7 +21,6 @@ import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ServiceSettings } from 'ui/vis/map/service_settings';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import {
   BasicOptions,
@@ -32,9 +31,7 @@ import {
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
 
-export type TileMapOptionsProps = { serviceSettings: ServiceSettings } & VisOptionsProps<
-  TileMapVisParams
->;
+export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 
 function TileMapOptions(props: TileMapOptionsProps) {
   const { stateParams, setValue, vis } = props;

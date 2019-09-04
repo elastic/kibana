@@ -32,7 +32,11 @@ import { TileMapOptions } from './components/tile_map_options';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings, serviceSettings } = dependencies;
+  const { uiSettings, collections } = dependencies;
+  const wms = uiSettings.get('visualization:tileMap:WMSdefaults');
+  if (!wms.selectedTmsLayer && collections.tmsLayers.length) {
+    wms.selectedTmsLayer = collections.tmsLayers[0];
+  }
 
   return visFactory.createBaseVisualization({
     name: 'tile_map',
@@ -54,7 +58,7 @@ export function createTileMapTypeDefinition(dependencies) {
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
-        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
+        wms,
       },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
@@ -111,9 +115,9 @@ export function createTileMapTypeDefinition(dependencies) {
             }),
           },
         ],
-        tmsLayers: [],
+        tmsLayers: collections.tmsLayers,
       },
-      optionsTemplate: (props) => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => <TileMapOptions {...props} />,
       schemas: new Schemas([
         {
           group: 'metrics',

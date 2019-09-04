@@ -30,5 +30,4 @@ export interface VisOptionsProps<VisParamType = unknown> {
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;
-  forceUpdateVis(): void;
 }
