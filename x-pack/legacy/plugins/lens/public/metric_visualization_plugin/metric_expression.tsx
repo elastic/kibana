@@ -42,6 +42,13 @@ export const metricChart: ExpressionFunction<
       types: ['string'],
       help: 'The column whose value is being displayed',
     },
+    mode: {
+      types: ['string'],
+      options: ['reduced', 'full'],
+      default: 'full',
+      help:
+        'The display mode of the chart - reduced will only show the metric itself without min size',
+    },
   },
   context: {
     types: ['lens_multitable'],
@@ -82,7 +89,7 @@ export function MetricChart({
   args,
   formatFactory,
 }: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { title, accessor } = args;
+  const { title, accessor, mode } = args;
   let value = '-';
   const firstTable = Object.values(data.tables)[0];
 
@@ -109,9 +116,9 @@ export function MetricChart({
         textAlign: 'center',
       }}
     >
-      <AutoScale>
+      <AutoScale minScale={mode === 'reduced' ? 0 : undefined}>
         <div style={{ fontSize: '60pt', fontWeight: 600 }}>{value}</div>
-        <div style={{ fontSize: '24pt' }}>{title}</div>
+        {mode === 'full' && <div style={{ fontSize: '24pt' }}>{title}</div>}
       </AutoScale>
     </div>
   );

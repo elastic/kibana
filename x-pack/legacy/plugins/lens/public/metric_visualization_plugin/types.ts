@@ -11,6 +11,7 @@ export interface State {
 
 export interface MetricConfig extends State {
   title: string;
+  mode: 'reduced' | 'full';
 }
 
 export type PersistableState = State;

@@ -56,4 +56,5 @@ $lnsSuggestionWidth: 150px;
 .lnsSuggestionChartWrapper {
   height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
+  margin: 0 $euiSizeS;
 }

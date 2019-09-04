@@ -64,10 +64,23 @@ export const calculateFilterRatio: ExpressionFunction<
       newRows.push(result);
     }
 
+    const newColumns = data.columns
+      .filter(col => !col.id.includes('filter-ratio'))
+      .map(col =>
+        col.id === id
+          ? {
+              ...col,
+              formatHint: {
+                id: 'percent',
+              },
+            }
+          : col
+      );
+
     return {
       type: 'kibana_datatable',
       rows: newRows,
-      columns: data.columns.filter(col => !col.id.includes('filter-ratio')),
+      columns: newColumns,
     };
   },
 };

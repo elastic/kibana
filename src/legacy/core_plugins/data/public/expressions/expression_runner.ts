@@ -19,7 +19,7 @@
 
 import { Ast, fromExpression } from '@kbn/interpreter/common';
 
-import { RequestAdapter, DataAdapter } from '../../../../../plugins/inspector/public';
+import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { RenderFunctionsRegistry, Interpreter, Result } from './expressions_service';
 
 export interface ExpressionRunnerOptions {

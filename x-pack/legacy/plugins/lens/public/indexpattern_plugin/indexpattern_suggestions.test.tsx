@@ -213,7 +213,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -255,7 +254,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -298,7 +296,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -395,7 +392,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -437,7 +433,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -480,7 +475,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -656,7 +650,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'extended',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -827,7 +820,6 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table).toEqual({
           changeType: 'initial',
           label: undefined,
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [
             expect.objectContaining({
@@ -930,7 +922,6 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)).toEqual([
         expect.objectContaining({
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             changeType: 'unchanged',
             label: undefined,
@@ -950,7 +941,6 @@ describe('IndexPattern Data Source suggestions', () => {
         }),
         expect.objectContaining({
           table: {
-            datasourceSuggestionId: 1,
             isMultiRow: true,
             changeType: 'unchanged',
             label: undefined,
@@ -996,7 +986,6 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)[0]).toEqual(
         expect.objectContaining({
           table: {
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             changeType: 'extended',
             label: 'Over time',
@@ -1064,7 +1053,6 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)[2]).toEqual(
         expect.objectContaining({
           table: {
-            datasourceSuggestionId: 2,
             isMultiRow: true,
             changeType: 'extended',
             label: 'Over time',
