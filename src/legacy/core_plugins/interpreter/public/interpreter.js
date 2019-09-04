@@ -61,11 +61,10 @@ export const getInterpreter = async () => {
     _interpreterPromise = new Promise(resolve => _resolve = resolve);
     initialize();
   }
-  const { interpreter } = await _interpreterPromise;
-  return interpreter;
+  return await _interpreterPromise;
 };
 
 export const interpretAst = async (...params) => {
-  const interpreter = await getInterpreter();
+  const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
 };
