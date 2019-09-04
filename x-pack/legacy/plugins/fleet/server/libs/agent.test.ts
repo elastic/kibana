@@ -22,16 +22,7 @@ describe('Agent lib', () => {
 
       let error: Error | null = null;
       try {
-        await agentLib.enroll(
-          'not-a-valid-enrollment-token',
-          'PERMANENT',
-          {
-            id: 'config-id-1',
-            sharedId: 'config-shared-id-1',
-          },
-          undefined,
-          'agent-1'
-        );
+        await agentLib.enroll('not-a-valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
       } catch (err) {
         error = err;
       }
@@ -48,10 +39,6 @@ describe('Agent lib', () => {
       const agent = await agentLib.enroll(
         'valid-enrollment-token',
         'PERMANENT',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined,
         'agent-1'
       );
@@ -59,8 +46,8 @@ describe('Agent lib', () => {
       expect(agent).toBeDefined();
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
-        config_id: 'config-id-1',
-        config_shared_id: 'config-shared-id-1',
+        config_id: 'configId',
+        config_shared_id: 'configSharedId',
       });
     });
 
@@ -72,10 +59,6 @@ describe('Agent lib', () => {
       const agent1 = await agentLib.enroll(
         'valid-enrollment-token',
         'PERMANENT',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined,
         'agent-1'
       );
@@ -86,10 +69,6 @@ describe('Agent lib', () => {
       const agent2 = await agentLib.enroll(
         'valid-enrollment-token',
         'PERMANENT',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined,
         'agent-1'
       );
@@ -105,29 +84,11 @@ describe('Agent lib', () => {
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
-      await agentLib.enroll(
-        'valid-enrollment-token',
-        'PERMANENT',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
-        undefined,
-        'agent-1'
-      );
+      await agentLib.enroll('valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
       let error: Error | null = null;
 
       try {
-        await agentLib.enroll(
-          'valid-enrollment-token',
-          'PERMANENT',
-          {
-            id: 'config-id-1',
-            sharedId: 'config-shared-id-1',
-          },
-          undefined,
-          'agent-1'
-        );
+        await agentLib.enroll('valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
       } catch (err) {
         error = err;
       }
@@ -144,18 +105,14 @@ describe('Agent lib', () => {
       const agent = await agentLib.enroll(
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined
       );
 
       expect(agent).toBeDefined();
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
-        config_id: 'config-id-1',
-        config_shared_id: 'config-shared-id-1',
+        config_id: 'configId',
+        config_shared_id: 'configSharedId',
       });
     });
 
@@ -167,10 +124,6 @@ describe('Agent lib', () => {
       const agent = await agentLib.enroll(
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined
       );
 
@@ -188,19 +141,11 @@ describe('Agent lib', () => {
       const agent1 = await agentLib.enroll(
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined
       );
       const agent2 = await agentLib.enroll(
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
-        {
-          id: 'config-id-1',
-          sharedId: 'config-shared-id-1',
-        },
         undefined
       );
       expect(agent1.parent_id).toBe(agent2.parent_id);
