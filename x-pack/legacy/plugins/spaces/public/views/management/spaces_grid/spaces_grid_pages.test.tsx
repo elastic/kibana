@@ -6,6 +6,18 @@
 jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([]),
 }));
+jest.mock('../../../../../xpack_main/public/services/xpack_info', () => {
+  return {
+    xpackInfo: {
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'features.security.showLinks') {
+          return true;
+        }
+        throw new Error(`unexpected key: ${key}`);
+      }),
+    },
+  };
+});
 import '../../../__mocks__/ui_capabilities';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
