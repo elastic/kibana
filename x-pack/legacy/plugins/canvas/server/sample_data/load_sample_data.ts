@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { ServerStrings } from '../../i18n';
+// @ts-ignore Untyped local
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
 
+const { SampleData: strings } = ServerStrings;
+
+// @ts-ignore: Untyped in Kibana
 export function loadSampleData(server) {
   const now = new Date();
   const nowTimestamp = now.toISOString();
+
+  // @ts-ignore: Untyped local
   function updateCanvasWorkpadTimestamps(savedObjects) {
+    // @ts-ignore: Untyped local
     return savedObjects.map(savedObject => {
       if (savedObject.type === 'canvas-workpad') {
         savedObject.attributes['@timestamp'] = nowTimestamp;
@@ -21,9 +28,7 @@ export function loadSampleData(server) {
     });
   }
 
-  const sampleDataLinkLabel = i18n.translate('xpack.canvas.sampleDataLinkLabel', {
-    defaultMessage: 'Canvas',
-  });
+  const sampleDataLinkLabel = strings.getLinkLabel();
   server.addSavedObjectsToSampleDataset(
     'ecommerce',
     updateCanvasWorkpadTimestamps(ecommerceSavedObjects)
