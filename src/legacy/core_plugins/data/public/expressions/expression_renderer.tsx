@@ -26,6 +26,7 @@ import { IExpressionLoader, ExpressionLoader } from './lib/loader';
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
+  className: 'string';
   expression: string | ExpressionAST;
   /**
    * If an element is specified, but the response of the expression run can't be rendered
@@ -38,13 +39,14 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
 export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer => ({
+  className,
   expression,
   onRenderFailure,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
-  const handlerRef = useRef((null as any) as ExpressionLoader);
+  const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
 
   useEffect(() => {
     if (mountpoint.current) {
@@ -59,10 +61,11 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
         }
       });
     }
-  }, [expression, mountpoint.current]);
+  }, [expression, options, mountpoint.current]);
 
   return (
     <div
+      className={className}
       ref={el => {
         mountpoint.current = el;
       }}
