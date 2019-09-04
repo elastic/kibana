@@ -53,6 +53,12 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
         doSetup()
         preWorkerClosure()
 
+        try {
+          sh 'yarn run github-checks-reporter "Test-Check" echo 1'
+        } catch (ex) {
+          print "github-checks-reporter error: ${ex}"
+        }
+
         def nextWorker = 1
         def worker = { workerClosure ->
           def workerNumber = nextWorker
@@ -153,8 +159,6 @@ def jobRunner(label, closure) {
       string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
     ]) {
       node(label) {
-        sh "echo ${env.VAULT_ROLE_ID}"
-
         catchError {
           checkout scm
 
