@@ -12,7 +12,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
-
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DraggableWrapper } from './draggable_wrapper';
 

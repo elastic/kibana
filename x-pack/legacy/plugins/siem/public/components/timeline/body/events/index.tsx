@@ -6,18 +6,17 @@
 
 import * as React from 'react';
 
-import { StatefulEvent } from './stateful_event';
-
-import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
-import { EventsContainer } from '../../styles';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { maxDelay } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import { EventsContainer } from '../../styles';
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
+import { StatefulEvent } from './stateful_event';
 
 interface Props {
   actionsColumnWidth: number;

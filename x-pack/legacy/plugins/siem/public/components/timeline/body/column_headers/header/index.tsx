@@ -7,9 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { useContext } from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import {
@@ -19,15 +19,14 @@ import {
 import { TruncatableText } from '../../../../truncatable_text';
 import { WithHoverActions } from '../../../../with_hover_actions';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
+import { TimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { Actions, ACTIONS_WIDTH } from '../actions';
 import { ColumnHeader } from '../column_header';
 import { FullHeightFlexGroup, FullHeightFlexItem } from '../common/styles';
 import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
-
 import { getNewSortDirectionOnClick } from './helpers';
-import { TimelineContext } from '../../../timeline_context';
 
 const TITLE_PADDING = 10; // px
 const RESIZE_HANDLE_HEIGHT = 35; // px

@@ -6,18 +6,17 @@
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
+import { useContext } from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
-import { OnUpdateColumns } from '../timeline/events';
-import { WithHoverActions } from '../with_hover_actions';
-
-import * as i18n from './translations';
 import { CountBadge } from '../page';
-import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
+import { WithHoverActions } from '../with_hover_actions';
+import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};

@@ -19,7 +19,6 @@ import { ActionCreator } from 'typescript-fsa';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { TruncatableText } from '../truncatable_text';
-
 import { getDraggableId, getDroppableId } from './helpers';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder

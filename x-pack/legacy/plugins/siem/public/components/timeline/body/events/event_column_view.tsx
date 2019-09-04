@@ -7,16 +7,16 @@
 import * as React from 'react';
 import uuid from 'uuid';
 
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { Note } from '../../../../lib/note';
+import { AssociateNote, UpdateNote } from '../../../notes/helpers';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
+import { TimelineRow, TimelineRowGroup } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
-import { TimelineRow, TimelineRowGroup } from '../../styles';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { Note } from '../../../../lib/note';
 
 interface Props {
   id: string;

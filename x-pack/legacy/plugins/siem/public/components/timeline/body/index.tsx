@@ -6,14 +6,10 @@
 
 import * as React from 'react';
 
-import { ColumnHeaders } from './column_headers';
-import { ColumnHeader } from './column_headers/column_header';
-import { Events } from './events';
-import { getActionsColumnWidth } from './helpers';
-import { ColumnRenderer } from './renderers/column_renderer';
-import { RowRenderer } from './renderers/row_renderer';
-import { Sort } from './sort';
-
+import { BrowserFields } from '../../../containers/source';
+import { TimelineItem } from '../../../graphql/types';
+import { Note } from '../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -24,10 +20,13 @@ import {
   OnUpdateColumns,
 } from '../events';
 import { HorizontalScroll, VerticalScrollContainer } from '../styles';
-import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
-import { BrowserFields } from '../../../containers/source';
-import { TimelineItem } from '../../../graphql/types';
-import { Note } from '../../../lib/note';
+import { ColumnHeaders } from './column_headers';
+import { ColumnHeader } from './column_headers/column_header';
+import { Events } from './events';
+import { getActionsColumnWidth } from './helpers';
+import { ColumnRenderer } from './renderers/column_renderer';
+import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
 
 interface Props {
   addNoteToEvent: AddNoteToEvent;

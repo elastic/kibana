@@ -9,20 +9,19 @@ import VisibilitySensor from 'react-visibility-sensor';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
-import { StatefulEventChild } from './stateful_event_child';
-
-import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { getRowRenderer } from '../renderers/get_row_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
-import { ExpandableEvent } from '../../expandable_event';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import { ExpandableEvent } from '../../expandable_event';
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { getRowRenderer } from '../renderers/get_row_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
+import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;

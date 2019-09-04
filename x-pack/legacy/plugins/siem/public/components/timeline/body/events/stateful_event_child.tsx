@@ -7,15 +7,14 @@
 import * as React from 'react';
 import uuid from 'uuid';
 
-import { EventColumnView } from './event_column_view';
-
-import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { NoteCards } from '../../../notes/note_cards';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { NoteCards } from '../../../notes/note_cards';
+import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { EventColumnView } from './event_column_view';
 
 interface Props {
   id: string;

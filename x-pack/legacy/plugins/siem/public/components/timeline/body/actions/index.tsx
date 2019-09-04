@@ -7,13 +7,13 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 
-import { eventHasNotes, getPinTooltip } from '../helpers';
-import * as i18n from '../translations';
-import { NotesButton } from '../../properties/helpers';
-import { TimelineCell, TimelineCellContent, TimelineRowGroupActions } from '../../styles';
+import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { Pin } from '../../../pin';
-import { Note } from '../../../../lib/note';
+import { NotesButton } from '../../properties/helpers';
+import { TimelineCell, TimelineCellContent, TimelineRowGroupActions } from '../../styles';
+import { eventHasNotes, getPinTooltip } from '../helpers';
+import * as i18n from '../translations';
 
 interface Props {
   actionsColumnWidth: number;

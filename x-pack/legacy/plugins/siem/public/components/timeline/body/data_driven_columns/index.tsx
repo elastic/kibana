@@ -6,15 +6,15 @@
 
 import * as React from 'react';
 
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { OnResize, Resizeable } from '../../../resize_handle';
+import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_handle/styled_handles';
+import { OnColumnResized } from '../../events';
+import { TimelineCell, TimelineCellContent, TimelineRowGroupData } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { FullHeightFlexItem } from '../column_headers/common/styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
-import { OnColumnResized } from '../../events';
-import { TimelineCell, TimelineCellContent, TimelineRowGroupData } from '../../styles';
-import { OnResize, Resizeable } from '../../../resize_handle';
-import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_handle/styled_handles';
-import { TimelineNonEcsData } from '../../../../graphql/types';
 
 interface Props {
   _id: string;
