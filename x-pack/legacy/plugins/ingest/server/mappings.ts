@@ -13,9 +13,6 @@ export const mappings = {
       description: {
         type: 'text',
       },
-      output: {
-        type: 'keyword',
-      },
       monitoring_enabled: {
         type: 'boolean',
       },
@@ -28,6 +25,12 @@ export const mappings = {
             type: 'keyword',
           },
           meta: {
+            type: 'keyword',
+          },
+          output: {
+            type: 'keyword',
+          },
+          queue: {
             type: 'keyword',
           },
           policy_id: {

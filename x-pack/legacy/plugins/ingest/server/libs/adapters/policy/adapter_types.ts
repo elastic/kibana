@@ -10,8 +10,6 @@ export const RuntimeDatasourceInput = t.interface(
   {
     id: t.string,
     meta: t.union([t.undefined, t.string]),
-    output: t.string,
-    queue: t.union([t.undefined, t.string]),
     other: t.string, // JSON, gets flattened to top level when returned via REST API
     policy_id: t.string,
   },
@@ -24,6 +22,8 @@ const RuntimeDatasource = t.interface(
     ref_source: t.union([t.undefined, t.string]),
     ref: t.union([t.undefined, t.string]),
     policy: t.union([t.undefined, t.string]),
+    output: t.string,
+    queue: t.union([t.undefined, t.string]),
     inputs: t.array(t.string),
   },
   'Datasource'
@@ -33,7 +33,6 @@ export const NewRuntimePolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
-    output: t.string,
     monitoring_enabled: t.boolean,
     shared_id: t.string,
     version: t.number,
