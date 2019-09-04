@@ -4058,7 +4058,7 @@
     "xpack.beatsManagement.tagTable.typeColumnName": "类型",
     "xpack.beatsManagement.walkthrough.initial.betaBadgeText": "公测版",
     "xpack.canvas.badge.readOnly.text": "只读",
-    "xpack.canvas.badge.readOnly.tooltip": "无法保存 Canvas Workpad",
+    "xpack.canvas.badge.readOnly.tooltip": "无法保存 {canvas} Workpad",
     "xpack.canvas.elements.areaChartDisplayName": "面积图",
     "xpack.canvas.elements.areaChartHelpText": "已填充主体的折线图",
     "xpack.canvas.elements.bubbleChartDisplayName": "气泡图",
