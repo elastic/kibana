@@ -190,15 +190,13 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
     }
 
     _getGeoHashAgg() {
-      return this.vis.getAggConfig().find((agg) => {
+      return this.vis.getAggConfig().aggs.find((agg) => {
         return get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
 
     _getMetricAgg() {
-      return this.vis.getAggConfig().find((agg) => {
-        return agg.type.type === 'metrics';
-      });
+      return this.vis.getAggConfig().byType('metrics')[0];
     }
 
     _isFilteredByCollar() {
