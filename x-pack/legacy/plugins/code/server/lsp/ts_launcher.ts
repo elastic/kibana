@@ -33,6 +33,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     return TS_LANG_DETACH_PORT;
   }
 
+  protected startupTimeout = 5000;
+
   createExpander(
     proxy: LanguageServerProxy,
     builtinWorkspace: boolean,
