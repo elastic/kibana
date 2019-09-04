@@ -31,7 +31,6 @@ export class PolicyLib {
     const newPolicy: NewPolicyFile = {
       name,
       description: description || '',
-      output: 'defaut',
       status: 'active',
       monitoring_enabled: true,
       shared_id: uuidv4(),
@@ -93,12 +92,11 @@ export class PolicyLib {
     policy: Partial<{
       name: string;
       description: string;
-      output: string;
       monitoring_enabled: boolean;
     }>
   ): Promise<{ id: string; version: number; shared_id: string }> {
     const invalidKeys = Object.keys(policy).filter(
-      key => !['name', 'description', 'output', 'monitoring_enabled'].includes(key)
+      key => !['name', 'description', 'monitoring_enabled'].includes(key)
     );
 
     if (invalidKeys.length !== 0) {
