@@ -65,16 +65,6 @@ export class PolicyLib {
       (policy.data_sources[i] as any).inputs = {
         id: uuidv4(),
         meta: {},
-        output: {
-          elasticsearch: {
-            hosts: ['127.0.0.1:9200'],
-          },
-        },
-        queue: {
-          spool: {
-            file: '/some/path',
-          },
-        },
         other: {}, // JSON, gets flattened to top level when returned via REST API
         policy_id: id,
       };
