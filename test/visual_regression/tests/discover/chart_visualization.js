@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }) {
       this.tags(['skipFirefox']);
 
       it('should show bars in the correct time zone', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await visualTesting.snapshot();
       });
 
@@ -61,6 +62,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data for chart interval Daily', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Daily');
         await retry.try(async () => {
           await visualTesting.snapshot();
@@ -68,6 +70,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data for chart interval Weekly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Weekly');
         await retry.try(async () => {
           await visualTesting.snapshot();
@@ -80,20 +83,24 @@ export default function ({ getService, getPageObjects }) {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be('Daily');
         });
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await visualTesting.snapshot();
       });
 
       it('should show correct data for chart interval Monthly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Monthly');
         await visualTesting.snapshot();
       });
 
       it('should show correct data for chart interval Yearly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Yearly');
         await visualTesting.snapshot();
       });
 
       it('should show correct data for chart interval Auto', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Auto');
         await visualTesting.snapshot();
       });
@@ -105,6 +112,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await retry.try(async function () {
           await visualTesting.snapshot();
         });
