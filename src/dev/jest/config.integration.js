@@ -24,6 +24,7 @@ export default {
   testMatch: [
     '**/integration_tests/**/*.test.js',
     '**/integration_tests/**/*.test.ts',
+    '**/integration_tests/**/*.test.tsx',
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
