@@ -19,7 +19,7 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     defaultMessage: 'Configured Tile Map Service'
   });
   static description = i18n.translate('xpack.maps.source.kbnTMSDescription', {
-    defaultMessage: 'Map tiles service configured in kibana.yml'
+    defaultMessage: 'Tile map service configured in kibana.yml'
   });
 
   static icon = 'logoKibana';
