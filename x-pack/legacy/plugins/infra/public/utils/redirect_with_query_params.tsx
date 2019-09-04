@@ -11,20 +11,26 @@ import { Route, Redirect, RouteProps } from 'react-router-dom';
 // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
 export const RedirectWithQueryParams: React.FunctionComponent<{
   from: string;
-  to: string;
-  exact?: boolean;
-}> = ({ from, to, exact }) => (
+  to: string | RouteProps['location'];
+}> = ({ from, to, ...rest }) => (
   <Route
     path={from}
     render={({ location }: RouteProps) =>
       location ? (
         <Redirect
+          {...rest}
           from={from}
-          exact={exact}
-          to={{
-            ...location,
-            pathname: location.pathname.replace(from, to),
-          }}
+          to={
+            typeof to === 'string'
+              ? {
+                  ...location,
+                  pathname: to,
+                }
+              : {
+                  ...location,
+                  ...to,
+                }
+          }
         />
       ) : null
     }
