@@ -27,9 +27,9 @@ export function BlacklistForm({
     <>
       {blacklistedNodes.length > 0 ? (
         <EuiText size="s">
-          {i18n.translate('xpack.graph.blacklist.description', {
+          {i18n.translate('xpack.graph.settings.blacklist.blacklistHelpText', {
             defaultMessage:
-              'The nodes listed here will not show up through searches. Delete them from this list and submit new searches to add them to the workspace again.',
+              'These terms are currently blacklisted from re-appearing in the workspace',
           })}
         </EuiText>
       ) : (
@@ -52,7 +52,7 @@ export function BlacklistForm({
             label={node.label}
             extraAction={{
               iconType: 'trash',
-              'aria-label': i18n.translate('xpack.graph.blacklist.removeLabel', {
+              'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
                 defaultMessage: 'Remove',
               }),
               alwaysShow: true,

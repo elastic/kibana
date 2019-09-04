@@ -100,13 +100,23 @@ export function AdvancedSettingsForm({
 
       <EuiFormRow
         fullWidth
-        helpText={i18n.translate(
-          'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1',
-          {
-            defaultMessage:
-              'To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias. This must be a single-term field or searches will be rejected with an error.',
-          }
-        )}
+        helpText={
+          <>
+            {i18n.translate('xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1', {
+              defaultMessage:
+                'To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.',
+            })}{' '}
+            <em>
+              {i18n.translate(
+                'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText2',
+                {
+                  defaultMessage:
+                    'This must be a single-term field or searches will be rejected with an error.',
+                }
+              )}
+            </em>
+          </>
+        }
         label={i18n.translate('xpack.graph.settings.advancedSettings.diversityFieldInputLabel', {
           defaultMessage: 'Diversity field',
         })}
@@ -141,13 +151,21 @@ export function AdvancedSettingsForm({
       {advancedSettings.sampleDiversityField && (
         <EuiFormRow
           fullWidth
-          helpText={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
-            defaultMessage:
-              'Max number of documents in a sample that can contain the same value for the {fieldName} field',
-            values: {
-              fieldName: 'field',
-            },
-          })}
+          helpText={
+            <>
+              {i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
+                defaultMessage:
+                  'Max number of documents in a sample that can contain the same value for the',
+              })}{' '}
+              <em>{advancedSettings.sampleDiversityField.name}</em>{' '}
+              {i18n.translate(
+                'xpack.graph.settings.advancedSettings.maxValuesInputHelpText.fieldText',
+                {
+                  defaultMessage: 'field',
+                }
+              )}
+            </>
+          }
           label={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputLabel', {
             defaultMessage: 'Max docs per field',
           })}

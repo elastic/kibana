@@ -68,6 +68,10 @@ export function DrilldownForm({ template, setValue, onSubmit, onGoBack }: Drilld
             value={template.description}
             isInvalid={touched.description && !template.description}
             onChange={e => setValue('description', e.target.value)}
+            placeholder={i18n.translate(
+              'xpack.graph.settings.drillDowns.urlDescriptionInputPlaceholder',
+              { defaultMessage: 'Search on Google' }
+            )}
           />
         </EuiFormRow>
         <EuiForm>
