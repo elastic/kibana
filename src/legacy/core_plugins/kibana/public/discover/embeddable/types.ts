@@ -18,7 +18,7 @@
  */
 
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { SavedSearch } from '../types';
