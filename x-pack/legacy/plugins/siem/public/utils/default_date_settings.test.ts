@@ -29,7 +29,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
 } from '../../common/constants';
 import { Policy } from '../store/inputs/model';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 
 // Change the constants to be static values so we can test against those instead of
 // relative sliding date times. Jest cannot access these outer scoped variables so
