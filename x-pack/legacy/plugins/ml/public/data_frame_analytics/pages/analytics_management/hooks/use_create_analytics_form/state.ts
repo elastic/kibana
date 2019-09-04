@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { COMMA_SEPARATOR } from '../../../../../../common/constants/index_patterns';
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
@@ -96,8 +95,8 @@ export const getJobConfigFromFormState = (
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
-      index: formState.sourceIndex.includes(COMMA_SEPARATOR)
-        ? formState.sourceIndex.split(COMMA_SEPARATOR)
+      index: formState.sourceIndex.includes(',')
+        ? formState.sourceIndex.split(',').map(d => d.trim())
         : formState.sourceIndex,
     },
     dest: {

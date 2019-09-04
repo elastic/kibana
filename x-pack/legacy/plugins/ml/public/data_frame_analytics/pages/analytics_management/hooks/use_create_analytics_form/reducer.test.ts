@@ -89,16 +89,22 @@ describe('useCreateAnalyticsForm', () => {
   test('validateAdvancedEditor(): check index pattern variations', () => {
     // valid single index pattern
     expect(validateAdvancedEditor(getMockState('the-source-index')).isValid).toBe(true);
-    // valid comma-separated index pattern
-    expect(
-      validateAdvancedEditor(getMockState('the-source-index-1,the-source-index-2')).isValid
-    ).toBe(true);
     // valid array with one ES index pattern
     expect(validateAdvancedEditor(getMockState(['the-source-index'])).isValid).toBe(true);
     // valid array with two ES index patterns
     expect(
       validateAdvancedEditor(getMockState(['the-source-index-1', 'the-source-index-2'])).isValid
     ).toBe(true);
+    // invalid comma-separated index pattern, this is only allowed in the simple form
+    // but not the advanced editor.
+    expect(
+      validateAdvancedEditor(getMockState('the-source-index-1,the-source-index-2')).isValid
+    ).toBe(false);
+    expect(
+      validateAdvancedEditor(
+        getMockState(['the-source-index-1,the-source-index-2', 'the-source-index-3'])
+      ).isValid
+    ).toBe(false);
     // invalid formats ("fake" TS casting to get valid TS and be able to run the tests)
     expect(validateAdvancedEditor(getMockState({} as SourceIndex)).isValid).toBe(false);
     expect(
