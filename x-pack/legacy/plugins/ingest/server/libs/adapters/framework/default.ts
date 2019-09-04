@@ -78,8 +78,8 @@ export class BackendFrameworkAdapter {
     }
   }
 
-  public exposeMethod(name: string, method: () => any) {
-    this.server.expose(name, method);
+  public expose(name: string, thing: any) {
+    this.server.expose(name, thing);
   }
 
   public async getUser(request: Request): Promise<KibanaUser | null> {
