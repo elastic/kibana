@@ -4,7 +4,7 @@ Creating i18n strings in Kibana requires use of the `@kbn/i18n` library. The fol
 
 ## Why i18n Dictionaries
 
-In Canvas, we prefer to use "dictionaries" of i18n strings over including translation inline.
+In Canvas, we prefer to use "dictionaries" of i18n strings over including translation inline. There are a number of reasons for this.
 
 ### API Signature is Lengthy
 
@@ -41,8 +41,8 @@ In either case, including all of this code inline, where the string is ultimatel
 import { FunctionStrings } from './some/i18n/dictionary';
 const { AlterColumn: strings } = FunctionStrings;
 
-AlterColumn.getColumnHelpText();
-AlterColumn.getAlterColumnHelpText();
+const help = strings.getColumnHelpText();
+const moreHelp = strings.getAlterColumnHelpText();
 ```
 
 ### Reducing Duplication, Auditing
@@ -57,13 +57,14 @@ There are some Best Practices™️ to follow when localizing Canvas strings:
 
 - Create dictionaries in `/canvas/i18n`.
   - Organize first by the top-level subject or directory, (e.g. `functions`, `renderers`, `components`, etc).
-- Don't create too many files. Prefer to split up a dictionary rather than start with separate ones.
+- Don't create too many files. Prefer to eventually split up a dictionary rather than start with many small ones.
   - Let's avoid ten files with two strings apiece, for example.
-- Create functions that produce a `string`, rather than properties.
-  - Prefer `getSomeString({...args}) => string` over `someString: string`.
-  - This standardizes the practice, but also allows for passing runtime argument parameters to the localized string at any point.
-  - The exception to this are Canvas `Functions`, which use a more complex dictionary, influenced by `data/interpreter`.
+- Create functions that produce a `string`, rather than properties of `string`s.
+  - Prefer `getSomeString({...values}) => i18n.translate(...);`.
+  - Avoid `someString: i18n.translate(...);`.
+  - Standardizes the practice, also allows for passing dynamic values to the localized string in the future.
+  - Exception to this is the dictionary for Canvas `Function`s, which use a more complex dictionary, influenced by `data/interpreter`.
 
 ## Constants
 
-In some cases, there are proper nouns or other words that should not be translated, (e.g. 'Canvas', 'JavaScript', 'momentJS', etc). We've created `/canvas/i18n/constants.ts` to collect these words. Add and use these constants as necessary.
+In some cases, there are proper nouns or other words that should not be translated, (e.g. 'Canvas', 'JavaScript', 'momentJS', etc). We've created `/canvas/i18n/constants.ts` to collect these words. Use and add to these constants as necessary.
