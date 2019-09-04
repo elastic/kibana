@@ -35,12 +35,18 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
     <>
       <StepText>
         {isSettingUp || isRetrying ? (
-          <EuiLoadingSpinner size="xl" />
+          <span>
+            <EuiLoadingSpinner size="xl" />
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.steps.setupProcess.loadingText"
+              defaultMessage="Creating ML jobs..."
+            />
+          </span>
         ) : didSetupFail ? (
           <>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
-              defaultMessage="Something went wrong creating the necessary Machine Learning resources.
+              defaultMessage="Something went wrong creating the necessary Machine Learning jobs.
               Please ensure your configured logs indices ({indexPattern}) exist."
               values={{
                 indexPattern,

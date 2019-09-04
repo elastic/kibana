@@ -6,9 +6,15 @@
 
 import * as rt from 'io-ts';
 import { kfetch } from 'ui/kfetch';
-import { getJobId } from '../../../../../common/log_analysis';
+import { getJobId, getDatafeedId } from '../../../../../common/log_analysis';
 
 export const callCleanupMLResources = async (spaceId: string, sourceId: string) => {
+  // Stop datafeed first due to https://github.com/elastic/kibana/issues/44652
+  await kfetch({
+    method: 'POST',
+    pathname: `/api/ml/datafeeds/${getDatafeedId(spaceId, sourceId, 'log-entry-rate')}/_stop`,
+  });
+
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
   const deleteJobsResponse = await kfetch({
     method: 'POST',
@@ -19,12 +25,6 @@ export const callCleanupMLResources = async (spaceId: string, sourceId: string) 
       })
     ),
   });
-
-  // If for some reason we do need to delete datafeeds
-  // const deleteLogRateDatafeedResponse = await kfetch({
-  //   method: 'DELETE',
-  //   pathname: `/api/ml/datafeeds/${getDatafeedId(spaceId, sourceId, 'log-entry-rate')}`,
-  // });
 
   return deleteJobsResponse;
 };
