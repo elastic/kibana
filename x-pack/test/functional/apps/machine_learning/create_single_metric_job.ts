@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
   const memoryLimit = '15MB';
 
   describe('single metric job creation', function() {
-    this.tags('smoke');
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
     });
@@ -148,46 +148,65 @@ export default function({ getService }: FtrProviderContext) {
     it('displays details for the created job in the job list', async () => {
       const rows = await ml.jobTable.parseJobTable();
       const job = rows.filter(row => row.id === jobId)[0];
-      expect(job.description).to.eql(jobDescription);
-      expect(job.jobGroups).to.eql(jobGroups);
-      expect(job.recordCount).to.eql('2,399');
-      expect(job.memoryStatus).to.eql('ok');
-      expect(job.jobState).to.eql('closed');
-      expect(job.datafeedState).to.eql('stopped');
-      expect(job.latestTimestamp).to.eql('2016-02-11 23:56:59');
+      expect(job).to.eql({
+        id: jobId,
+        description: jobDescription,
+        jobGroups,
+        recordCount: '2,399',
+        memoryStatus: 'ok',
+        jobState: 'closed',
+        datafeedState: 'stopped',
+        latestTimestamp: '2016-02-11 23:56:59',
+      });
 
       const countDetails = await ml.jobTable.parseJobCounts(jobId);
       const counts = countDetails.counts;
-      expect(counts.job_id).to.eql(jobId);
-      expect(counts.processed_record_count).to.eql('2,399');
-      expect(counts.processed_field_count).to.eql('4,798');
-      expect(counts.input_bytes).to.eql('180.6 KB');
-      expect(counts.input_field_count).to.eql('4,798');
-      expect(counts.invalid_date_count).to.eql('0');
-      expect(counts.missing_field_count).to.eql('0');
-      expect(counts.out_of_order_timestamp_count).to.eql('0');
-      expect(counts.empty_bucket_count).to.eql('0');
-      expect(counts.sparse_bucket_count).to.eql('0');
-      expect(counts.bucket_count).to.eql('239');
-      expect(counts.earliest_record_timestamp).to.eql('2016-02-07 00:02:50');
-      expect(counts.latest_record_timestamp).to.eql('2016-02-11 23:56:59');
+
+      // last_data_time holds a runtime timestamp and is hard to predict
+      // the property is only validated to be present and then removed
+      // so it doesn't make the counts object validation fail
       expect(counts).to.have.property('last_data_time');
-      expect(counts.input_record_count).to.eql('2,399');
-      expect(counts.latest_bucket_timestamp).to.eql('2016-02-11 23:30:00');
+      delete counts.last_data_time;
+
+      expect(counts).to.eql({
+        job_id: jobId,
+        processed_record_count: '2,399',
+        processed_field_count: '4,798',
+        input_bytes: '180.6 KB',
+        input_field_count: '4,798',
+        invalid_date_count: '0',
+        missing_field_count: '0',
+        out_of_order_timestamp_count: '0',
+        empty_bucket_count: '0',
+        sparse_bucket_count: '0',
+        bucket_count: '239',
+        earliest_record_timestamp: '2016-02-07 00:02:50',
+        latest_record_timestamp: '2016-02-11 23:56:59',
+        input_record_count: '2,399',
+        latest_bucket_timestamp: '2016-02-11 23:30:00',
+      });
 
       const modelSizeStats = countDetails.modelSizeStats;
-      expect(modelSizeStats.job_id).to.eql(jobId);
-      expect(modelSizeStats.result_type).to.eql('model_size_stats');
-      expect(modelSizeStats.model_bytes).to.eql('47.6 KB');
-      expect(modelSizeStats.model_bytes_exceeded).to.eql('0');
-      expect(modelSizeStats.model_bytes_memory_limit).to.eql('15728640');
-      expect(modelSizeStats.total_by_field_count).to.eql('3');
-      expect(modelSizeStats.total_over_field_count).to.eql('0');
-      expect(modelSizeStats.total_partition_field_count).to.eql('2');
-      expect(modelSizeStats.bucket_allocation_failures_count).to.eql('0');
-      expect(modelSizeStats.memory_status).to.eql('ok');
+
+      // log_time holds a runtime timestamp and is hard to predict
+      // the property is only validated to be present and then removed
+      // so it doesn't make the modelSizeStats object validation fail
       expect(modelSizeStats).to.have.property('log_time');
-      expect(modelSizeStats.timestamp).to.eql('2016-02-11 23:00:00');
+      delete modelSizeStats.log_time;
+
+      expect(modelSizeStats).to.eql({
+        job_id: jobId,
+        result_type: 'model_size_stats',
+        model_bytes: '47.6 KB',
+        model_bytes_exceeded: '0',
+        model_bytes_memory_limit: '15728640',
+        total_by_field_count: '3',
+        total_over_field_count: '0',
+        total_partition_field_count: '2',
+        bucket_allocation_failures_count: '0',
+        memory_status: 'ok',
+        timestamp: '2016-02-11 23:00:00',
+      });
     });
   });
 }
