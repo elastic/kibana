@@ -18,6 +18,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { AggParamType } from '../param_types/agg';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
 
@@ -37,10 +38,14 @@ function OrderAggParamEditor({
 
       // we aren't creating a custom aggConfig
       if (!orderBy || orderBy !== 'custom') {
-        setValue(null);
+        setValue(undefined);
+      } else if (value) {
+        setValue(value);
       } else {
-        const paramDef = agg.type.params.byName.orderAgg;
-        setValue(value || paramDef.makeOrderAgg(agg));
+        const paramDef = agg.type.paramByName('orderAgg');
+        if (paramDef) {
+          setValue((paramDef as AggParamType).makeAgg(agg));
+        }
       }
     }
   }, [agg.params.orderBy, metricAggs]);
@@ -53,7 +58,7 @@ function OrderAggParamEditor({
 
   return (
     <DefaultEditorAggParams
-      agg={value}
+      agg={value as AggConfig}
       groupName="metrics"
       className="visEditorAgg__subAgg"
       formIsTouched={subAggParams.formIsTouched}
