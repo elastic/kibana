@@ -21,46 +21,67 @@ import React from 'react';
 
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { RenderingService } from './rendering_service';
+import { InternalApplicationStart } from '../application';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
 describe('RenderingService#start', () => {
-  const getService = () => {
+  const getService = ({ legacyMode = false }: { legacyMode?: boolean } = {}) => {
     const rendering = new RenderingService();
+    const application = {
+      getComponent: () => <div>Hello application!</div>,
+    } as InternalApplicationStart;
     const chrome = chromeServiceMock.createStartContract();
-    chrome.getComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getLegacyMode.mockReturnValue(legacyMode);
     const targetDomElement = document.createElement('div');
-    const start = rendering.start({ chrome, targetDomElement });
+    const start = rendering.start({ application, chrome, injectedMetadata, targetDomElement });
     return { start, targetDomElement };
   };
 
-  it('renders into provided DOM element', () => {
+  it('renders application service into provided DOM element', () => {
     const { targetDomElement } = getService();
-    expect(targetDomElement).toMatchInlineSnapshot(`
-<div>
-  <div
-    class="content"
-    data-test-subj="kibanaChrome"
-  >
-    <div>
-      Hello chrome!
-    </div>
-    <div />
-  </div>
-</div>
-`);
+    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
+      <div
+        class="application"
+      >
+        <div>
+          Hello application!
+        </div>
+      </div>
+    `);
   });
 
-  it('returns a div for the legacy service to render into', () => {
-    const {
-      start: { legacyTargetDomElement },
-      targetDomElement,
-    } = getService();
-    legacyTargetDomElement.innerHTML = '<span id="legacy">Hello legacy!</span>';
-    expect(targetDomElement.querySelector('#legacy')).toMatchInlineSnapshot(`
-<span
-  id="legacy"
->
-  Hello legacy!
-</span>
-`);
+  it('contains wrapper divs', () => {
+    const { targetDomElement } = getService();
+    expect(targetDomElement.querySelector('div.app-wrapper')).toBeDefined();
+    expect(targetDomElement.querySelector('div.app-wrapper-pannel')).toBeDefined();
+  });
+
+  describe('legacyMode', () => {
+    it('renders into provided DOM element', () => {
+      const { targetDomElement } = getService({ legacyMode: true });
+      expect(targetDomElement).toMatchInlineSnapshot(`
+          <div>
+            <div
+              class="content"
+              data-test-subj="kibanaChrome"
+            >
+              <div>
+                Hello chrome!
+              </div>
+              <div />
+            </div>
+          </div>
+      `);
+    });
+
+    it('returns a div for the legacy service to render into', () => {
+      const {
+        start: { legacyTargetDomElement },
+        targetDomElement,
+      } = getService({ legacyMode: true });
+      expect(targetDomElement.contains(legacyTargetDomElement!)).toBe(true);
+    });
   });
 });
