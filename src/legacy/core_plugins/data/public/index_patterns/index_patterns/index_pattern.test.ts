@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import mockLogstashFields from '../../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { defaults, pluck, last, get } from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
-import { DuplicateField } from 'ui/errors';
-
 import { IndexPattern } from './index_pattern';
+
+// @ts-ignore
+import { DuplicateField } from 'ui/errors';
+// @ts-ignore
+import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
+// @ts-ignore
+
+import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { Field } from '../index_patterns_service';
 
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
-  }
+  },
 }));
 
 jest.mock('ui/utils/mapping_setup', () => ({
@@ -36,16 +41,16 @@ jest.mock('ui/utils/mapping_setup', () => ({
     id: true,
     title: true,
     fieldFormatMap: {
-      _deserialize: jest.fn().mockImplementation(() => ([])),
+      _deserialize: jest.fn().mockImplementation(() => []),
     },
-  }))
+  })),
 }));
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
     addError: jest.fn(),
-  }
+  },
 }));
 
 jest.mock('ui/saved_objects', () => {
@@ -54,32 +59,32 @@ jest.mock('ui/saved_objects', () => {
   };
 });
 
-let mockFieldsFetcherResponse = [];
+let mockFieldsFetcherResponse: any[] = [];
+
 jest.mock('./_fields_fetcher', () => ({
   createFieldsFetcher: jest.fn().mockImplementation(() => ({
     fetch: jest.fn().mockImplementation(() => {
       return new Promise(resolve => resolve(mockFieldsFetcherResponse));
     }),
     every: jest.fn(),
-  }))
+  })),
 }));
 
-let object;
+let object: any = {};
+
 const savedObjectsClient = {
   create: jest.fn(),
   get: jest.fn().mockImplementation(() => object),
   update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
     if (object._version !== version) {
-      throw {
+      throw new Object({
         res: {
-          status: 409
-        }
-      };
+          status: 409,
+        },
+      });
     }
-
     object.attributes.title = body.title;
     object._version += 'a';
-
     return {
       id: object._id,
       _version: object._version,
@@ -96,35 +101,44 @@ const config = {
 };
 
 const apiClient = {
+  _getUrl: jest.fn(),
   getFieldsForTimePattern: jest.fn(),
   getFieldsForWildcard: jest.fn(),
 };
 
 // helper function to create index patterns
-function create(id, payload) {
-  const indexPattern = new IndexPattern(id, cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
+function create(id: string, payload?: any): Promise<IndexPattern> {
+  const indexPattern = new IndexPattern(
+    id,
+    (cfg: any) => config.get(cfg),
+    savedObjectsClient as any,
+    apiClient,
+    patternCache
+  );
 
   setDocsourcePayload(id, payload);
 
   return indexPattern.init();
 }
 
-function setDocsourcePayload(id, providedPayload) {
-  object = _.defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
+function setDocsourcePayload(id: string | null, providedPayload: any) {
+  object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
 describe('IndexPattern', () => {
   const indexPatternId = 'test-pattern';
-  let indexPattern;
+
+  let indexPattern: IndexPattern;
+
   // create an indexPattern instance for each test
-  beforeEach(function () {
-    return create(indexPatternId).then(function (pattern) {
+  beforeEach(() => {
+    return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;
     });
   });
 
-  describe('api', function () {
-    it('should have expected properties', function () {
+  describe('api', () => {
+    test('should have expected properties', () => {
       expect(indexPattern).toHaveProperty('refreshFields');
       expect(indexPattern).toHaveProperty('popularizeField');
       expect(indexPattern).toHaveProperty('getScriptedFields');
@@ -140,16 +154,16 @@ describe('IndexPattern', () => {
     });
   });
 
-  describe('init', function () {
-    it('should append the found fields', function () {
+  describe('init', () => {
+    test('should append the found fields', () => {
       expect(savedObjectsClient.get).toHaveBeenCalled();
-      expect(indexPattern.fields).toHaveLength(mockLogstashFields().length);
+      expect(indexPattern.fields).toHaveLength(mockLogStashFields().length);
       expect(indexPattern.fields).toBeInstanceOf(IndexedArray);
     });
   });
 
-  describe('fields', function () {
-    it('should have expected properties on fields', function () {
+  describe('fields', () => {
+    test('should have expected properties on fields', function() {
       expect(indexPattern.fields[0]).toHaveProperty('displayName');
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
       expect(indexPattern.fields[0]).toHaveProperty('format');
@@ -158,42 +172,45 @@ describe('IndexPattern', () => {
     });
   });
 
-  describe('getScriptedFields', function () {
-    it('should return all scripted fields', function () {
-      const scriptedNames = _(mockLogstashFields()).where({ scripted: true }).pluck('name').value();
-      const respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
+  describe('getScriptedFields', () => {
+    test('should return all scripted fields', () => {
+      const scriptedNames = mockLogStashFields()
+        .filter((item: Field) => item.scripted === true)
+        .map((item: Field) => item.name);
+      const respNames = pluck(indexPattern.getScriptedFields(), 'name');
+
       expect(respNames).toEqual(scriptedNames);
     });
   });
 
-  describe('getNonScriptedFields', function () {
-    it('should return all non-scripted fields', function () {
-      const notScriptedNames = _(mockLogstashFields()).where({ scripted: false }).pluck('name').value();
-      const respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
+  describe('getNonScriptedFields', () => {
+    test('should return all non-scripted fields', () => {
+      const notScriptedNames = mockLogStashFields()
+        .filter((item: Field) => item.scripted === false)
+        .map((item: Field) => item.name);
+      const respNames = pluck(indexPattern.getNonScriptedFields(), 'name');
+
       expect(respNames).toEqual(notScriptedNames);
     });
-
   });
 
-  describe('refresh fields', function () {
-    it('should fetch fields from the fieldsFetcher', async function () {
+  describe('refresh fields', () => {
+    test('should fetch fields from the fieldsFetcher', async () => {
       expect(indexPattern.fields.length).toBeGreaterThan(2);
 
-      mockFieldsFetcherResponse = [
-        { name: 'foo' },
-        { name: 'bar' }
-      ];
+      mockFieldsFetcherResponse = [{ name: 'foo' }, { name: 'bar' }];
 
       await indexPattern.refreshFields();
 
       mockFieldsFetcherResponse = [];
 
       const newFields = indexPattern.getNonScriptedFields();
+
       expect(newFields).toHaveLength(2);
       expect(newFields.map(f => f.name)).toEqual(['foo', 'bar']);
     });
 
-    it('should preserve the scripted fields', async function () {
+    test('should preserve the scripted fields', async () => {
       // add spy to indexPattern.getScriptedFields
       // sinon.spy(indexPattern, 'getScriptedFields');
 
@@ -202,13 +219,16 @@ describe('IndexPattern', () => {
 
       // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
       // sinon.assert.calledOnce(indexPattern.getScriptedFields);
-      expect(indexPattern.getScriptedFields().map(f => f.name))
-        .toEqual(mockLogstashFields().filter(f => f.scripted).map(f => f.name));
+      expect(indexPattern.getScriptedFields().map(f => f.name)).toEqual(
+        mockLogStashFields()
+          .filter((f: Field) => f.scripted)
+          .map((f: Field) => f.name)
+      );
     });
   });
 
-  describe('add and remove scripted fields', function () {
-    it('should append the scripted field', function () {
+  describe('add and remove scripted fields', () => {
+    test('should append the scripted field', async () => {
       // keep a copy of the current scripted field count
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const oldCount = indexPattern.getScriptedFields().length;
@@ -217,142 +237,128 @@ describe('IndexPattern', () => {
       const scriptedField = {
         name: 'new scripted field',
         script: 'false',
-        type: 'boolean'
+        type: 'boolean',
       };
-      indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
+
+      await indexPattern.addScriptedField(
+        scriptedField.name,
+        scriptedField.script,
+        scriptedField.type,
+        'lang'
+      );
+
       const scriptedFields = indexPattern.getScriptedFields();
       // expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).toHaveLength(oldCount + 1);
       expect(indexPattern.fields.byName[scriptedField.name].name).toEqual(scriptedField.name);
     });
 
-    it('should remove scripted field, by name', function () {
+    test('should remove scripted field, by name', async () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
-      const scriptedField = _.last(scriptedFields);
+      const scriptedField = last(scriptedFields);
 
-      indexPattern.removeScriptedField(scriptedField.name);
+      await indexPattern.removeScriptedField(scriptedField.name);
 
       // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.byName[scriptedField.name]).toEqual(undefined);
     });
 
-    it('should not allow duplicate names', async () => {
+    test('should not allow duplicate names', async () => {
       const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = _.last(scriptedFields);
+      const scriptedField = last(scriptedFields);
       expect.assertions(1);
       try {
-        await indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
+        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
     });
   });
 
-  describe('popularizeField', function () {
-    it('should increment the popularity count by default', function () {
+  describe('popularizeField', () => {
+    test('should increment the popularity count by default', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(function (field) {
-        const oldCount = field.count;
+      indexPattern.fields.forEach(async field => {
+        const oldCount = field.count || 0;
 
-        indexPattern.popularizeField(field.name);
+        await indexPattern.popularizeField(field.name);
 
         // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + 1);
       });
     });
 
-    it('should increment the popularity count', function () {
+    test('should increment the popularity count', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(function (field) {
-        const oldCount = field.count;
+      indexPattern.fields.forEach(async field => {
+        const oldCount = field.count || 0;
         const incrementAmount = 4;
 
-        indexPattern.popularizeField(field.name, incrementAmount);
+        await indexPattern.popularizeField(field.name, incrementAmount);
 
         // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + incrementAmount);
       });
     });
 
-    it('should decrement the popularity count', function () {
-      indexPattern.fields.forEach(function (field) {
-        const oldCount = field.count;
+    test('should decrement the popularity count', () => {
+      indexPattern.fields.forEach(async field => {
+        const oldCount = field.count || 0;
         const incrementAmount = 4;
         const decrementAmount = -2;
 
-        indexPattern.popularizeField(field.name, incrementAmount);
-        indexPattern.popularizeField(field.name, decrementAmount);
+        await indexPattern.popularizeField(field.name, incrementAmount);
+        await indexPattern.popularizeField(field.name, decrementAmount);
 
         expect(field.count).toEqual(oldCount + incrementAmount + decrementAmount);
       });
     });
 
-    it('should not go below 0', function () {
-      indexPattern.fields.forEach(function (field) {
+    test('should not go below 0', () => {
+      indexPattern.fields.forEach(async field => {
         const decrementAmount = -Number.MAX_VALUE;
-        indexPattern.popularizeField(field.name, decrementAmount);
+
+        await indexPattern.popularizeField(field.name, decrementAmount);
+
         expect(field.count).toEqual(0);
       });
     });
   });
 
-  describe('getIndex', () => {
-    it('should return the title when there is no intervalName', () => {
-      expect(indexPattern.getIndex()).toBe(indexPattern.title);
-    });
-
-    it('should convert time-based intervals to wildcards', () => {
-      const oldTitle = indexPattern.title;
-      indexPattern.intervalName = 'daily';
-
-      indexPattern.title = '[logstash-]YYYY.MM.DD';
-      expect(indexPattern.getIndex()).toBe('logstash-*');
-
-      indexPattern.title = 'YYYY.MM.DD[-logstash]';
-      expect(indexPattern.getIndex()).toBe('*-logstash');
-
-      indexPattern.title = 'YYYY[-logstash-]YYYY.MM.DD';
-      expect(indexPattern.getIndex()).toBe('*-logstash-*');
-
-      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD';
-      expect(indexPattern.getIndex()).toBe('*-logstash-*-foo-*');
-
-      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD[-bar]';
-      expect(indexPattern.getIndex()).toBe('*-logstash-*-foo-*-bar');
-
-      indexPattern.title = '[logstash-]YYYY[-foo-]MM.DD[-bar]';
-      expect(indexPattern.getIndex()).toBe('logstash-*-foo-*-bar');
-
-      indexPattern.title = '[logstash]';
-      expect(indexPattern.getIndex()).toBe('logstash');
-
-      indexPattern.title = oldTitle;
-      delete indexPattern.intervalName;
-    });
-  });
-
-  it('should handle version conflicts', async () => {
+  test('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
-      _version: 'foo',
       _id: 'foo',
+      _version: 'foo',
       attributes: {
-        title: 'something'
-      }
+        title: 'something',
+      },
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern('foo', cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
+    const pattern = new IndexPattern(
+      'foo',
+      (cfg: any) => config.get(cfg),
+      savedObjectsClient as any,
+      apiClient,
+      patternCache
+    );
     await pattern.init();
 
-    expect(pattern.version).toBe('fooa');
+    expect(get(pattern, 'version')).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern('foo', cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
+    const samePattern = new IndexPattern(
+      'foo',
+      (cfg: any) => config.get(cfg),
+      savedObjectsClient as any,
+      apiClient,
+      patternCache
+    );
     await samePattern.init();
 
-    expect(samePattern.version).toBe('fooaa');
+    expect(get(samePattern, 'version')).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
