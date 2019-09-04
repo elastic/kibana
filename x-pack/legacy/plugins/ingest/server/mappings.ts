@@ -5,7 +5,7 @@
  */
 
 export const mappings = {
-  configurations: {
+  policies: {
     properties: {
       name: {
         type: 'text',
@@ -30,10 +30,10 @@ export const mappings = {
           meta: {
             type: 'keyword',
           },
-          config_id: {
+          policy_id: {
             type: 'keyword',
           },
-          config: {
+          policy: {
             type: 'keyword',
           },
         },

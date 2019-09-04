@@ -32,6 +32,10 @@ export class PolicyAdapter {
       throw new Error(policySO.error.message);
     }
 
+    if (!policySO.attributes) {
+      throw new Error(`No policy found with ID of ${id}`);
+    }
+
     const policy = {
       id: policySO.id,
       ...policySO.attributes,
@@ -217,7 +221,7 @@ export class PolicyAdapter {
       newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
     }
 
-    return newInputs.map(input => input.id);
+    return newInputs.map(input => input.attributes.id);
   }
 
   public async deleteInputs(inputIDs: string[]): Promise<{ success: boolean }> {

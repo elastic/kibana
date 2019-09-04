@@ -109,7 +109,7 @@ export class BackendFrameworkAdapter {
 
     // If, for some reason, we cannot get the license information
     // from Elasticsearch, assume worst case and disable
-    if (!xpackInfo || !xpackInfo.isAvailable()) {
+    if (!xpackInfo) {
       this.info = null;
       return;
     }
@@ -136,7 +136,7 @@ export class BackendFrameworkAdapter {
         },
       };
     } catch (e) {
-      this.server.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
+      this.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
       throw e;
     }
 

@@ -24,7 +24,7 @@ export function ingest(kibana: any) {
     configPrefix: CONFIG_PREFIX,
     uiExports: {
       savedObjectSchemas: {
-        configurations: {
+        policies: {
           isNamespaceAgnostic: true,
           indexPattern: INDEX_NAMES.INGEST,
         },
