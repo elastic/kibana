@@ -51,7 +51,6 @@ export const NewRuntimeBackupPolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
-    output: t.string,
     monitoring_enabled: t.boolean,
     agent_version: t.string,
     flat_data_sources: t.string,

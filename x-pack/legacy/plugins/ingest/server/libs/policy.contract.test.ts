@@ -5,7 +5,6 @@
  */
 
 import { callWhenOnline } from '@mattapperson/slapshot/lib/call_when_online';
-import { createKibanaServer } from '../../../../../test_utils/jest/contract_tests/servers';
 import { compose } from './compose/memorized';
 import { ServerLibs } from './types';
 import * as elasticsearch from 'elasticsearch';
@@ -27,14 +26,20 @@ describe('Policies Lib', () => {
 
   beforeAll(async () => {
     await callWhenOnline(async () => {
-      servers = await createKibanaServer({
-        security: { enabled: true },
-      });
-      const esPolicy = JSON.parse(process.env.__JEST__ESServer || '');
-      es = new elasticsearch.Client({
-        hosts: esPolicy.hosts,
-        httpAuth: esPolicy.username ? `${esPolicy.username}:${esPolicy.password}` : undefined,
-      });
+      if (typeof (global as any).import !== 'undefined') {
+        const { createKibanaServer } = await import(
+          '../../../../../test_utils/jest/contract_tests/servers'
+        );
+
+        servers = await createKibanaServer({
+          security: { enabled: true },
+        });
+        const esPolicy = JSON.parse(process.env.__JEST__ESServer || '');
+        es = new elasticsearch.Client({
+          hosts: esPolicy.hosts,
+          httpAuth: esPolicy.username ? `${esPolicy.username}:${esPolicy.password}` : undefined,
+        });
+      }
     });
 
     libs = compose(servers);
