@@ -15,7 +15,7 @@ import { InfrastructurePage } from './pages/infrastructure';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
-import { RedirectWithQueryParams } from './utils/infra_redirect';
+import { RedirectWithQueryParams } from './utils/redirect_with_query_params';
 
 interface RouterProps {
   history: History;
