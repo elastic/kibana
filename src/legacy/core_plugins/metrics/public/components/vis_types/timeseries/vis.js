@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import reactCSS from 'reactcss';
 
-import { startsWith, get, cloneDeep, map, isEqual } from 'lodash';
+import { startsWith, get, cloneDeep, map } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
@@ -76,10 +76,15 @@ export class TimeseriesVisualization extends Component {
     return vars;
   };
 
-  static getYAxisDomain = model => ({
-    min: get(model, 'axis_min'),
-    max: get(model, 'axis_max'),
-  });
+  static getYAxisDomain = model => {
+    const axisMin = get(model, 'axis_min', '').toString();
+    const axisMax = get(model, 'axis_max', '').toString();
+
+    return {
+      min: axisMin.length ? Number(axisMin) : undefined,
+      max: axisMax.length ? Number(axisMax) : undefined,
+    };
+  };
 
   static addYAxis = (yAxis, { id, groupId, position, tickFormatter, domain, hide }) => {
     yAxis.push({
@@ -165,23 +170,18 @@ export class TimeseriesVisualization extends Component {
       this.props.getConfig
     );
     const yAxis = [];
+    let mainDomainAdded = false;
 
     this.showToastNotification = null;
-
-    TimeseriesVisualization.addYAxis(yAxis, {
-      tickFormatter,
-      id: yAxisIdGenerator('main'),
-      groupId: mainAxisGroupId,
-      position: model.axis_position,
-      domain: mainAxisDomain,
-    });
 
     seriesModel.forEach(seriesGroup => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
       const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
-      const domain = TimeseriesVisualization.getYAxisDomain(seriesGroup);
-      const isCustomDomain = !isEqual(domain, mainAxisDomain);
+      const domain = hasSeparateAxis
+        ? TimeseriesVisualization.getYAxisDomain(seriesGroup)
+        : undefined;
+      const isCustomDomain = groupId !== mainAxisGroupId;
       const seriesGroupTickFormatter = TimeseriesVisualization.getTickFormatter(
         seriesGroup,
         this.props.getConfig
@@ -193,8 +193,8 @@ export class TimeseriesVisualization extends Component {
       if (seriesGroup.stacked === STACKED_OPTIONS.PERCENT) {
         seriesGroup.separate_axis = true;
         seriesGroup.axisFormatter = 'percent';
-        seriesGroup.axis_min = 0;
-        seriesGroup.axis_max = 1;
+        seriesGroup.axis_min = seriesGroup.axis_min || 0;
+        seriesGroup.axis_max = seriesGroup.axis_max || 1;
         seriesGroup.axis_position = model.axis_position;
       }
 
@@ -214,11 +214,22 @@ export class TimeseriesVisualization extends Component {
           groupId,
           id: yAxisIdGenerator(seriesGroup.id),
           position: seriesGroup.axis_position,
+          hide: isStackedWithinSeries,
           tickFormatter:
             seriesGroup.stacked === STACKED_OPTIONS.PERCENT
               ? this.yAxisStackedByPercentFormatter
               : seriesGroupTickFormatter,
         });
+      } else if (!mainDomainAdded) {
+        TimeseriesVisualization.addYAxis(yAxis, {
+          tickFormatter,
+          id: yAxisIdGenerator('main'),
+          groupId: mainAxisGroupId,
+          position: model.axis_position,
+          domain: mainAxisDomain,
+        });
+
+        mainDomainAdded = true;
       }
     });
 
