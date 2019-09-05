@@ -46,7 +46,7 @@ export function ActionBar({
   isLoading: boolean;
   onChangeCount: (count: number) => void;
   onLoadMoreClick: () => void;
-  type: string;
+  type: 'successor' | 'predecessor';
   warning: boolean;
   warningDocCount?: number;
 }) {
@@ -60,26 +60,35 @@ export function ActionBar({
             data-test-subj="successorWarningMsg"
             iconType="bolt"
             title={
-              <FormattedMessage
-                id="kbn.context.newerDocumentsWarning"
-                defaultMessage="Only {warningDocCount} documents newer than the anchor could be found."
-                values={{ warningDocCount }}
-              />
+              warningDocCount === 0 ? (
+                <FormattedMessage
+                  id="kbn.context.newerDocumentsWarningZero"
+                  defaultMessage="No documents newer than the anchor could be found."
+                />
+              ) : (
+                <FormattedMessage
+                  id="kbn.context.newerDocumentsWarning"
+                  defaultMessage="Only {warningDocCount} documents newer than the anchor could be found."
+                  values={{ warningDocCount }}
+                />
+              )
             }
+            size="s"
           />
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiFlexGroup direction="row" responsive={false}>
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj={
               type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
             }
-            isLoading={isLoading}
             disabled={isDisabled}
             iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
+            isLoading={isLoading}
             onClick={onLoadMoreClick}
+            size="s"
           >
             <FormattedMessage
               id="kbn.context.loadMoreDescription"
@@ -133,12 +142,20 @@ export function ActionBar({
           data-test-subj="predecessorWarningMsg"
           iconType="bolt"
           title={
-            <FormattedMessage
-              id="kbn.context.olderDocumentsWarning"
-              defaultMessage="Only {warningDocCount} documents older than the anchor could be found."
-              values={{ warningDocCount }}
-            />
+            warningDocCount === 0 ? (
+              <FormattedMessage
+                id="kbn.context.olderDocumentsWarningZero"
+                defaultMessage="No documents older than the anchor could be found."
+              />
+            ) : (
+              <FormattedMessage
+                id="kbn.context.olderDocumentsWarning"
+                defaultMessage="Only {warningDocCount} documents older than the anchor could be found."
+                values={{ warningDocCount }}
+              />
+            )
           }
+          size="s"
         />
       )}
       {type === 'predecessor' && <EuiSpacer size="s" />}
