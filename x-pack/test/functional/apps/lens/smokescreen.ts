@@ -20,7 +20,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
 
   async function goToValidTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
