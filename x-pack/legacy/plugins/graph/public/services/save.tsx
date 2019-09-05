@@ -29,7 +29,7 @@ export function save({
   ) => Promise<{ id?: string } | { error: string }>;
 }) {
   const currentTitle = workspace.title;
-  const currentDescription = workspace.title;
+  const currentDescription = workspace.description;
   const onSave = ({
     newTitle,
     newDescription,
