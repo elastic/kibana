@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const MetricsExplorerEmptyChart = injectI18n(() => {

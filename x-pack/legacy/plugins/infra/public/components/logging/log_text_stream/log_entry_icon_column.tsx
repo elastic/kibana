@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { LogEntryColumnContent } from './log_entry_column';
@@ -29,13 +29,12 @@ export const LogEntryIconColumn: React.FunctionComponent<LogEntryIconColumnProps
   );
 };
 
-export const LogEntryDetailsIconColumn = injectI18n<
+export const LogEntryDetailsIconColumn: React.FunctionComponent<
   LogEntryIconColumnProps & {
     openFlyout: () => void;
   }
->(({ intl, isHighlighted, isHovered, openFlyout }) => {
-  const label = intl.formatMessage({
-    id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
+> = ({ isHighlighted, isHovered, openFlyout }) => {
+  const label = i18n.translate('xpack.infra.logEntryItemView.viewDetailsToolTip', {
     defaultMessage: 'View Details',
   });
 
@@ -48,7 +47,7 @@ export const LogEntryDetailsIconColumn = injectI18n<
       ) : null}
     </LogEntryIconColumn>
   );
-});
+};
 
 const IconColumnContent = LogEntryColumnContent.extend.attrs<{
   isHighlighted: boolean;
