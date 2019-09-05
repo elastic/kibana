@@ -133,6 +133,7 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
   return (
     <EuiBasicTable
       className="lnsDataTable"
+      data-test-subj="lnsDataTable"
       columns={props.args.columns.columnIds
         .map((field, index) => {
           return {

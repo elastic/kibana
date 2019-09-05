@@ -20,6 +20,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
   async function goToValidTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -45,10 +46,24 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function assertExpectedMetric() {
-    const expectedTitle = 'Maximum of bytes';
-    const expectedValue = '19,986';
-    await assertExactText('[data-test-subj="lns_metric_title"]', expectedTitle);
-    await assertExactText('[data-test-subj="lns_metric_value"]', expectedValue);
+    await assertExactText('[data-test-subj="lns_metric_title"]', 'Maximum of bytes');
+    await assertExactText('[data-test-subj="lns_metric_value"]', '19,986');
+  }
+
+  async function assertExpectedTable() {
+    await assertExactText(
+      '[data-test-subj="lnsDataTable"] thead .euiTableCellContent__text',
+      'Maximum of bytes'
+    );
+    await assertExactText(
+      '[data-test-subj="lnsDataTable"] tbody .euiTableCellContent__text',
+      '19,986'
+    );
+  }
+
+  async function switchToVisualization(dataTestSubj: string) {
+    await find.clickByCssSelector('[data-test-subj="lnsChartSwitchPopover"]');
+    await find.clickByCssSelector(`[data-test-subj="${dataTestSubj}"]`);
   }
 
   function clickVisualizeListItem(title: string) {
@@ -70,6 +85,17 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.addVisualizations([
         { name: 'Artistpreviouslyknownaslens', embeddableType: 'lens' },
       ]);
+      await assertExpectedMetric();
+    });
+
+    it('should allow seamless transition to and from table view', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await clickVisualizeListItem('Artistpreviouslyknownaslens');
+      await goToValidTimeRange();
+      await assertExpectedMetric();
+      await switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await assertExpectedTable();
+      await switchToVisualization('lnsChartSwitchPopover_lnsMetric');
       await assertExpectedMetric();
     });
 
