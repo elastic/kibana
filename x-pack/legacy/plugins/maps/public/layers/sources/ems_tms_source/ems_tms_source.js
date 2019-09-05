@@ -23,7 +23,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     defaultMessage: 'EMS Basemaps'
   });
   static description = i18n.translate('xpack.maps.source.emsTileDescription', {
-    defaultMessage: 'Map tiles from Elastic Maps Service'
+    defaultMessage: 'Tile map service from Elastic Maps Service'
   });
   static icon = 'emsApp';
 

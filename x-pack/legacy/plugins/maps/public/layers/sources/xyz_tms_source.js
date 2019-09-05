@@ -23,7 +23,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     defaultMessage: 'Tile Map Service'
   });
   static description = i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Map tiles from a URL that includes the XYZ coordinates'
+    defaultMessage: 'Tile map service configured in interface'
   });
   static icon = 'grid';
 
