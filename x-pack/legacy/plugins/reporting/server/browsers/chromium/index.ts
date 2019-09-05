@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
+import { BrowserConfig } from '../../../types';
 
 export { paths } from './paths';
 
 export async function createDriverFactory(
-  binaryPath,
-  logger,
-  browserConfig,
-  queueTimeout
-): HeadlessChromiumDriverFactory {
+  binaryPath: string,
+  logger: LevelLogger,
+  browserConfig: BrowserConfig,
+  queueTimeout: number
+): Promise<HeadlessChromiumDriverFactory> {
   return new HeadlessChromiumDriverFactory(binaryPath, logger, browserConfig, queueTimeout);
 }

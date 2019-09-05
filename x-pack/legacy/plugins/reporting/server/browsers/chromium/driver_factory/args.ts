@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IArgOptions {
-  userDataDir: string;
-  viewport: { width: number; height: number };
-  disableSandbox: boolean;
-  proxyConfig: {
-    enabled: boolean;
-    server: string;
-    bypass?: string[];
-  };
-  verboseLogging?: boolean;
+import { BrowserConfig } from '../../../../types';
+
+interface LaunchArgs {
+  userDataDir: BrowserConfig['userDataDir'];
+  viewport: BrowserConfig['viewport'];
+  disableSandbox: BrowserConfig['disableSandbox'];
+  proxy: BrowserConfig['proxy'];
+  verboseLogging: BrowserConfig['verboseLogging'];
 }
 
 export const args = ({
   userDataDir,
   viewport,
   disableSandbox,
-  proxyConfig,
+  proxy: proxyConfig,
   verboseLogging,
-}: IArgOptions) => {
+}: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
