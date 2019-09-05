@@ -75,7 +75,7 @@ export const FilterGroupComponent = ({
       items: locations,
       onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
-      title: i18n.translate('xpack.uptime.filterPopover.title.location', {
+      title: i18n.translate('xpack.uptime.filterBar.options.location.name', {
         defaultMessage: 'Location',
       }),
     },
@@ -86,7 +86,7 @@ export const FilterGroupComponent = ({
       items: ids,
       onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.id'),
-      title: i18n.translate('xpack.uptime.filterPopover.title.id', { defaultMessage: 'ID' }),
+      title: i18n.translate('xpack.uptime.filterBar.options.idLabel', { defaultMessage: 'ID' }),
     },
     {
       fieldName: 'url.full',
@@ -95,7 +95,7 @@ export const FilterGroupComponent = ({
       items: urls,
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.full'),
-      title: i18n.translate('xpack.uptime.filterPopover.title.url', { defaultMessage: 'URL' }),
+      title: i18n.translate('xpack.uptime.filterBar.options.urlLabel', { defaultMessage: 'URL' }),
     },
     {
       fieldName: 'url.port',
@@ -104,7 +104,7 @@ export const FilterGroupComponent = ({
       items: ports,
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.port'),
-      title: i18n.translate('xpack.uptime.filterPopover.title.port', { defaultMessage: 'Port' }),
+      title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
     },
     {
       fieldName: 'monitor.type',
@@ -113,7 +113,7 @@ export const FilterGroupComponent = ({
       items: schemes,
       onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
-      title: i18n.translate('xpack.uptime.filterPopover.title.scheme', {
+      title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
         defaultMessage: 'Scheme',
       }),
     },
@@ -122,14 +122,14 @@ export const FilterGroupComponent = ({
   return (
     <EuiFilterGroup>
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterStatusButton.up.content', {
+        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
           defaultMessage: 'Up',
         })}
         value="up"
         withNext={true}
       />
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterStatusButton.down.content', {
+        content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
           defaultMessage: 'Down',
         })}
         value="down"
