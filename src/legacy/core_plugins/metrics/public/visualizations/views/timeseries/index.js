@@ -90,6 +90,7 @@ export const TimeSeries = ({
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = chrome.getUiSettingsClient();
   const timeZone = timezoneProvider(uiSettings)();
+  const hasBarChart = series.some(({ bars }) => bars.show);
 
   return (
     <Chart ref={chartRef} renderer="canvas" className="tvbVisTimeSeries">
@@ -99,13 +100,17 @@ export const TimeSeries = ({
         onBrushEnd={onBrush}
         animateData={false}
         onCursorUpdate={handleCursorUpdate}
-        theme={{
-          crosshair: {
-            band: {
-              fill: '#F00',
-            },
-          },
-        }}
+        theme={
+          hasBarChart
+            ? {}
+            : {
+                crosshair: {
+                  band: {
+                    fill: '#F00',
+                  },
+                },
+              }
+        }
         baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{
           snap: true,
