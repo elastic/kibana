@@ -51,13 +51,16 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
             <Route
               path={hostsPagePath}
               render={() => (
-                <HostsBody
-                  from={from}
-                  to={to}
-                  setQuery={setQuery}
-                  isInitializing={isInitializing}
-                  children={HostsQueryTabBody}
-                />
+                <>
+                  <Hosts from={from} to={to} setQuery={setQuery} isInitializing={isInitializing} />
+                  <HostsBody
+                    from={from}
+                    to={to}
+                    setQuery={setQuery}
+                    isInitializing={isInitializing}
+                    children={HostsQueryTabBody}
+                  />
+                </>
               )}
             />
           )}
@@ -217,7 +220,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
           from={`${url}/:detailName`}
           to={`${url}/:detailName/${HostsTableType.authentications}`}
         />
-        <Redirect from="/hosts/" to="/hosts" />
+        <Redirect from="/hosts/" to={`/hosts/${HostsTableType.hosts}`} />
       </Switch>
     )}
   </GlobalTime>

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
-import { isEqual } from 'lodash/fp';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { CONSTANTS } from '../url_state/constants';
