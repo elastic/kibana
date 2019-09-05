@@ -27,7 +27,9 @@ import chrome from 'ui/chrome';
 // need to get rid of angular from these
 // @ts-ignore
 import { TimeRange } from 'src/plugins/data/public';
-import { SearchSource, SearchSourceProvider } from '../../../../ui/public/courier/search_source';
+import { SearchSource } from '../../../../ui/public/courier/search_source';
+// @ts-ignore
+import { SearchSourceProvider } from '../../../../ui/public/courier/search_source';
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
