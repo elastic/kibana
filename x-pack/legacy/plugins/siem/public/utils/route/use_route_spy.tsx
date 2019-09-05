@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import { useContext } from 'react';
+import { RouterSpyStateContext } from './helpers';
 
-import { OverviewComponent } from './overview';
-
-export const Overview = memo(() => <OverviewComponent />);
-
-Overview.displayName = 'Overview';
+export const useRouteSpy = () => useContext(RouterSpyStateContext);
