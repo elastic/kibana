@@ -52,3 +52,7 @@ export function toElasticsearchQuery(node, indexPattern, config = {}) {
   return kueryFunction.toElasticsearchQuery(node, indexPattern, config);
 }
 
+export function getTargetFields(node) {
+  const kueryFunction = functions[node.function];
+  return kueryFunction.getTargetFields(node);
+}
