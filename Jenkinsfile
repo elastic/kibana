@@ -4,86 +4,84 @@
 
 // library 'kibana-pipeline-library'
 
-timeout(time: 180, unit: 'MINUTES') {
-  timestamps {
-    ansiColor('xterm') {
-      parallel([
-        'kibana-intake': legacyJobRunner('kibana-intake'),
-        'x-pack-intake': legacyJobRunner('x-pack-intake'),
-        'kibana-oss-tests-1': withWorkers('kibana-oss-tests-1', { buildOss() }, [
-          'oss-ciGroup1': getOssCiGroupWorker(1),
-          'oss-ciGroup2': getOssCiGroupWorker(2),
-          'oss-ciGroup3': getOssCiGroupWorker(3),
-          'oss-ciGroup4': getOssCiGroupWorker(4),
-          'oss-ciGroup5': getOssCiGroupWorker(5),
-          'oss-ciGroup6': getOssCiGroupWorker(6),
-          'oss-ciGroup7': getOssCiGroupWorker(7),
-          'oss-ciGroup8': getOssCiGroupWorker(8),
-          'oss-ciGroup9': getOssCiGroupWorker(9),
-          'oss-ciGroup10': getOssCiGroupWorker(10),
-          'oss-ciGroup11': getOssCiGroupWorker(11),
-          'oss-ciGroup12': getOssCiGroupWorker(12),
-          'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
-          'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
-        ]),
-        'kibana-xpack-tests-1': withWorkers('kibana-xpack-tests', { buildXpack() }, [
-          'xpack-ciGroup1': getXpackCiGroupWorker(1),
-          'xpack-ciGroup2': getXpackCiGroupWorker(2),
-          'xpack-ciGroup3': getXpackCiGroupWorker(3),
-          'xpack-ciGroup4': getXpackCiGroupWorker(4),
-          'xpack-ciGroup5': getXpackCiGroupWorker(5),
-          'xpack-ciGroup6': getXpackCiGroupWorker(6),
-          'xpack-ciGroup7': getXpackCiGroupWorker(7),
-          'xpack-ciGroup8': getXpackCiGroupWorker(8),
-          'xpack-ciGroup9': getXpackCiGroupWorker(9),
-          'xpack-ciGroup10': getXpackCiGroupWorker(10),
-          'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-          'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
-        ]),
-        // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-      ])
+stage("Before") {
+  print "Before"
+}
+
+stage("Job") {
+  timeout(time: 180, unit: 'MINUTES') {
+    timestamps {
+      ansiColor('xterm') {
+        parallel([
+          'kibana-intake-1': legacyJobRunner('kibana-intake'),
+          'x-pack-intake-1': legacyJobRunner('x-pack-intake'),
+          'kibana-oss-tests-1': withWorkers('kibana-oss-tests-1', { buildOss() }, [
+            'oss-ciGroup1': getOssCiGroupWorker(1),
+            'oss-ciGroup2': getOssCiGroupWorker(2),
+            'oss-ciGroup3': getOssCiGroupWorker(3),
+            'oss-ciGroup4': getOssCiGroupWorker(4),
+            'oss-ciGroup5': getOssCiGroupWorker(5),
+            'oss-ciGroup6': getOssCiGroupWorker(6),
+            'oss-ciGroup7': getOssCiGroupWorker(7),
+            'oss-ciGroup8': getOssCiGroupWorker(8),
+            'oss-ciGroup9': getOssCiGroupWorker(9),
+            'oss-ciGroup10': getOssCiGroupWorker(10),
+            'oss-ciGroup11': getOssCiGroupWorker(11),
+            'oss-ciGroup12': getOssCiGroupWorker(12),
+            'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+            'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
+          ]),
+          'kibana-xpack-tests-1': withWorkers('kibana-xpack-tests', { buildXpack() }, [
+            'xpack-ciGroup1': getXpackCiGroupWorker(1),
+            'xpack-ciGroup2': getXpackCiGroupWorker(2),
+            'xpack-ciGroup3': getXpackCiGroupWorker(3),
+            'xpack-ciGroup4': getXpackCiGroupWorker(4),
+            'xpack-ciGroup5': getXpackCiGroupWorker(5),
+            'xpack-ciGroup6': getXpackCiGroupWorker(6),
+            'xpack-ciGroup7': getXpackCiGroupWorker(7),
+            'xpack-ciGroup8': getXpackCiGroupWorker(8),
+            'xpack-ciGroup9': getXpackCiGroupWorker(9),
+            'xpack-ciGroup10': getXpackCiGroupWorker(10),
+            'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+            'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+          ]),
+          // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+        ])
+      }
     }
   }
 }
 
+stage("After") {
+  print "After"
+}
+
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
-    stage(name) {
-      jobRunner('tests-xl') {
-        try {
-          stage("${name} - Setup") {
-            doSetup()
-          }
+    jobRunner('tests-xl') {
+      try {
+        doSetup()
+        preWorkerClosure()
 
-          stage("${name} - Build") {
-            preWorkerClosure()
-          }
+        def nextWorker = 1
+        def worker = { workerClosure ->
+          def workerNumber = nextWorker
+          nextWorker++
 
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
-
-            return {
-              workerClosure(workerNumber)
-            }
-          }
-
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
-          }
-
-          parallel(workers)
-        } finally {
-          stage("${name} - GCS}") {
-            uploadAllGcsArtifacts(name)
-          }
-
-          stage("${name} - JUnit") {
-            publishJunit()
+          return {
+            workerClosure(workerNumber)
           }
         }
+
+        def workers = [:]
+        workerClosures.each { workerName, workerClosure ->
+          workers[workerName] = worker(workerClosure)
+        }
+
+        parallel(workers)
+      } finally {
+        uploadAllGcsArtifacts(name)
+        publishJunit()
       }
     }
   }
@@ -91,22 +89,20 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
 
 def getPostBuildWorker(name, closure) {
   return { workerNumber ->
-    stage(name) {
-      def kibanaPort = "61${workerNumber}1"
-      def esPort = "61${workerNumber}2"
-      def esTransportPort = "61${workerNumber}3"
+    def kibanaPort = "61${workerNumber}1"
+    def esPort = "61${workerNumber}2"
+    def esTransportPort = "61${workerNumber}3"
 
-      withEnv([
-        "CI_WORKER_NUMBER=${workerNumber}",
-        "TEST_KIBANA_HOST=localhost",
-        "TEST_KIBANA_PORT=${kibanaPort}",
-        "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
-        "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
-        "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-        "IS_PIPELINE_JOB=1",
-      ]) {
-        closure()
-      }
+    withEnv([
+      "CI_WORKER_NUMBER=${workerNumber}",
+      "TEST_KIBANA_HOST=localhost",
+      "TEST_KIBANA_PORT=${kibanaPort}",
+      "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
+      "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+      "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+      "IS_PIPELINE_JOB=1",
+    ]) {
+      closure()
     }
   }
 }
@@ -135,20 +131,22 @@ def getXpackCiGroupWorker(ciGroup) {
 
 def legacyJobRunner(name) {
   return {
-    withEnv([
-      "JOB=${name}",
-    ]) {
-      jobRunner('linux && immutable') {
-        try {
-          stage(name) {
-            runbld '.ci/run.sh'
+    parallel([
+      "${name}": {
+        withEnv([
+          "JOB=${name}",
+        ]) {
+          jobRunner('linux && immutable') {
+            try {
+              runbld '.ci/run.sh'
+            } finally {
+              uploadAllGcsArtifacts(name)
+              publishJunit()
+            }
           }
-        } finally {
-          uploadAllGcsArtifacts(name)
-          publishJunit()
         }
       }
-    }
+    ])
   }
 }
 
