@@ -95,8 +95,8 @@ export class SiemNavigationComponent extends React.Component<TabNavigationProps 
         pathName,
         search,
         tabName,
-        timerange,
         timelineId,
+        timerange,
       } = nextProps;
       if (pathName) {
         setBreadcrumbs({
@@ -119,30 +119,30 @@ export class SiemNavigationComponent extends React.Component<TabNavigationProps 
   public render() {
     const {
       display,
-      pageName,
-      pathName,
-      hosts,
       hostDetails,
+      hosts,
       navTabs,
       network,
+      pageName,
+      pathName,
       showBorder,
       tabName,
-      timerange,
       timelineId,
+      timerange,
     } = this.props;
     return (
       <TabNavigation
         display={display}
-        pageName={pageName}
-        pathName={pathName}
         hosts={hosts}
         hostDetails={hostDetails}
-        tabName={tabName}
         navTabs={navTabs}
         network={network}
+        pageName={pageName}
+        pathName={pathName}
         showBorder={showBorder}
-        timerange={timerange}
+        tabName={tabName}
         timelineId={timelineId}
+        timerange={timerange}
       />
     );
   }

@@ -7,7 +7,7 @@
 import { login } from '../login/helpers';
 
 /** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = 50 * 1000;
+export const DEFAULT_TIMEOUT = 30 * 1000;
 
 /**
  * Authenticates with Kibana, visits the specified `url`, and waits for the

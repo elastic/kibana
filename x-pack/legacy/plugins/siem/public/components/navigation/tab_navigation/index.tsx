@@ -59,10 +59,11 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
 
   public mapLocationToTab = (pageName: string, tabName?: HostsTableType): string => {
     const { navTabs } = this.props;
-    const myNavTab = Object.keys(navTabs)
-      .map(tab => get(tab, navTabs))
-      .filter((item: NavTab) => tabName === item.id || pageName === item.id)[0];
-    return getOr('', 'id', myNavTab);
+    return getOr(
+      '',
+      'id',
+      Object.values(navTabs).find(item => tabName === item.id || pageName === item.id)
+    );
   };
 
   private renderTabs = (): JSX.Element[] => {
