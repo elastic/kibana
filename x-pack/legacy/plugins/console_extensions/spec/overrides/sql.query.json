@@ -4,7 +4,7 @@
       "query": {
         "__template": {
           "__raw": true,
-          "value": "\n\"\"\"\nSELECT * FROM \"TABLE\"\n\"\"\""
+          "value": "\"\"\"\nSELECT * FROM \"TABLE\"\n\"\"\""
         }
       }
     },
