@@ -12,6 +12,10 @@ import { shouldShowBanner } from './should_show_banner';
 import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
 import { npStart } from 'ui/new_platform';
 
+const asleep = (time) => new Promise(resolve => {
+  setTimeout(resolve, time);
+});
+
 /**
  * Add the Telemetry opt-in banner if the user has not already made a decision.
  *
@@ -38,7 +42,11 @@ async function asyncInjectBanner($injector) {
   // determine if the banner should be displayed
   if (await shouldShowBanner(telemetryOptInProvider, config)) {
     const $http = $injector.get('$http');
-
+    // Temperory fix for the banner flashing before the welcome screen
+    // This should be removed once telemetry is moved to OSS.
+    // Currently it is hard to detect if welcome screen should be showing or not
+    // since one is in OSS and another in x-pack
+    await asleep(750);
     renderBanner(telemetryOptInProvider, () => fetchTelemetry($http, { unencrypted: true }));
   }
 }
