@@ -46,7 +46,7 @@ export class ESPewPewSource extends AbstractESSource {
     defaultMessage: 'Point to point'
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between source and destination'
+    defaultMessage: 'Aggregated data paths between the source and destination'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
