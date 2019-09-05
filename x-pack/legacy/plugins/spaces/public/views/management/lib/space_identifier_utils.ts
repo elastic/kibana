@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MAX_SPACE_ID_LENGTH } from '../../../../common/constants';
-
 export function toSpaceIdentifier(value = '') {
   return value.toLowerCase().replace(/[^a-z0-9_]/g, '-');
 }
 
 export function isValidSpaceIdentifier(value = '') {
-  return value === toSpaceIdentifier(value) && value.length <= MAX_SPACE_ID_LENGTH;
+  return value === toSpaceIdentifier(value);
 }

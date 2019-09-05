@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { MAX_SPACE_ID_LENGTH } from '../../../../common/constants';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { Space } from '../../../../common/model/space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
@@ -91,10 +90,7 @@ export class SpaceValidator {
           'xpack.spaces.management.validateSpace.urlIdentifierAllowedCharactersErrorMessage',
           {
             defaultMessage:
-              'URL identifier can only contain a-z, 0-9, and the characters "_" and "-". Must be no larger than {maxLength} characters.',
-            values: {
-              maxLength: MAX_SPACE_ID_LENGTH,
-            },
+              'URL identifier can only contain a-z, 0-9, and the characters "_" and "-".',
           }
         )
       );
