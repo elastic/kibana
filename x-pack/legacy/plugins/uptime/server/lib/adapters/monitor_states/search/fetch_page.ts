@@ -6,7 +6,6 @@
 
 import { flatten } from 'lodash';
 import { MonitorIterator } from './iterator';
-import { MonitorGroups } from '../monitor_id_with_groups';
 import { CursorPagination } from '../adapter_types';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { QUERY } from "../../../../../common/constants";
@@ -17,6 +16,21 @@ export interface MonitorPage {
   items: MonitorGroups[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
+}
+
+export interface MonitorGroups {
+  id: string;
+  groups: MonitorLocCheckGroup[];
+}
+export interface MonitorLocCheckGroup {
+  monitorId: string;
+  location: string | null;
+  filterMatchesLatest: boolean;
+  checkGroup: string;
+  timestamp: Date;
+  up: number;
+  down: number;
+  status: 'up' | 'down';
 }
 
 export interface EnrichedPage {

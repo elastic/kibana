@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { fetchPage } from './fetch_page';
+export { fetchPage, MonitorGroups, MonitorLocCheckGroup, MonitorPage } from './fetch_page';
