@@ -15,7 +15,7 @@ import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
   getConditionalHeaders,
-  addForceNowQuerystring,
+  getFullUrls,
   getCustomLogo,
 } from '../../../common/execute_job/';
 
@@ -45,7 +45,7 @@ function executeJobFn(server) {
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
-      mergeMap(addForceNowQuerystring),
+      mergeMap(getFullUrls),
       mergeMap(({ job, conditionalHeaders, logo, urls }) => {
         return generatePdfObservable(
           jobLogger,

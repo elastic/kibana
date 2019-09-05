@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { addForceNowQuerystring } from './index';
+import { getFullUrls } from './index';
 
 let mockServer: any;
 beforeEach(() => {
@@ -14,7 +14,7 @@ beforeEach(() => {
 
 test(`fails if no URL is passed`, async () => {
   await expect(
-    addForceNowQuerystring({
+    getFullUrls({
       job: {
         title: 'cool-job-bro',
         type: 'csv',
@@ -31,7 +31,7 @@ test(`fails if no URL is passed`, async () => {
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const { urls } = await addForceNowQuerystring({
+  const { urls } = await getFullUrls({
     job: {
       title: 'cool-job-bro',
       type: 'csv',
@@ -54,7 +54,7 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
 test(`appends forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
 
-  const { urls } = await addForceNowQuerystring({
+  const { urls } = await getFullUrls({
     job: {
       title: 'cool-job-bro',
       type: 'csv',
@@ -75,7 +75,7 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
-  const { urls } = await addForceNowQuerystring({
+  const { urls } = await getFullUrls({
     job: {
       title: 'cool-job-bro',
       type: 'csv',

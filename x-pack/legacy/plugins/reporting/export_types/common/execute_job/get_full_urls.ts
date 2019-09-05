@@ -15,7 +15,7 @@ function getSavedObjectAbsoluteUrl(job: JobDocPayload, relativeUrl: string, serv
   return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
 }
 
-export const addForceNowQuerystring = async ({
+export const getFullUrls = async ({
   job,
   conditionalHeaders,
   logo,
