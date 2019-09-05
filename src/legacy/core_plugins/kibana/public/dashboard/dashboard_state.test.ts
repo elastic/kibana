@@ -23,7 +23,8 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
-import { Timefilter, TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
+import { Timefilter } from 'ui/timefilter';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 describe('DashboardState', function() {

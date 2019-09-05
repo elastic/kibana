@@ -83,6 +83,10 @@ Defaults to `120000` (two minutes).
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
 
+`xpack.reporting.capture.maxAttempts`::
+If capturing a report fails for any reason, Kibana will re-attempt othe reporting
+job, as many times as this setting. Defaults to `3`.
+
 `xpack.reporting.capture.loadDelay`::
 When visualizations are not evented, this is the amount of time before
 taking a screenshot. All visualizations that ship with Kibana are evented, so this

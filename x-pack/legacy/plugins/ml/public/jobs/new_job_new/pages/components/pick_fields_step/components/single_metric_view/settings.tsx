@@ -15,11 +15,10 @@ import { SparseDataSwitch } from '../sparse_data';
 import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (proceed: boolean) => void;
 }
 
-export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
+export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
@@ -39,28 +38,24 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
 
   return (
     <Fragment>
-      {isActive && (
-        <Fragment>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <BucketSpan setIsValid={setIsValid} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SparseDataSwitch />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={convertToMultiMetric}>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
-                  defaultMessage="Convert to multi metric job"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      )}
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <BucketSpan setIsValid={setIsValid} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SparseDataSwitch />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={convertToMultiMetric}>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
+              defaultMessage="Convert to multi metric job"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 };
