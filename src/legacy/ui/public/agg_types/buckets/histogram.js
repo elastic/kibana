@@ -76,13 +76,13 @@ export const histogramBucketAgg = new BucketAggType({
     {
       name: 'interval',
       editorComponent: NumberIntervalParamEditor,
-      modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
+      modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, searchRequest) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
           ? { script: { source: field.script, lang: field.lang } }
           : { field: field.name };
 
-        return searchSource
+        const childSearchSource = searchSource
           .createChild()
           .setField('size', 0)
           .setField('aggs', {
@@ -92,15 +92,19 @@ export const histogramBucketAgg = new BucketAggType({
             minAgg: {
               min: aggBody
             }
-          })
-          .fetch()
+          });
+
+        searchRequest.whenAborted(() => childSearchSource.cancelQueued());
+
+        return childSearchSource.fetch()
           .then((resp) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),
               max: _.get(resp, 'aggregations.maxAgg.value')
             });
           })
-          .catch(() => {
+          .catch(e => {
+            if (e.name === 'AbortError') return;
             toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
               // eslint-disable-next-line max-len
               defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
