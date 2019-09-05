@@ -50,7 +50,7 @@ export function DrilldownList({
         </Fragment>
       ))}
       <EuiAccordion
-        id={`accordion-new`}
+        id="accordion-new"
         buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
           defaultMessage: 'New template',
         })}

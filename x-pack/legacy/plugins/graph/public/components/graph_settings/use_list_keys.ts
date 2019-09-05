@@ -45,7 +45,7 @@ export function useListKeys<T>(list: T[]) {
 
   return useCallback(
     (item: T): string => {
-      const itemId = currentIdMap.get(item)!;
+      const itemId = currentIdMap.get(item);
       if (itemId) {
         return itemId;
       }
