@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { indexBy, Dictionary } from 'lodash';
+import { FieldFormat } from '../field_format';
+
+interface FieldFormatConfig {
+  id: string;
+  params?: Record<string, any>;
+}
 
 export class FieldFormatsService {
-  constructor(fieldFormatClasses, getConfig) {
-    this._fieldFormats = _.indexBy(fieldFormatClasses, 'id');
+  getConfig: any;
+  _fieldFormats: Dictionary<FieldFormat>;
+
+  constructor(fieldFormatClasses: FieldFormat[], getConfig: Function) {
+    this._fieldFormats = indexBy(fieldFormatClasses, 'id');
     this.getConfig = getConfig;
   }
 
@@ -30,9 +39,9 @@ export class FieldFormatsService {
    * using the format:defaultTypeMap config map
    *
    * @param  {String} fieldType - the field type
-   * @return {String}
+   * @return {FieldFormatConfig}
    */
-  getDefaultConfig(fieldType) {
+  getDefaultConfig(fieldType: string): FieldFormatConfig {
     const defaultMap = this.getConfig('format:defaultTypeMap');
     return defaultMap[fieldType] || defaultMap._default_;
   }
@@ -43,21 +52,19 @@ export class FieldFormatsService {
    * @param  {String} fieldType
    * @return {FieldFormat}
    */
-  getDefaultInstance(fieldType) {
-    const conf = this.getDefaultConfig(fieldType);
-    const FieldFormat = this._fieldFormats[conf.id];
-    return new FieldFormat(conf.params, this.getConfig);
+  getDefaultInstance(fieldType: string): FieldFormat {
+    return this.getInstance(this.getDefaultConfig(fieldType));
   }
 
   /**
    * Get the fieldFormat instance for a field format configuration.
    *
-   * @param  {Object} conf:id, conf:params
+   * @param  {FieldFormatConfig} field format config
    * @return {FieldFormat}
    */
-  getInstance(conf) {
-    const FieldFormat = this._fieldFormats[conf.id];
-    return new FieldFormat(conf.params, this.getConfig);
+  getInstance(conf: FieldFormatConfig): FieldFormat {
+    // @ts-ignore
+    return new this._fieldFormats[conf.id](conf.params, this.getConfig);
   }
 
   /**
@@ -66,7 +73,7 @@ export class FieldFormatsService {
    * @param  {String} fieldFormatId - the FieldFormat id
    * @return {FieldFormat}
    */
-  getType(fieldFormatId) {
+  getType(fieldFormatId: string): any {
     return this._fieldFormats[fieldFormatId];
   }
 }

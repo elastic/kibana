@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { fieldFormatsMixin } from './field_formats_mixin';
-export { FieldFormat } from './field_format';
+export { setup as textContentTypeSetup } from './text_content_type';
+export { setup as htmlContentTypeSetup } from './html_content_type';

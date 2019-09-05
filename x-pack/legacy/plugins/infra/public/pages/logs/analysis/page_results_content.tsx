@@ -152,14 +152,14 @@ export const AnalysisResultsContent = ({
                           <span>
                             <FormattedMessage
                               id="xpack.infra.logs.analysis.anomaliesDetectedText"
-                              defaultMessage="Detected {formattedNumber} anomalies"
+                              defaultMessage="Detected {formattedNumber} {number, plural, one {anomaly} other {anomalies}}"
                               values={{
-                                formattedNumber:
-                                  anomaliesDetected === 0 ? (
-                                    <EuiBadge color="default">0</EuiBadge>
-                                  ) : (
-                                    <EuiBadge color="warning">{anomaliesDetected}</EuiBadge>
-                                  ),
+                                formattedNumber: (
+                                  <EuiBadge color={anomaliesDetected === 0 ? 'default' : 'warning'}>
+                                    {anomaliesDetected}
+                                  </EuiBadge>
+                                ),
+                                number: anomaliesDetected,
                               }}
                             />
                           </span>
