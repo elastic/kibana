@@ -167,7 +167,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         <>
           <EuiSpacer size="m" />
           <TextInputOption
-            dataTestSubj={`valueAxisTitle${index}`}
+            data-test-subj={`valueAxisTitle${index}`}
             label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel', {
               defaultMessage: 'Title',
             })}

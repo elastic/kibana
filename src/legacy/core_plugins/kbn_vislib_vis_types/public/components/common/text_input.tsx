@@ -21,17 +21,17 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 interface TextInputOptionProps<ParamName extends string> {
-  dataTestSubj?: string;
   disabled?: boolean;
   helpText?: React.ReactNode;
   label?: React.ReactNode;
   paramName: ParamName;
   value?: string;
+  'data-test-subj'?: string;
   setValue: (paramName: ParamName, value: string) => void;
 }
 
 function TextInputOption<ParamName extends string>({
-  dataTestSubj,
+  'data-test-subj': dataTestSubj,
   disabled,
   helpText,
   label,

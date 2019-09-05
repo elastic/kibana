@@ -21,7 +21,6 @@ import React from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface NumberInputOptionProps<ParamName extends string> {
-  dataTestSubj?: string;
   error?: string[];
   isInvalid?: boolean;
   label?: React.ReactNode;
@@ -30,11 +29,11 @@ interface NumberInputOptionProps<ParamName extends string> {
   paramName: ParamName;
   step?: number;
   value?: number | '';
+  'data-test-subj'?: string;
   setValue: (paramName: ParamName, value: number | '') => void;
 }
 
 function NumberInputOption<ParamName extends string>({
-  dataTestSubj,
   error,
   isInvalid,
   label,
@@ -44,6 +43,7 @@ function NumberInputOption<ParamName extends string>({
   step,
   value = '',
   setValue,
+  'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
   return (
     <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>

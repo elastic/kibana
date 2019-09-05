@@ -523,10 +523,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.toggleAccordion(`yAxisOptionsAccordion${axisId}`);
 
       await testSubjects.click('yAxisSetYExtents');
-      const maxField = await testSubjects.find('yAxisYExtentsMax');
-      await maxField.type(max);
-      const minField = await testSubjects.find('yAxisYExtentsMin');
-      await minField.type(min);
+      await testSubjects.setValue('yAxisYExtentsMax', max);
+      await testSubjects.setValue('yAxisYExtentsMin', min);
 
     }
 
