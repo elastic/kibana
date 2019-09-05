@@ -34,7 +34,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
     }, [search]);
     useEffect(() => {
       if (pageName && !isEqual(route.pathName, pathname)) {
-        if (isInitializing) {
+        if (isInitializing && detailName == null) {
           dispatch({
             type: 'updateRouteWithOutSearch',
             route: {
