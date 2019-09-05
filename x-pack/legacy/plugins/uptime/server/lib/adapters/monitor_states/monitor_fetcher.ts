@@ -24,7 +24,6 @@ export const fetchPaginatedMonitors = async (
   const iterator = new MonitorIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
-  const start = new Date();
   while (items.length < size) {
     const monitor = await iterator.next();
     if (!monitor) {
@@ -33,11 +32,10 @@ export const fetchPaginatedMonitors = async (
     items.push(monitor);
 
     // We want the before pagination to be before the first item we encounter
-    if (items.length === 0) {
+    if (items.length === 1) {
       paginationBefore = await iterator.paginationBeforeCurrent();
     }
   }
-  console.log('Fetching done', new Date().getTime() - start.getTime() + 'ms', items.length, size);
 
   // We have to create these objects before checking if we can navigate backward
   const paginationAfter: CursorPagination | null = (await iterator.peek())

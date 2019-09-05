@@ -53,7 +53,7 @@ export class MonitorIterator {
   }
 
   async paginationBeforeCurrent(): Promise<CursorPagination | null> {
-    const reverseFetcher = await iterator.reverse();
+    const reverseFetcher = await this.reverse();
     return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
   }
 
@@ -142,13 +142,9 @@ export class MonitorIterator {
   }
 
   private async queryNext(size: number): Promise<CheckGroupsPageResult> {
-    const start = new Date();
-
     const { monitorIds, filteredCheckGroups, searchAfter } = await this.queryPotentialMatches(size);
     const matching = await this.refinePotentialMatches(monitorIds, filteredCheckGroups);
 
-    const elapsed = new Date().getTime() - start.getTime();
-    console.debug('Exec Query in', elapsed + 'ms', 'Len', matching.length);
     return {
       monitorIdGroups: matching,
       searchAfter,
@@ -236,13 +232,6 @@ export class MonitorIterator {
         if (this.queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {
           continue MonitorLoop;
         }
-        console.log(
-          'MATCH STATUS FILTER',
-          this.queryContext.statusFilter,
-          mlcg.status,
-          mlcg,
-          topSource.monitor
-        );
         groups.push(mlcg);
       }
       matching.set(monitorId, groups);
