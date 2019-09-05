@@ -47,7 +47,7 @@ function Section({ section }) {
   return (
     <React.Fragment>
       <EuiTitle size="xs"><h4>{section.title}</h4></EuiTitle>
-      <div className="job-section">
+      <div className="job-section"  data-test-subj={section.id}>
         <EuiTable compressed={true}>
           <EuiTableBody>
             { section.items.map((item, i) => (<SectionItem item={item} key={i} />)) }
@@ -78,7 +78,7 @@ export class JobDetailsPane  extends Component {
     return (
       <React.Fragment>
         <EuiSpacer size="s" />
-        <div className="row" time={time}>
+        <div className="row" time={time}  data-test-subj={this.props['data-test-subj']}>
           <div className="col-md-6">
             {
               sections
@@ -100,5 +100,6 @@ export class JobDetailsPane  extends Component {
 }
 JobDetailsPane.propTypes = {
   sections: PropTypes.array.isRequired,
+  'data-test-subj': PropTypes.string,
 };
 
