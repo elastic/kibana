@@ -6,6 +6,5 @@
 import { MonitorLocCheckGroup } from './monitor_loc_check_group';
 export interface MonitorIdWithGroups {
   id: string;
-  matchesFilter: boolean;
   groups: MonitorLocCheckGroup[];
 }

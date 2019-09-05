@@ -7,21 +7,21 @@
 import { CursorDirection } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorPagination } from './adapter_types';
-import { CheckGroupsPageResult, refinePotentialMatches } from './refine_potential_matches';
-import { MonitorIdWithGroups } from './monitor_id_with_groups';
-import { findPotentialMatches } from './find_potential_matches';
+import { ChunkResult, refinePotentialMatches } from './query/refine_potential_matches';
+import { MonitorGroups } from './monitor_id_with_groups';
+import { findPotentialMatches } from './query/find_potential_matches';
 
 export class MonitorIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
-  buffer: MonitorIdWithGroups[];
+  buffer: MonitorGroups[];
   bufferPos: number;
   searchAfter: any;
 
   constructor(
     queryContext: QueryContext,
-    initialBuffer: MonitorIdWithGroups[] = [],
+    initialBuffer: MonitorGroups[] = [],
     initialBufferPos: number = -1
   ) {
     this.queryContext = queryContext;
@@ -74,25 +74,19 @@ export class MonitorIterator {
 
   // Returns the last item fetched with next(). null if no items fetched with
   // next or if next has not yet been invoked.
-  current(): MonitorIdWithGroups | null {
+  current(): MonitorGroups | null {
     return this.buffer[this.bufferPos] || null;
   }
 
-  async next(): Promise<MonitorIdWithGroups | null> {
+  async next(): Promise<MonitorGroups | null> {
     while (true) {
       const found = this.buffer[this.bufferPos + 1];
       if (found) {
         this.bufferPos++;
-        // Keep searching if we haven't matched
-        if (found.matchesFilter) {
-          return found;
-        } else {
-          // If this item doesn't match the filter continue the loop
-          // to see if the next one does
-          continue;
-        }
+        return found;
       }
 
+      // Keep searching if we haven't matched
       const fetchedMore = await this.queryNextAndBuffer();
       if (!fetchedMore) {
         return null;
@@ -100,7 +94,7 @@ export class MonitorIterator {
     }
   }
 
-  async peek(): Promise<MonitorIdWithGroups | null> {
+  async peek(): Promise<MonitorGroups | null> {
     let bufAheadPos = this.bufferPos + 1;
     while (true) {
       const bufAhead = this.buffer[bufAheadPos];
@@ -112,7 +106,7 @@ export class MonitorIterator {
         }
       }
 
-      if (bufAhead && bufAhead.matchesFilter) {
+      if (bufAhead) {
         return bufAhead;
       }
 
@@ -133,13 +127,13 @@ export class MonitorIterator {
       return false;
     }
 
-    results.monitorIdGroups.forEach((mig: MonitorIdWithGroups) => this.buffer.push(mig));
+    results.monitorIdGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
     this.searchAfter = results.searchAfter;
 
     return true;
   }
 
-  private async queryNext(size: number): Promise<CheckGroupsPageResult> {
+  private async queryNext(size: number): Promise<ChunkResult> {
     const { monitorIds, checkGroups, searchAfter } = await findPotentialMatches(
       this.queryContext,
       this.searchAfter,

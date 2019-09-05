@@ -5,9 +5,9 @@
  */
 
 import { get, set } from 'lodash';
-import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { INDEX_NAMES } from '../../../../common/constants';
-import { CursorDirection } from '../../../../common/graphql/types';
+import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { CursorDirection } from '../../../../../common/graphql/types';
+import {INDEX_NAMES} from "../../../../../common/constants";
 
 export const findPotentialMatches = async (
   queryContext: QueryContext,
