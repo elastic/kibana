@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as i18n from '../../components/navigation/translations';
-import { NavTab } from '../../components/navigation/type';
+import * as i18n from './translations';
 import {
   getOverviewUrl,
   getNetworkUrl,
   getTimelinesUrl,
   getHostsUrl,
 } from '../../components/link_to';
+import { NavTab } from '../../components/navigation/types';
 
 export enum SiemPageName {
   overview = 'overview',
