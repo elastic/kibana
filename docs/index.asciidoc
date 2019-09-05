@@ -76,7 +76,7 @@ include::api.asciidoc[]
 
 include::plugins.asciidoc[]
 
-include::development.asciidoc[]
+include::development/index.asciidoc[]
 
 include::limitations.asciidoc[]
 
