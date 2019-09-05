@@ -10,7 +10,6 @@ import { TokenAdapter } from './default';
 import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objets_database/adapter_types';
 import { SODatabaseAdapter } from '../saved_objets_database/default';
 import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
-import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
 import { Token, TokenType } from './adapter_types';
 import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
 import { MemorizeEncryptedSavedObjects } from '../encrypted_saved_objects/memorize_adapter';
@@ -48,6 +47,9 @@ describe('Token Adapter', () => {
 
   beforeAll(async () => {
     await Slapshot.callWhenOnline(async () => {
+      const { createKibanaServer } = await import(
+        '../../../../../../../test_utils/jest/contract_tests/servers'
+      );
       servers = await createKibanaServer({
         security: { enabled: false },
       });
