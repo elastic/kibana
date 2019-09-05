@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NumberList } from '../../../../agg_types/number_list';
+import { NumberList } from '../number_list';
 import { AggParamEditorProps } from '..';
 
 function PercentileRanksEditor({
