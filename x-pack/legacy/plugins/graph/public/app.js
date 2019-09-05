@@ -57,7 +57,7 @@ import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { save } from  './services/save';
+import { save } from  './services/save_modal';
 
 import settingsTemplate from './angular/templates/settings.html';
 
