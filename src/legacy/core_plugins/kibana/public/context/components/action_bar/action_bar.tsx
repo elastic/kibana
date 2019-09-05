@@ -90,11 +90,7 @@ export function ActionBar({
             onClick={onLoadMoreClick}
             size="s"
           >
-            <FormattedMessage
-              id="kbn.context.loadMoreDescription"
-              defaultMessage="Load {defaultStepSize} more"
-              values={{ defaultStepSize }}
-            />
+            <FormattedMessage id="kbn.context.loadMoreDescription" defaultMessage="Load" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -115,6 +111,7 @@ export function ActionBar({
               }
               disabled={isDisabled}
               onChange={ev => onChangeCount(Number(ev.target.value))}
+              step={defaultStepSize}
               type="number"
               value={count}
             />
