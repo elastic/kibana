@@ -13,7 +13,6 @@ import { StickyContainer } from 'react-sticky';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
-import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 
 import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
@@ -47,9 +46,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     isInitializing,
     filterQueryExpression,
     from,
-    match: {
-      params: { detailName, tabName },
-    },
+    detailName,
     setQuery,
     setAbsoluteRangeDatePicker,
     to,
@@ -168,7 +165,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
 HostDetailsComponent.displayName = 'HostDetailsComponent';
 
-export const HostDetails = compose<React.ComponentClass<HostsQueryProps & HostComponentProps>>(
+export const HostDetails = compose<React.ComponentClass<HostsQueryProps & { detailName: string }>>(
   connect(
     makeMapStateToProps,
     {

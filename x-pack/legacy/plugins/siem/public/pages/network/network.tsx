@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { ActionCreator } from 'typescript-fsa';
+import { RouteComponentProps } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -50,7 +51,7 @@ interface NetworkComponentReduxProps {
   }>;
 }
 
-type NetworkComponentProps = NetworkComponentReduxProps;
+type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponentProps<{}>>;
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );

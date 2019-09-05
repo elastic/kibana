@@ -22,9 +22,7 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
     filterQueryExpression,
     from,
     isInitializing,
-    match: {
-      params: { detailName, tabName },
-    },
+    detailName,
     setAbsoluteRangeDatePicker,
     setQuery,
     to,

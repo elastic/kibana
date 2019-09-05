@@ -142,8 +142,18 @@ export const HomePage = pure(() => (
                   <Switch>
                     <Redirect from="/" exact={true} to="/:pageName(overview)" />
                     <Route path="/:pageName(overview)" render={() => <Overview />} />
-                    <Route path="/:pageName(hosts)" component={HostsContainer} />
-                    <Route path="/:pageName(network)" component={NetworkContainer} />
+                    <Route
+                      path="/:pageName(hosts)"
+                      render={({ match, location }) => (
+                        <HostsContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route
+                      path="/:pageName(network)"
+                      render={({ match, location }) => (
+                        <NetworkContainer url={match.url} location={location} />
+                      )}
+                    />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route path="/ml-hosts" component={MlHostConditionalContainer} />

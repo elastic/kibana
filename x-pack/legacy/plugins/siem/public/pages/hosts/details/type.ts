@@ -20,6 +20,7 @@ interface HostDetailsComponentDispatchProps {
     from: number;
     to: number;
   }>;
+  detailName: string;
 }
 
 export interface HostDetailsBodyProps extends HostsQueryProps {
@@ -33,5 +34,4 @@ export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
 
 export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
-  HostComponentProps &
   HostDetailsBodyProps;
