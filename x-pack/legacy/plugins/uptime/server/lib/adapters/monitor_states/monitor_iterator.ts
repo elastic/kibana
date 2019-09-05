@@ -7,9 +7,9 @@
 import { CursorDirection } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorPagination } from './adapter_types';
-import { refinePotentialMatches } from './refine_potential_matches';
+import { CheckGroupsPageResult, refinePotentialMatches } from './refine_potential_matches';
 import { MonitorIdWithGroups } from './monitor_id_with_groups';
-import { CheckGroupsPageResult, findPotentialMatches } from './find_potential_matches';
+import { findPotentialMatches } from './find_potential_matches';
 
 export class MonitorIterator {
   queryContext: QueryContext;

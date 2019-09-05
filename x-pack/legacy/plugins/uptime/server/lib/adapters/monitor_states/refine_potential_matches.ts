@@ -76,7 +76,7 @@ const fullyMatchingIds = async (
       };
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
-      if (queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {
+      if (queryContext.statusFilter && queryContext.statusFilter !== mlcg.status) {
         continue MonitorLoop;
       }
       groups.push(mlcg);
