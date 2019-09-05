@@ -74,4 +74,4 @@ For more information about the {anomaly-detect} feature, see
 include::creating-jobs.asciidoc[]
 include::job-tips.asciidoc[]
 include::creating-df-kib.asciidoc[]
-
+include::analytics.asciidoc[]

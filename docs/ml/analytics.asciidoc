@@ -1,0 +1,13 @@
+[role="xpack"]
+[[ml-analytics]]
+== {dfanalytics}
+
+The *Machine Learning* > *Analytics* UI enables you to create, manage, and view
+the results from {dfanalytics-jobs}. You can create and manage
+{stack-ov}/dfa-outlier-detection.html[{oldetection}] jobs by using {kib} or by
+using the {ref}/ml-df-analytics-apis.html[{dfanalytics} APIs]. 
+
+////
+. Describe the requirement for numeric fields (ideally from a transform).
+. Describe how to interpret the charts that are returned by these jobs.
+////
