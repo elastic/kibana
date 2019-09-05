@@ -6,6 +6,7 @@
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { getConditionalHeaders, getCustomLogo } from './index';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
 let mockServer: any;
 beforeEach(() => {
@@ -235,7 +236,7 @@ test('uses basePath from job when creating saved object service', async () => {
         savedObjectType: 'search',
       },
       basePath: jobBasePath,
-    },
+    } as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });
@@ -277,7 +278,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
         isImmediate: false,
         savedObjectType: 'search',
       },
-    },
+    } as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });
