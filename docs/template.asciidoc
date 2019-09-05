@@ -16,6 +16,8 @@ scrolling down the page:
 * <<section2-description, Task section title>>
 * <<section3-description, Task section title>>
 
+TIP: Keep lists to 5-7 items, plus or minus 2 when absolutely necessary.
+
 Provide a screenshot or video.
 
 TIP: Need inspiration? Here are some good examples:
