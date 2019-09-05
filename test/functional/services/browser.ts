@@ -215,7 +215,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       } else {
         // The offset should be specified in pixels relative to the top-left corner of the element's bounding box
         const getOffset: any = (offset: { x: number; y: number }) =>
-          offset ? { x: offset.x, y: offset.y } : { x: 0, y: 0 };
+          offset ? { x: offset.x || 0, y: offset.y || 0 } : { x: 0, y: 0 };
 
         if (from.location instanceof WebElementWrapper === false) {
           throw new Error('Dragging point should be WebElementWrapper instance');
