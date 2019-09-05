@@ -107,7 +107,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
     return {
       ...this.setupApi!,
       expressions: {
-        ...this.setupApi!,
+        ...this.setupApi!.expressions,
         ...this.expressions.start({ inspector: plugins.inspector }),
       },
     };
