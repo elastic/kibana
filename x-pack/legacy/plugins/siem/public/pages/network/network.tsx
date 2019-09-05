@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { ActionCreator } from 'typescript-fsa';
+import { RouteComponentProps } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -33,12 +34,16 @@ import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_netw
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { EmbeddedMap } from '../../components/embeddables/embedded_map';
+import { NetworkFilter } from '../../containers/network';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
+  queryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -46,7 +51,7 @@ interface NetworkComponentReduxProps {
   }>;
 }
 
-type NetworkComponentProps = NetworkComponentReduxProps;
+type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponentProps<{}>>;
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
@@ -70,8 +75,8 @@ export const getFlexDirection = () => {
 };
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker }) => {
-    return (
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
+    <>
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -88,6 +93,17 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <NetworkFilter indexPattern={indexPattern} type={networkModel.NetworkType.page}>
+                      {({ applyFilterQueryFromKueryExpression }) => (
+                        <EmbeddedMap
+                          applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+                          queryExpression={queryExpression}
+                          startDate={from}
+                          endDate={to}
+                          setQuery={setQuery}
+                        />
+                      )}
+                    </NetworkFilter>
                     <KpiNetworkQuery
                       endDate={to}
                       filterQuery={filterQuery}
@@ -269,16 +285,19 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           )
         }
       </WithSource>
-    );
-  }
+      <SpyRoute />
+    </>
+  )
 );
 
 NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
+  const getNetworkFilterExpression = networkSelectors.networkFilterExpression();
   const mapStateToProps = (state: State) => ({
     filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
+    queryExpression: getNetworkFilterExpression(state, networkModel.NetworkType.page) || '',
   });
   return mapStateToProps;
 };

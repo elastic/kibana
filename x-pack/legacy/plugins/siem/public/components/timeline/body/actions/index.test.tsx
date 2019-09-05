@@ -7,7 +7,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../mock';
-import { ACTIONS_COLUMN_WIDTH } from '../helpers';
+import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
 
 import { Actions } from '.';
 
@@ -16,7 +16,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -42,7 +42,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -68,7 +68,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -96,7 +96,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -123,13 +123,42 @@ describe('Actions', () => {
     expect(onEventToggled).toBeCalled();
   });
 
+  test('it does NOT render a notes button when isEventsViewer is true', () => {
+    const toggleShowNotes = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          isEventViewer={true}
+          loading={false}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="timeline-notes-button-small"]').exists()).toBe(false);
+  });
+
   test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
     const toggleShowNotes = jest.fn();
 
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -156,13 +185,42 @@ describe('Actions', () => {
     expect(toggleShowNotes).toBeCalled();
   });
 
+  test('it does NOT render a pin button when isEventViewer is true', () => {
+    const onPinClicked = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          isEventViewer={true}
+          loading={false}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
+  });
+
   test('it invokes onPinClicked when the button for pinning events is clicked', () => {
     const onPinClicked = jest.fn();
 
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
