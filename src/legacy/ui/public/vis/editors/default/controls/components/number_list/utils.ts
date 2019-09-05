@@ -18,10 +18,10 @@
  */
 
 import { last } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from 'packages/kbn-i18n/target/types';
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { parseRange, Range } from '../../../../utils/range';
+import { parseRange, Range } from '../../../../../../utils/range';
 import { NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';

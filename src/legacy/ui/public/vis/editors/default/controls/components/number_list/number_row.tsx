@@ -20,8 +20,8 @@
 import React from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Range } from '../../../../utils/range';
+import { i18n } from 'packages/kbn-i18n/target/types';
+import { Range } from '../../../../../../utils/range';
 
 interface NumberRowProps {
   autoFocus: boolean;
