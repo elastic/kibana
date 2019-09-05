@@ -18,6 +18,10 @@ import {
   EuiModalFooter,
   EuiToolTip,
 } from '@elastic/eui';
+
+import { ComponentStrings } from '../../../i18n';
+const { WorkpadHeader: strings } = ComponentStrings;
+
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
@@ -41,7 +45,8 @@ export class WorkpadHeader extends React.PureComponent {
       position="bottom"
       content={
         <span>
-          Enter fullscreen mode <ToolTipShortcut namespace="PRESENTATION" action="FULLSCREEN" />
+          {strings.getFullScreenTooltipText()}{' '}
+          <ToolTipShortcut namespace="PRESENTATION" action="FULLSCREEN" />
         </span>
       }
     >
@@ -76,7 +81,7 @@ export class WorkpadHeader extends React.PureComponent {
         <ElementTypes onClose={this._hideElementModal} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={this._hideElementModal}>
-            Close
+            {strings.getAddElementModalCloseBtnText()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -87,10 +92,12 @@ export class WorkpadHeader extends React.PureComponent {
 
   _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
     if (!this.props.canUserWrite) {
-      return "You don't have permission to edit this workpad";
+      return strings.getNoWritePermText();
     }
 
-    const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+    const content = this.props.isWriteable
+      ? strings.getHideEditControlText()
+      : strings.getShowEditControlText();
 
     if (textOnly) {
       return content;
@@ -163,7 +170,9 @@ export class WorkpadHeader extends React.PureComponent {
                   <AssetManager />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this._showEmbeddablePanel}>Embed object</EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={this._showEmbeddablePanel}>
+                    {strings.getEmbedObjectBtnText()}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -173,7 +182,7 @@ export class WorkpadHeader extends React.PureComponent {
                     data-test-subj="add-element-button"
                     onClick={this._showElementModal}
                   >
-                    Add element
+                    {strings.getAddElementBtnText()}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

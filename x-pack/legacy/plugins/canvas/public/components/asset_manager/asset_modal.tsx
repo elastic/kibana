@@ -24,6 +24,10 @@ import {
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
+
+import { ComponentStrings } from '../../../i18n';
+const { AssetModal: strings } = ComponentStrings;
+
 // @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
@@ -68,7 +72,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
     <EuiPanel className="canvasAssetManager__emptyPanel">
       <EuiEmptyPrompt
         iconType="importAction"
-        title={<h2>Import your assets to get started</h2>}
+        title={<h2>{strings.getEmptyAssetsMessageText()}</h2>}
         titleSize="xs"
       />
     </EuiPanel>
@@ -83,15 +87,15 @@ export const AssetModal: FunctionComponent<Props> = props => {
       >
         <EuiModalHeader className="canvasAssetManager__modalHeader">
           <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
-            Manage workpad assets
+            {strings.getModalTitleText()}
           </EuiModalHeaderTitle>
           <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
             <EuiFlexItem grow={false}>
               {isLoading ? (
-                <Loading animated text="Uploading images" />
+                <Loading animated text={strings.getLoadingText()} />
               ) : (
                 <EuiFilePicker
-                  initialPromptText="Select or drag and drop images"
+                  initialPromptText={strings.getFilePickerPromptText()}
                   compressed
                   multiple
                   onChange={onFileUpload}
@@ -103,10 +107,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="s" color="subdued">
-            <p>
-              Below are the image assets in this workpad. Any assets that are currently in use
-              cannot be determined at this time. To reclaim space, delete assets.
-            </p>
+            <p>{strings.getDescriptionText()}</p>
           </EuiText>
           <EuiSpacer />
           {assetValues.length ? (
@@ -137,11 +138,13 @@ export const AssetModal: FunctionComponent<Props> = props => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textNoWrap">
-              <EuiText id="CanvasAssetManagerLabel">{percentageUsed}% space used</EuiText>
+              <EuiText id="CanvasAssetManagerLabel">
+                {strings.getSpaceUsedText(percentageUsed)}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiButton size="s" onClick={onClose}>
-            Close
+            {strings.getModalCloseBtnText()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
