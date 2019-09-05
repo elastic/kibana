@@ -61,7 +61,6 @@ export function Main() {
     ResizeChecker,
   } = useAppContext();
 
-  const [pastRequests, setPastRequests] = useState<any[]>(() => history.getHistory());
   const [editorReady, setEditorReady] = useState<boolean>(false);
   const [inputEditor, setInputEditor] = useState<any>(null);
   const [outputEditor, setOutputEditor] = useState<any>(null);
@@ -99,6 +98,8 @@ export function Main() {
     []
   );
 
+  const [pastRequests, setPastRequests] = useState<any[]>(() => history.getHistory());
+
   const sendCurrentRequest = useCallback(() => {
     inputEditor.focus();
     inputEditor.sendCurrentRequestToES(() => {
@@ -106,9 +107,23 @@ export function Main() {
     }, outputEditor);
   }, [inputEditor, outputEditor]);
 
+  const clearHistory = useCallback(() => {
+    history.clearHistory();
+    setPastRequests(history.getHistory());
+  }, []);
+
+  const restoreFromHistory = useCallback((req: any) => {
+    history.restoreFromHistory(req);
+  }, []);
+
   const renderConsoleHistory = () => {
     return editorReady ? (
-      <ConsoleHistory reqs={pastRequests} close={() => setShowHistory(false)} />
+      <ConsoleHistory
+        restoreFromHistory={restoreFromHistory}
+        clearHistory={clearHistory}
+        requests={pastRequests}
+        close={() => setShowHistory(false)}
+      />
     ) : null;
   };
 

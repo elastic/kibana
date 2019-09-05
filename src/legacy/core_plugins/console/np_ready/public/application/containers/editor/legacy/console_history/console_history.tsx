@@ -37,14 +37,16 @@ import { HistoryViewer } from './history_viewer';
 
 interface Props {
   close: () => void;
-  reqs: any[];
+  clearHistory: () => void;
+  restoreFromHistory: (req: any) => void;
+  requests: any[];
 }
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
-export function ConsoleHistory({ close, reqs }: Props) {
+export function ConsoleHistory({ close, requests, clearHistory, restoreFromHistory }: Props) {
   const {
-    services: { history, settings },
+    services: { settings },
     ResizeChecker,
   } = useAppContext();
 
@@ -82,24 +84,24 @@ export function ConsoleHistory({ close, reqs }: Props) {
   const initialize = () => {
     const nextSelectedIndex = 0;
     (describeReq as any).cache = new WeakMap();
-    setViewingReq(reqs[nextSelectedIndex]);
-    selectedReq.current = reqs[nextSelectedIndex];
+    setViewingReq(requests[nextSelectedIndex]);
+    selectedReq.current = requests[nextSelectedIndex];
     setSelectedIndex(nextSelectedIndex);
     scrollIntoView(nextSelectedIndex);
   };
 
   const clear = () => {
-    history.clearHistory();
+    clearHistory();
     initialize();
   };
 
   const restore = (req: any = selectedReq.current) => {
-    history.restoreFromHistory(req);
+    restoreFromHistory(req);
   };
 
   useEffect(() => {
     initialize();
-  }, [reqs]);
+  }, [requests]);
 
   /* eslint-disable */
   return (
@@ -128,10 +130,10 @@ export function ConsoleHistory({ close, reqs }: Props) {
                 ++currentIdx;
               }
 
-              const nextSelectedIndex = Math.min(Math.max(0, currentIdx), reqs.length - 1);
+              const nextSelectedIndex = Math.min(Math.max(0, currentIdx), requests.length - 1);
 
-              setViewingReq(reqs[nextSelectedIndex]);
-              selectedReq.current = reqs[nextSelectedIndex];
+              setViewingReq(requests[nextSelectedIndex]);
+              selectedReq.current = requests[nextSelectedIndex];
               setSelectedIndex(nextSelectedIndex);
               scrollIntoView(nextSelectedIndex);
             }}
@@ -143,7 +145,7 @@ export function ConsoleHistory({ close, reqs }: Props) {
               defaultMessage: 'History of sent requests',
             })}
           >
-            {reqs.map((req, idx) => {
+            {requests.map((req, idx) => {
               const reqDescription = describeReq(req);
               const isSelected = viewingReq === req;
               return (
