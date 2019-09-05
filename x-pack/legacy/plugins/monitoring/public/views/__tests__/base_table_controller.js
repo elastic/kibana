@@ -22,8 +22,8 @@ describe('MonitoringViewBaseTableController', function () {
     timefilter = {
       enableTimeRangeSelector: spy(),
       enableAutoRefreshSelector: spy(),
-      isTimeRangeSelectorEnabled: true,
-      isAutoRefreshSelectorEnabled: true
+      getIsTimeRangeSelectorEnabled: () => true,
+      getIsAutoRefreshSelectorEnabled: () => true,
     };
     titleService = spy();
     executorService = {
