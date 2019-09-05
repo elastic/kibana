@@ -28,10 +28,10 @@ import { I18nContext } from 'ui/i18n';
  * `error` are undefined, persisting was not successful, but the
  * modal can still recover (e.g. the name of the saved object was already taken).
  */
-type SaveResult = { id?: string } | { error: Error };
+export type SaveResult = { id?: string } | { error: Error };
 
-function isError(result: SaveResult): result is { error: Error } {
-  return 'error' in result;
+function isSuccess(result: SaveResult): result is { id?: string } {
+  return 'id' in result;
 }
 
 interface MinimalSaveModalProps {
@@ -51,7 +51,7 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
   const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
     const response = await onSave(...args);
     // close modal if we either hit an error or the saved object got an id
-    if (Boolean(isError(response) ? response.error : response.id)) {
+    if (Boolean(isSuccess(response) ? response.id : response.error)) {
       closeModal();
     }
     return response;
