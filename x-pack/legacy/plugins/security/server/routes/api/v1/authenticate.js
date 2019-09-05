@@ -19,28 +19,6 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       .type(contentType);
   }
 
-  const xsrfWhitelist = server.config().get('server.xsrf.whitelist');
-  server.ext('onRequest', (request, h) => {
-    // We handle this route in new platform plugin, but use different URL.
-    if (request.path === '/api/security/v1/saml') {
-      server.log(
-        ['warning', 'security', 'deprecation'],
-        `The following URL is deprecated and will stop working in the next major version: ${request.path}`
-      );
-
-      // If deprecated route (`/api/security/v1/saml`) is included into XSRF whitelist we should
-      // implicitly include `/security/api/authc/saml/callback` as well to preserve the same behavior.
-      // We can't modify config, but we can mark route as ^safe^ via `kbn-xsrf` header.
-      if (xsrfWhitelist.includes(request.path)) {
-        request.headers['kbn-xsrf'] = true;
-      }
-
-      request.setUrl('/security/api/authc/saml/callback');
-    }
-
-    return h.continue;
-  });
-
   server.route({
     method: 'POST',
     path: '/api/security/v1/login',

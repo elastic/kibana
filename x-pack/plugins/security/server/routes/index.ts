@@ -8,6 +8,7 @@ import { CoreSetup, IRouter, Logger } from '../../../../../src/core/server';
 import { Authentication } from '../authentication';
 import { ConfigType } from '../config';
 import { defineAuthenticationRoutes } from './authentication';
+import { LegacyAPI } from '../plugin';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -18,6 +19,7 @@ export interface RouteDefinitionParams {
   logger: Logger;
   config: ConfigType;
   authc: Authentication;
+  getLegacyAPI: () => LegacyAPI;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

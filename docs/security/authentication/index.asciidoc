@@ -100,7 +100,7 @@ xpack.security.authc.saml.realm: realm-name
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-server.xsrf.whitelist: [/security/api/authc/saml/callback]
+server.xsrf.whitelist: [/api/security/authc/saml/callback]
 --------------------------------------------------------------------------------
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.

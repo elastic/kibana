@@ -17,49 +17,83 @@ export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
 /**
  * Defines routes required for SAML authentication.
  */
-function defineSAMLRoutes({ basePath, router, logger, authc }: RouteDefinitionParams) {
+function defineSAMLRoutes({
+  basePath,
+  router,
+  logger,
+  authc,
+  getLegacyAPI,
+}: RouteDefinitionParams) {
+  function createCustomResourceResponse(body: string, contentType: string) {
+    return {
+      body,
+      headers: {
+        'content-type': contentType,
+        'cache-control': 'private, no-cache, no-store',
+        'content-security-policy': getLegacyAPI().cspRules,
+      },
+      statusCode: 200,
+    };
+  }
+
   router.get(
     {
-      path: '/api/authc/saml/capture-current-url',
-      validate: { query: schema.object({ currentPath: schema.string() }) },
+      path: '/api/security/authc/saml/capture-url-fragment',
+      validate: false,
       options: { authRequired: false },
     },
     (context, request, response) => {
-      const { currentPath } = request.query;
-      return response.custom({
-        body: `
-        <!DOCTYPE html>
-        <title>Kibana SAML Login</title>
-        <script>
-          window.location.replace(
-            '${basePath.get(
-              request
-            )}/security/api/authc/saml/start?currentURL=' + encodeURIComponent('${currentPath}' + window.location.hash)
-          );
-        </script>
-      `,
-        headers: {
-          'content-type': 'text/html',
-          'cache-control': 'private, no-cache, no-store',
-          // HACK: inline scripts aren't allowed yet.
-          // 'content-security-policy': getLegacyAPI().cspRules,
-        },
-        statusCode: 200,
-      });
+      const currentBasePath = basePath.get(request);
+      // We're also preventing `favicon.ico` request since it can cause new SAML handshake.
+      return response.custom(
+        createCustomResourceResponse(
+          `
+          <!DOCTYPE html>
+          <title>Kibana SAML Login</title>
+          <link rel="icon" href="data:,">
+          <script src="${currentBasePath}/api/security/authc/saml/capture-url-fragment.js"></script>
+        `,
+          'text/html'
+        )
+      );
     }
   );
 
   router.get(
     {
-      path: '/api/authc/saml/start',
-      validate: { query: schema.object({ currentURL: schema.string() }) },
+      path: '/api/security/authc/saml/capture-url-fragment.js',
+      validate: false,
+      options: { authRequired: false },
+    },
+    (context, request, response) => {
+      const currentBasePath = basePath.get(request);
+      return response.custom(
+        createCustomResourceResponse(
+          `
+          window.location.replace(
+            '${currentBasePath}/api/security/authc/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
+          );
+        `,
+          'text/javascript'
+        )
+      );
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/security/authc/saml/start',
+      validate: { query: schema.object({ redirectURLFragment: schema.string() }) },
       options: { authRequired: false },
     },
     async (context, request, response) => {
       try {
         const authenticationResult = await authc.login(request, {
           provider: 'saml',
-          value: { step: SAMLLoginStep.UserURLCaptured, currentURL: request.query.currentURL },
+          value: {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: request.query.redirectURLFragment,
+          },
         });
 
         // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
@@ -75,38 +109,52 @@ function defineSAMLRoutes({ basePath, router, logger, authc }: RouteDefinitionPa
     }
   );
 
-  router.post(
-    {
-      path: '/api/authc/saml/callback',
-      validate: {
-        body: schema.object({
-          SAMLResponse: schema.string(),
-          RelayState: schema.maybe(schema.string()),
-        }),
+  // Generate two identical routes with new and deprecated URL and issue a warning if route with
+  // deprecated URL is ever used.
+  for (const path of ['/api/security/authc/saml/callback', '/api/security/v1/saml']) {
+    router.post(
+      {
+        path,
+        validate: {
+          body: schema.object({
+            SAMLResponse: schema.string(),
+            RelayState: schema.maybe(schema.string()),
+          }),
+        },
+        options: { authRequired: false },
       },
-      options: { authRequired: false },
-    },
-    async (context, request, response) => {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        const authenticationResult = await authc.login(request, {
-          provider: 'saml',
-          value: {
-            step: SAMLLoginStep.SAMLResponseReceived,
-            samlResponse: request.body.SAMLResponse,
-            nextURL: request.body.RelayState,
-          },
-        });
+      async (context, request, response) => {
+        try {
+          if (path === '/api/security/v1/saml') {
+            const currentBasePath = basePath.get(request);
+            logger.warn(
+              `The "${currentBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${currentBasePath}/api/security/authc/saml/callback" URL instead.`,
+              { tags: ['deprecation'] }
+            );
+          }
 
-        if (authenticationResult.redirected()) {
-          return response.redirected({ headers: { location: authenticationResult.redirectURL! } });
+          // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
+          const authenticationResult = await authc.login(request, {
+            provider: 'saml',
+            value: {
+              step: SAMLLoginStep.SAMLResponseReceived,
+              samlResponse: request.body.SAMLResponse,
+              redirectURL: request.body.RelayState,
+            },
+          });
+
+          if (authenticationResult.redirected()) {
+            return response.redirected({
+              headers: { location: authenticationResult.redirectURL! },
+            });
+          }
+
+          return response.unauthorized({ body: authenticationResult.error });
+        } catch (err) {
+          logger.error(err);
+          return response.internalError();
         }
-
-        return response.unauthorized({ body: authenticationResult.error });
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
       }
-    }
-  );
+    );
+  }
 }

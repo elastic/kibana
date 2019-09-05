@@ -86,6 +86,7 @@ export class Plugin {
       logger: this.initializerContext.logger.get('routes'),
       config,
       authc,
+      getLegacyAPI: this.getLegacyAPI,
     });
 
     return deepFreeze({

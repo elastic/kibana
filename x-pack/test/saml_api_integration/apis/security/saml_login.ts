@@ -22,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/security/api/authc/saml/callback`,
+      destination: `http://localhost:${kibanaServerConfig.port}/api/security/authc/saml/callback`,
       sessionIndex: chance.natural(),
       ...options,
     });
@@ -64,62 +64,88 @@ export default function({ getService }: FtrProviderContext) {
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
     });
 
-    describe('capturing current URL', () => {
-      it('should redirect user to a page that would capture client URL', async () => {
+    describe('capture URL fragment', () => {
+      it('should redirect user to a page that would capture URL fragment', async () => {
         const handshakeResponse = await supertest
           .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
-        expect(handshakeResponse.headers['set-cookie']).to.be(undefined);
+        // The cookie should capture current path.
+        const cookies = handshakeResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const handshakeCookie = request.cookie(cookies[0])!;
+        expect(handshakeCookie.key).to.be('sid');
+        expect(handshakeCookie.value).to.not.be.empty();
+        expect(handshakeCookie.path).to.be('/');
+        expect(handshakeCookie.httpOnly).to.be(true);
+
         expect(handshakeResponse.headers.location).to.be(
-          '/security/api/authc/saml/capture-current-url?currentPath=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three'
+          '/api/security/authc/saml/capture-url-fragment'
         );
       });
 
       it('should return an HTML page that will extract URL fragment', async () => {
         const response = await supertest
-          .get(
-            '/security/api/authc/saml/capture-current-url?currentPath=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three'
-          )
+          .get('/api/security/authc/saml/capture-url-fragment')
           .expect(200);
+
+        const kibanaBaseURL = url.format({ ...config.get('servers.kibana'), auth: false });
         const dom = new JSDOM(response.text, {
+          url: kibanaBaseURL,
           runScripts: 'dangerously',
+          resources: 'usable',
           beforeParse(window) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
-            // tries to do that and we have to workaround this behaviour.
-            Object.defineProperty(window, 'location', {
-              value: {
-                hash: '#/workpad',
-                href:
-                  'https://kibana.com/security/api/authc/saml/capture-current-url?currentPath=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three#/workpad',
-                replace(newLocation: string) {
-                  this.href = newLocation;
+            // tries to do that and we have to workaround this behaviour. We also need to wait until our
+            // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise(resolve => {
+              Object.defineProperty(window, 'location', {
+                value: {
+                  hash: '#/workpad',
+                  href: `${kibanaBaseURL}/api/security/authc/saml/capture-url-fragment#/workpad`,
+                  replace(newLocation: string) {
+                    this.href = newLocation;
+                    resolve();
+                  },
                 },
-              },
+              });
             });
           },
         });
 
+        await (dom.window as Record<string, any>).__isScriptExecuted__;
+
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
-        /* expect(response.headers['content-security-policy']).to.be(
+        expect(response.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
-        );*/
+        );
 
         // Check that script that forwards URL fragment worked correctly.
         expect(dom.window.location.href).to.be(
-          '/security/api/authc/saml/start?currentURL=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three%23%2Fworkpad'
+          '/api/security/authc/saml/start?redirectURLFragment=%23%2Fworkpad'
         );
       });
     });
 
     describe('initiating handshake', () => {
-      const encodedNextURL = '%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three%23%2Fworkpad';
-      const initiateHandshakeURL = `/security/api/authc/saml/start?currentURL=${encodedNextURL}`;
+      const encodedRedirectURLFragment = '%23%2Fworkpad';
+      const encodedRedirectURLPath = '%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three';
+      const initiateHandshakeURL = `/api/security/authc/saml/start?redirectURLFragment=${encodedRedirectURLFragment}`;
+
+      let captureURLCookie: Cookie;
+      beforeEach(async () => {
+        const response = await supertest.get('/abc/xyz/handshake?one=two three').expect(302);
+        captureURLCookie = request.cookie(response.headers['set-cookie'][0])!;
+      });
 
       it('should properly set cookie and redirect user to IdP', async () => {
-        const handshakeResponse = await supertest.get(initiateHandshakeURL).expect(302);
+        const handshakeResponse = await supertest
+          .get(initiateHandshakeURL)
+          .set('Cookie', captureURLCookie.cookieString())
+          .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
@@ -135,12 +161,19 @@ export default function({ getService }: FtrProviderContext) {
           true /* parseQueryString */
         );
         expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
-        expect(redirectURL.href!.endsWith(`&RelayState=${encodedNextURL}`)).to.be(true);
+        expect(
+          redirectURL.href!.endsWith(
+            `&RelayState=${encodedRedirectURLPath}${encodedRedirectURLFragment}`
+          )
+        ).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
 
       it('should not allow access to the API', async () => {
-        const handshakeResponse = await supertest.get(initiateHandshakeURL).expect(302);
+        const handshakeResponse = await supertest
+          .get(initiateHandshakeURL)
+          .set('Cookie', captureURLCookie.cookieString())
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
@@ -154,6 +187,7 @@ export default function({ getService }: FtrProviderContext) {
         const ajaxResponse = await supertest
           .get(initiateHandshakeURL)
           .set('kbn-xsrf', 'xxx')
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(401);
 
         expect(ajaxResponse.headers['set-cookie']).to.be(undefined);
@@ -161,13 +195,20 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('finishing handshake', () => {
-      const encodedNextURL = '%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three%23%2Fworkpad';
+      const encodedRedirectURLFragment = '%23%2Fworkpad';
+      const encodedRedirectURL = `%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three${encodedRedirectURLFragment}`;
       let handshakeCookie: Cookie;
       let samlRequestId: string;
 
       beforeEach(async () => {
+        const captureURLResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
+          .expect(302);
+        const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
+
         const handshakeResponse = await supertest
-          .get(`/security/api/authc/saml/start?currentURL=${encodedNextURL}`)
+          .get(`/api/security/authc/saml/start?redirectURLFragment=${encodedRedirectURLFragment}`)
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
         handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
@@ -176,7 +217,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail if SAML response is not complemented with handshake cookie', async () => {
         await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(401);
@@ -184,17 +225,17 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }),
-            RelayState: encodedNextURL,
+            RelayState: encodedRedirectURL,
           })
           .expect(302);
 
         // User should be redirected to the URL that initiated handshake.
-        expect(samlAuthenticationResponse.headers.location).to.be(encodedNextURL);
+        expect(samlAuthenticationResponse.headers.location).to.be(encodedRedirectURL);
 
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
@@ -229,7 +270,7 @@ export default function({ getService }: FtrProviderContext) {
         // Don't pass handshake cookie, RelayState query string parameter and don't include
         // `inResponseTo` into SAML response to simulate IdP initiated login.
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
@@ -268,7 +309,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail if SAML response is not valid', async () => {
         await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
@@ -284,7 +325,7 @@ export default function({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         // Imitate IdP initiated login.
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
@@ -346,8 +387,16 @@ export default function({ getService }: FtrProviderContext) {
       let idpSessionIndex: string;
 
       beforeEach(async () => {
+        const captureURLResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
+          .expect(302);
+        const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
+
         const handshakeResponse = await supertest
-          .get(`/security/api/authc/saml/start?currentURL=${encodeURIComponent('/abc/xyz')}`)
+          .get(
+            `/api/security/authc/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
@@ -355,7 +404,7 @@ export default function({ getService }: FtrProviderContext) {
 
         idpSessionIndex = chance.natural();
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
@@ -363,7 +412,7 @@ export default function({ getService }: FtrProviderContext) {
               inResponseTo: samlRequestId,
               sessionIndex: idpSessionIndex,
             }),
-            RelayState: encodeURIComponent('/abc/xyz'),
+            RelayState: encodeURIComponent('/abc/xyz#workpad'),
           })
           .expect(302);
 
@@ -496,20 +545,28 @@ export default function({ getService }: FtrProviderContext) {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {
+        const captureURLResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
+          .expect(302);
+        const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
+
         const handshakeResponse = await supertest
-          .get(`/security/api/authc/saml/start?currentURL=${encodeURIComponent('/abc/xyz')}`)
+          .get(
+            `/api/security/authc/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }),
-            RelayState: encodeURIComponent('/abc/xyz'),
+            RelayState: encodeURIComponent('/abc/xyz#workpad'),
           })
           .expect(302);
 
@@ -581,20 +638,28 @@ export default function({ getService }: FtrProviderContext) {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {
+        const captureURLResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
+          .expect(302);
+        const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
+
         const handshakeResponse = await supertest
-          .get(`/security/api/authc/saml/start?currentURL=${encodeURIComponent('/abc/xyz')}`)
+          .get(
+            `/api/security/authc/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
             SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }),
-            RelayState: encodeURIComponent('/abc/xyz'),
+            RelayState: encodeURIComponent('/abc/xyz#workpad'),
           })
           .expect(302);
 
@@ -629,7 +694,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(handshakeCookie.httpOnly).to.be(true);
 
         expect(handshakeResponse.headers.location).to.be(
-          '/security/api/authc/saml/capture-current-url?currentPath=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three'
+          '/api/security/authc/saml/capture-url-fragment'
         );
       });
     });
@@ -639,15 +704,23 @@ export default function({ getService }: FtrProviderContext) {
       let existingSessionCookie: Cookie;
 
       beforeEach(async () => {
+        const captureURLResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
+          .expect(302);
+        const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
+
         const handshakeResponse = await supertest
-          .get(`/security/api/authc/saml/start?currentURL=${encodeURIComponent('/abc/xyz')}`)
+          .get(
+            `/api/security/authc/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
+          .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .send({
@@ -655,7 +728,7 @@ export default function({ getService }: FtrProviderContext) {
               inResponseTo: samlRequestId,
               username: existingUsername,
             }),
-            RelayState: encodeURIComponent('/abc/xyz'),
+            RelayState: encodeURIComponent('/abc/xyz#workpad'),
           })
           .expect(302);
 
@@ -666,7 +739,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should renew session and redirect to the home page if login is for the same user', async () => {
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) })
@@ -702,7 +775,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should create a new session and redirect to the `overwritten_session` if login is for another user', async () => {
         const newUsername = 'c@d.e';
         const samlAuthenticationResponse = await supertest
-          .post('/security/api/authc/saml/callback')
+          .post('/api/security/authc/saml/callback')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })

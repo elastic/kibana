@@ -52,7 +52,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           step: SAMLLoginStep.SAMLResponseReceived,
           samlResponse: 'saml-response-xml',
-          nextURL: '/test-base-path/some-path',
+          redirectURL: '/test-base-path/some-path',
         },
         { requestId: 'some-request-id' }
       );
@@ -79,7 +79,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           step: SAMLLoginStep.SAMLResponseReceived,
           samlResponse: 'saml-response-xml',
-          nextURL: '/test-base-path/some-path',
+          redirectURL: '/test-base-path/some-path',
         },
         {}
       );
@@ -153,7 +153,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           step: SAMLLoginStep.SAMLResponseReceived,
           samlResponse: 'saml-response-xml',
-          nextURL: '/test-base-path/some-path',
+          redirectURL: '/test-base-path/some-path',
         },
         { requestId: 'some-request-id' }
       );
