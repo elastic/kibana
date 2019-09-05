@@ -65,6 +65,7 @@ describe('metric_expression', () => {
         >
           <AutoScale>
             <div
+              data-test-subj="lns_metric_value"
               style={
                 Object {
                   "fontSize": "60pt",
@@ -75,6 +76,7 @@ describe('metric_expression', () => {
               10110
             </div>
             <div
+              data-test-subj="lns_metric_title"
               style={
                 Object {
                   "fontSize": "24pt",
