@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../index_patterns';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -33,18 +33,14 @@ export interface PanelOptionsMenuProps {
   closeContextMenu: boolean;
 }
 
-interface PanelOptionsMenuUiProps extends PanelOptionsMenuProps {
-  intl: InjectedIntl;
-}
-
 interface State {
   actionContextMenuPanel?: EuiContextMenuPanelDescriptor;
   isPopoverOpen: boolean;
 }
 
-class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State> {
+export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, State> {
   private mounted = false;
-  public static getDerivedStateFromProps(props: PanelOptionsMenuUiProps, state: State) {
+  public static getDerivedStateFromProps(props: PanelOptionsMenuProps, state: State) {
     if (props.closeContextMenu) {
       return {
         ...state,
@@ -55,7 +51,7 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
     }
   }
 
-  constructor(props: PanelOptionsMenuUiProps) {
+  constructor(props: PanelOptionsMenuProps) {
     super(props);
     this.state = {
       actionContextMenuPanel: undefined,
@@ -77,14 +73,13 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
   }
 
   public render() {
-    const { isViewMode, intl } = this.props;
+    const { isViewMode } = this.props;
     const button = (
       <EuiButtonIcon
         iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
         color="text"
         className="embPanel__optionsMenuButton"
-        aria-label={intl.formatMessage({
-          id: 'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
+        aria-label={i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel', {
           defaultMessage: 'Panel options',
         })}
         data-test-subj="embeddablePanelToggleMenuIcon"
@@ -139,5 +134,3 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
     this.setState(({ isPopoverOpen }) => ({ isPopoverOpen: !isPopoverOpen }), after);
   };
 }
-
-export const PanelOptionsMenu = injectI18n(PanelOptionsMenuUi);

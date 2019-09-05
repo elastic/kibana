@@ -11,7 +11,7 @@ import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { getFilteredQueryAndStatusFilter } from '../../helper';
 import { queryEnriched } from './enriched_fetcher';
 
-export type QueryContext = {
+export interface QueryContext {
   database: any;
   request: any;
   dateRangeStart: string;
@@ -20,7 +20,7 @@ export type QueryContext = {
   filterClause: any | null;
   size: number;
   statusFilter?: string;
-};
+}
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
@@ -44,10 +44,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const queryContext: QueryContext = {
       database: this.database,
-      request: request,
-      dateRangeStart: dateRangeStart,
-      dateRangeEnd: dateRangeEnd,
-      pagination: pagination,
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      pagination,
       filterClause,
       size,
       statusFilter,

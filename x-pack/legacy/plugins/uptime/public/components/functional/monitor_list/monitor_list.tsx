@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -82,15 +83,16 @@ export const MonitorListComponent = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel paddingSize="s">
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.monitorList.monitoringStatusTitle"
+              defaultMessage="Monitor status"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}

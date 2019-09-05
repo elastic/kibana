@@ -112,6 +112,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
+              height="120px"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

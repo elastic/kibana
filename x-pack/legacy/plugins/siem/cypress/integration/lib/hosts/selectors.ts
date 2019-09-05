@@ -12,3 +12,6 @@ export const ALL_HOSTS_WIDGET_HOST = '[data-react-beautiful-dnd-drag-handle]';
 
 /** All the draggable hosts in the `All Hosts` widget on the `Hosts` page */
 export const ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS = `${ALL_HOSTS_WIDGET} ${ALL_HOSTS_WIDGET_HOST}`;
+
+/** Clicking this button displays the `Events` tab */
+export const EVENTS_TAB_BUTTON = '[data-test-subj="navigation-events"]';
