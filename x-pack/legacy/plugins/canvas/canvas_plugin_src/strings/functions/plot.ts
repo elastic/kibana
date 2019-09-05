@@ -9,7 +9,7 @@ import { plot } from '../../functions/common/plot';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
-import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../constants';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
   help: i18n.translate('xpack.canvas.functions.plotHelpText', {
