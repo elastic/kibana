@@ -4,18 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { get, set } from 'lodash';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { MonitorIdWithGroups } from './monitor_id_with_groups';
 import { CursorDirection } from '../../../../common/graphql/types';
 
-export const filteredCheckGroupsQuery = async (
+export const findPotentialMatches = async (
   queryContext: QueryContext,
   searchAfter: any,
   size: number
 ) => {
-  const body = filteredCheckGroupsQueryBody(queryContext, searchAfter, size);
+  const queryResult = await query(queryContext, searchAfter, size);
+
+  const checkGroups = new Set<string>();
+  const monitorIds: string[] = [];
+  get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
+    const monitorId = b.key.monitor_id;
+    monitorIds.push(monitorId);
+
+    // Doc count can be zero if status filter optimization does not match
+    if (b.summaries.doc_count > 0) {
+      const checkGroup = b.summaries.top.hits.hits[0]._source.monitor.check_group;
+      checkGroups.add(checkGroup);
+    }
+  });
+
+  return {
+    monitorIds,
+    checkGroups,
+    searchAfter: queryResult.aggregations.monitors.after_key,
+  };
+};
+
+const query = async (queryContext: QueryContext, searchAfter: any, size: number) => {
+  const body = queryBody(queryContext, searchAfter, size);
 
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
@@ -25,14 +47,10 @@ export const filteredCheckGroupsQuery = async (
   return await queryContext.database.search(queryContext.request, params);
 };
 
-const filteredCheckGroupsQueryBody = (
-  queryContext: QueryContext,
-  searchAfter: any,
-  size: number
-) => {
+const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const query = queryContext.filterClause.filter || { match_all: {} };
+  const queryClause = queryContext.filterClause.filter || { match_all: {} };
 
   // This clause is an optimization for the case where we only want to show 'up' monitors.
   // We know we can exclude any down matches because an 'up' monitor may not have any 'down' matches.
@@ -45,7 +63,7 @@ const filteredCheckGroupsQueryBody = (
 
   const body = {
     size: 0,
-    query,
+    query: queryClause,
     aggs: {
       monitors: {
         composite: {
@@ -81,11 +99,6 @@ const filteredCheckGroupsQueryBody = (
   }
   return body;
 };
-
-export interface CheckGroupsPageResult {
-  monitorIdGroups: MonitorIdWithGroups[];
-  searchAfter: string;
-}
 
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';

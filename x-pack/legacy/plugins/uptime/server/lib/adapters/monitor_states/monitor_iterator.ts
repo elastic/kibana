@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
 import { CursorDirection } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorPagination } from './adapter_types';
-import { mostRecentCheckGroups } from './most_recent_check_groups_query';
-import { MonitorLocCheckGroup } from './monitor_loc_check_group';
+import { refinePotentialMatches } from './refine_potential_matches';
 import { MonitorIdWithGroups } from './monitor_id_with_groups';
-import { filteredCheckGroupsQuery, CheckGroupsPageResult } from './filtered_check_groups_query';
+import { CheckGroupsPageResult, findPotentialMatches } from './find_potential_matches';
 
 export class MonitorIterator {
   queryContext: QueryContext;
@@ -135,108 +133,23 @@ export class MonitorIterator {
       return false;
     }
 
-    results.monitorIdGroups.forEach(mlcg => this.buffer.push(mlcg));
+    results.monitorIdGroups.forEach((mig: MonitorIdWithGroups) => this.buffer.push(mig));
     this.searchAfter = results.searchAfter;
 
     return true;
   }
 
   private async queryNext(size: number): Promise<CheckGroupsPageResult> {
-    const { monitorIds, filteredCheckGroups, searchAfter } = await this.queryPotentialMatches(size);
-    const matching = await this.refinePotentialMatches(monitorIds, filteredCheckGroups);
+    const { monitorIds, checkGroups, searchAfter } = await findPotentialMatches(
+      this.queryContext,
+      this.searchAfter,
+      size
+    );
+    const matching = await refinePotentialMatches(this.queryContext, monitorIds, checkGroups);
 
     return {
       monitorIdGroups: matching,
       searchAfter,
     };
-  }
-
-  private async queryPotentialMatches(size: number) {
-    const filteredQueryResult = await filteredCheckGroupsQuery(
-      this.queryContext,
-      this.searchAfter,
-      size
-    );
-
-    const filteredCheckGroups = new Set<string>();
-    const monitorIds: string[] = [];
-    get<any>(filteredQueryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
-      const monitorId = b.key.monitor_id;
-      monitorIds.push(monitorId);
-
-      // Doc count can be zero if status filter optimization does not match
-      if (b.summaries.doc_count > 0) {
-        const checkGroup = b.summaries.top.hits.hits[0]._source.monitor.check_group;
-        filteredCheckGroups.add(checkGroup);
-      }
-    });
-
-    return {
-      monitorIds,
-      filteredCheckGroups,
-      searchAfter: filteredQueryResult.aggregations.monitors.after_key,
-    };
-  }
-
-  private async refinePotentialMatches(
-    monitorIds: string[],
-    filteredCheckGroups: Set<string>
-  ): Promise<MonitorIdWithGroups[]> {
-    let matches: MonitorIdWithGroups[] = [];
-
-    if (monitorIds.length === 0) {
-      return matches;
-    }
-
-    const recentGroupsMatchingStatus = await this.fullyMatchingIds(monitorIds, filteredCheckGroups);
-
-    monitorIds.forEach((id: string) => {
-      const mostRecentGroups = recentGroupsMatchingStatus.get(id);
-      matches.push({
-        id,
-        matchesFilter: !!mostRecentGroups,
-        groups: mostRecentGroups || [],
-      });
-    });
-    matches = sortBy(matches, miwg => miwg.id);
-    if (this.queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
-      matches.reverse();
-    }
-    return matches;
-  }
-
-  private async fullyMatchingIds(monitorIds: string[], filteredCheckGroups: Set<string>) {
-    const mostRecentQueryResult = await mostRecentCheckGroups(this.queryContext, monitorIds);
-
-    const matching = new Map<string, MonitorLocCheckGroup[]>();
-    MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
-      const monitorId: string = monBucket.key;
-      const groups: MonitorLocCheckGroup[] = [];
-      for (const locBucket of monBucket.location.buckets) {
-        const location = locBucket.key;
-        const topSource = locBucket.top.hits.hits[0]._source;
-        const checkGroup = topSource.monitor.check_group;
-
-        const mlcg: MonitorLocCheckGroup = {
-          monitorId,
-          location,
-          checkGroup,
-          filterMatchesLatest: filteredCheckGroups.has(checkGroup),
-          timestamp: topSource['@timestamp'],
-          up: topSource.summary.up,
-          down: topSource.summary.down,
-          status: topSource.summary.down > 0 ? 'down' : 'up',
-        };
-
-        // This monitor doesn't match, so just skip ahead and don't add it to the output
-        if (this.queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {
-          continue MonitorLoop;
-        }
-        groups.push(mlcg);
-      }
-      matching.set(monitorId, groups);
-    }
-
-    return matching;
   }
 }
