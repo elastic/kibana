@@ -10331,7 +10331,6 @@
     "xpack.uptime.filterBar.filterUpLabel": "运行",
     "xpack.uptime.filterBar.options.idLabel": "ID",
     "xpack.uptime.filterBar.options.location.name": "位置",
-    "xpack.uptime.filterBar.options.nameLabel": "名称",
     "xpack.uptime.filterBar.options.portLabel": "端口",
     "xpack.uptime.filterBar.options.schemeLabel": "方案",
     "xpack.uptime.filterBar.options.urlLabel": "URL",
