@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiText, EuiAccordion, EuiButtonIcon, EuiSpacer, EuiIcon } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { EuiText, EuiAccordion, EuiSpacer, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { DrilldownForm } from './drilldown_form';
+import { useListKeys } from './use_list_keys';
 
 export function DrilldownList({
   removeUrlTemplate,
   saveUrlTemplate,
   urlTemplates,
 }: Pick<GraphSettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
+  const getListKey = useListKeys(urlTemplates);
+
   return (
     <>
       <EuiText size="s">
@@ -25,9 +28,9 @@ export function DrilldownList({
       </EuiText>
       <EuiSpacer />
       {urlTemplates.map((template, index) => (
-        <>
+        <Fragment key={getListKey(template)}>
           <EuiAccordion
-            id={`accordion-${index}-${template.description}`}
+            id={getListKey(template)}
             buttonContent={template.description}
             className="gphSettingsAccordion"
             buttonClassName="gphSettingsAccordion__button"
@@ -43,16 +46,18 @@ export function DrilldownList({
             />
           </EuiAccordion>
           <EuiSpacer />
-        </>
+        </Fragment>
       ))}
       <EuiAccordion
-        id={`accordion--1`}
+        id={`accordion-new`}
         buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
           defaultMessage: 'New template',
         })}
         className="gphSettingsAccordion"
         buttonClassName="gphSettingsAccordion__button"
-        extraAction={<EuiIcon type="plusInCircleFilled" color="primary" />}
+        extraAction={
+          <EuiIcon className="gphSettings__addIcon" type="plusInCircleFilled" color="primary" />
+        }
       >
         <DrilldownForm
           onSubmit={newTemplate => {

@@ -12,10 +12,11 @@
   padding: $euiSizeM;
 }
 
-
-.gphSettingsForm {
-}
-j
 .gphSettings__helpTextButton {
-  
+  font-weight: bold;
+  color: $euiColorPrimary;
+}
+
+.gphSettings__addIcon {
+  pointer-events: none;
 }

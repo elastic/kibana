@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { AdvancedSettings } from '../../types';
@@ -37,7 +37,7 @@ export function AdvancedSettingsForm({
   }
 
   return (
-    <form className="gphSettingsForm">
+    <form>
       <EuiFormRow
         fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputHelpText', {

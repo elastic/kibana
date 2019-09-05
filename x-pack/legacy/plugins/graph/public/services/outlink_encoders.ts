@@ -15,6 +15,7 @@ export interface OutlinkEncoder {
   title: string;
   description: string;
   encode: (workspace: Workspace) => string;
+  type: 'kql' | 'lucene' | 'plain' | 'esq';
 }
 
 export const getOutlinkEncoders = (): OutlinkEncoder[] => [
@@ -29,6 +30,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
     encode(workspace) {
       return asKQL(workspace, 'or');
     },
+    type: 'kql',
   },
   {
     id: 'kql',
@@ -41,6 +43,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
     encode(workspace) {
       return asKQL(workspace, 'and');
     },
+    type: 'kql',
   },
   {
     id: 'esq-rison-loose',
@@ -56,6 +59,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
         rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes(), true))
       );
     },
+    type: 'esq',
   },
   {
     id: 'esq-rison',
@@ -71,6 +75,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
         rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes()))
       );
     },
+    type: 'esq',
   },
   {
     id: 'esq-similar-rison',
@@ -86,6 +91,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
         rison.encode(workspace.getLikeThisButNotThisQuery(workspace.getSelectedOrAllNodes()))
       );
     },
+    type: 'esq',
   },
   {
     id: 'esq-plain',
@@ -100,6 +106,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
         JSON.stringify(workspace.getQuery(workspace.getSelectedOrAllNodes()))
       );
     },
+    type: 'esq',
   },
   {
     id: 'text-plain',
@@ -121,6 +128,7 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
       }
       return encodeURIComponent(q);
     },
+    type: 'plain',
   },
   {
     id: 'text-lucene',
@@ -148,5 +156,6 @@ export const getOutlinkEncoders = (): OutlinkEncoder[] => [
         .join('');
       return encodeURIComponent(q);
     },
+    type: 'lucene',
   },
 ];

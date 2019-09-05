@@ -573,16 +573,21 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.saveUrlTemplate = function (index, urlTemplate) {
+    const newTemplatesList = [...$scope.urlTemplates];
     if (index !== -1) {
-      $scope.urlTemplates[index] = urlTemplate;
+      newTemplatesList[index] = urlTemplate;
     } else {
-      $scope.urlTemplates.push(urlTemplate);
+      newTemplatesList.push(urlTemplate);
     }
+
+    $scope.urlTemplates = newTemplatesList;
   };
 
   $scope.removeUrlTemplate = function (urlTemplate) {
-    const i = $scope.urlTemplates.indexOf(urlTemplate);
-    $scope.urlTemplates.splice(i, 1);
+    const newTemplatesList = [...$scope.urlTemplates];
+    const i = newTemplatesList.indexOf(urlTemplate);
+    newTemplatesList.splice(i, 1);
+    $scope.urlTemplates = newTemplatesList;
   };
 
   $scope.openUrlTemplate = function (template) {

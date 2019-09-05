@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
   EuiButton,
-  EuiCallOut,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,7 +44,7 @@ function isUpdateForm(props: DrilldownFormProps): props is UpdateFormProps {
 export function DrilldownForm(props: DrilldownFormProps) {
   const { onSubmit } = props;
   const getInitialTemplate = () =>
-    'initialTemplate' in props
+    isUpdateForm(props)
       ? props.initialTemplate
       : {
           encoder: encoders[0],
@@ -55,6 +54,13 @@ export function DrilldownForm(props: DrilldownFormProps) {
         };
 
   const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
+
+  // reset local form if template passed in from parent component changes
+  useEffect(() => {
+    if (isUpdateForm(props) && currentTemplate !== props.initialTemplate) {
+      setCurrentTemplate(props.initialTemplate);
+    }
+  }, [isUpdateForm(props) && props.initialTemplate]);
 
   const [touched, setTouched] = useState({
     description: false,
@@ -67,6 +73,28 @@ export function DrilldownForm(props: DrilldownFormProps) {
     setCurrentTemplate({ ...currentTemplate, [key]: value });
   }
 
+  function reset() {
+    setTouched({
+      description: false,
+      url: false,
+    });
+    setCurrentTemplate(getInitialTemplate());
+    setAutoformatUrl(false);
+  }
+
+  function convertUrl() {
+    setCurrentTemplate({
+      ...currentTemplate,
+      url: replaceKibanaUrlParam(currentTemplate.url),
+      // reset to kql encoder
+      encoder:
+        currentTemplate.encoder.type === 'kql'
+          ? currentTemplate.encoder
+          : encoders.find(enc => enc.type === 'kql')!,
+    });
+    setAutoformatUrl(false);
+  }
+
   const urlPlaceholderMissing = Boolean(
     currentTemplate.url && !isUrlTemplateValid(currentTemplate.url)
   );
@@ -74,10 +102,12 @@ export function DrilldownForm(props: DrilldownFormProps) {
 
   return (
     <form
-      className="gphSettingsForm"
       onSubmit={e => {
         e.preventDefault();
         onSubmit(currentTemplate);
+        if (!isUpdateForm(props)) {
+          reset();
+        }
       }}
     >
       <EuiSpacer size="s" />
@@ -108,32 +138,25 @@ export function DrilldownForm(props: DrilldownFormProps) {
           })}
           helpText={
             <>
-              {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
-                defaultMessage:
-                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
-                values: { gquery: '{{gquery}}' },
-              })}
-              <br />
               {autoformatUrl && (
                 <strong>
                   {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
                     defaultMessage: 'Possible Kibana URL pasted, ',
                   })}
-                  <EuiButtonEmpty
-                    size="xs"
-                    className="gphSettings__helpTextButton"
-                    onClick={() => {
-                      setValue('url', replaceKibanaUrlParam(currentTemplate.url));
-                      setAutoformatUrl(false);
-                    }}
-                  >
+                  <button className="gphSettings__helpTextButton" onClick={convertUrl}>
                     {i18n.translate(
                       'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
                       { defaultMessage: 'convert it' }
                     )}
-                  </EuiButtonEmpty>
+                  </button>
+                  <br />
                 </strong>
               )}
+              {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
+                defaultMessage:
+                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
+                values: { gquery: '{{gquery}}' },
+              })}
             </>
           }
           onBlur={() => setTouched({ ...touched, url: true })}
@@ -168,36 +191,6 @@ export function DrilldownForm(props: DrilldownFormProps) {
             isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
           />
         </EuiFormRow>
-        {autoformatUrl && (
-          <>
-            <EuiCallOut
-              size="s"
-              title={i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
-                defaultMessage: 'Kibana URL pasted',
-              })}
-            >
-              <p>
-                {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
-                  defaultMessage:
-                    'This looks like a Kibana URL. Would you like us to convert it to a template for you?',
-                })}
-              </p>
-              <EuiButton
-                size="s"
-                onClick={() => {
-                  setValue('url', replaceKibanaUrlParam(currentTemplate.url));
-                  setAutoformatUrl(false);
-                }}
-              >
-                {i18n.translate(
-                  'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                  { defaultMessage: 'Convert' }
-                )}
-              </EuiButton>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
       </EuiForm>
       <EuiFormRow
         fullWidth
@@ -265,11 +258,7 @@ export function DrilldownForm(props: DrilldownFormProps) {
         )}
         <EuiFlexItem grow={null}>
           {
-            <EuiButtonEmpty
-              onClick={() => {
-                setCurrentTemplate(getInitialTemplate());
-              }}
-            >
+            <EuiButtonEmpty onClick={reset}>
               {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
                 defaultMessage: 'Reset',
               })}
