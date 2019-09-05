@@ -1,5 +1,5 @@
 ## Summary
-Welcome to the Kibana rollup plugin! This plugin provides Kibana support for [Elasticsearch's rollup feature](https://www.elastic.co/guide/en/elasticsearch/reference/master/xpack-rollup.html). Please read the ES documentation to understand what rollup indices are, and how rollup jobs create them.
+Welcome to the Kibana rollup plugin! This plugin provides Kibana support for [Elasticsearch's rollup feature](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-rollup.html). Please read the ES documentation to understand what rollup indices are, and how rollup jobs create them.
 
 This plugin allows Kibana to:
 
@@ -25,7 +25,7 @@ In order for Kibana to consume and use rollup indices for visualizations, simila
 Once the user has at least one rollup job configured, in the Index Pattern UI, the standard `Create index pattern` button will become a context menu with two options, one for regular index pattern and one for rollup index pattern. This is done by registering a [rollup config to index pattern creation extension points](public/index_pattern_creation/rollup_index_pattern_creation_config.js), in particular using the `getIndexPatternCreationOption()`. Once the user selects to create a rollup index pattern, this config also adjusts creation wizard in the following ways:
 1. Adds `Rollup` badge to list of matching indices that are rollup indices using `getIndexTags()`.
 2. Enforces index pattern rules using `checkIndicesForErrors()`. Rollup index patterns must match **one** rollup index, and optionally any number of regular indices. A rollup index pattern configured with one or more regular indices is affectionally known as a "hybrid" index pattern, and this allows the user to visualize historical (rollup) data and live (regular) data in the same visualization.
-3. Routes to this plugin's [rollup `_fields_for_wildcard` endpoint](server/routes/api/index_patterns.js) using `getFetchForWildcardOptions()`, so that the internal rollup data field names are mapped to the original field names.
+3. Routes to this plugin's [rollup `_fields_for_wildcard` endpoint](server/routes/api/index_patterns.js), instead of the standard one, using `getFetchForWildcardOptions()`, so that the internal rollup data field names are mapped to the original field names.
 4. Writes additional information about what aggregations, fields, histogram interval, and date histogram interval and timezone to the rollup index pattern saved object using `getIndexPatternMappings()`. This collection of information referred to as its "capabilities".
 
 Once a rollup index pattern is created, it will be tagged with `Rollup` in the list of index patterns, and its details page will display capabilities information. This is done by registering [yet another config for index pattern list](public/index_pattern_list/rollup_index_pattern_list_config.js) extension points.
