@@ -30,6 +30,10 @@ import { I18nContext } from 'ui/i18n';
  */
 type SaveResult = { id?: string } | { error: Error };
 
+function isError(result: SaveResult): result is { error: Error } {
+  return 'error' in result;
+}
+
 interface MinimalSaveModalProps {
   onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
@@ -46,7 +50,8 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
 
   const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
     const response = await onSave(...args);
-    if (('id' in response && response.id) || ('error' in response && response.error)) {
+    // close modal if we either hit an error or the saved object got an id
+    if (Boolean(isError(response) ? response.error : response.id)) {
       closeModal();
     }
     return response;
