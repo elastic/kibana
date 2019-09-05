@@ -6,11 +6,15 @@
 
 import React from 'react';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import {
+  setup as dataSetup,
+  start as dataStart,
+} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
-import { EditorFrameSetupPlugins } from './plugin';
+import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
-type DataSetup = typeof data;
+type DataSetup = typeof dataSetup;
+type DataStart = typeof dataStart;
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -80,8 +84,12 @@ export function createMockFramePublicAPI(): FrameMock {
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
-export type MockedDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
+export type MockedSetupDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
   data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataSetup['expressions']> };
+};
+
+export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'data'> & {
+  data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataStart['expressions']> };
 };
 
 export function createExpressionRendererMock(): jest.Mock<
@@ -91,9 +99,9 @@ export function createExpressionRendererMock(): jest.Mock<
   return jest.fn(_ => <span />);
 }
 
-export function createMockDependencies() {
+export function createMockSetupDependencies() {
   return ({
-    dataSetup: {
+    data: {
       indexPatterns: {
         indexPatterns: {},
       },
@@ -102,17 +110,21 @@ export function createMockDependencies() {
         registerRenderer: jest.fn(),
       },
     },
-    dataStart: {
-      expressions: {
-        ExpressionRenderer: createExpressionRendererMock(),
-        run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
-      },
-    },
     embeddables: {
       registerEmbeddableFactory: jest.fn(),
     },
     chrome: {
       getSavedObjectsClient: () => {},
     },
-  } as unknown) as MockedDependencies;
+  } as unknown) as MockedSetupDependencies;
+}
+
+export function createMockStartDependencies() {
+  return ({
+    data: {
+      expressions: {
+        ExpressionRenderer: jest.fn(() => null),
+      },
+    },
+  } as unknown) as MockedStartDependencies;
 }

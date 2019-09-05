@@ -33,10 +33,13 @@ export interface EditorFrameInstance {
 }
 
 export interface EditorFrameSetup {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
+}
+
+export interface EditorFrameStart {
+  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority

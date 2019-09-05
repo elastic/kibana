@@ -5,7 +5,12 @@
  */
 
 import { EditorFramePlugin } from './plugin';
-import { createMockDependencies, MockedDependencies } from './mocks';
+import {
+  MockedSetupDependencies,
+  MockedStartDependencies,
+  createMockSetupDependencies,
+  createMockStartDependencies,
+} from './mocks';
 
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
@@ -17,17 +22,23 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => 
   start: {},
   setup: {},
 }));
-jest.mock('./embeddable/embeddable_factory', () => ({ EmbeddableFactory: class Mock {} }));
+jest.mock('./embeddable/embeddable_factory', () => ({
+  EmbeddableFactory: class Mock {
+    setExpressionRenderer() {}
+  },
+}));
 
 describe('editor_frame plugin', () => {
   let pluginInstance: EditorFramePlugin;
   let mountpoint: Element;
-  let pluginDependencies: MockedDependencies;
+  let pluginSetupDependencies: MockedSetupDependencies;
+  let pluginStartDependencies: MockedStartDependencies;
 
   beforeEach(() => {
     pluginInstance = new EditorFramePlugin();
     mountpoint = document.createElement('div');
-    pluginDependencies = createMockDependencies();
+    pluginSetupDependencies = createMockSetupDependencies();
+    pluginStartDependencies = createMockStartDependencies();
   });
 
   afterEach(() => {
@@ -36,7 +47,8 @@ describe('editor_frame plugin', () => {
 
   it('should create an editor frame instance which mounts and unmounts', () => {
     expect(() => {
-      const publicAPI = pluginInstance.setup(null, pluginDependencies);
+      pluginInstance.setup(null, pluginSetupDependencies);
+      const publicAPI = pluginInstance.start(null, pluginStartDependencies);
       const instance = publicAPI.createInstance({});
       instance.mount(mountpoint, {
         onError: jest.fn(),
@@ -49,7 +61,8 @@ describe('editor_frame plugin', () => {
   });
 
   it('should not have child nodes after unmount', () => {
-    const publicAPI = pluginInstance.setup(null, pluginDependencies);
+    pluginInstance.setup(null, pluginSetupDependencies);
+    const publicAPI = pluginInstance.start(null, pluginStartDependencies);
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint, {
       onError: jest.fn(),
