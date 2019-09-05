@@ -77,7 +77,15 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     // TODO parse the KQL tree and check whether this would work out
     return false;
   },
-  paramEditor: ({ state, setState, currentColumn, uiSettings, storage, layerId }) => {
+  paramEditor: ({
+    state,
+    setState,
+    currentColumn,
+    uiSettings,
+    storage,
+    layerId,
+    savedObjectsClient,
+  }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
     return (
@@ -94,6 +102,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             screenTitle={''}
             store={storage}
             uiSettings={uiSettings}
+            savedObjectsClient={savedObjectsClient}
             onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam({
@@ -121,6 +130,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               screenTitle={''}
               store={storage}
               uiSettings={uiSettings}
+              savedObjectsClient={savedObjectsClient}
               onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam({

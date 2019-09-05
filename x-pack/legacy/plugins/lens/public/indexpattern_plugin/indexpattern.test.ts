@@ -9,6 +9,7 @@ import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data
 import { Storage } from 'ui/storage';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { toastNotifications as notificationsMock } from 'ui/notify';
+import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
@@ -140,6 +141,7 @@ describe('IndexPattern Data Source', () => {
       interpreter: { functionsRegistry },
       toastNotifications: notificationsMock,
       data: dataMock,
+      savedObjectsClient: {} as SavedObjectsClientContract,
     });
 
     persistedState = {

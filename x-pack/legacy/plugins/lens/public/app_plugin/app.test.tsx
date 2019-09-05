@@ -13,6 +13,7 @@ import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { SavedObjectsClientContract } from 'src/core/public';
 
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/query', () => ({
   QueryBar: jest.fn(() => null),
@@ -22,6 +23,7 @@ jest.mock('ui/new_platform');
 jest.mock('ui/notify');
 jest.mock('ui/chrome');
 jest.mock('../persistence');
+jest.mock('src/core/public');
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -39,6 +41,7 @@ function makeDefaultArgs(): jest.Mocked<{
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
+  savedObjectsClient: SavedObjectsClientContract;
 }> {
   return ({
     editorFrame: createMockFrame(),
@@ -68,6 +71,7 @@ function makeDefaultArgs(): jest.Mocked<{
     },
     QueryBar: jest.fn(() => <div />),
     redirectTo: jest.fn(id => {}),
+    savedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<{
     editorFrame: EditorFrameInstance;
     chrome: Chrome;
@@ -75,6 +79,7 @@ function makeDefaultArgs(): jest.Mocked<{
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
+    savedObjectsClient: SavedObjectsClientContract;
   }>;
 }
 
