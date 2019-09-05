@@ -17,7 +17,6 @@ import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
-import { StatefulEvent } from './events/stateful_event';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
