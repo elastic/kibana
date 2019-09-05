@@ -21,8 +21,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 
+/**
+ * Represents the result of trying to persist the saved object.
+ * Contains `error` prop if something unexpected happened (e.g. network error).
+ * Contains an `id` if persisting was successful. If `id` and
+ * `error` are undefined, persisting was not successful, but the
+ * modal can still recover (e.g. the name of the saved object was already taken).
+ */
+type SaveResult = { id?: string } | { error: Error };
+
 interface MinimalSaveModalProps {
-  onSave: (...args: any[]) => Promise<{ id?: string } | { error: Error }>;
+  onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }
 

@@ -49,7 +49,6 @@ export function GraphSaveModal({
       objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
         defaultMessage: 'workspace',
       })}
-      className="gphSaveModal"
       options={
         <>
           <EuiFormRow
