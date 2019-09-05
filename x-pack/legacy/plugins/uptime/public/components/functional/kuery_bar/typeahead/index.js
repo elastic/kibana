@@ -156,8 +156,6 @@ export class Typeahead extends Component {
   };
 
   render() {
-    const { queryExample } = this.props;
-
     return (
       <ClickOutside
         onClickOutside={this.onClickOutside}
@@ -174,9 +172,6 @@ export class Typeahead extends Component {
               {
                 defaultMessage:
                   'Search monitor IDs, names, and protocol types...',
-                values: {
-                  queryExample
-                }
               }
             )}
             inputRef={node => {
