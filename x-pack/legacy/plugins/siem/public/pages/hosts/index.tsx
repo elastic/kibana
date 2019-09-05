@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
-
-import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { HostDetailsBody, HostDetails } from './details';
 import {
@@ -40,7 +37,9 @@ const getHostDetailsTabPath = (pagePath: string) =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events})`;
 
-export const HostsContainer = pure<HostComponentProps>(({ match }) => (
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const HostsContainer = React.memo<Props>(({ url }) => (
   <GlobalTime>
     {({ to, from, setQuery, isInitializing }) => (
       <Switch>
@@ -48,7 +47,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
           strict
           exact
           path={hostsPagePath}
-          render={props => (
+          render={() => (
             <Route
               path={hostsPagePath}
               render={() => (
@@ -59,7 +58,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={HostsQueryTabBody}
                   />
                 </>
@@ -71,7 +69,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
           strict
           exact
           path={getHostsTabPath(hostsPagePath)}
-          render={props => (
+          render={() => (
             <>
               <Hosts from={from} to={to} setQuery={setQuery} isInitializing={isInitializing} />
               <Route
@@ -82,7 +80,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={HostsQueryTabBody}
                   />
                 )}
@@ -95,7 +92,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={AuthenticationsQueryTabBody}
                   />
                 )}
@@ -108,7 +104,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={UncommonProcessTabBody}
                   />
                 )}
@@ -121,7 +116,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={AnomaliesTabBody}
                   />
                 )}
@@ -134,7 +128,6 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={EventsTabBody}
                   />
                 )}
@@ -153,7 +146,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                 to={to}
                 setQuery={setQuery}
                 isInitializing={isInitializing}
-                {...props}
+                detailName={props.match.params.detailName}
               />
               <Route
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.hosts})`}
@@ -163,8 +156,8 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
                     children={HostsQueryTabBody}
+                    detailName={props.match.params.detailName}
                   />
                 )}
               />
@@ -176,7 +169,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
+                    detailName={props.match.params.detailName}
                     children={AuthenticationsQueryTabBody}
                   />
                 )}
@@ -189,7 +182,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
+                    detailName={props.match.params.detailName}
                     children={UncommonProcessTabBody}
                   />
                 )}
@@ -202,7 +195,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
+                    detailName={props.match.params.detailName}
                     children={AnomaliesTabBody}
                   />
                 )}
@@ -215,7 +208,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    {...props}
+                    detailName={props.match.params.detailName}
                     children={EventsTabBody}
                   />
                 )}
@@ -224,8 +217,8 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
           )}
         />
         <Redirect
-          from={`${match.url}/:detailName`}
-          to={`${match.url}/:detailName/${HostsTableType.authentications}`}
+          from={`${url}/:detailName`}
+          to={`${url}/:detailName/${HostsTableType.authentications}`}
         />
         <Redirect from="/hosts/" to={`/hosts/${HostsTableType.hosts}`} />
       </Switch>

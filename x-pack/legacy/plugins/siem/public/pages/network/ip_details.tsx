@@ -16,7 +16,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { getNetworkUrl } from '../../components/link_to/redirect_to_network';
 import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
@@ -59,17 +59,10 @@ interface IPDetailsComponentReduxProps {
   }>;
 }
 
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+export type IPDetailsComponentProps = IPDetailsComponentReduxProps & { detailName: string };
 
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
-  ({
-    match: {
-      params: { detailName },
-    },
-    filterQuery,
-    flowTarget,
-    setAbsoluteRangeDatePicker,
-  }) => (
+  ({ detailName, filterQuery, flowTarget, setAbsoluteRangeDatePicker }) => (
     <>
       <WithSource sourceId="default" data-test-subj="ip-details-page">
         {({ indicesExist, indexPattern }) => {

@@ -5,24 +5,28 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-
-import { pure } from 'recompose';
-
-import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
 
 const networkPath = `/:pageName(network)`;
-export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
-  <>
-    <Switch>
-      <Route strict exact path={networkPath} render={props => <Network {...props} />} />
-      <Route path={`${networkPath}/ip/:detailName`} render={props => <IPDetails {...props} />} />
-      <Redirect from="/network/" to="/network" />
-    </Switch>
-  </>
+
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const NetworkContainer = React.memo<Props>(() => (
+  <Switch>
+    <Route strict exact path={networkPath} render={() => <Network />} />
+    <Route
+      path={`${networkPath}/ip/:detailName`}
+      render={({
+        match: {
+          params: { detailName },
+        },
+      }) => <IPDetails detailName={detailName} />}
+    />
+    <Redirect from="/network/" to="/network" />
+  </Switch>
 ));
 
 NetworkContainer.displayName = 'NetworkContainer';
