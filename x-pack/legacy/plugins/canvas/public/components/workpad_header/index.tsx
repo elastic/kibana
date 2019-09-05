@@ -6,11 +6,11 @@
 
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-// @ts-ignore: Local Untyped
+// @ts-ignore untyped local
 import { canUserWrite } from '../../state/selectors/app';
-// @ts-ignore: Local Untyped
+// @ts-ignore untyped local
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
-// @ts-ignore: Local Untyped
+// @ts-ignore untyped local
 import { setWriteable } from '../../state/actions/workpad';
 import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header';
 

@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../i18n';
-const { WorkpadHeader: strings } = ComponentStrings;
 
 // @ts-ignore untyped local
 import { AssetManager } from '../asset_manager';
@@ -37,6 +36,8 @@ import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
 import { WorkpadZoom } from './workpad_zoom';
+
+const { WorkpadHeader: strings } = ComponentStrings;
 
 export interface Props {
   isWriteable: boolean;

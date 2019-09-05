@@ -18,11 +18,12 @@ import {
 import React, { FunctionComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
-const { Asset: strings } = ComponentStrings;
 
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { AssetType } from '../../../types';
+
+const { Asset: strings } = ComponentStrings;
 
 interface Props {
   /** The asset to be rendered */

@@ -26,13 +26,14 @@ import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
-const { AssetModal: strings } = ComponentStrings;
 
 // @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
 import { AssetType } from '../../../types';
+
+const { AssetModal: strings } = ComponentStrings;
 
 interface Props {
   /** The assets to display within the modal */

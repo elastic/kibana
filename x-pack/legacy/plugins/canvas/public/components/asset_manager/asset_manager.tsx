@@ -15,11 +15,12 @@ import PropTypes from 'prop-types';
 import React, { Fragment, PureComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
-const { AssetManager: strings } = ComponentStrings;
 
 import { ConfirmModal } from '../confirm_modal';
 import { AssetType } from '../../../types';
 import { AssetModal } from './asset_modal';
+
+const { AssetManager: strings } = ComponentStrings;
 
 interface Props {
   /** A list of assets, if available */

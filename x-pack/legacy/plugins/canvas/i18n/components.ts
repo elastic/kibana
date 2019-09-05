@@ -35,7 +35,7 @@ export const ComponentStrings = {
         defaultMessage: 'Download',
       }),
     getThumbnailAltText: () =>
-      i18n.translate('xpack.canvas.asset.deleteAssetTooltipText', {
+      i18n.translate('xpack.canvas.asset.thumbnailAltText', {
         defaultMessage: 'Asset thumbnail',
       }),
   },
@@ -85,7 +85,10 @@ export const ComponentStrings = {
       }),
     getSpaceUsedText: (percentageUsed: number) =>
       i18n.translate('xpack.canvas.assetModal.spacedUsedText', {
-        defaultMessage: `${percentageUsed}% space used`,
+        defaultMessage: '{percentageUsed}% space used',
+        values: {
+          percentageUsed,
+        },
       }),
   },
   WorkpadHeader: {
