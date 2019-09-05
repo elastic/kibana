@@ -2504,7 +2504,6 @@
     "kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel": "円を表示",
     "kbnVislibVisTypes.controls.pointSeries.series.showLineLabel": "線を表示",
     "kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel": "値軸",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsTitle": "カスタム範囲",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel": "最高",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel": "最低",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.minNeededScaleText": "ログスケールが選択されている場合、最低値は 0 よりも大きいものである必要があります",

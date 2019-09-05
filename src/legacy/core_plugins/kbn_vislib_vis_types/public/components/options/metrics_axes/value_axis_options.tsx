@@ -163,7 +163,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         setValue={setValueAxis}
       />
 
-      {axis.show && (
+      {axis.show ? (
         <>
           <EuiSpacer size="m" />
           <TextInputOption
@@ -178,9 +178,11 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
           <LabelOptions axis={axis} axesName="valueAxes" index={index} {...props} />
         </>
+      ) : (
+        <EuiSpacer size="xs" />
       )}
 
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
 
       <EuiAccordion
         id={`yAxisOptionsAccordion${axis.id}`}

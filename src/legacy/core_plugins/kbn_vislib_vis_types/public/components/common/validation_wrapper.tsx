@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 
 export interface ValidationVisOptionsProps<T> extends VisOptionsProps<T> {
@@ -40,14 +40,17 @@ function ValidationWrapper<T = unknown>({
   const isPanelValid = Object.values(panelState).every(item => item.valid);
   const { setValidity } = rest;
 
-  const setValidityHandler = (paramName: string, isValid: boolean) => {
-    setPanelState({
-      ...panelState,
-      [paramName]: {
-        valid: isValid,
-      },
-    });
-  };
+  const setValidityHandler = useCallback(
+    (paramName: string, isValid: boolean) => {
+      setPanelState({
+        ...panelState,
+        [paramName]: {
+          valid: isValid,
+        },
+      });
+    },
+    [panelState]
+  );
 
   useEffect(() => {
     setValidity(isPanelValid);

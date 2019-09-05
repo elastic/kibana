@@ -2504,7 +2504,6 @@
     "kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel": "显示为圆圈",
     "kbnVislibVisTypes.controls.pointSeries.series.showLineLabel": "显示为线条",
     "kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel": "值轴",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsTitle": "定制范围",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel": "最大值",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel": "最小值",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.minNeededScaleText": "如果选择了对数刻度，最小值必须大于 0",
