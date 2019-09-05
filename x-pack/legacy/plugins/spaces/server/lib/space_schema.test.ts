@@ -48,6 +48,26 @@ describe('#id', () => {
     );
   });
 
+  test(`allows an id of length 500`, () => {
+    const id = new Array(500).fill('a').join('');
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      id,
+    });
+    expect(result.error).toBeNull();
+  });
+
+  test(`doesn't allow an id of length 501`, () => {
+    const id = new Array(501).fill('a').join('');
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      id,
+    });
+    expect(result.error).toMatchInlineSnapshot(
+      `[ValidationError: child "id" fails because ["id" length must be less than or equal to 500 characters long]]`
+    );
+  });
+
   ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', ',', '.', '/', '?'].forEach(
     invalidCharacter => {
       test(`doesn't allow ${invalidCharacter}`, () => {

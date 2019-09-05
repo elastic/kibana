@@ -116,7 +116,21 @@ describe('validateURLIdentifier', () => {
 
     expect(validator.validateURLIdentifier(space)).toEqual({
       isInvalid: true,
-      error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-".',
+      error:
+        'URL identifier can only contain a-z, 0-9, and the characters "_" and "-". Must be no larger than 500 characters.',
+    });
+  });
+
+  test('it requires a valid Space Identifier less than 500 characters', () => {
+    const space = {
+      id: new Array(501).fill('a').join(''),
+      name: '',
+    };
+
+    expect(validator.validateURLIdentifier(space)).toEqual({
+      isInvalid: true,
+      error:
+        'URL identifier can only contain a-z, 0-9, and the characters "_" and "-". Must be no larger than 500 characters.',
     });
   });
 
