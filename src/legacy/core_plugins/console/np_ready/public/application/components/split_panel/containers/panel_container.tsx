@@ -29,18 +29,16 @@ export interface Props {
 }
 
 interface State {
-  currentPanel: number;
   isDragging: boolean;
   currentResizerPos: number;
 }
 
-const initialState = { currentPanel: -1, isDragging: false, currentResizerPos: -1 };
+const initialState: State = { isDragging: false, currentResizerPos: -1 };
 
 const pxToPercent = (proportion: number, whole: number) => (proportion / whole) * 100;
 
-// TODO: Write tests for this
 export function PanelsContainer({ children, onPanelWidthChange }: Props) {
-  const [firstChild, ...rest] = Children.toArray(children);
+  const [firstChild, secondChild] = Children.toArray(children);
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,28 +48,21 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
     return containerRef.current!.getBoundingClientRect().width;
   };
 
-  const childrenWithResizer = rest.reduce(
-    (acc: ReactNode[], child, idx) => {
-      // The target idx is offset by one, we want to target the panel to the left of the resizer
-      // for resizing.
-      return acc.concat([
-        <Resizer
-          key={idx}
-          onMouseDown={event => {
-            event.preventDefault();
-            setState({
-              ...state,
-              currentPanel: idx,
-              isDragging: true,
-              currentResizerPos: event.clientX,
-            });
-          }}
-        />,
-        child,
-      ]);
-    },
-    [firstChild]
-  );
+  const childrenWithResizer = [
+    firstChild,
+    <Resizer
+      key={'resizer'}
+      onMouseDown={event => {
+        event.preventDefault();
+        setState({
+          ...state,
+          isDragging: true,
+          currentResizerPos: event.clientX,
+        });
+      }}
+    />,
+    secondChild,
+  ];
 
   return (
     <PanelContextProvider registry={registryRef.current}>
@@ -82,19 +73,16 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
           if (state.isDragging) {
             const { clientX: x } = event;
             const { current: registry } = registryRef;
-            const [left, right] = registry.getResizerNeighbours(state.currentPanel);
+            const [left, right] = registry.getPanels();
             const delta = x - state.currentResizerPos;
             const containerWidth = getContainerWidth();
             const leftPercent = pxToPercent(left.getWidth() + delta, containerWidth);
             const rightPercent = pxToPercent(right.getWidth() - delta, containerWidth);
-
             left.setWidth(leftPercent);
             right.setWidth(rightPercent);
 
             if (onPanelWidthChange) {
-              onPanelWidthChange(
-                registry.getPanels().map(panel => pxToPercent(panel.getWidth(), containerWidth))
-              );
+              onPanelWidthChange([leftPercent, rightPercent]);
             }
 
             setState({ ...state, currentResizerPos: x });

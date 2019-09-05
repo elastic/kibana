@@ -30,7 +30,7 @@ export interface Props {
  */
 export function Resizer(props: Props) {
   return (
-    <div {...props} className="conApp__resizer">
+    <div {...props} className="conApp__resizer" data-test-subj="splitPanelResizer">
       &#xFE19;
     </div>
   );
