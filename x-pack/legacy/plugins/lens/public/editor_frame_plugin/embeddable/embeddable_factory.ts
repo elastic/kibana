@@ -29,9 +29,13 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
 
   private chrome: Chrome;
   private indexPatternService: IndexPatterns;
-  private expressionRenderer: ExpressionRenderer | null = null;
+  private expressionRenderer: ExpressionRenderer;
 
-  constructor(chrome: Chrome, indexPatternService: IndexPatterns) {
+  constructor(
+    chrome: Chrome,
+    expressionRenderer: ExpressionRenderer,
+    indexPatternService: IndexPatterns
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
@@ -42,11 +46,8 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       },
     });
     this.chrome = chrome;
+    this.expressionRenderer = expressionRenderer;
     this.indexPatternService = indexPatternService;
-  }
-
-  public setExpressionRenderer(renderer: ExpressionRenderer) {
-    this.expressionRenderer = renderer;
   }
 
   public isEditable() {
@@ -68,12 +69,6 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
   ) {
-    if (this.expressionRenderer === null) {
-      throw new Error(
-        'Cannot initialize embeddables before expression renderer is provided. Make sure the `start` lifecycle is completed.'
-      );
-    }
-
     const store = new SavedObjectIndexStore(this.chrome.getSavedObjectsClient());
     const savedVis = await store.load(savedObjectId);
 

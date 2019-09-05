@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   setup as dataSetup,
   start as dataStart,
@@ -29,12 +29,12 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  chrome: Chrome;
-  embeddables: ReturnType<EmbeddablePlugin['setup']>;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
+  embeddables: ReturnType<EmbeddablePlugin['start']>;
+  chrome: Chrome;
 }
 
 export class EditorFramePlugin {
@@ -43,17 +43,8 @@ export class EditorFramePlugin {
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
 
-  private embeddableFactory: EmbeddableFactory | null = null;
-
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.data.expressions.registerFunction(() => mergeTables);
-
-    this.embeddableFactory = new EmbeddableFactory(
-      plugins.chrome,
-      plugins.data.indexPatterns.indexPatterns
-    );
-
-    plugins.embeddables.registerEmbeddableFactory('lens', this.embeddableFactory);
 
     return {
       registerDatasource: (name, datasource) => {
@@ -66,11 +57,14 @@ export class EditorFramePlugin {
   }
 
   public start(_core: CoreStart | null, plugins: EditorFrameStartPlugins): EditorFrameStart {
-    if (this.embeddableFactory === null) {
-      throw new Error('Start lifecycle called before setup lifecycle');
-    }
-
-    this.embeddableFactory.setExpressionRenderer(plugins.data.expressions.ExpressionRenderer);
+    plugins.embeddables.registerEmbeddableFactory(
+      'lens',
+      new EmbeddableFactory(
+        plugins.chrome,
+        plugins.data.expressions.ExpressionRenderer,
+        plugins.data.indexPatterns.indexPatterns
+      )
+    );
 
     const createInstance = (): EditorFrameInstance => {
       let domElement: Element;
@@ -124,13 +118,13 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data: dataSetup,
-    chrome,
-    embeddables: embeddablePlugin,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(null, {
     data: dataStart,
+    chrome,
+    embeddables: embeddablePlugin,
   });
 
 export const editorFrameStop = () => editorFrame.stop();

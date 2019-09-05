@@ -23,9 +23,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => 
   setup: {},
 }));
 jest.mock('./embeddable/embeddable_factory', () => ({
-  EmbeddableFactory: class Mock {
-    setExpressionRenderer() {}
-  },
+  EmbeddableFactory: class Mock {},
 }));
 
 describe('editor_frame plugin', () => {

@@ -79,6 +79,8 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
 
+  private setupApi: DataSetup | null = null;
+
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
@@ -87,7 +89,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
       uiSettings,
       savedObjectsClient,
     });
-    return {
+    this.setupApi = {
       expressions: this.expressions.setup(),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
@@ -97,11 +99,17 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
     };
+
+    return this.setupApi;
   }
 
   public start(core: CoreStart, plugins: DataPluginStartDependencies) {
     return {
-      expressions: this.expressions.start({ inspector: plugins.inspector }),
+      ...this.setupApi!,
+      expressions: {
+        ...this.setupApi!,
+        ...this.expressions.start({ inspector: plugins.inspector }),
+      },
     };
   }
 
