@@ -48,30 +48,42 @@ timeout(time: 180, unit: 'MINUTES') {
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-xl') {
-      try {
-        doSetup()
-        preWorkerClosure()
+    stage(name) {
+      jobRunner('tests-xl') {
+        try {
+          stage("${name} - Setup") {
+            doSetup()
+          }
 
-        def nextWorker = 1
-        def worker = { workerClosure ->
-          def workerNumber = nextWorker
-          nextWorker++
+          stage("${name} - Build") {
+            preWorkerClosure()
+          }
 
-          return {
-            workerClosure(workerNumber)
+          def nextWorker = 1
+          def worker = { workerClosure ->
+            def workerNumber = nextWorker
+            nextWorker++
+
+            return {
+              workerClosure(workerNumber)
+            }
+          }
+
+          def workers = [:]
+          workerClosures.each { workerName, workerClosure ->
+            workers[workerName] = worker(workerClosure)
+          }
+
+          parallel(workers)
+        } finally {
+          stage("${name} - GCS}") {
+            uploadAllGcsArtifacts(name)
+          }
+
+          stage("${name} - JUnit") {
+            publishJunit()
           }
         }
-
-        def workers = [:]
-        workerClosures.each { workerName, workerClosure ->
-          workers[workerName] = worker(workerClosure)
-        }
-
-        parallel(workers)
-      } finally {
-        uploadAllGcsArtifacts(name)
-        publishJunit()
       }
     }
   }
@@ -79,7 +91,7 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
 
 def getPostBuildWorker(name, closure) {
   return { workerNumber ->
-    // stage(name) {
+    stage(name) {
       def kibanaPort = "61${workerNumber}1"
       def esPort = "61${workerNumber}2"
       def esTransportPort = "61${workerNumber}3"
@@ -95,7 +107,7 @@ def getPostBuildWorker(name, closure) {
       ]) {
         closure()
       }
-    // }
+    }
   }
 }
 
