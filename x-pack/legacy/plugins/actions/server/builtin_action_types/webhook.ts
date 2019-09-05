@@ -11,7 +11,7 @@ import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_hea
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities, NotWhitelistedError } from '../actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -63,13 +63,13 @@ function valdiateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
-  const { url } = configObject;
-  const whitelistValidation = configurationUtilities.isWhitelistedUri(url);
-  if (whitelistValidation instanceof NotWhitelistedError) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(configObject.url);
+  } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
       values: {
-        message: whitelistValidation.message,
+        message: whitelistError.message,
       },
     });
   }
@@ -87,10 +87,11 @@ export async function executor(
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
-  const whitelistValidation = configurationUtilities.isWhitelistedUri(url);
-  if (whitelistValidation instanceof NotWhitelistedError) {
-    log(`warn`, `error on webhook action "${id}": The target "${url}" has not been whitelisted`);
-    return errorRequestInvalid(id, whitelistValidation.message);
+  try {
+    configurationUtilities.ensureWhitelistedUri(url);
+  } catch (whitelistError) {
+    log(`warn`, `error on webhook action "${id}": ${whitelistError.message}`);
+    return errorRequestInvalid(id, whitelistError.message);
   }
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(

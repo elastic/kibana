@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { tryCatch } from 'fp-ts/lib/Option';
+import { i18n } from '@kbn/i18n';
+import { tryCatch, fromNullable } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 import { curry } from 'lodash';
 
@@ -12,60 +13,73 @@ export enum WhitelistedHosts {
   Any = '*',
 }
 
+enum WhitelistingField {
+  url = 'url',
+  hostname = 'hostname',
+}
+
 export interface ActionsKibanaConfig {
   enabled: boolean;
   whitelistedHosts: string[];
 }
 
-export class NotWhitelistedError extends Error {
-  constructor(message: string) {
-    super(message); // 'Error' breaks prototype chain here
-    Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
-  }
-}
-
 export interface ActionsConfigurationUtilities {
-  isWhitelistedHostname: (hostname: string) => string | NotWhitelistedError;
-  isWhitelistedUri: (uri: string) => string | NotWhitelistedError;
+  isWhitelistedHostname: (hostname: string) => boolean;
+  isWhitelistedUri: (uri: string) => boolean;
+  ensureWhitelistedHostname: (hostname: string) => void;
+  ensureWhitelistedUri: (uri: string) => void;
 }
 
-const whitelistingErrorMessage = 'target url not in whitelist';
-const doesValueWhitelistAnyHostname = (whitelistedHostname: string): boolean =>
-  whitelistedHostname === WhitelistedHosts.Any;
-
-function isWhitelisted(
-  config: ActionsKibanaConfig,
-  hostname: string
-): string | NotWhitelistedError {
-  if (
-    Array.isArray(config.whitelistedHosts) &&
-    config.whitelistedHosts.find(
-      whitelistedHostname =>
-        doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
-    )
-  ) {
-    return hostname;
-  }
-  return new NotWhitelistedError(whitelistingErrorMessage);
+function whitelistingErrorMessage(field: WhitelistingField, value: string) {
+  return i18n.translate('xpack.actions.urlWhitelistConfigurationError', {
+    defaultMessage: 'target {field} "{value}" is not in the Kibana whitelist',
+    values: {
+      value,
+      field,
+    },
+  });
 }
+
+function doesValueWhitelistAnyHostname(whitelistedHostname: string): boolean {
+  return whitelistedHostname === WhitelistedHosts.Any;
+}
+
+function isWhitelisted({ whitelistedHosts }: ActionsKibanaConfig, hostname: string): boolean {
+  return (
+    Array.isArray(whitelistedHosts) &&
+    fromNullable(
+      whitelistedHosts.find(
+        whitelistedHostname =>
+          doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+      )
+    ).isSome()
+  );
+}
+
+function isWhitelistedHostnameInUri(config: ActionsKibanaConfig, uri: string): boolean {
+  return tryCatch(() => new URL(uri))
+    .map(url => url.hostname)
+    .mapNullable(hostname => isWhitelisted(config, hostname))
+    .getOrElse(false);
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsKibanaConfig
 ): ActionsConfigurationUtilities {
   const isWhitelistedHostname = curry(isWhitelisted)(config);
+  const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);
   return {
-    isWhitelistedUri(uri: string): string | NotWhitelistedError {
-      return tryCatch(() => new URL(uri))
-        .map(url => url.hostname)
-        .map(hostname => {
-          const result = isWhitelistedHostname(hostname);
-          if (result instanceof NotWhitelistedError) {
-            return result;
-          } else {
-            return uri;
-          }
-        })
-        .getOrElse(new NotWhitelistedError(whitelistingErrorMessage));
-    },
     isWhitelistedHostname,
+    isWhitelistedUri,
+    ensureWhitelistedUri(uri: string) {
+      if (!isWhitelistedUri(uri)) {
+        throw new Error(whitelistingErrorMessage(WhitelistingField.url, uri));
+      }
+    },
+    ensureWhitelistedHostname(hostname: string) {
+      if (!isWhitelistedHostname(hostname)) {
+        throw new Error(whitelistingErrorMessage(WhitelistingField.hostname, hostname));
+      }
+    },
   };
 }

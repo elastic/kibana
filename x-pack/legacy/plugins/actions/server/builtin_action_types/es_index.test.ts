@@ -20,10 +20,12 @@ import { ActionParamsType, ActionTypeConfigType } from './es_index';
 
 const ACTION_TYPE_ID = '.index';
 const NO_OP_FN = () => {};
-const MOCK_KIBANA_CONFIG = {
-  isWhitelistedUri: _ => _,
-  isWhitelistedHostname: _ => _,
-} as ActionsConfigurationUtilities;
+const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
+  isWhitelistedHostname: _ => true,
+  isWhitelistedUri: _ => true,
+  ensureWhitelistedHostname: _ => {},
+  ensureWhitelistedUri: _ => {},
+};
 
 const services = {
   log: NO_OP_FN,
@@ -50,7 +52,7 @@ beforeAll(() => {
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
 
-  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG);
+  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG_UTILS);
 
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });

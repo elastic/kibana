@@ -16,10 +16,12 @@ import { registerBuiltInActionTypes } from './index';
 
 const ACTION_TYPE_ID = '.server-log';
 const NO_OP_FN = () => {};
-const MOCK_KIBANA_CONFIG = {
-  isWhitelistedUri: _ => _,
-  isWhitelistedHostname: _ => _,
-} as ActionsConfigurationUtilities;
+const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
+  isWhitelistedHostname: _ => true,
+  isWhitelistedUri: _ => true,
+  ensureWhitelistedHostname: _ => {},
+  ensureWhitelistedUri: _ => {},
+};
 
 const services: Services = {
   log: NO_OP_FN,
@@ -44,7 +46,7 @@ beforeAll(() => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
-  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG);
+  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG_UTILS);
 });
 
 beforeEach(() => {

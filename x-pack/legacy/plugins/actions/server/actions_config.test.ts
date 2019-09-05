@@ -8,8 +8,78 @@ import {
   ActionsKibanaConfig,
   getActionsConfigurationUtilities,
   WhitelistedHosts,
-  NotWhitelistedError,
 } from './actions_config';
+
+describe('ensureWhitelistedUri', () => {
+  test('returns true when "any" hostnames are allowed', () => {
+    const config: ActionsKibanaConfig = {
+      enabled: false,
+      whitelistedHosts: [WhitelistedHosts.Any],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).ensureWhitelistedUri(
+        'https://github.com/elastic/kibana'
+      )
+    ).toBeUndefined();
+  });
+
+  test('throws when the hostname in the requested uri is not in the whitelist', () => {
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureWhitelistedUri(
+        'https://github.com/elastic/kibana'
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target url \\"https://github.com/elastic/kibana\\" is not in the Kibana whitelist"`
+    );
+  });
+
+  test('throws when the uri cannot be parsed as a valid URI', () => {
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureWhitelistedUri('github.com/elastic')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target url \\"github.com/elastic\\" is not in the Kibana whitelist"`
+    );
+  });
+
+  test('returns true when the hostname in the requested uri is in the whitelist', () => {
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: ['github.com'] };
+    expect(
+      getActionsConfigurationUtilities(config).ensureWhitelistedUri(
+        'https://github.com/elastic/kibana'
+      )
+    ).toBeUndefined();
+  });
+});
+
+describe('ensureWhitelistedHostname', () => {
+  test('returns true when "any" hostnames are allowed', () => {
+    const config: ActionsKibanaConfig = {
+      enabled: false,
+      whitelistedHosts: [WhitelistedHosts.Any],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
+    ).toBeUndefined();
+  });
+
+  test('throws when the hostname in the requested uri is not in the whitelist', () => {
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target hostname \\"github.com\\" is not in the Kibana whitelist"`
+    );
+  });
+
+  test('returns true when the hostname in the requested uri is in the whitelist', () => {
+    const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: ['github.com'] };
+    expect(
+      getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
+    ).toBeUndefined();
+  });
+});
 
 describe('isWhitelistedUri', () => {
   test('returns true when "any" hostnames are allowed', () => {
@@ -19,20 +89,20 @@ describe('isWhitelistedUri', () => {
     };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
-    ).toEqual('https://github.com/elastic/kibana');
+    ).toEqual(true);
   });
 
-  test('returns a NotWhitelistedError when the hostname in the requested uri is not in the whitelist', () => {
+  test('throws when the hostname in the requested uri is not in the whitelist', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
-    ).toEqual(new NotWhitelistedError('target url not in whitelist'));
+    ).toEqual(false);
   });
 
-  test('returns a NotWhitelistedError when the uri cannot be parsed as a valid URI', () => {
+  test('throws when the uri cannot be parsed as a valid URI', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
     expect(getActionsConfigurationUtilities(config).isWhitelistedUri('github.com/elastic')).toEqual(
-      new NotWhitelistedError('target url not in whitelist')
+      false
     );
   });
 
@@ -40,7 +110,7 @@ describe('isWhitelistedUri', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: ['github.com'] };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
-    ).toEqual('https://github.com/elastic/kibana');
+    ).toEqual(true);
   });
 });
 
@@ -51,21 +121,21 @@ describe('isWhitelistedHostname', () => {
       whitelistedHosts: [WhitelistedHosts.Any],
     };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
-      'github.com'
+      true
     );
   });
 
-  test('returns false when the hostname in the requested uri is not in the whitelist', () => {
+  test('throws when the hostname in the requested uri is not in the whitelist', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
-      new NotWhitelistedError('target url not in whitelist')
+      false
     );
   });
 
   test('returns true when the hostname in the requested uri is in the whitelist', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: ['github.com'] };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
-      'github.com'
+      true
     );
   });
 });

@@ -6,7 +6,7 @@
 
 import { getActionType, executor } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { ActionsConfigurationUtilities, NotWhitelistedError } from '../actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { Services, ActionTypeExecutorOptions } from '../types';
 
@@ -18,8 +18,10 @@ const servicesMock: Services = {
 };
 
 const configUtilsMock: ActionsConfigurationUtilities = {
-  isWhitelistedUri: _ => _,
-  isWhitelistedHostname: _ => _,
+  isWhitelistedHostname: _ => true,
+  isWhitelistedUri: _ => true,
+  ensureWhitelistedHostname: _ => {},
+  ensureWhitelistedUri: _ => {},
 };
 
 describe('actionType', () => {
@@ -146,10 +148,7 @@ describe('config validation', () => {
   });
 
   test('config validation passes when kibana config whitelists the url', () => {
-    const actionType = getActionType({
-      isWhitelistedUri: _ => _,
-      isWhitelistedHostname: _ => _,
-    });
+    const actionType = getActionType(configUtilsMock);
 
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
@@ -166,8 +165,10 @@ describe('config validation', () => {
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     const actionType = getActionType({
-      isWhitelistedUri: _ => new NotWhitelistedError(`target url is not whitelisted`),
-      isWhitelistedHostname: _ => _,
+      ...configUtilsMock,
+      ensureWhitelistedUri: _ => {
+        throw new Error(`target url is not whitelisted`);
+      },
     });
 
     const config: Record<string, any> = {
@@ -215,11 +216,11 @@ describe('executor', () => {
     const params: Record<string, any> = {};
     const result = await executor(
       {
-        isWhitelistedUri(uri) {
+        ...configUtilsMock,
+        ensureWhitelistedUri(uri) {
           expect(uri).toEqual(config.url);
-          return new NotWhitelistedError(`${uri}`);
+          throw new Error(`${uri}`);
         },
-        isWhitelistedHostname: _ => _,
       },
       {
         id: 'webhook',
