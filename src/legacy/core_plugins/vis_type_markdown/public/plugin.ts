@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 
 import { markdownVis } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
@@ -39,7 +39,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { data, visualizations }: MarkdownPluginSetupDependencies) {
-    visualizations.types.VisTypesRegistryProvider.register(() => markdownVis);
+    visualizations.types.registerVisualization(() => markdownVis);
     data.expressions.registerFunction(createMarkdownVisFn);
   }
 
