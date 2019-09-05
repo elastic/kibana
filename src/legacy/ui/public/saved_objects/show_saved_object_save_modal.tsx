@@ -46,7 +46,7 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
 
   const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
     const response = await onSave(...args);
-    if (('id' in response && response.id) || 'error' in response) {
+    if (('id' in response && response.id) || ('error' in response && response.error)) {
       closeModal();
     }
     return response;
