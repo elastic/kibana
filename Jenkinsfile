@@ -11,34 +11,34 @@ timeout(time: 180, unit: 'MINUTES') {
         'kibana-intake': legacyJobRunner('kibana-intake'),
         'x-pack-intake': legacyJobRunner('x-pack-intake'),
         'kibana-oss-tests-1': withWorkers('kibana-oss-tests-1', { buildOss() }, [
-          getOssCiGroupWorker(1),
-          getOssCiGroupWorker(2),
-          getOssCiGroupWorker(3),
-          getOssCiGroupWorker(4),
-          getOssCiGroupWorker(5),
-          getOssCiGroupWorker(6),
-          getOssCiGroupWorker(7),
-          getOssCiGroupWorker(8),
-          getOssCiGroupWorker(9),
-          getOssCiGroupWorker(10),
-          getOssCiGroupWorker(11),
-          getOssCiGroupWorker(12),
-          getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
-          getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
+          'oss-ciGroup1': getOssCiGroupWorker(1),
+          'oss-ciGroup2': getOssCiGroupWorker(2),
+          'oss-ciGroup3': getOssCiGroupWorker(3),
+          'oss-ciGroup4': getOssCiGroupWorker(4),
+          'oss-ciGroup5': getOssCiGroupWorker(5),
+          'oss-ciGroup6': getOssCiGroupWorker(6),
+          'oss-ciGroup7': getOssCiGroupWorker(7),
+          'oss-ciGroup8': getOssCiGroupWorker(8),
+          'oss-ciGroup9': getOssCiGroupWorker(9),
+          'oss-ciGroup10': getOssCiGroupWorker(10),
+          'oss-ciGroup11': getOssCiGroupWorker(11),
+          'oss-ciGroup12': getOssCiGroupWorker(12),
+          'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+          'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
         ]),
         'kibana-xpack-tests-1': withWorkers('kibana-xpack-tests', { buildXpack() }, [
-          getXpackCiGroupWorker(1),
-          getXpackCiGroupWorker(2),
-          getXpackCiGroupWorker(3),
-          getXpackCiGroupWorker(4),
-          getXpackCiGroupWorker(5),
-          getXpackCiGroupWorker(6),
-          getXpackCiGroupWorker(7),
-          getXpackCiGroupWorker(8),
-          getXpackCiGroupWorker(9),
-          getXpackCiGroupWorker(10),
-          getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-          getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+          'xpack-ciGroup1': getXpackCiGroupWorker(1),
+          'xpack-ciGroup2': getXpackCiGroupWorker(2),
+          'xpack-ciGroup3': getXpackCiGroupWorker(3),
+          'xpack-ciGroup4': getXpackCiGroupWorker(4),
+          'xpack-ciGroup5': getXpackCiGroupWorker(5),
+          'xpack-ciGroup6': getXpackCiGroupWorker(6),
+          'xpack-ciGroup7': getXpackCiGroupWorker(7),
+          'xpack-ciGroup8': getXpackCiGroupWorker(8),
+          'xpack-ciGroup9': getXpackCiGroupWorker(9),
+          'xpack-ciGroup10': getXpackCiGroupWorker(10),
+          'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+          'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
         ]),
         // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
       ])
@@ -46,7 +46,7 @@ timeout(time: 180, unit: 'MINUTES') {
   }
 }
 
-def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
+def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
     jobRunner('tests-xl') {
       try {
@@ -63,9 +63,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
           }
         }
 
-        // TODO update workerClosures to be a map, and use key for parallel key?
         def workers = [:]
-        workerClosures.eachWithIndex { workerClosure, i -> workers["worker-${i+1}"] = worker(workerClosure) }
+        workerClosures.each { workerName, workerClosure ->
+          workers[workerName] = worker(workerClosure)
+        }
 
         parallel(workers)
       } finally {
@@ -78,7 +79,7 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = []) {
 
 def getPostBuildWorker(name, closure) {
   return { workerNumber ->
-    stage(name) {
+    // stage(name) {
       def kibanaPort = "61${workerNumber}1"
       def esPort = "61${workerNumber}2"
       def esTransportPort = "61${workerNumber}3"
@@ -94,7 +95,7 @@ def getPostBuildWorker(name, closure) {
       ]) {
         closure()
       }
-    }
+    // }
   }
 }
 
