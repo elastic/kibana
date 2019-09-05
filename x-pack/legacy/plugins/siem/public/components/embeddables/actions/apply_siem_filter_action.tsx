@@ -61,9 +61,7 @@ export class ApplySiemFilterAction extends Action {
       const filterQuery = getOr('', 'query.query', embeddable.getInput());
       const filterKey = Object.keys(filterObject)[0];
 
-      const filterExpression = Array.isArray(filterObject[filterKey].query)
-        ? getExpressionFromArray(filterKey, filterObject[filterKey].query)
-        : `${filterKey}: "${filterObject[filterKey].query}"`;
+      const filterExpression = getFilterExpression(filterKey, filterObject[filterKey].query);
 
       this.applyFilterQueryFromKueryExpression(
         filterQuery.length > 0 ? `${filterQuery} and ${filterExpression}` : filterExpression
@@ -72,7 +70,20 @@ export class ApplySiemFilterAction extends Action {
   }
 }
 
-export const getExpressionFromArray = (filterKey: string, filterValues: string[]) =>
+export const getFilterExpression = (
+  filterKey: string,
+  filterValue: string | string[] | undefined
+): string => {
+  if (Array.isArray(filterValue)) {
+    return getExpressionFromArray(filterKey, filterValue);
+  } else if (filterValue != null) {
+    return `${filterKey}: "${filterValue}"`;
+  } else {
+    return `(NOT ${filterKey}:*)`;
+  }
+};
+
+export const getExpressionFromArray = (filterKey: string, filterValues: string[]): string =>
   filterValues.length > 0
     ? `(${filterValues.map(filterValue => `${filterKey}: "${filterValue}"`).join(' OR ')})`
     : '';
