@@ -53,6 +53,7 @@ export class NodeRepositoriesService implements ClusterStateListener {
         currentState: RepoState.CLONING,
       });
     }
+    // TODO remove the stale local repo after the Kibana HA is ready
     for (const localRemovedRepo of localRemovedRepos) {
       this.log.info(
         `Repository removed from node [${this.localNodeId}]: ${util.inspect(
