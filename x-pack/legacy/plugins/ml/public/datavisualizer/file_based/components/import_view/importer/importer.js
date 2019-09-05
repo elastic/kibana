@@ -161,7 +161,7 @@ function updatePipelineTimezone(ingestPipeline) {
 }
 
 function createDocumentChunks(docArray) {
-  let chunks = [];
+  const chunks = [];
   // chop docArray into 5000 doc chunks
   const tempChunks = chunk(docArray, CHUNK_SIZE);
 
@@ -183,7 +183,7 @@ function createDocumentChunks(docArray) {
       const smallerChunks = chunk(docs, adjustedChunkSize);
       chunks.push(...smallerChunks);
     } else {
-      chunks = tempChunks;
+      chunks.push(docs);
     }
   }
   return chunks;
