@@ -15,8 +15,12 @@ import {
   Field,
   PersistedGraphWorkspace,
   PersistedWorkspaceState,
+  IndexPatternSavedObject,
 } from '../types';
+import { getOutlinkEncoders } from './outlink_encoders';
+import { urlTemplateIconChoicesByClass } from './style_choices';
 
+const outlinkEncoders = getOutlinkEncoders();
 
 function serializeNode(
   { icon, data, scaledSize, parent, ...serializableProps }: WorkspaceNode,
@@ -96,147 +100,169 @@ export function appStateToSavedWorkspace(
 }
 
 function deserializeUrlTemplate({ encoderID, iconClass, ...serializableProps }: PersistedUrlTemplate) {
-  const encoder = outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === urlTemplate.encoderID);
+  const encoder = outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === encoderID);
+  if (!encoder) {
+    return;
+  }
+
+  const template: UrlTemplate = {
+    ...serializableProps,
+    encoder,
+    icon: null
+  };
+
+  if (iconClass) {
+    template.icon = urlTemplateIconChoicesByClass[iconClass] ?urlTemplateIconChoicesByClass[iconClass] : null;
+        }
+
+
+  return template;
 }
 
-export function savedWorkspaceToAppState(savedWorkspace: PersistedGraphWorkspace) {
-    const persistedWorkspaceState: PersistedGraphWorkspace= JSON.parse(savedWorkspace.wsState);
+export function 
+
+export function savedWorkspaceToAppState(savedWorkspace: PersistedGraphWorkspace, indexPatterns: IndexPatternSavedObject[]) {
+    const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
     
-    const urlTemplates = 
+    const urlTemplates = persistedWorkspaceState.urlTemplates.map(deserializeUrlTemplate).filter((template: UrlTemplate | undefined): template is UrlTemplate => Boolean(template));
 
+    const indexPattern = indexPatterns.find(pattern => pattern.attributes.title === persistedWorkspaceState.indexPattern);
 
-    const wsObj = JSON.parse($route.current.locals.savedWorkspace.wsState);
-    $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    $scope.description = $route.current.locals.savedWorkspace.description;
-
-    // Load any saved drill-down templates
-    wsObj.urlTemplates.forEach(urlTemplate => {
-      const encoder = $scope.outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === urlTemplate.encoderID);
-      if (encoder) {
-        const template = {
-          url: urlTemplate.url,
-          description: urlTemplate.description,
-          encoder: encoder,
-        };
-        if (urlTemplate.iconClass) {
-          template.icon = drillDownIconChoicesByClass[urlTemplate.iconClass];
-        }
-        $scope.urlTemplates.push(template);
-      }
-    });
-
-    //Lookup the saved index pattern title
-    let savedObjectIndexPattern = null;
-    $scope.indices.forEach(function (savedObject) {
-      // wsObj.indexPattern is the title string of an indexPattern which
-      // we attempt here to look up in the list of currently saved objects
-      // that contain index pattern definitions
-      if(savedObject.attributes.title === wsObj.indexPattern) {
-        savedObjectIndexPattern = savedObject;
-      }
-    });
-    if(!savedObjectIndexPattern) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Missing index pattern {indexPattern}',
-          values: { indexPattern: wsObj.indexPattern },
-        })
-      );
-      return;
+    if (!indexPattern) {
+      throw new Error('Index pattern not found');
     }
+    // const wsObj = JSON.parse($route.current.locals.savedWorkspace.wsState);
+    // $scope.savedWorkspace = $route.current.locals.savedWorkspace;
+    // $scope.description = $route.current.locals.savedWorkspace.description;
 
-    $scope.indexSelected(savedObjectIndexPattern, function () {
-      Object.assign($scope.exploreControls, wsObj.exploreControls);
+    // // Load any saved drill-down templates
+    // wsObj.urlTemplates.forEach(urlTemplate => {
+    //   const encoder = $scope.outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === urlTemplate.encoderID);
+    //   if (encoder) {
+    //     const template = {
+    //       url: urlTemplate.url,
+    //       description: urlTemplate.description,
+    //       encoder: encoder,
+    //     };
+    //     if (urlTemplate.iconClass) {
+    //       template.icon = drillDownIconChoicesByClass[urlTemplate.iconClass];
+    //     }
+    //     $scope.urlTemplates.push(template);
+    //   }
+    // });
 
-      if ($scope.exploreControls.sampleDiversityField) {
-        $scope.exploreControls.sampleDiversityField =  $scope.allFields.find(field =>
-          $scope.exploreControls.sampleDiversityField.name === field.name);
-      }
+    // //Lookup the saved index pattern title
+    // let savedObjectIndexPattern = null;
+    // $scope.indices.forEach(function (savedObject) {
+    //   // wsObj.indexPattern is the title string of an indexPattern which
+    //   // we attempt here to look up in the list of currently saved objects
+    //   // that contain index pattern definitions
+    //   if(savedObject.attributes.title === wsObj.indexPattern) {
+    //     savedObjectIndexPattern = savedObject;
+    //   }
+    // });
+    // if(!savedObjectIndexPattern) {
+    //   toastNotifications.addDanger(
+    //     i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+    //       defaultMessage: 'Missing index pattern {indexPattern}',
+    //       values: { indexPattern: wsObj.indexPattern },
+    //     })
+    //   );
+    //   return;
+    // }
 
-      for (const i in wsObj.selectedFields) {
-        const savedField = wsObj.selectedFields[i];
-        for (const f in $scope.allFields) {
-          const field = $scope.allFields[f];
-          if (savedField.name === field.name) {
-            field.hopSize = savedField.hopSize;
-            field.lastValidHopSize = savedField.lastValidHopSize;
-            field.color = savedField.color;
-            field.icon = $scope.iconChoicesByClass[savedField.iconClass];
-            field.selected = true;
-            $scope.selectedFields.push(field);
-            break;
-          }
-        }
-        //TODO what if field name no longer exists as part of the index-pattern definition?
-      }
+    // $scope.indexSelected(savedObjectIndexPattern, function () {
+    //   Object.assign($scope.exploreControls, wsObj.exploreControls);
 
-      $scope.updateLiveResponseFields();
-      initWorkspaceIfRequired();
-      const graph = {
-        nodes: [],
-        edges: []
-      };
-      for (const i in wsObj.vertices) {
-        var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-        const node = {
-          field: vertex.field,
-          term: vertex.term,
-          label: vertex.label,
-          color: vertex.color,
-          icon: $scope.allFields.filter(function (fieldDef) {
-            return vertex.field === fieldDef.name;
-          })[0].icon,
-          data: {}
-        };
-        graph.nodes.push(node);
-      }
-      for (const i in wsObj.blacklist) {
-        var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-        const fieldDef = $scope.allFields.filter(function (fieldDef) {
-          return vertex.field === fieldDef.name;
-        })[0];
-        if (fieldDef) {
-          const node = {
-            field: vertex.field,
-            term: vertex.term,
-            label: vertex.label,
-            color: vertex.color,
-            icon: fieldDef.icon,
-            data: {
-              field: vertex.field,
-              term: vertex.term
-            }
-          };
-          $scope.workspace.blacklistedNodes.push(node);
-        }
-      }
-      for (const i in wsObj.links) {
-        const link = wsObj.links[i];
-        graph.edges.push({
-          source: link.source,
-          target: link.target,
-          inferred: link.inferred,
-          label: link.label,
-          term: vertex.term,
-          width: link.width,
-          weight: link.weight
-        });
-      }
+    //   if ($scope.exploreControls.sampleDiversityField) {
+    //     $scope.exploreControls.sampleDiversityField =  $scope.allFields.find(field =>
+    //       $scope.exploreControls.sampleDiversityField.name === field.name);
+    //   }
 
-      $scope.workspace.mergeGraph(graph);
+    //   for (const i in wsObj.selectedFields) {
+    //     const savedField = wsObj.selectedFields[i];
+    //     for (const f in $scope.allFields) {
+    //       const field = $scope.allFields[f];
+    //       if (savedField.name === field.name) {
+    //         field.hopSize = savedField.hopSize;
+    //         field.lastValidHopSize = savedField.lastValidHopSize;
+    //         field.color = savedField.color;
+    //         field.icon = $scope.iconChoicesByClass[savedField.iconClass];
+    //         field.selected = true;
+    //         $scope.selectedFields.push(field);
+    //         break;
+    //       }
+    //     }
+    //     //TODO what if field name no longer exists as part of the index-pattern definition?
+    //   }
 
-      // Wire up parents and children
-      for (const i in wsObj.vertices) {
-        const vertex = wsObj.vertices[i];
-        const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
-        const visNode = $scope.workspace.nodesMap[vId];
-        // Default the positions.
-        visNode.x = vertex.x;
-        visNode.y = vertex.y;
-        if (vertex.parent !== null) {
-          const parentSavedObj = graph.nodes[vertex.parent];
-          const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
-          visNode.parent = $scope.workspace.nodesMap[parentId];
-        }
-      }
+    //   $scope.updateLiveResponseFields();
+    //   initWorkspaceIfRequired();
+    //   const graph = {
+    //     nodes: [],
+    //     edges: []
+    //   };
+    //   for (const i in wsObj.vertices) {
+    //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
+    //     const node = {
+    //       field: vertex.field,
+    //       term: vertex.term,
+    //       label: vertex.label,
+    //       color: vertex.color,
+    //       icon: $scope.allFields.filter(function (fieldDef) {
+    //         return vertex.field === fieldDef.name;
+    //       })[0].icon,
+    //       data: {}
+    //     };
+    //     graph.nodes.push(node);
+    //   }
+    //   for (const i in wsObj.blacklist) {
+    //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
+    //     const fieldDef = $scope.allFields.filter(function (fieldDef) {
+    //       return vertex.field === fieldDef.name;
+    //     })[0];
+    //     if (fieldDef) {
+    //       const node = {
+    //         field: vertex.field,
+    //         term: vertex.term,
+    //         label: vertex.label,
+    //         color: vertex.color,
+    //         icon: fieldDef.icon,
+    //         data: {
+    //           field: vertex.field,
+    //           term: vertex.term
+    //         }
+    //       };
+    //       $scope.workspace.blacklistedNodes.push(node);
+    //     }
+    //   }
+    //   for (const i in wsObj.links) {
+    //     const link = wsObj.links[i];
+    //     graph.edges.push({
+    //       source: link.source,
+    //       target: link.target,
+    //       inferred: link.inferred,
+    //       label: link.label,
+    //       term: vertex.term,
+    //       width: link.width,
+    //       weight: link.weight
+    //     });
+    //   }
+
+    //   $scope.workspace.mergeGraph(graph);
+
+    //   // Wire up parents and children
+    //   for (const i in wsObj.vertices) {
+    //     const vertex = wsObj.vertices[i];
+    //     const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
+    //     const visNode = $scope.workspace.nodesMap[vId];
+    //     // Default the positions.
+    //     visNode.x = vertex.x;
+    //     visNode.y = vertex.y;
+    //     if (vertex.parent !== null) {
+    //       const parentSavedObj = graph.nodes[vertex.parent];
+    //       const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
+    //       visNode.parent = $scope.workspace.nodesMap[parentId];
+    //     }
+    //   }
 }
