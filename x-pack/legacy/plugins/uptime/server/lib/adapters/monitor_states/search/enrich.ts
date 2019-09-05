@@ -4,32 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, flatten, sortBy } from 'lodash';
-import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { getHistogramInterval } from '../../helper';
-import { QUERY, INDEX_NAMES, STATES } from '../../../../common/constants';
-import { fetchPaginatedMonitors } from './monitor_fetcher';
+import { get, sortBy } from 'lodash';
+import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { getHistogramInterval } from '../../../helper';
+import { INDEX_NAMES, STATES } from '../../../../../common/constants';
 import {
   MonitorSummary,
   SummaryHistogram,
   Check,
   CursorDirection,
   SortOrder,
-} from '../../../../common/graphql/types';
-import { CursorPagination } from './adapter_types';
+} from '../../../../../common/graphql/types';
 
-export interface EnrichedQueryResult {
-  items: any[];
-  nextPagePagination: CursorPagination | null;
-  prevPagePagination: CursorPagination | null;
-}
-
-export const queryEnriched = async (queryContext: QueryContext): Promise<EnrichedQueryResult> => {
-  const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
-  const mlcgsResult = await fetchPaginatedMonitors(queryContext, size);
-
-  const checkGroups = flatten(mlcgsResult.items.map(mlcg => mlcg.groups.map(g => g.checkGroup)));
-
+export const enrich = async (queryContext: QueryContext, checkGroups: string[]): Promise<any[]> => {
   // TODO the scripted metric query here is totally unnecessary and largely
   // redundant with the way the code works now. This could be simplified
   // to a much simpler query + some JS processing.
@@ -275,16 +262,12 @@ export const queryEnriched = async (queryContext: QueryContext): Promise<Enriche
     histogram: histogramMap[summary.monitor_id],
   }));
 
-  const sortedResItems = sortBy(resItems, 'monitor_id');
+  const sortedResItems: any = sortBy(resItems, 'monitor_id');
   if (queryContext.pagination.sortOrder === SortOrder.DESC) {
     sortedResItems.reverse();
   }
 
-  return {
-    items: sortedResItems,
-    nextPagePagination: mlcgsResult.nextPagePagination,
-    prevPagePagination: mlcgsResult.prevPagePagination,
-  };
+  return sortedResItems;
 };
 
 const getHistogramForMonitors = async (

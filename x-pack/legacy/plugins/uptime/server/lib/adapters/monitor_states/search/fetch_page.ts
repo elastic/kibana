@@ -4,23 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorIterator } from './monitor_iterator';
-import { MonitorIdWithGroups } from './monitor_id_with_groups';
-import { CursorPagination } from './adapter_types';
-import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
+import { flatten } from 'lodash';
+import { MonitorIterator } from './iterator';
+import { MonitorGroups } from '../monitor_id_with_groups';
+import { CursorPagination } from '../adapter_types';
+import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QUERY } from "../../../../../common/constants";
+import { enrich } from "./enrich";
+import {CursorDirection, SortOrder} from "../../../../../common/graphql/types";
 
 export interface MonitorPage {
-  items: MonitorIdWithGroups[];
+  items: MonitorGroups[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
 }
 
-export const fetchPaginatedMonitors = async (
+export interface EnrichedPage {
+  items: any[]; // TODO define this type better.
+  nextPagePagination: CursorPagination | null;
+  prevPagePagination: CursorPagination | null;
+}
+
+export const fetchPage = async (queryContext: QueryContext): Promise<EnrichedPage> => {
+  const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
+  const monitorPage = await fetchPageMonitors(queryContext, size);
+
+  const checkGroups: string[] = flatten(monitorPage.items.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup)));
+
+  const enrichedMonitors = await enrich(queryContext, checkGroups)
+
+  return {
+    items: enrichedMonitors,
+    nextPagePagination: monitorPage.nextPagePagination,
+    prevPagePagination: monitorPage.prevPagePagination,
+  };
+}
+
+const fetchPageMonitors = async (
   queryContext: QueryContext,
   size: number
 ): Promise<MonitorPage> => {
-  const items: MonitorIdWithGroups[] = [];
+  const items: MonitorGroups[] = [];
   const iterator = new MonitorIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;

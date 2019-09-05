@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CursorDirection } from '../../../../common/graphql/types';
-import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { CursorPagination } from './adapter_types';
-import { ChunkResult, refinePotentialMatches } from './query/refine_potential_matches';
-import { MonitorGroups } from './monitor_id_with_groups';
-import { findPotentialMatches } from './query/find_potential_matches';
+import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { CursorPagination } from '../adapter_types';
+import { MonitorGroups } from '../monitor_id_with_groups';
+import {searchChunk} from "./search_chunk";
+import {CursorDirection} from "../../../../../common/graphql/types";
 
 export class MonitorIterator {
   queryContext: QueryContext;
@@ -122,7 +121,7 @@ export class MonitorIterator {
       this.bufferPos = 0;
     }
 
-    const results = await this.queryNext(size);
+    const results = await searchChunk(this.queryContext, this.searchAfter, size);
     if (results.monitorIdGroups.length === 0) {
       return false;
     }
@@ -131,19 +130,5 @@ export class MonitorIterator {
     this.searchAfter = results.searchAfter;
 
     return true;
-  }
-
-  private async queryNext(size: number): Promise<ChunkResult> {
-    const { monitorIds, checkGroups, searchAfter } = await findPotentialMatches(
-      this.queryContext,
-      this.searchAfter,
-      size
-    );
-    const matching = await refinePotentialMatches(this.queryContext, monitorIds, checkGroups);
-
-    return {
-      monitorIdGroups: matching,
-      searchAfter,
-    };
   }
 }

@@ -9,7 +9,7 @@ import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from
 import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { getFilteredQueryAndStatusFilter } from '../../helper';
-import { queryEnriched } from './enriched_fetcher';
+import { fetchPage } from './search';
 
 export interface QueryContext {
   database: any;
@@ -53,20 +53,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     };
 
-    const enriched = await queryEnriched(queryContext);
-
-    const jsonify = (p: any): string | null => {
-      if (!p) {
-        return null;
-      }
-
-      return JSON.stringify(p);
-    };
+    const page = await fetchPage(queryContext);
 
     return {
-      summaries: enriched.items,
-      nextPagePagination: jsonify(enriched.nextPagePagination),
-      prevPagePagination: jsonify(enriched.prevPagePagination),
+      summaries: page.items,
+      nextPagePagination: jsonifyPagination(page.nextPagePagination),
+      prevPagePagination: jsonifyPagination(page.prevPagePagination),
     };
   }
 
@@ -84,3 +76,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
   }
 }
+
+// To simplify the handling of the group of pagination vars they're passed back to the client as a string
+const jsonifyPagination = (p: any): string | null => {
+  if (!p) {
+    return null;
+  }
+
+  return JSON.stringify(p);
+};
