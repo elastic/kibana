@@ -22,6 +22,9 @@ import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { findObjectByTitle } from 'ui/saved_objects';
+import { timefilter } from 'ui/timefilter';
+import { setup } from '../../../core_plugins/data/public/legacy';
+const filterManager = setup.filter.filterManager;
 
 export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {
@@ -100,8 +103,8 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         parentEl: this._el,
         vegaParser,
         serviceSettings,
-        queryfilter: this._vis.API.queryFilter,
-        timefilter: this._vis.API.timeFilter,
+        queryfilter: filterManager,
+        timefilter: timefilter,
         findIndex: this.findIndex.bind(this),
       };
 
