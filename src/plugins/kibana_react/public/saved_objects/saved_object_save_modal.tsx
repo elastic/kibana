@@ -53,7 +53,6 @@ interface Props {
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
-  className?: string;
 }
 
 interface State {
@@ -81,7 +80,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className={this.props.className}
+            className="dshSaveModal"
             onClose={this.props.onClose}
           >
             <EuiModalHeader>

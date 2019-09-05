@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { csv } from '../../functions/common/csv';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { DATATABLE, CSV } from '../constants';
+import { DATATABLE, CSV } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof csv>> = {
   help: i18n.translate('xpack.canvas.functions.csvHelpText', {

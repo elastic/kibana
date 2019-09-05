@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+interface SetupDependecies {
+  VisFiltersProvider: any;
+  createFilter: any;
+}
 
-import { getNodeShasums } from '../node_shasums';
+/**
+ * Vis Filters Service
+ *
+ * @internal
+ */
+export class FiltersService {
+  public setup({ VisFiltersProvider, createFilter }: SetupDependecies) {
+    return {
+      VisFiltersProvider,
+      createFilter,
+    };
+  }
 
-describe('src/dev/build/tasks/nodejs/node_shasums', () => {
-  it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums('8.9.4');
-    expect(shasums).to.have.property('node-v8.9.4.tar.gz');
-  });
-});
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type FiltersSetup = ReturnType<FiltersService['setup']>;

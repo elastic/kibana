@@ -21,8 +21,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 
+/**
+ * Represents the result of trying to persist the saved object.
+ * Contains `error` prop if something unexpected happened (e.g. network error).
+ * Contains an `id` if persisting was successful. If `id` and
+ * `error` are undefined, persisting was not successful, but the
+ * modal can still recover (e.g. the name of the saved object was already taken).
+ */
+type SaveResult = { id?: string } | { error: Error };
+
 interface MinimalSaveModalProps {
-  onSave: (...args: any[]) => Promise<{ id?: string } | { error: Error }>;
+  onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }
 
@@ -35,13 +44,12 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
 
   const onSave = saveModal.props.onSave;
 
-  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = (...args) => {
-    return onSave(...args).then(response => {
-      if (('id' in response && response.id) || 'error' in response) {
-        closeModal();
-      }
-      return response;
-    });
+  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
+    const response = await onSave(...args);
+    if (('id' in response && response.id) || ('error' in response && response.error)) {
+      closeModal();
+    }
+    return response;
   };
   document.body.appendChild(container);
   const element = React.cloneElement(saveModal, {
