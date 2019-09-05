@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+// @ts-ignore no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import {
   EuiFlexItem,
@@ -22,17 +23,34 @@ import {
 import { ComponentStrings } from '../../../i18n';
 const { WorkpadHeader: strings } = ComponentStrings;
 
+// @ts-ignore untyped local
 import { AssetManager } from '../asset_manager';
+// @ts-ignore untyped local
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { AddEmbeddablePanel } from '../embeddable_flyout';
+// @ts-ignore untyped local
 import { ControlSettings } from './control_settings';
+// @ts-ignore untyped local
 import { RefreshControl } from './refresh_control';
+// @ts-ignore untyped local
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
 import { WorkpadZoom } from './workpad_zoom';
 
-export class WorkpadHeader extends React.PureComponent {
+export interface Props {
+  isWriteable: boolean;
+  toggleWriteable: () => void;
+  canUserWrite: boolean;
+  selectedPage: number;
+}
+
+interface State {
+  isModalVisible: boolean;
+  isPanelVisible: boolean;
+}
+
+export class WorkpadHeader extends React.PureComponent<Props, State> {
   static propTypes = {
     isWriteable: PropTypes.bool,
     toggleWriteable: PropTypes.func,
@@ -40,7 +58,7 @@ export class WorkpadHeader extends React.PureComponent {
 
   state = { isModalVisible: false, isPanelVisible: false };
 
-  _fullscreenButton = ({ toggleFullscreen }) => (
+  _fullscreenButton = ({ toggleFullscreen }: { toggleFullscreen: () => void }) => (
     <EuiToolTip
       position="bottom"
       content={
@@ -58,7 +76,7 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiToolTip>
   );
 
-  _keyHandler = action => {
+  _keyHandler = (action: string) => {
     if (action === 'EDITING') {
       this.props.toggleWriteable();
     }
@@ -90,7 +108,7 @@ export class WorkpadHeader extends React.PureComponent {
 
   _embeddableAdd = () => <AddEmbeddablePanel onClose={this._hideEmbeddablePanel} />;
 
-  _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
+  _getEditToggleToolTipText = () => {
     if (!this.props.canUserWrite) {
       return strings.getNoWritePermText();
     }
@@ -98,6 +116,12 @@ export class WorkpadHeader extends React.PureComponent {
     const content = this.props.isWriteable
       ? strings.getHideEditControlText()
       : strings.getShowEditControlText();
+
+    return content;
+  };
+
+  _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
+    const content = this._getEditToggleToolTipText();
 
     if (textOnly) {
       return content;
@@ -156,7 +180,7 @@ export class WorkpadHeader extends React.PureComponent {
                     iconType={isWriteable ? 'lockOpen' : 'lock'}
                     onClick={toggleWriteable}
                     size="s"
-                    aria-label={this._getEditToggleToolTip({ textOnly: true })}
+                    aria-label={this._getEditToggleToolTipText()}
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>
