@@ -44,13 +44,12 @@ export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProp
 
   const onSave = saveModal.props.onSave;
 
-  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = (...args) => {
-    return onSave(...args).then(response => {
-      if (('id' in response && response.id) || 'error' in response) {
-        closeModal();
-      }
-      return response;
-    });
+  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
+    const response = await onSave(...args);
+    if (('id' in response && response.id) || 'error' in response) {
+      closeModal();
+    }
+    return response;
   };
   document.body.appendChild(container);
   const element = React.cloneElement(saveModal, {
