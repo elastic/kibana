@@ -24,7 +24,7 @@ export async function extractErrors(
   savedObjectResults: SavedObject[],
   savedObjectsToImport: SavedObject[],
   savedObjectsClient?: SavedObjectsClientContract,
-  sourceSpaceId?: string
+  destSpaceId?: string
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
@@ -33,14 +33,16 @@ export async function extractErrors(
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
-  
   if (savedObjectsClient) {
     const bulkGetResult = await savedObjectsClient.bulkGet(savedObjectsToImport, {
-      namespace: sourceSpaceId
+      namespace: destSpaceId,
     });
 
     for (const savedObject of bulkGetResult.saved_objects) {
-      savedObjectsTitlesMap.set(`${savedObject.type}:${savedObject.id}`, `${savedObject.attributes.title}`);
+      savedObjectsTitlesMap.set(
+        `${savedObject.type}:${savedObject.id}`,
+        `${savedObject.attributes.title}`
+      );
     }
   }
 
@@ -58,9 +60,7 @@ export async function extractErrors(
         // pick the correct title of the saved object that conflicts
         let realTitle = title;
         if (savedObjectsClient) {
-          realTitle = savedObjectsTitlesMap.get(
-            `${savedObject.type}:${savedObject.id}`
-          );
+          realTitle = savedObjectsTitlesMap.get(`${savedObject.type}:${savedObject.id}`);
         }
         errors.push({
           id: savedObject.id,

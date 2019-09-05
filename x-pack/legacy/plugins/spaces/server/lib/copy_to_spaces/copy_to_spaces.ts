@@ -44,21 +44,17 @@ export function copySavedObjectsToSpacesFactory(
   const importObjectsToSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    options: CopyOptions,
-    srcSpaceId?: string
+    options: CopyOptions
   ) => {
     try {
-      const importResponse = await importExport.importSavedObjects(
-        {
-          namespace: spaceIdToNamespace(spaceId),
-          objectLimit: importExport.objectLimit,
-          overwrite: options.overwrite,
-          savedObjectsClient,
-          supportedTypes: eligibleTypes,
-          readStream: objectsStream,
-        },
-        srcSpaceId
-      );
+      const importResponse = await importExport.importSavedObjects({
+        namespace: spaceIdToNamespace(spaceId),
+        objectLimit: importExport.objectLimit,
+        overwrite: options.overwrite,
+        savedObjectsClient,
+        supportedTypes: eligibleTypes,
+        readStream: objectsStream,
+      });
 
       return {
         success: importResponse.success,
@@ -83,8 +79,7 @@ export function copySavedObjectsToSpacesFactory(
       response[spaceId] = await importObjectsToSpace(
         spaceId,
         createReadableStreamFromArray(exportedSavedObjects),
-        options,
-        sourceSpaceId
+        options
       );
     }
 

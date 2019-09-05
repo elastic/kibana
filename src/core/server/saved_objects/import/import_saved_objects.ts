@@ -26,17 +26,14 @@ import {
 } from './types';
 import { validateReferences } from './validate_references';
 
-export async function importSavedObjects(
-  {
-    readStream,
-    objectLimit,
-    overwrite,
-    savedObjectsClient,
-    supportedTypes,
-    namespace,
-  }: SavedObjectsImportOptions,
-  sourceSpaceId?: string
-): Promise<SavedObjectsImportResponse> {
+export async function importSavedObjects({
+  readStream,
+  objectLimit,
+  overwrite,
+  savedObjectsClient,
+  supportedTypes,
+  namespace,
+}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import
@@ -73,7 +70,7 @@ export async function importSavedObjects(
     bulkCreateResult.saved_objects,
     filteredObjects,
     savedObjectsClient,
-    sourceSpaceId
+    namespace
   );
   errorAccumulator = [...errorAccumulator, ...soErrors];
   return {
