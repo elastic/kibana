@@ -84,7 +84,7 @@ export const HomePage = pure(() => (
           <WithSource sourceId="default">
             {({ browserFields, indexPattern }) => (
               <DragDropContextWrapper browserFields={browserFields}>
-                <UseUrlState indexPattern={indexPattern} />
+                <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
                 <AutoSaveWarningMsg />
                 <Flyout
                   flyoutHeight={calculateFlyoutHeight({

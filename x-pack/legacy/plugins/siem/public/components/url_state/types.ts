@@ -6,12 +6,13 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-
 import { Dispatch } from 'redux';
+
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 import { RouteSpyState } from '../../utils/route/types';
+import { NavTab } from '../navigation/type';
 
 import { CONSTANTS } from './constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
@@ -53,6 +54,7 @@ export interface UrlState {
 export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
+  navTabs: Record<string, NavTab>;
   indexPattern?: StaticIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;

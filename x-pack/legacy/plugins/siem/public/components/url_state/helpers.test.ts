@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SiemPageName } from '../../pages/home/home_navigations';
-
+import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
 import { isKqlForRoute, getTitle } from './helpers';
 import { CONSTANTS } from './constants';
 
@@ -45,24 +44,28 @@ describe('Helpers Url_State', () => {
   });
   describe('getTitle', () => {
     test('host page name', () => {
-      const result = getTitle('hosts', undefined);
+      const result = getTitle('hosts', undefined, navTabs);
       expect(result).toEqual('Hosts');
     });
     test('network page name', () => {
-      const result = getTitle('network', undefined);
+      const result = getTitle('network', undefined, navTabs);
       expect(result).toEqual('Network');
     });
     test('overview page name', () => {
-      const result = getTitle('overview', undefined);
+      const result = getTitle('overview', undefined, navTabs);
       expect(result).toEqual('Overview');
     });
     test('timelines page name', () => {
-      const result = getTitle('timelines', undefined);
+      const result = getTitle('timelines', undefined, navTabs);
       expect(result).toEqual('Timelines');
     });
     test('details page name', () => {
-      const result = getTitle('hosts', 'details');
+      const result = getTitle('hosts', 'details', navTabs);
       expect(result).toEqual('details');
+    });
+    test('Not existing', () => {
+      const result = getTitle('IamHereButNotReally', undefined, navTabs);
+      expect(result).toEqual('');
     });
   });
 });

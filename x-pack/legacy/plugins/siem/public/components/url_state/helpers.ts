@@ -7,11 +7,11 @@
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
+
+import { SiemPageName } from '../../pages/home/home_navigations';
+import { NavTab } from '../navigation/type';
 import { CONSTANTS } from './constants';
 import { LocationTypes, UrlStateType } from './types';
-import { SiemPageName } from '../../pages/home/home_navigations';
-
-import * as i18n from './translations';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -87,18 +87,13 @@ export const getUrlType = (pageName: string): UrlStateType => {
   return 'overview';
 };
 
-export const getTitle = (pageName: string, detailName: string | undefined): string => {
+export const getTitle = (
+  pageName: string,
+  detailName: string | undefined,
+  navTabs: Record<string, NavTab>
+): string => {
   if (detailName != null) return detailName;
-  if (pageName === SiemPageName.hosts) {
-    return i18n.HOSTS;
-  } else if (pageName === SiemPageName.network) {
-    return i18n.NETWORK;
-  } else if (pageName === SiemPageName.overview) {
-    return i18n.OVERVIEW;
-  } else if (pageName === SiemPageName.timelines) {
-    return i18n.TIMELINES;
-  }
-  return i18n.OVERVIEW;
+  return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
 export const getCurrentLocation = (
