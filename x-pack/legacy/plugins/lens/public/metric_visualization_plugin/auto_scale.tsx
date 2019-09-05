@@ -75,6 +75,7 @@ export class AutoScale extends React.Component<Props, State> {
               maxWidth: '100%',
               maxHeight: '100%',
               overflow: 'hidden',
+              lineHeight: 1.5,
             }}
           >
             <div
@@ -106,7 +107,7 @@ export function computeScale(
   child: ClientDimensionable | null
 ) {
   const MAX_SCALE = 1;
-  const MIN_SCALE = 0.3;
+  const MIN_SCALE = 0.2;
 
   if (!parent || !child) {
     return 1;
