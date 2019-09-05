@@ -87,12 +87,6 @@ export async function executor(
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
-  try {
-    configurationUtilities.ensureWhitelistedUri(url);
-  } catch (whitelistError) {
-    log(`warn`, `error on webhook action "${id}": ${whitelistError.message}`);
-    return errorRequestInvalid(id, whitelistError.message);
-  }
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
     axios.request({
@@ -150,25 +144,10 @@ function successResult(data: any): ActionTypeExecutorResult {
   return { status: 'ok', data };
 }
 
-function errorRequestInvalid(id: string, message: string): ActionTypeExecutorResult {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidRequestErrorMessage', {
-    defaultMessage:
-      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
-    values: {
-      message,
-      id,
-    },
-  });
-  return {
-    status: 'error',
-    message: errMessage,
-  };
-}
-
 function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
     defaultMessage:
-      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
+      'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -183,7 +162,7 @@ function errorResultInvalid(id: string, message: string): ActionTypeExecutorResu
 function errorResultUnreachable(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
     defaultMessage:
-      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
+      'Unreachable Webhook: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -200,7 +179,7 @@ function retryResult(id: string, message: string): ActionTypeExecutorResult {
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
       defaultMessage:
-        'an error occurred in webhook action "{id}" calling a remote webhook, retry later',
+        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry later',
       values: {
         id,
       },
@@ -226,7 +205,7 @@ function retryResultSeconds(
     'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage:
-        'an error occurred in webhook action "{id}" calling a remote webhook, retry at {retryString}: {message}',
+        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry at {retryString}: {message}',
       values: {
         id,
         retryString,
