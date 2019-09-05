@@ -4,45 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
+import { format as urlFormat, parse as urlParse } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
-import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
+import { KbnServer } from '../../../types';
+import { JobDocPayloadPNG } from '../../png/types';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
-function getSavedObjectAbsoluteUrl(job: JobDocPayload, relativeUrl: string, server: KbnServer) {
-  const getAbsoluteUrl: any = getAbsoluteUrlFactory(server);
-
-  const { pathname: path, hash, search } = url.parse(relativeUrl);
-  return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
+interface KeyedRelativeUrl {
+  relativeUrl: string;
 }
 
 export const getFullUrls = async ({
   job,
-  conditionalHeaders,
-  logo,
   server,
+  ...mergeValues // caller's mergeMap passes props we only need to pass through
 }: {
-  job: JobDocPayload;
-  conditionalHeaders?: ConditionalHeaders;
-  logo?: any;
+  job: JobDocPayloadPNG | JobDocPayloadPDF;
   server: KbnServer;
 }) => {
-  // if no URLS then its from PNG which should only have one so put it in the array and process as PDF does
-  if (!job.urls) {
-    if (!job.relativeUrl) {
-      throw new Error(`Unable to generate report. Url is not defined.`);
-    }
-    job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
+  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
+
+  // PDF and PNG job params put in the url differently
+  let relativeUrls: string[] = [];
+
+  if (job.relativeUrl) {
+    // single page (png)
+    relativeUrls = [job.relativeUrl];
+  } else if (job.objects) {
+    // multi page (pdf)
+    relativeUrls = job.objects.map((obj: KeyedRelativeUrl) => obj.relativeUrl);
   }
 
-  const urls = job.urls.map((jobUrl: string) => {
+  const absoluteUrls = relativeUrls.map(relativeUrl => {
+    const { pathname: path, hash, search } = urlParse(relativeUrl);
+    return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
+  });
+
+  // why 2 maps
+  const urls = absoluteUrls.map((jobUrl: string) => {
     if (!job.forceNow) {
       return jobUrl;
     }
 
-    const parsed: any = url.parse(jobUrl, true);
-    const hash: any = url.parse(parsed.hash.replace(/^#/, ''), true);
+    const parsed: any = urlParse(jobUrl, true);
+    const hash: any = urlParse(parsed.hash.replace(/^#/, ''), true);
 
-    const transformedHash = url.format({
+    const transformedHash = urlFormat({
       pathname: hash.pathname,
       query: {
         ...hash.query,
@@ -50,11 +57,11 @@ export const getFullUrls = async ({
       },
     });
 
-    return url.format({
+    return urlFormat({
       ...parsed,
       hash: transformedHash,
     });
   });
 
-  return { job, conditionalHeaders, logo, urls, server };
+  return { job, urls, server, ...mergeValues };
 };
