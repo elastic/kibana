@@ -13,6 +13,7 @@ import {
   ConsoleMessage,
   Request as PuppeteerRequest,
 } from 'puppeteer';
+import { ChildProcess } from 'child_process';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
@@ -46,15 +47,12 @@ export class HeadlessChromiumDriverFactory {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
-    this.logger = logger;
+    this.logger = logger; // TODO: just pass logger into each method from outside, like test() has it
   }
 
   type = 'chromium';
 
-  test(
-    { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: Logger
-  ) {
+  test({ viewport }: { viewport: IArgOptions['viewport'] }, logger: Logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -69,17 +67,20 @@ export class HeadlessChromiumDriverFactory {
       executablePath: this.binaryPath,
       ignoreHTTPSErrors: true,
       args: chromiumArgs,
-      env: {
-        TZ: browserTimezone,
-      },
-    } as LaunchOptions).catch((error: Error) => {
-      logger.error(
-        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
-      );
-      logger.error(error);
-      logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
-      return null;
-    });
+    } as LaunchOptions)
+      .then((browser: Browser) => {
+        const childProcess: ChildProcess = browser.process();
+        logger.info(`Test browser process launched with PID: ${childProcess.pid}`);
+        return browser;
+      })
+      .catch((error: Error) => {
+        logger.error(
+          `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
+        );
+        logger.error(error);
+        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+        return null;
+      });
   }
 
   create({
@@ -117,6 +118,10 @@ export class HeadlessChromiumDriverFactory {
             TZ: browserTimezone,
           },
         } as LaunchOptions);
+
+        // log the child process PID
+        const childProcess: ChildProcess = browser.process();
+        this.logger.info(`Job browser process launched with PID: ${childProcess.pid}`);
 
         page = await browser.newPage();
 
