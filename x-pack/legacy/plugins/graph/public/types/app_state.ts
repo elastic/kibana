@@ -5,7 +5,7 @@
  */
 
 import { SimpleSavedObject } from 'src/core/public';
-import { Workspace } from '.';
+import { Workspace } from './workspace_state';
 
 // TODO interim type, will be replaced by actual type in parallel pr
 type OutlinkEncoder = any;

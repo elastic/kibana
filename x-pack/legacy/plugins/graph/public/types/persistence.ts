@@ -43,8 +43,6 @@ export interface PersistedField extends Omit<Field, 'icon'> {
 
 export interface PersistedNode
   extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize'> {
-  x: number;
-  y: number;
   field: string;
   term: string;
   parent: number | null;
