@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { Root } from 'joi';
 import { init } from './server';
@@ -15,6 +16,7 @@ export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: 'alerting',
     configPrefix: 'xpack.alerting',
+    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'actions', 'task_manager', 'encrypted_saved_objects'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
@@ -34,6 +36,9 @@ export function alerting(kibana: any) {
     init,
     uiExports: {
       mappings,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      managementSections: ['plugins/alerting'],
+      home: ['plugins/alerting/register_feature'],
     },
   });
 }
