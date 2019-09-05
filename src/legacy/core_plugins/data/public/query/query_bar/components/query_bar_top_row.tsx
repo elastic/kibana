@@ -71,7 +71,7 @@ interface Props {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
-  timeHistory: TimeHistoryContract;
+  timeHistory?: TimeHistoryContract;
 }
 
 interface State {
@@ -151,7 +151,10 @@ export class QueryBarTopRowUI extends Component<Props, State> {
 
   public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
-    this.props.timeHistory.add(dateRange);
+
+    if (this.props.timeHistory) {
+      this.props.timeHistory.add(dateRange);
+    }
 
     this.props.onSubmit({ query, dateRange });
   };
@@ -263,14 +266,17 @@ export class QueryBarTopRowUI extends Component<Props, State> {
       return null;
     }
 
-    const recentlyUsedRanges = this.props.timeHistory
-      .get()
-      .map(({ from, to }: { from: string; to: string }) => {
-        return {
-          start: from,
-          end: to,
-        };
-      });
+    let recentlyUsedRanges;
+    if (this.props.timeHistory) {
+      recentlyUsedRanges = this.props.timeHistory
+        .get()
+        .map(({ from, to }: { from: string; to: string }) => {
+          return {
+            start: from,
+            end: to,
+          };
+        });
+    }
 
     const commonlyUsedRanges = this.props.uiSettings
       .get('timepicker:quickRanges')
