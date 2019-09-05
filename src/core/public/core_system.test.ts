@@ -272,7 +272,9 @@ describe('#start()', () => {
     await startCore();
     expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
     expect(MockRenderingService.start).toHaveBeenCalledWith({
+      application: expect.any(Object),
       chrome: expect.any(Object),
+      injectedMetadata: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -364,7 +366,7 @@ describe('LegacyPlatformService targetDomElement', () => {
   it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
     const core = createCoreSystem();
 
-    let targetDomElementInStart: HTMLElement | null;
+    let targetDomElementInStart: HTMLElement | undefined;
     MockLegacyPlatformService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementInStart = targetDomElement;
     });

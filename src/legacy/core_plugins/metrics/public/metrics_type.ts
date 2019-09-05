@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import { visFactory } from '../../visualizations/public';
+import { visFactory } from '../../visualizations/public/np_ready/public';
 
 // @ts-ignore
 import { createMetricsRequestHandler } from './request_handler';
