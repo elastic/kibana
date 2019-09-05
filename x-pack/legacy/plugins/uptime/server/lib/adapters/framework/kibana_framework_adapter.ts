@@ -5,96 +5,71 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Server } from 'hapi';
+import { Request, Server, ResponseToolkit } from 'hapi';
+import { runHttpQuery } from 'apollo-server-core';
 import {
   UMBackendFrameworkAdapter,
   UMFrameworkRequest,
   UMFrameworkResponse,
   UMFrameworkRouteOptions,
-  UMHapiGraphQLPluginOptions,
 } from './adapter_types';
-import { uptimeGraphQLHapiPlugin } from './apollo_framework_adapter';
+import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   private server: Server;
 
-  constructor(hapiServer: Server, private readonly register: any, private readonly route: any) {
+  constructor(hapiServer: Server) {
     this.server = hapiServer;
-    this.register = register;
-    this.route = route;
-    console.log(JSON.stringify(Object.keys(this.server), null, 2))
-    console.log('route', this.server.route);
   }
 
   public registerRoute<
     RouteRequest extends UMFrameworkRequest,
     RouteResponse extends UMFrameworkResponse
   >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    this.route(route);
+    this.server.route(route);
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<UMHapiGraphQLPluginOptions>({
-      options: {
-        graphQLOptions: (req: any) => ({
-          context: { req },
-          schema,
-        }),
-        path: routePath,
-        route: {
-          tags: ['access:uptime'],
-        },
+    const options = {
+      graphQLOptions: (req: any) => ({
+        context: { req },
+        schema,
+      }),
+      path: routePath,
+      route: {
+        tags: ['access:uptime'],
       },
-      plugin: uptimeGraphQLHapiPlugin,
+    };
+    this.server.route({
+      options: options.route,
+      handler: async (request: Request, h: ResponseToolkit) => {
+        try {
+          const { method } = request;
+          const query =
+            method === 'post'
+              ? (request.payload as Record<string, any>)
+              : (request.query as Record<string, any>);
+
+          const graphQLResponse = await runHttpQuery([request], {
+            method: method.toUpperCase(),
+            options: options.graphQLOptions,
+            query,
+          });
+
+          return h.response(graphQLResponse).type('application/json');
+        } catch (error) {
+          if (error.isGraphQLError === true) {
+            return h
+              .response(error.message)
+              .code(error.statusCode)
+              .type('application/json');
+          }
+          return h.response(error).type('application/json');
+        }
+      },
+      method: ['get', 'post'],
+      path: options.path || DEFAULT_GRAPHQL_PATH,
+      vhost: undefined,
     });
   }
 }
-
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License;
-//  * you may not use this file except in compliance with the Elastic License.
-//  */
-
-// import { GraphQLSchema } from 'graphql';
-// import {
-//   UMBackendFrameworkAdapter,
-//   UMFrameworkRequest,
-//   UMFrameworkResponse,
-//   UMFrameworkRouteOptions,
-//   UMHapiGraphQLPluginOptions,
-// } from './adapter_types';
-// import { uptimeGraphQLHapiPlugin } from './apollo_framework_adapter';
-
-// export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-//   constructor(
-//     private readonly route: (route: any) => void,
-//     private readonly register: <T>(options: any) => void
-//   ) {
-//     this.route = route;
-//     this.register = register;
-//   }
-
-//   public registerRoutez<
-//     RouteRequest extends UMFrameworkRequest,
-//     RouteResponse extends UMFrameworkResponse
-//   >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-//     // this.route(route);
-//   }
-
-//   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-//   //   this.register<UMHapiGraphQLPluginOptions>({
-//   //     options: {
-//   //       graphQLOptions: (req: any) => ({
-//   //         context: { req },
-//   //         schema,
-//   //       }),
-//   //       path: routePath,
-//   //       route: {
-//   //         tags: ['access:uptime'],
-//   //       },
-//   //     },
-//   //     plugin: uptimeGraphQLHapiPlugin,
-//   //   });
-//   }
-// }
