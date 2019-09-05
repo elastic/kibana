@@ -174,14 +174,11 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     }
   }
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
-
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
   });
 
   $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
@@ -189,11 +186,14 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       $scope.savedQuery = undefined;
       return;
     }
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
   /* End of Saved Queries */
   async function onQueryChange({ filters, query, time }) {
