@@ -11,8 +11,9 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 
 import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/track_usage';
+import { TabNavigationProps } from '../type';
 import { HostsTableType } from '../../../store/hosts/model';
-import { NavTab, TabNavigationProps } from '../type';
+import { NavTab } from '../../url_state/types';
 import { getSearch } from '../helpers';
 
 const TabContainer = styled.div`

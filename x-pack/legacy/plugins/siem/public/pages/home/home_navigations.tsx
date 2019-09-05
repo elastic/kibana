@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as i18n from '../../components/navigation/translations';
-import { NavTab } from '../../components/navigation/type';
 import {
   getOverviewUrl,
   getNetworkUrl,
   getTimelinesUrl,
   getHostsUrl,
 } from '../../components/link_to';
+import { NavTab } from '../../components/url_state/types';
 
 export enum SiemPageName {
   overview = 'overview',

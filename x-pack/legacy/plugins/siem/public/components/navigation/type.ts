@@ -6,17 +6,8 @@
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
-import { KqlQuery, UrlStateType } from '../url_state/types';
+import { KqlQuery, UrlStateType, NavTab } from '../url_state/types';
 import { HostsTableType } from '../../store/hosts/model';
-
-export interface NavTab {
-  id: string;
-  name: string;
-  href: string;
-  disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
-}
 
 export interface SiemNavigationComponentProps {
   display?: 'default' | 'condensed';

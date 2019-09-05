@@ -20,7 +20,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
       params: { pageName, detailName, tabName },
     },
   }) => {
-    const [isInitializing, setIsnitializing] = useState(true);
+    const [isInitializing, setIsInitializing] = useState(true);
     const [route, dispatch] = useRouteSpy();
 
     useEffect(() => {
@@ -29,7 +29,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           type: 'updateSearch',
           search,
         });
-        setIsnitializing(false);
+        setIsInitializing(false);
       }
     }, [search]);
     useEffect(() => {
@@ -45,7 +45,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               history,
             },
           });
-          setIsnitializing(false);
+          setIsInitializing(false);
         } else {
           dispatch({
             type: 'updateRoute',

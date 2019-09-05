@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import * as i18n from './translations';
 
-import { NavTab } from '../../components/navigation/type';
 import { HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 
 import { HostsQuery } from '../../containers/hosts';
@@ -24,6 +23,7 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
+import { NavTab } from '../../components/url_state/types';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
