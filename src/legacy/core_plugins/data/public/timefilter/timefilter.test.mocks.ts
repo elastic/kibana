@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { fieldFormatsMixin } from './field_formats_mixin';
-export { FieldFormat } from './field_format';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
+
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
