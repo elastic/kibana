@@ -8,6 +8,7 @@ import { EuiFieldSearch, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
+import { toggleSelectedItems } from './toggle_selected_item';
 
 export interface FilterPopoverProps {
   fieldName: string;
@@ -88,16 +89,7 @@ export const FilterPopover = ({
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}
             key={item}
-            onClick={() => {
-              const index = tempSelectedItems.indexOf(item);
-              const nextSelectedItems = [...tempSelectedItems];
-              if (index >= 0) {
-                nextSelectedItems.splice(index, 1);
-              } else {
-                nextSelectedItems.push(item);
-              }
-              setTempSelectedItems(nextSelectedItems);
-            }}
+            onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
           >
             {item}
           </EuiFilterSelectItem>
