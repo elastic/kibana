@@ -18,9 +18,9 @@ import { getWindow } from '../../../lib/get_window';
 import { downloadWorkpad } from '../../../lib/download_workpad';
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
-import { CanvasWorkpad } from '../../../../types';
+import { State, CanvasWorkpad } from '../../../../types';
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
   enabled: getReportingBrowserType(state) === 'chromium',

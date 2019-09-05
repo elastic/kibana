@@ -145,6 +145,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltipText', {
         defaultMessage: 'Enter fullscreen mode',
       }),
+    getFullScreenButtonLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonLabelText', {
+        defaultMessage: 'View fullscreen',
+      }),
     getHideEditControlText: () =>
       i18n.translate('xpack.canvas.workpadHeader.hideEditControlText', {
         defaultMessage: 'Hide editing controls',
@@ -156,6 +160,65 @@ export const ComponentStrings = {
     getShowEditControlText: () =>
       i18n.translate('xpack.canvas.workpadHeader.showEditControlText', {
         defaultMessage: 'Show editing controls',
+      }),
+  },
+  WorkpadHeaderAutoRefreshControls: {
+    getRefreshListTitleText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitleText', {
+        defaultMessage: 'Refresh elements',
+      }),
+    getRefreshListDurationPrefix: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListDurationPrefix', {
+        defaultMessage: 'Every',
+      }),
+    getRefreshListDurationManualText: () =>
+      i18n.translate(
+        'xpack.canvas.workpadHeaderAutoRefreshControls.refreshListDurationManualText',
+        {
+          defaultMessage: 'Manually',
+        }
+      ),
+    getDisableTooltipText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltipText', {
+        defaultMessage: 'Disable auto-refresh',
+      }),
+    getIntervalFormLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.intervalFormLabel', {
+        defaultMessage: 'Change auto-refresh interval',
+      }),
+  },
+  WorkpadHeaderControlSettings: {
+    getTooltipText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderControlSettings.tooltipText', {
+        defaultMessage: 'Control settings',
+      }),
+  },
+  WorkpadHeaderKioskControls: {
+    getTitleText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitleText', {
+        defaultMessage: 'Cycle fullscreen pages',
+      }),
+    getCycleIntervalPrefix: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleIntervalPrefix', {
+        defaultMessage: 'Every',
+      }),
+    getCycleSwitchLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleSwitchLabelText', {
+        defaultMessage: 'Cycle slides automatically',
+      }),
+    getCycleFormLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabelText', {
+        defaultMessage: 'Change cycling interval',
+      }),
+  },
+  WorkpadHeaderRefreshControlSettings: {
+    getTooltipText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.tooltipText', {
+        defaultMessage: 'Refresh data',
+      }),
+    getButtonLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.buttonLabelText', {
+        defaultMessage: 'Refresh Elements',
       }),
   },
 };

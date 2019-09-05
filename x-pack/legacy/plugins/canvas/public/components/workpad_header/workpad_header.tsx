@@ -71,7 +71,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
     >
       <EuiButtonIcon
         iconType="fullScreen"
-        aria-label="View fullscreen"
+        aria-label={strings.getFullScreenButtonLabelText()}
         onClick={toggleFullscreen}
       />
     </EuiToolTip>

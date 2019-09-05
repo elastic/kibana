@@ -10,6 +10,7 @@ export * from './angular';
 export * from './components';
 export * from './constants';
 export * from './shortcuts';
+export * from './units';
 
 export const getAppDescription = () =>
   i18n.translate('xpack.canvas.appDescription', {
