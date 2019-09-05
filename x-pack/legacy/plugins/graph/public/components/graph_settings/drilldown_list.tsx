@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiAccordion, EuiButtonIcon } from '@elastic/eui';
+import { EuiText, EuiAccordion, EuiButtonIcon, EuiSpacer, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { DrilldownForm } from './drilldown_form';
@@ -23,27 +23,36 @@ export function DrilldownList({
             'Drilldown links configured here can be used to link to other applications and carry over the selected nodes as part of the URL',
         })}
       </EuiText>
+      <EuiSpacer />
       {urlTemplates.map((template, index) => (
-        <EuiAccordion
-          id={`accordion-${index}-${template.description}`}
-          buttonContent={template.description}
-        >
-          <DrilldownForm
-            initialTemplate={template}
-            onSubmit={newTemplate => {
-              saveUrlTemplate(index, newTemplate);
-            }}
-            onRemove={() => {
-              removeUrlTemplate(template);
-            }}
-          />
-        </EuiAccordion>
+        <>
+          <EuiAccordion
+            id={`accordion-${index}-${template.description}`}
+            buttonContent={template.description}
+            className="gphSettingsAccordion"
+            buttonClassName="gphSettingsAccordion__button"
+          >
+            <DrilldownForm
+              initialTemplate={template}
+              onSubmit={newTemplate => {
+                saveUrlTemplate(index, newTemplate);
+              }}
+              onRemove={() => {
+                removeUrlTemplate(template);
+              }}
+            />
+          </EuiAccordion>
+          <EuiSpacer />
+        </>
       ))}
       <EuiAccordion
         id={`accordion--1`}
         buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
-          defaultMessage: 'Create new template',
+          defaultMessage: 'New template',
         })}
+        className="gphSettingsAccordion"
+        buttonClassName="gphSettingsAccordion__button"
+        extraAction={<EuiIcon type="plusInCircleFilled" color="primary" />}
       >
         <DrilldownForm
           onSubmit={newTemplate => {

@@ -2,5 +2,20 @@
 @import 'src/legacy/ui/public/styles/_styling_constants';
 
 .gphSettingsFlyout {
-  max-width: $euiSizeXXL * 20;
+  max-width: $euiSizeXXL * 13;
+}
+
+.gphSettingsAccordion {
+  border-top: 1px solid $euiColorLightShade;
+  border-bottom: 1px solid $euiColorLightShade;
+  background-color: $euiColorLightestShade;
+  padding: $euiSizeM;
+}
+
+
+.gphSettingsForm {
+}
+j
+.gphSettings__helpTextButton {
+  
 }

@@ -74,12 +74,15 @@ export function DrilldownForm(props: DrilldownFormProps) {
 
   return (
     <form
+      className="gphSettingsForm"
       onSubmit={e => {
         e.preventDefault();
         onSubmit(currentTemplate);
       }}
     >
+      <EuiSpacer size="s" />
       <EuiFormRow
+        fullWidth
         label={i18n.translate('xpack.graph.settings.drillDowns.urlDescriptionInputLabel', {
           defaultMessage: 'Title',
         })}
@@ -87,6 +90,7 @@ export function DrilldownForm(props: DrilldownFormProps) {
         onBlur={() => setTouched({ ...touched, description: true })}
       >
         <EuiFieldText
+          fullWidth
           value={currentTemplate.description}
           isInvalid={touched.description && !currentTemplate.description}
           onChange={e => setValue('description', e.target.value)}
@@ -98,14 +102,40 @@ export function DrilldownForm(props: DrilldownFormProps) {
       </EuiFormRow>
       <EuiForm>
         <EuiFormRow
+          fullWidth
           label={i18n.translate('xpack.graph.settings.drillDowns.urlInputLabel', {
             defaultMessage: 'URL',
           })}
-          helpText={i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
-            defaultMessage:
-              'Define template URLs using {gquery} where the selected vertex terms are inserted',
-            values: { gquery: '{{gquery}}' },
-          })}
+          helpText={
+            <>
+              {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
+                defaultMessage:
+                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
+                values: { gquery: '{{gquery}}' },
+              })}
+              <br />
+              {autoformatUrl && (
+                <strong>
+                  {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
+                    defaultMessage: 'Possible Kibana URL pasted, ',
+                  })}
+                  <EuiButtonEmpty
+                    size="xs"
+                    className="gphSettings__helpTextButton"
+                    onClick={() => {
+                      setValue('url', replaceKibanaUrlParam(currentTemplate.url));
+                      setAutoformatUrl(false);
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
+                      { defaultMessage: 'convert it' }
+                    )}
+                  </EuiButtonEmpty>
+                </strong>
+              )}
+            </>
+          }
           onBlur={() => setTouched({ ...touched, url: true })}
           isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
           error={
@@ -120,6 +150,7 @@ export function DrilldownForm(props: DrilldownFormProps) {
           }
         >
           <EuiFieldText
+            fullWidth
             placeholder="https://www.google.co.uk/#q={{gquery}}"
             value={currentTemplate.url}
             onChange={e => {
@@ -169,12 +200,14 @@ export function DrilldownForm(props: DrilldownFormProps) {
         )}
       </EuiForm>
       <EuiFormRow
+        fullWidth
         helpText={currentTemplate.encoder.description}
         label={i18n.translate('xpack.graph.settings.drillDowns.urlEncoderInputLabel', {
           defaultMessage: 'URL parameter type',
         })}
       >
         <EuiComboBox
+          fullWidth
           singleSelection={{ asPlainText: true }}
           isClearable={false}
           options={encoders.map(encoder => ({ label: encoder.title, value: encoder }))}
@@ -191,6 +224,7 @@ export function DrilldownForm(props: DrilldownFormProps) {
         />
       </EuiFormRow>
       <EuiFormRow
+        fullWidth
         label={i18n.translate('xpack.graph.settings.drillDowns.toolbarIconPickerLabel', {
           defaultMessage: 'Toolbar icon',
         })}
@@ -245,11 +279,11 @@ export function DrilldownForm(props: DrilldownFormProps) {
         <EuiFlexItem grow={null}>
           <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
             {isUpdateForm(props)
-              ? i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
-                  defaultMessage: 'Add template',
-                })
-              : i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
+              ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
                   defaultMessage: 'Update template',
+                })
+              : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
+                  defaultMessage: 'Add template',
                 })}
           </EuiButton>
         </EuiFlexItem>

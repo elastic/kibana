@@ -37,8 +37,9 @@ export function AdvancedSettingsForm({
   }
 
   return (
-    <EuiForm>
+    <form className="gphSettingsForm">
       <EuiFormRow
+        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputHelpText', {
           defaultMessage:
             'Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant',
@@ -48,6 +49,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.sampleSize}
@@ -56,6 +58,7 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
+        fullWidth
         helpText={i18n.translate(
           'xpack.graph.settings.advancedSettings.significantLinksCheckboxHelpText',
           {
@@ -76,6 +79,7 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
+        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.certaintyInputHelpText', {
           defaultMessage:
             'The min number of documents that are required as evidence before introducing a related term',
@@ -85,6 +89,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.minDocCount}
@@ -93,6 +98,7 @@ export function AdvancedSettingsForm({
       </EuiFormRow>
 
       <EuiFormRow
+        fullWidth
         helpText={
           <>
             {i18n.translate('xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1', {
@@ -115,6 +121,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiComboBox
+          fullWidth
           placeholder={i18n.translate(
             'xpack.graph.settings.advancedSettings.diversityFieldInputOptionLabel',
             { defaultMessage: '[No diversification]' }
@@ -142,6 +149,7 @@ export function AdvancedSettingsForm({
 
       {advancedSettings.sampleDiversityField && (
         <EuiFormRow
+          fullWidth
           helpText={
             <>
               {i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
@@ -162,6 +170,7 @@ export function AdvancedSettingsForm({
           })}
         >
           <EuiFieldNumber
+            fullWidth
             min={1}
             max={500000}
             value={advancedSettings.maxValuesPerDoc}
@@ -171,6 +180,7 @@ export function AdvancedSettingsForm({
       )}
 
       <EuiFormRow
+        fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputHelpText', {
           defaultMessage: 'Max time in milliseconds a request can run',
         })}
@@ -179,6 +189,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          fullWidth
           min={1}
           max={500000}
           value={advancedSettings.timeoutMillis}
@@ -194,6 +205,6 @@ export function AdvancedSettingsForm({
           }
         />
       </EuiFormRow>
-    </EuiForm>
+    </form>
   );
 }
