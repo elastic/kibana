@@ -299,6 +299,22 @@ export class PolicyTable extends Component {
     const { name } = policy;
     const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
       const value = policy[fieldName];
+
+      if (fieldName === 'name') {
+        return (
+          <th
+            key={`${fieldName}-${name}`}
+            className="euiTableRowCell"
+            scope="row"
+            data-test-subj={`policyTableCell-${fieldName}`}
+          >
+            <div className={`euiTableCellContent policyTable__content----${fieldName}`}>
+              {this.buildRowCell(fieldName, value)}
+            </div>
+          </th>
+        );
+      }
+
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
@@ -390,6 +406,18 @@ export class PolicyTable extends Component {
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
           <EuiTable className="policyTable__horizontalScroll">
+            <caption
+              role="status"
+              aria-relevant="text"
+              aria-live="polite"
+              className="euiScreenReaderOnly"
+            >
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.captionText"
+                defaultMessage="Below is a table of {count} items."
+                values={{ count: totalNumberOfPolicies }}
+              />
+            </caption>
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>

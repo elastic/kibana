@@ -237,6 +237,21 @@ export class IndexTable extends Component {
     return Object.keys(HEADERS).map(fieldName => {
       const { name } = index;
       const value = index[fieldName];
+
+      if (fieldName === 'name') {
+        return (
+          <th
+            key={`${fieldName}-${name}`}
+            className="euiTableRowCell"
+            scope="row"
+            data-test-subj={`indexTableCell-${fieldName}`}
+          >
+            <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
+              {this.buildRowCell(fieldName, value, index)}
+            </div>
+          </th>
+        );
+      }
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
@@ -332,6 +347,12 @@ export class IndexTable extends Component {
                 this.toggleItem(name);
               }}
               data-test-subj="indexTableRowCheckbox"
+              aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectIndexAriaLabel', {
+                defaultMessage: 'Select this row'
+              })}
+              title={i18n.translate('xpack.idxMgmt.indexTable.selectIndexTitle', {
+                defaultMessage: 'Select this row'
+              })}
             />
           </EuiTableRowCellCheckbox>
           {this.buildRowCells(index)}
@@ -507,6 +528,18 @@ export class IndexTable extends Component {
         {indices.length > 0 ? (
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <EuiTable className="indTable">
+              <caption
+                role="status"
+                aria-relevant="text"
+                aria-live="polite"
+                className="euiScreenReaderOnly"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTable.captionText"
+                  defaultMessage="Below is a table of {count} items."
+                  values={{ count: indices.length }}
+                />
+              </caption>
               <EuiTableHeader>
                 <EuiTableHeaderCellCheckbox>
                   <EuiCheckbox
@@ -514,6 +547,9 @@ export class IndexTable extends Component {
                     checked={this.areAllItemsSelected()}
                     onChange={this.toggleAll}
                     type="inList"
+                    aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel', {
+                      defaultMessage: 'Select all rows'
+                    })}
                   />
                 </EuiTableHeaderCellCheckbox>
                 {this.buildHeader()}
