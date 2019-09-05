@@ -26,6 +26,7 @@ import chrome from 'ui/chrome';
 
 // need to get rid of angular from these
 // @ts-ignore
+import { TimeRange } from 'src/plugins/data/public';
 import { SearchSource, SearchSourceProvider } from '../../../../ui/public/courier/search_source';
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
 
@@ -35,7 +36,7 @@ import {
   getResponseInspectorStats,
 } from '../../../../ui/public/courier/utils/courier_inspector_utils';
 import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
-import { getTime, TimeRange } from '../../../../ui/public/timefilter';
+import { getTime } from '../../../../ui/public/timefilter';
 import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/embedded_visualize_handler';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';

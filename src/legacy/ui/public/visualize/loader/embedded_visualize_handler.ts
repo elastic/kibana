@@ -27,6 +27,7 @@ import { toastNotifications } from 'ui/notify';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
+import { TimeRange } from 'src/plugins/data/public';
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
@@ -34,7 +35,7 @@ import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
-import { timefilter, TimeRange } from '../../timefilter';
+import { timefilter } from '../../timefilter';
 import { Vis } from '../../vis';
 // @ts-ignore untyped dependency
 import { VisFiltersProvider } from '../../vis/vis_filters';
