@@ -119,9 +119,17 @@ function deserializeUrlTemplate({ encoderID, iconClass, ...serializableProps }: 
   return template;
 }
 
-export function 
+// returns the id of the index pattern, lookup is done in app.js
+export function lookupIndexPattern(persistedGraphWorkspace, indexPatternSavedObjects): string
 
-export function savedWorkspaceToAppState(savedWorkspace: PersistedGraphWorkspace, indexPatterns: IndexPatternSavedObject[]) {
+// returns all graph fields mapped out of the index pattern
+export function mapFields(indexpattern: IndexPattern): Field[]
+
+// 1. call lookupIndexPattern()
+// fetch index pattern
+// 2. call savedWorkspaceToAppState() to map everything
+// 2.1. savedWorkspaceToAppState will call mapFields under the hood (will also be called by "new workspace" branch if selecting an index pattern)
+export function savedWorkspaceToAppState(savedWorkspace: PersistedGraphWorkspace, indexPattern: IndexPattern) {
     const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
     
     const urlTemplates = persistedWorkspaceState.urlTemplates.map(deserializeUrlTemplate).filter((template: UrlTemplate | undefined): template is UrlTemplate => Boolean(template));
