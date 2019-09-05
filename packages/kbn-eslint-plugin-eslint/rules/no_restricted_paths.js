@@ -78,7 +78,7 @@ module.exports = {
                 },
                 allowSameFolder: { type: 'boolean' },
               },
-              additionalProperties: true,
+              additionalProperties: false,
             },
           },
           basePath: { type: 'string' },

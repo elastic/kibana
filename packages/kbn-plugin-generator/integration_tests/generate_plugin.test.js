@@ -46,8 +46,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     const create = spawn(process.execPath, ['scripts/generate_plugin.js', pluginName], {
       cwd: ROOT_DIR,
     });
-    create.stdout.on('data', () => {
-      create.stdin.write('\n');
+    create.stdout.on('data', function selectDefaults() {
+      create.stdin.write('\n'); // Generate a plugin with default options.
     });
     create.on('close', done);
   });
