@@ -11,7 +11,7 @@ export const RuntimeDatasourceInput = t.interface(
     id: t.string,
     meta: t.union([t.undefined, t.string]),
     other: t.string, // JSON, gets flattened to top level when returned via REST API
-    policy_id: t.string,
+    data_source_id: t.string,
   },
   'DatasourceInput'
 );
@@ -21,7 +21,6 @@ const RuntimeDatasource = t.interface(
     uuid: t.string,
     ref_source: t.union([t.undefined, t.string]),
     ref: t.union([t.undefined, t.string]),
-    policy: t.union([t.undefined, t.string]),
     output: t.string,
     queue: t.union([t.undefined, t.string]),
     inputs: t.array(t.string),

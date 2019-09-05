@@ -26,20 +26,18 @@ describe('Policies Lib', () => {
 
   beforeAll(async () => {
     await callWhenOnline(async () => {
-      if (typeof (global as any).import !== 'undefined') {
-        const { createKibanaServer } = await import(
-          '../../../../../test_utils/jest/contract_tests/servers'
-        );
+      const { createKibanaServer } = await import(
+        '../../../../../test_utils/jest/contract_tests/servers'
+      );
 
-        servers = await createKibanaServer({
-          security: { enabled: true },
-        });
-        const esPolicy = JSON.parse(process.env.__JEST__ESServer || '');
-        es = new elasticsearch.Client({
-          hosts: esPolicy.hosts,
-          httpAuth: esPolicy.username ? `${esPolicy.username}:${esPolicy.password}` : undefined,
-        });
-      }
+      servers = await createKibanaServer({
+        security: { enabled: true },
+      });
+      const esPolicy = JSON.parse(process.env.__JEST__ESServer || '');
+      es = new elasticsearch.Client({
+        hosts: esPolicy.hosts,
+        httpAuth: esPolicy.username ? `${esPolicy.username}:${esPolicy.password}` : undefined,
+      });
     });
 
     libs = compose(servers);
