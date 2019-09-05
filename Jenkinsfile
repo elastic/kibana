@@ -1,21 +1,17 @@
 #!/bin/groovy
 
-// properties([durabilityHint('PERFORMANCE_OPTIMIZED')]) // TODO put this in JJB?
+properties([
+  durabilityHint('PERFORMANCE_OPTIMIZED'),
+])
 
-// library 'kibana-pipeline-library'
-
-stage("Before") {
-  print "Before"
-}
-
-stage("Job") {
+stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
         parallel([
-          'kibana-intake-1': legacyJobRunner('kibana-intake'),
-          'x-pack-intake-1': legacyJobRunner('x-pack-intake'),
-          'kibana-oss-tests-1': withWorkers('kibana-oss-tests-1', { buildOss() }, [
+          'kibana-intake-agent': legacyJobRunner('kibana-intake'),
+          'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
+          'kibana-oss-agent': withWorkers('kibana-oss-tests', { buildOss() }, [
             'oss-ciGroup1': getOssCiGroupWorker(1),
             'oss-ciGroup2': getOssCiGroupWorker(2),
             'oss-ciGroup3': getOssCiGroupWorker(3),
@@ -31,7 +27,7 @@ stage("Job") {
             'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
             'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
           ]),
-          'kibana-xpack-tests-1': withWorkers('kibana-xpack-tests', { buildXpack() }, [
+          'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
             'xpack-ciGroup1': getXpackCiGroupWorker(1),
             'xpack-ciGroup2': getXpackCiGroupWorker(2),
             'xpack-ciGroup3': getXpackCiGroupWorker(3),
@@ -45,15 +41,11 @@ stage("Job") {
             'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
             'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
           ]),
-          // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+          // TODO make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
         ])
       }
     }
   }
-}
-
-stage("After") {
-  print "After"
 }
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
@@ -80,8 +72,13 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
 
         parallel(workers)
       } finally {
-        uploadAllGcsArtifacts(name)
-        publishJunit()
+        catchError {
+          uploadAllGcsArtifacts(name)
+        }
+
+        catchError {
+          publishJunit()
+        }
       }
     }
   }
@@ -159,7 +156,7 @@ def jobRunner(label, closure) {
     "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
     "TEST_BROWSER_HEADLESS=1",
   ]) {
-    withCredentials([ // TODO make these not necessary?
+    withCredentials([
       string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
       string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
       string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
@@ -174,7 +171,7 @@ def jobRunner(label, closure) {
           }
         }
 
-        // sendMail() // TODO
+        sendMail()
       }
     }
   }
@@ -183,8 +180,8 @@ def jobRunner(label, closure) {
 // TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
 def uploadGcsArtifact(jobName, pattern) {
-  // def storageLocation = "gs://kibana-ci-artifacts/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}" // TODO
-  def storageLocation = "gs://kibana-pipeline-testing/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}"
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}" // TODO
+  // def storageLocation = "gs://kibana-pipeline-testing/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}"
 
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
