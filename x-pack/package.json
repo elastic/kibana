@@ -149,6 +149,7 @@
     "hapi": "^17.5.3",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
+    "jest-localstorage-mock": "^2.4.0",
     "jest-styled-components": "^6.3.3",
     "jsdom": "^12.2.0",
     "madge": "3.4.4",

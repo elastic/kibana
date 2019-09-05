@@ -5,8 +5,8 @@
  */
 
 import { ILicense } from '../common/types';
-import { Plugin } from './plugin';
 import { setup } from './__fixtures__/setup';
+import { Plugin } from './plugin';
 
 describe('licensing feature', () => {
   let plugin: Plugin;
@@ -14,6 +14,7 @@ describe('licensing feature', () => {
 
   afterEach(async () => {
     await plugin.stop();
+    sessionStorage.clear();
   });
 
   describe('valid feature', () => {

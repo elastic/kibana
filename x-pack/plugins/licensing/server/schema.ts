@@ -5,7 +5,7 @@
  */
 
 import { schema as Schema } from '@kbn/config-schema';
-import { DEFAULT_POLLING_FREQUENCY } from './constants';
+import { DEFAULT_POLLING_FREQUENCY } from '../common/constants';
 
 export const schema = Schema.object({
   isEnabled: Schema.boolean({ defaultValue: true }),

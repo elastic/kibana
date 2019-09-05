@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SERVICE_NAME = 'licensing';
+export const API_ROUTE = '/api/xpack/v1/info';
+export const LICENSING_SESSION = 'xpack.licensing';
+export const LICENSING_SESSION_SIGNATURE = 'xpack.licensing.signature';
+export const SIGNATURE_HEADER = 'kbn-xpack-sig';
 export const DEFAULT_POLLING_FREQUENCY = 30001; // 30 seconds
 export enum LICENSE_STATUS {
   Unavailable = 'UNAVAILABLE',

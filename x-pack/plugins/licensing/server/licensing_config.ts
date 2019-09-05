@@ -5,7 +5,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { LicensingConfigType } from './types';
+import { TypeOf } from '@kbn/config-schema';
+import { schema } from './schema';
 
 export class LicensingConfig {
   public isEnabled: boolean;
@@ -15,7 +16,7 @@ export class LicensingConfig {
   /**
    * @internal
    */
-  constructor(rawConfig: LicensingConfigType, env: PluginInitializerContext['env']) {
+  constructor(rawConfig: TypeOf<typeof schema>, env: PluginInitializerContext['env']) {
     this.isEnabled = rawConfig.isEnabled;
     this.clusterSource = rawConfig.clusterSource;
     this.pollingFrequency = rawConfig.pollingFrequency;

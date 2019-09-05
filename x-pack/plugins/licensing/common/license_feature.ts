@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { License } from './license';
 import { LicenseFeatureSerializer } from './types';
+import { License } from './license';
 
 export class LicenseFeature {
   private serializable: LicenseFeatureSerializer = license => ({

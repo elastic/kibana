@@ -7,7 +7,7 @@
 import { IContextProvider, RequestHandler } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ILicense } from './types';
+import { ILicense } from '../common/types';
 
 export function createRouteHandlerContext(
   license$: Observable<ILicense>

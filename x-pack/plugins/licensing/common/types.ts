@@ -5,10 +5,46 @@
  */
 
 import { Observable } from 'rxjs';
-import { TypeOf } from '@kbn/config-schema';
-import { schema } from './schema';
 import { LICENSE_TYPE, LICENSE_STATUS } from './constants';
+import { License } from './license';
 import { LicenseFeature } from './license_feature';
+
+/**
+ * @public
+ * Results from remote request fetching a raw license.
+ */
+export interface RawLicense {
+  /**
+   * UID for license.
+   */
+  uid?: string;
+
+  /**
+   * The validity status of the license.
+   */
+  status?: string;
+
+  /**
+   * Unix epoch of the expiration date of the license.
+   */
+  expiry_date_in_millis?: number;
+
+  /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   */
+  type?: string;
+}
+
+/**
+ * @public
+ * Results from remote request fetching raw featuresets.
+ */
+export interface RawFeatures {
+  [key: string]: {
+    available: boolean;
+    enabled: boolean;
+  };
+}
 
 /**
  * @public
@@ -70,7 +106,7 @@ export interface ILicense {
   /**
    * If the license is not available, provides a string or Error containing the reason.
    */
-  reasonUnavailable: string | Error | null;
+  reasonUnavailable?: string | Error;
 
   /**
    * The MD5 hash of the serialized license.
@@ -105,7 +141,13 @@ export interface ILicense {
    * A specific API for interacting with the specific features of the license.
    * @param name the name of the feature to interact with
    */
-  getFeature(name: string): LicenseFeature | undefined;
+  getFeature(name: string): LicenseFeature;
+}
+
+/** @public */
+export interface ILicensingPlugin {
+  refresh(): void;
+  sign?(serialized: string): string;
 }
 
 /** @public */
@@ -113,11 +155,9 @@ export interface LicensingPluginSetup {
   license$: Observable<ILicense>;
 }
 /** @public */
-export type LicensingConfigType = TypeOf<typeof schema>;
-/** @public */
 export type LicenseType = keyof typeof LICENSE_TYPE;
 /** @public */
-export type LicenseFeatureSerializer = (licensing: ILicense) => any;
+export type LicenseFeatureSerializer = (licensing: License) => any;
 
 /** @public */
 export interface LicensingRequestContext {

@@ -17,6 +17,7 @@ describe('licensing plugin', () => {
 
   afterEach(async () => {
     await plugin.stop();
+    sessionStorage.clear();
   });
 
   test('returns instance of licensing setup', async () => {
@@ -25,10 +26,10 @@ describe('licensing plugin', () => {
   });
 
   test('still returns instance of licensing setup when request fails', async () => {
-    const { clusterClient, coreSetup, plugin: _plugin } = await setupOnly();
+    const { coreSetup, plugin: _plugin } = await setupOnly();
 
     plugin = _plugin;
-    clusterClient.callAsInternalUser.mockRejectedValue(new Error('test'));
+    coreSetup.http.get.mockRejectedValue(new Error('test'));
 
     const { license$ } = await plugin.setup(coreSetup);
     const finalLicense = await license$
@@ -42,16 +43,13 @@ describe('licensing plugin', () => {
   });
 
   test('observable receives updated licenses', async () => {
-    const { clusterClient, coreSetup, plugin: _plugin } = await setupOnly({
-      config: {
-        pollingFrequency: 100,
-      },
-    });
+    const { coreSetup, plugin: _plugin } = await setupOnly();
     const types = ['basic', 'gold', 'platinum'];
     let iterations = 0;
 
     plugin = _plugin;
-    clusterClient.callAsInternalUser.mockImplementation(() => {
+    plugin.pollingFrequency = 100;
+    coreSetup.http.get.mockImplementation(() => {
       return Promise.resolve(
         licenseMerge({
           license: {
@@ -80,22 +78,5 @@ describe('licensing plugin', () => {
     });
 
     expect(licenseTypes).toEqual(['basic', 'gold', 'platinum']);
-  });
-
-  test('provides a licensing context to http routes', async () => {
-    const { coreSetup, plugin: _plugin } = await setupOnly();
-
-    plugin = _plugin;
-
-    await plugin.setup(coreSetup);
-
-    expect(coreSetup.http.registerRouteHandlerContext.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "licensing",
-          [Function],
-        ],
-      ]
-    `);
   });
 });
