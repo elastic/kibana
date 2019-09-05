@@ -144,7 +144,7 @@ iconChoices.forEach(icon => {
   iconChoicesByClass[icon.class] = icon;
 });
 
-export const drillDownIconChoices = [
+export const urlTemplateIconChoices = [
   // Patterns are used to help default icon choices for common field names
   {
     class: 'fa-line-chart',
@@ -205,7 +205,7 @@ export const drillDownIconChoices = [
 ];
 export const drillDownIconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
 
-drillDownIconChoices.forEach(icon => {
+urlTemplateIconChoices.forEach(icon => {
   drillDownIconChoicesByClass[icon.class] = icon;
 });
 

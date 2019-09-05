@@ -20,8 +20,12 @@ import { i18n } from '@kbn/i18n';
 import { UrlTemplate } from '../../types';
 import { LegacyIcon } from './legacy_icon';
 import { getOutlinkEncoders } from '../../services/outlink_encoders';
-import { drillDownIconChoices } from '../../services/style_choices';
-import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../services/drilldown';
+import { urlTemplateIconChoices } from '../../services/style_choices';
+import {
+  isUrlTemplateValid,
+  isKibanaUrl,
+  replaceKibanaUrlParam,
+} from '../../services/url_template';
 
 const encoders = getOutlinkEncoders();
 
@@ -35,13 +39,13 @@ export interface UpdateFormProps {
   onRemove: () => void;
 }
 
-export type DrilldownFormProps = NewFormProps | UpdateFormProps;
+export type UrlTemplateFormProps = NewFormProps | UpdateFormProps;
 
-function isUpdateForm(props: DrilldownFormProps): props is UpdateFormProps {
+function isUpdateForm(props: UrlTemplateFormProps): props is UpdateFormProps {
   return 'initialTemplate' in props;
 }
 
-export function DrilldownForm(props: DrilldownFormProps) {
+export function UrlTemplateForm(props: UrlTemplateFormProps) {
   const { onSubmit } = props;
   const getInitialTemplate = () =>
     isUpdateForm(props)
@@ -223,7 +227,7 @@ export function DrilldownForm(props: DrilldownFormProps) {
         })}
       >
         <div>
-          {drillDownIconChoices.map(icon => (
+          {urlTemplateIconChoices.map(icon => (
             <LegacyIcon
               key={icon.class}
               asListIcon

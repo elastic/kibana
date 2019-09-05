@@ -59,7 +59,7 @@ import {
 } from './services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { save } from  './services/save';
-import { drillDownRegex } from  './services/drilldown';
+import { urlTemplateRegex } from  './services/url_template';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
@@ -592,7 +592,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.openUrlTemplate = function (template) {
     const url = template.url;
-    const newUrl = url.replace(drillDownRegex, template.encoder.encode($scope.workspace));
+    const newUrl = url.replace(urlTemplateRegex, template.encoder.encode($scope.workspace));
     window.open(newUrl, '_blank');
   };
 

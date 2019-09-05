@@ -10,7 +10,7 @@ import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elas
 import * as Rx from 'rxjs';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlacklistForm } from './blacklist_form';
-import { DrilldownList } from './drilldown_list';
+import { UrlTemplateList } from './url_template_list';
 import { WorkspaceNode, AdvancedSettings, UrlTemplate, Field } from '../../types';
 
 const tabs = [
@@ -28,7 +28,7 @@ const tabs = [
     title: i18n.translate('xpack.graph.settings.drillDownsTitle', {
       defaultMessage: 'Drill-downs',
     }),
-    component: DrilldownList,
+    component: UrlTemplateList,
   },
 ];
 
