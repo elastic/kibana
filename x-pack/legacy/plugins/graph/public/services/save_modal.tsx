@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedGraphWorkspace } from '../types/persistence';
+import { PersistedGraphWorkspace } from '../types/persistence';
 import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
 import { GraphSavePolicy } from '../types/config';
 
@@ -18,7 +18,7 @@ export function save({
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
-  workspace: SavedGraphWorkspace;
+  workspace: PersistedGraphWorkspace;
   saveWorkspace: (
     saveOptions: {
       confirmOverwrite: boolean;

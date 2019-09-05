@@ -4,83 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppState } from '../types';
+import {
+  AppState,
+  PersistedNode,
+  WorkspaceNode,
+  WorkspaceEdge,
+  PersistedEdge,
+  UrlTemplate,
+  PersistedUrlTemplate,
+  Field,
+  PersistedGraphWorkspace,
+  PersistedWorkspaceState,
+} from '../types';
+
+function serializeNode(
+  { icon, data, scaledSize, parent, ...serializableProps }: WorkspaceNode,
+  allNodes: WorkspaceNode[] = []
+): PersistedNode {
+  return {
+    ...serializableProps,
+    field: data.field,
+    term: data.term,
+    parent: parent ? allNodes.indexOf(parent) : null,
+    size: scaledSize,
+  };
+}
+
+function serializeEdge(
+  { source, target, ...serializableProbs }: WorkspaceEdge,
+  allNodes: WorkspaceNode[] = []
+): PersistedEdge {
+  return {
+    ...serializableProbs,
+    source: allNodes.indexOf(source),
+    target: allNodes.indexOf(target),
+  };
+}
+
+function serializeUrlTemplate({ encoder, icon, ...serializableProps }: UrlTemplate) {
+  const serializedTemplate: PersistedUrlTemplate = {
+    ...serializableProps,
+    encoderID: encoder.id,
+  };
+  if (icon) {
+    serializedTemplate.iconClass = icon.class;
+  }
+  return serializedTemplate;
+}
+
+function serializeField({ icon, ...serializableProps }: Field) {
+  return {
+    ...serializableProps,
+    iconClass: icon.class,
+  };
+}
 
 export function appStateToSavedWorkspace(
-  { workspace, urlTemplates, advancedSettings }: AppState,
+  currentSavedWorkspace: PersistedGraphWorkspace,
+  { workspace, urlTemplates, advancedSettings, selectedIndex, selectedFields }: AppState,
   canSaveData: boolean
-) {
-  let blacklist = [];
-  let vertices = [];
-  let links = [];
-  if (canSaveData) {
-    blacklist = workspace.blacklistedNodes.map(function(node) {
-      return {
-        x: node.x,
-        y: node.y,
-        field: node.data.field,
-        term: node.data.term,
-        label: node.label,
-        color: node.color,
-        parent: null,
-        weight: node.weight,
-        size: node.scaledSize,
-      };
-    });
-    vertices = workspace.nodes.map(function(node) {
-      return {
-        x: node.x,
-        y: node.y,
-        field: node.data.field,
-        term: node.data.term,
-        label: node.label,
-        color: node.color,
-        parent: node.parent ? workspace.nodes.indexOf(node.parent) : null,
-        weight: node.weight,
-        size: node.scaledSize,
-      };
-    });
-    links = workspace.edges.map(function(edge) {
-      return {
-        weight: edge.weight,
-        width: edge.width,
-        inferred: edge.inferred,
-        label: edge.label,
-        source: workspace.nodes.indexOf(edge.source),
-        target: workspace.nodes.indexOf(edge.target),
-      };
-    });
-  }
+): PersistedGraphWorkspace {
+  const blacklist: PersistedNode[] = canSaveData
+    ? workspace.blacklistedNodes.map(node => serializeNode(node))
+    : [];
+  const vertices: PersistedNode[] = canSaveData
+    ? workspace.nodes.map(node => serializeNode(node, workspace.nodes))
+    : [];
+  const links: PersistedEdge[] = canSaveData
+    ? workspace.edges.map(edge => serializeEdge(edge, workspace.nodes))
+    : [];
 
-  const mappedUrlTemplates = urlTemplates.map(function(template) {
-    const result = {
-      url: template.url,
-      description: template.description,
-      encoderID: template.encoder.id,
-    };
-    if (template.icon) {
-      result.iconClass = template.icon.class;
-    }
-    return result;
-  });
+  const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
 
-  $scope.savedWorkspace.wsState = JSON.stringify({
-    indexPattern: $scope.selectedIndex.attributes.title,
-    selectedFields: $scope.selectedFields.map(function(field) {
-      return {
-        name: field.name,
-        lastValidHopSize: field.lastValidHopSize,
-        color: field.color,
-        iconClass: field.icon.class,
-        hopSize: field.hopSize,
-      };
-    }),
+  const persistedWorkspaceState: PersistedWorkspaceState = {
+    indexPattern: selectedIndex.attributes.title,
+    selectedFields: selectedFields.map(serializeField),
     blacklist,
     vertices,
     links,
     urlTemplates: mappedUrlTemplates,
     exploreControls: advancedSettings,
-  });
-  $scope.savedWorkspace.numVertices = vertices.length;
-  $scope.savedWorkspace.numLinks = links.length;
+  };
+
+  return {
+    ...currentSavedWorkspace,
+    wsState: JSON.stringify(persistedWorkspaceState),
+    numVertices: vertices.length,
+    numLinks: links.length,
+  };
 }
