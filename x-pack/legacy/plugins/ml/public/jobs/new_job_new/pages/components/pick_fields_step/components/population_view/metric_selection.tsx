@@ -48,6 +48,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
@@ -112,6 +113,12 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       setEnd(jobCreator.end);
       loadCharts();
     }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
+      loadCharts();
+    }
+
     setSplitField(jobCreator.splitField);
 
     // update by fields and their by fields
