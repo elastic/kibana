@@ -88,7 +88,7 @@ export function ActionBar({
             iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
             isLoading={isLoading}
             onClick={onLoadMoreClick}
-            size="s"
+            flush="right"
           >
             <FormattedMessage id="kbn.context.loadMoreDescription" defaultMessage="Load" />
           </EuiButtonEmpty>
@@ -122,12 +122,12 @@ export function ActionBar({
             {type === 'successor' ? (
               <FormattedMessage
                 id="kbn.context.olderDocumentsDescription"
-                defaultMessage="Older documents"
+                defaultMessage="older documents"
               />
             ) : (
               <FormattedMessage
                 id="kbn.context.newerDocumentsDescription"
-                defaultMessage="Newer documents"
+                defaultMessage="newer documents"
               />
             )}
           </EuiFormRow>
