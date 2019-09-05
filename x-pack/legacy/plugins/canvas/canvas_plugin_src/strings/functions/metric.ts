@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { metric } from '../../functions/common/metric';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
+import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {
