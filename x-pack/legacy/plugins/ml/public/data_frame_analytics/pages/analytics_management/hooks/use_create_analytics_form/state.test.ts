@@ -21,5 +21,13 @@ describe('useCreateAnalyticsForm', () => {
     expect(idx(jobConfig, _ => _.source.index)).toBe('the-source-index');
     expect(idx(jobConfig, _ => _.analyzed_fields.excludes)).toStrictEqual([]);
     expect(typeof idx(jobConfig, _ => _.analyzed_fields.includes)).toBe('undefined');
+
+    // test the conversion of comma-separated Kibana index patterns to ES array based index patterns
+    state.form.sourceIndex = 'the-source-index-1,the-source-index-2';
+    const jobConfigSourceIndexArray = getJobConfigFromFormState(state.form);
+    expect(idx(jobConfigSourceIndexArray, _ => _.source.index)).toStrictEqual([
+      'the-source-index-1',
+      'the-source-index-2',
+    ]);
   });
 });

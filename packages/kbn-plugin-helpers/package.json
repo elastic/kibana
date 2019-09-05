@@ -16,7 +16,7 @@
     "@babel/core": "^7.5.5",
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
-    "del": "^4.0.0",
+    "del": "^4.1.1",
     "execa": "^1.0.0",
     "globby": "^8.0.1",
     "gulp-babel": "^8.0.0",

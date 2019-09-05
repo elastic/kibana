@@ -20,7 +20,7 @@ export const RedirectToNetworkPage = ({
   },
   location: { search },
 }: NetworkComponentProps) => (
-  <RedirectWrapper to={detailName ? `/network/ip/${detailName}${search}` : `/network/${search}`} />
+  <RedirectWrapper to={detailName ? `/network/ip/${detailName}${search}` : `/network${search}`} />
 );
 
 export const getNetworkUrl = () => '#/link-to/network';

@@ -351,6 +351,38 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               "title": "logstash-*",
                             }
                           }
+                          navTabs={
+                            Object {
+                              "hosts": Object {
+                                "disabled": false,
+                                "href": "#/link-to/hosts",
+                                "id": "hosts",
+                                "name": "Hosts",
+                                "urlKey": "host",
+                              },
+                              "network": Object {
+                                "disabled": false,
+                                "href": "#/link-to/network",
+                                "id": "network",
+                                "name": "Network",
+                                "urlKey": "network",
+                              },
+                              "overview": Object {
+                                "disabled": false,
+                                "href": "#/link-to/overview",
+                                "id": "overview",
+                                "name": "Overview",
+                                "urlKey": "overview",
+                              },
+                              "timelines": Object {
+                                "disabled": false,
+                                "href": "#/link-to/timelines",
+                                "id": "timelines",
+                                "name": "Timelines",
+                                "urlKey": "timeline",
+                              },
+                            }
+                          }
                         >
                           <Connect(UrlStateContainer)
                             indexPattern={
@@ -364,6 +396,38 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                   },
                                 ],
                                 "title": "logstash-*",
+                              }
+                            }
+                            navTabs={
+                              Object {
+                                "hosts": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/hosts",
+                                  "id": "hosts",
+                                  "name": "Hosts",
+                                  "urlKey": "host",
+                                },
+                                "network": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/network",
+                                  "id": "network",
+                                  "name": "Network",
+                                  "urlKey": "network",
+                                },
+                                "overview": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/overview",
+                                  "id": "overview",
+                                  "name": "Overview",
+                                  "urlKey": "overview",
+                                },
+                                "timelines": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/timelines",
+                                  "id": "timelines",
+                                  "name": "Timelines",
+                                  "urlKey": "timeline",
+                                },
                               }
                             }
                             pageName="network"
@@ -385,6 +449,38 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                     },
                                   ],
                                   "title": "logstash-*",
+                                }
+                              }
+                              navTabs={
+                                Object {
+                                  "hosts": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/hosts",
+                                    "id": "hosts",
+                                    "name": "Hosts",
+                                    "urlKey": "host",
+                                  },
+                                  "network": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/network",
+                                    "id": "network",
+                                    "name": "Network",
+                                    "urlKey": "network",
+                                  },
+                                  "overview": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/overview",
+                                    "id": "overview",
+                                    "name": "Overview",
+                                    "urlKey": "overview",
+                                  },
+                                  "timelines": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/timelines",
+                                    "id": "timelines",
+                                    "name": "Timelines",
+                                    "urlKey": "timeline",
+                                  },
                                 }
                               }
                               pageName="network"

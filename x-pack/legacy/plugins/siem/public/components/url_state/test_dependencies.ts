@@ -10,7 +10,7 @@ import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
 import { CONSTANTS } from './constants';
 import { InputsModelId } from '../../store/inputs/constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
 import { HostsTableType } from '../../store/hosts/model';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
@@ -51,6 +51,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
   tabName: HostsTableType.authentications,
   search: '',
   pathName: '/network',
+  navTabs,
   indexPattern: {
     fields: [
       {

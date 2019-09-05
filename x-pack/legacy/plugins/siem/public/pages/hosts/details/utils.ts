@@ -17,7 +17,7 @@ import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redi
 
 import * as i18n from '../translations';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../../lib/keury';
-import { RouteSpyState } from '../../../utils/route/spy_routes';
+import { RouteSpyState } from '../../../utils/route/types';
 
 export const type = hostsModel.HostsType.details;
 

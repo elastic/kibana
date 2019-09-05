@@ -59,6 +59,7 @@ export const useUrlStateHooks = ({
   dispatch,
   indexPattern,
   history,
+  navTabs,
   pageName,
   pathName,
   removeGlobalLinkTo,
@@ -279,7 +280,7 @@ export const useUrlStateHooks = ({
   });
 
   useEffect(() => {
-    document.title = `${getTitle(pageName, detailName)} - Kibana`;
+    document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
   }, [pageName]);
 
   return null;

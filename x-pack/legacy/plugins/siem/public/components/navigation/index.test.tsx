@@ -13,7 +13,7 @@ import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
 import { TabNavigationProps } from './type';
 import { HostsTableType } from '../../store/hosts/model';
-import { RouteSpyState } from '../../utils/route/spy_routes';
+import { RouteSpyState } from '../../utils/route/types';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),

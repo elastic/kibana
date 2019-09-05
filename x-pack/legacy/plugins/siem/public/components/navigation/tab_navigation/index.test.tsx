@@ -13,7 +13,7 @@ import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
 import { HostsTableType } from '../../../store/hosts/model';
 import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';
 import { CONSTANTS } from '../../url_state/constants';
-import { RouteSpyState } from '../../../utils/route/spy_routes';
+import { RouteSpyState } from '../../../utils/route/types';
 
 describe('Tab Navigation', () => {
   const pageName = SiemPageName.hosts;

@@ -10,11 +10,12 @@ import { getOr } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { getOverviewUrl } from '../../link_to';
 import { SiemPageName } from '../../../pages/home/home_navigations';
+import { RouteSpyState } from '../../../utils/route/types';
+import { getOverviewUrl } from '../../link_to';
+
 import { TabNavigationProps, SearchNavTab } from '../type';
 import { getSearch } from '../helpers';
-import { RouteSpyState } from '../../../utils/route/spy_routes';
 
 export const setBreadcrumbs = (object: RouteSpyState & TabNavigationProps) => {
   const breadcrumbs = getBreadcrumbsForRoute(object);

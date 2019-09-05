@@ -19,8 +19,8 @@ import { defaultProps, getMockPropsObj, mockHistory, testCases } from './test_de
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { CONSTANTS } from './constants';
-import { RouteSpyState } from '../../utils/route/spy_routes';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { RouteSpyState } from '../../utils/route/types';
+import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -44,7 +44,7 @@ const mockRouteSpy: RouteSpyState = {
   search: '',
   pathName: '/network',
 };
-jest.mock('../../utils/route/spy_routes', () => ({
+jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
@@ -64,7 +64,7 @@ describe('UrlStateContainer', () => {
       <MockedProvider>
         <TestProviders store={store}>
           <Router history={mockHistory}>
-            <UseUrlState indexPattern={indexPattern} />
+            <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           </Router>
         </TestProviders>
       </MockedProvider>

@@ -84,7 +84,7 @@ export const HomePage = pure(() => (
           <WithSource sourceId="default">
             {({ browserFields, indexPattern }) => (
               <DragDropContextWrapper browserFields={browserFields}>
-                <UseUrlState indexPattern={indexPattern} />
+                <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
                 <AutoSaveWarningMsg />
                 <Flyout
                   flyoutHeight={calculateFlyoutHeight({
@@ -140,7 +140,7 @@ export const HomePage = pure(() => (
                     </EuiFlexGroup>
                   </NavGlobal>
                   <Switch>
-                    <Redirect from="/" exact={true} to="/:pageName(overview)" />
+                    <Redirect from="/" exact={true} to="/overview" />
                     <Route path="/:pageName(overview)" render={() => <Overview />} />
                     <Route
                       path="/:pageName(hosts)"

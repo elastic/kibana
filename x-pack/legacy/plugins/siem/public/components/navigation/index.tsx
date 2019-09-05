@@ -9,6 +9,10 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 
 import { isEqual } from 'lodash/fp';
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { CONSTANTS } from '../url_state/constants';
+
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps, SiemNavigationComponentProps } from './type';
@@ -21,8 +25,6 @@ import {
   hostsModel,
   networkModel,
 } from '../../store';
-import { CONSTANTS } from '../url_state/constants';
-import { RouteSpyState, useRouteSpy } from '../../utils/route/spy_routes';
 
 export class SiemNavigationComponent extends React.Component<TabNavigationProps & RouteSpyState> {
   public shouldComponentUpdate(nextProps: Readonly<TabNavigationProps & RouteSpyState>): boolean {
