@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
+import * as t from "io-ts";
 
 export const RuntimeDatasourceInput = t.intersection([
   t.interface(
     {
-      data_source_id: t.string,
+      data_source_id: t.string
     },
-    'DatasourceInput'
+    "DatasourceInput"
   ),
   t.partial({
-    meta: t.string,
+    meta: t.string
   }),
-  t.UnknownRecord,
+  t.UnknownRecord
 ]);
 
 const RuntimeDatasource = t.interface(
@@ -26,9 +26,9 @@ const RuntimeDatasource = t.interface(
     ref: t.union([t.undefined, t.string]),
     output: t.string,
     queue: t.union([t.undefined, t.string]),
-    inputs: t.array(t.string),
+    inputs: t.array(t.string)
   },
-  'Datasource'
+  "Datasource"
 );
 
 const NewRuntimeDatasource = t.interface(
@@ -37,9 +37,9 @@ const NewRuntimeDatasource = t.interface(
     ref: t.union([t.undefined, t.string]),
     output: t.string,
     queue: t.union([t.undefined, t.object]),
-    inputs: t.array(t.object),
+    inputs: t.array(t.object)
   },
-  'NewDatasource'
+  "NewDatasource"
 );
 
 export const NewRuntimePolicyFile = t.interface(
@@ -52,16 +52,16 @@ export const NewRuntimePolicyFile = t.interface(
     status: t.keyof({
       active: null,
       locked: null,
-      inactive: null,
+      inactive: null
     }),
     agent_version: t.string,
     data_sources: t.array(RuntimeDatasource),
     created_on: t.string,
     created_by: t.union([t.undefined, t.string]),
     updated_on: t.string,
-    updated_by: t.union([t.undefined, t.string]),
+    updated_by: t.union([t.undefined, t.string])
   },
-  'PolicyFile'
+  "PolicyFile"
 );
 
 export const NewRuntimeBackupPolicyFile = t.interface(
@@ -70,23 +70,26 @@ export const NewRuntimeBackupPolicyFile = t.interface(
     description: t.string,
     monitoring_enabled: t.boolean,
     agent_version: t.string,
-    flat_data_sources: t.string,
+    flat_data_sources: t.string
   },
-  'BackupPolicyFile'
+  "BackupPolicyFile"
 );
 
 const ExistingDocument = t.interface({
   id: t.string,
   updated_on: t.string,
-  updated_by: t.union([t.undefined, t.string]),
+  updated_by: t.union([t.undefined, t.string])
 });
 
 export const RuntimeBackupPolicyFile = t.intersection([
   NewRuntimeBackupPolicyFile,
-  ExistingDocument,
+  ExistingDocument
 ]);
 
-export const RuntimePolicyFile = t.intersection([NewRuntimePolicyFile, ExistingDocument]);
+export const RuntimePolicyFile = t.intersection([
+  NewRuntimePolicyFile,
+  ExistingDocument
+]);
 export const FullRuntimePolicyFile = t.intersection([
   RuntimePolicyFile,
   t.type({
@@ -94,11 +97,11 @@ export const FullRuntimePolicyFile = t.intersection([
       t.intersection([
         RuntimeDatasource,
         t.type({
-          inputs: t.array(RuntimeDatasourceInput),
-        }),
+          inputs: t.array(RuntimeDatasourceInput)
+        })
       ])
-    ),
-  }),
+    )
+  })
 ]);
 
 export type NewBackupPolicyFile = t.TypeOf<typeof NewRuntimeBackupPolicyFile>;

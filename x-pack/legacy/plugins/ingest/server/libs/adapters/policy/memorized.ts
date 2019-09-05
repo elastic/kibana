@@ -17,7 +17,7 @@ export class MemorizedPolicyAdapter {
   ): Promise<{ id: string; shared_id: string; version: number }> {
     const { shared_id, ...policy } = newPolicy;
     return await memorize(
-      `create - ${JSON.stringify({ ...policy, shared_id: 'string' })}`,
+      `create - ${JSON.stringify({ name: policy.name, description: policy.description })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -82,7 +82,7 @@ export class MemorizedPolicyAdapter {
 
   public async update(id: string, policy: PolicyFile): Promise<{ id: string; version: number }> {
     return await memorize(
-      `update - ${JSON.stringify({ policy })}`,
+      `update - ${JSON.stringify({ name: policy.name, description: policy.description })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
