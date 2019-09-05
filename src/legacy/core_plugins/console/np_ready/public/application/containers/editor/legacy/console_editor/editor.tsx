@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import $ from 'jquery';
 
+import { EuiIcon } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -106,7 +107,7 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
               data-test-subj="send-request-button"
               className="conApp__editorActionButton conApp__editorActionButton--success"
             >
-              <i className="fa fa-play" />
+              <EuiIcon type="play" />
             </button>
           </EuiToolTip>
           <ConsoleMenu

@@ -57,13 +57,13 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
       return acc.concat([
         <Resizer
           key={idx}
-          onMouseDown={eve => {
-            eve.preventDefault();
+          onMouseDown={event => {
+            event.preventDefault();
             setState({
               ...state,
               currentPanel: idx,
               isDragging: true,
-              currentResizerPos: eve.clientX,
+              currentResizerPos: event.clientX,
             });
           }}
         />,
@@ -78,9 +78,9 @@ export function PanelsContainer({ children, onPanelWidthChange }: Props) {
       <div
         ref={containerRef}
         style={{ display: 'flex', height: '100%', width: '100%' }}
-        onMouseMove={eve => {
+        onMouseMove={event => {
           if (state.isDragging) {
-            const { clientX: x } = eve;
+            const { clientX: x } = event;
             const { current: registry } = registryRef;
             const [left, right] = registry.getResizerNeighbours(state.currentPanel);
             const delta = x - state.currentResizerPos;

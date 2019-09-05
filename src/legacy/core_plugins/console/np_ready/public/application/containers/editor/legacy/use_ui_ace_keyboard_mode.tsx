@@ -18,7 +18,7 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { keyCodes } from '@elastic/eui';
+import { keyCodes, EuiText } from '@elastic/eui';
 
 const Overlay = ({
   onMount,
@@ -38,10 +38,8 @@ const Overlay = ({
     tabIndex={0}
     role="application"
   >
-    <p className="kuiText kuiVerticalRhythmSmall">Press Enter to start editing.</p>
-    <p className="kuiText kuiVerticalRhythmSmall">
-      When you&rsquo;re done, press Escape to stop editing.
-    </p>
+    <EuiText size="s">Press Enter to start editing.</EuiText>
+    <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
   </div>
 );
 

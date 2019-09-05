@@ -21,7 +21,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
-import { keyCodes, EuiSpacer } from '@elastic/eui';
+import {
+  keyCodes,
+  EuiSpacer,
+  EuiIcon,
+  EuiTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiButton,
+} from '@elastic/eui';
 
 import { useAppContext } from '../../../../context';
 import { HistoryViewer } from './history_viewer';
@@ -96,9 +105,10 @@ export function ConsoleHistory({ close, reqs }: Props) {
   return (
     <>
       <div className="conHistory">
-        <h2 className="kuiLocalDropdownTitle">
-          {i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}
-        </h2>
+        <EuiTitle size="s">
+          <h2>{i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <div className="conHistory__body">
           <ul
             ref={listRef}
@@ -163,7 +173,7 @@ export function ConsoleHistory({ close, reqs }: Props) {
                 >
                   {reqDescription}
                   <span className="conHistory__reqIcon">
-                    <i className="fa fa-chevron-right" />
+                    <EuiIcon type="arrowRight" />
                   </span>
                 </li>
               );
@@ -175,31 +185,37 @@ export function ConsoleHistory({ close, reqs }: Props) {
           <HistoryViewer settings={settings} req={viewingReq} ResizeChecker={ResizeChecker} />
         </div>
 
-        <div className="conHistory__footer">
-          <button className="kuiButton kuiButton--danger" onClick={() => clear()}>
-            {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
-              defaultMessage: 'Clear',
-            })}
-          </button>
+        <EuiSpacer size="s" />
 
-          <div className="conHistory__footerButtonsRight">
-            <button className="kuiButton kuiButton--hollow" onClick={() => close()}>
-              {i18n.translate('console.historyPage.closehistoryButtonLabel', {
-                defaultMessage: 'Close',
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="danger" onClick={() => clear()}>
+              {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
+                defaultMessage: 'Clear',
               })}
-            </button>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
 
-            <button
-              className="kuiButton kuiButton--primary"
-              disabled={!selectedReq}
-              onClick={() => restore()}
-            >
-              {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
-                defaultMessage: 'Apply',
-              })}
-            </button>
-          </div>
-        </div>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty color="primary" onClick={() => close()}>
+                  {i18n.translate('console.historyPage.closehistoryButtonLabel', {
+                    defaultMessage: 'Close',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" disabled={!selectedReq} onClick={() => restore()}>
+                  {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
+                    defaultMessage: 'Apply',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       <EuiSpacer size="s" />
     </>
