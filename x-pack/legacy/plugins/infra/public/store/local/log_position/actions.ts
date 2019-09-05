@@ -12,10 +12,11 @@ const actionCreator = actionCreatorFactory('x-pack/infra/local/log_position');
 
 export const jumpToTargetPosition = actionCreator<TimeKey>('JUMP_TO_TARGET_POSITION');
 
-export const jumpToTargetPositionTime = (time: number) =>
+export const jumpToTargetPositionTime = (time: number, fromAutoReload: boolean = false) =>
   jumpToTargetPosition({
     tiebreaker: 0,
     time,
+    fromAutoReload,
   });
 
 export interface ReportVisiblePositionsPayload {

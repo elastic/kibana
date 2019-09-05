@@ -113,7 +113,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
-
     return (
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && !hasItems ? (
