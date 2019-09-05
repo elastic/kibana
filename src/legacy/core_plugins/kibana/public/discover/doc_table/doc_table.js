@@ -29,8 +29,7 @@ import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
-uiModules
-  .get('app/discover')
+uiModules.get('app/discover')
   .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',
@@ -53,13 +52,13 @@ uiModules
         inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
-        $scope.$watch('minimumVisibleRows', minimumVisibleRows => {
+        $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
           $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
         });
 
         $scope.persist = {
           sorting: $scope.sorting,
-          columns: $scope.columns,
+          columns: $scope.columns
         };
 
         const limitTo = $filter('limitTo');
@@ -68,9 +67,7 @@ uiModules
           $scope.pageOfItems = limitTo($scope.hits, $scope.pager.pageSize, $scope.pager.startIndex);
         };
 
-        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
-          config.get('discover:sampleSize')
-        );
+        $scope.limitedResultsWarning = getLimitedSearchResultsMessage(config.get('discover:sampleSize'));
 
         $scope.addRows = function () {
           $scope.limit += 50;
@@ -119,8 +116,9 @@ uiModules
           calculateItemsOnPage();
         };
 
-        $scope.shouldShowLimitedResultsWarning = () =>
-          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount;
-      },
+        $scope.shouldShowLimitedResultsWarning = () => (
+          !$scope.pager.hasNextPage && $scope.pager.totalItems < $scope.totalHitCount
+        );
+      }
     };
   });

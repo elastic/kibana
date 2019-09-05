@@ -39,6 +39,7 @@ import { PersistedState } from '../../../persisted_state';
 import { DataAdapter, RequestAdapter } from '../../../inspector/adapters';
 
 describe('visualize loader', () => {
+
   let DataLoader;
   let searchSource;
   let vis;
@@ -72,45 +73,46 @@ describe('visualize loader', () => {
   }
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
-  beforeEach(
-    ngMock.inject((_$rootScope_, savedVisualizations, interpreterConfig, Private) => {
-      $rootScope = _$rootScope_;
-      searchSource = Private(FixturesStubbedSearchSourceProvider);
-      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, interpreterConfig, Private) => {
+    $rootScope = _$rootScope_;
+    searchSource = Private(FixturesStubbedSearchSourceProvider);
+    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-      DataLoader = interpreterConfig.enableInVisualize ? PipelineDataLoader : VisualizeDataLoader;
-      // Create a new Vis object
-      const Vis = Private(VisProvider);
-      vis = new Vis(indexPattern, {
-        type: 'pie',
-        title: 'testVis',
-        params: {},
-        aggs: [
-          { type: 'count', schema: 'metric' },
-          {
-            type: 'range',
-            schema: 'bucket',
-            params: {
-              field: 'bytes',
-              ranges: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
-            },
-          },
-        ],
-      });
-      vis.type.requestHandler = 'courier';
-      vis.type.responseHandler = 'none';
-      vis.type.requiresSearch = false;
+    DataLoader = interpreterConfig.enableInVisualize ? PipelineDataLoader : VisualizeDataLoader;
+    // Create a new Vis object
+    const Vis = Private(VisProvider);
+    vis = new Vis(indexPattern, {
+      type: 'pie',
+      title: 'testVis',
+      params: {},
+      aggs: [
+        { type: 'count', schema: 'metric' },
+        {
+          type: 'range',
+          schema: 'bucket',
+          params: {
+            field: 'bytes',
+            ranges: [
+              { from: 0, to: 1000 },
+              { from: 1000, to: 2000 }
+            ]
+          }
+        }
+      ]
+    });
+    vis.type.requestHandler = 'courier';
+    vis.type.responseHandler = 'none';
+    vis.type.requiresSearch = false;
 
-      // Setup savedObject
-      mockedSavedObject = createSavedObject();
+    // Setup savedObject
+    mockedSavedObject = createSavedObject();
 
-      sandbox = sinon.sandbox.create();
-      // Mock savedVisualizations.get to return 'mockedSavedObject' when id is 'exists'
-      sandbox
-        .stub(savedVisualizations, 'get')
-        .callsFake(id => (id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()));
-    })
-  );
+    sandbox = sinon.sandbox.create();
+    // Mock savedVisualizations.get to return 'mockedSavedObject' when id is 'exists'
+    sandbox.stub(savedVisualizations, 'get').callsFake((id) =>
+      id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()
+    );
+  }));
   setupAndTeardownInjectorStub();
   beforeEach(async () => {
     loader = await getVisualizeLoader();
@@ -123,6 +125,7 @@ describe('visualize loader', () => {
   });
 
   describe('getVisualizeLoader', () => {
+
     it('should return a promise', () => {
       expect(getVisualizeLoader().then).to.be.a('function');
     });
@@ -131,16 +134,21 @@ describe('visualize loader', () => {
       const visualizeLoader = await getVisualizeLoader();
       expect(visualizeLoader).to.be.an('object');
     });
+
   });
 
   describe('service', () => {
+
     describe('getVisualizationList', () => {
+
       it('should be a function', async () => {
         expect(loader.getVisualizationList).to.be.a('function');
       });
+
     });
 
     describe('embedVisualizationWithSavedObject', () => {
+
       it('should be a function', () => {
         expect(loader.embedVisualizationWithSavedObject).to.be.a('function');
       });
@@ -169,7 +177,7 @@ describe('visualize loader', () => {
       it('should append content to container when using append parameter', () => {
         const container = angular.element('<div><div id="prevContent"></div></div>');
         loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {
-          append: true,
+          append: true
         });
         expect(container.children().length).to.be(2);
         expect(container.find('#prevContent').length).to.be(1);
@@ -184,9 +192,9 @@ describe('visualize loader', () => {
       it('should apply data attributes from dataAttrs parameter', () => {
         const vis = embedWithParams({
           dataAttrs: {
-            foo: '',
+            'foo': '',
             'with-dash': 'value',
-          },
+          }
         });
         expect(vis.attr('data-foo')).to.be('');
         expect(vis.attr('data-with-dash')).to.be('value');
@@ -194,6 +202,7 @@ describe('visualize loader', () => {
     });
 
     describe('embedVisualizationWithId', () => {
+
       it('should be a function', async () => {
         expect(loader.embedVisualizationWithId).to.be.a('function');
       });
@@ -202,8 +211,7 @@ describe('visualize loader', () => {
         const resolveSpy = sinon.spy();
         const rejectSpy = sinon.spy();
         const container = newContainer();
-        return loader
-          .embedVisualizationWithId(container[0], 'not-existing', {})
+        return loader.embedVisualizationWithId(container[0], 'not-existing', {})
           .then(resolveSpy, rejectSpy)
           .then(() => {
             expect(resolveSpy.called).to.be(false);
@@ -216,6 +224,7 @@ describe('visualize loader', () => {
         await loader.embedVisualizationWithId(container[0], 'exists', {});
         expect(container.find('[data-test-subj="visualizationLoader"]').length).to.be(1);
       });
+
     });
 
     describe('EmbeddedVisualizeHandler', () => {
@@ -225,32 +234,18 @@ describe('visualize loader', () => {
       });
 
       it('should be returned from embedVisualizationWithSavedObject', async () => {
-        const handler = loader.embedVisualizationWithSavedObject(
-          newContainer()[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
         expect(handler instanceof EmbeddedVisualizeHandler).to.be(true);
       });
 
       it('should give access to the visualize element', () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {}
-        );
-        expect(handler.getElement()).to.be(
-          container.find('[data-test-subj="visualizationLoader"]')[0]
-        );
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
+        expect(handler.getElement()).to.be(container.find('[data-test-subj="visualizationLoader"]')[0]);
       });
 
       it('should allow opening the inspector of the visualization and return its session', () => {
-        const handler = loader.embedVisualizationWithSavedObject(
-          newContainer()[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
         sandbox.spy(Inspector, 'open');
         const inspectorSession = handler.openInspector();
         expect(Inspector.open.calledOnce).to.be(true);
@@ -259,13 +254,10 @@ describe('visualize loader', () => {
       });
 
       describe('inspector', () => {
+
         describe('hasInspector()', () => {
           it('should forward to inspectors hasInspector', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             sinon.spy(Inspector, 'isAvailable');
             handler.hasInspector();
             expect(Inspector.isAvailable.calledOnce).to.be(true);
@@ -275,11 +267,7 @@ describe('visualize loader', () => {
           });
 
           it('should return hasInspectors result', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             const stub = sinon.stub(Inspector, 'isAvailable');
             stub.returns(true);
             expect(handler.hasInspector()).to.be(true);
@@ -293,16 +281,13 @@ describe('visualize loader', () => {
         });
 
         describe('openInspector()', () => {
+
           beforeEach(() => {
             sinon.stub(Inspector, 'open');
           });
 
           it('should call openInspector with all attached inspectors', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             handler.openInspector();
             expect(Inspector.open.calledOnce).to.be(true);
             const adapters = Inspector.open.lastCall.args[0];
@@ -310,11 +295,7 @@ describe('visualize loader', () => {
           });
 
           it('should pass the vis title to the openInspector call', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             handler.openInspector();
             expect(Inspector.open.calledOnce).to.be(true);
             const params = Inspector.open.lastCall.args[1];
@@ -327,77 +308,50 @@ describe('visualize loader', () => {
         });
 
         describe('inspectorAdapters', () => {
+
           it('should register none for none requestHandler', () => {
             const savedObj = createSavedObject();
             savedObj.vis.type.requestHandler = 'none';
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              savedObj,
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj, {});
             expect(handler.inspectorAdapters).to.eql({});
           });
 
           it('should attach data and request handler for courier', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             expect(handler.inspectorAdapters.data).to.be.a(DataAdapter);
             expect(handler.inspectorAdapters.requests).to.be.a(RequestAdapter);
           });
 
           it('should allow enabling data adapter manually', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             expect(handler.inspectorAdapters.data).to.be.a(DataAdapter);
           });
 
           it('should allow enabling requests adapter manually', () => {
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              createSavedObject(),
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
             expect(handler.inspectorAdapters.requests).to.be.a(RequestAdapter);
           });
 
           it('should allow adding custom inspector adapters via the custom key', () => {
-            const Foodapter = class {};
-            const Bardapter = class {};
+            const Foodapter = class { };
+            const Bardapter = class { };
             const savedObj = createSavedObject();
             savedObj.vis.type.inspectorAdapters = {
-              custom: { foo: Foodapter, bar: Bardapter },
+              custom: { foo: Foodapter, bar: Bardapter }
             };
-            const handler = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              savedObj,
-              {}
-            );
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj, {});
             expect(handler.inspectorAdapters.foo).to.be.a(Foodapter);
             expect(handler.inspectorAdapters.bar).to.be.a(Bardapter);
           });
 
           it('should not share adapter instances between vis instances', () => {
-            const Foodapter = class {};
+            const Foodapter = class { };
             const savedObj1 = createSavedObject();
             const savedObj2 = createSavedObject();
             savedObj1.vis.type.inspectorAdapters = { custom: { foo: Foodapter } };
             savedObj2.vis.type.inspectorAdapters = { custom: { foo: Foodapter } };
-            const handler1 = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              savedObj1,
-              {}
-            );
-            const handler2 = loader.embedVisualizationWithSavedObject(
-              newContainer()[0],
-              savedObj2,
-              {}
-            );
+            const handler1 = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj1, {});
+            const handler2 = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj2, {});
             expect(handler1.inspectorAdapters.foo).to.be.a(Foodapter);
             expect(handler2.inspectorAdapters.foo).to.be.a(Foodapter);
             expect(handler1.inspectorAdapters.foo).not.to.be(handler2.inspectorAdapters.foo);
@@ -406,15 +360,12 @@ describe('visualize loader', () => {
             expect(handler1.inspectorAdapters.data).not.to.be(handler2.inspectorAdapters.data);
           });
         });
+
       });
 
       it('should have whenFirstRenderComplete returns a promise resolving on first renderComplete event', async () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
         const spy = sinon.spy();
         handler.whenFirstRenderComplete().then(spy);
         expect(spy.notCalled).to.be(true);
@@ -425,11 +376,7 @@ describe('visualize loader', () => {
 
       it('should add listeners via addRenderCompleteListener that triggers on renderComplete events', async () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
@@ -440,11 +387,7 @@ describe('visualize loader', () => {
 
       it('should call render complete listeners once per renderComplete event', async () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
@@ -456,11 +399,7 @@ describe('visualize loader', () => {
 
       it('should successfully remove listeners from render complete', async () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {}
-        );
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
         const spy = sinon.spy();
         handler.addRenderCompleteListener(spy);
         expect(spy.notCalled).to.be(true);
@@ -472,51 +411,38 @@ describe('visualize loader', () => {
         expect(spy.notCalled).to.be(true);
       });
 
+
       it('should allow updating and deleting data attributes', () => {
         const container = newContainer();
-        const handler = loader.embedVisualizationWithSavedObject(
-          container[0],
-          createSavedObject(),
-          {
-            dataAttrs: {
-              foo: 42,
-            },
+        const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {
+          dataAttrs: {
+            foo: 42
           }
-        );
-        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-foo')).to.be(
-          '42'
-        );
+        });
+        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-foo')).to.be('42');
         handler.update({
           dataAttrs: {
             foo: null,
             added: 'value',
-          },
+          }
         });
-        expect(
-          container.find('[data-test-subj="visualizationLoader"]')[0].hasAttribute('data-foo')
-        ).to.be(false);
-        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be(
-          'value'
-        );
+        expect(container.find('[data-test-subj="visualizationLoader"]')[0].hasAttribute('data-foo')).to.be(false);
+        expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
       it('should allow updating the time range of the visualization', async () => {
         const spy = sandbox.spy(DataLoader.prototype, 'fetch');
 
-        const handler = loader.embedVisualizationWithSavedObject(
-          newContainer()[0],
-          createSavedObject(),
-          {
-            timeRange: { from: 'now-7d', to: 'now' },
-          }
-        );
+        const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
+          timeRange: { from: 'now-7d', to: 'now' }
+        });
 
         // Wait for the initial fetch and render to happen
         await timeout(150);
         spy.resetHistory();
 
         handler.update({
-          timeRange: { from: 'now-10d/d', to: 'now' },
+          timeRange: { from: 'now-10d/d', to: 'now' }
         });
 
         // Wait for fetch debounce to happen (as soon as we use lodash 4+ we could use fake timers here for the debounce)
@@ -548,5 +474,6 @@ describe('visualize loader', () => {
         sinon.assert.calledWith(spy, sinon.match({ forceFetch: false }));
       });
     });
+
   });
 });
