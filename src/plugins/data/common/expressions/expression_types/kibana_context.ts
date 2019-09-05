@@ -18,8 +18,8 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query } from '../../query/types';
-import { TimeRange } from '../../timefilter/types';
 
 const name = 'kibana_context';
 export type KIBANA_CONTEXT_NAME = 'kibana_context';

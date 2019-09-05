@@ -17,26 +17,5 @@
  * under the License.
  */
 
-// @ts-ignore
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-
-/**
- * Vis Filters Service
- *
- * @internal
- */
-export class FiltersService {
-  public setup() {
-    return {
-      VisFiltersProvider,
-      createFilter,
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type FiltersSetup = ReturnType<FiltersService['setup']>;
+export { setup as textContentTypeSetup } from './text_content_type';
+export { setup as htmlContentTypeSetup } from './html_content_type';

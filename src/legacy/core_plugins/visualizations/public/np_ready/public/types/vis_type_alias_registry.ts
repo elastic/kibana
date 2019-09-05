@@ -52,7 +52,12 @@ export interface VisTypeAlias {
 
 const registry: VisTypeAlias[] = [];
 
-export const visTypeAliasRegistry = {
+export interface VisTypeAliasRegistry {
+  get: () => VisTypeAlias[];
+  add: (newVisTypeAlias: VisTypeAlias) => void;
+}
+
+export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
   add: (newVisTypeAlias: VisTypeAlias) => {
     if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {

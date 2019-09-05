@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { fieldFormatsMixin } from './field_formats_mixin';
-export { FieldFormat } from './field_format';
+interface SetupDependecies {
+  VisFiltersProvider: any;
+  createFilter: any;
+}
+
+/**
+ * Vis Filters Service
+ *
+ * @internal
+ */
+export class FiltersService {
+  public setup({ VisFiltersProvider, createFilter }: SetupDependecies) {
+    return {
+      VisFiltersProvider,
+      createFilter,
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type FiltersSetup = ReturnType<FiltersService['setup']>;

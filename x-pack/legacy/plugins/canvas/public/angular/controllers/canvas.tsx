@@ -7,11 +7,22 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+import { Store } from 'redux';
 import chrome from 'ui/chrome';
-import { App } from '../../components/app';
+import { UICapabilities } from 'ui/capabilities';
 
-export function CanvasRootController(canvasStore, $scope, $element, uiCapabilities) {
+// @ts-ignore Untyped local
+import { App } from '../../components/app';
+import { AngularStrings } from '../../../i18n';
+
+const { CanvasRootController: strings } = AngularStrings;
+
+export function CanvasRootController(
+  canvasStore: Store,
+  $scope: any, // Untyped in Kibana
+  $element: any, // Untyped in Kibana
+  uiCapabilities: UICapabilities
+) {
   const domNode = $element[0];
 
   // set the read-only badge when appropriate
@@ -19,12 +30,8 @@ export function CanvasRootController(canvasStore, $scope, $element, uiCapabiliti
     uiCapabilities.canvas.save
       ? undefined
       : {
-          text: i18n.translate('xpack.canvas.badge.readOnly.text', {
-            defaultMessage: 'Read only',
-          }),
-          tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
-            defaultMessage: 'Unable to save Canvas workpads',
-          }),
+          text: strings.getReadOnlyBadgeText(),
+          tooltip: strings.getReadOnlyBadgeTooltip(),
           iconType: 'glasses',
         }
   );

@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../core/public/mocks';
+import { FieldFormat } from '../field_format';
+import { FieldFormatConvert } from '../types';
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+const ID = 'custom';
+
+export const createCustomFieldFormat = (convert: FieldFormatConvert) =>
+  class CustomFieldFormat extends FieldFormat {
+    static id = ID;
+
+    public get _convert() {
+      return convert;
+    }
+  };

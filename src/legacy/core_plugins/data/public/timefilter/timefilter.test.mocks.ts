@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
 
-import { getNodeShasums } from '../node_shasums';
-
-describe('src/dev/build/tasks/nodejs/node_shasums', () => {
-  it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums('8.9.4');
-    expect(shasums).to.have.property('node-v8.9.4.tar.gz');
-  });
-});
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
