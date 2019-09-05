@@ -16,8 +16,12 @@ import {
   RelativeTimeRange,
   UrlInputsModel,
 } from '../../store/inputs/model';
+import { useApolloClient } from '../../utils/apollo_context';
+import { queryTimelineById } from '../open_timeline/helpers';
+import { HostsType } from '../../store/hosts/model';
+import { NetworkType } from '../../store/network/model';
 
-import { CONSTANTS } from './constants';
+import { CONSTANTS, UrlStateType } from './constants';
 import {
   replaceQueryStringInLocation,
   getQueryStringFromLocation,
@@ -37,12 +41,7 @@ import {
   KeyUrlState,
   KqlQuery,
   ALL_URL_STATE_KEYS,
-  UrlStateType,
 } from './types';
-import { useApolloClient } from '../../utils/apollo_context';
-import { queryTimelineById } from '../open_timeline/helpers';
-import { HostsType } from '../../store/hosts/model';
-import { NetworkType } from '../../store/network/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef(value);

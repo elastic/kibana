@@ -14,8 +14,9 @@ import { SiemPageName } from '../../../pages/home/home_navigations';
 import { RouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
 
-import { TabNavigationProps, SearchNavTab } from '../type';
+import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
+import { SearchNavTab } from '../types';
 
 export const setBreadcrumbs = (object: RouteSpyState & TabNavigationProps) => {
   const breadcrumbs = getBreadcrumbsForRoute(object);

@@ -9,13 +9,14 @@ import { Location } from 'history';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
 import { KqlQuery, URL_STATE_KEYS, KeyUrlState } from '../url_state/types';
-
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
-import { SearchNavTab, TabNavigationProps } from './type';
+
+import { TabNavigationProps } from './tab_navigation/types';
+import { SearchNavTab } from './types';
 
 export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): string => {
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {

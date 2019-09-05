@@ -12,20 +12,10 @@ import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } fro
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 import { RouteSpyState } from '../../utils/route/types';
-
-import { CONSTANTS } from './constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
+import { NavTab } from '../navigation/types';
 
-export interface NavTab {
-  id: string;
-  name: string;
-  href: string;
-  disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
-}
-
-export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+import { CONSTANTS, UrlStateType } from './constants';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.kqlQuery,

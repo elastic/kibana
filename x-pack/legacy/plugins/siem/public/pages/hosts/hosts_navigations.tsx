@@ -23,7 +23,7 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
-import { NavTab } from '../../components/url_state/types';
+import { NavTab } from '../../components/navigation/types';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {

@@ -10,7 +10,7 @@ import { encodeIpv6 } from '../../../lib/helpers';
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../store/hosts/model';
 import { RouteSpyState } from '../../../utils/route/types';
-import { TabNavigationProps } from '../type';
+import { TabNavigationProps } from '../tab_navigation/types';
 
 jest.mock('ui/chrome', () => ({
   getBasePath: () => {

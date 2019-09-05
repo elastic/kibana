@@ -11,7 +11,7 @@ import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
-import { TabNavigationProps } from './type';
+import { TabNavigationProps } from './tab_navigation/types';
 import { HostsTableType } from '../../store/hosts/model';
 import { RouteSpyState } from '../../utils/route/types';
 

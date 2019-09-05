@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { TabNavigation } from './';
-import { TabNavigationProps } from '../type';
+import { TabNavigationProps } from './types';
 import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
 import { HostsTableType } from '../../../store/hosts/model';
 import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';

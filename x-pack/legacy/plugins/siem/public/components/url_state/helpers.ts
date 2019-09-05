@@ -9,8 +9,9 @@ import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
 
 import { SiemPageName } from '../../pages/home/home_navigations';
-import { CONSTANTS } from './constants';
-import { LocationTypes, UrlStateType, NavTab } from './types';
+import { NavTab } from '../navigation/types';
+import { CONSTANTS, UrlStateType } from './constants';
+import { LocationTypes } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {

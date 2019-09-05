@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UrlInputsModel } from '../../store/inputs/model';
-import { CONSTANTS } from '../url_state/constants';
-import { KqlQuery, UrlStateType, NavTab } from '../url_state/types';
-import { HostsTableType } from '../../store/hosts/model';
+import { UrlInputsModel } from '../../../store/inputs/model';
+import { CONSTANTS } from '../../url_state/constants';
+import { KqlQuery } from '../../url_state/types';
+import { HostsTableType } from '../../../store/hosts/model';
 
-export interface SiemNavigationComponentProps {
-  display?: 'default' | 'condensed';
-  navTabs: Record<string, NavTab>;
-  showBorder?: boolean;
-}
+import { SiemNavigationComponentProps } from '../types';
 
 export interface TabNavigationProps extends SiemNavigationComponentProps {
   pathName: string;
@@ -25,5 +21,3 @@ export interface TabNavigationProps extends SiemNavigationComponentProps {
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timelineId]: string;
 }
-
-export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };

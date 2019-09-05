@@ -12,10 +12,6 @@ import { connect } from 'react-redux';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { CONSTANTS } from '../url_state/constants';
-
-import { setBreadcrumbs } from './breadcrumbs';
-import { TabNavigation } from './tab_navigation';
-import { TabNavigationProps, SiemNavigationComponentProps } from './type';
 import {
   inputsSelectors,
   hostsSelectors,
@@ -25,6 +21,11 @@ import {
   hostsModel,
   networkModel,
 } from '../../store';
+
+import { setBreadcrumbs } from './breadcrumbs';
+import { TabNavigation } from './tab_navigation';
+import { TabNavigationProps } from './tab_navigation/types';
+import { SiemNavigationComponentProps } from './types';
 
 export class SiemNavigationComponent extends React.Component<TabNavigationProps & RouteSpyState> {
   public shouldComponentUpdate(nextProps: Readonly<TabNavigationProps & RouteSpyState>): boolean {
