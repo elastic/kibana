@@ -45,13 +45,22 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
       `!${baseDir}/src/legacy/core_plugins/**/public`
     ]);
+    const discoveredLegacyPluginEntries = await globby([
+      `${baseDir}/src/legacy/plugins/*/server/index.js`,
+      `!${baseDir}/src/legacy/plugins/**/public`
+    ]);
     const discoveredPluginEntries = await globby([
       `${baseDir}/src/plugins/*/server/index.js`,
       `!${baseDir}/src/plugins/**/public`
     ]);
 
     // Compose all the needed entries
-    const serverEntries = [ ...mainCodeEntries, ...discoveredLegacyCorePluginEntries, ...discoveredPluginEntries];
+    const serverEntries = [
+      ...mainCodeEntries,
+      ...discoveredLegacyCorePluginEntries,
+      ...discoveredLegacyPluginEntries,
+      ...discoveredPluginEntries
+    ];
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
