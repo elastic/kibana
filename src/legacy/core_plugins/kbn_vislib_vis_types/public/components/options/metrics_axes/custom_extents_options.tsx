@@ -18,9 +18,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ValueAxis } from '../../../types';
 import { NumberInputOption, SwitchOption } from '../../common';
@@ -83,15 +81,6 @@ function CustomExtentsOptions({
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h3>
-          <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsTitle"
-            defaultMessage="Custom extents"
-          />
-        </h3>
-      </EuiTitle>
-
       <SwitchOption
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBoundsLabel',

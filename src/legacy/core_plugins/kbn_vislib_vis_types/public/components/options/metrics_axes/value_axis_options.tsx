@@ -19,7 +19,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { BasicVislibParams, ValueAxis } from '../../../types';
 import { Positions } from '../../../utils/collections';
@@ -118,25 +118,6 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
   return (
     <>
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel', {
-          defaultMessage: 'Show',
-        })}
-        paramName="show"
-        value={axis.show}
-        setValue={setValueAxis}
-      />
-
-      <TextInputOption
-        dataTestSubj={`valueAxisTitle${index}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel', {
-          defaultMessage: 'Title',
-        })}
-        paramName="text"
-        value={axis.title.text}
-        setValue={setValueAxisTitle}
-      />
-
       <SelectOption
         id={`valueAxisPosition${index}`}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel', {
@@ -170,27 +151,57 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         setValue={setValueAxisScale}
       />
 
+      <EuiHorizontalRule margin="m" />
+
+      <SwitchOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel', {
+          defaultMessage: 'Show axes lines and labels',
+        })}
+        noStyle={true}
+        paramName="show"
+        value={axis.show}
+        setValue={setValueAxis}
+      />
+
+      {axis.show && (
+        <>
+          <EuiSpacer size="m" />
+          <TextInputOption
+            dataTestSubj={`valueAxisTitle${index}`}
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel', {
+              defaultMessage: 'Title',
+            })}
+            paramName="text"
+            value={axis.title.text}
+            setValue={setValueAxisTitle}
+          />
+
+          <LabelOptions axis={axis} axesName="valueAxes" index={index} {...props} />
+        </>
+      )}
+
+      <EuiHorizontalRule margin="m" />
+
       <EuiAccordion
         id={`yAxisOptionsAccordion${axis.id}`}
         className="visEditorSidebar__section visEditorSidebar__collapsible"
         initialIsOpen={false}
         buttonContentClassName="euiText euiText--small"
         buttonContent={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.advancedOptionsLabel',
+          'kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsLabel',
           {
-            defaultMessage: 'Advanced options',
+            defaultMessage: 'Custom extents',
           }
         )}
         aria-label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleAdvancedOptionsLabel',
+          'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleCustomExtendsAriaLabel',
           {
-            defaultMessage: 'Toggle advanced options',
+            defaultMessage: 'Toggle custom extents',
           }
         )}
       >
         <>
           <EuiSpacer size="m" />
-          <LabelOptions axis={axis} axesName="valueAxes" index={index} {...props} />
           <CustomExtentsOptions
             axis={axis}
             setValueAxisScale={setValueAxisScale}
