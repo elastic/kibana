@@ -144,7 +144,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             <>
               {autoformatUrl && (
                 <strong>
-                  {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip', {
+                  {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
                     defaultMessage: 'Possible Kibana URL pasted, ',
                   })}
                   <button className="gphSettings__helpTextButton" onClick={convertUrl}>
