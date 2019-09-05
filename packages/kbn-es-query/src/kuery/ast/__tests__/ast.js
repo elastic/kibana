@@ -198,6 +198,51 @@ describe('kuery AST API', function () {
       expect(actual).to.eql(expected);
     });
 
+    it('should support nested queries indicated by curly braces', () => {
+      const expected = nodeTypes.function.buildNode(
+        'nested',
+        nodeTypes.function.buildNode('is', 'response', '200')
+      );
+      const actual = ast.fromKueryExpression('{ response:200 }');
+      expect(actual).to.eql(expected);
+    });
+
+    it('should support nested subqueries and subqueries inside nested queries', () => {
+      const expected = nodeTypes.function.buildNode(
+        'and',
+        [
+          nodeTypes.function.buildNode('is', 'response', '200'),
+          nodeTypes.function.buildNode(
+            'nested',
+            nodeTypes.function.buildNode('or', [
+              nodeTypes.function.buildNode('is', 'extension', 'jpg'),
+              nodeTypes.function.buildNode('is', 'extension', 'png'),
+            ])
+          )]);
+      const actual = ast.fromKueryExpression('response:200 and { extension:jpg or extension:png }');
+      expect(actual).to.eql(expected);
+    });
+
+    it('should support nested sub-queries inside paren groups', () => {
+      const expected = nodeTypes.function.buildNode(
+        'and',
+        [
+          nodeTypes.function.buildNode('is', 'response', '200'),
+          nodeTypes.function.buildNode('or', [
+            nodeTypes.function.buildNode(
+              'nested',
+              nodeTypes.function.buildNode('is', 'extension', 'jpg')
+            ),
+            nodeTypes.function.buildNode(
+              'nested',
+              nodeTypes.function.buildNode('is', 'extension', 'png')
+            ),
+          ])
+        ]);
+      const actual = ast.fromKueryExpression('response:200 and ( { extension:jpg } or { extension:png } )');
+      expect(actual).to.eql(expected);
+    });
+
   });
 
   describe('fromLiteralExpression', function () {

@@ -59,7 +59,19 @@ SubQuery
     }
     return query;
   }
-  / Expression
+  / NestedQuery
+
+NestedQuery
+  = '{' Space* query:OrQuery trailing:OptionalSpace '}' {
+      if (trailing.type === 'cursor') {
+        return {
+          ...trailing,
+          suggestionTypes: ['conjunction']
+        };
+      }
+      return buildFunctionNode('nested', [query]);
+    }
+    / Expression
 
 Expression
   = FieldRangeExpression
@@ -272,7 +284,7 @@ Keyword
   = Or / And / Not
 
 SpecialCharacter
-  = [\\():<>"*]
+  = [\\():<>"*{}]
 
 RangeOperator
   = '<=' { return 'lte'; }
