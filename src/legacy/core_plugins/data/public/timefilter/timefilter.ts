@@ -20,17 +20,17 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment, { Moment } from 'moment';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import chrome from 'ui/chrome';
-import { UiSettingsClientContract } from 'src/core/public';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { IScope } from 'angular';
-import { timeHistory } from './time_history';
+import { TimeHistory } from './time_history';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import uiRoutes from '../routes';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
+
+export interface TimefilterConfig {
+  timeDefaults: TimeRange;
+  refreshIntervalDefaults: RefreshInterval;
+}
 
 // Timefilter accepts moment input but always returns string output
 export type InputTimeRange =
@@ -53,13 +53,15 @@ export class Timefilter {
 
   private _time: TimeRange;
   private _refreshInterval!: RefreshInterval;
+  private _history: TimeHistory;
 
   public isTimeRangeSelectorEnabled: boolean = false;
   public isAutoRefreshSelectorEnabled: boolean = false;
 
-  constructor(uiSettings: UiSettingsClientContract) {
-    this._time = uiSettings.get('timepicker:timeDefaults');
-    this.setRefreshInterval(uiSettings.get('timepicker:refreshIntervalDefaults'));
+  constructor(config: TimefilterConfig, timeHistory: TimeHistory) {
+    this._history = timeHistory;
+    this._time = config.timeDefaults;
+    this.setRefreshInterval(config.refreshIntervalDefaults);
   }
 
   getEnabledUpdated$ = () => {
@@ -106,7 +108,7 @@ export class Timefilter {
         from: newTime.from,
         to: newTime.to,
       };
-      timeHistory.add(this._time);
+      this._history.add(this._time);
       this.timeUpdate$.next();
       this.fetch$.next();
     }
@@ -221,64 +223,3 @@ export class Timefilter {
     this.autoRefreshFetch$.next();
   };
 }
-
-export const timefilter = new Timefilter(chrome.getUiSettingsClient());
-
-// TODO
-// remove everything underneath once globalState is no longer an angular service
-// and listener can be registered without angular.
-function convertISO8601(stringTime: string): string {
-  const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-  return obj.isValid() ? obj.toString() : stringTime;
-}
-
-// Currently some parts of Kibana (index patterns, timefilter) rely on addSetupWork in the uiRouter
-// and require it to be executed to properly function.
-// This function is exposed for applications that do not use uiRoutes like APM
-// Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
-export const registerTimefilterWithGlobalState = _.once((globalState: any, $rootScope: IScope) => {
-  const uiSettings = chrome.getUiSettingsClient();
-  const timeDefaults = uiSettings.get('timepicker:timeDefaults');
-  const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
-
-  timefilter.setTime(_.defaults(globalState.time || {}, timeDefaults));
-  timefilter.setRefreshInterval(
-    _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults)
-  );
-
-  globalState.on('fetch_with_changes', () => {
-    // clone and default to {} in one
-    const newTime: TimeRange = _.defaults({}, globalState.time, timeDefaults);
-    const newRefreshInterval: RefreshInterval = _.defaults(
-      {},
-      globalState.refreshInterval,
-      refreshIntervalDefaults
-    );
-
-    if (newTime) {
-      if (newTime.to) newTime.to = convertISO8601(newTime.to);
-      if (newTime.from) newTime.from = convertISO8601(newTime.from);
-    }
-
-    timefilter.setTime(newTime);
-    timefilter.setRefreshInterval(newRefreshInterval);
-  });
-
-  const updateGlobalStateWithTime = () => {
-    globalState.time = timefilter.getTime();
-    globalState.refreshInterval = timefilter.getRefreshInterval();
-    globalState.save();
-  };
-
-  subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
-    next: updateGlobalStateWithTime,
-  });
-
-  subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
-    next: updateGlobalStateWithTime,
-  });
-});
-
-uiRoutes.addSetupWork((globalState, $rootScope) => {
-  return registerTimefilterWithGlobalState(globalState, $rootScope);
-});
