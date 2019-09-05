@@ -113,7 +113,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
         null,
         plugin.opaqueId
       ),
-      createRouter: () => deps.http.createRouter(`/${plugin.name}`, plugin.opaqueId),
+      createRouter: () => deps.http.createRouter('', plugin.opaqueId),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,

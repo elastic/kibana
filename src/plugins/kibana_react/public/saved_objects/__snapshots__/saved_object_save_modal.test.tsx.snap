@@ -6,7 +6,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
     onSubmit={[Function]}
   >
     <EuiModal
-      className="dshSaveModal"
+      className="kbnSavedObjectSaveModal"
       data-test-subj="savedObjectSaveModal"
       maxWidth={true}
       onClose={[Function]}
@@ -76,11 +76,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           size="m"
           type="submit"
         >
-          <FormattedMessage
-            defaultMessage="Confirm Save"
-            id="kibana-react.savedObjects.saveModal.confirmSaveButtonLabel"
-            values={Object {}}
-          />
+          Save
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
