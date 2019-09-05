@@ -125,6 +125,11 @@ export const reporting = (kibana) => {
               }).default(),
               maxScreenshotDimension: Joi.number().integer().default(1950)
             }).default()
+          }).default(),
+          maxAttempts: Joi.number().integer().greater(0).when('$dist', {
+            is: true,
+            then: Joi.default(3),
+            otherwise: Joi.default(1),
           }).default()
         }).default(),
         csv: Joi.object({
