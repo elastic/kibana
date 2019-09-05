@@ -12,7 +12,7 @@ import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
-import { isGroupId } from '../../components/workpad_page/integration_utils';
+import { isGroupId } from '../../components/workpad_page/positioning_utils';
 
 const { set, del, insert } = immutable;
 
