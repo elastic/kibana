@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { all } from '../../functions/common/all';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { BOOLEAN_TRUE } from '../constants';
+import { BOOLEAN_TRUE } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof all>> = {
   help: i18n.translate('xpack.canvas.functions.allHelpText', {
