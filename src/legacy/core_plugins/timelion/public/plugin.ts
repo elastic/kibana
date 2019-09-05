@@ -23,8 +23,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
-import { VisualizationsSetup } from 'src/legacy/core_plugins/visualizations/public';
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
@@ -65,7 +65,7 @@ export class TimelionPlugin
     const dependencies: LegacyDependenciesPluginSetup = await plugins.__LEGACY.setup();
 
     plugins.data.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    plugins.visualizations.types.VisTypesRegistryProvider.register(() =>
+    plugins.visualizations.types.registerVisualization(() =>
       getTimelionVisualization(dependencies)
     );
   }
