@@ -11,7 +11,7 @@ If you are in an environment where you have multiple {kib} instances in a cluste
 
 [float]
 ==== Enable Code app
-While in beta, you can turn on Code by adding the following line to `kibana.yaml`:
+While in beta, you can turn on *Code* by adding the following line to `kibana.yaml`:
 
 [source,yaml]
 ----
@@ -20,7 +20,7 @@ xpack.code.ui.enabled: true
 
 [float]
 ==== Import your first repository
-. In {Kib}, navigate to the Code app.
+. In {Kib}, navigate to *Code*.
 
 . In the *Repository URL* field, paste the following GitHub clone URL:
 +
