@@ -12,11 +12,12 @@
   padding: $euiSizeM;
 }
 
+.gphSettingsAccordion__button {
+  margin: -$euiSizeM;
+  padding: $euiSizeM;
+}
+
 .gphSettings__helpTextButton {
   font-weight: bold;
   color: $euiColorPrimary;
-}
-
-.gphSettings__addIcon {
-  pointer-events: none;
 }
