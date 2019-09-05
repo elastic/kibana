@@ -203,10 +203,10 @@ export const urlTemplateIconChoices = [
     code: '\uf1e0',
   },
 ];
-export const drillDownIconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
+export const urlTemplateIconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
 
 urlTemplateIconChoices.forEach(icon => {
-  drillDownIconChoicesByClass[icon.class] = icon;
+  urlTemplateIconChoicesByClass[icon.class] = icon;
 });
 
 export const colorChoices = [

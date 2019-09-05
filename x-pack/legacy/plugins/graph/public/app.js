@@ -51,8 +51,8 @@ import {
   iconChoices,
   colorChoices,
   iconChoicesByClass,
-  drillDownIconChoices,
-  drillDownIconChoicesByClass
+  urlTemplateIconChoices,
+  urlTemplateIconChoicesByClass
 } from './services/style_choices';
 import {
   getOutlinkEncoders,
@@ -230,7 +230,7 @@ app.controller('graphuiPlugin', function (
   $scope.spymode = 'request';
 
   $scope.iconChoices = iconChoices;
-  $scope.drillDownIconChoices = drillDownIconChoices;
+  $scope.drillDownIconChoices = urlTemplateIconChoices;
   $scope.colors = colorChoices;
   $scope.iconChoicesByClass = iconChoicesByClass;
 
@@ -932,7 +932,7 @@ app.controller('graphuiPlugin', function (
           encoder: encoder,
         };
         if (urlTemplate.iconClass) {
-          template.icon = drillDownIconChoicesByClass[urlTemplate.iconClass];
+          template.icon = urlTemplateIconChoicesByClass[urlTemplate.iconClass];
         }
         $scope.urlTemplates.push(template);
       }

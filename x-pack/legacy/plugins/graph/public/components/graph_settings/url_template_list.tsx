@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiText, EuiAccordion, EuiSpacer, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
-import { DrilldownForm } from './url_template_form';
+import { UrlTemplateForm } from './url_template_form';
 import { useListKeys } from './use_list_keys';
 
 export function UrlTemplateList({
@@ -35,7 +35,7 @@ export function UrlTemplateList({
             className="gphSettingsAccordion"
             buttonClassName="gphSettingsAccordion__button"
           >
-            <DrilldownForm
+            <UrlTemplateForm
               initialTemplate={template}
               onSubmit={newTemplate => {
                 saveUrlTemplate(index, newTemplate);
@@ -57,7 +57,7 @@ export function UrlTemplateList({
         buttonClassName="gphSettingsAccordion__button"
         extraAction={<EuiIcon type="plusInCircleFilled" color="primary" />}
       >
-        <DrilldownForm
+        <UrlTemplateForm
           onSubmit={newTemplate => {
             saveUrlTemplate(-1, newTemplate);
           }}
