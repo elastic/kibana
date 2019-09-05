@@ -33,6 +33,6 @@ export const uptime = (kibana: any) =>
       home: ['plugins/uptime/register_feature'],
     },
     init(server: KibanaServer) {
-      initServerWithKibana(server);
+      initServerWithKibana(server, server.plugins.elasticsearch, server.plugins.xpack_main);
     },
   });
