@@ -29,7 +29,7 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import 'ui/render_complete/directive';
+import '../render_complete/directive';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
