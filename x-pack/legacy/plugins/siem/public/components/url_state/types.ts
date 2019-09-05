@@ -11,10 +11,10 @@ import { Dispatch } from 'redux';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
+import { RouteSpyState } from '../../utils/route/types';
 
 import { CONSTANTS } from './constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { RouteSpyState } from '../../utils/route/spy_routes';
 
 export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
 

@@ -19,23 +19,22 @@ import {
   timelineSelectors,
 } from '../../store';
 import { hostsActions, inputsActions, networkActions, timelineActions } from '../../store/actions';
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, UrlStateProps, KqlQuery, LocationTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { getCurrentLocation } from './helpers';
-import { useRouteSpy, RouteSpyState } from '../../utils/route/spy_routes';
 
 export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
-  props => {
+  (props: UrlStateContainerPropTypes) => {
     useUrlStateHooks(props);
     return null;
   },
   (prevProps, nextProps) =>
-    prevProps.pageName === nextProps.pageName &&
-    prevProps.pathName === nextProps.pathName &&
-    isEqual(prevProps.urlState, nextProps.urlState)
+    prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
 );
 
 UrlStateContainer.displayName = 'UrlStateContainer';

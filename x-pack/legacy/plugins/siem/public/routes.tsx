@@ -10,7 +10,7 @@ import { Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
-import { ManageRoutesSpy } from './utils/route/spy_routes';
+import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
 
 interface RouterProps {
   history: History;
