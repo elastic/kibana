@@ -30,7 +30,7 @@ Filters are applied to all layers in your map and other panels when your map is 
 
 [float]
 [[maps-create-spatial-filters]]
-==== Create spatial filters
+==== Spatial filters
 
 Spatial filters narrow search results to documents that either intersect, are within, or do not intersect with the specified geometry.
 
