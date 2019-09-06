@@ -26,6 +26,7 @@ import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
+import { MapTypes } from './map_types';
 
 export class GeohashLayer extends KibanaMapLayer {
 
@@ -54,19 +55,19 @@ export class GeohashLayer extends KibanaMapLayer {
       colorRamp: this._geohashOptions.colorRamp
     };
     switch (this._geohashOptions.mapType) {
-      case 'Scaled Circle Markers':
+      case MapTypes.ScaledCircleMarkers:
         this._geohashMarkers = new ScaledCirclesMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case 'Shaded Circle Markers':
+      case MapTypes.ShadedCircleMarkers:
         this._geohashMarkers = new ShadedCirclesMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case 'Shaded Geohash Grid':
+      case MapTypes.ShadedGeohashGrid:
         this._geohashMarkers = new GeohashGridMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case 'Heatmap':
+      case MapTypes.Heatmap:
 
         let radius = 15;
         if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {

@@ -24,7 +24,7 @@ import {
   UiSettingsClientContract,
 } from '../../../../core/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -64,7 +64,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
     data.expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.registerVisualization(() =>
       createTileMapTypeDefinition(visualizationDependencies)
     );
   }
