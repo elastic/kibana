@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
 import { StepText } from './step_text';
@@ -35,13 +35,17 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
     <>
       <StepText>
         {isSettingUp || isRetrying ? (
-          <span>
-            <EuiLoadingSpinner size="xl" />
-            <FormattedMessage
-              id="xpack.infra.analysisSetup.steps.setupProcess.loadingText"
-              defaultMessage="Creating ML jobs..."
-            />
-          </span>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.infra.analysisSetup.steps.setupProcess.loadingText"
+                defaultMessage="Creating ML jobs..."
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : didSetupFail ? (
           <>
             <FormattedMessage
