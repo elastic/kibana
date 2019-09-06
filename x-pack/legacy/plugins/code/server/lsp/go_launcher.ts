@@ -77,9 +77,12 @@ export class GoServerLauncher extends AbstractLauncher {
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger) {
-    const launchersFound = glob.sync('go-langserver', {
-      cwd: installationPath,
-    });
+    const launchersFound = glob.sync(
+      process.platform === 'win32' ? 'go-langserver.exe' : 'go-langserver',
+      {
+        cwd: installationPath,
+      }
+    );
     if (!launchersFound.length) {
       throw new Error('Cannot find executable go language server');
     }
@@ -92,12 +95,13 @@ export class GoServerLauncher extends AbstractLauncher {
     // Construct $GOROOT from the bundled go toolchain.
     const goRoot = goToolchain;
     const goHome = path.resolve(goToolchain, 'bin');
-    envPath = envPath + ':' + goHome;
+    envPath = process.platform === 'win32' ? envPath + ';' + goHome : envPath + ':' + goHome;
     // Construct $GOPATH under 'kibana/data/code'.
     const goPath = this.options.goPath;
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
+    const goCache = path.resolve(goPath, '.cache');
     const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(installationPath, launchersFound[0]);
     const p = spawn(golsp, params, {
@@ -109,6 +113,7 @@ export class GoServerLauncher extends AbstractLauncher {
         CLIENT_PORT: port.toString(),
         GOROOT: goRoot,
         GOPATH: goPath,
+        GOCACHE: goCache,
         PATH: envPath,
         CGO_ENABLED: '0',
       },
