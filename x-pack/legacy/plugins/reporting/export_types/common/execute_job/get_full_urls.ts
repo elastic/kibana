@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { format as urlFormat, parse as urlParse } from 'url';
+import {
+  format as urlFormat,
+  parse as urlParse,
+  UrlWithStringQuery,
+  UrlWithParsedQuery,
+} from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { KbnServer } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
@@ -39,24 +44,34 @@ export async function getFullUrls({
     );
   }
 
-  const absoluteUrls = relativeUrls.map(relativeUrl => {
-    const { pathname: path, hash, search } = urlParse(relativeUrl);
-    return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
-  });
+  const urls = relativeUrls.map(relativeUrl => {
+    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
+    const jobUrl = getAbsoluteUrl({
+      basePath: job.basePath,
+      path: parsedRelative.pathname,
+      hash: parsedRelative.hash,
+      search: parsedRelative.search,
+    });
 
-  // why 2 maps
-  const urls = absoluteUrls.map((jobUrl: string) => {
     if (!job.forceNow) {
       return jobUrl;
     }
 
-    const parsed: any = urlParse(jobUrl, true);
-    const hash: any = urlParse(parsed.hash.replace(/^#/, ''), true);
+    // capture the route to the visualization
+    const parsed: UrlWithParsedQuery = urlParse(jobUrl, true);
+    if (!parsed.hash) {
+      throw new Error(
+        'No valid hash in the URL! A hash is expected for the application to route to the intended visualization.'
+      );
+    }
 
+    const visualizationRoute: UrlWithParsedQuery = urlParse(parsed.hash.replace(/^#/, ''), true);
+
+    // combine the visualization route and forceNow parameter into a URL
     const transformedHash = urlFormat({
-      pathname: hash.pathname,
+      pathname: visualizationRoute.pathname,
       query: {
-        ...hash.query,
+        ...visualizationRoute.query,
         forceNow: job.forceNow,
       },
     });
