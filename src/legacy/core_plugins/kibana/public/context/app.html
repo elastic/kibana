@@ -63,8 +63,9 @@
 >
   <!-- Controls -->
   <context-action-bar
-        count="contextApp.state.queryParameters.predecessorCount"
         default-step-size="contextApp.state.queryParameters.defaultStepSize"
+        doc-count="contextApp.state.queryParameters.predecessorCount"
+        doc-count-available="contextApp.state.rows.predecessors.length"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
         is-loading="![
         contextApp.constants.LOADING_STATUS.LOADED,
@@ -73,9 +74,6 @@
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
         on-load-more-click="contextApp.actions.fetchMorePredecessorRows"
         type="'predecessor'"
-        warning="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
-        && (contextApp.state.queryParameters.predecessorCount > contextApp.state.rows.predecessors.length)"
-        warning-doc-count="contextApp.state.rows.predecessors.length"
   ></context-action-bar>
 
 
@@ -114,8 +112,9 @@
 
   <!-- Controls -->
   <context-action-bar
-    count="contextApp.state.queryParameters.successorCount"
     default-step-size="contextApp.state.queryParameters.defaultStepSize"
+    doc-count="contextApp.state.queryParameters.successorCount"
+    doc-count-available="contextApp.state.rows.successors.length"
     is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
     is-loading="![
     contextApp.constants.LOADING_STATUS.LOADED,
@@ -124,8 +123,5 @@
     on-change-count="contextApp.actions.fetchGivenSuccessorRows"
     on-load-more-click="contextApp.actions.fetchMoreSuccessorRows"
     type="'successor'"
-    warning="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)
-    && (contextApp.state.queryParameters.successorCount > contextApp.state.rows.successors.length)"
-    warningDocCount="contextApp.state.rows.successors.length"
   ></context-action-bar>
 </main>

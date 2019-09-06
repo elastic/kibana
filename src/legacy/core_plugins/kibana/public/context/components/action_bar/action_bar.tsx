@@ -33,15 +33,20 @@ export type ActionBarType = 'successor' | 'predecessor';
 
 export interface ActionBarProps {
   /**
-   * it's the number of documents to be / that were fetched
-   */
-  count: number;
-  /**
    * the number of docs to be added to the current count
    */
   defaultStepSize: number;
   /**
-   * is true while the anchor of disovers context is fetched
+   * the number of docs to be displayed
+   */
+  docCount: number;
+  /**
+   *  the number of documents that are acually available
+   *  display warning when it's lower than docCount
+   */
+  docCountAvailable: number;
+  /**
+   * is true while the anchor record is fetched
    */
   isDisabled: boolean;
   /**
@@ -49,43 +54,40 @@ export interface ActionBarProps {
    */
   isLoading: boolean;
   /**
-   * is executed when the input containing count is changed
+   * is triggered when the input containing count is changed
    * @param count
    */
   onChangeCount: (count: number) => void;
   /**
-   * is executed the 'Load' button is clicked
+   * is triggered the 'Load' button is clicked
    */
   onLoadMoreClick: () => void;
   /**
-   * just a note how predecssor and successor types are used
-   * predecessor bar + list entries | anchor record | successor list entries + bar
+   * can be `predecessor` or `successor`, usage in context:
+   * predecessor action bar + records
+   * anchor record
+   * successor records + action bar
    */
   type: ActionBarType;
-  /**
-   * displayed when less documents then count are available
-   */
-  warning: boolean;
-  warningDocCount?: number;
 }
 
 export function ActionBar({
-  count,
   defaultStepSize = 5,
+  docCount,
+  docCountAvailable,
   isDisabled,
   isLoading,
   onChangeCount,
   onLoadMoreClick,
   type,
-  warning,
-  warningDocCount = 0,
 }: ActionBarProps) {
+  const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === 'successor';
   return (
     <>
       {isSuccessor && <EuiSpacer size="s" />}
-      {isSuccessor && warning && <ActionBarWarning docCount={warningDocCount} type={type} />}
-      {isSuccessor && warning && <EuiSpacer size="s" />}
+      {isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
+      {isSuccessor && showWarning && <EuiSpacer size="s" />}
       <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -96,7 +98,7 @@ export function ActionBar({
             onClick={onLoadMoreClick}
             flush="right"
           >
-            <FormattedMessage id="kbn.context.loadMoreDescription" defaultMessage="Load" />
+            <FormattedMessage id="kbn.context.loadButtonLabel" defaultMessage="Load" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -117,7 +119,7 @@ export function ActionBar({
               onChange={ev => onChangeCount(Number(ev.target.value))}
               step={defaultStepSize}
               type="number"
-              value={count}
+              value={docCount}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -137,7 +139,7 @@ export function ActionBar({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {!isSuccessor && warning && <ActionBarWarning docCount={warningDocCount} type={type} />}
+      {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
       {!isSuccessor && <EuiSpacer size="s" />}
     </>
   );

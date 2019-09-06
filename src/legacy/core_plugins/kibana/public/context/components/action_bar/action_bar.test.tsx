@@ -25,15 +25,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('Test Discover Context ActionBar for successor records', () => {
   const props = {
-    count: 20,
     defaultStepSize: 10,
+    docCount: 20,
+    docCountAvailable: 0,
     isDisabled: false,
     isLoading: false,
     onChangeCount: jest.fn(),
     onLoadMoreClick: jest.fn(),
     type: 'successor',
-    warning: true,
-    warningDocCount: 1,
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
@@ -43,29 +42,28 @@ describe('Test Discover Context ActionBar for successor records', () => {
     expect(props.onChangeCount).toHaveBeenCalledTimes(1);
   });
 
-  test('Load more button ', () => {
+  test('Load button ', () => {
     findTestSubject(wrapper, 'successorLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });
 
   test('Warning about limitation of additional records', () => {
     expect(findTestSubject(wrapper, 'successorWarningMsg').text()).toBe(
-      'Only 1 documents newer than the anchor could be found.'
+      'No documents newer than the anchor could be found.'
     );
   });
 });
 
 describe('Test Discover Context ActionBar for predecessor records', () => {
   const props = {
-    count: 20,
+    docCount: 20,
+    docCountAvailable: 1,
     defaultStepSize: 7,
     isDisabled: false,
     isLoading: false,
     onChangeCount: jest.fn(),
     onLoadMoreClick: jest.fn(),
     type: 'predecessor',
-    warning: true,
-    warningDocCount: 1,
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
@@ -77,7 +75,7 @@ describe('Test Discover Context ActionBar for predecessor records', () => {
     expect(props.onChangeCount).toHaveBeenCalledTimes(1);
   });
 
-  test('Load more button ', () => {
+  test('Load button ', () => {
     findTestSubject(wrapper, 'predecessorLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });
