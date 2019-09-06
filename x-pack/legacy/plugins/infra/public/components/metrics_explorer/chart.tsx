@@ -5,7 +5,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {

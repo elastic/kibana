@@ -126,7 +126,6 @@ export const LogsToolbar = () => {
               jumpToTargetPositionTime,
               startLiveStreaming,
               stopLiveStreaming,
-              targetPosition,
             }) => (
               <LogTimeControls
                 currentTime={visibleMidpointTime}

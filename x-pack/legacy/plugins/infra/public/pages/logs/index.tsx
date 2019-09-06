@@ -5,8 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
