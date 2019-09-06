@@ -11,10 +11,12 @@ import {
   HttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
+  CoreSetup,
 } from '../../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
 import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
+import { LegacyAPI } from '../../new_platform/plugin';
 
 describe('onRequestInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
@@ -108,7 +110,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -130,7 +138,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -155,7 +169,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -177,7 +197,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -206,7 +232,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -228,7 +260,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -250,7 +288,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 
@@ -272,7 +316,13 @@ describe('onRequestInterceptor', () => {
         get: jest.fn().mockReturnValue(basePath),
       } as unknown) as KibanaConfig;
 
-      initSpacesOnRequestInterceptor({ config, http });
+      initSpacesOnRequestInterceptor({
+        getLegacyAPI: () =>
+          ({
+            legacyConfig: (config as unknown) as KibanaConfig,
+          } as LegacyAPI),
+        http: (http as unknown) as CoreSetup['http'],
+      });
 
       await root.start();
 

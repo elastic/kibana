@@ -5,12 +5,14 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../../lib/audit_logger';
 import { KibanaRequest, SavedObjectsService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { LegacyAPI } from '../plugin';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -23,9 +25,25 @@ const mockLogger = {
 };
 
 const createService = async (serverBasePath: string = '') => {
-  const spacesService = new SpacesService(mockLogger, serverBasePath);
+  const legacyAPI: LegacyAPI = {
+    legacyConfig: {
+      get: (key: string) => {
+        switch (key) {
+          case 'server.basePath':
+            return serverBasePath;
+          default:
+            throw new Error(`unexpected legacy config key: ${key}`);
+        }
+      },
+    } as KibanaConfig,
+    savedObjects: ({
+      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
+    } as unknown) as SavedObjectsService,
+  } as LegacyAPI;
 
-  const httpSetup = httpServiceMock.createSetupContract();
+  const spacesService = new SpacesService(mockLogger, () => legacyAPI);
+
+  const httpSetup = coreMock.createSetup().http;
   httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
     const spaceId = getSpaceIdFromPath(request.url.path);
 
@@ -40,10 +58,7 @@ const createService = async (serverBasePath: string = '') => {
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of({ maxSpaces: 10 }),
     security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-    savedObjects: ({
-      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
-    } as unknown) as SavedObjectsService,
-    spacesAuditLogger: new SpacesAuditLogger({}),
+    getSpacesAuditLogger: () => new SpacesAuditLogger({}),
   });
 
   return spacesServiceSetup;

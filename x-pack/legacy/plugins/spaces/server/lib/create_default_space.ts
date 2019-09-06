@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'rxjs/operators';
-import { ElasticsearchServiceSetup, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsService, CoreSetup } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: CoreSetup['elasticsearch'];
   savedObjects: SavedObjectsService;
 }
 

@@ -12,9 +12,9 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: ExternalRouteRequestFacade) {

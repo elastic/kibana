@@ -13,15 +13,20 @@ import { getSpaceById } from '../../lib';
 import { InternalRouteDeps } from '.';
 
 export function initInternalSpacesApi(deps: InternalRouteDeps) {
-  const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, spacesService, getLegacyAPI, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any) {
+      const { savedObjects, legacyConfig } = getLegacyAPI();
+
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
       const id = request.params.id;
+
+      const basePath: string = legacyConfig.get('server.basePath');
+      const defaultRoute: string = legacyConfig.get('server.defaultRoute');
 
       try {
         const existingSpace: Space | null = await getSpaceById(
@@ -34,11 +39,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
         }
 
         return {
-          location: addSpaceIdToPath(
-            config.get('server.basePath'),
-            existingSpace.id,
-            config.get('server.defaultRoute')
-          ),
+          location: addSpaceIdToPath(basePath, existingSpace.id, defaultRoute),
         };
       } catch (error) {
         return wrapError(error);
