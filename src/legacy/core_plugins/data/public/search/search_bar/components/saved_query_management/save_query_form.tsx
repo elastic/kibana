@@ -98,6 +98,12 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       defaultMessage: 'Title conflicts with an existing saved query',
     }
   );
+  const titleMissingErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.titleMissingText',
+    {
+      defaultMessage: 'Title is required',
+    }
+  );
   const whitespaceErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.whitespaceErrorText',
     {
@@ -107,6 +113,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 
   const validate = () => {
     const errors = [];
+    if (!title.length) {
+      errors.push(titleMissingErrorText);
+    }
     if (title.length > title.trim().length) {
       errors.push(whitespaceErrorText);
     }
