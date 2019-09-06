@@ -5,11 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, fromNullable, isSome, map, mapNullable, fold } from 'fp-ts/lib/Option';
+import { tryCatch, fromNullable, isSome, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { constant, identity } from 'fp-ts/lib/function';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -65,7 +64,7 @@ function isWhitelistedHostnameInUri(config: ActionsKibanaConfig, uri: string): b
     tryCatch(() => new URL(uri)),
     map(url => url.hostname),
     mapNullable(hostname => isWhitelisted(config, hostname)),
-    fold(constant(false), identity)
+    getOrElse(() => false)
   );
 }
 
