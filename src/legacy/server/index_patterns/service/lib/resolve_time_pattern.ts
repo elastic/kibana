@@ -20,6 +20,8 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
+import { APICaller } from 'src/core/server';
+
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi } from './es_api';
 
@@ -34,12 +36,16 @@ import { callIndexAliasApi } from './es_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster, timePattern) {
+export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
-  const allIndexDetails = chain(aliases)
-    .reduce((acc, index, indexName) => acc.concat(indexName, Object.keys(index.aliases || {})), [])
-    .sort()
+  const allIndexDetails = chain<string[]>(aliases as string[])
+    .reduce(
+      (acc: string[], index: any, indexName: string) =>
+        acc.concat(indexName, Object.keys(index.aliases || {})),
+      []
+    )
+    .sortBy((indexName: string) => indexName)
     .uniq(true)
     .map(indexName => {
       const parsed = moment(indexName, timePattern, true);
