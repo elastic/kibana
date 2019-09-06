@@ -22,7 +22,7 @@ import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'src/plugins/data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import {
   EmbeddableFactory,
@@ -77,7 +77,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const courier = $injector.get<unknown>('courier');
     const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
     const editUrl = chrome.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
 
@@ -88,7 +87,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
       const savedObject = await searchLoader.get(savedObjectId);
       return new SearchEmbeddable(
         {
-          courier,
           savedSearch: savedObject,
           $rootScope,
           $compile,

@@ -14,7 +14,7 @@ import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './d
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 
 jest.mock('ui/new_platform');
@@ -33,30 +33,35 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasExistence: true,
     fields: [
       {
         name: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
     ],
   },
@@ -80,6 +85,7 @@ describe('IndexPatternDimensionPanel', () => {
     state = {
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -115,6 +121,7 @@ describe('IndexPatternDimensionPanel', () => {
       filterOperations: () => true,
       storage: {} as Storage,
       uiSettings: {} as UiSettingsClientContract,
+      savedObjectsClient: {} as SavedObjectsClientContract,
     };
 
     jest.clearAllMocks();
@@ -947,6 +954,7 @@ describe('IndexPatternDimensionPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

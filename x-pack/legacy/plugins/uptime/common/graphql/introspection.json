@@ -548,6 +548,18 @@
         "description": "A request sent from a monitor to a host",
         "fields": [
           {
+            "name": "id",
+            "description": "unique ID for this ping",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "timestamp",
             "description": "The timestamp of the ping's creation",
             "args": [],
@@ -1062,7 +1074,7 @@
             "name": "response",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "StatusCode", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "HTTPResponse", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1090,14 +1102,65 @@
       },
       {
         "kind": "OBJECT",
-        "name": "StatusCode",
+        "name": "HTTPResponse",
         "description": "",
         "fields": [
           {
             "name": "status_code",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "body",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "HTTPBody", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HTTPBody",
+        "description": "",
+        "fields": [
+          {
+            "name": "bytes",
+            "description": "Size of HTTP response body in bytes",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hash",
+            "description": "Hash of the HTTP response body",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "content",
+            "description": "Response body of the HTTP Response. May be truncated based on client settings.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "content_bytes",
+            "description": "Byte length of the content string, taking into account multibyte chars.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1809,13 +1872,17 @@
       {
         "kind": "OBJECT",
         "name": "TLS",
-        "description": "",
+        "description": "Contains monitor transmission encryption information.",
         "fields": [
           {
             "name": "certificate_not_valid_after",
-            "description": "",
+            "description": "The date and time after which the certificate is invalid.",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2813,6 +2880,14 @@
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tls",
+            "description": "Transport encryption information.",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "TLS", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

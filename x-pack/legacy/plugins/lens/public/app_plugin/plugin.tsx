@@ -9,7 +9,7 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
-import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
+import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
@@ -23,6 +23,7 @@ import { EditorFrameInstance } from '../types';
 
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
+  private store: SavedObjectIndexStore | null = null;
 
   constructor() {}
 
@@ -33,15 +34,25 @@ export class AppPlugin {
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
-    const editorFrame = editorFrameSetup();
-    const store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
+    const editorFrameSetupInterface = editorFrameSetup();
+    this.store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
-    editorFrame.registerDatasource('indexpattern', indexPattern);
-    editorFrame.registerVisualization(xyVisualization);
-    editorFrame.registerVisualization(datatableVisualization);
-    editorFrame.registerVisualization(metricVisualization);
+    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
+    editorFrameSetupInterface.registerVisualization(xyVisualization);
+    editorFrameSetupInterface.registerVisualization(datatableVisualization);
+    editorFrameSetupInterface.registerVisualization(metricVisualization);
+  }
 
-    this.instance = editorFrame.createInstance({});
+  start() {
+    if (this.store === null) {
+      throw new Error('Start lifecycle called before setup lifecycle');
+    }
+
+    const store = this.store;
+
+    const editorFrameStartInterface = editorFrameStart();
+
+    this.instance = editorFrameStartInterface.createInstance({});
 
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
       return (
@@ -49,6 +60,7 @@ export class AppPlugin {
           editorFrame={this.instance!}
           chrome={chrome}
           store={new Storage(localStorage)}
+          savedObjectsClient={chrome.getSavedObjectsClient()}
           docId={routeProps.match.params.id}
           docStorage={store}
           redirectTo={id => {
@@ -96,4 +108,5 @@ export class AppPlugin {
 const app = new AppPlugin();
 
 export const appSetup = () => app.setup();
+export const appStart = () => app.start();
 export const appStop = () => app.stop();

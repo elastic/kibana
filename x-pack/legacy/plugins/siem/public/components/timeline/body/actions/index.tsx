@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -31,6 +30,7 @@ interface Props {
   eventId: string;
   eventIsPinned: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventViewer?: boolean;
   loading: boolean;
   noteIds: string[];
   onEventToggled: () => void;
@@ -97,6 +97,7 @@ export const Actions = React.memo<Props>(
     eventId,
     eventIsPinned,
     getNotesByIds,
+    isEventViewer = false,
     loading = false,
     noteIds,
     onEventToggled,
@@ -144,39 +145,43 @@ export const Actions = React.memo<Props>(
           </ExpandEventContainer>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            data-test-subj="timeline-action-pin-tool-tip"
-            content={getPinTooltip({
-              isPinned: eventIsPinned,
-              eventHasNotes: eventHasNotes(noteIds),
-            })}
-          >
-            <PinContainer>
-              <Pin
-                allowUnpinning={!eventHasNotes(noteIds)}
-                pinned={eventIsPinned}
-                data-test-subj="pin-event"
-                onClick={onPinClicked}
-              />
-            </PinContainer>
-          </EuiToolTip>
-        </EuiFlexItem>
+        {!isEventViewer && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                data-test-subj="timeline-action-pin-tool-tip"
+                content={getPinTooltip({
+                  isPinned: eventIsPinned,
+                  eventHasNotes: eventHasNotes(noteIds),
+                })}
+              >
+                <PinContainer>
+                  <Pin
+                    allowUnpinning={!eventHasNotes(noteIds)}
+                    pinned={eventIsPinned}
+                    data-test-subj="pin-event"
+                    onClick={onPinClicked}
+                  />
+                </PinContainer>
+              </EuiToolTip>
+            </EuiFlexItem>
 
-        <NotesButtonContainer grow={false}>
-          <NotesButton
-            animate={false}
-            associateNote={associateNote}
-            data-test-subj="add-note"
-            getNotesByIds={getNotesByIds}
-            noteIds={noteIds || emptyNotes}
-            showNotes={showNotes}
-            size="s"
-            toggleShowNotes={toggleShowNotes}
-            toolTip={i18n.NOTES_TOOLTIP}
-            updateNote={updateNote}
-          />
-        </NotesButtonContainer>
+            <NotesButtonContainer grow={false}>
+              <NotesButton
+                animate={false}
+                associateNote={associateNote}
+                data-test-subj="add-note"
+                getNotesByIds={getNotesByIds}
+                noteIds={noteIds || emptyNotes}
+                showNotes={showNotes}
+                size="s"
+                toggleShowNotes={toggleShowNotes}
+                toolTip={i18n.NOTES_TOOLTIP}
+                updateNote={updateNote}
+              />
+            </NotesButtonContainer>
+          </>
+        )}
       </EuiFlexGroup>
     </ActionsContainer>
   ),

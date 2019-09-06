@@ -46,8 +46,8 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       },
     });
     this.chrome = chrome;
-    this.indexPatternService = indexPatternService;
     this.expressionRenderer = expressionRenderer;
+    this.indexPatternService = indexPatternService;
   }
 
   public isEditable() {

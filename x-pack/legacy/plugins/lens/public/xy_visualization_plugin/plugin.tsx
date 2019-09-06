@@ -8,19 +8,14 @@ import { CoreSetup, UiSettingsClientContract } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
-
-import {
-  renderersRegistry,
-  functionsRegistry,
-} from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
+import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { xyVisualization } from './xy_visualization';
-import { InterpreterSetup, RenderFunction } from '../interpreter_types';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 
 export interface XyVisualizationPluginSetupPlugins {
-  interpreter: InterpreterSetup;
+  expressions: ExpressionsSetup;
   chrome: Chrome;
   // TODO this is a simulated NP plugin.
   // Once field formatters are actually migrated, the actual shim can be used
@@ -44,22 +39,21 @@ class XyVisualizationPlugin {
   setup(
     _core: CoreSetup | null,
     {
-      interpreter,
+      expressions,
       fieldFormat: { formatFactory },
       chrome: { getUiSettingsClient },
     }: XyVisualizationPluginSetupPlugins
   ) {
-    interpreter.functionsRegistry.register(() => legendConfig);
-    interpreter.functionsRegistry.register(() => xConfig);
-    interpreter.functionsRegistry.register(() => layerConfig);
-    interpreter.functionsRegistry.register(() => xyChart);
+    expressions.registerFunction(() => legendConfig);
+    expressions.registerFunction(() => xConfig);
+    expressions.registerFunction(() => layerConfig);
+    expressions.registerFunction(() => xyChart);
 
-    interpreter.renderersRegistry.register(
-      () =>
-        getXyChartRenderer({
-          formatFactory,
-          timeZone: getTimeZone(getUiSettingsClient()),
-        }) as RenderFunction<unknown>
+    expressions.registerRenderer(() =>
+      getXyChartRenderer({
+        formatFactory,
+        timeZone: getTimeZone(getUiSettingsClient()),
+      })
     );
 
     return xyVisualization;
@@ -72,10 +66,7 @@ const plugin = new XyVisualizationPlugin();
 
 export const xyVisualizationSetup = () =>
   plugin.setup(null, {
-    interpreter: {
-      renderersRegistry,
-      functionsRegistry,
-    },
+    expressions: dataSetup.expressions,
     fieldFormat: {
       formatFactory: getFormat,
     },

@@ -1,3 +1,5 @@
+@import './tools_control/index';
+
 .mapToolbarOverlay {
   position: absolute;
   top: ($euiSizeM + $euiSizeS) + ($euiSizeXL * 2); // Position and height of mapbox controls plus margin

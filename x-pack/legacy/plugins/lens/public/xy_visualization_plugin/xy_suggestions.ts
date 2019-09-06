@@ -47,22 +47,29 @@ function getIconForSeries(type: SeriesType): EuiIconType {
  *
  * @param opts
  */
-export function getSuggestions(
-  opts: SuggestionRequest<State>
-): Array<VisualizationSuggestion<State>> {
-  return opts.tables
-    .filter(
-      ({ isMultiRow, columns }) =>
-        // We only render line charts for multi-row queries. We require at least
-        // two columns: one for x and at least one for y, and y columns must be numeric.
-        // We reject any datasource suggestions which have a column of an unknown type.
-        isMultiRow &&
-        columns.length > 1 &&
-        columns.some(col => col.operation.dataType === 'number') &&
-        !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
-    )
-    .map(table => getSuggestionForColumns(table, opts.state))
-    .filter((suggestion): suggestion is VisualizationSuggestion<State> => suggestion !== undefined);
+export function getSuggestions({
+  table,
+  state,
+}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+  if (
+    // We only render line charts for multi-row queries. We require at least
+    // two columns: one for x and at least one for y, and y columns must be numeric.
+    // We reject any datasource suggestions which have a column of an unknown type.
+    !table.isMultiRow ||
+    table.columns.length <= 1 ||
+    table.columns.every(col => col.operation.dataType !== 'number') ||
+    table.columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
+  ) {
+    return [];
+  }
+
+  const suggestion = getSuggestionForColumns(table, state);
+
+  if (suggestion) {
+    return [suggestion];
+  }
+
+  return [];
 }
 
 function getSuggestionForColumns(
@@ -77,7 +84,6 @@ function getSuggestionForColumns(
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = buckets;
     return getSuggestion(
-      table.datasourceSuggestionId,
       table.layerId,
       table.changeType,
       x,
@@ -89,7 +95,6 @@ function getSuggestionForColumns(
   } else if (buckets.length === 0) {
     const [x, ...yValues] = values;
     return getSuggestion(
-      table.datasourceSuggestionId,
       table.layerId,
       table.changeType,
       x,
@@ -111,7 +116,6 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
 }
 
 function getSuggestion(
-  datasourceSuggestionId: number,
   layerId: string,
   changeType: TableChangeType,
   xValue: TableSuggestionColumn,
@@ -133,7 +137,6 @@ function getSuggestion(
     yValues,
     splitBy,
     changeType,
-    datasourceSuggestionId,
     xValue,
   };
 
@@ -245,7 +248,6 @@ function buildSuggestion({
   yValues,
   splitBy,
   changeType,
-  datasourceSuggestionId,
   xValue,
 }: {
   currentState: XYState | undefined;
@@ -257,7 +259,6 @@ function buildSuggestion({
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
   changeType: string;
-  datasourceSuggestionId: number;
 }) {
   const newLayer = {
     ...(getExistingLayer(currentState, layerId) || {}),
@@ -284,7 +285,6 @@ function buildSuggestion({
     score: ((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3,
     // don't advertise chart of same type but with less data
     hide: currentState && changeType === 'reduced',
-    datasourceSuggestionId,
     state,
     previewIcon: getIconForSeries(seriesType),
     previewExpression: buildPreviewExpression(state, layerId, xValue, yValues, splitBy),

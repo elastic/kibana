@@ -28,6 +28,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventViewer?: boolean;
   loading: boolean;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
@@ -54,6 +55,7 @@ export const EventColumnView = React.memo<Props>(
     eventIdToNoteIds,
     expanded,
     getNotesByIds,
+    isEventViewer = false,
     loading,
     onColumnResized,
     onEventToggled,
@@ -78,6 +80,7 @@ export const EventColumnView = React.memo<Props>(
             pinnedEventIds,
           })}
           getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
           loading={loading}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}

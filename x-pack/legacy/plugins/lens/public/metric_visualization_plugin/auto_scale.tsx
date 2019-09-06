@@ -10,6 +10,7 @@ import { EuiResizeObserver } from '@elastic/eui';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode | React.ReactNode[];
+  minScale?: number;
 }
 
 interface State {
@@ -25,7 +26,7 @@ export class AutoScale extends React.Component<Props, State> {
     super(props);
 
     this.scale = _.throttle(() => {
-      const scale = computeScale(this.parent, this.child);
+      const scale = computeScale(this.parent, this.child, this.props.minScale);
 
       // Prevent an infinite render loop
       if (this.state.scale !== scale) {
@@ -54,7 +55,7 @@ export class AutoScale extends React.Component<Props, State> {
   };
 
   render() {
-    const { children } = this.props;
+    const { children, minScale, ...rest } = this.props;
     const { scale } = this.state;
     const style = this.props.style || {};
 
@@ -62,7 +63,7 @@ export class AutoScale extends React.Component<Props, State> {
       <EuiResizeObserver onResize={this.scale}>
         {resizeRef => (
           <div
-            {...this.props}
+            {...rest}
             ref={el => {
               this.setParent(el);
               resizeRef(el);
@@ -97,17 +98,18 @@ interface ClientDimensionable {
   clientHeight: number;
 }
 
+const MAX_SCALE = 1;
+const MIN_SCALE = 0.3;
+
 /**
  * computeScale computes the ratio by which the child needs to shrink in order
  * to fit into the parent. This function is only exported for testing purposes.
  */
 export function computeScale(
   parent: ClientDimensionable | null,
-  child: ClientDimensionable | null
+  child: ClientDimensionable | null,
+  minScale: number = MIN_SCALE
 ) {
-  const MAX_SCALE = 1;
-  const MIN_SCALE = 0.3;
-
   if (!parent || !child) {
     return 1;
   }
@@ -115,5 +117,5 @@ export function computeScale(
   const scaleX = parent.clientWidth / child.clientWidth;
   const scaleY = parent.clientHeight / child.clientHeight;
 
-  return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), MIN_SCALE);
+  return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), minScale);
 }

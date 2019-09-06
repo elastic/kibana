@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import {
   DatasourceDimensionPanelProps,
@@ -28,7 +29,7 @@ import {
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
-import { Datasource } from '..';
+import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
@@ -37,6 +38,16 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   title: string;
   timeFieldName?: string | null;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
+
+  // TODO: Load index patterns and existence data in one API call
+  hasExistence?: boolean;
 }
 
 export interface IndexPatternField {
@@ -58,6 +69,11 @@ export interface IndexPatternField {
       }
     >
   >;
+
+  // TODO: This is loaded separately, but should be combined into one API
+  exists?: boolean;
+  cardinality?: number;
+  count?: number;
 }
 
 export interface DraggedField {
@@ -78,6 +94,7 @@ export interface IndexPatternPersistedState {
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
+  showEmptyFields: boolean;
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
@@ -136,11 +153,17 @@ export function getIndexPatternDatasource({
   chrome,
   toastNotifications,
   storage,
-}: IndexPatternDatasourcePluginPlugins & { storage: Storage }) {
+  savedObjectsClient,
+}: IndexPatternDatasourcePluginPlugins & {
+  storage: Storage;
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
   const uiSettings = chrome.getUiSettingsClient();
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
+      // TODO: The initial request should only load index pattern names because each saved object is large
+      //       Followup requests should load a single index pattern + existence information
       const indexPatternObjects = await getIndexPatterns(chrome, toastNotifications);
       const indexPatterns: Record<string, IndexPattern> = {};
 
@@ -154,12 +177,14 @@ export function getIndexPatternDatasource({
         return {
           ...state,
           indexPatterns,
+          showEmptyFields: false,
         };
       }
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         layers: {},
+        showEmptyFields: false,
       };
     },
 
@@ -222,7 +247,11 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(state, setState, layerId) {
+    getPublicAPI(
+      state: IndexPatternPrivateState,
+      setState: StateSetter<IndexPatternPrivateState>,
+      layerId: string
+    ) {
       return {
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
@@ -243,6 +272,7 @@ export function getIndexPatternDatasource({
                 setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
+                savedObjectsClient={savedObjectsClient}
                 layerId={props.layerId}
                 {...props}
               />

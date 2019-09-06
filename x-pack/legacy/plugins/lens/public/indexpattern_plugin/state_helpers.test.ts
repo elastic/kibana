@@ -41,6 +41,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -86,6 +87,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -135,6 +137,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -166,6 +169,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -225,6 +229,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -300,6 +305,7 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',

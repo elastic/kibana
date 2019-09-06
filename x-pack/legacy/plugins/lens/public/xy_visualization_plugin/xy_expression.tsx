@@ -23,9 +23,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
-import { RenderFunction } from '../interpreter_types';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -93,7 +93,7 @@ export interface XYChartProps {
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   timeZone: string;
-}): RenderFunction<XYChartProps> => ({
+}): IInterpreterRenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {

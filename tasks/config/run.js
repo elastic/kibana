@@ -208,7 +208,7 @@ module.exports = function (grunt) {
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
+        '--optimize.bundleDir=' + resolve(__dirname, '../../data/optimize/testdev'),
       ]
     }),
 

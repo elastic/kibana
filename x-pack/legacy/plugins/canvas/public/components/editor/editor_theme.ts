@@ -17,28 +17,6 @@ const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 
-const themeColors = {
-  keyword: themeName.euiColorAccent,
-  comment: themeName.euiColorDarkShade,
-  delimiter: themeName.euiColorSecondary,
-  string: themeName.euiColorPrimary,
-  number: themeName.euiColorWarning,
-  regexp: themeName.euiColorPrimary,
-  types: `${IS_DARK_THEME ? themeName.euiColorVis5 : themeName.euiColorVis9}`,
-  annotation: themeName.euiColorLightShade,
-  tag: themeName.euiColorAccent,
-  symbol: themeName.euiColorDanger,
-  foreground: themeName.euiColorDarkestShade,
-  editorBackground: themeName.euiColorEmptyShade,
-  lineNumbers: themeName.euiColorDarkShade,
-  editorIndentGuide: themeName.euiColorLightShade,
-  selectionBackground: `${IS_DARK_THEME ? '#343551' : '#E3E4ED'}`,
-  editorWidgetBackground: themeName.euiColorLightestShade,
-  editorWidgetBorder: themeName.euiColorLightShade,
-  findMatchBackground: themeName.euiColorWarning,
-  findMatchHighlightBackground: themeName.euiColorWarning,
-};
-
 export const theme: monacoEditor.editor.IStandaloneThemeData = {
   base: 'vs',
   inherit: true,
@@ -56,8 +34,8 @@ export const theme: monacoEditor.editor.IStandaloneThemeData = {
     { token: 'variable.predefined', foreground: themeName.euiColorSecondary },
     { token: 'constant', foreground: themeName.euiColorAccent },
     { token: 'comment', foreground: themeName.euiColorMediumShade },
-    { token: 'number', foreground: themeName.euiColorWarning },
-    { token: 'number.hex', foreground: themeName.euiColorPrimary },
+    { token: 'number', foreground: themeName.euiColorAccent },
+    { token: 'number.hex', foreground: themeName.euiColorAccent },
     { token: 'regexp', foreground: themeName.euiColorDanger },
     { token: 'annotation', foreground: themeName.euiColorMediumShade },
     { token: 'type', foreground: themeName.euiColorVis0 },
@@ -104,13 +82,13 @@ export const theme: monacoEditor.editor.IStandaloneThemeData = {
     { token: 'predefined.sql', foreground: themeName.euiColorMediumShade },
   ],
   colors: {
-    'editor.foreground': themeColors.foreground,
-    'editor.background': themeColors.editorBackground,
-    'editorLineNumber.foreground': themeColors.lineNumbers,
-    'editorLineNumber.activeForeground': themeColors.lineNumbers,
-    'editorIndentGuide.background': themeColors.editorIndentGuide,
-    'editor.selectionBackground': themeColors.selectionBackground,
-    'editorWidget.border': themeColors.editorWidgetBorder,
-    'editorWidget.background': themeColors.editorWidgetBackground,
+    'editor.foreground': themeName.euiColorDarkestShade,
+    'editor.background': themeName.euiColorEmptyShade,
+    'editorLineNumber.foreground': themeName.euiColorDarkShade,
+    'editorLineNumber.activeForeground': themeName.euiColorDarkShade,
+    'editorIndentGuide.background': themeName.euiColorLightShade,
+    'editor.selectionBackground': `${IS_DARK_THEME ? '#343551' : '#E3E4ED'}`,
+    'editorWidget.border': themeName.euiColorLightShade,
+    'editorWidget.background': themeName.euiColorLightestShade,
   },
 };
