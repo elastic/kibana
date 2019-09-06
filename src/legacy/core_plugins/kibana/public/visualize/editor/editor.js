@@ -513,14 +513,12 @@ function VisEditor(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -528,13 +526,13 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
-      });
-    });
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
+      });}
   });
 
   /**
