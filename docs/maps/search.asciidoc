@@ -37,7 +37,7 @@ Spatial filters narrow search results to documents that either intersect, are wi
 You can create spatial filters by:
 
 * Clicking image:maps/images/tools_icon.png[] to define the spatial fitler by drawing a polygon or a bounding box on the map.
-* Clicking *Filter by geometry* in a feature tooltip to use a feature's geometry for the spatial filter.
+* Click *Filter by geometry* in a tooltip, and then use the feature's geometry for the spatial filter.
 +
 [role="screenshot"]
 image::maps/images/create_spatial_filter.png[]
