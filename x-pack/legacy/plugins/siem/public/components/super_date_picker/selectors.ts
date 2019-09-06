@@ -61,8 +61,8 @@ export const isLoadingSelector = () =>
     query => query.some(i => i.loading === true)
   );
 
-export const refetchSelector = () =>
+export const queriesSelector = () =>
   createSelector(
     getQuery,
-    query => query.map(i => i.refetch)
+    query => query
   );
