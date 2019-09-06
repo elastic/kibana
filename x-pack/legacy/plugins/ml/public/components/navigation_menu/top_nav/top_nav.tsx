@@ -25,7 +25,7 @@ const MlSuperDatePicker = (EuiSuperDatePicker as any) as ComponentWithConstructo
 // a prop change of isPaused on the internal interval. This fix will be released
 // with EUI 13.7.0 but only 13.6.1 without the fix made it into Kibana 7.4 so
 // it's copied here.
-class MlSuperDatePickerWithUpdate extends MlSuperDatePicker {
+export class MlSuperDatePickerWithUpdate extends MlSuperDatePicker {
   componentDidUpdate = () => {
     // @ts-ignore
     this.stopInterval();

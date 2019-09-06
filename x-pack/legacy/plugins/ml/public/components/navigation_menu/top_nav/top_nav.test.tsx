@@ -10,12 +10,14 @@ import React from 'react';
 import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
-import { TopNav } from './top_nav';
+import { MlSuperDatePickerWithUpdate, TopNav } from './top_nav';
 
 uiTimefilterMock.enableAutoRefreshSelector();
 uiTimefilterMock.enableTimeRangeSelector();
 
 jest.mock('../../../contexts/ui/use_ui_context');
+
+const noop = () => {};
 
 describe('Navigation Menu: <TopNav />', () => {
   beforeEach(() => {
@@ -37,41 +39,61 @@ describe('Navigation Menu: <TopNav />', () => {
     refreshSubscription.unsubscribe();
   });
 
-  test('Listen for super date picker refresh.', done => {
-    const refreshListener = jest.fn();
-    const refreshSubscription = mlTimefilterRefresh$.subscribe(refreshListener);
+  // The following tests are written against MlSuperDatePickerWithUpdate
+  // instead of TopNav. TopNav uses hooks and we cannot writing tests
+  // with async hook updates yet until React 16.9 is available.
 
-    uiTimefilterMock.setRefreshInterval({ value: 5, pause: false });
+  // MlSuperDatePickerWithUpdate fixes an issue with EuiSuperDatePicker
+  // which didn't make it into Kibana 7.4. We should be able to just
+  // use EuiSuperDatePicker again once the following PR is in EUI:
+  // https://github.com/elastic/eui/pull/2298
 
-    mount(<TopNav />);
+  test('Listen for consecutive super date picker refreshs.', async () => {
+    const onRefresh = jest.fn();
 
-    setTimeout(() => {
-      expect(refreshListener).toBeCalledTimes(1);
-      refreshSubscription.unsubscribe();
-      done();
-    }, 10);
+    const componentRefresh = mount(
+      <MlSuperDatePickerWithUpdate
+        onTimeChange={noop}
+        isPaused={false}
+        onRefresh={onRefresh}
+        refreshInterval={10}
+      />
+    );
 
-    jest.runOnlyPendingTimers();
+    const instanceRefresh = componentRefresh.instance();
+
+    jest.advanceTimersByTime(10);
+    // @ts-ignore
+    await instanceRefresh.asyncInterval.__pendingFn;
+    jest.advanceTimersByTime(10);
+    // @ts-ignore
+    await instanceRefresh.asyncInterval.__pendingFn;
+
+    expect(onRefresh).toBeCalledTimes(2);
   });
 
-  test('Switching refresh interval to pause should stop listener being called.', done => {
-    const refreshListener = jest.fn();
-    const refreshSubscription = mlTimefilterRefresh$.subscribe(refreshListener);
+  test('Switching refresh interval to pause should stop onRefresh being called.', async () => {
+    const onRefresh = jest.fn();
 
-    uiTimefilterMock.setRefreshInterval({ value: 5, pause: false });
+    const componentRefresh = mount(
+      <MlSuperDatePickerWithUpdate
+        onTimeChange={noop}
+        isPaused={false}
+        onRefresh={onRefresh}
+        refreshInterval={10}
+      />
+    );
 
-    mount(<TopNav />);
+    const instanceRefresh = componentRefresh.instance();
 
-    setTimeout(() => {
-      uiTimefilterMock.setRefreshInterval({ value: 0, pause: true });
-    }, 10);
+    jest.advanceTimersByTime(10);
+    // @ts-ignore
+    await instanceRefresh.asyncInterval.__pendingFn;
+    componentRefresh.setProps({ isPaused: true, refreshInterval: 0 });
+    jest.advanceTimersByTime(10);
+    // @ts-ignore
+    await instanceRefresh.asyncInterval.__pendingFn;
 
-    setTimeout(() => {
-      expect(refreshListener).toBeCalledTimes(2);
-      refreshSubscription.unsubscribe();
-      done();
-    }, 20);
-
-    jest.runOnlyPendingTimers();
+    expect(onRefresh).toBeCalledTimes(1);
   });
 });
