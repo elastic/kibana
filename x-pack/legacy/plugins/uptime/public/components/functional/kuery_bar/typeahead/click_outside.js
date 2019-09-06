@@ -27,9 +27,8 @@ export default class ClickOutside extends Component {
   };
 
   render() {
-    const { ...restProps } = this.props;
     return (
-      <div ref={this.setNodeRef} {...restProps}>
+      <div ref={this.setNodeRef} style={this.props.style}>
         {this.props.children}
       </div>
     );
