@@ -163,12 +163,6 @@ export class RolesGridPage extends Component<Props, State> {
       { defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.' }
     );
 
-    const deprecatedRoleDesc = intl.formatMessage({
-      id: 'xpack.security.management.roles.deprecatedColumnDescription',
-      defaultMessage:
-        'Deprecated roles should not be assigned to users, as they will eventually be removed.',
-    });
-
     return [
       {
         field: 'name',
