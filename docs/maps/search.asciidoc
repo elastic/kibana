@@ -85,7 +85,7 @@ The most common cause for empty layers are searches for a field that exists in o
 [[maps-disable-search-for-layer]]
 ==== Disable search for layer
 
-You can disable the globar search bar from applying search context to a layer by unchecking *Apply global filter to layer* in Layer settings.
+To prevent the global search bar from applying search context to a layer, clear the *Apply global filter to layer* checkbox in Layer settings.
 Disabling the search context applies to the layer source and all <<terms-join, term joins>> configured for the layer.
 
 [float]
