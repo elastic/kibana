@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,8 +37,8 @@ const minError = i18n.translate(
   }
 );
 
-function areExtentsValid(min: number | '' = '', max: number | '' = ''): boolean {
-  if (min === '' || max === '') {
+function areExtentsValid(min: number | null = null, max: number | null = null): boolean {
+  if (min === null || max === null) {
     return true;
   }
 
@@ -59,11 +59,18 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
     errors.push(rangeError);
   }
 
-  if (type === ScaleTypes.LOG && (min === undefined || min <= 0)) {
+  if (type === ScaleTypes.LOG && (min === undefined || min === null || min <= 0)) {
     errors.push(minError);
   }
 
   const isValid = !errors.length;
+
+  const setExtents = useCallback(
+    (paramName, value) => {
+      setScale(paramName, value === '' ? null : value);
+    },
+    [setScale]
+  );
 
   useEffect(() => {
     setMultipleValidity('yExtents', isValid);
@@ -84,8 +91,8 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
               })}
               step={0.1}
               paramName="min"
-              value={min}
-              setValue={setScale}
+              value={min || ''}
+              setValue={setExtents}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -96,8 +103,8 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
               })}
               step={0.1}
               paramName="max"
-              value={max}
-              setValue={setScale}
+              value={max || ''}
+              setValue={setExtents}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

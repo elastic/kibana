@@ -42,8 +42,8 @@ interface Labels {
 export interface Scale {
   boundsMargin?: number | '';
   defaultYExtents?: boolean;
-  max?: number | '';
-  min?: number | '';
+  max?: number | null;
+  min?: number | null;
   mode?: AxisModes;
   setYExtents?: boolean;
   type: string;
