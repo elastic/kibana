@@ -17,7 +17,7 @@ export const stringifyKueries = (kueries: Map<string, Array<number | string>>): 
       return value.reduce(
         (prev: string, cur: string | number, index: number, array: Array<number | string>) => {
           let expression: string = `${key}:${cur}`;
-          if (typeof cur !== 'number' && cur.indexOf(' ') >= 0) {
+          if (typeof cur !== 'number' && (cur.indexOf(' ') >= 0 || cur.indexOf(':') >= 0)) {
             expression = `${key}:"${cur}"`;
           }
           if (array.length === 1) {
