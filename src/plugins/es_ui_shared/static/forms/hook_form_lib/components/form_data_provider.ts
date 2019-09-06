@@ -40,10 +40,10 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
       if (pathsToWatch) {
-        const valuesToWatchToArray = Array.isArray(pathsToWatch)
+        const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
-        if (valuesToWatchToArray.some(value => previousState.current[value] !== data[value])) {
+        if (valuesToWatchArray.some(value => previousState.current[value] !== data[value])) {
           previousState.current = data;
           setFormData(data);
         }

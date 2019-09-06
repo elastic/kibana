@@ -45,6 +45,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const [isChangingValue, setIsChangingValue] = useState(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
+  const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // -- HELPERS
@@ -115,6 +116,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     }
   };
 
+  const cancelInflightValidation = () => {
+    // Cancel any inflight validation (like an HTTP Request)
+    if (
+      inflightValidation.current &&
+      typeof (inflightValidation.current as any).cancel === 'function'
+    ) {
+      (inflightValidation.current as any).cancel();
+      inflightValidation.current = null;
+    }
+  };
+
   const runValidations = ({
     formData,
     value: valueToValidate,
@@ -124,15 +136,18 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     value: unknown;
     validationTypeToValidate?: string;
   }): ValidationError[] | Promise<ValidationError[]> => {
-    let validationErrors: ValidationError[] = [];
-    let hasToRunAsync = false;
-
     // By default, for fields that have an asynchronous validation
     // we will clear the errors as soon as the field value changes.
     clearErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
 
+    cancelInflightValidation();
+
     const runAsync = async () => {
+      const validationErrors: ValidationError[] = [];
+
       for (const validation of validations) {
+        inflightValidation.current = null;
+
         const {
           validator,
           exitOnFail = true,
@@ -146,13 +161,15 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
           continue;
         }
 
-        const validationResult = await validator({
+        inflightValidation.current = validator({
           value: (valueToValidate as unknown) as string,
           errors: validationErrors,
           form,
           formData,
           path,
-        });
+        }) as Promise<ValidationError>;
+
+        const validationResult = await inflightValidation.current;
 
         if (!validationResult) {
           continue;
@@ -172,7 +189,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     };
 
     const runSync = () => {
-      // Sequencially execute all the validations for the field
+      const validationErrors: ValidationError[] = [];
+      // Sequentially execute all the validations for the field
       for (const validation of validations) {
         const {
           validator,
@@ -187,38 +205,36 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
           continue;
         }
 
-        const validationResult: ValidationError = validator({
+        const validationResult = validator({
           value: (valueToValidate as unknown) as string,
           errors: validationErrors,
           form,
           formData,
           path,
-        }) as ValidationError;
+        });
 
         if (!validationResult) {
           continue;
         }
 
         if (!!validationResult.then) {
-          // The validator returned a Promise.
-          // Abort and run the validations asynchronously
-          hasToRunAsync = true;
-          break;
+          // The validator returned a Promise: abort and run the validations asynchronously
+          // We keep a reference to the onflith promise so we can cancel it.
+
+          inflightValidation.current = validationResult as Promise<ValidationError>;
+          cancelInflightValidation();
+
+          return runAsync();
         }
 
         validationErrors.push({
-          ...validationResult,
+          ...(validationResult as ValidationError),
           validationType: validationType || VALIDATION_TYPES.FIELD,
         });
 
         if (exitOnFail) {
           break;
         }
-      }
-
-      if (hasToRunAsync) {
-        validationErrors = [];
-        return runAsync();
       }
 
       return validationErrors;

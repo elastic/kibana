@@ -62,7 +62,7 @@ export function useForm<T = FormData>(
     if (options.stripEmptyFields) {
       return Object.entries(fields).reduce(
         (acc, [key, field]) => {
-          if (field.value !== '') {
+          if (typeof field.value !== 'string' || field.value.trim() !== '') {
             acc[key] = field;
           }
           return acc;
@@ -94,10 +94,14 @@ export function useForm<T = FormData>(
     return formData$.current.value;
   };
 
+  /**
+   * When a field value changes, validateFields() is called with the field name + any other fields
+   * declared in the "fieldsToValidateOnChange" (see the field config).
+   *
+   * When this method is called _without_ providing any fieldNames, we only need to validate fields that are pristine
+   * as the fields that are dirty have already been validated when their value changed.
+   */
   const validateFields: Form<T>['__validateFields'] = async fieldNames => {
-    // Fields that are dirty have already been validated when their value changed. Thus their errors array
-    // already contains any possible error.
-    // So when *no* fieldNames is provided, we only validate fields that haven't been changed by the user.
     const fieldsToValidate = fieldNames
       ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
       : fieldsToArray().filter(field => field.isPristine); // only validate fields that haven't been changed

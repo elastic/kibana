@@ -37,6 +37,21 @@ export interface ArrayItem {
   isNew: boolean;
 }
 
+/**
+ * Use UseArray to dynamically add fields to your form.
+ *
+ * example:
+ * If your form data looks like this:
+ *
+ * {
+ *   users: []
+ * }
+ *
+ * and you want to be able to add user objects ({ name: 'john', lastName. 'snow' }) inside
+ * the "users" array, you would use UseArray to render rows of user objects with 2 fields in each of them ("name" and "lastName")
+ *
+ * Look at the README.md for some examples.
+ */
 export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
   const form = useFormContext();
   const defaultValues = form.getFieldDefaultValue(path) as any[];
