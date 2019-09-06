@@ -45,6 +45,10 @@ function areExtentsValid(min: number | null = null, max: number | null = null): 
   return max > min;
 }
 
+function isNullOrUndefined(value?: number | null) {
+  return value === null || value === undefined;
+}
+
 interface YExtentsProps {
   scale: Scale;
   setScale: SetScale;
@@ -59,7 +63,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
     errors.push(rangeError);
   }
 
-  if (type === ScaleTypes.LOG && (min === undefined || min === null || min <= 0)) {
+  if (type === ScaleTypes.LOG && (isNullOrUndefined(min) || (min as number) <= 0)) {
     errors.push(minError);
   }
 
@@ -91,7 +95,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
               })}
               step={0.1}
               paramName="min"
-              value={min || ''}
+              value={isNullOrUndefined(min) ? '' : (min as number)}
               setValue={setExtents}
             />
           </EuiFlexItem>
@@ -103,7 +107,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
               })}
               step={0.1}
               paramName="max"
-              value={max || ''}
+              value={isNullOrUndefined(max) ? '' : (max as number)}
               setValue={setExtents}
             />
           </EuiFlexItem>
