@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import Boom from 'boom';
 import {
   AgentAdapter,
@@ -42,7 +41,7 @@ export class AgentLib {
       throw new Error('Impossible to enroll an already active agent');
     }
 
-    const enrolledAt = moment().toISOString();
+    const enrolledAt = new Date().toISOString();
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
@@ -118,7 +117,7 @@ export class AgentLib {
 
     const actions = this._filterActionsForCheckin(agent);
 
-    const now = moment().toISOString();
+    const now = new Date().toISOString();
     const updatedActions = actions.map(a => {
       return { ...a, sent_at: now };
     });
