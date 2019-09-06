@@ -23,7 +23,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
   const retry = getService('retry');
 
