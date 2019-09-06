@@ -6,31 +6,47 @@
 
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorPagination } from '../adapter_types';
-import { MonitorGroups } from '../monitor_id_with_groups';
-import {searchChunk} from "./search_chunk";
-import {CursorDirection} from "../../../../../common/graphql/types";
+import { fetchChunk } from './fetch_chunk';
+import { CursorDirection } from '../../../../../common/graphql/types';
+import { MonitorGroups } from './fetch_page';
 
-export class MonitorIterator {
+// Function that fetches a chunk of data used in iteration
+export type ChunkFetcher = (
+  queryContext: QueryContext,
+  searchAfter: any,
+  size: number
+) => Promise<ChunkResult>;
+
+// Result of fetching more results from the search.
+export interface ChunkResult {
+  monitorIdGroups: MonitorGroups[];
+  searchAfter: string;
+}
+
+export class Iterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
   buffer: MonitorGroups[];
   bufferPos: number;
   searchAfter: any;
+  chunkFetcher: ChunkFetcher;
 
   constructor(
     queryContext: QueryContext,
     initialBuffer: MonitorGroups[] = [],
-    initialBufferPos: number = -1
+    initialBufferPos: number = -1,
+    chunkFetcher: ChunkFetcher = fetchChunk
   ) {
     this.queryContext = queryContext;
     this.buffer = initialBuffer;
     this.bufferPos = initialBufferPos;
     this.searchAfter = queryContext.pagination.cursorKey;
+    this.chunkFetcher = chunkFetcher;
   }
 
   clone() {
-    return new MonitorIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
+    return new Iterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
 
   // Get a CursorPaginator object that will resume after the current() value.
@@ -55,7 +71,7 @@ export class MonitorIterator {
   }
 
   // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
-  reverse(): MonitorIterator | null {
+  reverse(): Iterator | null {
     const reverseContext = Object.assign({}, this.queryContext);
     const current = this.current();
 
@@ -68,7 +84,7 @@ export class MonitorIterator {
           : CursorDirection.AFTER,
     };
 
-    return current ? new MonitorIterator(reverseContext, [current], 0) : null;
+    return current ? new Iterator(reverseContext, [current], 0) : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
@@ -121,7 +137,7 @@ export class MonitorIterator {
       this.bufferPos = 0;
     }
 
-    const results = await searchChunk(this.queryContext, this.searchAfter, size);
+    const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     if (results.monitorIdGroups.length === 0) {
       return false;
     }

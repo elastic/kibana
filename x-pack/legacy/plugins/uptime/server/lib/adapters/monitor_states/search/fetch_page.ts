@@ -5,12 +5,12 @@
  */
 
 import { flatten } from 'lodash';
-import { MonitorIterator } from './iterator';
+import { Iterator } from './iterator';
 import { CursorPagination } from '../adapter_types';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { QUERY } from "../../../../../common/constants";
-import { enrich } from "./enrich";
-import {CursorDirection, SortOrder} from "../../../../../common/graphql/types";
+import { QUERY } from '../../../../../common/constants';
+import { enrich } from './enrich';
+import { CursorDirection, SortOrder } from '../../../../../common/graphql/types';
 
 export interface MonitorPage {
   items: MonitorGroups[];
@@ -43,23 +43,25 @@ export const fetchPage = async (queryContext: QueryContext): Promise<EnrichedPag
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
   const monitorPage = await fetchPageMonitors(queryContext, size);
 
-  const checkGroups: string[] = flatten(monitorPage.items.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup)));
+  const checkGroups: string[] = flatten(
+    monitorPage.items.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup))
+  );
 
-  const enrichedMonitors = await enrich(queryContext, checkGroups)
+  const enrichedMonitors = await enrich(queryContext, checkGroups);
 
   return {
     items: enrichedMonitors,
     nextPagePagination: monitorPage.nextPagePagination,
     prevPagePagination: monitorPage.prevPagePagination,
   };
-}
+};
 
 const fetchPageMonitors = async (
   queryContext: QueryContext,
   size: number
 ): Promise<MonitorPage> => {
   const items: MonitorGroups[] = [];
-  const iterator = new MonitorIterator(queryContext);
+  const iterator = new Iterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
   while (items.length < size) {

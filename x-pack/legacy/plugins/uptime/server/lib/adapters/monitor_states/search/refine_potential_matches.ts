@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {INDEX_NAMES} from '../../../../../common/constants';
-import {QueryContext} from '../elasticsearch_monitor_states_adapter';
-import {MonitorGroups} from '../monitor_id_with_groups';
-import {CursorDirection} from '../../../../../common/graphql/types';
-import {MonitorLocCheckGroup} from '../monitor_loc_check_group';
-
-export interface ChunkResult {
-  monitorIdGroups: MonitorGroups[];
-  searchAfter: string;
-}
+import { INDEX_NAMES } from '../../../../../common/constants';
+import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { MonitorGroups } from '../monitor_id_with_groups';
+import { CursorDirection } from '../../../../../common/graphql/types';
+import { MonitorLocCheckGroup } from '../monitor_loc_check_group';
 
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
@@ -31,14 +26,16 @@ export const refinePotentialMatches = async (
   );
 
   // Return the monitor groups filtering out things potential matches that weren't current
-  const matches: MonitorGroups[] = monitorIds.map((id: string) => {
-    return {id: id, groups: recentGroupsMatchingStatus.get(id) || []}
-  }).filter(mrg => mrg.groups.length > 0);
+  const matches: MonitorGroups[] = monitorIds
+    .map((id: string) => {
+      return { id, groups: recentGroupsMatchingStatus.get(id) || [] };
+    })
+    .filter(mrg => mrg.groups.length > 0);
 
   // Sort matches by ID
   matches.sort((a: MonitorGroups, b: MonitorGroups) => {
-    return (a.id === b.id ? 0 : (a.id > b.id ? 1 : -1));
-  })
+    return a.id === b.id ? 0 : a.id > b.id ? 1 : -1;
+  });
 
   if (queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
     matches.reverse();
@@ -91,18 +88,18 @@ export const mostRecentCheckGroups = async (queryContext: QueryContext, monitorI
     body: {
       size: 0,
       query: {
-        terms: {'monitor.id': monitorIds},
+        terms: { 'monitor.id': monitorIds },
       },
       aggs: {
         monitor: {
-          terms: {field: 'monitor.id', size: monitorIds.length},
+          terms: { field: 'monitor.id', size: monitorIds.length },
           aggs: {
             location: {
-              terms: {field: 'observer.geo.name', missing: 'N/A', size: 100},
+              terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
               aggs: {
                 top: {
                   top_hits: {
-                    sort: [{'@timestamp': 'desc'}],
+                    sort: [{ '@timestamp': 'desc' }],
                     _source: {
                       includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
                     },
