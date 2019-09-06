@@ -18,6 +18,7 @@ export class ClusterResourceLocator implements ResourceLocator {
   constructor(
     private readonly clusterService: ClusterService,
     private readonly clusterMembershipService: ClusterMembershipService,
+    // @ts-ignore
     private readonly schedulerService: ResourceSchedulerService
   ) {}
 
@@ -54,12 +55,12 @@ export class ClusterResourceLocator implements ResourceLocator {
     );
   }
 
+  /**
+   * Return undefined to let NodeRepositoriesService enqueue the clone job in cluster mode.
+   */
   async allocate(req: Request, resource: string): Promise<Endpoint | undefined> {
     // make the cluster service synchronize the meta data and allocate new resources to nodes
     await this.clusterService.pollClusterState();
-    // allocate the repository to nodes
-    await this.schedulerService.allocateUnassigned();
-    // the resource should be assigned to a node for now, if possible
-    return this.locate(req, resource);
+    return undefined;
   }
 }

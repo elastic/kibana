@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
+import { ObjectsTable } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 import { findObjects } from '../../../lib';
@@ -55,10 +55,6 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
-}));
-
-jest.mock('../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
@@ -318,7 +314,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should export all', async () => {
-      const { fetchExportByType } = require('../../../lib/fetch_export_by_type');
+      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
       const { saveAs } = require('@elastic/filesaver');
       const component = shallowWithIntl(
         <ObjectsTable.WrappedComponent
@@ -333,11 +329,11 @@ describe('ObjectsTable', () => {
 
       // Set up mocks
       const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
-      fetchExportByType.mockImplementation(() => blob);
+      fetchExportObjects.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
+      expect(fetchExportObjects).toHaveBeenCalledWith(allSavedObjects.map(so => ({ type: so.type, id: so.id })), true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
     });
