@@ -33,10 +33,6 @@ export type ActionBarType = 'successor' | 'predecessor';
 
 export interface ActionBarProps {
   /**
-   * the number of docs to be added to the current count
-   */
-  defaultStepSize: number;
-  /**
    * the number of docs to be displayed
    */
   docCount: number;
@@ -72,7 +68,6 @@ export interface ActionBarProps {
 }
 
 export function ActionBar({
-  defaultStepSize = 5,
   docCount,
   docCountAvailable,
   isDisabled,
@@ -117,7 +112,6 @@ export function ActionBar({
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
               onChange={ev => onChangeCount(Number(ev.target.value))}
-              step={defaultStepSize}
               type="number"
               value={docCount}
             />
