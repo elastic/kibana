@@ -7,5 +7,5 @@
 describe('simple usage', () => {
   it('should return an item', () => {
     expect(true).toBe(true);
-  })
+  });
 });
