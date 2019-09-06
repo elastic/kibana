@@ -433,9 +433,11 @@ export class CodeQueryBar extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-            {/* position:relative required on container so the suggestions appear under the query bar*/}
             <div
-              style={{ position: 'relative' }}
+              style={{
+                // position:relative required on container so the suggestions appear under the query bar
+                position: 'relative',
+              }}
               role="combobox"
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}
