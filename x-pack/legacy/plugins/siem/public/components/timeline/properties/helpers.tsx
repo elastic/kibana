@@ -168,7 +168,7 @@ const NotesIcon = pure<{ count: number }>(({ count }) => (
     aria-label={i18n.NOTES}
     color={count > 0 ? 'primary' : 'subdued'}
     data-test-subj="timeline-notes-icon"
-    size="l"
+    size="m"
     iconType="editorComment"
   />
 ));
