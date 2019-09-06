@@ -57,7 +57,7 @@ export function PanelConfig(props) {
     return function cleanup() {
       visDataSubscription.unsubscribe();
     };
-  }, [props.visData$]);
+  }, [model.id, props.visData$]);
 
   const updateControlValidity = (controlKey, isControlValid) => {
     formValidationResults[controlKey] = isControlValid;
