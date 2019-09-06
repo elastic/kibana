@@ -5,12 +5,12 @@
  */
 
 import { flatten } from 'lodash';
-import { Iterator } from './iterator';
 import { CursorPagination } from '../adapter_types';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { QUERY } from '../../../../../common/constants';
 import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../common/graphql/types';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
+import { MonitorGroupIterator } from './monitor_group_iterator';
 
 export interface MonitorGroupsPage {
   monitorGroups: MonitorGroups[];
@@ -72,7 +72,7 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   size: number
 ): Promise<MonitorGroupsPage> => {
   const monitorGroups: MonitorGroups[] = [];
-  const iterator = new Iterator(queryContext);
+  const iterator = new MonitorGroupIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
   while (monitorGroups.length < size) {

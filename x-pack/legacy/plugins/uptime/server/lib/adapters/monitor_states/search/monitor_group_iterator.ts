@@ -10,6 +10,9 @@ import { fetchChunk } from './fetch_chunk';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { MonitorGroups } from './fetch_page';
 
+// Hardcoded chunk size for how many monitors to fetch at a time when querying
+export const CHUNK_SIZE = 1000;
+
 // Function that fetches a chunk of data used in iteration
 export type ChunkFetcher = (
   queryContext: QueryContext,
@@ -19,11 +22,11 @@ export type ChunkFetcher = (
 
 // Result of fetching more results from the search.
 export interface ChunkResult {
-  monitorIdGroups: MonitorGroups[];
-  searchAfter: string;
+  monitorGroups: MonitorGroups[];
+  searchAfter: any;
 }
 
-export class Iterator {
+export class MonitorGroupIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
@@ -46,7 +49,7 @@ export class Iterator {
   }
 
   clone() {
-    return new Iterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
+    return new MonitorGroupIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
 
   // Get a CursorPaginator object that will resume after the current() value.
@@ -70,8 +73,8 @@ export class Iterator {
     return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
   }
 
-  // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
-  reverse(): Iterator | null {
+  // Returns a copy of this fetcher that goes backwards from the current positon
+  reverse(): MonitorGroupIterator | null {
     const reverseContext = Object.assign({}, this.queryContext);
     const current = this.current();
 
@@ -84,7 +87,7 @@ export class Iterator {
           : CursorDirection.AFTER,
     };
 
-    return current ? new Iterator(reverseContext, [current], 0) : null;
+    return current ? new MonitorGroupIterator(reverseContext, [current], 0) : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
@@ -129,7 +132,7 @@ export class Iterator {
     }
   }
 
-  async queryNextAndBuffer(size: number = 500, trim: boolean = true): Promise<boolean> {
+  async queryNextAndBuffer(size: number = CHUNK_SIZE, trim: boolean = true): Promise<boolean> {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.current();
     if (current && trim) {
@@ -138,11 +141,11 @@ export class Iterator {
     }
 
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
-    if (results.monitorIdGroups.length === 0) {
+    if (results.monitorGroups.length === 0) {
       return false;
     }
 
-    results.monitorIdGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
+    results.monitorGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
     this.searchAfter = results.searchAfter;
 
     return true;

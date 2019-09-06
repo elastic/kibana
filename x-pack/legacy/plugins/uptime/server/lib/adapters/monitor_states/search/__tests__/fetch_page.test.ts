@@ -12,8 +12,8 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
-import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../../common/graphql/types';
-import { CursorPagination } from '../../adapter_types';
+import { MonitorSummary } from '../../../../../../common/graphql/types';
+import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [
   {
@@ -59,35 +59,6 @@ const simpleEnricher = (monitorGroups: MonitorGroups[]): MonitorEnricher => {
         state: { summary: {}, timestamp: new Date(Date.parse('1999-12-31')).toISOString() },
       };
     });
-  };
-};
-
-const prevPagination = (key: any): CursorPagination => {
-  return {
-    cursorDirection: CursorDirection.BEFORE,
-    sortOrder: SortOrder.ASC,
-    cursorKey: key,
-  };
-};
-
-const nextPagination = (key: any): CursorPagination => {
-  return {
-    cursorDirection: CursorDirection.AFTER,
-    sortOrder: SortOrder.ASC,
-    cursorKey: key,
-  };
-};
-
-const simpleQueryContext = (): QueryContext => {
-  return {
-    database: undefined,
-    dateRangeEnd: '',
-    dateRangeStart: '',
-    filterClause: undefined,
-    pagination: prevPagination('something'),
-    request: undefined,
-    size: 0,
-    statusFilter: '',
   };
 };
 
