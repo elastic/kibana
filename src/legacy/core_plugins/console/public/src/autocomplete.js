@@ -346,6 +346,8 @@ export default function (editor) {
     let templateInserted = false;
     if (context.addTemplate && !_.isUndefined(term.template) && !_.isNull(term.template)) {
       let indentedTemplateLines;
+      // In order to allow triple quoted strings in template completion we check the `__raw_`
+      // attribute to determine whether this template should go through JSON formatting.
       if (term.template.__raw && term.template.value) {
         indentedTemplateLines = term.template.value.split('\n');
       } else {
