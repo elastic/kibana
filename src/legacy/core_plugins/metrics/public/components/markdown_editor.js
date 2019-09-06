@@ -24,7 +24,7 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
-import { tickFormatter } from './lib/tick_formatter';
+import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
 import 'brace/mode/markdown';
@@ -59,7 +59,7 @@ export class MarkdownEditor extends Component {
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
-    const rawFormatter = tickFormatter('0.[0000]', null, this.props.getConfig);
+    const rawFormatter = createTickFormatter('0.[0000]', null, this.props.getConfig);
 
     const createPrimitiveRow = key => {
       const snippet = `{{ ${key} }}`;
