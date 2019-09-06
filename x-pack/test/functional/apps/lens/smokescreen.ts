@@ -69,6 +69,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     return find.clickByCssSelector(`[data-test-subj="visListingTitleLink-${title}"]`);
   }
 
+  async function showHiddenFields() {
+    await find.clickByCssSelector('[data-test-subj="lnsIndexPatternFiltersToggle"]');
+    await find.clickByCssSelector('[data-test-subj="lnsEmptyFilter"]');
+    await find.clickByCssSelector('[data-test-subj="lnsIndexPatternFiltersToggle"]');
+  }
+
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -101,6 +107,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens visualizations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await showHiddenFields();
       await goToValidTimeRange();
 
       // Drag the @timestamp field to the workspace

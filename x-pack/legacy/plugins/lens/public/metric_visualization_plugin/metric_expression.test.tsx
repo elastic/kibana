@@ -51,42 +51,44 @@ describe('metric_expression', () => {
 
       expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x} />))
         .toMatchInlineSnapshot(`
-                <div
-                  style={
-                    Object {
-                      "alignItems": "center",
-                      "display": "flex",
-                      "flexDirection": "column",
-                      "justifyContent": "center",
-                      "maxHeight": "100%",
-                      "maxWidth": "100%",
-                      "textAlign": "center",
-                    }
-                  }
-                >
-                  <AutoScale>
-                    <div
-                      style={
-                        Object {
-                          "fontSize": "60pt",
-                          "fontWeight": 600,
-                        }
-                      }
-                    >
-                      10110
-                    </div>
-                    <div
-                      style={
-                        Object {
-                          "fontSize": "24pt",
-                        }
-                      }
-                    >
-                      My fanci metric chart
-                    </div>
-                  </AutoScale>
-                </div>
-            `);
+        <div
+          style={
+            Object {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "column",
+              "justifyContent": "center",
+              "maxHeight": "100%",
+              "maxWidth": "100%",
+              "textAlign": "center",
+            }
+          }
+        >
+          <AutoScale>
+            <div
+              data-test-subj="lns_metric_value"
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
+              }
+            >
+              10110
+            </div>
+            <div
+              data-test-subj="lns_metric_title"
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
+            </div>
+          </AutoScale>
+        </div>
+      `);
     });
 
     test('it does not render title in reduced mode', () => {
@@ -110,9 +112,7 @@ describe('metric_expression', () => {
             }
           }
         >
-          <AutoScale
-            minScale={0}
-          >
+          <AutoScale>
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -123,16 +123,6 @@ describe('metric_expression', () => {
               }
             >
               10110
-            </div>
-            <div
-              data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
-            >
-              My fanci metric chart
             </div>
           </AutoScale>
         </div>
