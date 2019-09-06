@@ -109,14 +109,14 @@ describe('AddToKql Component', () => {
       filterQuery: {
         kuery: {
           kind: 'kuery',
-          expression: 'host.name: siem-kibana',
+          expression: 'host.name: "siem-kibana"',
         },
         serializedQuery:
-          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
       },
       filterQueryDraft: {
         kind: 'kuery',
-        expression: 'host.name: siem-kibana',
+        expression: 'host.name: "siem-kibana"',
       },
     });
   });
@@ -173,14 +173,14 @@ describe('AddToKql Component', () => {
       filterQuery: {
         kuery: {
           kind: 'kuery',
-          expression: 'host.name: siem-kibana',
+          expression: 'host.name: "siem-kibana"',
         },
         serializedQuery:
-          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
       },
       filterQueryDraft: {
         kind: 'kuery',
-        expression: 'host.name: siem-kibana',
+        expression: 'host.name: "siem-kibana"',
       },
     });
   });
