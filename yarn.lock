@@ -983,10 +983,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.6.1":
-  version "13.6.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.6.1.tgz#4bcef855c9e5bb368436e18d79443b2f1fbeffef"
-  integrity sha512-i2f9J+Cf8/2fydIAT8MapvAtP//XZxybH0cU3UYASvc5P8DBt6rU/jdWLcHJhTHYZFDP+PjMMGzxWQNUS40IGg==
+"@elastic/eui@13.8.0":
+  version "13.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.8.0.tgz#fba1b3bf0b3dcaeda9fd29889cf4fde4edc11fb8"
+  integrity sha512-kffrDOOmqdjs2C/GWdFceYbpjjfwH5Og25HZb6XvCVu0VT1RUDXiQDPycKVQtn2dHp60y8PNrVcFw5T16tYGyw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
