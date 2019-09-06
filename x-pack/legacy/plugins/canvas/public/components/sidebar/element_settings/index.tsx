@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
@@ -13,11 +14,25 @@ interface Props {
   selectedElementId: string;
 }
 
-const mapStateToProps = (state: State, { selectedElementId }: Props) => ({
-  element: getElementById(state, selectedElementId, getSelectedPage(state)) as PositionedElement,
+const mapStateToProps = (state: State, { selectedElementId }: Props): StateProps => ({
+  element: getElementById(state, selectedElementId, getSelectedPage(state)),
 });
 
-export const ElementSettings = connect(mapStateToProps)(Component);
+interface StateProps {
+  element: PositionedElement | undefined;
+}
+
+const renderIfElement: React.FunctionComponent<StateProps> = props => {
+  if (props.element) {
+    return <Component element={props.element} />;
+  }
+
+  return null;
+};
+
+export const ElementSettings = connect<StateProps, {}, Props, State>(mapStateToProps)(
+  renderIfElement
+);
 
 ElementSettings.propTypes = {
   selectedElementId: PropTypes.string.isRequired,

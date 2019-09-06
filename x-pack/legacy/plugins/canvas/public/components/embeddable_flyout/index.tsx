@@ -36,7 +36,7 @@ interface DispatchProps {
 }
 
 // FIX: Missing state type
-const mapStateToProps = (state: any, ownProps: Props) => ({ pageId: getSelectedPage(state) });
+const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
   addEmbeddable: (pageId, partialElement): DispatchProps['addEmbeddable'] =>
