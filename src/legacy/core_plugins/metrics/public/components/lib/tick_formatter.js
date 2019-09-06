@@ -22,7 +22,7 @@ import { isNumber } from 'lodash';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 
-export const tickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
+export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template, { knownHelpersOnly: true });
   let formatter;
