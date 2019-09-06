@@ -22,7 +22,6 @@ import expect from '@kbn/expect';
 export function InspectorProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -132,7 +131,7 @@ export function InspectorProvider({ getService }) {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
+        await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterForInspectorCellValue', cell);
         await filterBtn.click();
       });
@@ -143,7 +142,7 @@ export function InspectorProvider({ getService }) {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
+        await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterOutInspectorCellValue', cell);
         await filterBtn.click();
       });
