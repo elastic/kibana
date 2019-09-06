@@ -4,18 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-export class NotFoundPage extends React.PureComponent {
-  public render() {
-    return (
-      <div data-test-subj="infraNotFoundPage">
-        <FormattedMessage
-          id="xpack.infra.notFoundPage.noContentFoundErrorTitle"
-          defaultMessage="No content found"
+export const NotFoundPage = () => (
+  <EuiFlexGroup justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="faceNeutral"
+          iconColor="subdued"
+          title={
+            <EuiTitle size="m">
+              {
+                <h3>
+                  {i18n.translate('xpack.uptime.emptyStateError.404', {
+                    defaultMessage: 'Page Not found',
+                  })}
+                </h3>
+              }
+            </EuiTitle>
+          }
+          body={
+            <Link to="/">
+              <EuiButton href="/">Back to home</EuiButton>
+            </Link>
+          }
         />
-      </div>
-    );
-  }
-}
+      </EuiPanel>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
