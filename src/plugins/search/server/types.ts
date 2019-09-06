@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { RequestHandlerContext } from 'kibana/server';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface IKibanaSearchRequest {
+  id?: string;
+  debug?: boolean;
 }
 
-export { DataServerPlugin as Plugin };
+export interface IKibanaSearchResponse<THits> {
+  percentComplete: number;
+
+  hits: THits[];
+}
+
+export interface ISearchStrategy<TRequest, TResponse> {
+  search: (request: TRequest) => Promise<TResponse>;
+}

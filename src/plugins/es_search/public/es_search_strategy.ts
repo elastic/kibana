@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ISearchContext } from 'src/plugins/search/public';
+import {
+  TClientSearchStrategyProvider,
+  IClientSearchStrategy,
+  SYNC_SEARCH_STRATEGY,
+} from '../../search/public';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+import { ES_SEARCH_STRATEGY } from '../common';
+import { IEsSearchRequest, IEsSearchResponse } from './types';
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+export const esClientSearchStrategyProvider: TClientSearchStrategyProvider<
+  IEsSearchRequest,
+  IEsSearchResponse<any>
+> = (context: ISearchContext): IClientSearchStrategy<IEsSearchRequest, IEsSearchResponse<any>> => {
+  return {
+    search: (request, options) =>
+      context.search.search(
+        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
+        options,
+        SYNC_SEARCH_STRATEGY
+      ),
+  };
+};

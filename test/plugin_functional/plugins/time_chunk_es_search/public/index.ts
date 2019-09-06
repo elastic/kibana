@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+import { TimeChunkEsSearchPlugin } from './plugin';
 
-  public setup(core: CoreSetup) {}
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new TimeChunkEsSearchPlugin(initializerContext);
 
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+export { ITimeChunkEsRequest } from './types';
+export { TIME_CHUNK_ES_SEARCH_STRATEGY } from '../common';

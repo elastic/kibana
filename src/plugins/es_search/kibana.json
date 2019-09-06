@@ -1,0 +1,7 @@
+{
+  "id": "esSearch",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["search"]
+}

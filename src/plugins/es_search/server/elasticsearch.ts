@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface StringMap<T = unknown> {
+  [key: string]: T;
 }
 
-export { DataServerPlugin as Plugin };
+export type IndexAsString<Map> = {
+  [k: string]: Map[keyof Map];
+} & Map;
+
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export interface BoolQuery {
+  must_not: Array<Record<string, any>>;
+  should: Array<Record<string, any>>;
+  filter: Array<Record<string, any>>;
+}
+
+export { IEsRawSearchResponse } from '../common/elasticsearch';

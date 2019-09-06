@@ -18,29 +18,26 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
+import { ISearchAppMountContext } from '../../../../../src/plugins/search/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
-declare global {
-  interface Window {
-    corePluginB?: string;
+declare module 'kibana/public' {
+  interface AppMountContext {
+    search: ISearchAppMountContext;
   }
 }
-
-export interface CorePluginBDeps {
+export interface DataExplorerPluginDeps {
   core_plugin_a: CorePluginAPluginSetup;
 }
 
-export class CorePluginBPlugin
-  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
-  public setup(core: CoreSetup, deps: CorePluginBDeps) {
-    window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
-
+export class DataExplorerPlugin implements Plugin<void, void, DataExplorerPluginDeps> {
+  public setup(core: CoreSetup, deps: DataExplorerPluginDeps) {
     core.application.register({
-      id: 'bar',
-      title: 'Bar',
+      id: 'dataPluginExplorer',
+      title: 'Data plugin',
       async mount(context, params) {
         const { renderApp } = await import('./application');
-        return renderApp(context, params, filters);
+        return renderApp(context, params);
       },
     });
   }
@@ -48,6 +45,3 @@ export class CorePluginBPlugin
   public start() {}
   public stop() {}
 }
-
-export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;
-export type CorePluginBPluginStart = ReturnType<CorePluginBPlugin['start']>;

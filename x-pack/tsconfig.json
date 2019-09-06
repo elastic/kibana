@@ -36,6 +36,9 @@
       ],
       "monitoring/common/*": [
         "x-pack/monitoring/common/*"
+      ],
+      "kibana/public": [
+        "src/core/public"
       ]
     },
     "types": [

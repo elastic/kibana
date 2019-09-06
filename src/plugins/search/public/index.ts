@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializerContext } from '../../../core/public';
+import { SearchPublicPlugin } from './plugin';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SearchPublicPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
+export { ISearchAppMountContext } from './i_search_app_mount_context';
+export { TSearch } from './types';
+
+export {
+  TClientSearchStrategyProvider,
+  ISearchSetup,
+  IClientSearchStrategy,
+} from './i_setup_contract';
+
+export { SYNC_SEARCH_STRATEGY } from './plugin';
+
+export { ISearchContext } from './i_search_context';
+export { ISearchOptions, IKibanaClientSearchRequest, IKibanaClientSearchResponse } from './types';

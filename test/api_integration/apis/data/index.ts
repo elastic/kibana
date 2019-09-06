@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+// eslint-disable-next-line import/no-default-export
+export default function({ loadTestFile }: { loadTestFile: (file: string) => void }) {
+  describe('data', () => {
+    loadTestFile(require.resolve('./search'));
+  });
 }
-
-export { DataServerPlugin as Plugin };

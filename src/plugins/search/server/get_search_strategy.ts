@@ -17,15 +17,22 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ISearchStrategy } from './types';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export const getSearchStrategy = ({
+  strategyName,
+  defaultSearchStrategy,
+  searchStrategies,
+}: {
+  strategyName?: string;
+  defaultSearchStrategy: string;
+  searchStrategies: Map<string, () => Promise<ISearchStrategy<any, any>>>;
+}) => {
+  const name = strategyName ? strategyName : defaultSearchStrategy;
+  const strategyProvider = searchStrategies.get(name);
+  if (!strategyProvider) {
+    throw new Error(`No strategy found for ${strategyName}`);
+  }
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+  return strategyProvider();
+};

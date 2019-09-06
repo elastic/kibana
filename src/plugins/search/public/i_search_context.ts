@@ -16,16 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Observable } from 'rxjs';
+import { CoreSetup } from '../../../core/public';
+import { IKibanaClientSearchRequest, IKibanaClientSearchResponse, ISearchOptions } from './types';
+import { IClientSearchStrategy } from './i_setup_contract';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+export interface ISearchContext {
+  core: CoreSetup;
+  search: {
+    search: <
+      TRequest extends IKibanaClientSearchRequest,
+      TResponse extends IKibanaClientSearchResponse<any>
+    >(
+      request: TRequest,
+      options: ISearchOptions,
+      name: string
+    ) => Observable<TResponse>;
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+    getClientSearchStrategy: <
+      TRequest extends IKibanaClientSearchRequest,
+      TResponse extends IKibanaClientSearchResponse<any>
+    >(
+      name: string
+    ) => Promise<IClientSearchStrategy<TRequest, TResponse>>;
+  };
 }
-
-export { DataServerPlugin as Plugin };

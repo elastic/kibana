@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export { IDemoDataRequest, IDemoDataResponse, IDemoDataHit } from './types';
+import { DemoDataPlugin } from './plugin';
 
-  public setup(core: CoreSetup) {}
+export { DEMO_DATA_SEARCH_STRATEGY } from '../common';
 
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new DemoDataPlugin(initializerContext);

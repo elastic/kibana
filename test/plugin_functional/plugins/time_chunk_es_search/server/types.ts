@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ISearchStrategy } from 'src/plugins/search/server';
+import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/es_search/public';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface ITimeChunkEsRequest extends IEsSearchRequest {
+  timeRange: {
+    to: number;
+    from: number;
+    timeField: string;
+  };
+  timeIncrement: number;
 }
 
-export { DataServerPlugin as Plugin };
+export interface ISearchesInProgress {
+  [id: string]: {
+    request: IEsSearchRequest;
+    response: IEsSearchResponse<any>;
+    lastToTime: number;
+  };
+}
+
+export type ITimeChunkSearchStrategyProvider = (
+  searchesInProgress: ISearchesInProgress
+) => ISearchStrategy<IEsSearchRequest, IEsSearchResponse<any>>;

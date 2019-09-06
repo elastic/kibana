@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializerContext } from '../../../core/server';
+import { SearchServerPlugin } from './plugin';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SearchServerPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
+export { ISearchSetup, ISearchStrategy, TSearchStrategyProvider } from './i_setup_contract';
+export * from '../common';
+
+export { ISearchContext } from './i_search_context';

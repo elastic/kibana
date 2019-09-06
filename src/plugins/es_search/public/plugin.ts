@@ -17,15 +17,25 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ISearchSetup } from '../../search/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '../../../core/public';
+import { ES_SEARCH_STRATEGY } from '../common';
+import { esClientSearchStrategyProvider } from './es_search_strategy';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+interface EsSearchSetupDependencies {
+  search: ISearchSetup;
 }
 
-export { DataServerPlugin as Plugin };
+export class EsSearchPlugin implements Plugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup, deps: EsSearchSetupDependencies) {
+    deps.search.registerClientSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ES_SEARCH_STRATEGY,
+      esClientSearchStrategyProvider
+    );
+  }
+
+  public start() {}
+  public stop() {}
+}

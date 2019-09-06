@@ -1,0 +1,10 @@
+{
+  "id": "timeChunkEsSearch",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["time_chunk_es_search"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["search", "asyncSearch", "esSearch"],
+  "optionalPlugins": []
+}

@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { EsSearchPlugin } from './plugin';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export { IEsSearchRequest, IEsSearchResponse } from './types';
 
-  public setup(core: CoreSetup) {}
+export { ES_SEARCH_STRATEGY } from '../common';
 
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new EsSearchPlugin(initializerContext);

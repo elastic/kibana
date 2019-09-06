@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { Observable } from 'rxjs';
+import { SearchParams, SearchResponse } from 'elasticsearch';
+import { IKibanaClientSearchRequest, IKibanaClientSearchResponse } from 'src/plugins/search/public';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface IEsSearchRequest extends IKibanaClientSearchRequest {
+  params: SearchParams;
 }
 
-export { DataServerPlugin as Plugin };
+export interface IEsSearchResponse<T> extends IKibanaClientSearchResponse<T> {
+  rawResponse: SearchResponse<T>;
+}
+
+export type TEsSearch = (request: IEsSearchRequest) => Observable<IEsSearchResponse<any>>;

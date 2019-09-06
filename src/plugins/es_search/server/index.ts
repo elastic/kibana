@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializerContext } from '../../../core/server';
+import { EsSearchServerPlugin } from './plugin';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export { ES_SEARCH_STRATEGY } from '../common';
+export { IEsSearchRequest, IEsSearchResponse } from './types';
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new EsSearchServerPlugin(initializerContext);
 }
-
-export { DataServerPlugin as Plugin };

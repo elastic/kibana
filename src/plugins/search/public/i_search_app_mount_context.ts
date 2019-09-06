@@ -17,15 +17,24 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { Observable } from 'rxjs';
+import { IKibanaClientSearchRequest, IKibanaClientSearchResponse, ISearchOptions } from './types';
+import { IClientSearchStrategy } from './i_setup_contract';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export interface ISearchAppMountContext {
+  search: <
+    TRequest extends IKibanaClientSearchRequest,
+    TResponse extends IKibanaClientSearchResponse<any>
+  >(
+    request: TRequest,
+    options: ISearchOptions,
+    strategy: string
+  ) => Observable<TResponse>;
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+  getClientSearchStrategy: <
+    TRequest extends IKibanaClientSearchRequest,
+    TResponse extends IKibanaClientSearchResponse<any>
+  >(
+    name: string
+  ) => Promise<IClientSearchStrategy<TRequest, TResponse>>;
 }
-
-export { DataServerPlugin as Plugin };

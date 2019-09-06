@@ -17,15 +17,29 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { IKibanaSearchResponse, IKibanaSearchRequest } from 'src/plugins/search/server';
+import { ISearchStrategy } from 'src/plugins/search/server';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface IDemoDataRequest extends IKibanaSearchRequest {
+  responseTime: number;
+  totalHitCount: number;
 }
 
-export { DataServerPlugin as Plugin };
+export interface IDemoDataHit {
+  title: string;
+  message: string;
+}
+
+export type IDemoDataResponse = IKibanaSearchResponse<IDemoDataHit>;
+
+export interface ISearchesInProgress {
+  [id: string]: {
+    request: IDemoDataRequest;
+    response: IDemoDataResponse;
+    requestStartTime: number;
+  };
+}
+
+export type TDemoDataSearchStrategyProvider = (
+  searchesInProgress: ISearchesInProgress
+) => ISearchStrategy<IDemoDataRequest, IDemoDataResponse>;

@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './elasticsearch';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { IKibanaSearchResponse, IKibanaSearchRequest } from 'src/plugins/search/server';
+import { SearchParams } from 'elasticsearch';
+import { IEsRawSearchResponse } from './elasticsearch';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+export type IEsSearchRequest = IKibanaSearchRequest & SearchParams;
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
-}
-
-export { DataServerPlugin as Plugin };
+export type IEsSearchResponse<Hits, TSearchParams> = IKibanaSearchResponse &
+  IEsRawSearchResponse<Hits, TSearchParams>;

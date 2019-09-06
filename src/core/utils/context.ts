@@ -166,6 +166,15 @@ export interface IContextContainer<
   ) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
 }
 
+interface ProviderSourcePair<
+  TContext extends Record<string, any>,
+  THandlerReturn,
+  THandlerParameters extends any[] = []
+> {
+  provider: IContextProvider<TContext, keyof TContext, THandlerParameters>;
+  source: symbol;
+}
+
 /** @internal */
 export class ContextContainer<
   TContext extends Record<string, any>,
@@ -178,10 +187,7 @@ export class ContextContainer<
    */
   private readonly contextProviders = new Map<
     keyof TContext,
-    {
-      provider: IContextProvider<TContext, keyof TContext, THandlerParameters>;
-      source: symbol;
-    }
+    ProviderSourcePair<TContext, THandlerReturn, THandlerParameters>
   >();
   /** Used to keep track of which plugins registered which contexts for dependency resolution. */
   private readonly contextNamesBySource: Map<symbol, Array<keyof TContext>>;
@@ -297,10 +303,10 @@ export class ContextContainer<
 /** Sorts context provider pairs by core pairs first. */
 const sortByCoreFirst = (
   coreId: symbol
-): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) => (
-  [leftName, leftProvider],
-  [rightName, rightProvider]
-) => {
+): ((
+  left: [any, ProviderSourcePair<any, any, any>],
+  right: [any, ProviderSourcePair<any, any, any>]
+) => number) => ([leftName, leftProvider], [rightName, rightProvider]) => {
   if (leftProvider.source === coreId) {
     return rightProvider.source === coreId ? 0 : -1;
   } else {

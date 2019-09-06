@@ -1,0 +1,10 @@
+{
+  "id": "demoDataSearch",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["demo_data_search"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["search", "asyncSearch"],
+  "optionalPlugins": []
+}

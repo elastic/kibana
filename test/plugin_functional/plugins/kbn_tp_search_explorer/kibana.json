@@ -1,0 +1,10 @@
+{
+  "id": "kbn_tp_search_plugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["kbn_tp_search_plugin"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["search", "demoDataSearch"],
+  "optionalPlugins": []
+}

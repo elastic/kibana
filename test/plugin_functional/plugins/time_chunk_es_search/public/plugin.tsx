@@ -17,15 +17,25 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ISearchSetup } from '../../../../../src/plugins/search/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../src/core/public';
+import { TIME_CHUNK_ES_SEARCH_STRATEGY } from '../common';
+import { timeChunkEsClientSearchStrategyProvider } from './time_chunk_es_search_strategy';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+interface CustomEsSearchSetupDependencies {
+  search: ISearchSetup;
 }
 
-export { DataServerPlugin as Plugin };
+export class TimeChunkEsSearchPlugin implements Plugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup, deps: CustomEsSearchSetupDependencies) {
+    deps.search.registerClientSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      TIME_CHUNK_ES_SEARCH_STRATEGY,
+      timeChunkEsClientSearchStrategyProvider
+    );
+  }
+
+  public start() {}
+  public stop() {}
+}

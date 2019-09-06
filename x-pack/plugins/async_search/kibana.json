@@ -1,0 +1,7 @@
+{
+  "id": "asyncSearch",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["search"]
+}

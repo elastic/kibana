@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { IKibanaSearchResponse, IKibanaSearchRequest } from '../common';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+export interface IRouteHandlerSearchContext {
+  search: <TRequest extends IKibanaSearchRequest, TResponse extends IKibanaSearchResponse<any>>(
+    request: TRequest,
+    name: string
+  ) => Promise<TResponse>;
 }
-
-export { DataServerPlugin as Plugin };

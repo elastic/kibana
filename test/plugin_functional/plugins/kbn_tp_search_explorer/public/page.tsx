@@ -17,15 +17,37 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import React from 'react';
 
-export class DataServerPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
 
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-  public stop() {}
+interface PageProps {
+  title: string;
+  children: React.ReactNode;
 }
 
-export { DataServerPlugin as Plugin };
+export function Page({ title, children }: PageProps) {
+  return (
+    <EuiPageBody data-test-subj="searchTestPage">
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody>{children}</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+}

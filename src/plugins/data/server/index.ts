@@ -24,4 +24,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
+// export * from '../common';
+// export { ISearchStrategy } from './search';
