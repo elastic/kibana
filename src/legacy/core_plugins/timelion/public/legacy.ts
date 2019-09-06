@@ -26,21 +26,19 @@ import { TimelionPluginSetupDependencies, TimelionPluginStartDependencies } from
 import panelRegistry from './lib/panel_registry';
 import { LegacyDependenciesPlugin } from './shim';
 
+// Temporary solution
+// It will be removed when all dependent services are migrated to the new platform.
+const __LEGACY = new LegacyDependenciesPlugin();
+
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
   data: npSetup.plugins.data,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  __LEGACY,
 };
 
 const startPlugins: Readonly<TimelionPluginStartDependencies> = {
   panelRegistry,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  __LEGACY,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
