@@ -35,7 +35,8 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { timefilter, getTime, TimeRange } from 'ui/timefilter';
+import { timefilter, getTime } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -256,9 +257,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
-        triggerContext: {
-          filters,
-        },
+        filters,
       });
     };
   }

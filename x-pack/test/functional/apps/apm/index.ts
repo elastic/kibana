@@ -7,7 +7,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
   describe('APM', function() {
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./feature_controls'));
   });
 }

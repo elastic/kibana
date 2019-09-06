@@ -18,7 +18,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange } from 'ui/timefilter';
+import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import { Query } from '../../query/query_bar';
 
 export * from './components';
