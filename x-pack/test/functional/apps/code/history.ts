@@ -48,7 +48,6 @@ export default function manageRepositoriesFunctionalTests({
         const webDriver = await getService('__webdriver__').init();
         driver = webDriver.driver;
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
         await PageObjects.security.logout();
@@ -121,8 +120,7 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      // TODO: pending on migration to local git repository bundling
-      it.skip('in search page, change language filters can go back and forward', async () => {
+      it('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&langs=typescript`;
         await browser.get(url);
@@ -137,7 +135,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(language.indexOf('typescript')).to.equal(0);
         });
 
-        const unselectedFilter = (await find.allByCssSelector('.euiFacetButton--unSelected'))[0];
+        const unselectedFilter = (await find.allByCssSelector('.euiFacetButton--unSelected'))[1];
         await unselectedFilter.click();
 
         await retry.try(async () => {
