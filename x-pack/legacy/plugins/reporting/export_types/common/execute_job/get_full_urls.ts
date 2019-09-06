@@ -14,14 +14,14 @@ interface KeyedRelativeUrl {
   relativeUrl: string;
 }
 
-export const getFullUrls = async ({
+export async function getFullUrls({
   job,
   server,
   ...mergeValues // caller's mergeMap passes props we only need to pass through
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
   server: KbnServer;
-}) => {
+}) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 
   // PDF and PNG job params put in the url differently
@@ -64,4 +64,4 @@ export const getFullUrls = async ({
   });
 
   return { job, urls, server, ...mergeValues };
-};
+}

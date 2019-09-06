@@ -190,7 +190,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
 
   await getCustomLogo({
-    job: { basePath: '/sbp' } as JobDocPayloadPDF,
+    job: {} as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });

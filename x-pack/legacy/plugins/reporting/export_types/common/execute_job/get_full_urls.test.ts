@@ -6,6 +6,8 @@
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { getFullUrls } from './index';
+import { JobDocPayloadPNG } from '../../png/types';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
 let mockServer: any;
 beforeEach(() => {
@@ -15,15 +17,7 @@ beforeEach(() => {
 test(`fails if no URL is passed`, async () => {
   await expect(
     getFullUrls({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+      job: {} as JobDocPayloadPNG,
       server: mockServer,
     })
   ).rejects.toBeDefined();
@@ -33,16 +27,9 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const { urls } = await getFullUrls({
     job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
       relativeUrl: '/app/kibana#/something',
       forceNow,
-    },
+    } as JobDocPayloadPNG,
     server: mockServer,
   });
 
@@ -56,16 +43,9 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 
   const { urls } = await getFullUrls({
     job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
       relativeUrl: '/app/kibana#/something?_g=something',
       forceNow,
-    },
+    } as JobDocPayloadPNG,
     server: mockServer,
   });
 
@@ -77,17 +57,33 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
   const { urls } = await getFullUrls({
     job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
       relativeUrl: '/app/kibana#/something',
-    },
+    } as JobDocPayloadPNG,
     server: mockServer,
   });
 
   expect(urls[0]).toEqual('http://localhost:5601/sbp/app/kibana#/something');
+});
+
+test(`adds forceNow to each of multiple urls`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const { urls } = await getFullUrls({
+    job: {
+      objects: [
+        { relativeUrl: '/app/kibana#/something_aaa' },
+        { relativeUrl: '/app/kibana#/something_bbb' },
+        { relativeUrl: '/app/kibana#/something_ccc' },
+        { relativeUrl: '/app/kibana#/something_ddd' },
+      ],
+      forceNow,
+    } as JobDocPayloadPDF,
+    server: mockServer,
+  });
+
+  expect(urls).toEqual([
+    'http://localhost:5601/sbp/app/kibana#/something_aaa?forceNow=2000-01-01T00%3A00%3A00.000Z',
+    'http://localhost:5601/sbp/app/kibana#/something_bbb?forceNow=2000-01-01T00%3A00%3A00.000Z',
+    'http://localhost:5601/sbp/app/kibana#/something_ccc?forceNow=2000-01-01T00%3A00%3A00.000Z',
+    'http://localhost:5601/sbp/app/kibana#/something_ddd?forceNow=2000-01-01T00%3A00%3A00.000Z',
+  ]);
 });
