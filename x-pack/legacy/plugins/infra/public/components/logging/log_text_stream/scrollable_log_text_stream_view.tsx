@@ -60,7 +60,7 @@ interface ScrollableLogTextStreamViewState {
   targetId: string | null;
 }
 
-class ScrollableLogTextStreamViewClass extends React.PureComponent<
+export class ScrollableLogTextStreamView extends React.PureComponent<
   ScrollableLogTextStreamViewProps,
   ScrollableLogTextStreamViewState
 > {
@@ -272,8 +272,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     }
   );
 }
-
-export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);
 
 /**
  * This function-as-child component calculates the column widths based on the

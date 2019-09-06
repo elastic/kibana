@@ -22,7 +22,7 @@ interface Props {
   changeMetric: (metric: InfraSnapshotMetricInput) => void;
 }
 
-export class WaffleNodeTypeSwitcherClass extends React.PureComponent<Props> {
+export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     const nodeOptions = [
       {
@@ -59,5 +59,3 @@ export class WaffleNodeTypeSwitcherClass extends React.PureComponent<Props> {
     this.props.changeMetric({ type: InfraSnapshotMetricType.cpu });
   };
 }
-
-export const WaffleNodeTypeSwitcher = injectI18n(WaffleNodeTypeSwitcherClass);

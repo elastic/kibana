@@ -23,7 +23,7 @@ interface LogsPageNoIndicesContentProps {
 }
 
 export const LogsPageNoIndicesContent = injectUICapabilities(
-  injectI18n((props: LogsPageNoIndicesContentProps) => {
+  (props: LogsPageNoIndicesContentProps) => {
     const { uiCapabilities } = props;
 
     return (
@@ -70,5 +70,5 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
         )}
       </WithKibanaChrome>
     );
-  })
+  }
 );

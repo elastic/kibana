@@ -20,7 +20,7 @@ interface LogTimeControlsProps {
   jumpToTime: (time: number) => any;
 }
 
-class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
+export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   public render() {
     const { currentTime, isLiveStreaming } = this.props;
 
@@ -95,5 +95,3 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
     this.props.stopLiveStreaming();
   };
 }
-
-export const LogTimeControls = injectI18n(LogTimeControlsUI);
