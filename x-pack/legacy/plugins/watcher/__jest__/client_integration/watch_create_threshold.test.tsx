@@ -190,6 +190,45 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           expect(exists('watchVisualizationChart')).toBe(true);
           expect(exists('watchActionsPanel')).toBe(true);
         });
+
+        describe('watch conditions', () => {
+          beforeEach(async () => {
+            const { form, find, component } = testBed;
+
+            // Name, index and time fields are required before the watch condition expression renders
+            form.setInputValue('nameInput', 'my_test_watch');
+            find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
+            form.setInputValue('watchTimeFieldSelect', '@timestamp');
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+          });
+
+          test('should require a threshold value', async () => {
+            const { form, find, component } = testBed;
+
+            find('watchThresholdButton').simulate('click');
+
+            // Provide invalid value
+            form.setInputValue('watchThresholdInput', '');
+
+            expect(form.getErrorsMessages()).toContain('A value is required.');
+
+            // Provide valid value
+            form.setInputValue('watchThresholdInput', '0');
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+
+            expect(form.getErrorsMessages().length).toEqual(0);
+          });
+        });
       });
 
       describe('actions', () => {
