@@ -39,9 +39,9 @@ export function isEsIndexNotFoundError(err: any) {
  *  @param  {String} pattern the pattern which indexes were supposed to match
  *  @return {Boom}
  */
-export function createNoMatchingIndicesError(pattern: string) {
+export function createNoMatchingIndicesError(pattern: string[] | string) {
   const err = Boom.notFound(`No indices match pattern "${pattern}"`);
-  err.output.payload.code = ERR_NO_MATCHING_INDICES;
+  err.output.payload.message = ERR_NO_MATCHING_INDICES;
   return err;
 }
 
