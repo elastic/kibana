@@ -7,7 +7,8 @@
 import React, { Component, FC, Fragment, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
-import { TimeHistory, TimeRange } from 'ui/timefilter';
+import { TimeHistory } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';

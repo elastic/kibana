@@ -33,16 +33,17 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-
-export const actionType: ActionType = {
-  id: '.index',
-  name: 'index',
-  validate: {
-    config: ConfigSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(): ActionType {
+  return {
+    id: '.index',
+    name: 'index',
+    validate: {
+      config: ConfigSchema,
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 
