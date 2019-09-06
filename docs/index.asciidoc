@@ -7,7 +7,11 @@
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
+<<<<<<< HEAD
 include::{asciidoc-dir}/../../shared/versions67.asciidoc[]
+=======
+include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
+>>>>>>> 6b8c133b1d... [DOCS] Updates location of version attribute for Kibana Guide (#45051)
 
 :docker-repo:    docker.elastic.co/kibana/kibana
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
