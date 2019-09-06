@@ -35,12 +35,11 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="analyzer"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('analyzer')}
               config={fieldConfig('analyzer')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: ANALYZERS_OPTIONS,
                 },
               }}
@@ -49,12 +48,11 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="search_analyzer"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('search_analyzer')}
               config={fieldConfig('search_analyzer')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: ANALYZERS_OPTIONS,
                 },
               }}
@@ -63,12 +61,11 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="search_quote_analyzer"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('search_quote_analyzer')}
               config={fieldConfig('search_quote_analyzer')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: ANALYZERS_OPTIONS,
                 },
               }}
@@ -77,12 +74,11 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="index_options"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_options')}
               config={fieldConfig('index_options')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: INDEX_OPTIONS,
                 },
               }}
@@ -95,7 +91,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="eager_global_ordinals"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('eager_global_ordinals')}
               config={fieldConfig('eager_global_ordinals')}
               component={Field}
@@ -104,7 +99,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="index_phrases"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_phrases')}
               config={fieldConfig('index_phrases')}
               component={Field}
@@ -113,7 +107,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="norms"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('norms')}
               config={fieldConfig('norms')}
               component={Field}
@@ -122,7 +115,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="term_vector"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('term_vector')}
               config={fieldConfig('term_vector')}
               component={Field}
@@ -135,7 +127,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="boost"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('boost')}
               config={fieldConfig('boost')}
               component={Field}
@@ -147,7 +138,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
                 <EuiFlexItem>
                   <UseField
                     path="index_prefixes.min_chars"
-                    form={form}
                     defaultValue={
                       isEditMode
                         ? undefined
@@ -167,7 +157,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
                 <EuiFlexItem>
                   <UseField
                     path="index_prefixes.max_chars"
-                    form={form}
                     defaultValue={
                       isEditMode
                         ? undefined
@@ -190,7 +179,6 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="position_increment_gap"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('position_increment_gap')}
               config={fieldConfig('position_increment_gap')}
               component={Field}
@@ -199,12 +187,11 @@ export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="similarity"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('similarity')}
               config={fieldConfig('similarity')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: SIMILARITY_ALGORITHM_OPTIONS,
                 },
               }}

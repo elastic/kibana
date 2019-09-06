@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
@@ -18,7 +17,7 @@ import {
 import {
   useForm,
   UseField,
-  FormProvider,
+  Form,
   FormDataProvider,
   FieldConfig,
   ValidationConfig,
@@ -114,12 +113,17 @@ export const PropertyEditor = ({
 }: Props) => {
   const [isAdvancedSettingsVisible, setIsAdvancedSettingsVisible] = useState<boolean>(false);
 
-  const { form } = useForm({ defaultValue, serializer, deserializer });
+  const { form } = useForm({
+    defaultValue,
+    serializer,
+    deserializer,
+  });
   const isEditMode = typeof defaultValue !== 'undefined';
 
   const submitForm = async () => {
-    const { isValid, data: formData } = await form.submit();
-    if (isValid) {
+    const { isValid: isFormValid, data: formData } = await form.submit();
+
+    if (isFormValid) {
       const data =
         defaultValue && defaultValue.properties
           ? { ...formData, properties: defaultValue.properties }
@@ -142,21 +146,21 @@ export const PropertyEditor = ({
       <Fragment>
         <EuiSpacer size="m" />
         <div style={{ backgroundColor: '#F5F7FA', padding: '12px' }}>
-          <AdvancedSettingsComponent form={form} />
+          <AdvancedSettingsComponent />
         </div>
       </Fragment>
     );
   };
 
   return (
-    <FormProvider form={form}>
+    <Form form={form} className="property-editor">
       <FormDataProvider pathsToWatch="type">
         {formData => {
           const selectedDatatype = formData.type as DataType;
           const typeDefinition = dataTypesDefinition[selectedDatatype];
 
           return (
-            <EuiForm className="property-editor" {...rest}>
+            <Fragment>
               <EuiFlexGroup>
                 {/* Field name */}
                 <EuiFlexItem grow={false}>
@@ -222,7 +226,7 @@ export const PropertyEditor = ({
                       }}
                       component={Field}
                       componentProps={{
-                        fieldProps: {
+                        euiFieldProps: {
                           options: typeDefinition.subTypes.types.map(type => ({
                             value: type,
                             text: type,
@@ -244,7 +248,6 @@ export const PropertyEditor = ({
                       <EuiFlexItem>
                         {/* Basic parameters for the selected type */}
                         <PropertyBasicParameters
-                          form={form}
                           typeDefinition={typeDefinition}
                           isEditMode={isEditMode}
                         />
@@ -282,10 +285,10 @@ export const PropertyEditor = ({
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiForm>
+            </Fragment>
           );
         }}
       </FormDataProvider>
-    </FormProvider>
+    </Form>
   );
 };

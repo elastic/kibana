@@ -7,15 +7,11 @@
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import {
-  UseField,
-  Form,
-} from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import { UseField } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 import { parametersDefinition, ParameterName, DataTypeDefinition } from '../../config';
 
 interface Props {
-  form: Form;
   typeDefinition: DataTypeDefinition | null;
   isEditMode?: boolean;
   fieldPathPrefix?: string;
@@ -34,7 +30,6 @@ const getMaxWidth = (rowIndex: number, totalItems: number) => {
 };
 
 export const PropertyBasicParameters = ({
-  form,
   typeDefinition,
   isEditMode = false,
   fieldPathPrefix = '',

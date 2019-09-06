@@ -14,10 +14,10 @@ import { ERROR_CODES } from '../../constants';
 interface Props {
   field: FieldType;
   parentObject: Record<string, any>;
-  fieldProps?: Record<string, any>;
+  euiFieldProps?: Record<string, any>;
 }
 
-export const Name = ({ field, parentObject, fieldProps = {} }: Props) => {
+export const Name = ({ field, parentObject, euiFieldProps = {} }: Props) => {
   const { errors } = field;
 
   // All validation messages, except name conflict
@@ -55,7 +55,7 @@ export const Name = ({ field, parentObject, fieldProps = {} }: Props) => {
         onChange={field.onChange}
         isLoading={field.isValidating}
         fullWidth
-        {...fieldProps}
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );

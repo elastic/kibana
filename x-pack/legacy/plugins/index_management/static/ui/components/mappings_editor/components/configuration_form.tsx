@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
-import { EuiForm } from '@elastic/eui';
 
 import {
   useForm,
   UseField,
-  FormProvider,
+  Form,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 
 import {
@@ -26,22 +25,22 @@ interface Props {
   defaultValue?: any;
 }
 
-export const ConfigurationForm = ({ setGetDataHandler, defaultValue, onValidityChange }: Props) => {
-  const { form } = useForm({ schema, defaultValue });
+export const ConfigurationForm = React.memo(
+  ({ setGetDataHandler, defaultValue, onValidityChange }: Props) => {
+    const { form } = useForm({ schema, defaultValue });
 
-  useEffect(() => {
-    setGetDataHandler(form.submit);
-    onValidityChange(form.isValid);
-  }, [form]);
+    useEffect(() => {
+      setGetDataHandler(form.submit);
+      onValidityChange(form.isValid);
+    }, [form]);
 
-  return (
-    <FormProvider form={form}>
-      <EuiForm className="mappings-editor">
+    return (
+      <Form form={form} className="mappings-editor">
         <FormRow title="Configuration" description="Global settings for the index mappings">
           <UseField
             path="dynamic"
             componentProps={{
-              fieldProps: { options: DYNAMIC_SETTING_OPTIONS },
+              euiFieldProps: { options: DYNAMIC_SETTING_OPTIONS },
             }}
             component={Field}
           />
@@ -49,7 +48,7 @@ export const ConfigurationForm = ({ setGetDataHandler, defaultValue, onValidityC
           <UseField path="numeric_detection" component={Field} />
           <UseField path="dynamic_date_formats" component={Field} />
         </FormRow>
-      </EuiForm>
-    </FormProvider>
-  );
-};
+      </Form>
+    );
+  }
+);

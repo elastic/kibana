@@ -19,7 +19,7 @@ interface Props {
   onUpdate: (state: DocumentFieldsState) => void;
 }
 
-export const DocumentFields = ({ onUpdate }: Props) => {
+export const DocumentFields = React.memo(({ onUpdate }: Props) => {
   const { properties, selectedPath, selectedObjectToAddProperty } = usePropertiesState();
   const dispatch = usePropertiesDispatch();
 
@@ -83,4 +83,4 @@ export const DocumentFields = ({ onUpdate }: Props) => {
       )}
     </Fragment>
   );
-};
+});

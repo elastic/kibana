@@ -67,12 +67,12 @@ function propertiesReducer(state: State, action: Action): State {
 
 interface Props {
   children: React.ReactNode;
-  defaultProperties?: Record<string, any>;
+  defaultValue?: Record<string, any>;
 }
 
-export const PropertiesProvider = ({ children, defaultProperties = {} }: Props) => {
+export const PropertiesProvider = ({ children, defaultValue = {} }: Props) => {
   const [state, dispatch] = useReducer(propertiesReducer, {
-    properties: defaultProperties,
+    properties: defaultValue,
     selectedPath: null,
     selectedObjectToAddProperty: null,
   });
