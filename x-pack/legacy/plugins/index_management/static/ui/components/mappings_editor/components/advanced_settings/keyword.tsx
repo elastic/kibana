@@ -36,7 +36,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="normalizer"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('normalizer')}
               config={fieldConfig('normalizer')}
               component={Field}
@@ -45,7 +44,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="null_value"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('null_value')}
               config={fieldConfig('null_value')}
               component={Field}
@@ -54,7 +52,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="boost"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('boost')}
               config={fieldConfig('boost')}
               component={Field}
@@ -63,7 +60,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="ignore_above"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('ignore_above')}
               config={fieldConfig('ignore_above')}
               component={Field}
@@ -76,12 +72,11 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="index_options"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_options')}
               config={fieldConfig('index_options')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: INDEX_OPTIONS,
                 },
               }}
@@ -90,12 +85,11 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="similarity"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('similarity')}
               config={fieldConfig('similarity')}
               component={Field}
               componentProps={{
-                fieldProps: {
+                euiFieldProps: {
                   options: SIMILARITY_ALGORITHM_OPTIONS,
                 },
               }}
@@ -108,7 +102,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="eager_global_ordinals"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('eager_global_ordinals')}
               config={fieldConfig('eager_global_ordinals')}
               component={Field}
@@ -117,7 +110,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="index_phrases"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_phrases')}
               config={fieldConfig('index_phrases')}
               component={Field}
@@ -126,7 +118,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem grow={false}>
             <UseField
               path="norms"
-              form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('norms')}
               config={fieldConfig('norms')}
               component={Field}
@@ -135,7 +126,6 @@ export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
           <EuiFlexItem>
             <UseField
               path="split_queries_on_whitespace"
-              form={form}
               defaultValue={
                 isEditMode ? undefined : defaultValueParam('split_queries_on_whitespace')
               }
