@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
 
 const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const [inputValue, setInputValue] = useState('');
@@ -80,7 +81,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       />
       <EuiSpacer size="s" />
       <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        Create new group
+        {ArgumentStrings.FilterGroup.getCreateNewGroup()}
       </EuiButtonEmpty>
     </Fragment>
   );
@@ -99,7 +100,7 @@ FilterGroupInput.propTypes = {
 
 export const filterGroup = () => ({
   name: 'filterGroup',
-  displayName: 'Filter Group',
-  help: 'Create or select a filter group',
+  displayName: ArgumentStrings.FilterGroup.getDisplayName(),
+  help: ArgumentStrings.FilterGroup.getHelp(),
   simpleTemplate: templateFromReactComponent(FilterGroupInput),
 });
