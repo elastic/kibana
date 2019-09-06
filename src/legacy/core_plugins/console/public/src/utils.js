@@ -69,9 +69,9 @@ utils.collapseLiteralStrings = function (data) {
 utils.expandLiteralStrings = function (data) {
   return data.replace(/("(?:\\"|[^"])*?")/g, function (match, string) {
     // expand things with two slashes or more
-    if (string.match(/\\./)) {
+    if (string.split(/\\./).length > 2) {
       string = JSON.parse(string).replace('^\s*\n', '').replace('\n\s*^', '');
-      return '"""' + string  + '"""';
+      return '"""' + string + '"""';
     } else {
       return string;
     }
