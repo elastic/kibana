@@ -21,7 +21,7 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { tickFormatter } from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
@@ -68,7 +68,7 @@ export class TableVis extends Component {
       .map(item => {
         const column = this.visibleSeries.find(c => c.id === item.id);
         if (!column) return null;
-        const formatter = tickFormatter(
+        const formatter = createTickFormatter(
           column.formatter,
           column.value_template,
           this.props.getConfig

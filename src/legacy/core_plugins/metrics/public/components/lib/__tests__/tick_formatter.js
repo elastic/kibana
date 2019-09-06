@@ -18,11 +18,11 @@
  */
 
 import { expect } from 'chai';
-import { tickFormatter } from '../tick_formatter';
+import { createTickFormatter } from '../tick_formatter';
 
-describe('tickFormatter(format, template)', () => {
+describe('createTickFormatter(format, template)', () => {
   it('returns a number with two decimal place by default', () => {
-    const fn = tickFormatter();
+    const fn = createTickFormatter();
     expect(fn(1.5556)).to.equal('1.56');
   });
 
@@ -30,7 +30,7 @@ describe('tickFormatter(format, template)', () => {
     const config = {
       'format:percent:defaultPattern': '0.[00]%',
     };
-    const fn = tickFormatter('percent', null, key => config[key]);
+    const fn = createTickFormatter('percent', null, key => config[key]);
     expect(fn(0.5556)).to.equal('55.56%');
   });
 
@@ -38,12 +38,12 @@ describe('tickFormatter(format, template)', () => {
     const config = {
       'format:bytes:defaultPattern': '0.0b',
     };
-    const fn = tickFormatter('bytes', null, key => config[key]);
+    const fn = createTickFormatter('bytes', null, key => config[key]);
     expect(fn(1500 ^ 10)).to.equal('1.5KB');
   });
 
   it('returns a custom formatted string with custom formatter', () => {
-    const fn = tickFormatter('0.0a');
+    const fn = createTickFormatter('0.0a');
     expect(fn(1500)).to.equal('1.5k');
   });
 
@@ -51,17 +51,22 @@ describe('tickFormatter(format, template)', () => {
     const config = {
       'format:number:defaultLocale': 'fr',
     };
-    const fn = tickFormatter('0,0.0', null, key => config[key]);
+    const fn = createTickFormatter('0,0.0', null, key => config[key]);
     expect(fn(1500)).to.equal('1 500,0');
   });
 
   it('returns a custom formatted string with custom formatter and template', () => {
-    const fn = tickFormatter('0.0a', '{{value}}/s');
+    const fn = createTickFormatter('0.0a', '{{value}}/s');
     expect(fn(1500)).to.equal('1.5k/s');
   });
 
+  it('returns "foo" if passed a string', () => {
+    const fn = createTickFormatter();
+    expect(fn('foo')).to.equal('foo');
+  });
+
   it('returns value if passed a bad formatter', () => {
-    const fn = tickFormatter('102');
+    const fn = createTickFormatter('102');
     expect(fn(100)).to.equal('100');
   });
 
@@ -69,7 +74,7 @@ describe('tickFormatter(format, template)', () => {
     const config = {
       'format:number:defaultPattern': '0,0.[00]',
     };
-    const fn = tickFormatter('number', '{{value', key => config[key]);
+    const fn = createTickFormatter('number', '{{value', key => config[key]);
     expect(fn(1.5556)).to.equal('1.56');
   });
 });

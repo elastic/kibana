@@ -95,4 +95,8 @@ export interface PositionedElement {
    * AST of the Canvas expression for the element
    */
   ast: ExpressionAST;
+  /**
+   * Applied filter
+   */
+  filter: string;
 }

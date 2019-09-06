@@ -29,7 +29,7 @@ declare module 'kibana/server' {
 export class CorePluginBPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const router = core.http.createRouter();
-    router.get({ path: '/', validate: false }, async (context, req, res) => {
+    router.get({ path: '/core_plugin_b/', validate: false }, async (context, req, res) => {
       if (!context.pluginA) return res.internalError({ body: 'pluginA is disabled' });
       const response = await context.pluginA.ping();
       return res.ok({ body: `Pong via plugin A: ${response}` });
