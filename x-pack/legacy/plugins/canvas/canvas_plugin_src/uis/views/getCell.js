@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ViewStrings } from '../../strings';
+
 export const getCell = () => ({
   name: 'getCell',
-  displayName: 'Get cell',
-  help: 'Grab the first row and first column',
+  displayName: ViewStrings.GetCell.getDisplayName(),
+  help: ViewStrings.GetCell.getHelp(),
   modelArgs: ['size'],
   requiresContext: true,
   args: [],

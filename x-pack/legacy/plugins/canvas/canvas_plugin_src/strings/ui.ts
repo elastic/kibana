@@ -63,14 +63,14 @@ export const ViewStrings = {
       },
     },
   },
-};
-
-const thing = {
-  name: 'valueColumn',
-  displayName: 'Values column',
-  help: 'Column from which to extract values to make available in the dropdown',
-  argType: 'string',
-  options: {
-    confirm: 'Set',
+  GetCell: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.getCell.displayName', {
+        defaultMessage: 'Dropdown filter',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.getCell.help', {
+        defaultMessage: 'Grab the first row and first column',
+      }),
   },
 };
