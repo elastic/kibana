@@ -33,6 +33,10 @@ export async function getFullUrls({
   } else if (job.objects) {
     // multi page (pdf)
     relativeUrls = job.objects.map((obj: KeyedRelativeUrl) => obj.relativeUrl);
+  } else {
+    throw new Error(
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+    );
   }
 
   const absoluteUrls = relativeUrls.map(relativeUrl => {
