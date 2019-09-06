@@ -6,19 +6,10 @@
 
 import { mapValues } from 'lodash';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
-import {
-  ShortcutMap,
-  ElementActions,
-  ExpressionActions,
-  EditorActions,
-  PresentationActions,
-} from '../../types';
+import { ShortcutMap, ShortcutNameSpace } from '../../types';
 
 interface KeyMap {
-  ELEMENT: ElementActions;
-  EXPRESSION: ExpressionActions;
-  EDITOR: EditorActions;
-  PRESENTATION: PresentationActions;
+  [category: string]: ShortcutNameSpace;
 }
 
 type Modifier = 'ctrl' | 'command' | 'shift' | 'alt' | 'option';

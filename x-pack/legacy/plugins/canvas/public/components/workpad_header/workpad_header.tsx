@@ -22,8 +22,6 @@ import {
 
 import { ComponentStrings } from '../../../i18n';
 
-import { ShortcutActionType } from '../../../types/shortcuts';
-
 // @ts-ignore untyped local
 import { AssetManager } from '../asset_manager';
 // @ts-ignore untyped local
@@ -79,7 +77,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
     </EuiToolTip>
   );
 
-  _keyHandler = (action: ShortcutActionType) => {
+  _keyHandler = (action: string) => {
     if (action === 'EDITING') {
       this.props.toggleWriteable();
     }
