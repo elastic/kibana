@@ -43,42 +43,44 @@ export function BlacklistForm({
           }
         />
       )}
-      <EuiListGroup>
-        {blacklistedNodes.map(node => (
-          <EuiListGroupItem
-            icon={<LegacyIcon icon={node.icon} asListIcon />}
-            // TODO this is not enough to be unique
-            key={node.label}
-            label={node.label}
-            extraAction={{
-              iconType: 'trash',
-              'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
-                defaultMessage: 'Remove',
-              }),
-              color: 'danger',
-              alwaysShow: true,
-              onClick: () => {
-                unblacklistNode(node);
-              },
-            }}
-          />
-        ))}
-      </EuiListGroup>
       <EuiSpacer />
       {blacklistedNodes.length > 0 && (
-        <EuiButton
-          color="danger"
-          iconType="trash"
-          onClick={() => {
-            blacklistedNodes.forEach(node => {
-              unblacklistNode(node);
-            });
-          }}
-        >
-          {i18n.translate('xpack.graph.settings.blacklist.clearButtonLabel', {
-            defaultMessage: 'Clear all',
-          })}
-        </EuiButton>
+        <>
+          <EuiListGroup bordered maxWidth={false}>
+            {blacklistedNodes.map(node => (
+              <EuiListGroupItem
+                icon={<LegacyIcon icon={node.icon} asListIcon />}
+                // TODO this is not enough to be unique
+                key={node.label}
+                label={node.label}
+                extraAction={{
+                  iconType: 'trash',
+                  'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
+                    defaultMessage: 'Remove',
+                  }),
+                  color: 'danger',
+                  onClick: () => {
+                    unblacklistNode(node);
+                  },
+                }}
+              />
+            ))}
+          </EuiListGroup>
+          <EuiSpacer />
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            onClick={() => {
+              blacklistedNodes.forEach(node => {
+                unblacklistNode(node);
+              });
+            }}
+          >
+            {i18n.translate('xpack.graph.settings.blacklist.clearButtonLabel', {
+              defaultMessage: 'Clear all',
+            })}
+          </EuiButton>
+        </>
       )}
     </>
   );
