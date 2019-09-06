@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Role, isReadOnlyRole, isReservedRole, isRoleEnabled, copyRole, prepareRoleClone } from '.';
+import { Role } from '../../common/model';
+import {
+  copyRole,
+  isReadOnlyRole,
+  isReservedRole,
+  isDeprecatedRole,
+  isRoleEnabled,
+  prepareRoleClone,
+} from './role_utils';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {
@@ -54,6 +62,31 @@ describe('role', () => {
     test('should return false if role is NOT explicitly reserved or not reserved', () => {
       const testRole = {};
       expect(isReservedRole(testRole)).toBe(false);
+    });
+  });
+
+  describe('isDeprecatedRole', () => {
+    test('should return false if role is explicitly not deprecated', () => {
+      const testRole = {
+        metadata: {
+          _deprecated: false,
+        },
+      };
+      expect(isDeprecatedRole(testRole)).toBe(false);
+    });
+
+    test('should return true if role is explicitly deprecated', () => {
+      const testRole = {
+        metadata: {
+          _deprecated: true,
+        },
+      };
+      expect(isDeprecatedRole(testRole)).toBe(true);
+    });
+
+    test('should return false if role is NOT explicitly deprecated or not deprecated', () => {
+      const testRole = {};
+      expect(isDeprecatedRole(testRole)).toBe(false);
     });
   });
 

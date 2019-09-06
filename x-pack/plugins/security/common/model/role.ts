@@ -62,6 +62,15 @@ export function isReservedRole(role: Partial<Role>) {
 }
 
 /**
+ * Returns whether given role is deprecated or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isDeprecatedRole(role: Partial<Role>) {
+  return get(role, 'metadata._deprecated', false);
+}
+
+/**
  * Returns whether given role is editable through the UI or not.
  *
  * @param role the Role as returned by roles API

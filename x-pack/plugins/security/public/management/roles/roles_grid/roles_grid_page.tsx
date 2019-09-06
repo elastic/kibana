@@ -163,6 +163,12 @@ export class RolesGridPage extends Component<Props, State> {
       { defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.' }
     );
 
+    const deprecatedRoleDesc = intl.formatMessage({
+      id: 'xpack.security.management.roles.deprecatedColumnDescription',
+      defaultMessage:
+        'Deprecated roles should not be assigned to users, as they will eventually be removed.',
+    });
+
     return [
       {
         field: 'name',
@@ -196,14 +202,24 @@ export class RolesGridPage extends Component<Props, State> {
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (metadata: Role['metadata']) => {
-          const label = i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
-            defaultMessage: 'Reserved role',
-          });
+        render: (reserved: boolean | undefined, record: Role) => {
+          const isDeprecated = isDeprecatedRole(record);
+
+          const label = isDeprecated
+            ? i18n.translate('xpack.security.management.roles.reservedDeprecatedRoleIconLabel', {
+                defaultMessage: 'Deprecated reserved role',
+              })
+            : i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
+                defaultMessage: 'Reserved role',
+              });
 
           return metadata && metadata._reserved ? (
             <span title={label}>
-              <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
+              <EuiIcon
+                aria-label={label}
+                data-test-subj="reservedRole"
+                type={isDeprecated ? 'alert' : 'check'}
+              />
             </span>
           ) : null;
         },
