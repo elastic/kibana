@@ -58,7 +58,6 @@ import {
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
-  fetchExportByType,
   findObjects,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -303,20 +302,14 @@ class ObjectsTableUI extends Component {
 
   onExportAll = async () => {
     const { intl } = this.props;
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
-      (accum, [id, selected]) => {
-        if (selected) {
-          accum.push(id);
-        }
-        return accum;
-      },
-      []
-    );
+
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, savedObjects } = this.state;
+
+    const exportObjects = savedObjects.filter(so => exportAllSelectedOptions[so.type]).map(so => ({ type: so.type, id: so.id }));
 
     let blob;
     try {
-      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+      blob = await fetchExportObjects(exportObjects, isIncludeReferencesDeepChecked);
     } catch (e) {
       toastNotifications.addDanger({
         title: intl.formatMessage({
