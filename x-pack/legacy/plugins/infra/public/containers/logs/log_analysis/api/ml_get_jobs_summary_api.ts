@@ -6,8 +6,11 @@
 
 import * as rt from 'io-ts';
 import { kfetch } from 'ui/kfetch';
-import { getJobId } from '../../../../../common/log_analysis';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { getJobId } from '../../../../../common/log_analysis';
 
 export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
   const response = await kfetch({
@@ -19,7 +22,10 @@ export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
       })
     ),
   });
-  return fetchJobStatusResponsePayloadRT.decode(response).getOrElseL(throwErrors(createPlainError));
+  return pipe(
+    fetchJobStatusResponsePayloadRT.decode(response),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 export const fetchJobStatusRequestPayloadRT = rt.type({
