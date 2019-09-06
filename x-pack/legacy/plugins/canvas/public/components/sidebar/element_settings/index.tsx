@@ -3,24 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// @ts-ignore unconverted local file
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings';
-import { PositionedElement } from '../../../../types';
-
-interface State {
-  persistent: { workpad: { pages: Array<{ elements: PositionedElement[] }> } };
-}
+import { State, PositionedElement } from '../../../../types';
 
 interface Props {
   selectedElementId: string;
 }
 
 const mapStateToProps = (state: State, { selectedElementId }: Props) => ({
-  element: getElementById(state, selectedElementId, getSelectedPage(state)),
+  element: getElementById(state, selectedElementId, getSelectedPage(state)) as PositionedElement,
 });
 
 export const ElementSettings = connect(mapStateToProps)(Component);

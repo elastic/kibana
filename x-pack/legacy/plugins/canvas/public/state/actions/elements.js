@@ -393,6 +393,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   payload: element defaults. Eg {expression: 'foo'}
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
+  console.log(pageId);
   const newElement = { ...getDefaultElement(), ...getBareElement(element, true) };
   if (element.width) {
     newElement.position.width = element.width;

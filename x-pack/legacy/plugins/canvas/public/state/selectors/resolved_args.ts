@@ -5,29 +5,32 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore Untyped Local
 import * as argHelper from '../../lib/resolved_arg';
+// @ts-ignore Untyped Local
 import { prepend } from '../../lib/modify_path';
+import { State } from '../../../types';
 
-export function getArgs(state) {
-  return get(state, ['transient', 'resolvedArgs']);
+export function getArgs(state: State) {
+  return get<State, State['transient']['resolvedArgs']>(state, ['transient', 'resolvedArgs']);
 }
 
-export function getArg(state, path) {
+export function getArg(state: State, path: any[]) {
   return get(state, prepend(path, ['transient', 'resolvedArgs']));
 }
 
-export function getValue(state, path) {
+export function getValue(state: State, path: any[]) {
   return argHelper.getValue(getArg(state, path));
 }
 
-export function getState(state, path) {
+export function getState(state: State, path: any[]) {
   return argHelper.getState(getArg(state, path));
 }
 
-export function getError(state, path) {
+export function getError(state: State, path: any[]) {
   return argHelper.getError(getArg(state, path));
 }
 
-export function getInFlight(state) {
+export function getInFlight(state: State): boolean {
   return get(state, ['transient', 'inFlight'], false);
 }

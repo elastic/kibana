@@ -12,7 +12,6 @@ import { Dispatch } from 'redux';
 import { AddEmbeddableFlyout, Props } from './flyout';
 // @ts-ignore Untyped Local
 import { addElement } from '../../state/actions/elements';
-// @ts-ignore Untyped Local
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 
@@ -29,15 +28,15 @@ const allowedEmbeddables = {
 };
 
 interface StateProps {
-  pageId: number;
+  pageId: string;
 }
 
 interface DispatchProps {
-  addEmbeddable: (pageId: number, partialElement: { expression: string }) => void;
+  addEmbeddable: (pageId: string, partialElement: { expression: string }) => void;
 }
 
 // FIX: Missing state type
-const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
+const mapStateToProps = (state: any, ownProps: Props) => ({ pageId: getSelectedPage(state) });
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
   addEmbeddable: (pageId, partialElement): DispatchProps['addEmbeddable'] =>
