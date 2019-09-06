@@ -5,9 +5,9 @@
  */
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { getFullUrls } from './index';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { getFullUrls } from './get_full_urls';
 
 let mockServer: any;
 beforeEach(() => {

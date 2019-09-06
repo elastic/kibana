@@ -17,7 +17,7 @@ interface KeyedRelativeUrl {
 export async function getFullUrls({
   job,
   server,
-  ...mergeValues // caller's mergeMap passes props we only need to pass through
+  ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
   server: KbnServer;
