@@ -34,10 +34,10 @@ export function UrlTemplateList({
             buttonContent={template.description}
             // TODO: Change the icon below to the template.icon
             extraAction={<EuiIcon type="alert" />}
-            className="gphSettingsAccordion"
-            buttonClassName="gphSettingsAccordion__button"
+            className="gphUrlTemplateList__accordion"
+            buttonClassName="gphUrlTemplateList__accordionbutton"
             onToggle={isOpen => {
-              /* TODO: Use this to set a classname .gphSettingsAccordion-isOpen for the background color change */
+              /* TODO: Use this to set a classname .gphUrlTemplateList__accordion-isOpen for the background color change */
             }}
             paddingSize="m"
           >
@@ -60,8 +60,8 @@ export function UrlTemplateList({
         buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
           defaultMessage: 'New template',
         })}
-        className="gphSettingsAccordion"
-        buttonClassName="gphSettingsAccordion__button"
+        className="gphUrlTemplateList__accordion"
+        buttonClassName="gphUrlTemplateList__accordionbutton"
         paddingSize="m"
       >
         <UrlTemplateForm
