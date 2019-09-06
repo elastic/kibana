@@ -20,13 +20,19 @@ import { transactionSampleRateRt } from '../../common/runtime_types/transaction_
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration',
-  handler: async req => {
-    await createApmAgentConfigurationIndex(core.http.server);
+  handler: async (req, _, h) => {
+    try {
+      await createApmAgentConfigurationIndex(core.http.server);
 
-    const setup = await setupRequest(req);
-    return await listConfigurations({
-      setup
-    });
+      const setup = await setupRequest(req);
+      return await listConfigurations({ setup });
+    } catch (error) {
+      if (error.statusCode === 403) {
+        // return an empty list if user is not authorized
+        return [];
+      }
+      throw error;
+    }
   }
 }));
 

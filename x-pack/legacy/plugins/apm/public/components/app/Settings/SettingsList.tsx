@@ -173,6 +173,33 @@ export function SettingsList() {
     />
   );
 
+  const failurePrompt = (
+    <EuiEmptyPrompt
+      iconType="alert"
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.configTable.failurePromptTitle',
+            { defaultMessage: 'Failed to initialize settings.' }
+          )}
+        </h2>
+      }
+      body={
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.configTable.failurePromptText',
+              {
+                defaultMessage:
+                  'Whoops! The settings management failed to initialize. This might be because the user that is logged in does not have permission to read or write the APM agent configuration index. The next time a user with adequate privileges loads this screen, Kibana will complete this step.'
+              }
+            )}
+          </p>
+        </>
+      }
+    />
+  );
+
   return (
     <>
       <AddSettingsFlyout
@@ -294,10 +321,9 @@ export function SettingsList() {
         </EuiCallOut>
 
         <EuiSpacer size="m" />
-
-        {status === 'success' && !hasConfigurations ? (
-          emptyStatePrompt
-        ) : (
+        {status === 'failure' ? (
+          failurePrompt
+        ) : hasConfigurations ? (
           <ManagedTable
             noItemsMessage={<LoadingStatePrompt />}
             columns={COLUMNS}
@@ -306,6 +332,8 @@ export function SettingsList() {
             initialSortDirection="asc"
             initialPageSize={50}
           />
+        ) : (
+          emptyStatePrompt
         )}
       </EuiPanel>
     </>
