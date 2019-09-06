@@ -22,7 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButton,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -170,10 +169,14 @@ export class TimeSeriesExplorer extends React.Component {
   detectorIndexChangeHandler = (e) => {
     const id = e.target.value;
     if (id !== undefined) {
-      this.setState({ detectorId: id });
+      this.setState({ detectorId: id }, () => {
+        this.updateControlsForDetector(
+          () => this.loadEntityValues(
+            () => this.saveSeriesPropertiesAndRefresh()
+          )
+        );
+      });
     }
-    this.updateControlsForDetector();
-    this.loadEntityValues();
   };
 
   toggleShowAnnotationsHandler = () => {
@@ -322,7 +325,7 @@ export class TimeSeriesExplorer extends React.Component {
         }
         return stateEntity;
       })
-    }));
+    }), () => this.saveSeriesPropertiesAndRefresh());
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -378,7 +381,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  loadEntityValues = () => {
+  loadEntityValues = (callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
@@ -411,7 +414,7 @@ export class TimeSeriesExplorer extends React.Component {
               }
               return entity;
             })
-          });
+          }, callback);
         }
       });
   }
@@ -464,6 +467,10 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   refresh = () => {
+    if (this.state.loading) {
+      return;
+    }
+
     const { appStateHandler, timefilter } = this.props;
     const {
       detectorId: currentDetectorId,
@@ -653,7 +660,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  updateControlsForDetector = () => {
+  updateControlsForDetector = (callback = () => {}) => {
     const { appStateHandler } = this.props;
     const { detectorId, selectedJob } = this.state;
     // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
@@ -684,7 +691,7 @@ export class TimeSeriesExplorer extends React.Component {
       entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
-    this.setState({ entities });
+    this.setState({ entities }, callback);
   }
 
   loadForJobId(jobId, jobs) {
@@ -739,16 +746,16 @@ export class TimeSeriesExplorer extends React.Component {
     this.setState(
       { detectorId, detectors, selectedJob },
       () => {
-        this.updateControlsForDetector();
-
-        // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-        mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-          .catch((err) => { console.log('Error populating field formats:', err); })
+        this.updateControlsForDetector(() => {
+          // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
+          mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
+            .catch((err) => { console.log('Error populating field formats:', err); })
           // Load the data - if the FieldFormats failed to populate
           // the default formatting will be used for metric values.
-          .then(() => {
-            this.refresh();
-          });
+            .then(() => {
+              this.refresh();
+            });
+        });
       }
     );
   }
@@ -1024,19 +1031,6 @@ export class TimeSeriesExplorer extends React.Component {
                 />
               );
             })}
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButton
-                  fill
-                  iconType="refresh"
-                  onClick={this.saveSeriesPropertiesAndRefresh}
-                >
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.refreshButtonAriaLabel', {
-                    defaultMessage: 'Refresh'
-                  })}
-                </EuiButton>
-              </EuiFormRow>
-            </EuiFlexItem>
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
