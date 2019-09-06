@@ -16,13 +16,9 @@ import { CanvasWorkpad } from '../../../types';
 import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header';
 
 interface State {
-  transient: {
-    canUserWrite: boolean;
-  };
+  transient: { canUserWrite: boolean };
 
-  persistent: {
-    workpad: CanvasWorkpad;
-  };
+  persistent: { workpad: CanvasWorkpad };
 }
 
 interface StateProps {
