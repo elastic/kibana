@@ -79,13 +79,16 @@ utils.collapseLiteralStrings = function (data) {
 
  */
 
-const LITERAL_STRING_CANDIDATES = /((?<=:[\s\r\n]*)(?<!"")"(?:\\"|[^"\n])*\\?")/g;
+const LITERAL_STRING_CANDIDATES = /((:[\s\r\n]*)([^\\])"(\\"|[^"\n])*\\?")/g;
 
 utils.expandLiteralStrings = function (data) {
   return data.replace(LITERAL_STRING_CANDIDATES, function (match, string) {
     if (string.match(/\\./)) {
-      string = JSON.parse(string).replace('^\s*\n', '').replace('\n\s*^', '');
-      return '"""' + string + '"""';
+      const firstDoubleQuoteIdx = string.indexOf('"');
+      const firstPart = string.slice(0, firstDoubleQuoteIdx);
+      let secondPart = string.slice(firstDoubleQuoteIdx, string.length);
+      secondPart = JSON.parse(secondPart).replace('^\s*\n', '').replace('\n\s*^', '');
+      return `${firstPart}"""${secondPart}"""`;
     } else {
       return string;
     }
