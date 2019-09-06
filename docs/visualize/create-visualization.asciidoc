@@ -1,0 +1,19 @@
+[[create-the-data]]
+== Create the visualization
+
+Short description.
+
+. Open *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, select the visualization type.
+
+. On the *New Area/Choose a source* window, choose the data you want to display.
+
+[float]
+[[build-the-visualization]]
+== Build the visualization
+
+Something about the visualization builder.
+
