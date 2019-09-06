@@ -82,6 +82,46 @@ export function renderApp(context, { sectionBasePath, element }) {
   return () => ReactDOM.unmountComponentAtNode(element);
 }
 ```
+
+We can also create a utility in `kibana_react` to make it easy for folks to `mount` a React app:
+```ts
+// src/plugins/kibana_react/public/mount_with_react.tsx
+import { KibanaContextProvider } from './context';
+
+export const mountWithReact = (
+  Component: React.ComponentType<{ basename: string }>,
+  context: AppMountContext,
+  params: ManagementSectionMountParams,
+) => {
+  ReactDOM.render(
+    (
+      <KibanaContextProvider services={{ ...context }}>
+        <Component basename={params.sectionBasePath} />
+      </KibanaContextProvider>
+    ),
+    params.element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(params.element);
+}
+
+// my_plugin/public/plugin.ts
+import { mountWithReact } from 'src/plugins/kibana_react/public';
+
+export class MyPlugin {
+  setup(core, { management }) {
+    const kibanaSection = management.sections.get('kibana');
+    kibanaSection.registerLink({
+      id: 'my-other-kibana-section-link',
+      ...,
+      async mount(context, params) {
+        const { MySection } = await import('./components/my-section');
+        return mountWithReact(MySection, context, params);
+      }
+    });
+  }
+}
+```
  
 # Detailed design
 
@@ -97,7 +137,7 @@ interface ManagementStart {
 interface SectionsServiceSetup {
   get: (sectionId: string) => Section;
   getAvailable: () => Section[]; // filtered based on capabilities
-  register: (RegisterParams) => Section | Error;
+  register: Register;
 }
 
 interface SectionsServiceStart {
@@ -106,33 +146,33 @@ interface SectionsServiceStart {
   navigateToSectionLink: (linkId: string, options?: { path?: string; state?: any }) => void;
 }
 
-interface RegisterParams {
-  id: string;
-  title: string;
-  description: string; // not used in current UI, but possibly in future
-  order?: number;
-  euiIconType?: string; // takes precedence over `icon` property.
-  icon?: string; // URL to image file; fallback if no `euiIconType`
-}
+type Register = (
+  id: string,
+  title: string,
+  description: string, // not used in current UI, but possibly in future
+  order?: number,
+  euiIconType?: string, // takes precedence over `icon` property.
+  icon?: string, // URL to image file; fallback if no `euiIconType`
+) => Section | Error;
  
-interface RegisterLinkParams {
+type RegisterLink = (
   id: string;
   title: string;
   description: string; // not used in current UI, but possibly in future
   order?: number;
   mount: ManagementSectionMount;
-}
+) => Link | Error;
  
 type Unmount = () => Promise<void> | void;
  
-interface MountParams {
+interface ManagementSectionMountParams {
   sectionBasePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
 }
 
 type ManagementSectionMount = (
   context: AppMountContext, // provided by core.ApplicationService
-  params: MountParams,
+  params: ManagementSectionMountParams,
 ) => Unmount | Promise<Unmount>;
 
 interface Link {
@@ -150,7 +190,7 @@ interface Section {
   title: string;
   description: string;
   links: Link[];
-  registerLink: (RegisterLinkParams) => Link | Error;
+  registerLink: RegisterLink;
   order?: number;
   euiIconType?: string;
   icon?: string;
