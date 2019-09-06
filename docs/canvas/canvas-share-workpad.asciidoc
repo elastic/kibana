@@ -2,13 +2,28 @@
 [[workpad-share-options]]
 == Share your workpad
 
-When you are ready to share your workpad, create a PDF, or export your workpad.
+When you've finished your workpad, you can share it outside of {kib}.
+
+[float]
+[[export-single-workpad]]
+=== Export workpads
+
+Create a JSON file of your workpad that you can export outside of {kib}.
+
+. From your workpad, click the *Share workpad* icon in the upper left corner.
+
+. Select *Download as JSON*.
++
+[role="screenshot"]
+image::images/canvas-export-workpad.png[Export single workpad]
+
+Want to export multiple workpads? Go to the *Canvas workpads* page, select the workpads you want to export, then click *Export*.
 
 [float]
 [[create-workpad-pdf]]
 === Create a PDF
 
-To view your workpad outside of Kibana, generate a PDF. 
+Create a PDF copy of your workpad that you can save and share outside of {kib}.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
@@ -20,29 +35,34 @@ To view your workpad outside of Kibana, generate a PDF.
 image::images/canvas-generate-pdf.gif[Generate PDF]
 
 [float]
-[[export-workpad]]
-=== Export your workpad
+[[create-workpad-URL]]
+=== Create a POST URL
 
-To share your workpad with another author, export it as a JSON file.
+Create the POST URL that automatically generates PDF reports with Watcher or a script. 
 
-[float]
-[[export-single-workpad]]
-==== Export a single workpad
+For more information, refer to <<automating-report-generation, Automating report generation>>.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner.
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. Select *Download as JSON*.
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+
+. Click *Copy POST URL*. 
 +
 [role="screenshot"]
-image::images/canvas-export-workpad.png[Export single workpad]
+image::images/canvas-create-URL.gif[Create POST URL]
 
 [float]
-[[export-multiple-workpads]]
-==== Export multiple workpads
+[[create-workpad-snapshot]]
+=== Embed on a website
 
-. Go to the *Canvas workpads* page.
+Create a snapshot of you workpad, then embed it on a website. To ensure that your connected data remains secure, the data in the JSON file is not connected to {kib}.
 
-. Select the workpads you want to export
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. Click *Export*.
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *Embed on a website*.
 
+. From the *Embed on a website* flyout, follow the instructions.
+
+NOTE: Snapshots encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not automatically appear in the JSON file.
+
+//TODO insert image
