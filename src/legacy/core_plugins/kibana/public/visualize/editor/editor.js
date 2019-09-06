@@ -532,7 +532,8 @@ function VisEditor(
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);
         });
-      });}
+      });
+    }
   });
 
   /**
