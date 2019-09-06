@@ -50,12 +50,12 @@ import {
   iconChoices,
   colorChoices,
   iconChoicesByClass,
-  drillDownIconChoices,
-  drillDownIconChoicesByClass
-} from './style_choices';
+  urlTemplateIconChoices,
+  urlTemplateIconChoicesByClass
+} from './services/style_choices';
 import {
   getOutlinkEncoders,
-} from './angular/services/outlink_encoders';
+} from './services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
 import { save } from  './services/save_modal';
@@ -226,7 +226,7 @@ app.controller('graphuiPlugin', function (
   $scope.spymode = 'request';
 
   $scope.iconChoices = iconChoices;
-  $scope.drillDownIconChoices = drillDownIconChoices;
+  $scope.drillDownIconChoices = urlTemplateIconChoices;
   $scope.colors = colorChoices;
   $scope.iconChoicesByClass = iconChoicesByClass;
 
