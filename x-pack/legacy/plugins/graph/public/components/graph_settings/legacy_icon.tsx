@@ -19,13 +19,13 @@ export interface LegacyIconProps {
 export function LegacyIcon(props: LegacyIconProps) {
   const icon = (
     <i
-      className={classNames('fa', {
+      className={classNames('fa', 'gphLegacyIcon', {
         selectedNode: props.selected,
         gphNode__text: !props.onClick,
         'gphNode__text--lowOpacity': !props.onClick,
         gphIconPicker__icon: !!props.onClick,
         gphNoUserSelect: !!props.onClick,
-        gphListIcon: props.asListIcon,
+        'gphLegacyIcon--list': props.asListIcon,
       })}
     >
       {props.icon.code}
@@ -33,7 +33,11 @@ export function LegacyIcon(props: LegacyIconProps) {
   );
 
   if (props.onClick) {
-    return <EuiButtonEmpty onClick={props.onClick}>{icon}</EuiButtonEmpty>;
+    return (
+      <EuiButtonEmpty color={props.selected ? 'primary' : 'text'} onClick={props.onClick}>
+        {icon}
+      </EuiButtonEmpty>
+    );
   } else {
     return icon;
   }

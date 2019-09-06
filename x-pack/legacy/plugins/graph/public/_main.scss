@@ -48,7 +48,7 @@
 }
 
 .gphIconPicker__icon {
-  opacity: .7;
+  opacity: .6;
 
   &.selectedNode,
   &:hover,
@@ -64,11 +64,6 @@
   &-unselected {
     @include euiFocusRing;
   }
-}
-
-.gphListIcon {
-  width: $euiSizeS * 2;
-  margin-right: $euiSizeM;
 }
 
 .gphAddButton {

@@ -230,7 +230,6 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           {urlTemplateIconChoices.map(icon => (
             <LegacyIcon
               key={icon.class}
-              asListIcon
               selected={icon === currentTemplate.icon}
               icon={icon}
               onClick={() => {
