@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { filterBarQuery } from '../../../queries';
-import { FilterPopoverProps, FilterPopover } from './filter_popout';
+import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
 
 interface FilterBarQueryResult {
