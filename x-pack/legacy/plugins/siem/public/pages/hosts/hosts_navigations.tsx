@@ -183,7 +183,7 @@ export const HostsQueryTabBody = ({
           setQuery={setQuery}
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </HostsQuery>
@@ -219,7 +219,7 @@ export const AuthenticationsQueryTabBody = ({
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           setQuery={setQuery}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </AuthenticationsQuery>
@@ -255,7 +255,7 @@ export const UncommonProcessTabBody = ({
           setQuery={setQuery}
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </UncommonProcessesQuery>
