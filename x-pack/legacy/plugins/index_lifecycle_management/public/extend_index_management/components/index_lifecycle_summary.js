@@ -101,8 +101,8 @@ export class IndexLifecycleSummary extends Component {
       </EuiLink>
     );
     return (
-      <Fragment>
-        <EuiDescriptionListTitle key="phaseDefinition">
+      <Fragment key="phaseDefinition">
+        <EuiDescriptionListTitle>
           <strong>
             <FormattedMessage
               defaultMessage="Phase definition"
