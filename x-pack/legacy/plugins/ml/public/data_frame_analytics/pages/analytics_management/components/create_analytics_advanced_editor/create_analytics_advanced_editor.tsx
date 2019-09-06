@@ -49,7 +49,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
   };
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
@@ -125,6 +125,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               onChange={onChange}
               setOptions={{
                 fontSize: '12px',
+                maxLines: 20,
               }}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',

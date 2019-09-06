@@ -25,7 +25,8 @@ export default function manageRepositoriesFunctionalTests({
   const existsInvisible = async (selector: string) =>
     await testSubjects.exists(selector, { allowHidden: true });
 
-  describe('History', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/37859
+  describe.skip('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 

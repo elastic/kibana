@@ -13,7 +13,7 @@ import * as Transactions from './mockData';
 import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { ISavedObject } from '../../../../services/rest/savedObjects';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -35,7 +35,7 @@ describe('TransactionActionMenu component', () => {
           prepend: (path: string) => `/basepath${path}`
         }
       }
-    } as unknown) as InternalCoreStart;
+    } as unknown) as LegacyCoreStart;
 
     jest
       .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
