@@ -35,7 +35,7 @@ export class HelloWorldAction extends Action {
     return 'Hello World Action!';
   }
 
-  public execute() {
+  public async execute() {
     const flyoutSession = this.overlays.openFlyout(
       <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
         Hello World, I am a hello world action!
