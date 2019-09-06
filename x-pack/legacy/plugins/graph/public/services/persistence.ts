@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
   AppState,
   PersistedNode,
@@ -12,13 +13,14 @@ import {
   PersistedEdge,
   UrlTemplate,
   PersistedUrlTemplate,
-  Field,
+  WorkspaceField,
   PersistedGraphWorkspace,
   PersistedWorkspaceState,
   IndexPatternSavedObject,
+  AdvancedSettings,
 } from '../types';
 import { getOutlinkEncoders } from './outlink_encoders';
-import { urlTemplateIconChoicesByClass } from './style_choices';
+import { urlTemplateIconChoicesByClass, getSuitableIcon, colorChoices, iconChoicesByClass } from './style_choices';
 
 const outlinkEncoders = getOutlinkEncoders();
 
@@ -57,7 +59,7 @@ function serializeUrlTemplate({ encoder, icon, ...serializableProps }: UrlTempla
   return serializedTemplate;
 }
 
-function serializeField({ icon, ...serializableProps }: Field) {
+function serializeField({ icon, ...serializableProps }: WorkspaceField) {
   return {
     ...serializableProps,
     iconClass: icon.class,
@@ -99,7 +101,11 @@ export function appStateToSavedWorkspace(
   };
 }
 
-function deserializeUrlTemplate({ encoderID, iconClass, ...serializableProps }: PersistedUrlTemplate) {
+function deserializeUrlTemplate({
+  encoderID,
+  iconClass,
+  ...serializableProps
+}: PersistedUrlTemplate) {
   const encoder = outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === encoderID);
   if (!encoder) {
     return;
@@ -108,169 +114,167 @@ function deserializeUrlTemplate({ encoderID, iconClass, ...serializableProps }: 
   const template: UrlTemplate = {
     ...serializableProps,
     encoder,
-    icon: null
+    icon: null,
   };
 
   if (iconClass) {
-    template.icon = urlTemplateIconChoicesByClass[iconClass] ?urlTemplateIconChoicesByClass[iconClass] : null;
-        }
-
+    template.icon = urlTemplateIconChoicesByClass[iconClass]
+      ? urlTemplateIconChoicesByClass[iconClass]
+      : null;
+  }
 
   return template;
 }
 
 // returns the id of the index pattern, lookup is done in app.js
-export function lookupIndexPattern(persistedGraphWorkspace, indexPatternSavedObjects): string
+export function lookupIndexPattern(
+  savedWorkspace: PersistedGraphWorkspace,
+  indexPatterns: IndexPatternSavedObject[]
+) {
+  const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+  const indexPattern = indexPatterns.find(
+    pattern => pattern.attributes.title === persistedWorkspaceState.indexPattern
+  );
+
+  if (indexPattern) {
+    return indexPattern.id;
+  }
+}
 
 // returns all graph fields mapped out of the index pattern
-export function mapFields(indexpattern: IndexPattern): Field[]
+export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
+  const blockedFieldNames = ['_id', '_index', '_score', '_source', '_type'];
+  const defaultHopSize = 5;
+
+  return indexPattern
+    .getNonScriptedFields()
+    .filter(field => blockedFieldNames.includes(field.name))
+    .map((field, index) => ({
+      name: field.name,
+      hopSize: defaultHopSize,
+      lastValidHopSize: defaultHopSize,
+      icon: getSuitableIcon(field.name),
+      color: colorChoices[index % colorChoices.length],
+      selected: false,
+    }))
+    .sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      } else if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+}
 
 // 1. call lookupIndexPattern()
 // fetch index pattern
 // 2. call savedWorkspaceToAppState() to map everything
 // 2.1. savedWorkspaceToAppState will call mapFields under the hood (will also be called by "new workspace" branch if selecting an index pattern)
-export function savedWorkspaceToAppState(savedWorkspace: PersistedGraphWorkspace, indexPattern: IndexPattern) {
-    const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
-    
-    const urlTemplates = persistedWorkspaceState.urlTemplates.map(deserializeUrlTemplate).filter((template: UrlTemplate | undefined): template is UrlTemplate => Boolean(template));
+export function savedWorkspaceToAppState(
+  savedWorkspace: PersistedGraphWorkspace,
+  indexPattern: IndexPattern
+) {
+  const defaultAdvancedSettings: AdvancedSettings = {
+      useSignificance: true,
+      sampleSize: 2000,
+      timeoutMillis: 5000,
+      maxValuesPerDoc: 1,
+      minDocCount: 3
+  };
+  const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
-    const indexPattern = indexPatterns.find(pattern => pattern.attributes.title === persistedWorkspaceState.indexPattern);
+  const urlTemplates = persistedWorkspaceState.urlTemplates
+    .map(deserializeUrlTemplate)
+    .filter((template: UrlTemplate | undefined): template is UrlTemplate => Boolean(template));
 
-    if (!indexPattern) {
-      throw new Error('Index pattern not found');
+  const allFields = mapFields(indexPattern);
+
+  const advancedSettings = Object.assign(defaultAdvancedSettings, persistedWorkspaceState.exploreControls);
+
+  if (advancedSettings.sampleDiversityField) {
+    // restore reference to sample diversity field
+    const serializedField = advancedSettings.sampleDiversityField;
+    advancedSettings.sampleDiversityField = allFields.find(field => field.name === serializedField.name);
+  }
+
+  persistedWorkspaceState.selectedFields.forEach(serializedField => {
+    const workspaceField = allFields.find(field => field.name === serializedField.name);
+    if (!workspaceField) {
+      return;
     }
-    // const wsObj = JSON.parse($route.current.locals.savedWorkspace.wsState);
-    // $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    // $scope.description = $route.current.locals.savedWorkspace.description;
+    workspaceField.hopSize = serializedField.hopSize;
+    workspaceField.lastValidHopSize = serializedField.lastValidHopSize;
+    workspaceField.color = serializedField.color;
+    workspaceField.icon = iconChoicesByClass[serializedField.iconClass];
+    workspaceField.selected = true;
+  });
 
-    // // Load any saved drill-down templates
-    // wsObj.urlTemplates.forEach(urlTemplate => {
-    //   const encoder = $scope.outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === urlTemplate.encoderID);
-    //   if (encoder) {
-    //     const template = {
-    //       url: urlTemplate.url,
-    //       description: urlTemplate.description,
-    //       encoder: encoder,
-    //     };
-    //     if (urlTemplate.iconClass) {
-    //       template.icon = drillDownIconChoicesByClass[urlTemplate.iconClass];
-    //     }
-    //     $scope.urlTemplates.push(template);
-    //   }
-    // });
+  //   const graph = {
+  //     nodes: [],
+  //     edges: []
+  //   };
+  //   for (const i in wsObj.vertices) {
+  //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
+  //     const node = {
+  //       field: vertex.field,
+  //       term: vertex.term,
+  //       label: vertex.label,
+  //       color: vertex.color,
+  //       icon: $scope.allFields.filter(function (fieldDef) {
+  //         return vertex.field === fieldDef.name;
+  //       })[0].icon,
+  //       data: {}
+  //     };
+  //     graph.nodes.push(node);
+  //   }
+  //   for (const i in wsObj.blacklist) {
+  //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
+  //     const fieldDef = $scope.allFields.filter(function (fieldDef) {
+  //       return vertex.field === fieldDef.name;
+  //     })[0];
+  //     if (fieldDef) {
+  //       const node = {
+  //         field: vertex.field,
+  //         term: vertex.term,
+  //         label: vertex.label,
+  //         color: vertex.color,
+  //         icon: fieldDef.icon,
+  //         data: {
+  //           field: vertex.field,
+  //           term: vertex.term
+  //         }
+  //       };
+  //       $scope.workspace.blacklistedNodes.push(node);
+  //     }
+  //   }
+  //   for (const i in wsObj.links) {
+  //     const link = wsObj.links[i];
+  //     graph.edges.push({
+  //       source: link.source,
+  //       target: link.target,
+  //       inferred: link.inferred,
+  //       label: link.label,
+  //       term: vertex.term,
+  //       width: link.width,
+  //       weight: link.weight
+  //     });
+  //   }
 
-    // //Lookup the saved index pattern title
-    // let savedObjectIndexPattern = null;
-    // $scope.indices.forEach(function (savedObject) {
-    //   // wsObj.indexPattern is the title string of an indexPattern which
-    //   // we attempt here to look up in the list of currently saved objects
-    //   // that contain index pattern definitions
-    //   if(savedObject.attributes.title === wsObj.indexPattern) {
-    //     savedObjectIndexPattern = savedObject;
-    //   }
-    // });
-    // if(!savedObjectIndexPattern) {
-    //   toastNotifications.addDanger(
-    //     i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-    //       defaultMessage: 'Missing index pattern {indexPattern}',
-    //       values: { indexPattern: wsObj.indexPattern },
-    //     })
-    //   );
-    //   return;
-    // }
+  //   $scope.workspace.mergeGraph(graph);
 
-    // $scope.indexSelected(savedObjectIndexPattern, function () {
-    //   Object.assign($scope.exploreControls, wsObj.exploreControls);
-
-    //   if ($scope.exploreControls.sampleDiversityField) {
-    //     $scope.exploreControls.sampleDiversityField =  $scope.allFields.find(field =>
-    //       $scope.exploreControls.sampleDiversityField.name === field.name);
-    //   }
-
-    //   for (const i in wsObj.selectedFields) {
-    //     const savedField = wsObj.selectedFields[i];
-    //     for (const f in $scope.allFields) {
-    //       const field = $scope.allFields[f];
-    //       if (savedField.name === field.name) {
-    //         field.hopSize = savedField.hopSize;
-    //         field.lastValidHopSize = savedField.lastValidHopSize;
-    //         field.color = savedField.color;
-    //         field.icon = $scope.iconChoicesByClass[savedField.iconClass];
-    //         field.selected = true;
-    //         $scope.selectedFields.push(field);
-    //         break;
-    //       }
-    //     }
-    //     //TODO what if field name no longer exists as part of the index-pattern definition?
-    //   }
-
-    //   $scope.updateLiveResponseFields();
-    //   initWorkspaceIfRequired();
-    //   const graph = {
-    //     nodes: [],
-    //     edges: []
-    //   };
-    //   for (const i in wsObj.vertices) {
-    //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-    //     const node = {
-    //       field: vertex.field,
-    //       term: vertex.term,
-    //       label: vertex.label,
-    //       color: vertex.color,
-    //       icon: $scope.allFields.filter(function (fieldDef) {
-    //         return vertex.field === fieldDef.name;
-    //       })[0].icon,
-    //       data: {}
-    //     };
-    //     graph.nodes.push(node);
-    //   }
-    //   for (const i in wsObj.blacklist) {
-    //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-    //     const fieldDef = $scope.allFields.filter(function (fieldDef) {
-    //       return vertex.field === fieldDef.name;
-    //     })[0];
-    //     if (fieldDef) {
-    //       const node = {
-    //         field: vertex.field,
-    //         term: vertex.term,
-    //         label: vertex.label,
-    //         color: vertex.color,
-    //         icon: fieldDef.icon,
-    //         data: {
-    //           field: vertex.field,
-    //           term: vertex.term
-    //         }
-    //       };
-    //       $scope.workspace.blacklistedNodes.push(node);
-    //     }
-    //   }
-    //   for (const i in wsObj.links) {
-    //     const link = wsObj.links[i];
-    //     graph.edges.push({
-    //       source: link.source,
-    //       target: link.target,
-    //       inferred: link.inferred,
-    //       label: link.label,
-    //       term: vertex.term,
-    //       width: link.width,
-    //       weight: link.weight
-    //     });
-    //   }
-
-    //   $scope.workspace.mergeGraph(graph);
-
-    //   // Wire up parents and children
-    //   for (const i in wsObj.vertices) {
-    //     const vertex = wsObj.vertices[i];
-    //     const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
-    //     const visNode = $scope.workspace.nodesMap[vId];
-    //     // Default the positions.
-    //     visNode.x = vertex.x;
-    //     visNode.y = vertex.y;
-    //     if (vertex.parent !== null) {
-    //       const parentSavedObj = graph.nodes[vertex.parent];
-    //       const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
-    //       visNode.parent = $scope.workspace.nodesMap[parentId];
-    //     }
-    //   }
+  //   // Wire up parents and children
+  //   for (const i in wsObj.vertices) {
+  //     const vertex = wsObj.vertices[i];
+  //     const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
+  //     const visNode = $scope.workspace.nodesMap[vId];
+  //     // Default the positions.
+  //     visNode.x = vertex.x;
+  //     visNode.y = vertex.y;
+  //     if (vertex.parent !== null) {
+  //       const parentSavedObj = graph.nodes[vertex.parent];
+  //       const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
+  //       visNode.parent = $scope.workspace.nodesMap[parentId];
+  //     }
+  //   }
 }

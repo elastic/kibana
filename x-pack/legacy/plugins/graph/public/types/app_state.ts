@@ -20,19 +20,20 @@ export interface UrlTemplate {
   isDefault?: boolean;
 }
 
-export interface Field {
+export interface WorkspaceField {
   name: string;
   hopSize?: number;
   lastValidHopSize?: number; // TODO handle this by an "active" flag
   color: string;
   icon: FontawesomeIcon;
+  selected: boolean;
 }
 
 export interface AdvancedSettings {
   sampleSize: number;
   useSignificance: boolean;
   minDocCount: number;
-  sampleDiversityField?: Field;
+  sampleDiversityField?: WorkspaceField;
   maxValuesPerDoc: number;
   timeoutMillis: number;
 }
@@ -43,6 +44,6 @@ export interface AppState {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;
   workspace: Workspace;
-  selectedFields: Field[];
+  selectedFields: WorkspaceField[];
   selectedIndex: IndexPatternSavedObject;
 }

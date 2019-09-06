@@ -5,7 +5,7 @@
  */
 
 import { SavedObject } from 'ui/saved_objects/saved_object';
-import { AdvancedSettings, UrlTemplate, Field } from './app_state';
+import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -37,7 +37,7 @@ export interface PersistedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'ico
   encoderID: string;
   iconClass?: string;
 }
-export interface PersistedField extends Omit<Field, 'icon'> {
+export interface PersistedField extends Omit<WorkspaceField, 'icon'> {
   iconClass: string;
 }
 
