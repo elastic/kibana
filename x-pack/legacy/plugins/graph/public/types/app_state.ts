@@ -6,11 +6,8 @@
 
 import { SimpleSavedObject } from 'src/core/public';
 import { Workspace } from './workspace_state';
-
-// TODO interim type, will be replaced by actual type in parallel pr
-type OutlinkEncoder = any;
-// TODO interim type, will be replaced by actual type in parallel pr
-type FontawesomeIcon = any;
+import { FontawesomeIcon } from '../services/style_choices';
+import { OutlinkEncoder } from '../services/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;
@@ -44,6 +41,7 @@ export interface AppState {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;
   workspace: Workspace;
+  allFields: WorkspaceField[];
   selectedFields: WorkspaceField[];
   selectedIndex: IndexPatternSavedObject;
 }

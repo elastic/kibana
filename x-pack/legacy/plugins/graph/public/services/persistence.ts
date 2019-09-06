@@ -18,9 +18,16 @@ import {
   PersistedWorkspaceState,
   IndexPatternSavedObject,
   AdvancedSettings,
+  GraphData,
+  Workspace,
 } from '../types';
 import { getOutlinkEncoders } from './outlink_encoders';
-import { urlTemplateIconChoicesByClass, getSuitableIcon, colorChoices, iconChoicesByClass } from './style_choices';
+import {
+  urlTemplateIconChoicesByClass,
+  getSuitableIcon,
+  colorChoices,
+  iconChoicesByClass,
+} from './style_choices';
 
 const outlinkEncoders = getOutlinkEncoders();
 
@@ -70,7 +77,7 @@ export function appStateToSavedWorkspace(
   currentSavedWorkspace: PersistedGraphWorkspace,
   { workspace, urlTemplates, advancedSettings, selectedIndex, selectedFields }: AppState,
   canSaveData: boolean
-): PersistedGraphWorkspace {
+) {
   const blacklist: PersistedNode[] = canSaveData
     ? workspace.blacklistedNodes.map(node => serializeNode(node))
     : [];
@@ -93,12 +100,9 @@ export function appStateToSavedWorkspace(
     exploreControls: advancedSettings,
   };
 
-  return {
-    ...currentSavedWorkspace,
-    wsState: JSON.stringify(persistedWorkspaceState),
-    numVertices: vertices.length,
-    numLinks: links.length,
-  };
+  currentSavedWorkspace.wsState = JSON.stringify(persistedWorkspaceState);
+  currentSavedWorkspace.numVertices = vertices.length;
+  currentSavedWorkspace.numLinks = links.length;
 }
 
 function deserializeUrlTemplate({
@@ -118,9 +122,8 @@ function deserializeUrlTemplate({
   };
 
   if (iconClass) {
-    template.icon = urlTemplateIconChoicesByClass[iconClass]
-      ? urlTemplateIconChoicesByClass[iconClass]
-      : null;
+    const iconCandidate = urlTemplateIconChoicesByClass[iconClass];
+    template.icon = iconCandidate ? iconCandidate : null;
   }
 
   return template;
@@ -137,7 +140,7 @@ export function lookupIndexPattern(
   );
 
   if (indexPattern) {
-    return indexPattern.id;
+    return indexPattern;
   }
 }
 
@@ -167,37 +170,38 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
     });
 }
 
-// 1. call lookupIndexPattern()
-// fetch index pattern
-// 2. call savedWorkspaceToAppState() to map everything
-// 2.1. savedWorkspaceToAppState will call mapFields under the hood (will also be called by "new workspace" branch if selecting an index pattern)
+export function makeNodeId(field: string, term: string) {
+  return field + '..' + term;
+}
+
 export function savedWorkspaceToAppState(
   savedWorkspace: PersistedGraphWorkspace,
-  indexPattern: IndexPattern
-) {
+  indexPattern: IndexPattern,
+  workspaceInstance: Workspace
+): Pick<
+  AppState,
+  'urlTemplates' | 'advancedSettings' | 'workspace' | 'allFields' | 'selectedFields'
+> {
   const defaultAdvancedSettings: AdvancedSettings = {
-      useSignificance: true,
-      sampleSize: 2000,
-      timeoutMillis: 5000,
-      maxValuesPerDoc: 1,
-      minDocCount: 3
+    useSignificance: true,
+    sampleSize: 2000,
+    timeoutMillis: 5000,
+    maxValuesPerDoc: 1,
+    minDocCount: 3,
   };
   const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
+  // todo clean this part up
+
+  // ================== url templates =============================
   const urlTemplates = persistedWorkspaceState.urlTemplates
     .map(deserializeUrlTemplate)
     .filter((template: UrlTemplate | undefined): template is UrlTemplate => Boolean(template));
 
+  // ================== fields =============================
   const allFields = mapFields(indexPattern);
 
-  const advancedSettings = Object.assign(defaultAdvancedSettings, persistedWorkspaceState.exploreControls);
-
-  if (advancedSettings.sampleDiversityField) {
-    // restore reference to sample diversity field
-    const serializedField = advancedSettings.sampleDiversityField;
-    advancedSettings.sampleDiversityField = allFields.find(field => field.name === serializedField.name);
-  }
-
+  // merge in selected information into all fields
   persistedWorkspaceState.selectedFields.forEach(serializedField => {
     const workspaceField = allFields.find(field => field.name === serializedField.name);
     if (!workspaceField) {
@@ -206,75 +210,92 @@ export function savedWorkspaceToAppState(
     workspaceField.hopSize = serializedField.hopSize;
     workspaceField.lastValidHopSize = serializedField.lastValidHopSize;
     workspaceField.color = serializedField.color;
-    workspaceField.icon = iconChoicesByClass[serializedField.iconClass];
+    // TODO handle this
+    workspaceField.icon = iconChoicesByClass[serializedField.iconClass]!;
     workspaceField.selected = true;
   });
 
-  //   const graph = {
-  //     nodes: [],
-  //     edges: []
-  //   };
-  //   for (const i in wsObj.vertices) {
-  //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-  //     const node = {
-  //       field: vertex.field,
-  //       term: vertex.term,
-  //       label: vertex.label,
-  //       color: vertex.color,
-  //       icon: $scope.allFields.filter(function (fieldDef) {
-  //         return vertex.field === fieldDef.name;
-  //       })[0].icon,
-  //       data: {}
-  //     };
-  //     graph.nodes.push(node);
-  //   }
-  //   for (const i in wsObj.blacklist) {
-  //     var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-  //     const fieldDef = $scope.allFields.filter(function (fieldDef) {
-  //       return vertex.field === fieldDef.name;
-  //     })[0];
-  //     if (fieldDef) {
-  //       const node = {
-  //         field: vertex.field,
-  //         term: vertex.term,
-  //         label: vertex.label,
-  //         color: vertex.color,
-  //         icon: fieldDef.icon,
-  //         data: {
-  //           field: vertex.field,
-  //           term: vertex.term
-  //         }
-  //       };
-  //       $scope.workspace.blacklistedNodes.push(node);
-  //     }
-  //   }
-  //   for (const i in wsObj.links) {
-  //     const link = wsObj.links[i];
-  //     graph.edges.push({
-  //       source: link.source,
-  //       target: link.target,
-  //       inferred: link.inferred,
-  //       label: link.label,
-  //       term: vertex.term,
-  //       width: link.width,
-  //       weight: link.weight
-  //     });
-  //   }
+  const selectedFields = allFields.filter(field => field.selected);
 
-  //   $scope.workspace.mergeGraph(graph);
+  // ================== advanced settings =============================
+  const advancedSettings = Object.assign(
+    defaultAdvancedSettings,
+    persistedWorkspaceState.exploreControls
+  );
 
-  //   // Wire up parents and children
-  //   for (const i in wsObj.vertices) {
-  //     const vertex = wsObj.vertices[i];
-  //     const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
-  //     const visNode = $scope.workspace.nodesMap[vId];
-  //     // Default the positions.
-  //     visNode.x = vertex.x;
-  //     visNode.y = vertex.y;
-  //     if (vertex.parent !== null) {
-  //       const parentSavedObj = graph.nodes[vertex.parent];
-  //       const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
-  //       visNode.parent = $scope.workspace.nodesMap[parentId];
-  //     }
-  //   }
+  if (advancedSettings.sampleDiversityField) {
+    // restore reference to sample diversity field
+    const serializedField = advancedSettings.sampleDiversityField;
+    advancedSettings.sampleDiversityField = allFields.find(
+      field => field.name === serializedField.name
+    );
+  }
+
+  // ================== nodes and edges =============================
+  const graph: GraphData = {
+    nodes: persistedWorkspaceState.vertices.map(serializedNode => ({
+      id: '',
+      field: serializedNode.field,
+      term: serializedNode.term,
+      label: serializedNode.label,
+      color: serializedNode.color,
+      icon: allFields.find(field => field.name === serializedNode.field)!.icon,
+      data: {
+        field: serializedNode.field,
+        term: serializedNode.term,
+      },
+    })),
+    edges: persistedWorkspaceState.links.map(serializedEdge => ({
+      id: '',
+      source: serializedEdge.source,
+      target: serializedEdge.target,
+      inferred: serializedEdge.inferred,
+      label: serializedEdge.label,
+      width: serializedEdge.width,
+      weight: serializedEdge.weight,
+    })),
+  };
+
+  workspaceInstance.mergeGraph(graph);
+
+  persistedWorkspaceState.vertices.forEach(persistedNode => {
+    const nodeId = makeNodeId(persistedNode.field, persistedNode.term);
+    const workspaceNode = workspaceInstance.nodesMap[nodeId];
+    workspaceNode.x = persistedNode.x;
+    workspaceNode.y = persistedNode.y;
+
+    if (persistedNode.parent !== null) {
+      const persistedParentNode = persistedWorkspaceState.vertices[persistedNode.parent];
+      const parentId = makeNodeId(persistedParentNode.field, persistedParentNode.term);
+      workspaceNode.parent = workspaceInstance.nodesMap[parentId];
+    }
+  });
+
+  // ================== blacklist =============================
+  const blacklistedNodes = persistedWorkspaceState.blacklist.map(persistedNode => {
+    const currentField = allFields.find(field => field.name === persistedNode.field)!;
+    return {
+      x: 0,
+      y: 0,
+      label: persistedNode.label,
+      color: persistedNode.color,
+      icon: currentField.icon,
+      parent: null,
+      scaledSize: 0,
+      data: {
+        field: persistedNode.field,
+        term: persistedNode.term,
+      },
+    };
+  });
+
+  workspaceInstance.blacklistedNodes.push(...blacklistedNodes);
+
+  return {
+    urlTemplates,
+    advancedSettings,
+    workspace: workspaceInstance,
+    allFields,
+    selectedFields,
+  };
 }

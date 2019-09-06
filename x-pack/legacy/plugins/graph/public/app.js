@@ -57,6 +57,7 @@ import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern } from './services/persistence';
 import { save } from  './services/save_modal';
 
 import settingsTemplate from './angular/templates/settings.html';
@@ -934,141 +935,33 @@ app.controller('graphuiPlugin', function (
 
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
-
-    const wsObj = JSON.parse($route.current.locals.savedWorkspace.wsState);
     $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    $scope.description = $route.current.locals.savedWorkspace.description;
-
-    // Load any saved drill-down templates
-    wsObj.urlTemplates.forEach(urlTemplate => {
-      const encoder = $scope.outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === urlTemplate.encoderID);
-      if (encoder) {
-        const template = {
-          url: urlTemplate.url,
-          description: urlTemplate.description,
-          encoder: encoder,
-        };
-        if (urlTemplate.iconClass) {
-          template.icon = drillDownIconChoicesByClass[urlTemplate.iconClass];
-        }
-        $scope.urlTemplates.push(template);
-      }
-    });
-
-    //Lookup the saved index pattern title
-    let savedObjectIndexPattern = null;
-    $scope.indices.forEach(function (savedObject) {
-      // wsObj.indexPattern is the title string of an indexPattern which
-      // we attempt here to look up in the list of currently saved objects
-      // that contain index pattern definitions
-      if(savedObject.attributes.title === wsObj.indexPattern) {
-        savedObjectIndexPattern = savedObject;
-      }
-    });
-    if(!savedObjectIndexPattern) {
+    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $scope.indices);
+    if(!selectedIndex) {
       toastNotifications.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Missing index pattern {indexPattern}',
-          values: { indexPattern: wsObj.indexPattern },
+          defaultMessage: 'Index pattern not found',
         })
       );
       return;
     }
-
-    $scope.indexSelected(savedObjectIndexPattern, function () {
-      Object.assign($scope.exploreControls, wsObj.exploreControls);
-
-      if ($scope.exploreControls.sampleDiversityField) {
-        $scope.exploreControls.sampleDiversityField =  $scope.allFields.find(field =>
-          $scope.exploreControls.sampleDiversityField.name === field.name);
-      }
-
-      for (const i in wsObj.selectedFields) {
-        const savedField = wsObj.selectedFields[i];
-        for (const f in $scope.allFields) {
-          const field = $scope.allFields[f];
-          if (savedField.name === field.name) {
-            field.hopSize = savedField.hopSize;
-            field.lastValidHopSize = savedField.lastValidHopSize;
-            field.color = savedField.color;
-            field.icon = $scope.iconChoicesByClass[savedField.iconClass];
-            field.selected = true;
-            $scope.selectedFields.push(field);
-            break;
-          }
-        }
-        //TODO what if field name no longer exists as part of the index-pattern definition?
-      }
-
-      $scope.updateLiveResponseFields();
+    $scope.selectedIndex = selectedIndex;
+    $scope.proposedIndex = selectedIndex;
+    $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
       initWorkspaceIfRequired();
-      const graph = {
-        nodes: [],
-        edges: []
-      };
-      for (const i in wsObj.vertices) {
-        var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-        const node = {
-          field: vertex.field,
-          term: vertex.term,
-          label: vertex.label,
-          color: vertex.color,
-          icon: $scope.allFields.filter(function (fieldDef) {
-            return vertex.field === fieldDef.name;
-          })[0].icon,
-          data: {}
-        };
-        graph.nodes.push(node);
-      }
-      for (const i in wsObj.blacklist) {
-        var vertex = wsObj.vertices[i]; // eslint-disable-line no-var
-        const fieldDef = $scope.allFields.filter(function (fieldDef) {
-          return vertex.field === fieldDef.name;
-        })[0];
-        if (fieldDef) {
-          const node = {
-            field: vertex.field,
-            term: vertex.term,
-            label: vertex.label,
-            color: vertex.color,
-            icon: fieldDef.icon,
-            data: {
-              field: vertex.field,
-              term: vertex.term
-            }
-          };
-          $scope.workspace.blacklistedNodes.push(node);
-        }
-      }
-      for (const i in wsObj.links) {
-        const link = wsObj.links[i];
-        graph.edges.push({
-          source: link.source,
-          target: link.target,
-          inferred: link.inferred,
-          label: link.label,
-          term: vertex.term,
-          width: link.width,
-          weight: link.weight
-        });
-      }
-
-      $scope.workspace.mergeGraph(graph);
-
-      // Wire up parents and children
-      for (const i in wsObj.vertices) {
-        const vertex = wsObj.vertices[i];
-        const vId = $scope.workspace.makeNodeId(vertex.field, vertex.term);
-        const visNode = $scope.workspace.nodesMap[vId];
-        // Default the positions.
-        visNode.x = vertex.x;
-        visNode.y = vertex.y;
-        if (vertex.parent !== null) {
-          const parentSavedObj = graph.nodes[vertex.parent];
-          const parentId = $scope.workspace.makeNodeId(parentSavedObj.field, parentSavedObj.term);
-          visNode.parent = $scope.workspace.nodesMap[parentId];
-        }
-      }
+      const {
+        urlTemplates,
+        advancedSettings,
+        workspace,
+        allFields,
+        selectedFields,
+      } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
+      $scope.allFields = allFields;
+      $scope.selectedFields = selectedFields;
+      $scope.workspace = workspace;
+      $scope.exploreControls = advancedSettings;
+      $scope.urlTemplates = urlTemplates;
+      $scope.updateLiveResponseFields();
       $scope.workspace.runLayout();
 
       // Allow URLs to include a user-defined text query
@@ -1076,9 +969,8 @@ app.controller('graphuiPlugin', function (
         $scope.searchTerm = $route.current.params.query;
         $scope.submit();
       }
-
     });
-  }else {
+  } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
     });
@@ -1097,80 +989,18 @@ app.controller('graphuiPlugin', function (
     const canSaveData = $scope.graphSavePolicy === 'configAndData' ||
       ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
 
-
-    let blacklist = [];
-    let vertices = [];
-    let links = [];
-    if (canSaveData) {
-      blacklist = $scope.workspace.blacklistedNodes.map(function (node) {
-        return {
-          x: node.x,
-          y: node.y,
-          field: node.data.field,
-          term: node.data.term,
-          label: node.label,
-          color: node.color,
-          parent: null,
-          weight: node.weight,
-          size: node.scaledSize,
-        };
-      });
-      vertices = $scope.workspace.nodes.map(function (node) {
-        return {
-          x: node.x,
-          y: node.y,
-          field: node.data.field,
-          term: node.data.term,
-          label: node.label,
-          color: node.color,
-          parent: node.parent ? $scope.workspace.nodes.indexOf(node.parent) : null,
-          weight: node.weight,
-          size: node.scaledSize,
-        };
-      });
-      links = $scope.workspace.edges.map(function (edge) {
-        return {
-          'weight': edge.weight,
-          'width': edge.width,
-          'inferred': edge.inferred,
-          'label': edge.label,
-          'source': $scope.workspace.nodes.indexOf(edge.source),
-          'target': $scope.workspace.nodes.indexOf(edge.target)
-        };
-      });
-    }
-
-    const urlTemplates = $scope.urlTemplates.map(function (template) {
-      const result = {
-        'url': template.url,
-        'description': template.description,
-        'encoderID': template.encoder.id
-      };
-      if (template.icon) {
-        result.iconClass = template.icon.class;
-      }
-      return result;
-    });
-
-    $scope.savedWorkspace.wsState = JSON.stringify({
-      'indexPattern': $scope.selectedIndex.attributes.title,
-      'selectedFields': $scope.selectedFields.map(function (field) {
-        return {
-          'name': field.name,
-          'lastValidHopSize': field.lastValidHopSize,
-          'color': field.color,
-          'iconClass': field.icon.class,
-          'hopSize': field.hopSize
-        };
-      }),
-      blacklist,
-      vertices,
-      links,
-      urlTemplates,
-      exploreControls: $scope.exploreControls
-    });
-    $scope.savedWorkspace.numVertices = vertices.length;
-    $scope.savedWorkspace.numLinks = links.length;
+    appStateToSavedWorkspace(
+      $scope.savedWorkspace,
+      {
+        workspace: $scope.workspace,
+        urlTemplates: $scope.urlTemplates,
+        advancedSettings: $scope.exploreControls,
+        selectedIndex: $scope.selectedIndex,
+        selectedFields: $scope.selectedFields
+      },
+      $scope.graphSavePolicy === 'configAndData' ||
+          ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData)
+    );
 
     return $scope.savedWorkspace.save(saveOptions).then(function (id) {
       if (id) {

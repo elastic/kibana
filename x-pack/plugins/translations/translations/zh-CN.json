@@ -4657,7 +4657,6 @@
     "xpack.graph.exploreGraph.timedOutWarningText": "浏览超时",
     "xpack.graph.featureRegistry.graphFeatureName": "Graph",
     "xpack.graph.home.breadcrumb": "Graph",
-    "xpack.graph.loadWorkspace.missingIndexPatternErrorMessage": "缺少索引模式 {indexPattern}",
     "xpack.graph.missingWorkspaceErrorMessage": "缺少工作空间",
     "xpack.graph.noDataSourceNotificationMessageText": "前往 “{managementIndexPatternsLink}” 并创建索引模式",
     "xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText": "管理 > 索引模式",

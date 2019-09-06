@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO interim type, will be replaced by actual type in parallel pr
-type FontawesomeIcon = any;
+import { FontawesomeIcon } from '../services/style_choices';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface JsonArray extends Array<JsonValue> {}
@@ -27,6 +26,7 @@ export interface WorkspaceNode {
   };
   scaledSize: number;
   parent: WorkspaceNode | null;
+  color: string;
 }
 
 export interface WorkspaceEdge {
@@ -38,7 +38,31 @@ export interface WorkspaceEdge {
   target: WorkspaceNode;
 }
 
+export interface GraphData {
+  nodes: Array<{
+    field: string;
+    term: string;
+    id: string;
+    label: string;
+    color: string;
+    icon: FontawesomeIcon;
+    data: {
+      field: string;
+      term: string;
+    };
+  }>;
+  edges: Array<{
+    source: number;
+    target: number;
+    weight: number;
+    width: number;
+    doc_count?: number;
+    inferred: boolean;
+  }>;
+}
+
 export interface Workspace {
+  nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blacklistedNodes: WorkspaceNode[];
@@ -52,4 +76,10 @@ export interface Workspace {
    * @param nodes List of nodes probably containing grouped nodes
    */
   returnUnpackedGroupeds(nodes: WorkspaceNode[]): WorkspaceNode[];
+
+  /**
+   * Adds new nodes retrieved from an elasticsearch search
+   * @param newData
+   */
+  mergeGraph(newData: GraphData): void;
 }
