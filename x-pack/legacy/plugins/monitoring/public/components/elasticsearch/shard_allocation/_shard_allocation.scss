@@ -1,3 +1,9 @@
+// SASSTODO: Generic selector
+monitoring-shard-allocation {
+  display: block;
+  border-top: $euiSizeS solid $euiColorLightestShade;
+}
+
 .monClusterTitle {
   font-size: $euiFontSizeL;
   margin: 0;
@@ -9,68 +15,43 @@
     display: block;
   }
 
-  // .parent {
-  //   padding-top: 14px;
-  //   border-left: 3px solid $euiColorSuccess !important;
-    
-  //   &.red {
-  //     border-left: 3px solid $euiColorDanger !important;
-  //   }
-    
-  //   &.yellow {
-  //     border-left: 3px solid $euiColorWarning !important;
-  //   }
-  // }
-  
   td.unassigned {
     vertical-align: middle;
-    // width: 150px;
+    width: 150px;
   }
 
   .children {
     padding-top: $euiSizeL;
   }
-  
+
   .child {
-    // float: left;
+    float: left;
     align-self: center;
-    // display: flex;
     background-color: $euiColorLightestShade;
     margin: $euiSizeS;
     border: 1px solid $euiColorLightShade;
     border-radius: $euiSizeXS;
 
-    >.euiFlexGroup {
-      padding: $euiSizeS;
-    }
-    
-
     &.index {
-      
       border-left: $euiSizeXS solid $euiColorSuccess;
 
       &.red {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
-
+      
       &.yellow {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
 
     .title {
-      // padding: $euiSizeS 0 $euiSizeS $euiSizeS;
-      // display: flex;
-      // display: inline-block;
+      padding: 5px 7px;
+      display: inline-block;
       text-align: center;
       font-size: $euiSizeM;
-      display: flex;
-      flex-direction: row;
-      // font: 10px sans-serif;
-      // color: $euiColorGhost;
+      color: $euiColorGhost;
 
       a {
-        // color: $euiColorGhost;
         text-decoration: none;
       }
 
@@ -90,35 +71,16 @@
     text-align: left;
   }
 
-  // td:first-child {
-  //   width: 200px;
-  // }
+  td:first-child {
+    width: 200px;
+  }
 
   .shard {
     align-self: center;
-    // padding: $euiSizeXS 7px;
+    padding: 5px 7px;
     font: $euiSizeM;
-    // border-left: 1px solid $euiColorEmptyShade;
-    // position: relative;
-    // display: inline-block;
+    position: relative;
+    display: inline-block;
   }
 
-  // .legend {
-  //   font-size: $euiSizeM;
-  //   background-color: $euiColorEmptyShade;
-  //   color: $euiColorDarkestShade;
-  //   padding: $euiSizeXS;
-
-  //   .title {
-  //     margin-left: $euiSizeXS;
-  //     font-weight: bold;
-  //   }
-
-  //   span.shard {
-  //     float: none;
-  //     display: inline-block;
-  //     margin: 0 $euiSizeXS 0 10px;
-  //     padding: 0 4px;
-  //   }
-  // }
 }

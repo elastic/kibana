@@ -11,10 +11,6 @@ import { TimeseriesContainer } from './timeseries_container';
 import { HorizontalLegend } from './horizontal_legend';
 import { getValuesForSeriesIndex, getValuesByX } from './get_values_for_legend';
 import { DEBOUNCE_SLOW_MS } from '../../../common/constants';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
 
 export class TimeseriesVisualization extends React.Component {
 
@@ -138,16 +134,16 @@ export class TimeseriesVisualization extends React.Component {
 
     return (
       <div className={className}>
-        <EuiFlexGroup direction="column" className="monRhythmChart__content">
-          <EuiFlexItem className="monRhythmChart__visualization">
+        <div style={style} className="monRhythmChart__content">
+          <div className="monRhythmChart__visualization">
             <TimeseriesContainer
               seriesToShow={this.state.seriesToShow}
               updateLegend={this.debouncedUpdateLegend}
               {...this.props}
             />
-          </EuiFlexItem>
+          </div>
           { legend }
-        </EuiFlexGroup>
+        </div>
       </div>
     );
   }

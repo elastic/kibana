@@ -74,16 +74,8 @@
   font-weight: bold;
 }
 
-img.lspvDetailDrawerIcon {
-  display: inline;
-  margin: 0 $euiSizeXS 0 0;
-  width: auto;
-  vertical-align: middle;
-}
-
-// SASSTODO: Why is this width here?
 .lspvDetailDrawerSparklineContainer {
-  width: 7vw;
+  width: 7vw; // needed for <Sparkline /> to work
 }
 
 @include euiBreakpoint('m') {
@@ -93,7 +85,7 @@ img.lspvDetailDrawerIcon {
     }
 
     .monPipelineViewer__metricFlexItem {
-      margin-bottom: $euiSizeXS !important;
+      margin-bottom: $euiSizeXS !important; // sass-lint:disable-line no-important
     }
 
     .monPipelineViewer__metric {

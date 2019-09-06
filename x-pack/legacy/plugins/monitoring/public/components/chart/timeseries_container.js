@@ -6,10 +6,6 @@
 
 import React from 'react';
 import { ChartTarget } from './chart_target';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
 
 export function TimeseriesContainer(props) {
   const container = {
@@ -20,8 +16,8 @@ export function TimeseriesContainer(props) {
   };
 
   return (
-    <EuiFlexItem>
+    <div style={container}>
       <ChartTarget {...props}/>
-    </EuiFlexItem>
+    </div>
   );
 }

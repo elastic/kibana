@@ -27,9 +27,9 @@ export class HorizontalLegend extends React.Component {
    */
   displayValue(value) {
     return (
-      <EuiFlexItem grow={false} className="monRhythmChart__legendValue">
+      <span className="monRhythmChart__legendValue">
         { value }
-      </EuiFlexItem>
+      </span>
     );
   }
 
@@ -85,20 +85,18 @@ export class HorizontalLegend extends React.Component {
           className={classes.join(' ')}
           onClick={event => this.props.onToggle(event, row.id)}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} className="monRhythmChart__legendLabel">
-              <EuiIcon
-                className="monRhythmChart__legendIndicator"
-                aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
-                  { defaultMessage: 'toggle button' })}
-                size="l"
-                type="dot"
-                color={row.color}
-              />
-              { ' ' + row.label + ' ' }
-            </EuiFlexItem>
-            { this.formatter(this.props.seriesValues[row.id], row) }
-          </EuiFlexGroup>
+          <span className="monRhythmChart__legendLabel">
+            <EuiIcon
+              className="monRhythmChart__legendIndicator"
+              aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                { defaultMessage: 'toggle button' })}
+              size="l"
+              type="dot"
+              color={row.color}
+            />
+            { ' ' + row.label + ' ' }
+          </span>
+          { this.formatter(this.props.seriesValues[row.id], row) }
         </EuiFlexItem>
       </EuiKeyboardAccessible>
     );
@@ -108,11 +106,11 @@ export class HorizontalLegend extends React.Component {
     const rows = this.props.series.map(this.createSeries);
 
     return (
-      <EuiFlexItem grow={false} className="monRhythmChart__legendHorizontal">
-        <EuiFlexGroup wrap={true} className="monRhythmChart__legend-series">
+      <div className="monRhythmChart__legendHorizontal">
+        <EuiFlexGroup wrap={true} gutterSize="s" className="monRhythmChart__legend-series">
           { rows }
         </EuiFlexGroup>
-      </EuiFlexItem>
+      </div>
     );
   }
 }
