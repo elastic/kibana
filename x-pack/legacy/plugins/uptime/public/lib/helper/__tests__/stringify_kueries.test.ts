@@ -7,9 +7,9 @@
 import { stringifyKueries } from '../stringify_kueries';
 
 describe('stringifyKueries', () => {
-  let kueries: Map<string, string[]>;
+  let kueries: Map<string, number[] | string[]>;
   beforeEach(() => {
-    kueries = new Map<string, string[]>();
+    kueries = new Map<string, number[] | string[]>();
     kueries.set('foo', ['fooValue1', 'fooValue2']);
     kueries.set('bar', ['barValue']);
   });
@@ -47,6 +47,11 @@ describe('stringifyKueries', () => {
   it('handles parens for values with greater than 2 items', () => {
     kueries.set('foo', ['val1', 'val2', 'val3']);
     kueries.set('baz', ['baz 1', 'baz 2']);
+    expect(stringifyKueries(kueries)).toMatchSnapshot();
+  });
+
+  it('handles number values', () => {
+    kueries.set('port', [80, 8080, 443]);
     expect(stringifyKueries(kueries)).toMatchSnapshot();
   });
 });

@@ -85,10 +85,12 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const filterQueryString = search || '';
   let error: any;
-  let kueryString: string;
+  let kueryString: string = '';
   try {
-    const filterMap = new Map<string, string[]>(JSON.parse(urlFilters));
-    kueryString = stringifyKueries(filterMap);
+    if (urlFilters !== '') {
+      const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
+      kueryString = stringifyKueries(filterMap);
+    }
   } catch {
     kueryString = '';
   }
@@ -130,7 +132,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
-        <EuiFlexGroup gutterSize="none" direction="column">
+        <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
             <KueryBar />
           </EuiFlexItem>

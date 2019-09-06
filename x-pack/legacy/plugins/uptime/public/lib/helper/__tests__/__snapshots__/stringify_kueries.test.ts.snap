@@ -6,6 +6,8 @@ exports[`stringifyKueries adds quotations inside parens if there are values cont
 
 exports[`stringifyKueries correctly stringifies a single value 1`] = `"foo:fooValue"`;
 
+exports[`stringifyKueries handles number values 1`] = `"(foo:fooValue1 or foo:fooValue2) and bar:barValue and (port:80 or port:8080 or port:443)"`;
+
 exports[`stringifyKueries handles parens for values with greater than 2 items 1`] = `"(foo:val1 or foo:val2 or foo:val3) and bar:barValue and (baz:\\"baz 1\\" or baz:\\"baz 2\\")"`;
 
 exports[`stringifyKueries returns an empty string for an empty map 1`] = `""`;
