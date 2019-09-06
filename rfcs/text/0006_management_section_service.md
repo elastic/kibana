@@ -37,14 +37,15 @@ This API is influenced heavily by the [application service mounting RFC](https:/
 
 export class MyPlugin {
   setup(core, { management }) {
-    management.sections.register({
+    // Registering a new link to a new section
+    const mySection = management.sections.register({
       id: 'my-section',
       title: 'My Main Section', // display name
       description: 'hello', // not used in current UI, but possibly in future
       order: 10,
       euiIconType: 'iconName',
     });
-    management.sections.registerLink('my-section', {
+    mySection.registerLink({
       id: 'my-link',
       title: 'My Link', // display name
       description: 'hello', // not used in current UI, but possibly in future
@@ -54,15 +55,26 @@ export class MyPlugin {
         return renderApp(context, params);
       }
     });
+
+    // Registering a new link to an existing section
+    const kibanaSection = management.sections.get('kibana');
+    kibanaSection.registerLink({ id: 'my-kibana-section-link', ... });
+  }
+
+  start(core, { management }) {
+    // access all registered sections, filtered based on capabilities
+    management.sections.getAvailable();
+    // automatically navigate to any section link by id
+    management.sections.navigateToSectionLink('my-kibana-section-link');
   }
 }
  
 // my_plugin/public/my-section.tsx
 
-export function renderApp(context, { basePath, element }) {
+export function renderApp(context, { sectionBasePath, element }) {
   ReactDOM.render(
-    // `basePath` would be `/app/management/my-section/my-link`
-    <MyApp basename={basePath} />,
+    // `sectionBasePath` would be `/app/management/my-section/my-link`
+    <MyApp basename={sectionBasePath} />,
     element
   );
  
@@ -75,58 +87,54 @@ export function renderApp(context, { basePath, element }) {
 
 ```ts
 interface ManagementSetup {
-  sections: SectionsService;
+  sections: SectionsServiceSetup;
+}
+
+interface ManagementStart {
+  sections: SectionsServiceStart;
 }
  
-interface SectionsService {
-  register: Register;
-  registerLink: RegisterLink;
+interface SectionsServiceSetup {
+  get: (sectionId: string) => Section;
   getAvailable: () => Section[]; // filtered based on capabilities
-  get: (id: string) => Section | undefined;
-  getLink: (id: string) => Link | undefined;
+  register: (RegisterParams) => Section | Error;
 }
- 
-type Register = ({
+
+interface SectionsServiceStart {
+  getAvailable: () => Array<Omit<Section, 'registerLink'>>; // filtered based on capabilities
+  // uses `core.application.navigateToApp` under the hood, automatically prepending the `path` for the link
+  navigateToSectionLink: (linkId: string, options?: { path?: string; state?: any }) => void;
+}
+
+interface RegisterParams {
   id: string;
   title: string;
   description: string; // not used in current UI, but possibly in future
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
-}) => Section | Error;
+}
  
-type RegisterLink = (sectionId: string, {
+interface RegisterLinkParams {
   id: string;
   title: string;
   description: string; // not used in current UI, but possibly in future
   order?: number;
   mount: ManagementSectionMount;
-}) => Link | Error;
+}
  
 type Unmount = () => Promise<void> | void;
  
+interface MountParams {
+  sectionBasePath: string; // base path for setting up your router
+  element: HTMLElement; // element the section should render into
+}
+
 type ManagementSectionMount = (
   context: AppMountContext, // provided by core.ApplicationService
   params: MountParams,
 ) => Unmount | Promise<Unmount>;
- 
-interface MountParams {
-  basePath: string; // base path for setting up your router
-  element: HTMLElement; // element the section should render into
-}
- 
-interface Section {
-  id: string;
-  title: string;
-  description: string;
-  baseBath: string;
-  links: Link[];
-  order?: number;
-  euiIconType?: string;
-  icon?: string;
-  destroy: () => Promise<void> | void; // de-registers and destroys all links
-}
- 
+
 interface Link {
   id: string;
   title: string;
@@ -135,6 +143,18 @@ interface Link {
   sectionId: string;
   order?: number;
   destroy: () => Promise<void> | void; // de-registers & calls unmount()
+}
+
+interface Section {
+  id: string;
+  title: string;
+  description: string;
+  links: Link[];
+  registerLink: (RegisterLinkParams) => Link | Error;
+  order?: number;
+  euiIconType?: string;
+  icon?: string;
+  destroy: () => Promise<void> | void; // de-registers and destroys all links
 }
 ```
 
@@ -256,7 +276,6 @@ interface Options {
 
 # Unresolved questions
 
-- Do individual links within a section need the ability to specify icons? Currently only the section headers have icons.
 - Do we need a field for a description? Currently there is no place for it in the UI, but it was added based on the mocks from the [reference section](#reference).
 - From a product perspective, what does the future of the Management section look like? There has been recent discussion around making Global vs Space-specific management areas (see links in [reference section](#reference)); if this is a feature we want in an `8.0` timeframe, we will probably need to resolve this question before moving forward. If this is something we plan for `8.x` and beyond, the current proposal remains mostly unaffected and we can add that as 
 
