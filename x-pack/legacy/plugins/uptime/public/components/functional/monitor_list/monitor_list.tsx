@@ -34,6 +34,7 @@ interface MonitorListProps {
   absoluteStartDate: number;
   absoluteEndDate: number;
   dangerColor: string;
+  hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
   // TODO: reintegrate pagination in a future release
@@ -56,6 +57,7 @@ export const MonitorListComponent = (props: Props) => {
     successColor,
     data,
     errors,
+    hasActiveFilters,
     linkParameters,
     loading,
     // TODO: reintroduce for pagination and sorting
@@ -126,11 +128,19 @@ export const MonitorListComponent = (props: Props) => {
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
-          noItemsMessage={i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-            defaultMessage: 'No uptime monitors found',
-            description:
-              'This message is shown if the monitors table is rendered but has no items.',
-          })}
+          noItemsMessage={
+            hasActiveFilters
+              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
+                  defaultMessage: 'No monitors found for selected filter criteria',
+                  description:
+                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
+                })
+              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+                  defaultMessage: 'No uptime monitors found',
+                  description:
+                    'This message is shown if the monitors table is rendered but has no items.',
+                })
+          }
           // TODO: reintegrate pagination in future release
           // pagination={pagination}
           // TODO: reintegrate sorting in future release

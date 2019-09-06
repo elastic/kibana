@@ -170,6 +170,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}
           dangerColor={colors.danger}
+          hasActiveFilters={!!filters}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}
