@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { mapColumn } from '../../functions/common/mapColumn';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CANVAS, DATATABLE } from '../constants';
+import { CANVAS, DATATABLE } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {

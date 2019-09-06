@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { render } from '../../functions/common/render';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT, CSS } from '../constants';
+import { CONTEXT, CSS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof render>> = {
   help: i18n.translate('xpack.canvas.functions.renderHelpText', {

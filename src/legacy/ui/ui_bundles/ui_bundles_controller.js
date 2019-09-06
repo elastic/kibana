@@ -25,6 +25,7 @@ import { existsSync } from 'fs';
 import del from 'del';
 import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
+import jsonStableStringify from 'json-stable-stringify';
 
 import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 
@@ -48,6 +49,21 @@ function getWebpackAliases(pluginSpecs) {
   }, {});
 }
 
+function sortAllArrays(input) {
+  if (Array.isArray(input)) {
+    return input
+      .map(i => sortAllArrays(i))
+      .sort((a, b) => typeof a === 'string' && typeof b === 'string' ? a.localeCompare(b) : 0);
+  }
+
+  if (typeof input === 'object') {
+    return Object.entries(input)
+      .map(([key, value]) => [key, sortAllArrays(value)]);
+  }
+
+  return input;
+}
+
 export class UiBundlesController {
   constructor(kbnServer) {
     const { config, uiApps, uiExports, pluginSpecs } = kbnServer;
@@ -59,9 +75,7 @@ export class UiBundlesController {
       sourceMaps: config.get('optimize.sourceMaps'),
       kbnVersion: config.get('pkg.version'),
       buildNum: config.get('pkg.buildNum'),
-      plugins: pluginSpecs
-        .map(spec => spec.getId())
-        .sort((a, b) => a.localeCompare(b))
+      appExtensions: sortAllArrays(uiExports.appExtensions),
     };
 
     this._filter = makeRe(config.get('optimize.bundleFilter') || '*', {
@@ -80,6 +94,13 @@ export class UiBundlesController {
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
+
+    // create a bundle for core-only with no modules
+    this.add({
+      id: 'core',
+      modules: [],
+      template: appEntryTemplate
+    });
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -143,7 +164,9 @@ export class UiBundlesController {
   }
 
   getContext() {
-    return JSON.stringify(this._context, null, '  ');
+    return jsonStableStringify(this._context, {
+      space: '  '
+    });
   }
 
   resolvePath(...args) {
