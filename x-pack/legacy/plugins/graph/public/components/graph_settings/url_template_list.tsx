@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiText, EuiAccordion, EuiSpacer, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiAccordion, EuiSpacer, EuiIcon, EuiTextAlign, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { UrlTemplateForm } from './url_template_form';
@@ -32,8 +32,14 @@ export function UrlTemplateList({
           <EuiAccordion
             id={getListKey(template)}
             buttonContent={template.description}
+            // TODO: Change the icon below to the template.icon
+            extraAction={<EuiIcon type="alert" />}
             className="gphSettingsAccordion"
             buttonClassName="gphSettingsAccordion__button"
+            onToggle={isOpen => {
+              /* TODO: Use this to set a classname .gphSettingsAccordion-isOpen for the background color change */
+            }}
+            paddingSize="m"
           >
             <UrlTemplateForm
               initialTemplate={template}
@@ -45,9 +51,10 @@ export function UrlTemplateList({
               }}
             />
           </EuiAccordion>
-          <EuiSpacer />
         </Fragment>
       ))}
+
+      {/* TODO: Only show the following accordion when the user clicked "Add template" and auto-expand */}
       <EuiAccordion
         id="accordion-new"
         buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
@@ -55,7 +62,7 @@ export function UrlTemplateList({
         })}
         className="gphSettingsAccordion"
         buttonClassName="gphSettingsAccordion__button"
-        extraAction={<EuiIcon type="plusInCircleFilled" color="primary" />}
+        paddingSize="m"
       >
         <UrlTemplateForm
           onSubmit={newTemplate => {
@@ -63,6 +70,15 @@ export function UrlTemplateList({
           }}
         />
       </EuiAccordion>
+
+      <EuiSpacer />
+
+      {/* TODO: Hook this up */}
+      <EuiTextAlign textAlign="center">
+        <EuiButton size="s" fill iconType="plusInCircle">
+          Add template
+        </EuiButton>
+      </EuiTextAlign>
     </>
   );
 }
