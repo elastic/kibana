@@ -68,11 +68,13 @@ export interface Feature<
    *
    * Items specified here will automatically cascade to the privileges defined below, unless specified differently there.
    *
-   * Example:
-   * // Enables access to the "Advanced Settings" management page within the Kibana section
-   * management: {
-   *   kibana: ['settings']
-   * }
+   * @example
+   * ```ts
+   *  // Enables access to the "Advanced Settings" management page within the Kibana section
+   *  management: {
+   *    kibana: ['settings']
+   *  }
+   * ```
    */
   management?: {
     [sectionId: string]: string[];
@@ -87,11 +89,13 @@ export interface Feature<
   /**
    * Feature privilege definition.
    *
-   * Example:
-   * {
-   *   all: {...},
-   *   read: {...}
-   * }
+   * @example
+   * ```ts
+   *  {
+   *    all: {...},
+   *    read: {...}
+   *  }
+   * ```
    * @see FeatureKibanaPrivileges
    */
   privileges: TPrivileges;

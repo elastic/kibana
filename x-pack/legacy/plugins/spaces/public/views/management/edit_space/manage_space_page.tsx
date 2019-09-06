@@ -79,7 +79,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
 
-    const getFeatures = kfetch({ method: 'get', pathname: '/features/api' });
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
     if (spaceId) {
       try {

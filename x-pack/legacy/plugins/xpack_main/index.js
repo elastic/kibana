@@ -88,7 +88,6 @@ export const xpackMain = (kibana) => {
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),
-        // HACK: we can remove this as soon as SO types are available to NP plugins (server side).
         savedObjectTypes: server.savedObjects.types
       });
 

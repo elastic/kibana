@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
     expect(result.response).to.have.property('statusCode', 200);
   };
 
-  describe('/features/api', () => {
+  describe('/api/features', () => {
     describe('with the "global all" privilege', () => {
       it('should return a 200', async () => {
         const username = 'global_all';
@@ -51,7 +51,7 @@ export default function({ getService }: FtrProviderContext) {
           });
 
           const result = await supertestWithoutAuth
-            .get('/features/api')
+            .get('/api/features/')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
             .then((response: any) => ({ error: undefined, response }))
@@ -89,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
           });
 
           const result = await supertestWithoutAuth
-            .get('/features/api')
+            .get('/api/features')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
             .then((response: any) => ({ error: undefined, response }))
@@ -106,7 +106,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('with trial license', () => {
       it('should return a full feature set', async () => {
         const { body } = await supertest
-          .get('/features/api')
+          .get('/api/features')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 

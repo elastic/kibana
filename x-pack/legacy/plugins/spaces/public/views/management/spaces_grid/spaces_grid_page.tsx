@@ -234,7 +234,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = kfetch({ method: 'get', pathname: '/features/api' });
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
     try {
       const [spaces, features] = await Promise.all([getSpaces, getFeatures]);

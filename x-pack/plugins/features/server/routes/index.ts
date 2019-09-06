@@ -19,7 +19,7 @@ export interface RouteDefinitionParams {
 
 export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDefinitionParams) {
   router.get(
-    { path: '/api', options: { tags: ['access:features'] }, validate: false },
+    { path: '/api/features', options: { tags: ['access:features'] }, validate: false },
     (context, request, response) => {
       const allFeatures = featureRegistry.getAll();
 

@@ -13,7 +13,7 @@ import { RequestHandler } from '../../../../../src/core/server';
 
 let currentLicenseLevel: string = 'gold';
 
-describe('GET /features/api', () => {
+describe('GET /api/features', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeEach(() => {
     const featureRegistry = new FeatureRegistry();

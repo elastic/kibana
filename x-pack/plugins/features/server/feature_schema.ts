@@ -6,23 +6,25 @@
 
 import Joi from 'joi';
 
-// Each feature gets its own property on the UICapabilities object,
-// but that object has a few built-in properties which should not be overwritten.
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import {
+  Capabilities as UICapabilities,
+  capabilitiesValidationRegex as uiCapabilitiesValidationRegex,
+} from '../../../../src/core/public';
 import { FeatureWithAllOrReadPrivileges } from './feature';
 
+// Each feature gets its own property on the UICapabilities object,
+// but that object has a few built-in properties which should not be overwritten.
 const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'management', 'navLinks'];
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
-export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
-  Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
+  Joi.array().items(Joi.string().regex(uiCapabilitiesValidationRegex))
 );
-const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
+const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesValidationRegex));
 
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
@@ -39,7 +41,7 @@ const privilegeSchema = Joi.object({
       .required(),
   }).required(),
   ui: Joi.array()
-    .items(Joi.string().regex(uiCapabilitiesRegex))
+    .items(Joi.string().regex(uiCapabilitiesValidationRegex))
     .required(),
 });
 
@@ -53,7 +55,7 @@ const schema = Joi.object({
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
   description: Joi.string(),
-  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
+  navLinkId: Joi.string().regex(uiCapabilitiesValidationRegex),
   app: Joi.array()
     .items(Joi.string())
     .required(),

@@ -31,7 +31,7 @@ export interface PluginSetupContract {
 }
 
 /**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
+ * Describes a set of APIs that are available in the legacy platform only and required by this plugin
  * to function properly.
  */
 export interface LegacyAPI {

@@ -17,11 +17,13 @@ export interface FeatureKibanaPrivileges {
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *
-   * Example:
-   * // Enables access to the "Advanced Settings" management page within the Kibana section
-   * management: {
-   *   kibana: ['settings']
-   * }
+   * @example
+   * ```ts
+   *  // Enables access to the "Advanced Settings" management page within the Kibana section
+   *  management: {
+   *    kibana: ['settings']
+   *  }
+   * ```
    */
   management?: {
     [sectionId: string]: string[];
@@ -35,22 +37,24 @@ export interface FeatureKibanaPrivileges {
   /**
    * If your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.
    *
-   * Example:
-   * // Configure your routes with a tag starting with the 'access:' prefix
-   * server.route({
-   *   path: '/api/my-route',
-   *   method: 'GET',
-   *   handler: () => { ...},
-   *   options: {
-   *     tags: ['access:my_feature-admin']
-   *   }
-   * });
+   * @example
+   * ```ts
+   *  // Configure your routes with a tag starting with the 'access:' prefix
+   *  server.route({
+   *    path: '/api/my-route',
+   *    method: 'GET',
+   *    handler: () => { ...},
+   *    options: {
+   *      tags: ['access:my_feature-admin']
+   *    }
+   *  });
    *
-   * Then, specify the tags here (without the 'access:' prefix) which should be secured:
+   *  Then, specify the tags here (without the 'access:' prefix) which should be secured:
    *
-   * {
+   *  {
    *    api: ['my_feature-admin']
-   * }
+   *  }
+   * ```
    *
    * NOTE: It is important to name your tags in a way that will not collide with other plugins/features.
    * A generic tag name like "access:read" could be used elsewhere, and access to that API endpoint would also
@@ -61,10 +65,12 @@ export interface FeatureKibanaPrivileges {
   /**
    * If your feature exposes a client-side application (most of them do!), then you can control access to them here.
    *
-   * Example:
-   * {
-   *   app: ['my-app', 'kibana']
-   * }
+   * @example
+   * ```ts
+   *  {
+   *    app: ['my-app', 'kibana']
+   *  }
+   * ```
    *
    */
   app?: string[];
@@ -75,19 +81,23 @@ export interface FeatureKibanaPrivileges {
   savedObject: {
     /**
      * List of saved object types which users should have full read/write access to when granted this privilege.
-     * Example:
-     * {
-     *   all: ['my-saved-object-type']
-     * }
+     * @example
+     * ```ts
+     *  {
+     *    all: ['my-saved-object-type']
+     *  }
+     * ```
      */
     all: string[];
 
     /**
      * List of saved object types which users should have read-only access to when granted this privilege.
-     * Example:
-     * {
+     * @example
+     * ```ts
+     *  {
      *    read: ['config']
-     * }
+     *  }
+     * ```
      */
     read: string[];
   };
@@ -95,17 +105,18 @@ export interface FeatureKibanaPrivileges {
    * A list of UI Capabilities that should be granted to users with this privilege.
    * These capabilities will automatically be namespaces within your feature id.
    *
-   * Example:
-   * {
-   *   ui: ['show', 'save']
-   * }
+   * @example
+   * ```ts
+   *  {
+   *    ui: ['show', 'save']
+   *  }
    *
-   * This translates in the UI to the following (assuming a feature id of "foo"):
+   *  This translates in the UI to the following (assuming a feature id of "foo"):
    *  import { uiCapabilities } from 'ui/capabilities';
    *
    *  const canShowApp = uiCapabilities.foo.show;
    *  const canSave = uiCapabilities.foo.save;
-   *
+   * ```
    * Note: Since these are automatically namespaced, you are free to use generic names like "show" and "save".
    *
    * @see UICapabilities

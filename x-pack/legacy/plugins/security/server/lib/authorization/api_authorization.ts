@@ -12,12 +12,8 @@ export function initAPIAuthorization(server: Server, authorization: Authorizatio
   const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
 
   server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
-    // if the api doesn't include or end with "/api/" or we aren't using RBAC for this request,
-    // just continue
-    if (
-      !(request.path.includes('/api/') || request.path.endsWith('/api')) ||
-      !mode.useRbacForRequest(request)
-    ) {
+    // if the api doesn't start with "/api/" or we aren't using RBAC for this request, just continue
+    if (!request.path.startsWith('/api/') || !mode.useRbacForRequest(request)) {
       return h.continue;
     }
 

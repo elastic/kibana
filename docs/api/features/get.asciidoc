@@ -12,11 +12,11 @@ Note: You cannot access this endpoint via the Console in {kib}.
 ===== Request
 
 To retrieve all features, issue a GET request to the
-/features/api endpoint.
+/api/features endpoint.
 
 [source,js]
 --------------------------------------------------
-GET /features/api
+GET /api/features
 --------------------------------------------------
 // KIBANA
 
