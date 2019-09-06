@@ -50,7 +50,7 @@ Spatial filters have the following properties:
 
 [float]
 [[maps-create-phrase-filter]]
-==== Create phrase filters
+==== Phrase filters
 
 Phrase filters narrow search results to documents that contain the phrase.
 You can create a phrase filter by clicking image:maps/images/gs_plus_icon.png[] in a feature tooltip.
