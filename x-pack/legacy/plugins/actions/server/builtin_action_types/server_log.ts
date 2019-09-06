@@ -21,15 +21,16 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-
-export const actionType: ActionType = {
-  id: '.server-log',
-  name: 'server-log',
-  validate: {
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(): ActionType {
+  return {
+    id: '.server-log',
+    name: 'server-log',
+    validate: {
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 
