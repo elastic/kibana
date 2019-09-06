@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { tickFormatter } from '../../lib/tick_formatter';
-import { TopN } from '../../../visualizations/components/top_n';
+import { createTickFormatter } from '../../lib/tick_formatter';
+import { TopN } from '../../../visualizations/views/top_n';
 import { getLastValue } from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
@@ -54,7 +54,7 @@ export function TopNVisualization(props) {
     const id = first(item.id.split(/:/));
     const seriesConfig = model.series.find(s => s.id === id);
     if (seriesConfig) {
-      const formatter = tickFormatter(
+      const tickFormatter = createTickFormatter(
         seriesConfig.formatter,
         seriesConfig.value_template,
         props.getConfig
@@ -73,7 +73,7 @@ export function TopNVisualization(props) {
       return {
         ...item,
         color,
-        tickFormatter: formatter,
+        tickFormatter,
       };
     }
     return item;

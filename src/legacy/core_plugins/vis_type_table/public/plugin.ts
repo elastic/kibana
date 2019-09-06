@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 
 import {
@@ -63,7 +63,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
 
     data.expressions.registerFunction(createTableVisFn);
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.registerVisualization(() =>
       createTableVisTypeDefinition(visualizationDependencies)
     );
   }

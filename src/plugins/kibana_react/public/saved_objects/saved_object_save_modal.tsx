@@ -35,8 +35,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-interface OnSaveProps {
+export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
@@ -72,14 +73,14 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   };
 
   public render() {
-    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, isLoading } = this.state;
+    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
 
     return (
       <EuiOverlayMask>
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="dshSaveModal"
+            className="kbnSavedObjectSaveModal"
             onClose={this.props.onClose}
           >
             <EuiModalHeader>
@@ -136,22 +137,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 />
               </EuiButtonEmpty>
 
-              <EuiButton
-                fill
-                data-test-subj="confirmSaveSavedObjectButton"
-                isLoading={isLoading}
-                isDisabled={title.length === 0}
-                type="submit"
-              >
-                {this.props.confirmButtonLabel ? (
-                  this.props.confirmButtonLabel
-                ) : (
-                  <FormattedMessage
-                    id="kibana-react.savedObjects.saveModal.confirmSaveButtonLabel"
-                    defaultMessage="Confirm Save"
-                  />
-                )}
-              </EuiButton>
+              {this.renderConfirmButton()}
             </EuiModalFooter>
           </EuiModal>
         </form>
@@ -204,6 +190,34 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     this.saveSavedObject();
   };
 
+  private renderConfirmButton = () => {
+    const { isLoading, title, hasTitleDuplicate } = this.state;
+
+    let confirmLabel: string | React.ReactNode = hasTitleDuplicate
+      ? i18n.translate('kibana-react.savedObjects.saveModal.confirmSaveButtonLabel', {
+          defaultMessage: 'Confirm save',
+        })
+      : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
+          defaultMessage: 'Save',
+        });
+
+    if (this.props.confirmButtonLabel) {
+      confirmLabel = this.props.confirmButtonLabel;
+    }
+
+    return (
+      <EuiButton
+        fill
+        data-test-subj="confirmSaveSavedObjectButton"
+        isLoading={isLoading}
+        isDisabled={title.length === 0}
+        type="submit"
+      >
+        {confirmLabel}
+      </EuiButton>
+    );
+  };
+
   private renderDuplicateTitleCallout = () => {
     if (!this.state.hasTitleDuplicate) {
       return;
@@ -230,10 +244,14 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 objectType: this.props.objectType,
                 confirmSaveLabel: (
                   <strong>
-                    <FormattedMessage
-                      id="kibana-react.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText"
-                      defaultMessage="Confirm Save"
-                    />
+                    {this.props.confirmButtonLabel
+                      ? this.props.confirmButtonLabel
+                      : i18n.translate(
+                          'kibana-react.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText',
+                          {
+                            defaultMessage: 'Confirm save',
+                          }
+                        )}
                   </strong>
                 ),
               }}
