@@ -200,9 +200,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     aggFieldPairList.forEach(af => {
       if (af.by !== undefined && af.by.field !== null) {
         // if a by field is set, it's only ready when the value is loaded
-        ready = af.by.value !== null;
-      } else {
-        ready = ready && true;
+        ready = ready && af.by.value !== null;
       }
     });
     return ready;
