@@ -24,10 +24,7 @@ import {
   KibanaContext,
   Render,
 } from 'src/plugins/data/common/expressions/types';
-import {
-  getTimelionRequestProvider,
-  TimelionSuccessResponse,
-} from './vis/timelion_request_handler';
+import { getTimelionRequestHandler, TimelionSuccessResponse } from './vis/timelion_request_handler';
 import { LegacyDependenciesPluginSetup } from './shim';
 
 const name = 'timelion_vis';
@@ -72,7 +69,7 @@ export const getTimelionVisualizationConfig = (
     },
   },
   async fn(context, args) {
-    const timelionRequestHandler = getTimelionRequestProvider(dependencies).handler;
+    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
 

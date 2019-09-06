@@ -51,61 +51,58 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-export function getTimelionRequestProvider(dependencies: LegacyDependenciesPluginSetup) {
+export function getTimelionRequestHandler(dependencies: LegacyDependenciesPluginSetup) {
   const { config, $http } = dependencies;
   const timezone = timezoneProvider(config)();
 
-  return {
-    name: 'timelion',
-    handler({
-      timeRange,
-      filters,
-      query,
-      visParams,
-    }: {
-      timeRange: TimeRange;
-      filters: Filter[];
-      query: Query;
-      visParams: VisParams;
-      forceFetch?: boolean;
-    }) {
-      return new Promise((resolve, reject) => {
-        const expression = visParams.expression;
-        if (!expression) return;
-        const esQueryConfigs = getEsQueryConfig(config);
-        const httpResult = $http
-          .post('../api/timelion/run', {
-            sheet: [expression],
-            extended: {
-              es: {
-                filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
-              },
+  return ({
+    timeRange,
+    filters,
+    query,
+    visParams,
+  }: {
+    timeRange: TimeRange;
+    filters: Filter[];
+    query: Query;
+    visParams: VisParams;
+    forceFetch?: boolean;
+  }) => {
+    return new Promise((resolve, reject) => {
+      const expression = visParams.expression;
+      if (!expression) return;
+      const esQueryConfigs = getEsQueryConfig(config);
+      const httpResult = $http
+        .post('../api/timelion/run', {
+          sheet: [expression],
+          extended: {
+            es: {
+              filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
-            time: _.extend(timeRange, {
-              interval: visParams.interval,
-              timezone,
-            }),
-          })
-          .then((resp: any) => resp.data)
-          .catch((resp: any) => {
-            throw resp.data;
-          });
+          },
+          time: _.extend(timeRange, {
+            interval: visParams.interval,
+            timezone,
+          }),
+        })
+        .then((resp: any) => resp.data)
+        .catch((resp: any) => {
+          throw resp.data;
+        });
 
-        httpResult
-          .then(function(resp: TimelionSuccessResponse) {
-            resolve(resp);
-          })
-          .catch(function(resp: any) {
-            const err = new Error(resp.message);
-            err.stack = resp.stack;
-            toastNotifications.addError(err, {
-              title: i18n.translate('timelion.requestHandlerErrorTitle', {
-                defaultMessage: 'Timelion request error',
-              }),
-            });
-            reject(err);
+      httpResult
+        .then(function(resp: TimelionSuccessResponse) {
+          resolve(resp);
+        })
+        .catch(function(resp: any) {
+          const err = new Error(resp.message);
+          err.stack = resp.stack;
+          toastNotifications.addError(err, {
+            title: i18n.translate('timelion.requestHandlerErrorTitle', {
+              defaultMessage: 'Timelion request error',
+            }),
           });
-      });
-    },
+          reject(err);
+        });
+    });
   };
 }
