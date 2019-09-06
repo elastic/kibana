@@ -10,7 +10,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  start as embeddablePlugin,
+  setup as embeddableFactorySetup,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   setup as dataSetup,
   start as dataStart,
@@ -29,6 +32,7 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
+  embeddables: ReturnType<EmbeddablePlugin['start']>;
 }
 
 export interface EditorFrameStartPlugins {
@@ -46,6 +50,15 @@ export class EditorFramePlugin {
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.data.expressions.registerFunction(() => mergeTables);
 
+    embeddableFactorySetup.registerEmbeddableFactory(
+      'lens',
+      new EmbeddableFactory(
+        chrome,
+        plugins.data.expressions.ExpressionRenderer,
+        plugins.data.indexPatterns.indexPatterns
+      )
+    );
+
     return {
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
@@ -57,15 +70,6 @@ export class EditorFramePlugin {
   }
 
   public start(_core: CoreStart | null, plugins: EditorFrameStartPlugins): EditorFrameStart {
-    plugins.embeddables.registerEmbeddableFactory(
-      'lens',
-      new EmbeddableFactory(
-        plugins.chrome,
-        plugins.data.expressions.ExpressionRenderer,
-        plugins.data.indexPatterns.indexPatterns
-      )
-    );
-
     const createInstance = (): EditorFrameInstance => {
       let domElement: Element;
       return {

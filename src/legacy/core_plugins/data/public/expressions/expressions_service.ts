@@ -52,19 +52,17 @@ export class ExpressionsService {
       registerType: npSetup.plugins.data.expressions.registerType,
       registerFunction: npSetup.plugins.data.expressions.registerFunction,
       registerRenderer: npSetup.plugins.data.expressions.registerRenderer,
+      ExpressionRenderer: createRenderer(loader),
     };
   }
 
   public start({ inspector }: ExpressionsServiceStartDependencies) {
-    const ExpressionRenderer = createRenderer(loader);
     setInspector(inspector);
 
     return {
       execute,
       render,
       loader,
-
-      ExpressionRenderer,
     };
   }
 
