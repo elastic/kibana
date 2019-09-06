@@ -93,11 +93,11 @@ export class Flyout extends Component {
             <EuiFormRow
               fullWidth
               label={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlLabel', {
-                defaultMessage: 'Monitoring cluster URL'
+                defaultMessage: 'URL of monitoring cluster'
               })}
               helpText={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlHelpText', {
-                defaultMessage: `This is typically a single instance, but if you have multiple, enter all of instance urls comma-separated.
-                Keep in mind that the running metricbeat instance will need to be able to communicate with these Elasticsearch servers.`
+                defaultMessage: `Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers.`
               })}
             >
               <EuiFieldText
@@ -233,7 +233,9 @@ export class Flyout extends Component {
     return (
       <EuiText size="s">
         <EuiLink href={documentationUrl} target="_blank">
-          Read more about this migration.
+          {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.learnMore', {
+            defaultMessage: 'Learn about this migration.'
+          })}
         </EuiLink>
       </EuiText>
     );
@@ -264,7 +266,7 @@ export class Flyout extends Component {
     }
 
     let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-      defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
+      defaultMessage: 'Migrate {instanceType} `{instanceName}` with Metricbeat',
       values: {
         instanceName,
         instanceType
@@ -273,7 +275,7 @@ export class Flyout extends Component {
 
     if (product.isNetNewUser) {
       title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitleNewUser', {
-        defaultMessage: 'Monitor {instanceName} {instanceType} with Metricbeat',
+        defaultMessage: 'Monitor {instanceType} `{instanceName}` with Metricbeat',
         values: {
           instanceName,
           instanceType
@@ -363,7 +365,7 @@ export class Flyout extends Component {
           {this.renderActiveStep()}
           {noClusterUuidPrompt}
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter style={{ marginBottom: '64px' }}>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import { uniq, get } from 'lodash';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
+import React, { PureComponent } from 'react';
+import { uniq } from 'lodash';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
 import { Stats } from 'plugins/monitoring/components/beats';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { i18n } from '@kbn/i18n';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 export class Listing extends PureComponent {
   getColumns() {
@@ -78,26 +80,14 @@ export class Listing extends PureComponent {
       setupMode
     } = this.props;
 
-    let detectedInstanceMessage = null;
-    if (setupMode.enabled && setupMode.data && get(setupMode.data, 'detected.mightExist')) {
-      detectedInstanceMessage = (
-        <Fragment>
-          <EuiCallOut
-            title={i18n.translate('xpack.monitoring.beats.instances.metricbeatMigration.detectedInstanceTitle', {
-              defaultMessage: 'Beats instance detected',
-            })}
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              {i18n.translate('xpack.monitoring.beats.instances.metricbeatMigration.detectedInstanceDescription', {
-                defaultMessage: `Based on your indices, we think you might have a beats instance. Click the 'Setup monitoring'
-                button below to start monitoring this instance.`
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </Fragment>
+    let setupModeCallOut = null;
+    if (setupMode.enabled && setupMode.data) {
+      setupModeCallOut = (
+        <ListingCallOut
+          setupModeData={setupMode.data}
+          useNodeIdentifier={false}
+          productName={BEATS_SYSTEM_ID}
+        />
       );
     }
 
@@ -115,16 +105,12 @@ export class Listing extends PureComponent {
           <EuiPageContent>
             <Stats stats={stats} />
             <EuiSpacer size="m"/>
-            {detectedInstanceMessage}
+            {setupModeCallOut}
             <EuiMonitoringTable
               className="beatsTable"
               rows={data}
               setupMode={setupMode}
-              uuidField="uuid"
-              nameField="name"
-              setupNewButtonLabel={i18n.translate('xpack.monitoring.beats.metricbeatMigration.setupNewButtonLabel', {
-                defaultMessage: 'Setup monitoring for new Beats instance'
-              })}
+              useNodeIdentifier={false}
               columns={this.getColumns()}
               sorting={sorting}
               pagination={pagination}

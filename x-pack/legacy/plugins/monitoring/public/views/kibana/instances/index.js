@@ -47,7 +47,7 @@ uiRoutes.when('/kibana/instances', {
               scope={$scope}
               injector={$injector}
               productName={KIBANA_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <KibanaInstances
@@ -62,6 +62,7 @@ uiRoutes.when('/kibana/instances', {
                       kbnUrl,
                     }}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

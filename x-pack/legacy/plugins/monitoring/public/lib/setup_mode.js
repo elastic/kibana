@@ -6,6 +6,7 @@
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { get, contains } from 'lodash';
+import chrome from 'ui/chrome';
 
 function isOnPage(hash) {
   return contains(window.location.hash, hash);
@@ -146,26 +147,11 @@ const setSetupModeMenuItem = () => {
 
   const globalState = angularState.injector.get('globalState');
   const navItems = globalState.inSetupMode
-    ? [
-      {
-        id: 'exit',
-        label: 'Exit Setup Mode',
-        description: 'Exit setup mode',
-        run: () => toggleSetupMode(false),
-        testId: 'exitSetupMode'
-      },
-      {
-        id: 'refresh',
-        label: 'Refresh Setup Data',
-        description: 'Refresh data used for setup mode',
-        run: () => updateSetupModeData(),
-        testId: 'refreshSetupModeData'
-      }
-    ]
+    ? []
     : [{
       id: 'enter',
       label: 'Enter Setup Mode',
-      description: 'Enter setup mode',
+      description: 'Enter setup',
       run: () => toggleSetupMode(true),
       testId: 'enterSetupMode'
     }];
@@ -177,14 +163,24 @@ const setSetupModeMenuItem = () => {
   }
 };
 
-export const initSetupModeState = ($scope, $injector, callback) => {
+export const initSetupModeState = async ($scope, $injector, callback) => {
   angularState.scope = $scope;
   angularState.injector = $injector;
   setSetupModeMenuItem();
   callback && setupModeState.callbacks.push(callback);
 
-  const globalState = angularState.injector.get('globalState');
+  const globalState = $injector.get('globalState');
   if (globalState.inSetupMode) {
-    toggleSetupMode(true);
+    await toggleSetupMode(true);
   }
+};
+
+export const isInSetupMode = async () => {
+  if (setupModeState.enabled) {
+    return true;
+  }
+
+  const $injector = angularState.injector || await chrome.dangerouslyGetActiveInjector();
+  const globalState = $injector.get('globalState');
+  return globalState.inSetupMode;
 };

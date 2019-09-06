@@ -56,6 +56,7 @@ const setOptions = (controller) => {
     , controller.pipelineDropdownElement);
 };
 
+
 /*
  * Manage data and provide helper methods for the "main" directive's template
  */
@@ -97,7 +98,7 @@ export class MonitoringMainController {
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
-      this.inListing = this.name === 'listing' || this.name === 'no-data';
+      this.inListing = this.name === 'listing';// || this.name === 'no-data';
     }
 
     if (!this.inListing) {

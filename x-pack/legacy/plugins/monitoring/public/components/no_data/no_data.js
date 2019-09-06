@@ -19,30 +19,64 @@ import {
   EuiText,
   EuiTitle,
   EuiTextColor,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
+import { CheckingSettings } from './checking_settings';
+import { ReasonFound, WeTried } from './reasons';
+import { CheckerErrors } from './checker_errors';
 
-// function NoDataMessage(props) {
-//   const { isLoading, reason, checkMessage } = props;
+function NoDataMessage(props) {
+  const { isLoading, reason, checkMessage } = props;
 
-//   if (isLoading && checkMessage !== null) {
-//     return <CheckingSettings checkMessage={checkMessage} />;
-//   }
+  if (isLoading && checkMessage !== null) {
+    return <CheckingSettings checkMessage={checkMessage} />;
+  }
 
-//   if (reason) {
-//     return <ReasonFound {...props} />;
-//   }
+  if (reason) {
+    return <ReasonFound {...props} />;
+  }
 
-//   return <WeTried />;
-// }
+  return <WeTried />;
+}
 
-export function NoData({ changePath }) {
+export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
+  const [useInternalCollection, setUseInternalCollection] = useState(false);
+
   async function startSetup() {
     setIsLoading(true);
     await toggleSetupMode(true);
-    changePath('/elasticsearch/nodes');
+    props.changePath('/elasticsearch/nodes');
+  }
+
+  if (useInternalCollection) {
+    return (
+      <EuiPage>
+        <EuiPageBody restrictWidth={600}>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            className="eui-textCenter"
+          >
+            <EuiIcon type="monitoringApp" size="xxl" />
+            <EuiSpacer size="m" />
+            <NoDataMessage {...props} />
+            <CheckerErrors errors={props.errors} />
+            <EuiHorizontalRule size="half" />
+            <EuiButtonEmpty>
+              <EuiTextColor color="primary" onClick={() => setUseInternalCollection(false)}>
+                <FormattedMessage
+                  id="xpack.monitoring.noData.setupMetricbeatInstead"
+                  defaultMessage="Or, set up with Metricbeat (recommended)"
+                />
+              </EuiTextColor>
+            </EuiButtonEmpty>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
   }
 
   return (
@@ -63,28 +97,13 @@ export function NoData({ changePath }) {
               />
             </h2>
           </EuiTitle>
-          <EuiTextColor color="subdued">
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
-                  defaultMessage="Monitoring provides insight to your hardware performance and load."
-                />
-              </p>
-            </EuiText>
-          </EuiTextColor>
           <EuiHorizontalRule size="half" />
           <EuiText>
             <p>
               <FormattedMessage
                 id="xpack.monitoring.noData.noMonitoringDataFound"
-                defaultMessage="We did not find any monitoring data in the currently selected time period."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.monitoring.noData.noMonitoringDataFound2"
-                defaultMessage="Either adjust your time period or click the button below to setup monitoring."
+                defaultMessage="Have you set up monitoring yet? If so, make sure that the selected time period in
+                the upper right includes monitoring data."
               />
             </p>
           </EuiText>
@@ -104,11 +123,20 @@ export function NoData({ changePath }) {
               >
                 <FormattedMessage
                   id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
-                  defaultMessage="Start monitoring setup"
+                  defaultMessage="Set up monitoring with Metricbeat"
                 />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiHorizontalRule size="half" />
+          <EuiButtonEmpty>
+            <EuiTextColor color="subdued" onClick={() => setUseInternalCollection(true)}>
+              <FormattedMessage
+                id="xpack.monitoring.noData.setupInternalInstead"
+                defaultMessage="Or, set up with internal collection (deprecated)"
+              />
+            </EuiTextColor>
+          </EuiButtonEmpty>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

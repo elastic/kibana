@@ -68,7 +68,7 @@ uiRoutes.when('/apm/instances', {
             scope={this.scope}
             injector={this.injector}
             productName={APM_CUSTOM_ID}
-            render={({ setupMode, flyoutComponent }) => (
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
                 <ApmServerInstances
@@ -80,6 +80,7 @@ uiRoutes.when('/apm/instances', {
                     data,
                   }}
                 />
+                {bottomBarComponent}
               </Fragment>
             )}
           />

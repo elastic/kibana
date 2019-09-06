@@ -63,7 +63,7 @@ uiRoutes.when('/beats/beats', {
             scope={this.scope}
             injector={this.injector}
             productName={BEATS_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent }) => (
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
                 <Listing
@@ -78,6 +78,7 @@ uiRoutes.when('/beats/beats', {
                     scope: this.scope,
                   }}
                 />
+                {bottomBarComponent}
               </Fragment>
             )}
           />

@@ -30,7 +30,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           <EuiText>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetup"
-              defaultMessage="If security features are enabled, there may be more setup required.{link}"
+              defaultMessage="If security is enabled, you might require {link}."
               values={{
                 link: (
                   <Fragment>
@@ -41,7 +41,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
                     >
                       <FormattedMessage
                         id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetupLinkText"
-                        defaultMessage="View more information."
+                        defaultMessage="additional setup"
                       />
                     </EuiLink>
                   </Fragment>
@@ -67,7 +67,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow these instructions."
             />
           </EuiLink>
         </p>
@@ -82,6 +82,14 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     }),
     children: (
       <Fragment>
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleInstallDirectory', {
+              defaultMessage: 'From the installation directory, run:'
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s"/>
         <EuiCodeBlock
           isCopyable
           language="bash"
@@ -93,9 +101,8 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
-              defaultMessage="By default the module will collect Elasticsearch monitoring metrics from {url}.
-              If the local Elasticsearch server has a different address,
-              you must specify it via the hosts setting in the {module} file."
+              defaultMessage="By default the module collects Elasticsearch metrics from {url}.
+              If the local server has a different address, add it to the hosts setting in {module}."
               values={{
                 module: (
                   <Monospace>modules.d/elasticsearch-xpack.yml</Monospace>
@@ -114,14 +121,14 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
 
   const configureMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatTitle', {
-      defaultMessage: 'Configure Metricbeat to send to the monitoring cluster'
+      defaultMessage: 'Configure Metricbeat to send data to the monitoring cluster'
     }),
     children: (
       <Fragment>
         <EuiText>
           <FormattedMessage
             id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatDescription"
-            defaultMessage="Make these changes in your {file}."
+            defaultMessage="Modify {file} to set the connection information."
             values={{
               file: (
                 <Monospace>metricbeat.yml</Monospace>
@@ -161,7 +168,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow these instructions."
             />
           </EuiLink>
         </p>
@@ -179,8 +186,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           size="s"
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
-            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Elasticsearch node.
-            We will continuously check in the background.`,
+            defaultMessage: `No monitoring data detected, but we’ll continue checking.`,
           })}
         />
       )
@@ -204,7 +210,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusDescription"
-              defaultMessage="We are now seeing monitoring data shipping from Metricbeat!"
+              defaultMessage="Metricbeat is shipping monitoring data."
             />
           </p>
         </EuiCallOut>

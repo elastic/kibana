@@ -27,7 +27,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           title={i18n.translate(
             'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartWarningTitle',
             {
-              defaultMessage: 'Warning'
+              defaultMessage: 'This step requires you to restart the Kibana server'
             }
           )}
           color="warning"
@@ -37,8 +37,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             <p>
               <FormattedMessage
                 id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartNote"
-                defaultMessage="This step requires you to restart the Kibana server.
-                Expect to see errors until the server is running again."
+                defaultMessage="Expect errors until the server is running again."
               />
             </p>
           </EuiText>
@@ -57,7 +56,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
-              defaultMessage="Add the following setting in the Kibana configuration file ({file}):"
+              defaultMessage="Add this setting to {file}."
               values={{
                 file: (
                   <Monospace>kibana.yml</Monospace>
@@ -78,7 +77,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
-              defaultMessage="Leave the {config} set to its default value ({defaultValue})."
+              defaultMessage="For {config}, leave the default value of ({defaultValue})."
               values={{
                 config: (
                   <Monospace>xpack.monitoring.enabled</Monospace>
@@ -108,7 +107,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
       lastInternallyCollectedMessage = (<FormattedMessage
         id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.partiallyMigratedStatusDescription"
-        defaultMessage="Last internal collection occurred {secondsSinceLastInternalCollectionLabel} ago."
+        defaultMessage="Last internal collection was {secondsSinceLastInternalCollectionLabel} ago."
         values={{
           secondsSinceLastInternalCollectionLabel,
         }}
@@ -124,15 +123,14 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusTitle',
             {
-              defaultMessage: `We still see data coming from internal collection of Kibana.`
+              defaultMessage: `Data is still coming from internal collection`
             }
           )}
         >
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusDescription"
-              defaultMessage="Note that it can take up to {secondsAgo} seconds to detect, but
-              we will continuously check in the background."
+              defaultMessage="It can take up to {secondsAgo} seconds to detect data, and we’ll continue checking."
               values={{
                 secondsAgo: meta.secondsAgo
               }}
@@ -163,7 +161,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.fullyMigratedStatusDescription"
-              defaultMessage="We are not seeing any documents from internal collection. Migration complete!"
+              defaultMessage="Internal collection is disabled. Migration complete!"
             />
           </p>
         </EuiCallOut>

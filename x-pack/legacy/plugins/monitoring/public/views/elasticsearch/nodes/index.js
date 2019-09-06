@@ -84,7 +84,7 @@ uiRoutes.when('/elasticsearch/nodes', {
               scope={$scope}
               injector={$injector}
               productName={ELASTICSEARCH_CUSTOM_ID}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <ElasticsearchNodes
@@ -97,6 +97,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                     pagination={this.pagination}
                     onTableChange={this.onTableChange}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

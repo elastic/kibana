@@ -10,6 +10,7 @@ import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used f
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
+import { SetupModeBadge } from '../../setup_mode/badge';
 import {
   EuiLink,
   EuiToolTip,
@@ -24,6 +25,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
@@ -50,9 +53,25 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
         </EuiLink>
       );
 
+      let setupModeStatus = null;
       if (setupMode && setupMode.enabled) {
         const list = _.get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
+        const instance = {
+          uuid: node.resolver,
+          name: node.name
+        };
+
+        setupModeStatus = (
+          <div className="monTableCell__setupModeStatus">
+            <SetupModeBadge
+              setupMode={setupMode}
+              status={status}
+              instance={instance}
+              productName={ELASTICSEARCH_CUSTOM_ID}
+            />
+          </div>
+        );
         if (status.isNetNewUser) {
           nameLink = value;
         }
@@ -77,6 +96,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
           <div className="monTableCell__transportAddress">
             {extractIp(node.transport_address)}
           </div>
+          {setupModeStatus}
         </div>
       );
     }
@@ -245,63 +265,57 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
       }, []));
   }
 
-  let netNewUserMessage = null;
-  let disableInternalCollectionForMigrationMessage = null;
+  let setupModeCallout = null;
   if (setupMode.data) {
-    // Think net new user scenario
-    const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
-    if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
-      const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
-        ? setupMode.shortcutToFinishMigration
-        : setupMode.openFlyout;
+    setupModeCallout = (
+      <ListingCallOut
+        setupModeData={setupMode.data}
+        useNodeIdentifier
+        productName={ELASTICSEARCH_CUSTOM_ID}
+        customRenderer={() => {
+          const customRenderResponse = {
+            shouldRender: false,
+            componentToRender: null
+          };
 
-      disableInternalCollectionForMigrationMessage = (
-        <Fragment>
-          <EuiCallOut
-            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionTitle', {
-              defaultMessage: 'Disable internal collection to finish the migration',
-            })}
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionDescription', {
-                defaultMessage: `All of your Elasticsearch servers are monitored using Metricbeat,
-                but you need to disable internal collection to finish the migration.`
-              })}
-            </p>
-            <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
-              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                defaultMessage: 'Disable and finish migration'
-              })}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </Fragment>
-      );
-    }
-    else if (!hasInstances) {
-      netNewUserMessage = (
-        <Fragment>
-          <EuiCallOut
-            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserTitle', {
-              defaultMessage: 'No monitoring data detected',
-            })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>
-              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserDescription', {
-                defaultMessage: `We did not detect any monitoring data, but we did detect the following Elasticsearch nodes.
-                Each detected node is listed below along with a Setup button. Clicking this button will guide you through
-                the process of enabling monitoring for each node.`
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </Fragment>
-      );
-    }
+          if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+            const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              ? setupMode.shortcutToFinishMigration
+              : setupMode.openFlyout;
+
+            customRenderResponse.shouldRender = true;
+            customRenderResponse.componentToRender = (
+              <Fragment>
+                <EuiCallOut
+                  title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle', {
+                    defaultMessage: 'Disable internal collection',
+                  })}
+                  color="warning"
+                  iconType="flag"
+                >
+                  <p>
+                    {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription', {
+                      defaultMessage: `Metricbeat is now monitoring your Elasticsearch servers.
+                      Disable internal collection to finish the migration.`
+                    })}
+                  </p>
+                  <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
+                    {i18n.translate(
+                      'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel', {
+                        defaultMessage: 'Disable and finish migration'
+                      }
+                    )}
+                  </EuiButton>
+                </EuiCallOut>
+                <EuiSpacer size="m"/>
+              </Fragment>
+            );
+          }
+
+          return customRenderResponse;
+        }}
+      />
+    );
   }
 
   function renderClusterStatus() {
@@ -322,8 +336,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     <EuiPage>
       <EuiPageBody>
         {renderClusterStatus()}
-        {disableInternalCollectionForMigrationMessage}
-        {netNewUserMessage}
+        {setupModeCallout}
         <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"
@@ -332,11 +345,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}
-            uuidField="resolver"
-            nameField="name"
-            setupNewButtonLabel={i18n.translate('xpack.monitoring.elasticsearch.metricbeatMigration.setupNewButtonLabel', {
-              defaultMessage: 'Setup monitoring for new Elasticsearch node'
-            })}
+            useNodeIdentifier
             search={{
               box: {
                 incremental: true,

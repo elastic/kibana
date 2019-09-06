@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
-import { I18nContext } from 'ui/i18n';
-import { render } from 'react-dom';
-import { NoData } from '../../components/no_data/no_data';
-
-const REACT_NODE_ID_NO_DATA = 'noDataReact';
+import { NoDataController } from './controller';
 
 uiRoutes
   .when('/no-data', {
@@ -31,18 +26,6 @@ uiRoutes
         });
       }
     },
-    controller: class {
-      constructor($injector, $scope) {
-        $scope.$$postDigest(() => {
-          render(
-            <I18nContext>
-              <NoData changePath={path => $scope.$apply(() => $injector.get('kbnUrl').changePath(path))} />
-            </I18nContext>,
-            document.getElementById(REACT_NODE_ID_NO_DATA)
-          );
-        });
-
-      }
-    }
+    controller: NoDataController,
   })
   .otherwise({ redirectTo: '/home' });
