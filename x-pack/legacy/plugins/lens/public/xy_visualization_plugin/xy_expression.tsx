@@ -129,19 +129,17 @@ export function XYChart({
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
-      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
-        <EuiFlexItem>
+      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
+        <p>
           <EuiIcon type={icon} color="subdued" size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.lens.xyVisualization.noDataLabel"
-              defaultMessage="No results found"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.lens.xyVisualization.noDataLabel"
+            defaultMessage="No results found"
+          />
+        </p>
+      </EuiText>
     );
   }
 
