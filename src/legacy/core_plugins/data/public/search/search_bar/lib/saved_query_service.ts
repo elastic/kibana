@@ -44,6 +44,11 @@ export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract
 ): SavedQueryService => {
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
+    if (!attributes.title.length) {
+      // title is required extra check against circumventing the front end
+      throw new Error('Cannot create saved query without a title');
+    }
+
     const query = {
       query:
         typeof attributes.query.query === 'string'
@@ -57,11 +62,6 @@ export const createSavedQueryService = (
       description: attributes.description,
       query,
     };
-
-    if (!attributes.title.length) {
-      // title is required extra check against circumventing the front end
-      throw new Error('Cannot create saved query without a title');
-    }
 
     if (attributes.filters) {
       queryObject.filters = attributes.filters;
