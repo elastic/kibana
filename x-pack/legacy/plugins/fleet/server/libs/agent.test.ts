@@ -207,12 +207,32 @@ describe('Agent lib', () => {
   });
 
   describe('checkin', () => {
+    it('should throw if the agens do not exists', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await expect(
+        agentLib.checkin('agent:1', [
+          {
+            timestamp: '2019-09-05T15:41:26+0000',
+            type: 'STATE',
+            event: {
+              message: 'State changed from PAUSE to STARTING',
+              type: 'STARTING',
+            },
+          },
+        ])
+      ).rejects.toThrowError(/Agent not found/);
+    });
+
     it('should update events', async () => {
       const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
         actions: [],
+        active: true,
         events: [
           {
             timestamp: '2019-09-05T15:43:26+0000',
@@ -224,10 +244,9 @@ describe('Agent lib', () => {
           },
         ],
       } as unknown) as Agent;
-      const agent = (await agentAdapter.getById('agent:1')) as Agent;
       const agentLib = new AgentLib(agentAdapter, token);
 
-      await agentLib.checkin(agent, [
+      await agentLib.checkin('agent:1', [
         {
           timestamp: '2019-09-05T15:41:26+0000',
           type: 'STATE',
@@ -264,18 +283,15 @@ describe('Agent lib', () => {
         user_provided_metadata: { key: 'user1' },
         actions: [],
         events: [],
+        active: true,
       } as unknown) as Agent;
-      const agent = (await agentAdapter.getById('agent:1')) as Agent;
       const agentLib = new AgentLib(agentAdapter, token);
 
-      await agentLib.checkin(agent, []);
+      await agentLib.checkin('agent:1', []);
 
       const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local1',
-      });
-      expect(refreshAgent.user_provided_metadata).toMatchObject({
-        key: 'user1',
       });
     });
 
@@ -288,21 +304,15 @@ describe('Agent lib', () => {
         user_provided_metadata: { key: 'user1' },
         actions: [],
         events: [],
+        active: true,
       } as unknown) as Agent;
-      const agent = (await agentAdapter.getById('agent:1')) as Agent;
       const agentLib = new AgentLib(agentAdapter, token);
 
-      await agentLib.checkin(agent, [], {
-        local: { key: 'local2' },
-        userProvided: { key: 'user2' },
-      });
+      await agentLib.checkin('agent:1', [], { key: 'local2' });
 
       const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local2',
-      });
-      expect(refreshAgent.user_provided_metadata).toMatchObject({
-        key: 'user2',
       });
     });
 
@@ -311,6 +321,7 @@ describe('Agent lib', () => {
       const agentAdapter = new InMemoryAgentAdapter();
       agentAdapter.agents['agent:1'] = ({
         id: 'agent:1',
+        active: true,
         actions: [
           {
             created_at: '2019-09-05T15:43:26+0000',
@@ -326,9 +337,9 @@ describe('Agent lib', () => {
         ],
         events: [],
       } as unknown) as Agent;
-      const agent = (await agentAdapter.getById('agent:1')) as Agent;
+
       const agentLib = new AgentLib(agentAdapter, token);
-      const { actions } = await agentLib.checkin(agent, []);
+      const { actions } = await agentLib.checkin('agent:1', []);
 
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({

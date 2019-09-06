@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import Boom from 'boom';
 import {
   AgentAdapter,
   Agent,
@@ -105,10 +106,16 @@ export class AgentLib {
    * @param metadata
    */
   public async checkin(
-    agent: Agent,
+    agentId: string,
     events: AgentEvent[],
-    metadata?: { local: any; userProvided: any }
+    localMetadata?: any
   ): Promise<{ actions: AgentAction[] }> {
+    const agent = await this.agentAdater.getById(agentId);
+
+    if (!agent || !agent.active) {
+      throw Boom.notFound('Agent not found or inactive');
+    }
+
     const actions = this._filterActionsForCheckin(agent);
 
     const now = moment().toISOString();
@@ -122,9 +129,8 @@ export class AgentLib {
       actions: updatedActions,
     };
 
-    if (metadata) {
-      updateData.local_metadata = metadata.local;
-      updateData.user_provided_metadata = metadata.userProvided;
+    if (localMetadata) {
+      updateData.local_metadata = localMetadata;
     }
 
     await this.agentAdater.update(agent.id, updateData);

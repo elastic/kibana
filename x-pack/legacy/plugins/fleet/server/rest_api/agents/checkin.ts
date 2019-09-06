@@ -6,6 +6,7 @@
 
 import * as Joi from 'joi';
 import Boom from 'boom';
+
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
@@ -17,7 +18,7 @@ type CheckinRequest = FrameworkRequest<{
   query: { page: string };
   payload: {
     events: any[];
-    metadata: { local: any; userProvided: any };
+    local_metadata: any;
   };
   headers: {
     'kbn-fleet-access-token': string;
@@ -43,18 +44,18 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
       }),
       payload: {
         events: Joi.array().required(),
-        metadata: Joi.object({
-          local: Joi.object(),
-          userProvided: Joi.object(),
-        }).optional(),
+        local_metadata: Joi.object().optional(),
       },
     },
   },
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
     await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
-    const agent = await getAndValidateAgent(request, libs);
-    const { actions } = await libs.agents.checkin(agent, events);
+    const { actions } = await libs.agents.checkin(
+      request.params.agentId,
+      events,
+      request.payload.local_metadata
+    );
 
     return {
       action: 'checkin',
@@ -89,15 +90,4 @@ async function validateAndDecodePayload(
   });
 
   return { events };
-}
-
-async function getAndValidateAgent(request: CheckinRequest, libs: FleetServerLib) {
-  const { agentId } = request.params;
-  const agent = await libs.agents.getById(agentId);
-
-  if (!agent) {
-    throw Boom.notFound('Agent not found');
-  }
-
-  return agent;
 }

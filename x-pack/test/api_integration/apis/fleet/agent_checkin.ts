@@ -30,7 +30,6 @@ export default function({ getService }: FtrProviderContext) {
         .set('kbn-fleet-access-token', 'i-am-not-a-valid-token')
         .send({
           events: [],
-          metadata: {},
         })
         .expect(401);
     });
@@ -60,7 +59,9 @@ export default function({ getService }: FtrProviderContext) {
               event: { type: 'STARTING', message: 'State change: STARTING' },
             },
           ],
-          metadata: {},
+          local_metadata: {
+            cpu: 12,
+          },
         })
         .expect(200);
 
