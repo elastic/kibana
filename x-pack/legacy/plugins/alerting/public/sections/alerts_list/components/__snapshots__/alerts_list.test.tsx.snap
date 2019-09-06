@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Alerts List: Empty List should render an Empty Prompt 1`] = `
+<EuiPageContent
+  panelPaddingSize="l"
+>
+  <EuiEmptyPrompt
+    body={
+      <EuiText
+        color="subdued"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Watch for changes or anomalies in your data and take action if needed."
+            id="xpack.alerting.sections.alertsList.subhead"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+    }
+    data-test-subj="emptyPrompt"
+    iconColor="subdued"
+    iconType="managementApp"
+    title={
+      <h1>
+        <FormattedMessage
+          defaultMessage="You don’t have any alerts yet"
+          id="xpack.alerting.sections.alertsList.emptyPromptTitle"
+          values={Object {}}
+        />
+      </h1>
+    }
+  />
+</EuiPageContent>
+`;

@@ -17,3 +17,10 @@ management.getSection('elasticsearch').register('alerting', {
   order: 7,
   url: '#/management/elasticsearch/alerting/',
 });
+
+management.getSection('elasticsearch/alerting').register('alerts', {
+  display: i18n.translate('xpack.watcher.sections.alertsList.managementSection.alertsDisplayName', {
+    defaultMessage: 'Alerts',
+  }),
+  order: 1,
+});
