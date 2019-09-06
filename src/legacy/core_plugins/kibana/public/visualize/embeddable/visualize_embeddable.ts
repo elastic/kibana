@@ -29,7 +29,7 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import {
   EmbeddableInput,

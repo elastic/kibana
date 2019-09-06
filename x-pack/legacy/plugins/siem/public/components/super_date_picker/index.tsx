@@ -31,7 +31,7 @@ import {
   isLoadingSelector,
   refetchSelector,
 } from './selectors';
-import { InputsRange } from '../../store/inputs/model';
+import { InputsRange, Policy } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -53,7 +53,7 @@ const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDateP
 
 interface SuperDatePickerStateRedux {
   duration: number;
-  policy: string;
+  policy: Policy['kind'];
   kind: string;
   fromStr: string;
   toStr: string;

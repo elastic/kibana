@@ -8,9 +8,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
-import { RenderFunction } from './plugin';
 import { AutoScale } from './auto_scale';
 
 export interface MetricChartProps {
@@ -42,6 +42,13 @@ export const metricChart: ExpressionFunction<
       types: ['string'],
       help: 'The column whose value is being displayed',
     },
+    mode: {
+      types: ['string'],
+      options: ['reduced', 'full'],
+      default: 'full',
+      help:
+        'The display mode of the chart - reduced will only show the metric itself without min size',
+    },
   },
   context: {
     types: ['lens_multitable'],
@@ -66,7 +73,7 @@ export const metricChart: ExpressionFunction<
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory
-): RenderFunction<MetricChartProps> => ({
+): IInterpreterRenderFunction<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric Chart',
   help: 'Metric Chart Renderer',
@@ -82,7 +89,7 @@ export function MetricChart({
   args,
   formatFactory,
 }: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { title, accessor } = args;
+  const { title, accessor, mode } = args;
   let value = '-';
   const firstTable = Object.values(data.tables)[0];
 
@@ -113,9 +120,11 @@ export function MetricChart({
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
         </div>
-        <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
-          {title}
-        </div>
+        {mode === 'full' && (
+          <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
+            {title}
+          </div>
+        )}
       </AutoScale>
     </div>
   );

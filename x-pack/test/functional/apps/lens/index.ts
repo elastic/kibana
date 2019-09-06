@@ -20,6 +20,11 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('lens/basic');
     });
 
+    after(async () => {
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('visualize/default');
+    });
+
     describe('', function() {
       this.tags(['ciGroup4', 'skipFirefox']);
 

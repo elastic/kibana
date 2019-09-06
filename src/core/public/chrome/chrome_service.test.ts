@@ -38,7 +38,7 @@ const store = new Map();
 
 function defaultStartDeps() {
   return {
-    application: applicationServiceMock.createStartContract(),
+    application: applicationServiceMock.createInternalStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
@@ -87,7 +87,7 @@ Array [
       const start = await service.start(defaultStartDeps());
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
-      expect(shallow(React.createElement(() => start.getComponent()))).toBeDefined();
+      expect(shallow(React.createElement(() => start.getHeaderComponent()))).toBeDefined();
     });
   });
 

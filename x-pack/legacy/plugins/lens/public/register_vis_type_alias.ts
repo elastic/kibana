@@ -5,10 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
+import { setup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+import { BASE_APP_URL, getEditPath } from '../common';
 
-visualizations.types.visTypeAliasRegistry.add({
-  aliasUrl: '/app/lens',
+setup.types.visTypeAliasRegistry.add({
+  aliasUrl: BASE_APP_URL,
   name: 'lens',
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens Visualizations',
@@ -27,7 +28,7 @@ visualizations.types.visTypeAliasRegistry.add({
         return {
           id,
           title,
-          editUrl: `/app/lens#/edit/${id}`,
+          editUrl: getEditPath(id),
           icon: 'faceHappy',
           isExperimental: true,
           savedObjectType: type,

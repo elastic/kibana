@@ -11,6 +11,9 @@ export const uiChromeMock = {
       get: (key: string) => {
         switch (key) {
           case 'dateFormat':
+            return {};
+          case 'theme:darkMode':
+            return false;
           case 'timepicker:timeDefaults':
             return {};
           case 'timepicker:refreshIntervalDefaults':

@@ -8,16 +8,12 @@
 import { CoreSetup } from 'src/core/public';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { datatableVisualization } from './visualization';
-
-import {
-  renderersRegistry,
-  functionsRegistry,
-} from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { InterpreterSetup, RenderFunction } from '../interpreter_types';
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
+import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
 
 export interface DatatableVisualizationPluginSetupPlugins {
-  interpreter: InterpreterSetup;
+  expressions: ExpressionsSetup;
   // TODO this is a simulated NP plugin.
   // Once field formatters are actually migrated, the actual shim can be used
   fieldFormat: {
@@ -30,13 +26,11 @@ class DatatableVisualizationPlugin {
 
   setup(
     _core: CoreSetup | null,
-    { interpreter, fieldFormat }: DatatableVisualizationPluginSetupPlugins
+    { expressions, fieldFormat }: DatatableVisualizationPluginSetupPlugins
   ) {
-    interpreter.functionsRegistry.register(() => datatableColumns);
-    interpreter.functionsRegistry.register(() => datatable);
-    interpreter.renderersRegistry.register(
-      () => getDatatableRenderer(fieldFormat.formatFactory) as RenderFunction<unknown>
-    );
+    expressions.registerFunction(() => datatableColumns);
+    expressions.registerFunction(() => datatable);
+    expressions.registerRenderer(() => getDatatableRenderer(fieldFormat.formatFactory));
 
     return datatableVisualization;
   }
@@ -48,10 +42,7 @@ const plugin = new DatatableVisualizationPlugin();
 
 export const datatableVisualizationSetup = () =>
   plugin.setup(null, {
-    interpreter: {
-      renderersRegistry,
-      functionsRegistry,
-    },
+    expressions: dataSetup.expressions,
     fieldFormat: {
       formatFactory: getFormat,
     },

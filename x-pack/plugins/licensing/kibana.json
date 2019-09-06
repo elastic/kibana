@@ -1,0 +1,8 @@
+{
+  "id": "licensing",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["x-pack", "licensing"],
+  "server": true,
+  "ui": false
+}

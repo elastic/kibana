@@ -27,7 +27,6 @@ function buildSuggestion({
   state,
   updatedLayer,
   layerId,
-  datasourceSuggestionId,
   label,
   changeType,
 }: {
@@ -35,7 +34,6 @@ function buildSuggestion({
   layerId: string;
   changeType: TableChangeType;
   updatedLayer?: IndexPatternLayer;
-  datasourceSuggestionId?: number;
   label?: string;
 }): DatasourceSuggestion<IndexPatternPrivateState> {
   const updatedState = updatedLayer
@@ -75,7 +73,6 @@ function buildSuggestion({
         operation: columnToOperation(columnMap[columnId]),
       })),
       isMultiRow,
-      datasourceSuggestionId: datasourceSuggestionId || 0,
       layerId,
       changeType,
       label,
@@ -351,7 +348,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             buildSuggestion({
               state,
               layerId,
-              datasourceSuggestionId: index,
               changeType: 'unchanged',
             })
           );
@@ -366,7 +362,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             buildSuggestion({
               state,
               layerId,
-              datasourceSuggestionId: index,
               changeType: 'unchanged',
             })
           );
@@ -386,11 +381,6 @@ export function getDatasourceSuggestionsFromCurrentState(
 
         return suggestions;
       })
-  ).map(
-    (suggestion, index): DatasourceSuggestion<IndexPatternPrivateState> => ({
-      ...suggestion,
-      table: { ...suggestion.table, datasourceSuggestionId: index },
-    })
   );
 }
 

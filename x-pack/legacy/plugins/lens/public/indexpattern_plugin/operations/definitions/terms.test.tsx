@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
@@ -24,6 +24,7 @@ describe('terms', () => {
     state = {
       indexPatterns: {},
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -311,6 +312,7 @@ describe('terms', () => {
           layerId="first"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -357,6 +359,7 @@ describe('terms', () => {
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -376,6 +379,7 @@ describe('terms', () => {
           layerId="first"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -422,6 +426,7 @@ describe('terms', () => {
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -444,6 +449,7 @@ describe('terms', () => {
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -487,6 +493,7 @@ describe('terms', () => {
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -504,6 +511,7 @@ describe('terms', () => {
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 

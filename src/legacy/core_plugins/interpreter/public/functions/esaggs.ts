@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 // @ts-ignore
-import { AggConfigs } from 'ui/vis/agg_configs.js';
+import { AggConfigs } from 'ui/vis/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 
@@ -87,7 +87,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       help: '',
     },
   },
-  async fn(context, args, handlers) {
+  async fn(context, args, { inspectorAdapters, abortSignal }) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
     const indexPatterns = Private(IndexPatternsProvider);
@@ -112,14 +112,15 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters: handlers.inspectorAdapters,
+      inspectorAdapters,
       queryFilter,
+      abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
     const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => {
+      columns: response.columns.map((column: any) => {
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,

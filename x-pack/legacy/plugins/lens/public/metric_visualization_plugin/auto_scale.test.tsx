@@ -25,8 +25,12 @@ describe('AutoScale', () => {
       expect(computeScale(mockElement(2000, 2000), mockElement(1000, 1000))).toBe(1);
     });
 
-    it('is never under 0.3', () => {
+    it('is never under 0.3 in default case', () => {
       expect(computeScale(mockElement(2000, 1000), mockElement(1000, 10000))).toBe(0.3);
+    });
+
+    it('is never under specified min scale if specified', () => {
+      expect(computeScale(mockElement(2000, 1000), mockElement(1000, 10000), 0.1)).toBe(0.1);
     });
 
     it('is the lesser of the x or y scale', () => {

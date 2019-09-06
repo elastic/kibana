@@ -9,6 +9,7 @@ import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data
 import { Storage } from 'ui/storage';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { toastNotifications as notificationsMock } from 'ui/notify';
+import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
@@ -140,6 +141,7 @@ describe('IndexPattern Data Source', () => {
       interpreter: { functionsRegistry },
       toastNotifications: notificationsMock,
       data: dataMock,
+      savedObjectsClient: {} as SavedObjectsClientContract,
     });
 
     persistedState = {
@@ -176,6 +178,7 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
         layers: {},
+        showEmptyFields: false,
       });
     });
 
@@ -184,6 +187,7 @@ describe('IndexPattern Data Source', () => {
       expect(state).toEqual({
         ...persistedState,
         indexPatterns: expectedIndexPatterns,
+        showEmptyFields: false,
       });
     });
   });
@@ -263,6 +267,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        showEmptyFields: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -281,6 +286,7 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
+        showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -313,6 +319,7 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
+          showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -336,6 +343,7 @@ describe('IndexPattern Data Source', () => {
     it('should return the title of the index patterns', () => {
       expect(
         indexPatternDatasource.getMetaData({
+          showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {

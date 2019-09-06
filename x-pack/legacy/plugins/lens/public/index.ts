@@ -20,7 +20,7 @@ import 'uiExports/savedObjectTypes';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { IScope } from 'angular';
 import chrome from 'ui/chrome';
-import { appSetup, appStop } from './app_plugin';
+import { appStart, appSetup, appStop } from './app_plugin';
 import { PLUGIN_ID } from '../common';
 
 // TODO: Convert this to the "new platform" way of doing UI
@@ -31,7 +31,8 @@ function Root($scope: IScope, $element: JQLite) {
     appStop();
   });
 
-  return render(appSetup(), el);
+  appSetup();
+  return render(appStart(), el);
 }
 
 chrome.setRootController(PLUGIN_ID, Root);

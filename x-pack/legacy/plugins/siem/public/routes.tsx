@@ -5,9 +5,8 @@
  */
 
 import { History } from 'history';
-import React from 'react';
+import React, { FC, memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
@@ -16,7 +15,7 @@ interface RouterProps {
   history: History;
 }
 
-export const PageRouter = pure<RouterProps>(({ history }) => (
+export const PageRouter: FC<RouterProps> = memo(({ history }) => (
   <Router history={history}>
     <Switch>
       <Route path="/" component={HomePage} />

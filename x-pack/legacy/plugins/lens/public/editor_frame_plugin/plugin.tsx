@@ -7,32 +7,34 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Registry } from '@kbn/interpreter/target/common';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
+import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  setup as dataSetup,
+  start as dataStart,
+} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import {
+  Datasource,
+  Visualization,
+  EditorFrameSetup,
+  EditorFrameInstance,
+  EditorFrameStart,
+} from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
-  data: typeof data;
-  chrome: Chrome;
-  embeddables: ReturnType<EmbeddablePlugin['setup']>;
-  interpreter: InterpreterSetup;
+  data: typeof dataSetup;
 }
 
-export interface InterpreterSetup {
-  functionsRegistry: Registry<
-    ExpressionFunction<string, unknown, unknown, unknown>,
-    ExpressionFunction<string, unknown, unknown, unknown>
-  >;
+export interface EditorFrameStartPlugins {
+  data: typeof dataStart;
+  embeddables: ReturnType<EmbeddablePlugin['start']>;
+  chrome: Chrome;
 }
 
 export class EditorFramePlugin {
@@ -42,8 +44,19 @@ export class EditorFramePlugin {
   private readonly visualizations: Record<string, Visualization> = {};
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
-    plugins.interpreter.functionsRegistry.register(() => mergeTables);
+    plugins.data.expressions.registerFunction(() => mergeTables);
 
+    return {
+      registerDatasource: (name, datasource) => {
+        this.datasources[name] = datasource as Datasource<unknown, unknown>;
+      },
+      registerVisualization: visualization => {
+        this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
+      },
+    };
+  }
+
+  public start(_core: CoreStart | null, plugins: EditorFrameStartPlugins): EditorFrameStart {
     plugins.embeddables.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
@@ -92,12 +105,6 @@ export class EditorFramePlugin {
 
     return {
       createInstance,
-      registerDatasource: (name, datasource) => {
-        this.datasources[name] = datasource as Datasource<unknown, unknown>;
-      },
-      registerVisualization: visualization => {
-        this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
-      },
     };
   }
 
@@ -110,12 +117,14 @@ const editorFrame = new EditorFramePlugin();
 
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
-    data,
+    data: dataSetup,
+  });
+
+export const editorFrameStart = () =>
+  editorFrame.start(null, {
+    data: dataStart,
     chrome,
     embeddables: embeddablePlugin,
-    interpreter: {
-      functionsRegistry,
-    },
   });
 
 export const editorFrameStop = () => editorFrame.stop();

@@ -11,7 +11,7 @@ import { FilterRatioIndexPatternColumn } from './filter_ratio';
 import { filterRatioOperation } from '.';
 import { IndexPatternPrivateState } from '../../indexpattern';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { QueryBarInput } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
 import { createMockedIndexPattern } from '../../mocks';
 
@@ -32,6 +32,7 @@ describe('filter_ratio', () => {
         },
       },
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -107,6 +108,7 @@ describe('filter_ratio', () => {
             currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
             storage={storageMock}
             uiSettings={{} as UiSettingsClientContract}
+            savedObjectsClient={{} as SavedObjectsClientContract}
           />
         );
       }).not.toThrow();
@@ -122,6 +124,7 @@ describe('filter_ratio', () => {
           currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -140,6 +143,7 @@ describe('filter_ratio', () => {
           currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -179,6 +183,7 @@ describe('filter_ratio', () => {
           currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 

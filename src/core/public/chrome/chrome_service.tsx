@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
@@ -27,13 +27,13 @@ import { IconType } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { ApplicationStart } from '../application';
+import { InternalApplicationStart } from '../application';
 import { HttpStart } from '../http';
 
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
-import { LoadingIndicator, Header } from './ui';
+import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 
 export { ChromeNavControls, ChromeRecentlyAccessed };
@@ -63,6 +63,7 @@ export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 /** @public */
@@ -73,7 +74,7 @@ interface ConstructorParams {
 }
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
@@ -83,14 +84,11 @@ interface StartDeps {
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new ReplaySubject(1);
-  private readonly browserSupportsCsp: boolean;
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
 
-  constructor({ browserSupportsCsp }: ConstructorParams) {
-    this.browserSupportsCsp = browserSupportsCsp;
-  }
+  constructor(private readonly params: ConstructorParams) {}
 
   public async start({
     application,
@@ -114,7 +112,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
 
-    if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
+    if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
         i18n.translate('core.chrome.legacyBrowserWarning', {
           defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
@@ -127,31 +125,31 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
 
-      getComponent: () => (
+      getHeaderComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
-          <div className="header-global-wrapper hide-for-sharing" data-test-subj="headerGlobalNav">
-            <Header
-              appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
-              badge$={badge$.pipe(takeUntil(this.stop$))}
-              basePath={http.basePath}
-              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-              kibanaDocLink={docLinks.links.kibana}
-              forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-              helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-              homeHref={http.basePath.prepend('/app/kibana#/home')}
-              isVisible$={isVisible$.pipe(
-                map(visibility => (FORCE_HIDDEN ? false : visibility)),
-                takeUntil(this.stop$)
-              )}
-              kibanaVersion={injectedMetadata.getKibanaVersion()}
-              navLinks$={navLinks.getNavLinks$()}
-              recentlyAccessed$={recentlyAccessed.get$()}
-              navControlsLeft$={navControls.getLeft$()}
-              navControlsRight$={navControls.getRight$()}
-            />
-          </div>
+          <Header
+            application={application}
+            appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+            badge$={badge$.pipe(takeUntil(this.stop$))}
+            basePath={http.basePath}
+            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+            kibanaDocLink={docLinks.links.kibana}
+            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            homeHref={http.basePath.prepend('/app/kibana#/home')}
+            isVisible$={isVisible$.pipe(
+              map(visibility => (FORCE_HIDDEN ? false : visibility)),
+              takeUntil(this.stop$)
+            )}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            legacyMode={injectedMetadata.getLegacyMode()}
+            navLinks$={navLinks.getNavLinks$()}
+            recentlyAccessed$={recentlyAccessed.get$()}
+            navControlsLeft$={navControls.getLeft$()}
+            navControlsRight$={navControls.getRight$()}
+          />
         </React.Fragment>
       ),
 
@@ -375,5 +373,5 @@ export interface InternalChromeStart extends ChromeStart {
    * Used only by MountingService to render the header UI
    * @internal
    */
-  getComponent(): JSX.Element;
+  getHeaderComponent(): JSX.Element;
 }

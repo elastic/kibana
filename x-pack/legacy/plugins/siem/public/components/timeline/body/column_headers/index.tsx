@@ -46,6 +46,7 @@ interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
+  isEventViewer?: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
@@ -66,7 +67,6 @@ const ColumnHeadersContainer = styled.div<{
   display: block;
   height: ${COLUMN_HEADERS_HEIGHT};
   overflow: hidden;
-  overflow-x: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
   margin-bottom: 2px;
 `;
@@ -91,6 +91,7 @@ export const ColumnHeaders = React.memo<Props>(
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    isEventViewer = false,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -127,6 +128,7 @@ export const ColumnHeaders = React.memo<Props>(
                     columnHeaders={columnHeaders}
                     data-test-subj="field-browser"
                     height={FIELD_BROWSER_HEIGHT}
+                    isEventViewer={isEventViewer}
                     onUpdateColumns={onUpdateColumns}
                     timelineId={timelineId}
                     toggleColumn={toggleColumn}
