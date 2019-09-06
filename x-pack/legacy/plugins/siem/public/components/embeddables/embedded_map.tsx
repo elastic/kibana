@@ -41,6 +41,7 @@ import {
 import { IndexPatternMapping, MapEmbeddableInput } from './types';
 import * as i18n from './translations';
 import { inputsModel } from '../../store/inputs';
+import { AppToast, useStateToaster } from '../toasters';
 
 // Used for setQuery to get a hook for when the user requests a refresh. Scope to page type if using map elsewhere
 const ID = 'embeddedMap';
@@ -76,7 +77,9 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     > | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+    const [isIndexError, setIsIndexError] = useState(false);
 
+    const [, dispatchToaster] = useStateToaster();
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
@@ -118,7 +121,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
         setEmbeddable(embeddableObject);
       } catch (e) {
-        // TODO: Throw toast https://github.com/elastic/siem-team/issues/449
+        displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, e.message);
+        setIsError(true);
       }
     };
 
@@ -143,9 +147,24 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         }
         return true;
       } catch (e) {
-        // TODO: Throw toast https://github.com/elastic/siem-team/issues/449
+        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message);
+        setIsError(true);
         return false;
       }
+    };
+
+    const displayErrorToast = (errorTitle: string, errorMessage: string) => {
+      const toast: AppToast = {
+        id: uuid.v4(),
+        title: errorTitle,
+        color: 'danger',
+        iconType: 'alert',
+        errors: [errorMessage],
+      };
+      dispatchToaster({
+        type: 'addToaster',
+        toast,
+      });
     };
 
     // Initial Load useEffect
@@ -162,7 +181,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
         if (matchingIndexPatterns.length === 0 || !setupSuccessfully) {
           setIsLoading(false);
-          setIsError(true);
+          setIsIndexError(true);
           return;
         }
 
@@ -170,7 +189,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         setIsLoading(false);
       };
 
-      if (!loadingKibanaIndexPatterns && kibanaIndexPatterns.length > 0) {
+      if (!loadingKibanaIndexPatterns) {
         importIfNotExists();
       }
     }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
@@ -194,7 +213,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
       }
     }, [startDate, endDate]);
 
-    return (
+    return isError ? null : (
       <>
         <EmbeddableWrapper>
           {embeddable != null ? (
@@ -208,7 +227,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
               inspector={npStart.plugins.inspector}
               SavedObjectFinder={SavedObjectFinder}
             />
-          ) : !isLoading && isError ? (
+          ) : !isLoading && isIndexError ? (
             <IndexPatternsMissingPrompt />
           ) : (
             <Loader data-test-subj="pewpew-loading-panel" overlay size="xl" />
