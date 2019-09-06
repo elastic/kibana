@@ -6,7 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../job_creator';
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
