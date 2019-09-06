@@ -52,41 +52,39 @@ export default (kibana) => {
           }
         } = kbnServer;
 
-        const testGlobs = [
-          'src/legacy/ui/public/**/*.js',
-          '!src/legacy/ui/public/flot-charts/**/*',
-        ];
+        const testGlobs = [];
 
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
-        // if (testingPluginIds) {
-        //   testGlobs.push('!src/legacy/ui/public/**/__tests__/**/*');
-        //   testingPluginIds.split(',').forEach((pluginId) => {
-        //     const plugin = plugins.find(plugin => plugin.id === pluginId);
+        if (testingPluginIds) {
+          testingPluginIds.split(',').forEach((pluginId) => {
+            const plugin = plugins.find(plugin => plugin.id === pluginId);
 
-        //     if (!plugin) {
-        //       throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
-        //     }
+            if (!plugin) {
+              throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
+            }
 
-        //     // add the modules from all of this plugins apps
-        //     for (const app of uiApps) {
-        //       if (app.getPluginId() === pluginId) {
-        //         modules.add(app.getMainModuleId());
-        //       }
-        //     }
+            // add the modules from all of this plugins apps
+            for (const app of uiApps) {
+              if (app.getPluginId() === pluginId) {
+                modules.add(app.getMainModuleId());
+              }
+            }
 
-        //     testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-        //   });
-        // } else {
-        // add the modules from all of the apps
-        for (const app of uiApps) {
-          modules.add(app.getMainModuleId());
+            testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+          });
+        } else {
+          // add all since we are not just focused on specific plugins
+          testGlobs.push('src/legacy/ui/public/**/*.js', '!src/legacy/ui/public/flot-charts/**/*');
+          // add the modules from all of the apps
+          for (const app of uiApps) {
+            modules.add(app.getMainModuleId());
+          }
+
+          for (const plugin of plugins) {
+            testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+          }
         }
-
-        for (const plugin of plugins) {
-          testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-        }
-        // }
 
         const testFiles = await findSourceFiles(testGlobs);
         for (const f of testFiles) modules.add(f);
