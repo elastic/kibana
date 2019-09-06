@@ -282,14 +282,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
     }
 
-    const result: any = { up, down, mixed, total: up + down + mixed };
+    const result: any = { up, down, mixed };
     if (statusFilter) {
-      for (const status in result) {
-        if (status !== 'total' && status !== statusFilter) {
+      for (const status in { up, mixed, down }) {
+        if (status !== statusFilter) {
           result[status] = 0;
         }
       }
     }
+
+    result.total = result.up + result.down + result.mixed;
 
     return result;
   }
