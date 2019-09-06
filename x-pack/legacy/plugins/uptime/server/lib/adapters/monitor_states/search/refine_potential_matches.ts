@@ -6,9 +6,8 @@
 
 import { INDEX_NAMES } from '../../../../../common/constants';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { MonitorGroups } from '../monitor_id_with_groups';
 import { CursorDirection } from '../../../../../common/graphql/types';
-import { MonitorLocCheckGroup } from '../monitor_loc_check_group';
+import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
@@ -63,10 +62,6 @@ const fullyMatchingIds = async (
         monitorId,
         location,
         checkGroup,
-        filterMatchesLatest: filteredCheckGroups.has(checkGroup),
-        timestamp: topSource['@timestamp'],
-        up: topSource.summary.up,
-        down: topSource.summary.down,
         status: topSource.summary.down > 0 ? 'down' : 'up',
       };
 

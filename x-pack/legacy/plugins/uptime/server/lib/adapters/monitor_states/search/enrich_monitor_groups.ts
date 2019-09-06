@@ -15,8 +15,12 @@ import {
   CursorDirection,
   SortOrder,
 } from '../../../../../common/graphql/types';
+import { MonitorEnricher } from './fetch_page';
 
-export const enrich = async (queryContext: QueryContext, checkGroups: string[]): Promise<any[]> => {
+export const enrichMonitorGroups: MonitorEnricher = async (
+  queryContext: QueryContext,
+  checkGroups: string[]
+): Promise<MonitorSummary[]> => {
   // TODO the scripted metric query here is totally unnecessary and largely
   // redundant with the way the code works now. This could be simplified
   // to a much simpler query + some JS processing.

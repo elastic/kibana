@@ -9,11 +9,11 @@ import { Iterator } from './iterator';
 import { CursorPagination } from '../adapter_types';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { QUERY } from '../../../../../common/constants';
-import { enrich } from './enrich';
-import { CursorDirection, SortOrder } from '../../../../../common/graphql/types';
+import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../common/graphql/types';
+import { enrichMonitorGroups } from './enrich_monitor_groups';
 
-export interface MonitorPage {
-  items: MonitorGroups[];
+export interface MonitorGroupsPage {
+  monitorGroups: MonitorGroups[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
 }
@@ -22,32 +22,43 @@ export interface MonitorGroups {
   id: string;
   groups: MonitorLocCheckGroup[];
 }
+
 export interface MonitorLocCheckGroup {
   monitorId: string;
   location: string | null;
-  filterMatchesLatest: boolean;
   checkGroup: string;
-  timestamp: Date;
-  up: number;
-  down: number;
   status: 'up' | 'down';
 }
 
 export interface EnrichedPage {
-  items: any[]; // TODO define this type better.
+  items: MonitorSummary[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
 }
 
-export const fetchPage = async (queryContext: QueryContext): Promise<EnrichedPage> => {
+export type MonitorGroupsFetcher = (
+  queryContext: QueryContext,
+  size: number
+) => Promise<MonitorGroupsPage>;
+
+export type MonitorEnricher = (
+  queryContext: QueryContext,
+  checkGroups: string[]
+) => Promise<MonitorSummary[]>;
+
+export const fetchPage = async (
+  queryContext: QueryContext,
+  monitorGroupFetcher: MonitorGroupsFetcher = fetchPageMonitorGroups,
+  monitorEnricher: MonitorEnricher = enrichMonitorGroups
+): Promise<EnrichedPage> => {
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
-  const monitorPage = await fetchPageMonitors(queryContext, size);
+  const monitorPage = await monitorGroupFetcher(queryContext, size);
 
   const checkGroups: string[] = flatten(
-    monitorPage.items.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup))
+    monitorPage.monitorGroups.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup))
   );
 
-  const enrichedMonitors = await enrich(queryContext, checkGroups);
+  const enrichedMonitors = await monitorEnricher(queryContext, checkGroups);
 
   return {
     items: enrichedMonitors,
@@ -56,23 +67,23 @@ export const fetchPage = async (queryContext: QueryContext): Promise<EnrichedPag
   };
 };
 
-const fetchPageMonitors = async (
+const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   queryContext: QueryContext,
   size: number
-): Promise<MonitorPage> => {
-  const items: MonitorGroups[] = [];
+): Promise<MonitorGroupsPage> => {
+  const monitorGroups: MonitorGroups[] = [];
   const iterator = new Iterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
-  while (items.length < size) {
+  while (monitorGroups.length < size) {
     const monitor = await iterator.next();
     if (!monitor) {
       break; // No more items to fetch
     }
-    items.push(monitor);
+    monitorGroups.push(monitor);
 
     // We want the before pagination to be before the first item we encounter
-    if (items.length === 1) {
+    if (monitorGroups.length === 1) {
       paginationBefore = await iterator.paginationBeforeCurrent();
     }
   }
@@ -85,11 +96,11 @@ const fetchPageMonitors = async (
   const ssAligned = searchSortAligned(queryContext.pagination);
 
   if (!ssAligned) {
-    items.reverse();
+    monitorGroups.reverse();
   }
 
   return {
-    items,
+    monitorGroups,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
     prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
   };
