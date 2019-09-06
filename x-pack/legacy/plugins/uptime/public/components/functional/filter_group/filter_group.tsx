@@ -31,11 +31,9 @@ export const FilterGroupComponent = ({
   data,
   onFilterUpdate,
 }: Props) => {
-  const ids = get<string[]>(data, 'filterBar.ids', []);
   const locations = get<string[]>(data, 'filterBar.locations', []);
   const ports = get<string[]>(data, 'filterBar.ports', []);
   const schemes = get<string[]>(data, 'filterBar.schemes', []);
-  const urls = get<string[]>(data, 'filterBar.urls', []);
 
   let filterKueries: Map<string, string[]>;
   try {
@@ -78,24 +76,6 @@ export const FilterGroupComponent = ({
       title: i18n.translate('xpack.uptime.filterBar.options.location.name', {
         defaultMessage: 'Location',
       }),
-    },
-    {
-      fieldName: 'monitor.id',
-      id: 'id',
-      isLoading,
-      items: ids,
-      onFilterFieldChange,
-      selectedItems: getSelectedItems('monitor.id'),
-      title: i18n.translate('xpack.uptime.filterBar.options.idLabel', { defaultMessage: 'ID' }),
-    },
-    {
-      fieldName: 'url.full',
-      id: 'url',
-      isLoading,
-      items: urls,
-      onFilterFieldChange,
-      selectedItems: getSelectedItems('url.full'),
-      title: i18n.translate('xpack.uptime.filterBar.options.urlLabel', { defaultMessage: 'URL' }),
     },
     {
       fieldName: 'url.port',
