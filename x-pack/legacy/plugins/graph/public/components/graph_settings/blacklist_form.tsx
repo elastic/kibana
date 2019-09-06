@@ -18,11 +18,13 @@ import {
 
 import { GraphSettingsProps } from './graph_settings';
 import { LegacyIcon } from './legacy_icon';
+import { useListKeys } from './use_list_keys';
 
 export function BlacklistForm({
   blacklistedNodes,
   unblacklistNode,
 }: Pick<GraphSettingsProps, 'blacklistedNodes' | 'unblacklistNode'>) {
+  const getListKey = useListKeys(blacklistedNodes);
   return (
     <>
       {blacklistedNodes.length > 0 ? (
@@ -50,8 +52,7 @@ export function BlacklistForm({
             {blacklistedNodes.map(node => (
               <EuiListGroupItem
                 icon={<LegacyIcon icon={node.icon} asListIcon />}
-                // TODO this is not enough to be unique
-                key={node.label}
+                key={getListKey(node)}
                 label={node.label}
                 extraAction={{
                   iconType: 'trash',
@@ -68,6 +69,7 @@ export function BlacklistForm({
           </EuiListGroup>
           <EuiSpacer />
           <EuiButton
+            data-test-subj="graphUnblacklistAll"
             color="danger"
             iconType="trash"
             onClick={() => {

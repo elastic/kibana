@@ -249,6 +249,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                   onClick={() => {
                     props.onRemove();
                   }}
+                  data-test-subj="graphRemoveUrlTemplate"
                 >
                   {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
                     defaultMessage: 'Remove',

@@ -69,7 +69,9 @@ export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) 
             <EuiTab
               key={title}
               isSelected={activeTab === index}
-              onClick={() => setActiveTab(index)}
+              onClick={() => {
+                setActiveTab(index);
+              }}
             >
               {title}
             </EuiTab>
