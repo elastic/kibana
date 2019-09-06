@@ -64,12 +64,7 @@ import {
 import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
-import {
-  ApplicationSetup,
-  Capabilities,
-  capabilitiesValidationRegex,
-  ApplicationStart,
-} from './application';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
@@ -200,7 +195,6 @@ export {
   ApplicationSetup,
   ApplicationStart,
   Capabilities,
-  capabilitiesValidationRegex,
   ChromeBadge,
   ChromeBrand,
   ChromeBreadcrumb,

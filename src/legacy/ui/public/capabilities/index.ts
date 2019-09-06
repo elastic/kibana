@@ -18,12 +18,9 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import {
-  Capabilities as UICapabilities,
-  capabilitiesValidationRegex as uiCapabilitiesValidationRegex,
-} from '../../../../core/public';
+import { Capabilities as UICapabilities } from '../../../../core/public';
 
-export { UICapabilities, uiCapabilitiesValidationRegex };
+export { UICapabilities };
 
 export const capabilities = {
   get() {

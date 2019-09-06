@@ -7,6 +7,12 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 
+// These exports are part of public Features plugin contract, any change in signature of exported
+// functions or removal of exports should be considered as a breaking change. Ideally we should
+// reduce number of such exports to zero and provide everything we want to expose via Setup/Start
+// run-time contracts.
+export { uiCapabilitiesRegex } from './feature_schema';
+
 export { Feature, FeatureWithAllOrReadPrivileges } from './feature';
 export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 export { PluginSetupContract } from './plugin';

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isString } from 'lodash';
-import { UICapabilities, uiCapabilitiesValidationRegex } from 'ui/capabilities';
+import { UICapabilities } from 'ui/capabilities';
+import { uiCapabilitiesRegex } from '../../../../../../../plugins/features/server';
 
 export class UIActions {
   private readonly prefix: string;
@@ -41,11 +42,11 @@ export class UIActions {
     if (
       uiCapabilityParts.length === 0 ||
       uiCapabilityParts.findIndex(
-        part => !part || !isString(part) || !uiCapabilitiesValidationRegex.test(part)
+        part => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
       ) >= 0
     ) {
       throw new Error(
-        `UI capabilities are required, and must all be strings matching the pattern ${uiCapabilitiesValidationRegex}`
+        `UI capabilities are required, and must all be strings matching the pattern ${uiCapabilitiesRegex}`
       );
     }
 

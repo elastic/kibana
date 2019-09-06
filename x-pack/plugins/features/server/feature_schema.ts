@@ -7,10 +7,7 @@
 import Joi from 'joi';
 
 import { difference } from 'lodash';
-import {
-  Capabilities as UICapabilities,
-  capabilitiesValidationRegex as uiCapabilitiesValidationRegex,
-} from '../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../src/core/public';
 import { FeatureWithAllOrReadPrivileges } from './feature';
 
 // Each feature gets its own property on the UICapabilities object,
@@ -19,12 +16,13 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
+export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
-  Joi.array().items(Joi.string().regex(uiCapabilitiesValidationRegex))
+  Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
-const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesValidationRegex));
+const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
@@ -41,7 +39,7 @@ const privilegeSchema = Joi.object({
       .required(),
   }).required(),
   ui: Joi.array()
-    .items(Joi.string().regex(uiCapabilitiesValidationRegex))
+    .items(Joi.string().regex(uiCapabilitiesRegex))
     .required(),
 });
 
@@ -55,7 +53,7 @@ const schema = Joi.object({
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
   description: Joi.string(),
-  navLinkId: Joi.string().regex(uiCapabilitiesValidationRegex),
+  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
   app: Joi.array()
     .items(Joi.string())
     .required(),

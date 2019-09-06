@@ -80,11 +80,6 @@ export interface Capabilities {
     navLinks: Record<string, boolean>;
 }
 
-// Warning: (ae-missing-release-tag) "capabilitiesValidationRegex" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export const capabilitiesValidationRegex: RegExp;
-
 // @public (undocumented)
 export interface ChromeBadge {
     // (undocumented)

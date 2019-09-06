@@ -82,12 +82,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
-## Variables
-
-|  Variable | Description |
-|  --- | --- |
-|  [capabilitiesValidationRegex](./kibana-plugin-public.capabilitiesvalidationregex.md) |  |
-
 ## Type Aliases
 
 |  Type Alias | Description |

@@ -18,7 +18,7 @@
  */
 
 export { ApplicationService } from './application_service';
-export { Capabilities, capabilitiesValidationRegex } from './capabilities';
+export { Capabilities } from './capabilities';
 export {
   App,
   AppBase,

@@ -18,5 +18,3 @@
  */
 
 export { Capabilities, CapabilitiesService } from './capabilities_service';
-
-export const capabilitiesValidationRegex = /^[a-zA-Z0-9:_-]+$/;
