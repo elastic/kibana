@@ -118,7 +118,7 @@ export const keymap: KeyMap = {
   },
   EXPRESSION: {
     displayName: namespaceDisplayNames.EXPRESSION,
-    RUN: getShortcuts('enter', { modifiers: 'ctrl', help: shortcutHelp.RUN_EXPRESSION }),
+    RUN: getShortcuts('enter', { modifiers: 'ctrl', help: shortcutHelp.RUN }),
   },
   EDITOR: {
     displayName: namespaceDisplayNames.EDITOR,
