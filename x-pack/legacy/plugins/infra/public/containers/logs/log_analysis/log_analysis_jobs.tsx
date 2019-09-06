@@ -149,11 +149,15 @@ export const useLogAnalysisJobs = ({
   const retry = useCallback(
     (start, end) => {
       setIsRetrying(true);
-      cleanupMLResources().then(() => {
-        setupMlModule(start, end).then(() => {
+      cleanupMLResources()
+        .then(() => {
+          setupMlModule(start, end).then(() => {
+            setIsRetrying(false);
+          });
+        })
+        .catch(() => {
           setIsRetrying(false);
         });
-      });
     },
     [setIsRetrying, cleanupMLResources, setupMlModule]
   );
