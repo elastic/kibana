@@ -14,14 +14,22 @@ import {
   jumpToTargetPositionTime,
   startAutoReload,
   stopAutoReload,
-  reportVisiblePositions,
 } from './actions';
 
-const createLiveStreamEpic = <State>(): Epic<Action, Action, State, {}> => action$ =>
+const LIVE_STREAM_INTERVAL = 5000;
+
+const createLiveStreamEpic = <State>(): Epic<
+  Action,
+  Action,
+  State,
+  { selectIsAutoReloadingScrollLocked: (state: State) => boolean }
+> => (action$, state$, { selectIsAutoReloadingScrollLocked }) =>
   action$.pipe(
     filter(startAutoReload.match),
-    exhaustMap(({ payload }) =>
-      timer(0, payload).pipe(
+    exhaustMap(() =>
+      timer(0, LIVE_STREAM_INTERVAL).pipe(
+        withLatestFrom(state$),
+        filter(([, state]) => selectIsAutoReloadingScrollLocked(state) === false),
         map(() => jumpToTargetPositionTime(Date.now(), true)),
         takeUntil(action$.pipe(filter(stopAutoReload.match)))
       )
@@ -35,11 +43,7 @@ const createLiveStreamScrollCancelEpic = <State>(): Epic<
   { selectIsAutoReloadingLogEntries: (state: State) => boolean }
 > => (action$, state$, { selectIsAutoReloadingLogEntries }) =>
   action$.pipe(
-    filter(
-      action =>
-        (reportVisiblePositions.match(action) && action.payload.fromScroll) ||
-        (jumpToTargetPosition.match(action) && !action.payload.fromAutoReload)
-    ),
+    filter(action => jumpToTargetPosition.match(action) && !action.payload.fromAutoReload),
     withLatestFrom(state$),
     filter(([, state]) => selectIsAutoReloadingLogEntries(state)),
     mapTo(stopAutoReload())

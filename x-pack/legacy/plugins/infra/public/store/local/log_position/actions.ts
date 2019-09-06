@@ -32,6 +32,8 @@ export const reportVisiblePositions = actionCreator<ReportVisiblePositionsPayloa
   'REPORT_VISIBLE_POSITIONS'
 );
 
-export const startAutoReload = actionCreator<number>('START_AUTO_RELOAD');
-
+export const startAutoReload = actionCreator('START_AUTO_RELOAD');
 export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');
+
+export const lockAutoReloadScroll = actionCreator('LOCK_AUTO_RELOAD_SCROLL');
+export const unlockAutoReloadScroll = actionCreator('UNLOCK_AUTO_RELOAD_SCROLL');

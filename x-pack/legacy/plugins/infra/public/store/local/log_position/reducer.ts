@@ -13,6 +13,8 @@ import {
   reportVisiblePositions,
   startAutoReload,
   stopAutoReload,
+  lockAutoReloadScroll,
+  unlockAutoReloadScroll,
 } from './actions';
 
 import { loadEntriesActionCreators } from '../../remote/log_entries/operations/load';
@@ -23,7 +25,6 @@ interface ManualTargetPositionUpdatePolicy {
 
 interface IntervalTargetPositionUpdatePolicy {
   policy: 'interval';
-  interval: number;
 }
 
 type TargetPositionUpdatePolicy =
@@ -40,6 +41,7 @@ export interface LogPositionState {
   };
   controlsShouldDisplayTargetPosition: boolean;
   autoReloadJustAborted: boolean;
+  autoReloadScrollLock: boolean;
 }
 
 export const initialLogPositionState: LogPositionState = {
@@ -54,6 +56,7 @@ export const initialLogPositionState: LogPositionState = {
   },
   controlsShouldDisplayTargetPosition: false,
   autoReloadJustAborted: false,
+  autoReloadScrollLock: false,
 };
 
 const targetPositionReducer = reducerWithInitialState(initialLogPositionState.targetPosition).case(
@@ -64,9 +67,8 @@ const targetPositionReducer = reducerWithInitialState(initialLogPositionState.ta
 const targetPositionUpdatePolicyReducer = reducerWithInitialState(
   initialLogPositionState.updatePolicy
 )
-  .case(startAutoReload, (state, interval) => ({
+  .case(startAutoReload, () => ({
     policy: 'interval',
-    interval,
   }))
   .case(stopAutoReload, () => ({
     policy: 'manual',
@@ -107,10 +109,19 @@ const autoReloadJustAbortedReducer = reducerWithInitialState(
   .case(loadEntriesActionCreators.resolveFailed, () => false)
   .case(loadEntriesActionCreators.resolve, () => false);
 
+const autoReloadScrollLockReducer = reducerWithInitialState(
+  initialLogPositionState.autoReloadScrollLock
+)
+  .case(startAutoReload, () => false)
+  .case(stopAutoReload, () => false)
+  .case(lockAutoReloadScroll, () => true)
+  .case(unlockAutoReloadScroll, () => false);
+
 export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
   controlsShouldDisplayTargetPosition: controlsShouldDisplayTargetPositionReducer,
   autoReloadJustAborted: autoReloadJustAbortedReducer,
+  autoReloadScrollLock: autoReloadScrollLockReducer,
 });
