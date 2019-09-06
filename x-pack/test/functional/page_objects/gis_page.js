@@ -470,14 +470,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async selectVectorSource() {
-      log.debug(`Select vector source`);
-      await testSubjects.click('vectorShapes');
+    async selectEMSBoundariesSource() {
+      log.debug(`Select EMS boundaries source`);
+      await testSubjects.click('emsBoundaries');
     }
 
     async selectGeoJsonUploadSource() {
-      log.debug(`Select upload geojson vector file`);
-      await testSubjects.click('uploadGeoJsonVectorFile');
+      log.debug(`Select upload geojson source`);
+      await testSubjects.click('uploadedGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
