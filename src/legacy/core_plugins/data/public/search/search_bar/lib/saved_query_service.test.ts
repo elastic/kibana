@@ -140,7 +140,7 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
-    it("should throw an error if the saved query doesn't have a title", async () => {
+    it('should throw an error if the saved query does not have a title', async () => {
       let error = null;
       try {
         await saveQuery({ ...savedQueryAttributes, title: '' });
