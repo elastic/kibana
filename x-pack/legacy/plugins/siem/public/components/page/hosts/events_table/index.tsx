@@ -272,7 +272,7 @@ export const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
   const columns = getEventsColumns(pageType);
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === hostsModel.HostsType.details) {
     return [i18n.HOST_NAME].reduce((acc, name) => {
       acc.splice(acc.findIndex(column => column.name === name), 1);
       return acc;
