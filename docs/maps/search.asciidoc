@@ -42,7 +42,7 @@ You can create spatial filters in two ways:
 [role="screenshot"]
 image::maps/images/create_spatial_filter.png[]
 
-You can configure the following spatial filter properties:
+Spatial filters have the following properties:
 
 * Use *Geometry label* to provide a distinguishable and meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
