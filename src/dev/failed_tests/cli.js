@@ -34,7 +34,7 @@ if (!branch) {
   process.exit(1);
 }
 
-const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
+const isMasterOrVersion = branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
 
 if (!isMasterOrVersion || isPr) {
   console.log('Failure issues only created on master/version branch jobs');
