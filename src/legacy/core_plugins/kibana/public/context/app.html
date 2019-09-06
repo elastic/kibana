@@ -73,7 +73,7 @@
         ].includes(contextApp.state.loadingStatus.predecessors.status)"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
         on-load-more-click="contextApp.actions.fetchMorePredecessorRows"
-        type="'predecessor'"
+        type="'predecessors'"
   ></context-action-bar>
 
 
@@ -122,6 +122,6 @@
     ].includes(contextApp.state.loadingStatus.successors.status)"
     on-change-count="contextApp.actions.fetchGivenSuccessorRows"
     on-load-more-click="contextApp.actions.fetchMoreSuccessorRows"
-    type="'successor'"
+    type="'successors'"
   ></context-action-bar>
 </main>
