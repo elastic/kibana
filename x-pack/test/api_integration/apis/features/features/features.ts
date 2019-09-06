@@ -15,18 +15,6 @@ export default function({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
 
-  const expect404 = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
-  };
-
-  const expect200 = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
-  };
-
   describe('/api/features', () => {
     describe('with the "global all" privilege', () => {
       it('should return a 200', async () => {
@@ -50,14 +38,11 @@ export default function({ getService }: FtrProviderContext) {
             full_name: 'a kibana user',
           });
 
-          const result = await supertestWithoutAuth
-            .get('/api/features/')
+          await supertestWithoutAuth
+            .get('/api/features')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
-            .then((response: any) => ({ error: undefined, response }))
-            .catch((error: any) => ({ error, response: undefined }));
-
-          expect200(result);
+            .expect(200);
         } finally {
           await security.role.delete(roleName);
           await security.user.delete(username);
@@ -88,14 +73,11 @@ export default function({ getService }: FtrProviderContext) {
             full_name: 'a kibana user',
           });
 
-          const result = await supertestWithoutAuth
+          await supertestWithoutAuth
             .get('/api/features')
             .auth(username, password)
             .set('kbn-xsrf', 'foo')
-            .then((response: any) => ({ error: undefined, response }))
-            .catch((error: any) => ({ error, response: undefined }));
-
-          expect404(result);
+            .expect(404);
         } finally {
           await security.role.delete(roleName);
           await security.user.delete(username);
