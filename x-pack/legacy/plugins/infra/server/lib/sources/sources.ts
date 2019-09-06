@@ -26,16 +26,19 @@ import {
   StaticSourceConfigurationRuntimeType,
 } from './types';
 
+interface Libs {
+  configuration: InfraConfigurationAdapter;
+  savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
+    Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
+}
+
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
+  private readonly libs: Libs;
 
-  constructor(
-    private readonly libs: {
-      configuration: InfraConfigurationAdapter;
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
-    }
-  ) {}
+  constructor(libs: Libs) {
+    this.libs = libs;
+  }
 
   public async getSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();

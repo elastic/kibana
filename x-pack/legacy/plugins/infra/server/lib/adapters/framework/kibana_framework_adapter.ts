@@ -7,9 +7,12 @@
 import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
-
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
+import { Request, ResponseToolkit } from 'hapi';
+import { runHttpQuery } from 'apollo-server-core';
+import Boom from 'boom';
+import * as GraphiQL from 'apollo-server-module-graphiql';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -19,12 +22,6 @@ import {
   InfraWrappableRequest,
   internalInfraFrameworkRequest,
 } from './adapter_types';
-import {
-  graphiqlHapi,
-  graphqlHapi,
-  HapiGraphiQLPluginOptions,
-  HapiGraphQLPluginOptions,
-} from './apollo_server_hapi';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 interface CallWithRequestParams extends GenericParams {
@@ -33,9 +30,11 @@ interface CallWithRequestParams extends GenericParams {
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
+  private server: Legacy.Server;
 
-  constructor(private server: Legacy.Server) {
+  constructor(server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
+    this.server = server;
   }
 
   public config(req: InfraFrameworkRequest<Legacy.Request>): KibanaConfig {
@@ -56,32 +55,79 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<HapiGraphQLPluginOptions>({
+    this.server.route({
       options: {
-        graphqlOptions: (req: Legacy.Request) => ({
-          context: { req: wrapRequest(req) },
-          schema,
-        }),
-        path: routePath,
-        route: {
-          tags: ['access:infra'],
-        },
+        tags: ['access:infra'],
       },
-      plugin: graphqlHapi,
+      handler: async (request: Request, h: ResponseToolkit) => {
+        try {
+          const query =
+            request.method === 'post'
+              ? (request.payload as Record<string, any>)
+              : (request.query as Record<string, any>);
+
+          const gqlResponse = await runHttpQuery([request], {
+            method: request.method.toUpperCase(),
+            options: (req: Legacy.Request) => ({
+              context: { req: wrapRequest(req) },
+              schema,
+            }),
+            query,
+          });
+
+          return h.response(gqlResponse).type('application/json');
+        } catch (error) {
+          if ('HttpQueryError' !== error.name) {
+            const queryError = Boom.boomify(error);
+
+            queryError.output.payload.message = error.message;
+
+            return queryError;
+          }
+
+          if (error.isGraphQLError === true) {
+            return h
+              .response(error.message)
+              .code(error.statusCode)
+              .type('application/json');
+          }
+
+          const genericError = new Boom(error.message, { statusCode: error.statusCode });
+
+          if (error.headers) {
+            Object.keys(error.headers).forEach(header => {
+              genericError.output.headers[header] = error.headers[header];
+            });
+          }
+
+          // Boom hides the error when status code is 500
+          genericError.output.payload.message = error.message;
+
+          throw genericError;
+        }
+      },
+      method: ['GET', 'POST'],
+      path: routePath || '/graphql',
     });
 
-    this.server.register<HapiGraphiQLPluginOptions>({
+    this.server.route({
       options: {
-        graphiqlOptions: request => ({
-          endpointURL: request ? `${request.getBasePath()}${routePath}` : routePath,
-          passHeader: `'kbn-version': '${this.version}'`,
-        }),
-        path: `${routePath}/graphiql`,
-        route: {
-          tags: ['access:infra'],
-        },
+        tags: ['access:infra'],
       },
-      plugin: graphiqlHapi,
+      handler: async (request: Request, h: ResponseToolkit) => {
+        const graphiqlString = await GraphiQL.resolveGraphiQLString(
+          request.query,
+          (req: Legacy.Request) => ({
+            endpointURL: req ? `${req.getBasePath()}${routePath}` : routePath,
+            passHeader: `'kbn-version': '${this.version}'`,
+          }),
+          request
+        );
+
+        return h.response(graphiqlString).type('text/html');
+      },
+      method: 'GET',
+      path: routePath ? `${routePath}/graphiql` : '/graphiql',
     });
   }
 
@@ -104,7 +150,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     req: InfraFrameworkRequest<Legacy.Request>,
     endpoint: string,
     params: CallWithRequestParams,
-    ...rest: any[]
+    ...rest: Array<any>
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;

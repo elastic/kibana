@@ -34,6 +34,7 @@ export function compose(server: Server): InfraBackendLibs {
   const snapshot = new InfraSnapshot({ sources, framework });
   const logAnalysis = new InfraLogAnalysis({ framework });
 
+  // TODO: separate these out individually and do away with "domains" as a temporary group
   const domainLibs: InfraDomainLibs = {
     fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
       sources,
