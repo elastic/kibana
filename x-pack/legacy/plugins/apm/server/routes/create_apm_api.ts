@@ -29,7 +29,8 @@ import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
-  transactionGroupsRoute
+  transactionGroupsRoute,
+  transactionGroupsAvgDurationByCountry
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -65,6 +66,7 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
+    .add(transactionGroupsAvgDurationByCountry)
     .add(errorGroupsLocalFiltersRoute)
     .add(metricsLocalFiltersRoute)
     .add(servicesLocalFiltersRoute)

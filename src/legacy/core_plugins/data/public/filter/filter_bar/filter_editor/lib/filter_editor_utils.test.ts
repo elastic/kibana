@@ -43,19 +43,7 @@ import { phraseFilter } from './fixtures/phrase_filter';
 import { phrasesFilter } from './fixtures/phrases_filter';
 import { rangeFilter } from './fixtures/range_filter';
 
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => {},
-}));
-
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addWarning: () => {},
-    },
-  }),
-  { virtual: true }
-);
+jest.mock('ui/new_platform');
 
 const mockedFields = mockFields as Field[];
 const mockedIndexPattern = mockIndexPattern as IndexPattern;

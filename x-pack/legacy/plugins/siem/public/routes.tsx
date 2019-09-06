@@ -5,22 +5,24 @@
  */
 
 import { History } from 'history';
-import React from 'react';
+import React, { FC, memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
+import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
 
 interface RouterProps {
   history: History;
 }
 
-export const PageRouter = pure<RouterProps>(({ history }) => (
-  <Router history={history}>
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route component={NotFoundPage} />
-    </Switch>
-  </Router>
+export const PageRouter: FC<RouterProps> = memo(({ history }) => (
+  <ManageRoutesSpy>
+    <Router history={history}>
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route component={NotFoundPage} />
+      </Switch>
+    </Router>
+  </ManageRoutesSpy>
 ));
