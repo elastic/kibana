@@ -13,7 +13,7 @@ import { PickByValue, Optional } from 'utility-types';
 export interface Params {
   query?: t.HasProps;
   path?: t.HasProps;
-  body?: t.Any;
+  body?: t.Any | t.HasProps;
 }
 
 type DecodeParams<TParams extends Params | undefined> = {

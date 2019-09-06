@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import {
   Action,
   IEmbeddable,
-  ActionContext,
   IncompatibleActionError,
 } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
@@ -40,7 +39,11 @@ function isExpanded(embeddable: IEmbeddable) {
   return embeddable.id === embeddable.parent.getInput().expandedPanelId;
 }
 
-export class ExpandPanelAction extends Action {
+interface ActionContext {
+  embeddable: IEmbeddable;
+}
+
+export class ExpandPanelAction extends Action<ActionContext> {
   public readonly type = EXPAND_PANEL_ACTION;
 
   constructor() {
@@ -80,7 +83,7 @@ export class ExpandPanelAction extends Action {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

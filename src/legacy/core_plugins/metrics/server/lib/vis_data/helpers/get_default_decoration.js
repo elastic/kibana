@@ -21,21 +21,10 @@ export const getDefaultDecoration = series => {
   const pointSize =
     series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;
-  let stack;
-  switch (series.stacked) {
-    case 'stacked':
-    case 'percent':
-      stack = true;
-      break;
-    case 'stacked_within_series':
-      stack = series.id;
-      break;
-    default:
-      stack = false;
-  }
 
   return {
-    stack,
+    seriesId: series.id,
+    stack: series.stacked,
     lines: {
       show: series.chart_type === 'line' && series.line_width !== 0,
       fill: Number(series.fill),
