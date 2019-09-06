@@ -53,16 +53,17 @@ export async function getFullUrls({
       search: parsedRelative.search,
     });
 
-    if (!job.forceNow) {
-      return jobUrl;
-    }
-
     // capture the route to the visualization
     const parsed: UrlWithParsedQuery = urlParse(jobUrl, true);
-    if (!parsed.hash) {
+    if (parsed.hash == null) {
       throw new Error(
         'No valid hash in the URL! A hash is expected for the application to route to the intended visualization.'
       );
+    }
+
+    // allow the hash check to perform first
+    if (!job.forceNow) {
+      return jobUrl;
     }
 
     const visualizationRoute: UrlWithParsedQuery = urlParse(parsed.hash.replace(/^#/, ''), true);

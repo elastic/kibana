@@ -20,7 +20,22 @@ test(`fails if no URL is passed`, async () => {
       job: {} as JobDocPayloadPNG,
       server: mockServer,
     })
-  ).rejects.toBeDefined();
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`]`
+  );
+});
+
+test(`fails if URL does not route to a visualization`, async () => {
+  await expect(
+    getFullUrls({
+      job: {
+        relativeUrl: '/app/phoney',
+      } as JobDocPayloadPNG,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: No valid hash in the URL! A hash is expected for the application to route to the intended visualization.]`
+  );
 });
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
