@@ -18,7 +18,6 @@ import {
   EuiIcon,
   EuiText,
   EuiFieldText,
-  EuiComboBox,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -35,6 +34,7 @@ import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
+import { RoleComboBox } from './role_combo_box';
 import { UserAPIClient } from '..';
 
 interface Props {
@@ -53,7 +53,7 @@ interface State {
   showDeleteConfirmation: boolean;
   user: EditUser;
   roles: Role[];
-  selectedRoles: Array<{ label: string }>;
+  selectedRoles: string[];
   formError: UserValidationResult | null;
 }
 
@@ -138,7 +138,7 @@ export class EditUserPage extends Component<Props, State> {
       currentUser,
       user,
       roles,
-      selectedRoles: user.roles.map(role => ({ label: role })) || [],
+      selectedRoles: user.roles || [],
     });
   }
 
@@ -167,9 +167,7 @@ export class EditUserPage extends Component<Props, State> {
         delete userToSave.password;
       }
       delete userToSave.confirmPassword;
-      userToSave.roles = selectedRoles.map(selectedRole => {
-        return selectedRole.label;
-      });
+      userToSave.roles = [...selectedRoles];
       try {
         await apiClient.saveUser(userToSave);
         this.props.notifications.toasts.addSuccess(
@@ -344,7 +342,7 @@ export class EditUserPage extends Component<Props, State> {
     });
   };
 
-  private onRolesChange = (selectedRoles: Array<{ label: string }>) => {
+  private onRolesChange = (selectedRoles: string[]) => {
     this.setState({
       selectedRoles,
     });
@@ -363,8 +361,8 @@ export class EditUserPage extends Component<Props, State> {
   public render() {
     const {
       user,
-      roles,
       selectedRoles,
+      roles,
       showChangePasswordForm,
       isNewUser,
       showDeleteConfirmation,
@@ -377,6 +375,20 @@ export class EditUserPage extends Component<Props, State> {
     if (!this.state.isLoaded) {
       return null;
     }
+
+    const hasAnyDeprecatedRolesAssigned = roles.filter(
+      role => isDeprecatedRole(role) && selectedRoles.includes(role.name)
+    );
+
+    const roleHelpText = hasAnyDeprecatedRolesAssigned ? (
+      <FormattedMessage
+        id="xpack.security.management.users.editUser.deprecatedRolesAssignedWarning"
+        defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role as soon as possible."
+        values={{ userName: user.username }}
+      />
+    ) : (
+      undefined
+    );
 
     return (
       <div className="secUsersEditPage">
@@ -491,18 +503,11 @@ export class EditUserPage extends Component<Props, State> {
                   { defaultMessage: 'Roles' }
                 )}
               >
-                <EuiComboBox
-                  data-test-subj="userFormRolesDropdown"
-                  placeholder={i18n.translate(
-                    'xpack.security.management.users.editUser.addRolesPlaceholder',
-                    { defaultMessage: 'Add roles' }
-                  )}
+                <RoleComboBox
+                  availableRoles={roles}
+                  selectedRoleNames={selectedRoles}
                   onChange={this.onRolesChange}
                   isDisabled={reserved}
-                  options={roles.map(role => {
-                    return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
-                  })}
-                  selectedOptions={selectedRoles}
                 />
               </EuiFormRow>
 

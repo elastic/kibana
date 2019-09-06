@@ -33,6 +33,7 @@ interface Props {
 
 interface State {
   users: User[];
+  roles: Role[];
   selection: User[];
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
@@ -44,6 +45,7 @@ export class UsersGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       users: [],
+      roles: [],
       selection: [],
       showDeleteConfirmation: false,
       permissionDenied: false,
@@ -56,7 +58,14 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const {
+      users,
+      roles,
+      filter,
+      permissionDenied,
+      showDeleteConfirmation,
+      selection,
+    } = this.state;
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
@@ -128,9 +137,25 @@ export class UsersGridPage extends Component<Props, State> {
         }),
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
+            const roleDefinition = roles.find(role => role.name === rolename);
+            const isDeprecated =
+              rolename === 'kibana_user' || (roleDefinition && isDeprecatedRole(roleDefinition));
             return (
               <Fragment key={rolename}>
-                <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
+                <EuiLink
+                  href={`${path}roles/edit/${rolename}`}
+                  color={isDeprecated ? 'warning' : 'primary'}
+                  title={
+                    isDeprecated
+                      ? intl.formatMessage({
+                          id: 'xpack.security.management.users.deprecatedRoleTitle',
+                          defaultMessage: 'This role is deprecated, and should no longer be used.',
+                        })
+                      : undefined
+                  }
+                >
+                  {rolename}
+                </EuiLink>
                 {index === rolenames.length - 1 ? null : ', '}
               </Fragment>
             );
@@ -191,8 +216,10 @@ export class UsersGridPage extends Component<Props, State> {
       };
     };
     const usersToShow = filter
-      ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
-          const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
+      ? users.filter(({ username, roles: userRoles, full_name: fullName = '', email = '' }) => {
+          const normalized = `${username} ${userRoles.join(
+            ' '
+          )} ${fullName} ${email}`.toLowerCase();
           const normalizedQuery = filter.toLowerCase();
           return normalized.indexOf(normalizedQuery) !== -1;
         })
