@@ -110,7 +110,7 @@ export function ActionBar({
               className="cxtSizePicker"
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
-              onChange={ev => onChangeCount(Number(ev.target.value))}
+              onChange={ev => onChangeCount(ev.target.valueAsNumber)}
               type="number"
               value={docCount}
             />
