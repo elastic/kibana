@@ -20,6 +20,10 @@ import { convertIntervalIntoUnit } from './get_interval';
 import { i18n } from '@kbn/i18n';
 
 export function getAxisLabelString(interval) {
+  if (!interval) {
+    return '';
+  }
+
   const convertedValue = convertIntervalIntoUnit(interval);
 
   if (convertedValue) {
