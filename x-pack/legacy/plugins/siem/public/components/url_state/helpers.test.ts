@@ -6,6 +6,7 @@
 import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
 import { isKqlForRoute, getTitle } from './helpers';
 import { CONSTANTS } from './constants';
+import { HostsType } from '../../store/hosts/model';
 
 describe('Helpers Url_State', () => {
   describe('isKqlForRoute', () => {
@@ -60,8 +61,8 @@ describe('Helpers Url_State', () => {
       expect(result).toEqual('Timelines');
     });
     test('details page name', () => {
-      const result = getTitle('hosts', 'details', navTabs);
-      expect(result).toEqual('details');
+      const result = getTitle('hosts', HostsType.details, navTabs);
+      expect(result).toEqual(HostsType.details);
     });
     test('Not existing', () => {
       const result = getTitle('IamHereButNotReally', undefined, navTabs);
