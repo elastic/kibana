@@ -80,7 +80,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="saveModal"
+            className="kbnSavedObjectSaveModal"
             onClose={this.props.onClose}
           >
             <EuiModalHeader>
