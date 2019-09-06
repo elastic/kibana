@@ -93,7 +93,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         log.debug('Looking at selection ' + selectionLabel);
         if (selectionLabel !== from && selectionLabel !== to) {
           (await selection.findByClassName('gphNode__text')).click();
-          await PageObjects.common.sleep(1000);
+          await PageObjects.common.sleep(200);
         }
       }
 
@@ -106,9 +106,8 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
     async clickEdge(edge: Edge) {
       await this.stopLayout();
-      const { height, width } = await edge.element.getPosition();
-      log.debug(`Clicking ${width / 2}, ${height} relative to edge element`);
-      await browser.clickMouseButton(edge.element, width / 2, height / 2);
+      await PageObjects.common.sleep(1000);
+      await edge.element.click();
       await this.startLayout();
     }
 

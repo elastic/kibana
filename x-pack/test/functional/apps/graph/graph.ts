@@ -135,14 +135,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await buildGraph();
       const { edges } = await PageObjects.graph.getGraphObjects();
 
-      const wordpressAdminEdge = edges.find(
+      const blogAdminBlogEdge = edges.find(
         ({ sourceNode, targetNode }) =>
-          sourceNode.label === 'wordpress' && targetNode.label === 'admin'
+          sourceNode.label === '/blog/wp-admin/' && targetNode.label === 'blog'
       )!;
 
-      await PageObjects.graph.isolateEdge(wordpressAdminEdge);
+      await PageObjects.graph.isolateEdge(blogAdminBlogEdge);
 
-      await PageObjects.graph.clickEdge(wordpressAdminEdge);
+      await PageObjects.graph.clickEdge(blogAdminBlogEdge);
 
       const vennTerm1 = await PageObjects.graph.getVennTerm1();
       log.debug('vennTerm1 = ' + vennTerm1);
@@ -159,11 +159,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const smallVennTerm2 = await PageObjects.graph.getSmallVennTerm2();
       log.debug('smallVennTerm2 = ' + smallVennTerm2);
 
-      expect(vennTerm1).to.be('wordpress');
-      expect(vennTerm2).to.be('admin');
+      expect(vennTerm1).to.be('/blog/wp-admin/');
+      expect(vennTerm2).to.be('blog');
       expect(smallVennTerm1).to.be('5');
       expect(smallVennTerm12).to.be(' (5) ');
-      expect(smallVennTerm2).to.be('21');
+      expect(smallVennTerm2).to.be('8');
     });
 
     it('should delete graph', async function() {
