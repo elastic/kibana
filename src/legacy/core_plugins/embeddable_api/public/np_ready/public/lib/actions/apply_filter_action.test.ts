@@ -48,9 +48,7 @@ describe('isCompatible()', () => {
           }),
         }),
       } as any,
-      triggerContext: {
-        filters: [],
-      },
+      filters: [],
     });
     expect(result).toBe(true);
   });
@@ -65,9 +63,7 @@ describe('isCompatible()', () => {
           }),
         }),
       } as any,
-      triggerContext: {
-        filters: [],
-      },
+      filters: [],
     });
     expect(result).toBe(false);
   });
@@ -83,25 +79,8 @@ describe('isCompatible()', () => {
           }),
         }),
       } as any,
-      triggerContext: {
-        // filters: [],
-      } as any,
-    });
+    } as any);
     expect(result1).toBe(false);
-
-    const result2 = await action.isCompatible({
-      embeddable: {
-        getRoot: () => ({
-          getInput: () => ({
-            filters: [],
-          }),
-        }),
-      } as any,
-      // triggerContext: {
-      // filters: [],
-      // } as any
-    });
-    expect(result2).toBe(false);
   });
 });
 
@@ -125,42 +104,41 @@ describe('execute()', () => {
       const error = expectError(() =>
         action.execute({
           embeddable: getEmbeddable(),
-          triggerContext: {},
         } as any)
       );
       expect(error).toBeInstanceOf(Error);
     });
 
-    test('updates filter input on success', () => {
+    test('updates filter input on success', async done => {
       const action = new ApplyFilterAction();
       const [embeddable, root] = getEmbeddable();
 
-      action.execute({
+      await action.execute({
         embeddable,
-        triggerContext: {
-          filters: ['FILTER' as any],
-        },
+        filters: ['FILTER' as any],
       });
 
       expect(root.updateInput).toHaveBeenCalledTimes(1);
       expect(root.updateInput.mock.calls[0][0]).toMatchObject({
         filters: ['FILTER'],
       });
+
+      done();
     });
 
-    test('checks if action isCompatible', () => {
+    test('checks if action isCompatible', async done => {
       const action = new ApplyFilterAction();
       const spy = jest.spyOn(action, 'isCompatible');
       const [embeddable] = getEmbeddable();
 
-      action.execute({
+      await action.execute({
         embeddable,
-        triggerContext: {
-          filters: ['FILTER' as any],
-        },
+        filters: ['FILTER' as any],
       });
 
       expect(spy).toHaveBeenCalledTimes(1);
+
+      done();
     });
   });
 });

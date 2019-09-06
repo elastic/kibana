@@ -35,9 +35,9 @@ const ParamsSchema = schema.object({
 // action type definition
 
 // customizing executor is only used for tests
-export function getActionType({ executor }: { executor?: ExecutorType } = {}): ActionType {
-  if (executor == null) executor = slackExecutor;
-
+export function getActionType(
+  { executor }: { executor: ExecutorType } = { executor: slackExecutor }
+): ActionType {
   return {
     id: '.slack',
     name: 'slack',
@@ -48,9 +48,6 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
     executor,
   };
 }
-
-// the production executor for this action
-export const actionType = getActionType();
 
 // action executor
 

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { repeatImage } from '../../functions/common/repeatImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT, BASE64, URL } from '../constants';
+import { CONTEXT, BASE64, URL } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
   help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
