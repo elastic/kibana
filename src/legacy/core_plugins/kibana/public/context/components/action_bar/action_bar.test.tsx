@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ActionBar } from './action_bar';
+import { ActionBar, ActionBarProps } from './action_bar';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -34,7 +34,7 @@ describe('Test Discover Context ActionBar for successor records', () => {
     type: 'successor',
     warning: true,
     warningDocCount: 1,
-  };
+  } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
   test('Count input', () => {
@@ -44,7 +44,6 @@ describe('Test Discover Context ActionBar for successor records', () => {
   });
 
   test('Load more button ', () => {
-    expect(findTestSubject(wrapper, 'successorLoadMoreButton').text()).toBe('Load 10 more');
     findTestSubject(wrapper, 'successorLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });
@@ -67,7 +66,7 @@ describe('Test Discover Context ActionBar for predecessor records', () => {
     type: 'predecessor',
     warning: true,
     warningDocCount: 1,
-  };
+  } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
   test('Count input', () => {
@@ -79,7 +78,6 @@ describe('Test Discover Context ActionBar for predecessor records', () => {
   });
 
   test('Load more button ', () => {
-    expect(findTestSubject(wrapper, 'predecessorLoadMoreButton').text()).toBe('Load 7 more');
     findTestSubject(wrapper, 'predecessorLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });

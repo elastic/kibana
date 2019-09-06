@@ -21,13 +21,53 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldNumber,
   EuiSpacer,
 } from '@elastic/eui';
+import { ActionBarWarning } from './action_bar_warning';
+
+export type ActionBarType = 'successor' | 'predecessor';
+
+export interface ActionBarProps {
+  /**
+   * it's the number of documents to be / that were fetched
+   */
+  count: number;
+  /**
+   * the number of docs to be added to the current count
+   */
+  defaultStepSize: number;
+  /**
+   * is true while the anchor of disovers context is fetched
+   */
+  isDisabled: boolean;
+  /**
+   * is true when list entries are fetched
+   */
+  isLoading: boolean;
+  /**
+   * is executed when the input containing count is changed
+   * @param count
+   */
+  onChangeCount: (count: number) => void;
+  /**
+   * is executed the 'Load' button is clicked
+   */
+  onLoadMoreClick: () => void;
+  /**
+   * just a note how predecssor and successor types are used
+   * predecessor bar + list entries | anchor record | successor list entries + bar
+   */
+  type: ActionBarType;
+  /**
+   * displayed when less documents then count are available
+   */
+  warning: boolean;
+  warningDocCount?: number;
+}
 
 export function ActionBar({
   count,
@@ -39,53 +79,19 @@ export function ActionBar({
   type,
   warning,
   warningDocCount = 0,
-}: {
-  count: number;
-  defaultStepSize: number;
-  isDisabled: boolean;
-  isLoading: boolean;
-  onChangeCount: (count: number) => void;
-  onLoadMoreClick: () => void;
-  type: 'successor' | 'predecessor';
-  warning: boolean;
-  warningDocCount?: number;
-}) {
+}: ActionBarProps) {
+  const isSuccessor = type === 'successor';
   return (
     <>
-      {type === 'successor' && <EuiSpacer size="s" />}
-      {type === 'successor' && warning && (
-        <>
-          <EuiCallOut
-            color="warning"
-            data-test-subj="successorWarningMsg"
-            iconType="bolt"
-            title={
-              warningDocCount === 0 ? (
-                <FormattedMessage
-                  id="kbn.context.newerDocumentsWarningZero"
-                  defaultMessage="No documents newer than the anchor could be found."
-                />
-              ) : (
-                <FormattedMessage
-                  id="kbn.context.newerDocumentsWarning"
-                  defaultMessage="Only {warningDocCount} documents newer than the anchor could be found."
-                  values={{ warningDocCount }}
-                />
-              )
-            }
-            size="s"
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
+      {isSuccessor && <EuiSpacer size="s" />}
+      {isSuccessor && warning && <ActionBarWarning docCount={warningDocCount} type={type} />}
+      {isSuccessor && warning && <EuiSpacer size="s" />}
       <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj={
-              type === 'predecessor' ? 'predecessorLoadMoreButton' : 'successorLoadMoreButton'
-            }
-            disabled={isDisabled}
-            iconType={type === 'predecessor' ? 'arrowUp' : 'arrowDown'}
+            data-test-subj={`${type}LoadMoreButton`}
+            iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
+            isDisabled={isDisabled}
             isLoading={isLoading}
             onClick={onLoadMoreClick}
             size="s"
@@ -97,7 +103,7 @@ export function ActionBar({
           <EuiFormRow>
             <EuiFieldNumber
               aria-label={
-                type === 'successor'
+                isSuccessor
                   ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
                       defaultMessage: 'Number of older documents',
                     })
@@ -106,9 +112,7 @@ export function ActionBar({
                     })
               }
               className="cxtSizePicker"
-              data-test-subj={
-                type === 'successor' ? 'successorCountPicker' : 'predecessorCountPicker'
-              }
+              data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
               onChange={ev => onChangeCount(Number(ev.target.value))}
               step={defaultStepSize}
@@ -119,7 +123,7 @@ export function ActionBar({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow displayOnly>
-            {type === 'successor' ? (
+            {isSuccessor ? (
               <FormattedMessage
                 id="kbn.context.olderDocumentsDescription"
                 defaultMessage="Older documents"
@@ -133,29 +137,8 @@ export function ActionBar({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {type === 'predecessor' && warning && (
-        <EuiCallOut
-          color="warning"
-          data-test-subj="predecessorWarningMsg"
-          iconType="bolt"
-          title={
-            warningDocCount === 0 ? (
-              <FormattedMessage
-                id="kbn.context.olderDocumentsWarningZero"
-                defaultMessage="No documents older than the anchor could be found."
-              />
-            ) : (
-              <FormattedMessage
-                id="kbn.context.olderDocumentsWarning"
-                defaultMessage="Only {warningDocCount} documents older than the anchor could be found."
-                values={{ warningDocCount }}
-              />
-            )
-          }
-          size="s"
-        />
-      )}
-      {type === 'predecessor' && <EuiSpacer size="s" />}
+      {!isSuccessor && warning && <ActionBarWarning docCount={warningDocCount} type={type} />}
+      {!isSuccessor && <EuiSpacer size="s" />}
     </>
   );
 }
