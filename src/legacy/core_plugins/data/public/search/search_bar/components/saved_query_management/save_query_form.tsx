@@ -149,7 +149,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage:
-            'Name cannot contain leading or trailing whitespace. Name must be unique.',
+            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
         })}
         isInvalid={hasErrors}
       >
