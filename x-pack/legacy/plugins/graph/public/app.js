@@ -57,7 +57,7 @@ import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern } from './services/persistence';
+import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
 import { save } from  './services/save_modal';
 
 import settingsTemplate from './angular/templates/settings.html';
@@ -383,7 +383,7 @@ app.controller('graphuiPlugin', function (
     });
   };
 
-  $scope.indexSelected = function (selectedIndex, postInitHandler) {
+  $scope.indexSelected = function (selectedIndex) {
     $scope.clearWorkspace();
     $scope.allFields = [];
     $scope.selectedFields = [];
@@ -393,59 +393,15 @@ app.controller('graphuiPlugin', function (
     $scope.selectedIndex = selectedIndex;
     $scope.proposedIndex = selectedIndex;
 
-    const promise = $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id);
-    promise
+    return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
       .then(function (indexPattern) {
-        const patternFields = indexPattern.getNonScriptedFields();
-        const blockedFieldNames = ['_id', '_index', '_score', '_source', '_type'];
-        patternFields.forEach(function (field, index) {
-          if (blockedFieldNames.indexOf(field.name) >= 0) {
-            return;
-          }
-          const graphFieldDef = {
-            'name': field.name
-          };
-          $scope.allFields.push(graphFieldDef);
-          graphFieldDef.hopSize = 5; //Default the number of results returned per hop
-          graphFieldDef.lastValidHopSize = graphFieldDef.hopSize;
-          graphFieldDef.icon = $scope.iconChoices[0];
-          for (let i = 0; i < $scope.iconChoices.length; i++) {
-            const icon = $scope.iconChoices[i];
-            for (let p = 0; p < icon.patterns.length; p++) {
-              const pattern = icon.patterns[p];
-              if (pattern.test(graphFieldDef.name)) {
-                graphFieldDef.icon = icon;
-                break;
-              }
-            }
-          }
-          graphFieldDef.color = $scope.colors[index % $scope.colors.length];
-        });
-        $scope.setAllFieldStatesToDefault();
-
-        $scope.allFields.sort(function (a, b) {
-        // TODO - should we use "popularity" setting from index pattern definition?
-        // What is its intended use? Couldn't see it on the patternField objects
-          if (a.name < b.name) {
-            return -1;
-          } else if (a.name > b.name) {
-            return 1;
-          }
-          return 0;
-        });
+        $scope.allFields = mapFields(indexPattern);
         $scope.filteredFields = $scope.allFields;
         if ($scope.allFields.length > 0) {
           $scope.selectedField = $scope.allFields[0];
         }
-
-
-        if (postInitHandler) {
-          postInitHandler();
-        }
-
       }, handleError);
-
   };
 
 
@@ -956,6 +912,8 @@ app.controller('graphuiPlugin', function (
         allFields,
         selectedFields,
       } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
+
+      // wire up stuff to angular
       $scope.allFields = allFields;
       $scope.selectedFields = selectedFields;
       $scope.workspace = workspace;
@@ -963,7 +921,10 @@ app.controller('graphuiPlugin', function (
       $scope.urlTemplates = urlTemplates;
       $scope.updateLiveResponseFields();
       $scope.workspace.runLayout();
-
+      $scope.filteredFields = $scope.allFields;
+      if ($scope.allFields.length > 0) {
+        $scope.selectedField = $scope.allFields[0];
+      }
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
         $scope.searchTerm = $route.current.params.query;
