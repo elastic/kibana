@@ -2,7 +2,7 @@
 [[maps-search]]
 == Searching your data
 
-**Elastic Maps** embeds the search bar for real-time ad hoc search.
+**Elastic Maps** embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
 Layers narrowed by the search context contain the icon image:maps/images/filter_icon.png[] to the right of layer name in the legend.
 
@@ -25,11 +25,13 @@ image::maps/images/global_search_bar.png[]
 [[maps-create-filter-from-map]]
 === Creating filters from your map
 
-You can create filters by interacting with your map.
-Filters are applied to all layers in your map and other panels when your map is <<maps-embedding, embedded in a dashboard>>
+You can create two types of filters by interacting with your map:
+
+* <<maps-spatial-filters, Spatial filters>>
+* <<maps-phrase-filter, Phrase filters>>
 
 [float]
-[[maps-create-spatial-filters]]
+[[maps-spatial-filters]]
 ==== Spatial filters
 
 Spatial filters narrow search results to documents that either intersect, are within, or do not intersect with the specified geometry.
@@ -44,16 +46,16 @@ image::maps/images/create_spatial_filter.png[]
 
 Spatial filters have the following properties:
 
-* Use *Geometry label* to provide a distinguishable and meaningful name for your spatial filter.
+* *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
-* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations.html[spatial relation operator] used at search time. Spatial relation selection is only available when the selected Spatial field is geo_shape.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations.html[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
 
 [float]
-[[maps-create-phrase-filter]]
+[[maps-phrase-filter]]
 ==== Phrase filters
 
-Phrase filters narrow search results to documents that contain the phrase.
-You can create a phrase filter by clicking image:maps/images/gs_plus_icon.png[] in a feature tooltip.
+A phrase filter narrows search results to documents that contain the specified text.
+You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a feature tooltip.
 
 [role="screenshot"]
 image::maps/images/create_phrase_filter.png[]
