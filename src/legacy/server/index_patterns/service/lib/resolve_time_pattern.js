@@ -38,10 +38,7 @@ export async function resolveTimePattern(callCluster, timePattern) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
   const allIndexDetails = chain(aliases)
-    .reduce((acc, index, indexName) => acc.concat(
-      indexName,
-      Object.keys(index.aliases || {})
-    ), [])
+    .reduce((acc, index, indexName) => acc.concat(indexName, Object.keys(index.aliases || {})), [])
     .sort()
     .uniq(true)
     .map(indexName => {
@@ -51,7 +48,7 @@ export async function resolveTimePattern(callCluster, timePattern) {
           valid: false,
           indexName,
           order: indexName,
-          isMatch: false
+          isMatch: false,
         };
       }
 
@@ -59,18 +56,15 @@ export async function resolveTimePattern(callCluster, timePattern) {
         valid: true,
         indexName,
         order: parsed,
-        isMatch: indexName === parsed.format(timePattern)
+        isMatch: indexName === parsed.format(timePattern),
       };
     })
     .sortByOrder(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {
-    all: allIndexDetails
-      .map(details => details.indexName),
+    all: allIndexDetails.map(details => details.indexName),
 
-    matches: allIndexDetails
-      .filter(details => details.isMatch)
-      .map(details => details.indexName),
+    matches: allIndexDetails.filter(details => details.isMatch).map(details => details.indexName),
   };
 }
