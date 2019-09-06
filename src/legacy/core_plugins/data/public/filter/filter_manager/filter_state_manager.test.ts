@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatterns } from '../../index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
