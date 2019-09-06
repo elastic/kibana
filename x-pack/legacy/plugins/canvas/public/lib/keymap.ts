@@ -18,8 +18,6 @@ interface KeyMap {
 
 type Modifier = 'ctrl' | 'command' | 'shift' | 'alt' | 'option';
 
-type Action = keyof keymap[keyof keymap];
-
 // maps key for all OS's with optional modifiers
 const getShortcuts = (
   shortcuts: string | string[],
