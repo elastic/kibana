@@ -18,10 +18,10 @@
  */
 
 import chrome from 'ui/chrome';
-import 'ui/es'; // required for $injector.get('es') below
 import { Plugin } from 'kibana/public';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { npStart, npSetup } from 'ui/new_platform';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
 
 /** @internal */
@@ -42,7 +42,6 @@ export class LegacyDependenciesPlugin
   implements
     Plugin<Promise<LegacyDependenciesPluginSetup>, Promise<LegacyDependenciesPluginStart>> {
   public async setup() {
-    // Init kibana/timelion_vis AngularJS module.
     initTimelionLegacyModule();
 
     const $injector = await chrome.dangerouslyGetActiveInjector();
@@ -50,7 +49,7 @@ export class LegacyDependenciesPlugin
 
     return {
       $http: $injector.get('$http'),
-      config: chrome.getUiSettingsClient(),
+      config: npSetup.core.uiSettings,
       createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
     } as LegacyDependenciesPluginSetup;
   }
@@ -61,7 +60,7 @@ export class LegacyDependenciesPlugin
     return {
       $rootScope: $injector.get('$rootScope'),
       $compile: $injector.get('$compile'),
-      config: chrome.getUiSettingsClient(),
+      config: npStart.core.uiSettings,
     } as LegacyDependenciesPluginStart;
   }
 }
