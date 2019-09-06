@@ -19,7 +19,7 @@
 
 import template from './timelion_expression_suggestions.html';
 
-export function makeTimelionExpressionSuggestions() {
+export function TimelionExpressionSuggestions() {
   return {
     restrict: 'E',
     scope: {

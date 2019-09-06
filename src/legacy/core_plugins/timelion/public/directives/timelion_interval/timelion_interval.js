@@ -21,7 +21,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import template from './timelion_interval.html';
 
-export function makeTimelionInterval($timeout) {
+export function TimelionInterval($timeout) {
   return {
     restrict: 'E',
     scope: {

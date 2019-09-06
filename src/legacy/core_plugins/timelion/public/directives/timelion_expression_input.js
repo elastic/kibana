@@ -56,7 +56,7 @@ import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/a
 
 const Parser = PEG.generate(grammar);
 
-export function makeTimelionExpInput($http, $timeout, Private) {
+export function TimelionExpInput($http, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {

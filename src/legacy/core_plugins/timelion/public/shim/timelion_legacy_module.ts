@@ -27,28 +27,28 @@ import { once } from 'lodash';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 // @ts-ignore
-import { makeChart } from '../directives/chart/chart';
+import { Chart } from '../directives/chart/chart';
 // @ts-ignore
-import { makeTimelionInterval } from '../directives/timelion_interval/timelion_interval';
+import { TimelionInterval } from '../directives/timelion_interval/timelion_interval';
 // @ts-ignore
-import { makeTimelionExpInput } from '../directives/timelion_expression_input';
+import { TimelionExpInput } from '../directives/timelion_expression_input';
 // @ts-ignore
-import { makeTimelionExpressionSuggestions } from '../directives/timelion_expression_suggestions/timelion_expression_suggestions';
+import { TimelionExpressionSuggestions } from '../directives/timelion_expression_suggestions/timelion_expression_suggestions';
 
 /** @internal */
 export const initTimelionLegacyModule = once((): void => {
   require('ui/state_management/app_state');
 
   uiModules
-    .get('kibana/timelion_vis', ['kibana'])
+    .get('apps/timelion', [])
     .controller('TimelionVisController', function($scope: any) {
       $scope.$on('timelionChartRendered', (event: any) => {
         event.stopPropagation();
         $scope.renderComplete();
       });
     })
-    .directive('chart', makeChart)
-    .directive('timelionInterval', makeTimelionInterval)
-    .directive('timelionExpressionSuggestions', makeTimelionExpressionSuggestions)
-    .directive('timelionExpressionInput', makeTimelionExpInput);
+    .directive('chart', Chart)
+    .directive('timelionInterval', TimelionInterval)
+    .directive('timelionExpressionSuggestions', TimelionExpressionSuggestions)
+    .directive('timelionExpressionInput', TimelionExpInput);
 });

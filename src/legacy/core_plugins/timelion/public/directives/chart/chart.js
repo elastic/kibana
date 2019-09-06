@@ -19,7 +19,7 @@
 import panelRegistryProvider from '../../lib/panel_registry';
 import { i18n } from '@kbn/i18n';
 
-export function makeChart(Private) {
+export function Chart(Private) {
   return {
     restrict: 'A',
     scope: {
