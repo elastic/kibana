@@ -25,9 +25,13 @@ import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
-export const useForm = <T = FormData>(
+interface UseFormReturn<T> {
+  form: Form<T>;
+}
+
+export function useForm<T = FormData>(
   formConfig: FormConfig<T> | undefined = {}
-): { form: Form<T> } => {
+): UseFormReturn<T> {
   const {
     onSubmit,
     schema,
@@ -177,13 +181,13 @@ export const useForm = <T = FormData>(
     isSubmitted,
     isSubmitting,
     isValid,
-    options,
     submit: submitForm,
     setFieldValue,
     setFieldErrors,
     getFields,
     getFormData,
     getFieldDefaultValue,
+    __options: options,
     __formData$: formData$,
     __updateFormDataAt: updateFormDataAt,
     __readFieldConfigFromSchema: readFieldConfigFromSchema,
@@ -195,4 +199,4 @@ export const useForm = <T = FormData>(
   return {
     form,
   };
-};
+}

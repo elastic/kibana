@@ -23,8 +23,8 @@ import { Form } from './types';
 
 const FormContext = createContext<Form<any> | undefined>(undefined);
 
-interface Props<T = Record<string, unknown>> {
-  form: Form<T>;
+interface Props {
+  form: Form<any>;
   children: React.ReactNode;
 }
 

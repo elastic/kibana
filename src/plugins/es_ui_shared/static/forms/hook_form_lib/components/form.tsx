@@ -17,7 +17,25 @@
  * under the License.
  */
 
-export * from './form';
-export * from './use_field';
-export * from './use_array';
-export * from './form_data_provider';
+import React, { ReactNode } from 'react';
+import { EuiForm } from '@elastic/eui';
+
+import { FormProvider } from '../form_context';
+import { Form as FormType } from '../types';
+
+interface Props {
+  form: FormType<any>;
+  FormWrapper?: (props: any) => JSX.Element;
+  children: ReactNode | ReactNode[];
+  className: string;
+}
+
+const DefaultFormWrapper = (props: any) => {
+  return <EuiForm {...props} />;
+};
+
+export const Form = ({ form, FormWrapper = DefaultFormWrapper, ...rest }: Props) => (
+  <FormProvider form={form}>
+    <FormWrapper {...rest} />
+  </FormProvider>
+);

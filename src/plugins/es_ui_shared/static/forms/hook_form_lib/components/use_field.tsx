@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, ComponentType } from 'react';
 
 import { Field as FieldType, FieldConfig } from '../types';
 import { useField } from '../hooks';
@@ -27,8 +27,8 @@ interface Props {
   path: string;
   config?: FieldConfig<any>;
   defaultValue?: unknown;
-  component?: (({ field }: { field: FieldType } & any) => JSX.Element) | 'input';
-  componentProps?: any;
+  component?: ComponentType<any> | 'input';
+  componentProps?: Record<string, any>;
   children?: (field: FieldType) => JSX.Element;
 }
 

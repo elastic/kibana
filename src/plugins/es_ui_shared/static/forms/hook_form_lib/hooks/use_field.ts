@@ -31,7 +31,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     validations = [],
     formatters = [],
     fieldsToValidateOnChange = [path],
-    errorDisplayDelay = form.options.errorDisplayDelay,
+    errorDisplayDelay = form.__options.errorDisplayDelay,
     serializer = (value: unknown) => value,
     deserializer = (value: unknown) => value,
   } = config;
@@ -44,6 +44,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const [isValidating, setValidating] = useState(false);
   const [isChangingValue, setIsChangingValue] = useState(false);
   const validateCounter = useRef(0);
+  const changeCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // -- HELPERS
@@ -77,22 +78,41 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return formatters.reduce((output, formatter) => formatter(output), inputValue);
   };
 
-  const onValueChange = () => {
-    setIsChangingValue(true);
-
-    // Update the form data observable
-    form.__updateFormDataAt(path, serializeOutput(value));
-
-    // Validate field(s) and set form.isValid flag
-    form.__validateFields(fieldsToValidateOnChange);
+  const onValueChange = async () => {
+    const changeIteration = ++changeCounter.current;
+    const startTime = Date.now();
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
-    debounceTimeout.current = setTimeout(() => {
-      setIsChangingValue(false);
-    }, errorDisplayDelay);
+    if (errorDisplayDelay > 0) {
+      setIsChangingValue(true);
+    }
+
+    // Update the form data observable
+    form.__updateFormDataAt(path, serializeOutput(value));
+
+    // Validate field(s) and set form.isValid flag
+    await form.__validateFields(fieldsToValidateOnChange);
+
+    /**
+     * If we have set a delay to display the error message after the field value has changed,
+     * we first check that this is the last "change iteration" (=== the last keystroke from the user)
+     * and then, we verify how long we've already waited for as form.__validateFields() is asynchronous
+     * and might already have taken more than the specified delay)
+     */
+    if (errorDisplayDelay > 0 && changeIteration === changeCounter.current) {
+      const delta = Date.now() - startTime;
+      if (delta < errorDisplayDelay) {
+        debounceTimeout.current = setTimeout(() => {
+          debounceTimeout.current = null;
+          setIsChangingValue(false);
+        }, errorDisplayDelay - delta);
+      } else {
+        setIsChangingValue(false);
+      }
+    }
   };
 
   const runValidations = ({
@@ -331,7 +351,14 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       // Avoid validate on mount
       return;
     }
+
     onValueChange();
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
   }, [value]);
 
   const field: Field = {

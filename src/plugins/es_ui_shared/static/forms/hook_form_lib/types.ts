@@ -24,13 +24,13 @@ export interface Form<T = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
-  readonly options: FormOptions;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
   getFieldDefaultValue: (fieldName: string) => unknown;
+  readonly __options: FormOptions;
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: Field) => void;
   __removeField: (fieldNames: string | string[]) => void;
