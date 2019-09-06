@@ -300,6 +300,8 @@
      * @param {Array.<string>} ids A list of encrypted request tokens returned within SAML
      * preparation response.
      * @param {string} content SAML response returned by identity provider.
+     * @param {string} [realm] Optional string used to identify the name of the OpenID Connect realm
+     * that should be used to authenticate request.
      *
      * @returns {{username: string, access_token: string, expires_in: number}} Object that
      * includes name of the user, access token to use for any consequent requests that
@@ -373,6 +375,8 @@
      * @param {string} nonce The nonce parameter that was returned by Elasticsearch in the
      * preparation response.
      * @param {string} redirect_uri The URL to where the UA was redirected by the OpenID Connect provider.
+     * @param {string} [realm] Optional string used to identify the name of the OpenID Connect realm
+     * that should be used to authenticate request.
      *
      * @returns {{username: string, access_token: string, refresh_token; string, expires_in: number}} Object that
      * includes name of the user, access token to use for any consequent requests that
@@ -391,7 +395,7 @@
      *
      * @param {string} token An access token that was created by authenticating to an OpenID Connect realm and
      * that needs to be invalidated.
-     * @param {string} refres_token A refresh token that was created by authenticating to an OpenID Connect realm and
+     * @param {string} refresh_token A refresh token that was created by authenticating to an OpenID Connect realm and
      * that needs to be invalidated.
      *
      * @returns {{redirect?: string}} If the Elasticsearch OpenID Connect realm configuration and the
