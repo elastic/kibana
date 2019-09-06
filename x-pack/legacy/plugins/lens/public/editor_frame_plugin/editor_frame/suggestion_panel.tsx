@@ -7,7 +7,16 @@
 import _ from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip, EuiButton } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiTitle,
+  EuiPanel,
+  EuiIconTip,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { toExpression, Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -62,7 +71,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={suggestion.title}>
       <EuiPanel
         className={classNames('lnsSuggestionPanel__button', {
-          'lnsSuggestionPanel__button--selected': selected,
+          'lnsSuggestionPanel__button-isSelected': selected,
         })}
         paddingSize="none"
         data-test-subj="lnsSuggestion"
@@ -71,9 +80,9 @@ const SuggestionPreview = ({
         {expressionError ? (
           <div className="lnsSidebar__suggestionIcon">
             <EuiIconTip
-              size="xxl"
+              size="xl"
               color="danger"
-              type="cross"
+              type="alert"
               aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
                 defaultMessage: 'Preview rendering failed',
               })}
@@ -84,7 +93,9 @@ const SuggestionPreview = ({
           </div>
         ) : previewExpression ? (
           <ExpressionRendererComponent
-            className="lnsSuggestionChartWrapper"
+            className={classNames('lnsSuggestionChartWrapper', [
+              `lnsSuggestionChartWrapper--${suggestion.previewIcon}`,
+            ])}
             expression={previewExpression}
             onRenderFailure={(e: unknown) => {
               // eslint-disable-next-line no-console
@@ -93,9 +104,9 @@ const SuggestionPreview = ({
             }}
           />
         ) : (
-          <div className="lnsSidebar__suggestionIcon">
+          <span className="lnsSidebar__suggestionIcon">
             <EuiIcon size="xxl" type={suggestion.previewIcon} />
-          </div>
+          </span>
         )}
       </EuiPanel>
     </EuiToolTip>
@@ -163,20 +174,37 @@ function InnerSuggestionPanel({
 
   return (
     <div className="lnsSuggestionsPanel">
-      <EuiTitle className="lnsSuggestionsPanel__title" size="xxs">
-        <h3>
-          <FormattedMessage
-            id="xpack.lens.editorFrame.suggestionPanelTitle"
-            defaultMessage="Suggestions"
-          />
-          {stagedPreview &&
-            '(Previewing a suggestion currently, you can go back to your previous state)'}
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle className="lnsSuggestionsPanel__title" size="xxs">
+            <h3>
+              <FormattedMessage
+                id="xpack.lens.editorFrame.suggestionPanelTitle"
+                defaultMessage="Suggestions"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {stagedPreview && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={() => {
+                dispatch({
+                  type: 'SUBMIT_SUGGESTION',
+                });
+              }}
+            >
+              Confirm and reload suggestions
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
       <div className="lnsSuggestionsPanel__suggestions">
         <EuiPanel
           className={classNames('lnsSuggestionPanel__button', {
-            'lnsSuggestionPanel__button--selected': lastSelectedSuggestion === -1,
+            'lnsSuggestionPanel__button-isSelected': lastSelectedSuggestion === -1,
           })}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
@@ -187,8 +215,12 @@ function InnerSuggestionPanel({
             });
           }}
         >
-          Current visualization
+          <div className="lnsSuggestionChartWrapper lnsSuggestionChartWrapper--withLabel">
+            &lt;- Render vis here -&gt;
+          </div>
+          <span className="lnsSuggestionPanel__buttonLabel">Current</span>
         </EuiPanel>
+
         {suggestions.map((suggestion, index) => {
           return (
             <SuggestionPreview
@@ -215,17 +247,6 @@ function InnerSuggestionPanel({
             />
           );
         })}
-        {stagedPreview && (
-          <EuiButton
-            onClick={() => {
-              dispatch({
-                type: 'SUBMIT_SUGGESTION',
-              });
-            }}
-          >
-            Show more suggestions
-          </EuiButton>
-        )}
       </div>
     </div>
   );
