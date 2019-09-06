@@ -51,6 +51,7 @@ const TimeseriesSeriesUI = injectI18n(function(props) {
     intl,
     name,
     uiRestrictions,
+    seriesQuantity,
   } = props;
 
   const defaults = {
@@ -87,6 +88,7 @@ const TimeseriesSeriesUI = injectI18n(function(props) {
               panel={panel}
               model={model}
               uiRestrictions={uiRestrictions}
+              seriesQuantity={seriesQuantity}
             />
           </div>
         </div>
@@ -98,6 +100,7 @@ const TimeseriesSeriesUI = injectI18n(function(props) {
           model={model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}
+          seriesQuantity={seriesQuantity}
         />
       );
     }
@@ -211,6 +214,7 @@ TimeseriesSeriesUI.propTypes = {
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
   indexPatternForQuery: PropTypes.string,
+  seriesQuantity: PropTypes.object,
 };
 
 export const TimeseriesSeries = injectI18n(TimeseriesSeriesUI);
