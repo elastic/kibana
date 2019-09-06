@@ -8,41 +8,45 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
-        parallel([
-          'kibana-intake-agent': legacyJobRunner('kibana-intake'),
-          'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
-          'kibana-oss-agent': withWorkers('kibana-oss-tests', { buildOss() }, [
-            'oss-ciGroup1': getOssCiGroupWorker(1),
-            'oss-ciGroup2': getOssCiGroupWorker(2),
-            'oss-ciGroup3': getOssCiGroupWorker(3),
-            'oss-ciGroup4': getOssCiGroupWorker(4),
-            'oss-ciGroup5': getOssCiGroupWorker(5),
-            'oss-ciGroup6': getOssCiGroupWorker(6),
-            'oss-ciGroup7': getOssCiGroupWorker(7),
-            'oss-ciGroup8': getOssCiGroupWorker(8),
-            'oss-ciGroup9': getOssCiGroupWorker(9),
-            'oss-ciGroup10': getOssCiGroupWorker(10),
-            'oss-ciGroup11': getOssCiGroupWorker(11),
-            'oss-ciGroup12': getOssCiGroupWorker(12),
-            'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
-            'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
-          ]),
-          'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
-            'xpack-ciGroup1': getXpackCiGroupWorker(1),
-            'xpack-ciGroup2': getXpackCiGroupWorker(2),
-            'xpack-ciGroup3': getXpackCiGroupWorker(3),
-            'xpack-ciGroup4': getXpackCiGroupWorker(4),
-            'xpack-ciGroup5': getXpackCiGroupWorker(5),
-            'xpack-ciGroup6': getXpackCiGroupWorker(6),
-            'xpack-ciGroup7': getXpackCiGroupWorker(7),
-            'xpack-ciGroup8': getXpackCiGroupWorker(8),
-            'xpack-ciGroup9': getXpackCiGroupWorker(9),
-            'xpack-ciGroup10': getXpackCiGroupWorker(10),
-            'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-            'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
-          ]),
-          // TODO make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-        ])
+        try {
+          parallel([
+            'kibana-intake-agent': legacyJobRunner('kibana-intake'),
+            'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
+            'kibana-oss-agent': withWorkers('kibana-oss-tests', { buildOss() }, [
+              'oss-ciGroup1': getOssCiGroupWorker(1),
+              'oss-ciGroup2': getOssCiGroupWorker(2),
+              'oss-ciGroup3': getOssCiGroupWorker(3),
+              'oss-ciGroup4': getOssCiGroupWorker(4),
+              'oss-ciGroup5': getOssCiGroupWorker(5),
+              'oss-ciGroup6': getOssCiGroupWorker(6),
+              'oss-ciGroup7': getOssCiGroupWorker(7),
+              'oss-ciGroup8': getOssCiGroupWorker(8),
+              'oss-ciGroup9': getOssCiGroupWorker(9),
+              'oss-ciGroup10': getOssCiGroupWorker(10),
+              'oss-ciGroup11': getOssCiGroupWorker(11),
+              'oss-ciGroup12': getOssCiGroupWorker(12),
+              'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+              'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
+            ]),
+            'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
+              'xpack-ciGroup1': getXpackCiGroupWorker(1),
+              'xpack-ciGroup2': getXpackCiGroupWorker(2),
+              'xpack-ciGroup3': getXpackCiGroupWorker(3),
+              'xpack-ciGroup4': getXpackCiGroupWorker(4),
+              'xpack-ciGroup5': getXpackCiGroupWorker(5),
+              'xpack-ciGroup6': getXpackCiGroupWorker(6),
+              'xpack-ciGroup7': getXpackCiGroupWorker(7),
+              'xpack-ciGroup8': getXpackCiGroupWorker(8),
+              'xpack-ciGroup9': getXpackCiGroupWorker(9),
+              'xpack-ciGroup10': getXpackCiGroupWorker(10),
+              'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
+              'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+            ]),
+            // TODO make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+          ])
+        } finally {
+          sendMail()
+        }
       }
     }
   }
@@ -148,30 +152,27 @@ def legacyJobRunner(name) {
 }
 
 def jobRunner(label, closure) {
-  withEnv([
-    "CI=true",
-    "HOME=${env.JENKINS_HOME}",
-    "PR_SOURCE_BRANCH=${env.ghprbSourceBranch}",
-    "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
-    "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
-    "TEST_BROWSER_HEADLESS=1",
-  ]) {
-    withCredentials([
-      string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
-      string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
-      string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
+  node(label) {
+    def scmVars = checkout scm
+
+    withEnv([
+      "CI=true",
+      "HOME=${env.JENKINS_HOME}",
+      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch}",
+      "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
+      "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
+      "TEST_BROWSER_HEADLESS=1",
+      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
     ]) {
-      node(label) {
-        catchError {
-          checkout scm
-
-          // scm is configured to check out to the ./kibana directory
-          dir('kibana') {
-            closure()
-          }
+      withCredentials([
+        string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
+        string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
+        string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
+      ]) {
+        // scm is configured to check out to the ./kibana directory
+        dir('kibana') {
+          closure()
         }
-
-        sendMail()
       }
     }
   }
