@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { timechartFn } from './schema';
 import { Panel } from '../panel';
 import { LegacyDependenciesPluginStart } from '../../shim';

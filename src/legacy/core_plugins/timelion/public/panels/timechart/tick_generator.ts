@@ -17,13 +17,12 @@
  * under the License.
  */
 
-export default function generateTicksProvider() {
-
-  function floorInBase(n, base) {
+export function generateTicksProvider() {
+  function floorInBase(n: any, base: any) {
     return base * Math.floor(n / base);
   }
 
-  function generateTicks(axis) {
+  function generateTicks(axis: any) {
     const returnTicks = [];
     let tickSize = 2;
     let delta = axis.delta;
@@ -31,13 +30,13 @@ export default function generateTicksProvider() {
     let tickVal;
     let tickCount = 0;
 
-    //Count the steps
+    // Count the steps
     while (Math.abs(delta) >= 1024) {
       steps++;
       delta /= 1024;
     }
 
-    //Set the tick size relative to the remaining delta
+    // Set the tick size relative to the remaining delta
     while (tickSize <= 1024) {
       if (delta <= tickSize) {
         break;
@@ -46,17 +45,17 @@ export default function generateTicksProvider() {
     }
     axis.tickSize = tickSize * Math.pow(1024, steps);
 
-    //Calculate the new ticks
+    // Calculate the new ticks
     const tickMin = floorInBase(axis.min, axis.tickSize);
     do {
-      tickVal = tickMin + (tickCount++) * axis.tickSize;
+      tickVal = tickMin + tickCount++ * axis.tickSize;
       returnTicks.push(tickVal);
     } while (tickVal < axis.max);
 
     return returnTicks;
   }
 
-  return function (axis) {
+  return function(axis: any) {
     return generateTicks(axis);
   };
 }

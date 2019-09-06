@@ -21,13 +21,12 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-export default function xaxisFormatterProvider(config) {
-
-  function getFormat(esInterval) {
+export function xaxisFormatterProvider(config: any) {
+  function getFormat(esInterval: any) {
     const parts = esInterval.match(/(\d+)(ms|s|m|h|d|w|M|y|)/);
 
     if (parts == null || parts[1] == null || parts[2] == null) {
-      throw new Error (
+      throw new Error(
         i18n.translate('timelion.panels.timechart.unknownIntervalErrorMessage', {
           defaultMessage: 'Unknown interval',
         })
@@ -49,7 +48,7 @@ export default function xaxisFormatterProvider(config) {
     return config.get('dateFormat');
   }
 
-  return function (esInterval) {
+  return function(esInterval: any) {
     return getFormat(esInterval);
   };
 }
