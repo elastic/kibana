@@ -66,10 +66,24 @@ utils.collapseLiteralStrings = function (data) {
   return splitData.join('');
 };
 
+/*
+  The following regex describes global match on:
+  1. one colon followed by any number of space characters (positive lookahead, non-capturing)
+  2. one double quote (indicating the start of a JSON value, i.e., we are not matching JSON keys).
+  3. greedily match any non double quote and non newline char OR any escaped double quote char (non-capturing).
+  4. handle a special case where an escaped slash may be the last character
+  5. one double quote
+
+  For instance: `: "some characters \" here"`
+  Will expand to: `"""some characters " here"""`
+
+ */
+
+const LITERAL_STRING_CANDIDATES = /((?<=:[\s\r\n]*)(?<!"")"(?:\\"|[^"\n])*\\?")/g;
+
 utils.expandLiteralStrings = function (data) {
-  return data.replace(/("(?:\\"|[^"])*?")/g, function (match, string) {
-    // expand things with two slashes or more
-    if (string.split(/\\./).length > 2) {
+  return data.replace(LITERAL_STRING_CANDIDATES, function (match, string) {
+    if (string.match(/\\./)) {
       string = JSON.parse(string).replace('^\s*\n', '').replace('\n\s*^', '');
       return '"""' + string + '"""';
     } else {
