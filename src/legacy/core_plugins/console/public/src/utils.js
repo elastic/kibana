@@ -68,14 +68,14 @@ utils.collapseLiteralStrings = function (data) {
 
 /*
   The following regex describes global match on:
-  1. one colon followed by any number of space characters (positive lookahead, non-capturing)
-  2. one double quote (indicating the start of a JSON value, i.e., we are not matching JSON keys).
+  1. one colon followed by any number of space characters
+  2. one double quote (not escaped, special case for JSON in JSON).
   3. greedily match any non double quote and non newline char OR any escaped double quote char (non-capturing).
   4. handle a special case where an escaped slash may be the last character
   5. one double quote
 
   For instance: `: "some characters \" here"`
-  Will expand to: `"""some characters " here"""`
+  Will match and be expanded to: `"""some characters " here"""`
 
  */
 
