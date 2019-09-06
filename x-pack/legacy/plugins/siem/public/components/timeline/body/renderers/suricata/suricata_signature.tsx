@@ -64,7 +64,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
         dataProvider={{
           and: [],
           enabled: true,
-          id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
+          id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
           name: String(signatureId),
           excluded: false,
           kqlQuery: '',
@@ -106,13 +106,16 @@ export const SuricataSignature = pure<{
   const tokens = getBeginningTokens(signature);
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <DraggableSignatureId id={id} signatureId={signatureId} />
+      <DraggableSignatureId
+        id={`draggable-signature-id-${contextId}-${id}`}
+        signatureId={signatureId}
+      />
       <Tokens tokens={tokens} />
       <LinkFlexItem grow={false}>
         <DefaultDraggable
           data-test-subj="draggable-signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
-          id={`${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
+          id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           name={name}
           value={signature}
         >
