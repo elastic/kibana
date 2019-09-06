@@ -22,6 +22,7 @@ import { EventColumnView } from './event_column_view';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
+import { eventIsPinned } from '../helpers';
 
 interface Props {
   actionsColumnWidth: number;
@@ -179,6 +180,8 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
     onPinEvent: OnPinEvent
   ): ((noteId: string) => void) => (noteId: string) => {
     addNoteToEvent({ eventId, noteId });
-    onPinEvent(eventId); // pin the event, because it has notes
+    if (!eventIsPinned({ eventId, pinnedEventIds: this.props.pinnedEventIds })) {
+      onPinEvent(eventId); // pin the event, because it has notes
+    }
   };
 }
