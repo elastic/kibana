@@ -467,6 +467,10 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   refresh = () => {
+    if (this.state.loading) {
+      return;
+    }
+
     const { appStateHandler, timefilter } = this.props;
     const {
       detectorId: currentDetectorId,
