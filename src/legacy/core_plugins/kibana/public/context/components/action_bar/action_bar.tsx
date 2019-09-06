@@ -94,7 +94,7 @@ export function ActionBar({
             isDisabled={isDisabled}
             isLoading={isLoading}
             onClick={onLoadMoreClick}
-            size="s"
+            flush="right"
           >
             <FormattedMessage id="kbn.context.loadMoreDescription" defaultMessage="Load" />
           </EuiButtonEmpty>
@@ -126,12 +126,12 @@ export function ActionBar({
             {isSuccessor ? (
               <FormattedMessage
                 id="kbn.context.olderDocumentsDescription"
-                defaultMessage="Older documents"
+                defaultMessage="older documents"
               />
             ) : (
               <FormattedMessage
                 id="kbn.context.newerDocumentsDescription"
-                defaultMessage="Newer documents"
+                defaultMessage="newer documents"
               />
             )}
           </EuiFormRow>
