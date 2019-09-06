@@ -83,12 +83,15 @@ const LITERAL_STRING_CANDIDATES = /((:[\s\r\n]*)([^\\])"(\\"|[^"\n])*\\?")/g;
 
 utils.expandLiteralStrings = function (data) {
   return data.replace(LITERAL_STRING_CANDIDATES, function (match, string) {
+    // Expand to triple quotes if there are _any_ slashes
     if (string.match(/\\./)) {
       const firstDoubleQuoteIdx = string.indexOf('"');
-      const firstPart = string.slice(0, firstDoubleQuoteIdx);
-      let secondPart = string.slice(firstDoubleQuoteIdx, string.length);
-      secondPart = JSON.parse(secondPart).replace('^\s*\n', '').replace('\n\s*^', '');
-      return `${firstPart}"""${secondPart}"""`;
+      const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
+      const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
+      const jsonValue = JSON.parse(rawStringifiedValue)
+        .replace('^\s*\n', '')
+        .replace('\n\s*^', '');
+      return `${colonAndAnySpacing}"""${jsonValue}"""`;
     } else {
       return string;
     }
