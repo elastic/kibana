@@ -601,15 +601,15 @@ export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
 
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): symbol;
+    add(mount: OverlayBannerMount, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     get$(): Observable<OverlayBanner[]>;
     // (undocumented)
     getComponent(): JSX.Element;
-    remove(id: symbol): boolean;
-    replace(id: symbol, mount: OverlayBannerMount, priority?: number): symbol;
+    remove(id: string): boolean;
+    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
 }
 
 // @public

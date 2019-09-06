@@ -44,7 +44,7 @@ export class UserBannerService {
   private settingsSubscription?: Subscription;
 
   public start({ banners, i18n, uiSettings }: StartDeps) {
-    let id: symbol | undefined;
+    let id: string | undefined;
     let timeout: any;
 
     const dismiss = () => {

@@ -39,7 +39,7 @@ export class Banners {
    *
    * @param {Object} component The React component to display.
    * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
-   * @return {symbol} A newly generated ID. This value can be used to remove/replace the banner.
+   * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
   add = ({ component, priority }: { component: React.ReactElement; priority?: number }) => {
     return npBanners.add(mountForComponent(component), priority);
@@ -48,10 +48,10 @@ export class Banners {
   /**
    * Remove an existing banner.
    *
-   * @param {symbol} id The ID of the banner to remove.
+   * @param {String} id The ID of the banner to remove.
    * @return {Boolean} {@code true} if the ID is recognized and the banner is removed. {@code false} otherwise.
    */
-  remove = (id: symbol): boolean => {
+  remove = (id: string): boolean => {
     return npBanners.remove(id);
   };
 
@@ -72,9 +72,9 @@ export class Banners {
     priority = 0,
   }: {
     component: React.ReactElement;
-    id: symbol;
+    id: string;
     priority?: number;
-  }): symbol => {
+  }): string => {
     return npBanners.replace(id, mountForComponent(component), priority);
   };
 }

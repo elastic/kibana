@@ -9,7 +9,7 @@ Add a new banner
 <b>Signature:</b>
 
 ```typescript
-add(mount: OverlayBannerMount, priority?: number): symbol;
+add(mount: OverlayBannerMount, priority?: number): string;
 ```
 
 ## Parameters
@@ -21,7 +21,7 @@ add(mount: OverlayBannerMount, priority?: number): symbol;
 
 <b>Returns:</b>
 
-`symbol`
+`string`
 
-a unique symbol for the given banner to be used with [OverlayBannersStart.remove()](./kibana-plugin-public.overlaybannersstart.remove.md) and [OverlayBannersStart.replace()](./kibana-plugin-public.overlaybannersstart.replace.md)
+a unique identifier for the given banner to be used with [OverlayBannersStart.remove()](./kibana-plugin-public.overlaybannersstart.remove.md) and [OverlayBannersStart.replace()](./kibana-plugin-public.overlaybannersstart.replace.md)
 

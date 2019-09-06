@@ -9,14 +9,14 @@ Remove a banner
 <b>Signature:</b>
 
 ```typescript
-remove(id: symbol): boolean;
+remove(id: string): boolean;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>symbol</code> |  |
+|  id | <code>string</code> |  |
 
 <b>Returns:</b>
 

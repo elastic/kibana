@@ -33,7 +33,7 @@ describe('BannersList', () => {
   test('renders a list of banners', () => {
     const banners$ = new BehaviorSubject<OverlayBanner[]>([
       {
-        id: Symbol(),
+        id: '1',
         mount: (el: HTMLElement) => {
           el.innerHTML = '<h1>Hello!</h1>';
           return () => (el.innerHTML = '');
@@ -51,7 +51,7 @@ describe('BannersList', () => {
     const unmount = jest.fn();
     const banners$ = new BehaviorSubject<OverlayBanner[]>([
       {
-        id: Symbol(),
+        id: '1',
         mount: (el: HTMLElement) => {
           el.innerHTML = '<h1>Hello!</h1>';
           return unmount;
@@ -65,15 +65,15 @@ describe('BannersList', () => {
     act(() => {
       banners$.next([
         {
-          id: Symbol(),
+          id: '1',
           mount: (el: HTMLElement) => {
             el.innerHTML = '<h1>First Banner!</h1>';
             return () => (el.innerHTML = '');
           },
-          priority: 0,
+          priority: 1,
         },
         {
-          id: Symbol(),
+          id: '2',
           mount: (el: HTMLElement) => {
             el.innerHTML = '<h1>Second banner!</h1>';
             return () => (el.innerHTML = '');
@@ -85,7 +85,7 @@ describe('BannersList', () => {
 
     // Two new banners should be rendered
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\"><h1>Second banner!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" class=\\"kbnGlobalBannerList__item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\"><h1>Second banner!</h1></div></div>"`
     );
     // Original banner should be unmounted
     expect(unmount).toHaveBeenCalled();

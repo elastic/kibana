@@ -106,5 +106,19 @@ describe('OverlayBannersService', () => {
         { id: updatedBanner2, mount: mount2, priority: -10 },
       ]);
     });
+
+    test('can be replaced multiple times using new id', async () => {
+      const mount1 = jest.fn();
+      const banner = service.add(mount1);
+      const mount2 = jest.fn();
+      const updatedBanner = service.replace(banner, mount2);
+      expect(banner).not.toEqual(updatedBanner);
+      // Make sure we can use the new id to replace again
+      const mount3 = jest.fn();
+      const updatedBanner2 = service.replace(updatedBanner, mount3);
+      expect(updatedBanner2).not.toEqual(updatedBanner);
+      // Should only be a single banner
+      expect(await currentBanners()).toEqual([{ id: updatedBanner2, mount: mount3, priority: 0 }]);
+    });
   });
 });

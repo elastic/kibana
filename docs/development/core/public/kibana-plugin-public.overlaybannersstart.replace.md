@@ -9,20 +9,20 @@ Replace a banner in place
 <b>Signature:</b>
 
 ```typescript
-replace(id: symbol, mount: OverlayBannerMount, priority?: number): symbol;
+replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>symbol</code> |  |
+|  id | <code>string &#124; undefined</code> |  |
 |  mount | <code>OverlayBannerMount</code> |  |
 |  priority | <code>number</code> |  |
 
 <b>Returns:</b>
 
-`symbol`
+`string`
 
-a new symbol for the given banner to be used with [OverlayBannersStart.remove()](./kibana-plugin-public.overlaybannersstart.remove.md) and [OverlayBannersStart.replace()](./kibana-plugin-public.overlaybannersstart.replace.md)
+a new identifier for the given banner to be used with [OverlayBannersStart.remove()](./kibana-plugin-public.overlaybannersstart.remove.md) and [OverlayBannersStart.replace()](./kibana-plugin-public.overlaybannersstart.replace.md)
 
