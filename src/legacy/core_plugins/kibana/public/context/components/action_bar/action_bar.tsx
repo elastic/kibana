@@ -28,8 +28,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
-
-export type ActionBarType = 'successor' | 'predecessor';
+import { SurrDocType } from '../../api/context';
 
 export interface ActionBarProps {
   /**
@@ -59,12 +58,12 @@ export interface ActionBarProps {
    */
   onLoadMoreClick: () => void;
   /**
-   * can be `predecessor` or `successor`, usage in context:
-   * predecessor action bar + records
+   * can be `predecessors` or `successors`, usage in context:
+   * predecessors action bar + records
    * anchor record
-   * successor records + action bar
+   * successors records + action bar
    */
-  type: ActionBarType;
+  type: SurrDocType;
 }
 
 export function ActionBar({
@@ -77,7 +76,7 @@ export function ActionBar({
   type,
 }: ActionBarProps) {
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
-  const isSuccessor = type === 'successor';
+  const isSuccessor = type === 'successors';
   return (
     <>
       {isSuccessor && <EuiSpacer size="s" />}

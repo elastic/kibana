@@ -25,31 +25,32 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('Test Discover Context ActionBar for successor records', () => {
   const props = {
-    defaultStepSize: 10,
     docCount: 20,
     docCountAvailable: 0,
     isDisabled: false,
     isLoading: false,
     onChangeCount: jest.fn(),
     onLoadMoreClick: jest.fn(),
-    type: 'successor',
+    type: 'successors',
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
   test('Count input', () => {
-    expect(findTestSubject(wrapper, 'successorCountPicker').props().value).toBe(20);
-    findTestSubject(wrapper, 'successorCountPicker').simulate('change', { target: { value: 123 } });
+    expect(findTestSubject(wrapper, 'successorsCountPicker').props().value).toBe(20);
+    findTestSubject(wrapper, 'successorsCountPicker').simulate('change', {
+      target: { value: 123 },
+    });
     expect(props.onChangeCount).toHaveBeenCalledTimes(1);
   });
 
   test('Load button ', () => {
-    findTestSubject(wrapper, 'successorLoadMoreButton').simulate('click');
+    findTestSubject(wrapper, 'successorsLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });
 
   test('Warning about limitation of additional records', () => {
-    expect(findTestSubject(wrapper, 'successorWarningMsg').text()).toBe(
-      'No documents newer than the anchor could be found.'
+    expect(findTestSubject(wrapper, 'successorsWarningMsg').text()).toBe(
+      'No documents older than the anchor could be found.'
     );
   });
 });
@@ -58,31 +59,30 @@ describe('Test Discover Context ActionBar for predecessor records', () => {
   const props = {
     docCount: 20,
     docCountAvailable: 1,
-    defaultStepSize: 7,
     isDisabled: false,
     isLoading: false,
     onChangeCount: jest.fn(),
     onLoadMoreClick: jest.fn(),
-    type: 'predecessor',
+    type: 'predecessors',
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
   test('Count input', () => {
-    expect(findTestSubject(wrapper, 'predecessorCountPicker').props().value).toBe(20);
-    findTestSubject(wrapper, 'predecessorCountPicker').simulate('change', {
+    expect(findTestSubject(wrapper, 'predecessorsCountPicker').props().value).toBe(20);
+    findTestSubject(wrapper, 'predecessorsCountPicker').simulate('change', {
       target: { value: 123 },
     });
     expect(props.onChangeCount).toHaveBeenCalledTimes(1);
   });
 
   test('Load button ', () => {
-    findTestSubject(wrapper, 'predecessorLoadMoreButton').simulate('click');
+    findTestSubject(wrapper, 'predecessorsLoadMoreButton').simulate('click');
     expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
   });
 
   test('Warning about limitation of additional records', () => {
-    expect(findTestSubject(wrapper, 'predecessorWarningMsg').text()).toBe(
-      'Only 1 documents older than the anchor could be found.'
+    expect(findTestSubject(wrapper, 'predecessorsWarningMsg').text()).toBe(
+      'Only 1 documents newer than the anchor could be found.'
     );
   });
 });

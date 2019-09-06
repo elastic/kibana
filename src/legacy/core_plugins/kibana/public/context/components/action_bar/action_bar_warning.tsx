@@ -19,15 +19,14 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
+import { SurrDocType } from '../../api/context';
 
-import { ActionBarType } from './action_bar';
-
-export function ActionBarWarning({ docCount, type }: { docCount: number; type: ActionBarType }) {
-  if (type === 'predecessor') {
+export function ActionBarWarning({ docCount, type }: { docCount: number; type: SurrDocType }) {
+  if (type === 'predecessors') {
     return (
       <EuiCallOut
         color="warning"
-        data-test-subj="predecessorWarningMsg"
+        data-test-subj="predecessorsWarningMsg"
         iconType="bolt"
         title={
           docCount === 0 ? (
@@ -51,7 +50,7 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: A
   return (
     <EuiCallOut
       color="warning"
-      data-test-subj="successorWarningMsg"
+      data-test-subj="successorsWarningMsg"
       iconType="bolt"
       title={
         docCount === 0 ? (
