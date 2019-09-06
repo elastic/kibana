@@ -51,7 +51,7 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
     const { client, implementsCustomErrorState, variables } = props;
     const fetch = () => {
       setLoading(true);
-      client.query<T>({ fetchPolicy: 'no-cache', query, variables }).then(
+      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(
         (result: any) => {
           updateState(result.loading, result.data, result.errors);
         },
