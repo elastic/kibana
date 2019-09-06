@@ -452,7 +452,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickColorPicker(): Promise<void> {
       const picker = await find.byCssSelector('.tvbColorPicker button');
-      await browser.clickMouseButton(picker);
+      await picker.clickMouseButton();
     }
 
     public async setBackgroundColor(colorHex: string): Promise<void> {

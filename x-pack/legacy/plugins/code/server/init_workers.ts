@@ -92,13 +92,16 @@ export function initWorkers(
   );
 
   // Initialize schedulers.
-  const cloneScheduler = new CloneScheduler(cloneWorker, serverOptions, esClient, log);
   const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
   const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
   updateScheduler.start();
   indexScheduler.start();
   // Check if the repository is local on the file system.
   // This should be executed once at the startup time of Kibana.
-  cloneScheduler.schedule();
-  return { indexScheduler, updateScheduler };
+  // Ignored in cluster mode, leave it to the node level control loop
+  if (!serverOptions.clusterEnabled) {
+    const cloneScheduler = new CloneScheduler(cloneWorker, serverOptions, esClient, log);
+    cloneScheduler.schedule();
+  }
+  return { indexScheduler, updateScheduler, cloneWorker, deleteWorker, indexWorker, updateWorker };
 }
