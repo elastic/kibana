@@ -196,7 +196,16 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   }
 
   function allDataReady() {
-    return pageReady && aggFieldPairList.length > 0;
+    let ready = aggFieldPairList.length > 0;
+    aggFieldPairList.forEach(af => {
+      if (af.by !== undefined && af.by.field !== null) {
+        // if a by field is set, it's only ready when the value is loaded
+        ready = af.by.value !== null;
+      } else {
+        ready = ready && true;
+      }
+    });
+    return ready;
   }
 
   return (
