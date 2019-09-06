@@ -54,4 +54,9 @@ describe('stringifyKueries', () => {
     kueries.set('port', [80, 8080, 443]);
     expect(stringifyKueries(kueries)).toMatchSnapshot();
   });
+
+  it('handles colon characters in values', () => {
+    kueries.set('monitor.id', ['https://elastic.co', 'https://example.com']);
+    expect(stringifyKueries(kueries)).toMatchSnapshot();
+  });
 });
