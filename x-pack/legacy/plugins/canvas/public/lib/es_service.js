@@ -42,8 +42,13 @@ export const getIndices = () =>
     })
     .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
 
-export const getDefaultIndex = () =>
-  savedObjectsClient
-    .get('index-pattern', AdvancedSettings.get('defaultIndex'))
-    .then(defaultIndex => defaultIndex.attributes.title)
-    .catch(err => notify.error(err, { title: `Couldn't fetch default index` }));
+export const getDefaultIndex = () => {
+  const defaultIndexId = AdvancedSettings.get('defaultIndex');
+
+  return defaultIndexId
+    ? savedObjectsClient
+        .get('index-pattern', defaultIndexId)
+        .then(defaultIndex => defaultIndex.attributes.title)
+        .catch(err => notify.error(err, { title: `Couldn't fetch default index` }))
+    : Promise.resolve('');
+};

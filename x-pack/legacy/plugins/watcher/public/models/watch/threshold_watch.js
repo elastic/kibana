@@ -206,7 +206,7 @@ export class ThresholdWatch extends BaseWatch {
     Array.from(Array(comparators[this.thresholdComparator].requiredValues)).forEach((value, i) => {
       const key = `threshold${i}`;
       errors[key] = [];
-      if (!this.threshold[i]) {
+      if (this.threshold[i] == null || this.threshold[i] === '') {
         errors[key].push(i18n.translate(
           'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
           {
