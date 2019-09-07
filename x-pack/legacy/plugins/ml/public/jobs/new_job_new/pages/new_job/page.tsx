@@ -79,6 +79,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     if (isSingleMetricJobCreator(jobCreator) === true) {
       jobCreator.modelPlot = true;
     }
+
+    if (kibanaContext.currentSavedSearch.id === undefined) {
+      // Jobs created from saved searches cannot be cloned in the wizard as the
+      // ML job config holds no reference to the saved search ID.
+      jobCreator.createdBy = null;
+    }
   }
 
   const chartInterval = new MlTimeBuckets();
