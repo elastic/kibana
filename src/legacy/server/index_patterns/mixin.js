@@ -19,23 +19,20 @@
 
 import { IndexPatternsService } from './service';
 
-import {
-  createFieldsForWildcardRoute,
-  createFieldsForTimePatternRoute,
-} from './routes';
+import { createFieldsForWildcardRoute, createFieldsForTimePatternRoute } from './routes';
 
 export function indexPatternsMixin(kbnServer, server) {
   const pre = {
     /**
-    *  Create an instance of the `indexPatterns` service
-    *  @type {Hapi.Pre}
-    */
+     *  Create an instance of the `indexPatterns` service
+     *  @type {Hapi.Pre}
+     */
     getIndexPatternsService: {
       assign: 'indexPatterns',
       method(request) {
         return request.getIndexPatternsService();
-      }
-    }
+      },
+    },
   };
 
   /**
