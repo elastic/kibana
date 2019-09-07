@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
@@ -32,11 +33,15 @@ import { SurrDocType } from '../../api/context';
 
 export interface ActionBarProps {
   /**
+   *  the number of documents fetched initially and added when the load button is clicked
+   */
+  defaultStepSize: number;
+  /**
    * the number of docs to be displayed
    */
   docCount: number;
   /**
-   *  the number of documents that are acually available
+   *  the number of documents that are  available
    *  display warning when it's lower than docCount
    */
   docCountAvailable: number;
@@ -67,6 +72,7 @@ export interface ActionBarProps {
 }
 
 export function ActionBar({
+  defaultStepSize,
   docCount,
   docCountAvailable,
   isDisabled,
@@ -77,6 +83,9 @@ export function ActionBar({
 }: ActionBarProps) {
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === 'successors';
+  const [newDocCount, setNewDocCount] = useState(docCount);
+  const onChangeDebouncedRef = useRef(debounce((val: number) => onChangeCount(val), 500));
+
   return (
     <>
       {isSuccessor && <EuiSpacer size="s" />}
@@ -89,7 +98,10 @@ export function ActionBar({
             iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
             isDisabled={isDisabled}
             isLoading={isLoading}
-            onClick={onLoadMoreClick}
+            onClick={() => {
+              onLoadMoreClick();
+              setNewDocCount(newDocCount + defaultStepSize);
+            }}
             flush="right"
           >
             <FormattedMessage id="kbn.context.loadButtonLabel" defaultMessage="Load" />
@@ -110,9 +122,15 @@ export function ActionBar({
               className="cxtSizePicker"
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
-              onChange={ev => onChangeCount(ev.target.valueAsNumber)}
+              onChange={ev => {
+                const value = ev.target.valueAsNumber;
+                setNewDocCount(value);
+                if (value >= 0) {
+                  onChangeDebouncedRef.current(value);
+                }
+              }}
               type="number"
-              value={docCount}
+              value={newDocCount >= 0 ? newDocCount : ''}
             />
           </EuiFormRow>
         </EuiFlexItem>
