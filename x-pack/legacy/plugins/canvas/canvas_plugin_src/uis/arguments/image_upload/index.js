@@ -15,6 +15,7 @@ import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
+import { ArgumentStrings } from '../../../strings';
 import { FileForm, LinkForm } from './forms';
 
 class ImageUpload extends React.Component {
@@ -107,9 +108,15 @@ class ImageUpload extends React.Component {
 
     let selectedAsset = {};
 
-    const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
+    const urlTypeOptions = [
+      { id: 'file', label: ArgumentStrings.ImageUpload.urlTypes.getFile() },
+      { id: 'link', label: ArgumentStrings.ImageUpload.urlTypes.getLink() },
+    ];
     if (assets.length) {
-      urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
+      urlTypeOptions.unshift({
+        id: 'asset',
+        label: ArgumentStrings.ImageUpload.urlTypes.getAsset(),
+      });
       selectedAsset = assets.find(({ value }) => value === url) || {};
     }
 
@@ -154,8 +161,8 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image upload',
-  help: 'Select or upload an image',
+  displayName: ArgumentStrings.ImageUpload.getDisplayName(),
+  help: ArgumentStrings.ImageUpload.getHelp(),
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),
   resolve({ args }) {

@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { URL } from '../../i18n';
 
 export const ArgumentStrings = {
   FilterGroup: {
@@ -20,6 +21,45 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.filterGroup.create', {
         defaultMessage: 'Create new group',
       }),
+  },
+  ImageUpload: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.displayName', {
+        defaultMessage: 'Image upload',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.help', {
+        defaultMessage: 'Select or upload an image',
+      }),
+    getImageUploading: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.imageUploading', {
+        defaultMessage: 'Image uploading',
+      }),
+    getFileUploadPrompt: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.fileUploadPrompt', {
+        defaultMessage: 'Select or drag and drop an image',
+      }),
+    getUrlFieldPlaceholder: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlFieldPlaceholder', {
+        defaultMessage: 'Image {url}',
+        values: {
+          url: URL,
+        },
+      }),
+    urlTypes: {
+      getFile: () =>
+        i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.file', {
+          defaultMessage: 'Import',
+        }),
+      getLink: () =>
+        i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.link', {
+          defaultMessage: 'Link',
+        }),
+      getAsset: () =>
+        i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.asset', {
+          defaultMessage: 'Asset',
+        }),
+    },
   },
 };
 
@@ -72,5 +112,37 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.getCell.help', {
         defaultMessage: 'Grab the first row and first column',
       }),
+  },
+  Image: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.image.displayName', {
+        defaultMessage: 'Image',
+      }),
+    args: {
+      mode: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.image.args.mode.displayName', {
+            defaultMessage: 'Fill mode',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.image.args.mode.help', {
+            defaultMessage: 'Note: Stretched fill may not work with vector images',
+          }),
+        options: {
+          contain: () =>
+            i18n.translate('xpack.canvas.uis.views.image.args.mode.options.contain', {
+              defaultMessage: 'Contain',
+            }),
+          cover: () =>
+            i18n.translate('xpack.canvas.uis.views.image.args.mode.options.cover', {
+              defaultMessage: 'Cover',
+            }),
+          stretch: () =>
+            i18n.translate('xpack.canvas.uis.views.image.args.mode.options.stretch', {
+              defaultMessage: 'Stretch',
+            }),
+        },
+      },
+    },
   },
 };
