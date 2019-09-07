@@ -21,7 +21,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   });
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -32,7 +32,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
     >
       <EuiFormRow
         label={title}
-        describedByIds={['single-example-aria']}
+        describedByIds={['description']}
         error={validation.message}
         isInvalid={validation.valid === false}
       >
