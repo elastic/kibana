@@ -222,7 +222,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.SavedObjectFinder
       ),
       new InspectPanelAction(this.props.inspector),
-      new RemovePanelAction(),
       new ChangeViewAction(
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
@@ -230,6 +229,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.notifications,
         this.props.SavedObjectFinder
       ),
+      new RemovePanelAction(),
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 

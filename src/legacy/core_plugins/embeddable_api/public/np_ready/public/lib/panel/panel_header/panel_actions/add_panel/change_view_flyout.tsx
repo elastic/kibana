@@ -17,26 +17,20 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { CoreSetup, SavedObject } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   // @ts-ignore
   EuiSuperSelect,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
 
 import { IContainer } from '../../../../containers';
-import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 
 interface Props {
@@ -77,50 +71,40 @@ export class ChangeViewFlyout extends React.Component<Props> {
     });
   };
 
-  public createNewEmbeddable = async (type: string) => {
+  public onChangeView = async (id: string, type: string, name: string) => {
+    const originalPanels = this.props.container.getInput().panels;
+    const filteredPanels = { ...originalPanels };
+
+    const nnw = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.w;
+    const nnh = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.h;
+    const nnx = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.x;
+    const nny = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.y;
+
+    // add the new view
+    const newObj = await this.props.container.addSavedObjectEmbeddable(type, id);
+
+    const finalPanels = this.props.container.getInput().panels;
+    (finalPanels[newObj.id] as DashboardPanelState).gridData.w = nnw;
+    (finalPanels[newObj.id] as DashboardPanelState).gridData.h = nnh;
+    (finalPanels[newObj.id] as DashboardPanelState).gridData.x = nnx;
+    (finalPanels[newObj.id] as DashboardPanelState).gridData.y = nny;
+
+    // delete the old view
+    delete finalPanels[this.props.viewToRemove.id];
+
+    // apply changes
+    this.props.container.updateInput(finalPanels);
+    this.props.container.reload();
+
+    this.showToast(name);
     this.props.onClose();
-    const factory = this.props.getFactory(type);
-
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-
-    const explicitInput = await factory.getExplicitInput();
-    const embeddable = await this.props.container.addNewEmbeddable(type, explicitInput);
-    if (embeddable) {
-      this.showToast(embeddable.getInput().title || '');
-    }
-  };
-
-  public onAddPanel = async (id: string, type: string, name: string) => {
-    if (this.props.viewToRemove.parent) {
-      /*
-      //const dashProps=this.props.viewToRemove.parent.getInput();
-      //var oldViewProps=(dashProps.panels[this.props.viewToRemove.id] as DashboardPanelState);
-
-
-      this.props.viewToRemove.parent.removeEmbeddable(this.props.viewToRemove.id);
-      this.props.container.addSavedObjectEmbeddable(type, id);
-      console.log(id);
-
-      const dashProps2=this.props.container.getInput();
-      console.log(dashProps2.panels);
-
-
-      //console.log((dashProps.panels[this.props.viewToRemove.id] as DashboardPanelState).gridData.w);
-      //(dashProps.panels[this.props.viewToRemove.id] as DashboardPanelState).gridData.w=4;
-
-      //this.props.viewToRemove.updateInput({panel: {gridData: {w:4}  }});
-      */
-      this.showToast(name);
-    }
   };
 
   public render() {
     const SavedObjectFinder = this.props.SavedObjectFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        onChoose={this.onAddPanel}
+        onChoose={this.onChangeView}
         savedObjectMetaData={[...this.props.getAllFactories()]
           .filter(
             embeddableFactory =>
@@ -134,31 +118,18 @@ export class ChangeViewFlyout extends React.Component<Props> {
       />
     );
 
-    const vtr = 'Substitute view ' + this.props.viewToRemove.getTitle() + ' with...';
+    const vtr = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with...';
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
+      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardChangeView">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage id="embeddableApi.addPanel.Title" defaultMessage={vtr} />
+              <span>{vtr}</span>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-        {/*
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={true}>
-              <EuiSuperSelect
-                data-test-subj="createNew"
-                options={this.getSelectCreateNewOptions()}
-                valueOfSelected="createNew"
-                onChange={(value: string) => this.createNewEmbeddable(value)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>*/}
       </EuiFlyout>
     );
   }
