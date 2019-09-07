@@ -18,7 +18,11 @@ describe('SuricataDetails', () => {
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
       const wrapper = shallow(
-        <SuricataDetails data={mockTimelineData[2].ecs} browserFields={mockBrowserFields} />
+        <SuricataDetails
+          data={mockTimelineData[2].ecs}
+          browserFields={mockBrowserFields}
+          timelineId="test"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -26,7 +30,11 @@ describe('SuricataDetails', () => {
     test('it returns text if the data does contain suricata data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <SuricataDetails data={mockTimelineData[2].ecs} browserFields={mockBrowserFields} />
+          <SuricataDetails
+            data={mockTimelineData[2].ecs}
+            browserFields={mockBrowserFields}
+            timelineId="test"
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -37,7 +45,11 @@ describe('SuricataDetails', () => {
     test('it returns null for text if the data contains no suricata data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <SuricataDetails data={mockTimelineData[0].ecs} browserFields={mockBrowserFields} />
+          <SuricataDetails
+            data={mockTimelineData[0].ecs}
+            browserFields={mockBrowserFields}
+            timelineId="test"
+          />
         </TestProviders>
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
