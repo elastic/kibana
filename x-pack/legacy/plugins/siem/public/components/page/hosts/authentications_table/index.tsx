@@ -328,11 +328,13 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   },
 ];
 
-export const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
+export const getAuthenticationColumnsCurated = (
+  pageType: hostsModel.HostsType
+): AuthTableColumns => {
   const columns = getAuthenticationColumns();
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === hostsModel.HostsType.details) {
     return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
       acc.splice(acc.findIndex(column => column.name === name), 1);
       return acc;

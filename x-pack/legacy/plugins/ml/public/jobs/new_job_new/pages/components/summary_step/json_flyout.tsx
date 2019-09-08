@@ -17,11 +17,11 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import { JobCreator } from '../../../common/job_creator';
+import { JobCreatorType } from '../../../common/job_creator';
 import { MLJobEditor } from '../../../../jobs_list/components/ml_job_editor';
 
 interface Props {
-  jobCreator: JobCreator;
+  jobCreator: JobCreatorType;
   closeFlyout: () => void;
 }
 export const JsonFlyout: FC<Props> = ({ jobCreator, closeFlyout }) => {

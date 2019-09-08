@@ -621,7 +621,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
           if (!$scope.opts.timefield) return;
 
-          const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
+          const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
 
           if (buckets && buckets.length === 1) {
             $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -761,6 +761,9 @@ function discoverController(
       })
       .then(onResults)
       .catch((error) => {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
@@ -964,15 +967,14 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
+
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -981,12 +983,14 @@ function discoverController(
       return;
     }
 
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   async function setupVisualization() {

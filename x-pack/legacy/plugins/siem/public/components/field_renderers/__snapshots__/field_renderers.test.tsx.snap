@@ -10,15 +10,23 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       grow={false}
     >
       <DefaultDraggable
-        field="source.autonomous_system.as_org"
-        id="ip-overview-source.autonomous_system.as_org"
+        field="source.as.organization.name"
+        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
         value="Test Org"
       />
-       /
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      /
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
       <DefaultDraggable
-        field="source.autonomous_system.asn"
-        id="ip-overview-source.autonomous_system.asn"
-        value="Test ASN"
+        field="source.as.number"
+        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+        value="12345"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -38,7 +46,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 <Component>
   <DefaultDraggable
     field="host.name"
-    id="ip-overview-host-name"
+    id="host-name-renderer-default-draggable-ip-overview-host-name"
     value="raspberrypi"
   >
     <HostDetailsLink
@@ -54,7 +62,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
 <Component>
   <DefaultDraggable
     field="host.name"
-    id="ip-overview-host-name"
+    id="host-name-renderer-default-draggable-ip-overview-host-name"
     value="raspberrypi"
   >
     <HostDetailsLink
@@ -78,7 +86,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     >
       <DefaultDraggable
         field="source.geo.city_name"
-        id="ip-overview-source.geo.city_name"
+        id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
         value={
           Array [
             "New York",
@@ -92,7 +100,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     >
       <DefaultDraggable
         field="source.geo.region_name"
-        id="ip-overview-source.geo.region_name"
+        id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
         value={
           Array [
             "New York",

@@ -41,6 +41,9 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 
+import { isPercentDisabled } from '../../lib/stacked';
+import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+
 export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
@@ -53,7 +56,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     split_color_mode: 'gradient',
     axis_min: '',
     axis_max: '',
-    stacked: 'none',
+    stacked: STACKED_OPTIONS.NONE,
     steps: 0,
   };
   const model = { ...defaults, ...props.model };
@@ -62,22 +65,23 @@ export const TimeseriesConfig = injectI18n(function(props) {
   const stackedOptions = [
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }),
-      value: 'none',
+      value: STACKED_OPTIONS.NONE,
     },
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }),
-      value: 'stacked',
+      value: STACKED_OPTIONS.STACKED,
     },
     {
       label: intl.formatMessage({
         id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
         defaultMessage: 'Stacked within series',
       }),
-      value: 'stacked_within_series',
+      value: STACKED_OPTIONS.STACKED_WITHIN_SERIES,
     },
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
-      value: 'percent',
+      value: STACKED_OPTIONS.PERCENT,
+      disabled: isPercentDisabled(props.seriesQuantity[model.id]),
     },
   ];
   const selectedStackedOption = stackedOptions.find(option => {
@@ -130,6 +134,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
   });
 
   let type;
+
   if (model.chart_type === 'line') {
     type = (
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
@@ -282,7 +287,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
             }
           >
             <EuiFieldNumber
-              step={0.5}
+              step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
             />
@@ -529,4 +534,5 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
+  seriesQuantity: PropTypes.object,
 };

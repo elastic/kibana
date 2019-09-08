@@ -21,10 +21,14 @@ import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
-import { AggParam } from '../agg_param';
-import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggConfig } from '../../vis';
+import { AggParam } from '../agg_params';
+import {
+  OptionedValueProp,
+  OptionedParamEditorProps,
+  OptionedParamType,
+} from '../param_types/optioned';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: AggConfig): boolean;
@@ -33,12 +37,14 @@ export interface AggregateValueProp extends OptionedValueProp {
 export type TopAggregateParamEditorProps = AggParamEditorProps<AggregateValueProp> &
   OptionedParamEditorProps<AggregateValueProp>;
 
-function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
-  const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
+export function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
+  const { options = [] } = agg
+    .getAggParams()
+    .find(({ name }: AggParam) => name === 'aggregate') as OptionedParamType;
   return options.filter((option: AggregateValueProp) => option.isCompatible(agg));
 }
 
-function TopAggregateParamEditor({
+export function TopAggregateParamEditor({
   agg,
   aggParam,
   value,
@@ -85,7 +91,7 @@ function TopAggregateParamEditor({
     }
 
     if (value) {
-      if (aggParam.options.byValue[value.value]) {
+      if (aggParam.options.find(opt => opt.value === value.value)) {
         return;
       }
 
@@ -93,7 +99,7 @@ function TopAggregateParamEditor({
     }
 
     if (filteredOptions.length === 1) {
-      setValue(aggParam.options.byValue[filteredOptions[0].value]);
+      setValue(aggParam.options.find(opt => opt.value === filteredOptions[0].value));
     }
   }, [fieldType]);
 
@@ -101,7 +107,7 @@ function TopAggregateParamEditor({
     if (event.target.value === emptyValue.value) {
       setValue();
     } else {
-      setValue(aggParam.options.byValue[event.target.value]);
+      setValue(aggParam.options.find(opt => opt.value === event.target.value));
     }
   };
 
@@ -125,5 +131,3 @@ function TopAggregateParamEditor({
     </EuiFormRow>
   );
 }
-
-export { TopAggregateParamEditor, getCompatibleAggs };
