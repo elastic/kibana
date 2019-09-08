@@ -259,9 +259,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
-        triggerContext: {
-          filters,
-        },
+        filters,
       });
     };
   }

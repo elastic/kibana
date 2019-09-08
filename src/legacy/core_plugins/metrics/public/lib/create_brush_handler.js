@@ -19,10 +19,12 @@
 
 import moment from 'moment';
 
-export const brushHandler = timefilter => ranges => {
+const TIME_MODE = 'absolute';
+
+export const createBrushHandler = timefilter => (from, to) => {
   timefilter.setTime({
-    from: moment(ranges.xaxis.from).toISOString(),
-    to: moment(ranges.xaxis.to).toISOString(),
-    mode: 'absolute',
+    from: moment(from).toISOString(),
+    to: moment(to).toISOString(),
+    mode: TIME_MODE,
   });
 };
