@@ -26,8 +26,8 @@ export const MonitorPageLink: FunctionComponent<DetailPageLinkProps> = ({
       to={
         // encode monitorid param as 64 base string to make it a valid URL, since it can be a url
         location === undefined
-          ? `/monitor/${btoa(id)}${linkParameters}`
-          : `/monitor/${btoa(id)}/${encodeURI(location)}/${linkParameters}`
+          ? `/monitor/${encodeURIComponent(id)}${linkParameters}`
+          : `/monitor/${encodeURIComponent(id)}/${encodeURI(location)}/${linkParameters}`
       }
     >
       {children}

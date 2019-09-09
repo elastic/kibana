@@ -44,7 +44,7 @@ export const MonitorPage = ({
   match,
 }: MonitorPageProps) => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
-  const monitorId = atob(match.params.monitorId);
+  const monitorId = decodeURIComponent(match.params.monitorId);
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
