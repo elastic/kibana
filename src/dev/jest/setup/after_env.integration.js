@@ -20,6 +20,6 @@
 /* eslint-env jest */
 
 /**
- * Set the default timeout for the integration test suite to 30 seconds
+ * Set the default timeout for the integration test suite to 10 minutes
  */
-jest.setTimeout(30 * 1000);
+jest.setTimeout(10 * 60 * 1000);

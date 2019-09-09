@@ -5,11 +5,10 @@
  */
 
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 import React from 'react';
 import * as i18n from './translations';
 
-import { NavTab } from '../../components/navigation/type';
 import { HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 
 import { HostsQuery } from '../../containers/hosts';
@@ -24,99 +23,120 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
 import { StatefulEventsViewer } from '../../components/events_viewer';
+import { NavTab } from '../../components/navigation/types';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
   return `#/hosts/${hostName}/${tabName}`;
 };
 
-export type KeyHostsNavTab =
-  | HostsTableType.hosts
-  | HostsTableType.authentications
-  | HostsTableType.uncommonProcesses
-  | HostsTableType.anomalies
-  | HostsTableType.events;
+type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
+  HostsTableType.authentications &
+  HostsTableType.uncommonProcesses &
+  HostsTableType.events;
+
+type KeyHostsNavTabWithMlPermission = KeyHostsNavTabWithoutMlPermission & HostsTableType.anomalies;
+
+export type KeyHostsNavTab = KeyHostsNavTabWithoutMlPermission | KeyHostsNavTabWithMlPermission;
+
+type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
+  HostsTableType.uncommonProcesses &
+  HostsTableType.events;
+
+type KeyHostDetailsNavTabWithMlPermission = KeyHostsNavTabWithoutMlPermission &
+  HostsTableType.anomalies;
 
 export type KeyHostDetailsNavTab =
-  | HostsTableType.authentications
-  | HostsTableType.uncommonProcesses
-  | HostsTableType.anomalies
-  | HostsTableType.events;
+  | KeyHostDetailsNavTabWithoutMlPermission
+  | KeyHostDetailsNavTabWithMlPermission;
 
 export type HostsNavTab = Record<KeyHostsNavTab, NavTab>;
 
-export const navTabsHosts: HostsNavTab = {
-  [HostsTableType.hosts]: {
-    id: HostsTableType.hosts,
-    name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTableType.hosts),
-    disabled: false,
-    urlKey: 'host',
-  },
-  [HostsTableType.authentications]: {
-    id: HostsTableType.authentications,
-    name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostsUrl(HostsTableType.authentications),
-    disabled: false,
-    urlKey: 'host',
-  },
-  [HostsTableType.uncommonProcesses]: {
-    id: HostsTableType.uncommonProcesses,
-    name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
-    disabled: false,
-    urlKey: 'host',
-  },
-  [HostsTableType.anomalies]: {
-    id: HostsTableType.anomalies,
-    name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostsUrl(HostsTableType.anomalies),
-    disabled: false,
-    urlKey: 'host',
-  },
-  [HostsTableType.events]: {
-    id: HostsTableType.events,
-    name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTableType.events),
-    disabled: false,
-    urlKey: 'host',
-  },
+export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
+  const hostsNavTabs = {
+    [HostsTableType.hosts]: {
+      id: HostsTableType.hosts,
+      name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.hosts),
+      disabled: false,
+      urlKey: 'host',
+    },
+    [HostsTableType.authentications]: {
+      id: HostsTableType.authentications,
+      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.authentications),
+      disabled: false,
+      urlKey: 'host',
+    },
+    [HostsTableType.uncommonProcesses]: {
+      id: HostsTableType.uncommonProcesses,
+      name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
+      disabled: false,
+      urlKey: 'host',
+    },
+    [HostsTableType.anomalies]: {
+      id: HostsTableType.anomalies,
+      name: i18n.NAVIGATION_ANOMALIES_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.anomalies),
+      disabled: false,
+      urlKey: 'host',
+    },
+    [HostsTableType.events]: {
+      id: HostsTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.events),
+      disabled: false,
+      urlKey: 'host',
+    },
+  };
+
+  return hasMlUserPermissions ? hostsNavTabs : omit([HostsTableType.anomalies], hostsNavTabs);
 };
 
-export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTab, NavTab> => ({
-  [HostsTableType.authentications]: {
-    id: HostsTableType.authentications,
-    name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
-    disabled: false,
-    urlKey: 'host',
-    isDetailPage: true,
-  },
-  [HostsTableType.uncommonProcesses]: {
-    id: HostsTableType.uncommonProcesses,
-    name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
-    disabled: false,
-    urlKey: 'host',
-    isDetailPage: true,
-  },
-  [HostsTableType.anomalies]: {
-    id: HostsTableType.anomalies,
-    name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
-    disabled: false,
-    urlKey: 'host',
-    isDetailPage: true,
-  },
-  [HostsTableType.events]: {
-    id: HostsTableType.events,
-    name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
-    disabled: false,
-    urlKey: 'host',
-    isDetailPage: true,
-  },
-});
+export const navTabsHostDetails = (
+  hostName: string,
+  hasMlUserPermissions: boolean
+): Record<KeyHostDetailsNavTab, NavTab> => {
+  const hostDetailsNavTabs = {
+    [HostsTableType.authentications]: {
+      id: HostsTableType.authentications,
+      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
+      disabled: false,
+      urlKey: 'host',
+      isDetailPage: true,
+    },
+    [HostsTableType.uncommonProcesses]: {
+      id: HostsTableType.uncommonProcesses,
+      name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
+      disabled: false,
+      urlKey: 'host',
+      isDetailPage: true,
+    },
+    [HostsTableType.anomalies]: {
+      id: HostsTableType.anomalies,
+      name: i18n.NAVIGATION_ANOMALIES_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
+      disabled: false,
+      urlKey: 'host',
+      isDetailPage: true,
+    },
+    [HostsTableType.events]: {
+      id: HostsTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
+      disabled: false,
+      urlKey: 'host',
+      isDetailPage: true,
+    },
+  };
+
+  return hasMlUserPermissions
+    ? hostDetailsNavTabs
+    : omit(HostsTableType.anomalies, hostDetailsNavTabs);
+};
 
 interface OwnProps {
   type: hostsModel.HostsType;
@@ -183,7 +203,7 @@ export const HostsQueryTabBody = ({
           setQuery={setQuery}
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </HostsQuery>
@@ -219,7 +239,7 @@ export const AuthenticationsQueryTabBody = ({
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           setQuery={setQuery}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </AuthenticationsQuery>
@@ -255,7 +275,7 @@ export const UncommonProcessTabBody = ({
           setQuery={setQuery}
           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           totalCount={totalCount}
-          type={hostsModel.HostsType.page}
+          type={type}
         />
       )}
     </UncommonProcessesQuery>
