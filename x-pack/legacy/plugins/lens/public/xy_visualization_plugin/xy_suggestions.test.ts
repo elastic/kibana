@@ -13,7 +13,6 @@ import {
 } from '../types';
 import { State, XYState } from './types';
 import { generateId } from '../id_generator';
-import { Ast } from '@kbn/interpreter/target/common';
 
 jest.mock('../id_generator');
 

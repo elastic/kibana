@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import { Ast } from '@kbn/interpreter/common';
 import {
   Visualization,
   Datasource,
