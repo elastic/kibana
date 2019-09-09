@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureRegistry } from './feature_registry';
+import { FeatureRegistry } from './feature_registry';
+import { Feature } from './feature';
 
 describe('FeatureRegistry', () => {
   it('allows a minimal feature to be registered', () => {

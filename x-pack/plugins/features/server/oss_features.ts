@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Feature } from './feature_registry';
+import { Feature } from './feature';
 
-const buildKibanaFeatures = (savedObjectTypes: string[]) => {
+export interface BuildOSSFeaturesParams {
+  savedObjectTypes: string[];
+  includeTimelion: boolean;
+}
+
+export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSSFeaturesParams) => {
   return [
     {
       id: 'discover',
-      name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
+      name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
       }),
       icon: 'discoverApp',
@@ -36,7 +41,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
     },
     {
       id: 'visualize',
-      name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
+      name: i18n.translate('xpack.features.visualizeFeatureName', {
         defaultMessage: 'Visualize',
       }),
       icon: 'visualizeApp',
@@ -62,7 +67,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
     },
     {
       id: 'dashboard',
-      name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
+      name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
       icon: 'dashboardApp',
@@ -104,7 +109,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
     },
     {
       id: 'dev_tools',
-      name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
+      name: i18n.translate('xpack.features.devToolsFeatureName', {
         defaultMessage: 'Dev Tools',
       }),
       icon: 'devToolsApp',
@@ -129,14 +134,14 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
           ui: ['show'],
         },
       },
-      privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+      privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
         defaultMessage:
           'User should also be granted the appropriate Elasticsearch cluster and index privileges',
       }),
     },
     {
       id: 'advancedSettings',
-      name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
+      name: i18n.translate('xpack.features.advancedSettingsFeatureName', {
         defaultMessage: 'Advanced Settings',
       }),
       icon: 'advancedSettingsApp',
@@ -164,7 +169,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
     },
     {
       id: 'indexPatterns',
-      name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
+      name: i18n.translate('xpack.features.indexPatternFeatureName', {
         defaultMessage: 'Index Pattern Management',
       }),
       icon: 'indexPatternApp',
@@ -192,7 +197,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
     },
     {
       id: 'savedObjectsManagement',
-      name: i18n.translate('xpack.main.featureRegistry.savedObjectsManagementFeatureName', {
+      name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',
       }),
       icon: 'savedObjectsApp',
@@ -220,6 +225,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
         },
       },
     },
+    ...(includeTimelion ? [timelionFeature] : []),
   ];
 };
 
@@ -247,17 +253,3 @@ const timelionFeature: Feature = {
     },
   },
 };
-
-export function registerOssFeatures(
-  registerFeature: (feature: Feature) => void,
-  savedObjectTypes: string[],
-  includeTimelion: boolean
-) {
-  for (const feature of buildKibanaFeatures(savedObjectTypes)) {
-    registerFeature(feature);
-  }
-
-  if (includeTimelion) {
-    registerFeature(timelionFeature);
-  }
-}
