@@ -8,14 +8,14 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { BarChartBaseComponent, BarChartWithCustomPrompt } from './barchart';
-import { ChartConfigsData, ChartHolder } from './common';
+import { ChartSeriesData, ChartHolder } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
 
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
-  const mockBarChartData: ChartConfigsData[] = [
+  const mockBarChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
@@ -271,7 +271,7 @@ describe.each([
       },
     ],
   ],
-])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
+])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
   let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
     shallowWrapper = shallow(<BarChartWithCustomPrompt height={100} width={120} data={data} />);

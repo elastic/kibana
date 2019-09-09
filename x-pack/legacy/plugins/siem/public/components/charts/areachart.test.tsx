@@ -8,14 +8,14 @@ import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { ChartConfigsData, ChartHolder } from './common';
+import { ChartHolder, ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
 
 describe('AreaChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
-  const mockAreaChartData: ChartConfigsData[] = [
+  const mockAreaChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: [
@@ -220,7 +220,7 @@ describe('AreaChartWithCustomPrompt', () => {
         ],
       ],
     ],
-  ])('renders areachart', (data: ChartConfigsData[] | [] | null | undefined) => {
+  ])('renders areachart', (data: ChartSeriesData[] | [] | null | undefined) => {
     beforeAll(() => {
       shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
@@ -310,7 +310,7 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
+  ])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
     beforeAll(() => {
       shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });

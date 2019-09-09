@@ -117,6 +117,8 @@ export interface Source {
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -845,6 +847,20 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime: EventsOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface EventsOverTimeHistogramData {
+  x: number;
+
+  y: number;
 }
 
 export interface HostsData {
@@ -1835,6 +1851,13 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface HostsSourceArgs {
   id?: string | null;
 
@@ -2413,6 +2436,222 @@ export namespace GetDomainsQuery {
     dsl: string[];
 
     response: string[];
+  };
+}
+
+export namespace GetEventsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: string | null;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    EventsOverTime: EventsOverTime;
+  };
+
+  export type EventsOverTime = {
+    __typename?: 'EventsOverTimeData';
+
+    eventsOverTime: _EventsOverTime[];
+
+    totalCount: number;
+
+    inspect?: Inspect | null;
+  };
+
+  export type _EventsOverTime = {
+    __typename?: 'EventsOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetEventsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInputPaginated;
+    sortField: SortField;
+    filterQuery?: string | null;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Events: Events;
+  };
+
+  export type Events = {
+    __typename?: 'EventsData';
+
+    totalCount: number;
+
+    pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
+
+    edges: Edges[];
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type Edges = {
+    __typename?: 'EcsEdges';
+
+    node: Node;
+  };
+
+  export type Node = {
+    __typename?: 'ECS';
+
+    _id: string;
+
+    _index?: string | null;
+
+    timestamp?: Date | null;
+
+    event?: Event | null;
+
+    host?: Host | null;
+
+    message?: ToStringArray | null;
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    suricata?: Suricata | null;
+
+    user?: User | null;
+
+    zeek?: Zeek | null;
+  };
+
+  export type Event = {
+    __typename?: 'EventEcsFields';
+
+    action?: ToStringArray | null;
+
+    category?: ToStringArray | null;
+
+    dataset?: ToStringArray | null;
+
+    id?: ToStringArray | null;
+
+    module?: ToStringArray | null;
+
+    severity?: ToNumberArray | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    name?: ToStringArray | null;
+
+    ip?: ToStringArray | null;
+
+    id?: ToStringArray | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+
+    ip?: ToStringArray | null;
+
+    port?: ToNumberArray | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DestinationEcsFields';
+
+    ip?: ToStringArray | null;
+
+    port?: ToNumberArray | null;
+  };
+
+  export type Suricata = {
+    __typename?: 'SuricataEcsFields';
+
+    eve?: Eve | null;
+  };
+
+  export type Eve = {
+    __typename?: 'SuricataEveData';
+
+    proto?: ToStringArray | null;
+
+    flow_id?: ToNumberArray | null;
+
+    alert?: Alert | null;
+  };
+
+  export type Alert = {
+    __typename?: 'SuricataAlertData';
+
+    signature?: ToStringArray | null;
+
+    signature_id?: ToNumberArray | null;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: ToStringArray | null;
+  };
+
+  export type Zeek = {
+    __typename?: 'ZeekEcsFields';
+
+    session_id?: ToStringArray | null;
   };
 }
 

@@ -76,12 +76,10 @@ export interface ChartSeriesConfigs {
   settings?: Partial<SettingSpecProps>;
 }
 
-export interface ChartConfigsData {
+export interface ChartSeriesData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;
-  areachartConfigs?: ChartSeriesConfigs | undefined;
-  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`

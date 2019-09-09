@@ -25,12 +25,18 @@ import {
   TimelineData,
   TimelineDetailsData,
   TimelineEdges,
+  EventsOverTimeData,
 } from '../../graphql/types';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import {
+  FrameworkAdapter,
+  FrameworkRequest,
+  RequestOptionsPaginated,
+  RequestBasicOptions,
+} from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
@@ -42,10 +48,14 @@ import {
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
   TimelineRequestOptions,
+  EventsOverTimeHistogram,
 } from './types';
+import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { EventsOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getTimelineData(
     request: FrameworkRequest,
@@ -125,7 +135,41 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
+
+  public async getEventsOverTime(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<EventsOverTimeData> {
+    const dsl = buildEventsOverTimeQuery(options);
+    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const eventsOverTimeBucket = getOr(null, 'aggregations.events.buckets', response);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    return {
+      inspect,
+      eventsOverTime: formatEventsOverTimeData(eventsOverTimeBucket),
+      totalCount,
+    };
+  }
 }
+
+export const formatEventsOverTimeData = (
+  data: EventsOverTimeHistogram[]
+): EventsOverTimeHistogramData[] => {
+  return data && data.length > 0
+    ? data.map<EventsOverTimeHistogramData>(({ key, doc_count }) => ({
+      x: key,
+      y: doc_count,
+    }))
+    : [];
+};
 
 export const formatEventsData = (
   fields: readonly string[],
@@ -203,22 +247,22 @@ const mergeTimelineFieldsWithHit = <T>(
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
             ? [
-                ...get('node.data', flattenedFields),
-                {
-                  field: fieldName,
-                  value: specialFields.includes(esField)
-                    ? get(esField, hit)
-                    : get(esField, hit._source),
-                },
-              ]
+              ...get('node.data', flattenedFields),
+              {
+                field: fieldName,
+                value: specialFields.includes(esField)
+                  ? get(esField, hit)
+                  : get(esField, hit._source),
+              },
+            ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
-                ...get('node.ecs', flattenedFields),
-                ...fieldName
-                  .split('.')
-                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
-              }
+              ...get('node.ecs', flattenedFields),
+              ...fieldName
+                .split('.')
+                .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+            }
             : get('node.ecs', flattenedFields),
         },
       };

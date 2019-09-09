@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartConfigsData,
+  ChartSeriesData,
   ChartHolder,
   getSeriesStyle,
   WrappedByAutoSizer,
@@ -52,7 +52,7 @@ const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
 
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
-  data: ChartConfigsData[];
+  data: ChartSeriesData[];
   width: number | null | undefined;
   height: number | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -89,23 +89,15 @@ export const AreaChartBaseComponent = React.memo<{
           ) : null;
         })}
 
-        {xTickFormatter ? (
-          <Axis
-            id={xAxisId}
-            position={Position.Bottom}
-            showOverlappingTicks={false}
-            tickFormat={xTickFormatter}
-            tickSize={0}
-          />
-        ) : (
-          <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
-        )}
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickFormat={xTickFormatter}
+          tickSize={0}
+        />
 
-        {yTickFormatter ? (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-        ) : (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} />
-        )}
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
       </Chart>
     </div>
   ) : null;
@@ -114,7 +106,7 @@ export const AreaChartBaseComponent = React.memo<{
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
 export const AreaChartWithCustomPrompt = React.memo<{
-  data: ChartConfigsData[] | null | undefined;
+  data: ChartSeriesData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -136,7 +128,7 @@ export const AreaChartWithCustomPrompt = React.memo<{
 AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
 
 export const AreaChart = React.memo<{
-  areaChart: ChartConfigsData[] | null | undefined;
+  areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ areaChart, configs }) => (
   <AutoSizer detectAnyWindowResize={false} content>
