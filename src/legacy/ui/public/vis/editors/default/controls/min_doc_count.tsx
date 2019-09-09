@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import React from 'react';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
+import { i18n } from '@kbn/i18n';
+import { SwitchParamEditor } from './switch';
+import { AggParamEditorProps } from '..';
 
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
+function MinDocCountParamEditor(props: AggParamEditorProps<boolean>) {
+  return (
+    <SwitchParamEditor
+      displayLabel={i18n.translate('common.ui.aggTypes.showEmptyBucketsLabel', {
+        defaultMessage: 'Show empty buckets',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
+        defaultMessage: 'Show all buckets, not only the buckets with results',
+      })}
+      {...props}
+    />
+  );
 }
+
+export { MinDocCountParamEditor };
