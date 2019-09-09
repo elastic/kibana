@@ -15,7 +15,7 @@ monitoring-shard-allocation {
     display: block;
   }
 
-  td.unassigned {
+  .unassigned {
     vertical-align: middle;
     width: 150px;
   }
@@ -38,24 +38,27 @@ monitoring-shard-allocation {
       &.red {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
-      
+
       &.yellow {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
 
     .title {
-      padding: 5px 7px;
-      display: inline-block;
+      padding: $euiSizeXS $euiSizeS;
       text-align: center;
       font-size: $euiSizeM;
       color: $euiColorGhost;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
 
       a {
         text-decoration: none;
       }
 
-      .euiIcon, i {
+      .euiIcon,
+      i {
         margin-left: $euiSizeXS;
       }
     }
@@ -77,7 +80,7 @@ monitoring-shard-allocation {
 
   .shard {
     align-self: center;
-    padding: 5px 7px;
+    padding: $euiSizeXS $euiSizeS;
     font: $euiSizeM;
     position: relative;
     display: inline-block;

@@ -12,7 +12,6 @@ import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 export class Unassigned extends React.Component {
