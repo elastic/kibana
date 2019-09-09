@@ -8,6 +8,10 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@ela
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { Provider } from '../timeline/data_providers/provider';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 
 const Header = styled.header`
   ${({ theme }) => `
@@ -19,23 +23,59 @@ const Header = styled.header`
 
 Header.displayName = 'Header';
 
+interface DraggableArguments {
+  field: string;
+  value: string;
+}
+
 export interface HeaderPageProps {
+  'data-test-subj'?: string;
   badgeLabel?: string;
   badgeTooltip?: string;
   children?: React.ReactNode;
+  draggableArguments?: DraggableArguments;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
-  'data-test-subj'?: string;
 }
 
 export const HeaderPage = pure<HeaderPageProps>(
-  ({ badgeLabel, badgeTooltip, children, subtitle, title, ...rest }) => (
+  ({ badgeLabel, badgeTooltip, children, draggableArguments, subtitle, title, ...rest }) => (
     <Header {...rest}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1 data-test-subj="page_headline_title">
-              {title}
+              {!draggableArguments ? (
+                title
+              ) : (
+                <DraggableWrapper
+                  data-test-subj="page_headline_draggable"
+                  dataProvider={{
+                    and: [],
+                    enabled: true,
+                    id: escapeDataProviderId(
+                      `header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`
+                    ),
+                    name: `${title}`,
+                    excluded: false,
+                    kqlQuery: '',
+                    queryMatch: {
+                      field: draggableArguments.field,
+                      value: `${draggableArguments.value}`,
+                      operator: IS_OPERATOR,
+                    },
+                  }}
+                  render={(dataProvider, _, snapshot) =>
+                    snapshot.isDragging ? (
+                      <DragEffects>
+                        <Provider dataProvider={dataProvider} />
+                      </DragEffects>
+                    ) : (
+                      title
+                    )
+                  }
+                />
+              )}
               {badgeLabel && (
                 <>
                   {' '}
