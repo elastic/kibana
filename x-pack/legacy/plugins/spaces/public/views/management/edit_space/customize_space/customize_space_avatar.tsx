@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, isValidHex } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
+import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, isValidHex } from '@elastic/eui';
+import { EuiFilePicker } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
+import { get } from 'lodash';
+import { encode } from '../../../../../../canvas/common/lib/dataurl';
+
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
 import { Space } from '../../../../../common/model/space';
 import { getSpaceColor, getSpaceInitials } from '../../../../../common/space_attributes';
@@ -20,6 +25,7 @@ interface Props {
 interface State {
   initialsHasFocus: boolean;
   pendingInitials?: string | null;
+  avatarImage?: string | null;
 }
 
 class CustomizeSpaceAvatarUI extends Component<Props, State> {
@@ -31,6 +37,16 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
       initialsHasFocus: false,
     };
   }
+
+  private _handleChange = (value: string) => {
+    this.setState({ avatarImage: value });
+  };
+
+  private onFileUpload = (files: File[]) => {
+    const [file] = files;
+    const [type, subtype] = get(file, 'type', '').split('/');
+    encode(file).then((dataurl: string) => this._handleChange(dataurl));
+  };
 
   public render() {
     const { space, intl } = this.props;
@@ -73,9 +89,34 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               isInvalid={isInvalidSpaceColor}
             />
           </EuiFormRow>
+          {this.filePickerOrImage()}
         </EuiFlexItem>
       </form>
     );
+  }
+
+  public filePickerOrImage() {
+    const { intl } = this.props;
+
+    if (!this.state.avatarImage) {
+      return (
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.management.customizeSpaceAvatar.avatarImage',
+            defaultMessage: 'Pick an image for your space',
+          })}
+        >
+          <EuiFilePicker
+            compressed
+            initialPromptText="Select avatar image"
+            onChange={this.onFileUpload}
+            accept="image/*"
+          />
+        </EuiFormRow>
+      );
+    } else {
+      return '<div>File uploaded</div>';
+    }
   }
 
   public initialsInputRef = (ref: HTMLInputElement) => {
