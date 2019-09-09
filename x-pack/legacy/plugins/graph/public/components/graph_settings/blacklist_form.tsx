@@ -24,10 +24,10 @@ export function BlacklistForm({
   blacklistedNodes,
   unblacklistNode,
 }: Pick<GraphSettingsProps, 'blacklistedNodes' | 'unblacklistNode'>) {
-  const getListKey = useListKeys(blacklistedNodes);
+  const getListKey = useListKeys(blacklistedNodes || []);
   return (
     <>
-      {blacklistedNodes.length > 0 ? (
+      {blacklistedNodes && blacklistedNodes.length > 0 ? (
         <EuiText size="s">
           {i18n.translate('xpack.graph.settings.blacklist.blacklistHelpText', {
             defaultMessage:
@@ -46,7 +46,7 @@ export function BlacklistForm({
         />
       )}
       <EuiSpacer />
-      {blacklistedNodes.length > 0 && (
+      {blacklistedNodes && unblacklistNode && blacklistedNodes.length > 0 && (
         <>
           <EuiListGroup bordered maxWidth={false}>
             {blacklistedNodes.map(node => (

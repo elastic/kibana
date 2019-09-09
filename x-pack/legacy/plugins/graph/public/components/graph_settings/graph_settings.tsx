@@ -35,8 +35,8 @@ const tabs = [
 export interface GraphSettingsProps {
   advancedSettings: AdvancedSettings;
   updateAdvancedSettings: (advancedSettings: AdvancedSettings) => void;
-  blacklistedNodes: WorkspaceNode[];
-  unblacklistNode: (node: WorkspaceNode) => void;
+  blacklistedNodes?: WorkspaceNode[];
+  unblacklistNode?: (node: WorkspaceNode) => void;
   urlTemplates: UrlTemplate[];
   removeUrlTemplate: (urlTemplate: UrlTemplate) => void;
   saveUrlTemplate: (index: number, urlTemplate: UrlTemplate) => void;

@@ -847,7 +847,7 @@ app.controller('graphuiPlugin', function (
   }
   $scope.topNavMenu.push({
     key: 'inspect',
-    disableButton: function () { return $scope.selectedIndex === null; },
+    disableButton: function () { return $scope.workspace === null; },
     label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
       defaultMessage: 'Inspect',
     }),
@@ -883,8 +883,8 @@ app.controller('graphuiPlugin', function (
         updateAdvancedSettings: (updatedSettings) => {
           $scope.exploreControls = updatedSettings;
         },
-        blacklistedNodes: [...$scope.workspace.blacklistedNodes],
-        unblacklistNode: $scope.workspace.unblacklist,
+        blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
+        unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
         urlTemplates: [...$scope.urlTemplates],
         removeUrlTemplate: $scope.removeUrlTemplate,
         saveUrlTemplate: $scope.saveUrlTemplate,
