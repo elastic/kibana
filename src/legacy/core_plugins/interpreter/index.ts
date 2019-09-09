@@ -30,7 +30,6 @@ export default function InterpreterPlugin(kibana: any) {
     uiExports: {
       injectDefaultVars: server => ({
         serverBasePath: server.config().get('server.basePath'),
-        interpreterConfig: server.config().get('interpreter'),
       }),
     },
     config: (Joi: any) => {
