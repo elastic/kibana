@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import 'ui/notify';
 import 'ui/courier';
 import 'ui/index_patterns';
@@ -27,78 +26,38 @@ import { timefilter } from 'ui/timefilter';
 import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 import '../components/doc_directive';
 
-const app = uiModules.get('apps/doc', [
-  'kibana/courier',
-  'kibana/index_patterns'
-]);
+const app = uiModules.get('apps/doc', ['kibana/courier', 'kibana/index_patterns']);
 
-
-const resolveIndexPattern = {
-  indexPattern: function (indexPatterns, savedSearches, $route) {
-    return indexPatterns.get($route.current.params.indexPattern);
-  }
-};
-
-const k7Breadcrumbs = ($route) => [
+const k7Breadcrumbs = $route => [
   ...getRootBreadcrumbs(),
   {
-    text: `${$route.current.params.index}#${$route.current.params.id}`
-  }
+    text: `${$route.current.params.index}#${$route.current.params.id}`,
+  },
 ];
 
 uiRoutes
   // the old, pre 8.0 route, no longer used, keep it to stay compatible
   // somebody might have bookmarked his favorite log messages
   .when('/doc/:indexPattern/:index/:type', {
-    template: html,
-    resolve: resolveIndexPattern,
-    k7Breadcrumbs
+    redirectTo: '/doc/:indexPatternId/:index',
   })
   //the new route, es 7 deprecated types, es 8 removed them
   .when('/doc/:indexPattern/:index', {
     template: html,
-    resolve: resolveIndexPattern,
-    k7Breadcrumbs
+    resolve: {
+      indexPattern: (indexPatterns, savedSearches, $route) => {
+        return indexPatterns.get($route.current.params.indexPattern);
+      },
+    },
+    k7Breadcrumbs,
   });
 
-app.controller('doc', function ($scope, $route, es) {
+app.controller('doc', ($scope, $route, es) => {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
-  // Pretty much only need this for formatting, not actually using it for fetching anything.
+  $scope.es = es;
+  $scope.id = $route.current.params.id;
+  $scope.index = $route.current.params.index;
   $scope.indexPattern = $route.current.locals.indexPattern;
-
-  const computedFields = $scope.indexPattern.getComputedFields();
-
-  es.search({
-    index: $route.current.params.index,
-    body: {
-      query: {
-        ids: {
-          values: [$route.current.params.id]
-        }
-      },
-      stored_fields: computedFields.storedFields,
-      _source: true,
-      script_fields: computedFields.scriptFields,
-      docvalue_fields: computedFields.docvalueFields
-    }
-  }).then(function (resp) {
-    if (resp.hits) {
-      if (resp.hits.total < 1) {
-        $scope.status = 'notFound';
-      } else {
-        $scope.status = 'found';
-        $scope.hit = resp.hits.hits[0];
-      }
-    }
-  }).catch(function (err) {
-    if (err.status === 404) {
-      $scope.status = 'notFound';
-    } else {
-      $scope.status = 'error';
-      $scope.resp = err;
-    }
-  });
-
 });

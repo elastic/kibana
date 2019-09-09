@@ -16,22 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
 import { DocViewer } from '../../doc_viewer/doc_viewer';
+import { searchDocById } from '../search_doc_by_id';
 
 export function Doc({
-  status,
+  es,
+  id,
+  index,
   indexPattern,
-  hit,
 }: {
-  status: string;
+  id: string;
+  index: string;
   indexPattern: IndexPattern;
-  hit: ElasticSearchHit;
+  es: any;
 }) {
+  const [status, setStatus] = useState('');
+  const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+  async function requestData() {
+    const result = await searchDocById(id, index, es, indexPattern);
+    setHit(result.hit ? result.hit : null);
+    setStatus(result.status);
+  }
+  useEffect(() => {
+    requestData();
+  }, []);
   return (
     <EuiPageContent>
       {status === 'notFound' && (
@@ -70,14 +83,14 @@ export function Doc({
         </EuiCallOut>
       )}
 
-      {status === undefined && (
+      {status === '' && (
         <EuiCallOut>
           <EuiLoadingSpinner size="m" />{' '}
           <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />
         </EuiCallOut>
       )}
 
-      {status === 'found' && (
+      {status === 'found' && hit !== null && (
         <div data-test-subj="doc-hit">
           <DocViewer hit={hit} indexPattern={indexPattern} />
         </div>
