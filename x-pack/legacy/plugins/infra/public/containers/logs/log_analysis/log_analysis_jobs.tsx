@@ -92,8 +92,14 @@ export const useLogAnalysisJobs = ({
             : 'created',
         }));
       },
+      onReject: () => {
+        setJobStatus(currentJobStatus => ({
+          ...currentJobStatus,
+          logEntryRate: 'failed',
+        }));
+      },
     },
-    [indexPattern, spaceId, sourceId]
+    [indexPattern, spaceId, sourceId, timeField, bucketSpan, setJobStatus]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
