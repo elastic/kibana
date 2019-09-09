@@ -18,26 +18,30 @@ import { SuricataSignature } from './suricata_signature';
 import { SuricataRefs } from './suricata_refs';
 
 const Details = styled.div`
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 Details.displayName = 'Details';
 
-export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ data }) => {
+export const SuricataDetails = pure<{
+  browserFields: BrowserFields;
+  data: Ecs;
+  timelineId: string;
+}>(({ data, timelineId }) => {
   const signature: string | null | undefined = get('suricata.eve.alert.signature[0]', data);
   const signatureId: number | null | undefined = get('suricata.eve.alert.signature_id[0]', data);
   if (signatureId != null && signature != null) {
     return (
       <Details>
         <SuricataSignature
-          contextId="test"
+          contextId={`suricata-signature-${timelineId}-${data._id}`}
           id={data._id}
           signature={signature}
           signatureId={signatureId}
         />
         <SuricataRefs signatureId={signatureId} />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} />
+        <NetflowRenderer data={data} timelineId={timelineId} />
       </Details>
     );
   } else {

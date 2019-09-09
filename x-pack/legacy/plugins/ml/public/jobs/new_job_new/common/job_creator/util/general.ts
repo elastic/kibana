@@ -13,14 +13,7 @@ import {
 } from '../../../../../../common/constants/aggregation_types';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import {
-  JobCreator,
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  PopulationJobCreator,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-} from '../';
+import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
@@ -133,7 +126,7 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 }
 
 function stashCombinedJob(
-  jobCreator: JobCreator,
+  jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
   advanced: boolean = false
 ) {
@@ -152,7 +145,7 @@ function stashCombinedJob(
   }
 }
 
-export function convertToMultiMetricJob(jobCreator: JobCreator) {
+export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   stashCombinedJob(jobCreator, true, false);
 
@@ -162,9 +155,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreator) {
   );
 }
 
-export function convertToAdvancedJob(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator
-) {
+export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
   stashCombinedJob(jobCreator, false, true);
 
@@ -178,7 +169,7 @@ export function convertToAdvancedJob(
   window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
 }
 
-export function resetJob(jobCreator: JobCreator) {
+export function resetJob(jobCreator: JobCreatorType) {
   jobCreator.jobId = '';
   stashCombinedJob(jobCreator, true, false);
 
