@@ -48,18 +48,4 @@ describe('EmbeddedMap', () => {
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
-
-  test('renders error correctly against snapshot', () => {
-    const wrapper = shallow(
-      <EmbeddedMap
-        applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-        queryExpression={''}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
-        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
-        setQuery={setQuery}
-      />
-    );
-    wrapper.update();
-    expect(toJson(wrapper)).toMatchSnapshot();
-  });
 });

@@ -123,6 +123,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         <EmbeddableWrapper>
           {embeddable != null ? (
             <EmbeddablePanel
+              data-test-subj="embeddable-panel"
               embeddable={embeddable}
               getActions={start.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
@@ -133,9 +134,9 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
               SavedObjectFinder={SavedObjectFinder}
             />
           ) : !isLoading && isIndexError ? (
-            <IndexPatternsMissingPrompt />
+            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
           ) : (
-            <Loader data-test-subj="pewpew-loading-panel" overlay size="xl" />
+            <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
         </EmbeddableWrapper>
         <EuiSpacer />
