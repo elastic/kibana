@@ -5,16 +5,17 @@
  */
 
 import { shapes } from '../../renderers/shape/shapes';
+import { ViewStrings } from '../../strings';
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
+  displayName: ViewStrings.Shape.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: 'Select a shape',
+      displayName: ViewStrings.Shape.args.Shape.getDisplayName(),
       argType: 'shape',
       options: {
         shapes,
@@ -22,27 +23,27 @@ export const shape = () => ({
     },
     {
       name: 'fill',
-      displayName: 'Fill',
+      displayName: ViewStrings.Shape.args.Fill.getDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: ViewStrings.Shape.args.Fill.getHelp(),
     },
     {
       name: 'border',
-      displayName: 'Border',
+      displayName: ViewStrings.Shape.args.Border.getDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: ViewStrings.Shape.args.Border.getHelp(),
     },
     {
       name: 'borderWidth',
-      displayName: 'Border width',
+      displayName: ViewStrings.Shape.args.BorderWidth.getDisplayName(),
       argType: 'number',
-      help: 'Border width',
+      help: ViewStrings.Shape.args.BorderWidth.getHelp(),
     },
     {
       name: 'maintainAspect',
-      displayName: 'Maintain aspect ratio',
+      displayName: ViewStrings.Shape.args.MaintainAspect.getDisplayName(),
       argType: 'toggle',
-      help: `Select 'true' to maintain aspect ratio`,
+      help: ViewStrings.Shape.args.MaintainAspect.getHelp(),
     },
   ],
 });

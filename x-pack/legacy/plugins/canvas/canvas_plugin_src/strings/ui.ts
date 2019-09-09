@@ -581,4 +581,58 @@ export const ViewStrings = {
       },
     },
   },
+  Shape: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.displayName', {
+        defaultMessage: 'Shape',
+      }),
+    args: {
+      Shape: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.shape.displayName', {
+            defaultMessage: 'Select a shape',
+          }),
+      },
+      Fill: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.fill.displayName', {
+            defaultMessage: 'Fill',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.fill.help', {
+            defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+          }),
+      },
+      Border: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.border.displayName', {
+            defaultMessage: 'Border',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.border.help', {
+            defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+          }),
+      },
+      BorderWidth: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.borderWidth.displayName', {
+            defaultMessage: 'Border width',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.borderWidth.help', {
+            defaultMessage: 'Border width',
+          }),
+      },
+      MaintainAspect: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspect.displayName', {
+            defaultMessage: 'Maintain aspect ratio',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspect.help', {
+            defaultMessage: `Select 'true' to maintain aspect ratio`,
+          }),
+      },
+    },
+  },
 };
