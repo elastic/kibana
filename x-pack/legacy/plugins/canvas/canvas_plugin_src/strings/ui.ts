@@ -306,4 +306,53 @@ export const ViewStrings = {
       },
     },
   },
+  Plot: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.plot.displayName', {
+        defaultMessage: 'Chart style',
+      }),
+    args: {
+      legend: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.legend.displayName', {
+            defaultMessage: 'Legend position',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.legend.help', {
+            defaultMessage: 'Disable or position the legend',
+          }),
+      },
+      xaxis: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.xaxis.displayName', {
+            defaultMessage: 'X-axis',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.xaxis.help', {
+            defaultMessage: 'Configure or disable the x-axis',
+          }),
+      },
+      yaxis: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.yaxis.displayName', {
+            defaultMessage: 'Y-axis',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.yaxis.help', {
+            defaultMessage: 'Configure or disable the Y-axis',
+          }),
+      },
+      defaultStyle: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyle.displayName', {
+            defaultMessage: 'Default style',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyle.help', {
+            defaultMessage:
+              'Set the style to be used by default by every series, unless overridden',
+          }),
+      },
+    },
+  },
 };

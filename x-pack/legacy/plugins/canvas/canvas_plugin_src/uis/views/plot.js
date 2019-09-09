@@ -7,12 +7,13 @@
 import { map, uniq } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
+import { ViewStrings } from '../../strings';
 
 const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Chart style',
+  displayName: ViewStrings.Plot.getDisplayName(),
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     {
@@ -21,8 +22,8 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend position',
-      help: 'Disable or position the legend',
+      displayName: ViewStrings.Plot.args.legend.getDisplayName(),
+      help: ViewStrings.Plot.args.legend.getHelp(),
       argType: 'select',
       default: 'ne',
       options: {
@@ -31,15 +32,15 @@ export const plot = () => ({
     },
     {
       name: 'xaxis',
-      displayName: 'X-axis',
-      help: 'Configure or disable the x-axis',
+      displayName: ViewStrings.Plot.args.xaxis.getDisplayName(),
+      help: ViewStrings.Plot.args.xaxis.getHelp(),
       argType: 'axisConfig',
       default: true,
     },
     {
       name: 'yaxis',
-      displayName: 'Y-axis',
-      help: 'Configure or disable the Y-axis',
+      displayName: ViewStrings.Plot.args.yaxis.getDisplayName(),
+      help: ViewStrings.Plot.args.yaxis.getHelp(),
       argType: 'axisConfig',
       default: true,
     },
@@ -49,8 +50,8 @@ export const plot = () => ({
     },
     {
       name: 'defaultStyle',
-      displayName: 'Default style',
-      help: 'Set the style to be used by default by every series, unless overridden',
+      displayName: ViewStrings.Plot.args.defaultStyle.getDisplayName(),
+      help: ViewStrings.Plot.args.defaultStyle.getHelp(),
       argType: 'seriesStyle',
       default: '{seriesStyle points=5}',
       options: {
