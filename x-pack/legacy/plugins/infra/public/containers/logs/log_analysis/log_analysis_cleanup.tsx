@@ -5,9 +5,9 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callCleanupMLResources } from './api/ml_cleanup_everything';
+import { callDeleteJobs, callStopDatafeed } from './api/ml_cleanup';
 
 export const useLogAnalysisCleanup = ({
   sourceId,
@@ -16,23 +16,47 @@ export const useLogAnalysisCleanup = ({
   sourceId: string;
   spaceId: string;
 }) => {
-  const [cleanupMLResourcesRequest, cleanupMLResources] = useTrackedPromise(
+  const [deleteJobsRequest, deleteJobs] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callCleanupMLResources(spaceId, sourceId);
+        return await callDeleteJobs(spaceId, sourceId);
       },
     },
     [spaceId, sourceId]
   );
 
-  const isCleaningUp = useMemo(() => cleanupMLResourcesRequest.state === 'pending', [
-    cleanupMLResourcesRequest.state,
-  ]);
+  const [stopDatefeedRequest, stopDatafeed] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callStopDatafeed(spaceId, sourceId);
+      },
+    },
+    [spaceId, sourceId]
+  );
+
+  const cleanupMLResources = useCallback(async () => {
+    return stopDatafeed().then(
+      () => {
+        return deleteJobs();
+      },
+      err => {
+        if (err.statusCode === 404) {
+          return deleteJobs();
+        } else {
+          throw err;
+        }
+      }
+    );
+  }, [stopDatafeed, deleteJobs]);
 
   return {
+    deleteJobsRequest,
+    deleteJobs,
+    stopDatefeedRequest,
+    stopDatafeed,
     cleanupMLResources,
-    isCleaningUp,
   };
 };
 

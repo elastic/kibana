@@ -182,6 +182,7 @@ export const useLogAnalysisJobs = ({
   );
 
   return {
+    setupMlModuleRequest,
     jobStatus,
     isLoadingSetupStatus,
     setup,
