@@ -6,7 +6,14 @@
 
 import { sortBy } from 'lodash';
 
-import { SnapshotDetails, SnapshotDetailsEs, SnapshotConfig, SnapshotConfigEs } from '../types';
+import {
+  SnapshotDetails,
+  SnapshotDetailsEs,
+  SnapshotConfig,
+  SnapshotConfigEs,
+  SnapshotRetention,
+  SnapshotRetentionEs,
+} from '../types';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -126,5 +133,47 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
       config[key] = value;
     }
     return config;
+  }, {});
+}
+
+export function deserializeSnapshotRetention(
+  snapshotRetentionEs: SnapshotRetentionEs
+): SnapshotRetention {
+  const {
+    expire_after: expireAfter,
+    max_count: maxCount,
+    min_count: minCount,
+  } = snapshotRetentionEs;
+
+  const snapshotRetention: SnapshotRetention = {
+    expireAfter,
+    maxCount,
+    minCount,
+  };
+
+  return Object.entries(snapshotRetention).reduce((retention: any, [key, value]) => {
+    if (value !== undefined) {
+      retention[key] = value;
+    }
+    return retention;
+  }, {});
+}
+
+export function serializeSnapshotRetention(
+  snapshotRetention: SnapshotRetention
+): SnapshotRetentionEs {
+  const { expireAfter, minCount, maxCount } = snapshotRetention;
+
+  const snapshotRetentionEs: SnapshotRetentionEs = {
+    expire_after: expireAfter,
+    min_count: minCount,
+    max_count: maxCount,
+  };
+
+  return Object.entries(snapshotRetentionEs).reduce((retention: any, [key, value]) => {
+    if (value !== undefined) {
+      retention[key] = value;
+    }
+    return retention;
   }, {});
 }

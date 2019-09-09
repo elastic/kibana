@@ -12,5 +12,7 @@ export {
   deserializeSnapshotDetails,
   deserializeSnapshotConfig,
   serializeSnapshotConfig,
+  deserializeSnapshotRetention,
+  serializeSnapshotRetention,
 } from './snapshot_serialization';
 export { deserializePolicy, serializePolicy } from './policy_serialization';
