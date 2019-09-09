@@ -7,7 +7,12 @@ import { merge, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
 import { BackendFrameworkLib } from './framework';
-import { PolicyFile, NewPolicyFile, FullPolicyFile } from './adapters/policy/adapter_types';
+import {
+  PolicyFile,
+  NewPolicyFile,
+  FullPolicyFile,
+  Datasource,
+} from './adapters/policy/adapter_types';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 import { NewDatasource } from './adapters/policy/adapter_types';
 
@@ -211,19 +216,23 @@ export class PolicyLib {
       );
     }
     const uuid = uuidv4();
-
-    datasource.inputs = await this.adapter.addInputs(
-      datasource.inputs.map(input => {
-        return {
-          id: uuidv4(),
-          other: JSON.stringify(input),
-          data_source_id: uuid,
-        };
-      })
-    );
+    const editedDS: NewDatasource & {
+      inputs: string[];
+    } = {
+      ...datasource,
+      inputs: (await this.adapter.addInputs(
+        datasource.inputs.map(input => {
+          return {
+            id: uuidv4(),
+            other: JSON.stringify(input),
+            data_source_id: uuid,
+          };
+        })
+      )) as any[],
+    };
 
     await this._update(oldPolicy, {
-      data_sources: [...oldPolicy.data_sources, datasource],
+      data_sources: [...oldPolicy.data_sources, { uuid, ...editedDS } as Datasource],
     });
 
     // TODO return data

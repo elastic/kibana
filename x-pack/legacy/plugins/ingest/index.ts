@@ -28,6 +28,10 @@ export function ingest(kibana: any) {
           isNamespaceAgnostic: true,
           indexPattern: INDEX_NAMES.INGEST,
         },
+        inputs: {
+          isNamespaceAgnostic: true,
+          indexPattern: INDEX_NAMES.INGEST,
+        },
       },
       mappings,
     },
