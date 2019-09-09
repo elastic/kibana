@@ -7,20 +7,15 @@
 import React from 'react';
 import {
   EuiPage,
-  EuiPageContent,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
-import { MonitoringTimeseriesContainer } from '../../chart';
+import { MonitoringCharts } from '../../elastic_chart';
 
 export const AdvancedNode = ({
   nodeSummary,
-  metrics,
-  ...props
+  metrics
 }) => {
   const metricsToShow = [
     metrics.node_gc,
@@ -46,20 +41,7 @@ export const AdvancedNode = ({
         <EuiPanel>
           <NodeDetailStatus stats={nodeSummary} />
         </EuiPanel>
-        <EuiSpacer size="m" />
-        <EuiPageContent>
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {metricsToShow.map((metric, index) => (
-              <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
-                <EuiSpacer />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        </EuiPageContent>
+        <MonitoringCharts metrics={metricsToShow}/>
       </EuiPageBody>
     </EuiPage>
   );
