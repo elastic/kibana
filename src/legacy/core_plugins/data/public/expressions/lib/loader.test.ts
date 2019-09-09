@@ -100,7 +100,7 @@ describe('ExpressionDataHandler', () => {
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
     let response = await expressionLoader.render$.pipe(first()).toPromise();
     expect(response).toBe(1);
-    expressionLoader.update('', {});
+    expressionLoader.update('test2', {});
     response = await expressionLoader.render$.pipe(first()).toPromise();
     expect(response).toBe(2);
   });
