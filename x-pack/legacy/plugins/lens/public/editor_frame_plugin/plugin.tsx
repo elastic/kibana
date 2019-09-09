@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
-import { setup as embeddableSetup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start as embeddableStart } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   setup as dataSetup,
   start as dataStart,
@@ -28,12 +28,12 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
   chrome: Chrome;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
+  embeddables: typeof embeddableStart;
   chrome: Chrome;
 }
 
@@ -46,15 +46,6 @@ export class EditorFramePlugin {
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.data.expressions.registerFunction(() => mergeTables);
 
-    plugins.registerEmbeddableFactory(
-      'lens',
-      new EmbeddableFactory(
-        plugins.chrome,
-        plugins.data.expressions.ExpressionRenderer,
-        plugins.data.indexPatterns.indexPatterns
-      )
-    );
-
     return {
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
@@ -66,6 +57,15 @@ export class EditorFramePlugin {
   }
 
   public start(_core: CoreStart | null, plugins: EditorFrameStartPlugins): EditorFrameStart {
+    plugins.embeddables.registerEmbeddableFactory(
+      'lens',
+      new EmbeddableFactory(
+        plugins.chrome,
+        plugins.data.expressions.ExpressionRenderer,
+        plugins.data.indexPatterns.indexPatterns
+      )
+    );
+
     const createInstance = (): EditorFrameInstance => {
       let domElement: Element;
       return {
@@ -119,13 +119,13 @@ export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data: dataStart,
     chrome,
-    registerEmbeddableFactory: embeddableSetup.registerEmbeddableFactory,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(null, {
     data: dataStart,
     chrome,
+    embeddables: embeddableStart,
   });
 
 export const editorFrameStop = () => editorFrame.stop();

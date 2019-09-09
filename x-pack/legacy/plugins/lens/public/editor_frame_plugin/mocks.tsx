@@ -111,7 +111,6 @@ export function createMockSetupDependencies() {
         indexPatterns: {},
       },
     },
-    registerEmbeddableFactory: jest.fn(),
     chrome: {
       getSavedObjectsClient: () => {},
     },
@@ -127,6 +126,9 @@ export function createMockStartDependencies() {
       indexPatterns: {
         indexPatterns: {},
       },
+    },
+    embeddables: {
+      registerEmbeddableFactory: jest.fn(),
     },
   } as unknown) as MockedStartDependencies;
 }
