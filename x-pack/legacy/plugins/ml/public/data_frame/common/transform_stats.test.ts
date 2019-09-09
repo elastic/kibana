@@ -5,23 +5,36 @@
  */
 
 import mockDataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
+import mockDataFrameTransformStats from './__mocks__/data_frame_transform_stats.json';
 
 import { DataFrameTransformListRow } from './transform_list';
-import { isCompletedBatchTransform, DATA_FRAME_TRANSFORM_STATE } from './transform_stats';
+import { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 
-describe('Data Frame: isCompletedBatchTransform()', () => {
+const getRow = (statsId: string) => {
+  return {
+    ...(mockDataFrameTransformListRow as DataFrameTransformListRow),
+    stats: {
+      ...mockDataFrameTransformStats.transforms.find(
+        (stats: DataFrameTransformListRow['stats']) => stats.id === statsId
+      ),
+    },
+  };
+};
+
+describe('Data Frame: Transform stats.', () => {
+  test('getTransformProgress()', () => {
+    // At the moment, any kind of stopped jobs don't include progress information.
+    // We cannot infer progress for now from an unfinished job that has been stopped for now.
+    expect(getTransformProgress(getRow('transform-created'))).toBe(undefined);
+    expect(getTransformProgress(getRow('transform-created-started-stopped'))).toBe(undefined);
+    expect(getTransformProgress(getRow('transform-running'))).toBe(21);
+    expect(getTransformProgress(getRow('transform-completed'))).toBe(100);
+  });
+
   test('isCompletedBatchTransform()', () => {
-    // check the transform config/state against the conditions
-    // that will be used by isCompletedBatchTransform()
-    // followed by a call to isCompletedBatchTransform() itself
-    const row = mockDataFrameTransformListRow as DataFrameTransformListRow;
-    expect(row.stats.checkpointing.last.checkpoint === 1).toBe(true);
-    expect(row.config.sync === undefined).toBe(true);
-    expect(row.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED).toBe(true);
-    expect(isCompletedBatchTransform(mockDataFrameTransformListRow)).toBe(true);
-
-    // adapt the mock config to resemble a non-completed transform.
-    row.stats.checkpointing.last.checkpoint = 0;
-    expect(isCompletedBatchTransform(mockDataFrameTransformListRow)).toBe(false);
+    expect(isCompletedBatchTransform(getRow('transform-created'))).toBe(false);
+    expect(isCompletedBatchTransform(getRow('transform-created-started-stopped'))).toBe(false);
+    expect(isCompletedBatchTransform(getRow('transform-running'))).toBe(false);
+    expect(isCompletedBatchTransform(getRow('transform-completed'))).toBe(true);
   });
 });
