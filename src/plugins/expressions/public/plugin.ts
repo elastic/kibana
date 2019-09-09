@@ -18,20 +18,30 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsService } from './expressions/expressions_service';
+import {
+  ExpressionsService,
+  ExpressionsSetupContract,
+  ExpressionsStartContract,
+} from './expressions/expressions_service';
 
-export class ExpressionsPublicPlugin implements Plugin<{}> {
-  expressions = new ExpressionsService();
+export class ExpressionsPublicPlugin
+  implements Plugin<{}, {}, ExpressionsSetupContract, ExpressionsStartContract> {
+  private readonly expressions = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): ExpressionsSetupContract {
     const expressions = this.expressions.setup();
     return {
       ...expressions,
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart): ExpressionsSetupContract {
+    const expressions = this.expressions.start();
+    return {
+      ...expressions,
+    };
+  }
   public stop() {}
 }

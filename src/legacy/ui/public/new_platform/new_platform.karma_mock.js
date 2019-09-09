@@ -33,7 +33,7 @@ export const npSetup = {
     },
     inspector: {
       registerView: () => undefined,
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: {
           register: () => undefined,
         },
