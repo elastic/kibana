@@ -89,5 +89,6 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
     }
   }
   text="[generic-text-123]"
+  timelineId="test"
 />
 `;
