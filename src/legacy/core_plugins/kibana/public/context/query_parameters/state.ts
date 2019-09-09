@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export function createInitialQueryParametersState(defaultStepSize, tieBreakerField) {
+export function createInitialQueryParametersState(
+  defaultStepSize: number = 5,
+  tieBreakerField: string = '_doc'
+) {
   return {
     anchorId: null,
     columns: [],
