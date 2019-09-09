@@ -14,7 +14,7 @@ export enum HostsType {
 
 export enum HostsTableType {
   authentications = 'authentications',
-  hosts = 'hosts',
+  hosts = 'allHosts',
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',

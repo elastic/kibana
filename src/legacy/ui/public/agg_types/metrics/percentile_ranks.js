@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PercentileRanksEditor } from '../controls/percentile_ranks';
+import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { fieldFormats } from '../../registry/field_formats';

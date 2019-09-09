@@ -13,6 +13,7 @@ import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector_style';
+import { vectorStyles } from '../../styles/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -42,10 +43,10 @@ export class ESPewPewSource extends AbstractESSource {
 
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
-    defaultMessage: 'Source-destination connections'
+    defaultMessage: 'Point to point'
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the origin and destinations.'
+    defaultMessage: 'Aggregated data paths between the source and destination'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
@@ -141,7 +142,7 @@ export class ESPewPewSource extends AbstractESSource {
 
   createDefaultLayer(options) {
     const styleDescriptor = VectorStyle.createDescriptor({
-      lineColor: {
+      [vectorStyles.LINE_COLOR]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -152,7 +153,7 @@ export class ESPewPewSource extends AbstractESSource {
           color: 'Blues'
         }
       },
-      lineWidth: {
+      [vectorStyles.LINE_WIDTH]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {

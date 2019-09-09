@@ -17,7 +17,7 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
       },
     }
   }
-  key="some-id"
+  key="draggable-score-draggable-wrapper-some-id"
   render={[Function]}
 />
 `;
@@ -39,7 +39,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
       },
     }
   }
-  key="some-id"
+  key="draggable-score-draggable-wrapper-some-id"
   render={[Function]}
 />
 `;
