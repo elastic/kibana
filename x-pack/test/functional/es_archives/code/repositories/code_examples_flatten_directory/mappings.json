@@ -1,0 +1,480 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".code-document-github.com-elastic-code-examples_flatten-directory-40bb5fb7": {
+      }
+    },
+    "index": ".code-document-github.com-elastic-code-examples_flatten-directory-40bb5fb7-1",
+    "mappings": {
+      "_meta": {
+        "version": 1
+      },
+      "dynamic_templates": [
+        {
+          "fieldDefaultNotAnalyzed": {
+            "mapping": {
+              "index": false,
+              "norms": false
+            },
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "content": {
+          "analyzer": "content_analyzer",
+          "type": "text"
+        },
+        "language": {
+          "type": "keyword"
+        },
+        "path": {
+          "analyzer": "path_analyzer",
+          "fields": {
+            "hierarchy": {
+              "analyzer": "path_hierarchy_analyzer",
+              "type": "text"
+            },
+            "keyword": {
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "qnames": {
+          "analyzer": "qname_path_hierarchy_analyzer",
+          "type": "text"
+        },
+        "repoUri": {
+          "type": "keyword"
+        },
+        "repository": {
+          "properties": {
+            "defaultBranch": {
+              "type": "keyword"
+            },
+            "indexedRevision": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "text"
+            },
+            "nextUpdateTimestamp": {
+              "index": false,
+              "type": "date"
+            },
+            "org": {
+              "type": "text"
+            },
+            "protocol": {
+              "index": false,
+              "norms": false,
+              "type": "text"
+            },
+            "revision": {
+              "type": "keyword"
+            },
+            "uri": {
+              "type": "text"
+            },
+            "url": {
+              "index": false,
+              "type": "text"
+            }
+          }
+        },
+        "repository_config": {
+          "properties": {
+            "disableGo": {
+              "type": "boolean"
+            },
+            "disableJava": {
+              "type": "boolean"
+            },
+            "disableTypescript": {
+              "type": "boolean"
+            },
+            "uri": {
+              "type": "text"
+            }
+          }
+        },
+        "repository_delete_status": {
+          "properties": {
+            "progress": {
+              "type": "integer"
+            },
+            "revision": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "uri": {
+              "type": "text"
+            }
+          }
+        },
+        "repository_git_status": {
+          "properties": {
+            "cloneProgress": {
+              "properties": {
+                "indexedDeltas": {
+                  "type": "integer"
+                },
+                "indexedObjects": {
+                  "type": "integer"
+                },
+                "isCloned": {
+                  "type": "boolean"
+                },
+                "localObjects": {
+                  "type": "integer"
+                },
+                "receivedBytes": {
+                  "type": "integer"
+                },
+                "receivedObjects": {
+                  "type": "integer"
+                },
+                "totalDeltas": {
+                  "type": "integer"
+                },
+                "totalObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "errorMessage": {
+              "type": "text"
+            },
+            "progress": {
+              "type": "integer"
+            },
+            "revision": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "uri": {
+              "type": "text"
+            }
+          }
+        },
+        "repository_index_status": {
+          "properties": {
+            "commitIndexProgress": {
+              "properties": {
+                "checkpoint": {
+                  "type": "object"
+                },
+                "fail": {
+                  "type": "integer"
+                },
+                "percentage": {
+                  "type": "integer"
+                },
+                "success": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "indexProgress": {
+              "properties": {
+                "checkpoint": {
+                  "properties": {
+                    "filePath": {
+                      "index": false,
+                      "norms": false,
+                      "type": "text"
+                    },
+                    "repoUri": {
+                      "index": false,
+                      "norms": false,
+                      "type": "text"
+                    },
+                    "revision": {
+                      "index": false,
+                      "norms": false,
+                      "type": "text"
+                    }
+                  }
+                },
+                "fail": {
+                  "type": "integer"
+                },
+                "percentage": {
+                  "type": "integer"
+                },
+                "success": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "progress": {
+              "type": "integer"
+            },
+            "revision": {
+              "type": "keyword"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "uri": {
+              "type": "text"
+            }
+          }
+        },
+        "repository_random_path": {
+          "type": "keyword"
+        },
+        "sha1": {
+          "index": false,
+          "norms": false,
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "content_analyzer": {
+              "char_filter": [
+                "content_char_filter"
+              ],
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "standard"
+            },
+            "lowercase_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "keyword",
+              "type": "custom"
+            },
+            "path_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "path_tokenizer",
+              "type": "custom"
+            },
+            "path_hierarchy_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "path_hierarchy_tokenizer",
+              "type": "custom"
+            },
+            "qname_path_hierarchy_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "qname_path_hierarchy_tokenizer",
+              "type": "custom"
+            }
+          },
+          "char_filter": {
+            "content_char_filter": {
+              "pattern": "[.]",
+              "replacement": " ",
+              "type": "pattern_replace"
+            }
+          },
+          "tokenizer": {
+            "path_hierarchy_tokenizer": {
+              "delimiter": "/",
+              "reverse": "true",
+              "type": "path_hierarchy"
+            },
+            "path_tokenizer": {
+              "pattern": "[\\\\./]",
+              "type": "pattern"
+            },
+            "qname_path_hierarchy_tokenizer": {
+              "delimiter": ".",
+              "reverse": "true",
+              "type": "path_hierarchy"
+            }
+          }
+        },
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".code-reference-github.com-elastic-code-examples_flatten-directory-40bb5fb7": {
+      }
+    },
+    "index": ".code-reference-github.com-elastic-code-examples_flatten-directory-40bb5fb7-1",
+    "mappings": {
+      "_meta": {
+        "version": 1
+      },
+      "dynamic_templates": [
+        {
+          "fieldDefaultNotAnalyzed": {
+            "mapping": {
+              "index": false,
+              "norms": false
+            },
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "category": {
+          "type": "keyword"
+        },
+        "location": {
+          "properties": {
+            "uri": {
+              "type": "text"
+            }
+          }
+        },
+        "symbol": {
+          "properties": {
+            "kind": {
+              "type": "keyword"
+            },
+            "location": {
+              "properties": {
+                "uri": {
+                  "type": "text"
+                }
+              }
+            },
+            "name": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".code-symbol-github.com-elastic-code-examples_flatten-directory-40bb5fb7": {
+      }
+    },
+    "index": ".code-symbol-github.com-elastic-code-examples_flatten-directory-40bb5fb7-1",
+    "mappings": {
+      "_meta": {
+        "version": 1
+      },
+      "dynamic_templates": [
+        {
+          "fieldDefaultNotAnalyzed": {
+            "mapping": {
+              "index": false,
+              "norms": false
+            },
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "qname": {
+          "analyzer": "qname_path_hierarchy_case_sensitive_analyzer",
+          "fields": {
+            "lowercased": {
+              "analyzer": "qname_path_hierarchy_case_insensitive_analyzer",
+              "type": "text"
+            }
+          },
+          "type": "text"
+        },
+        "symbolInformation": {
+          "properties": {
+            "kind": {
+              "index": false,
+              "type": "integer"
+            },
+            "location": {
+              "properties": {
+                "uri": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "name": {
+              "analyzer": "qname_path_hierarchy_case_sensitive_analyzer",
+              "fields": {
+                "lowercased": {
+                  "analyzer": "qname_path_hierarchy_case_insensitive_analyzer",
+                  "type": "text"
+                }
+              },
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "qname_path_hierarchy_case_insensitive_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "tokenizer": "qname_path_hierarchy_tokenizer",
+              "type": "custom"
+            },
+            "qname_path_hierarchy_case_sensitive_analyzer": {
+              "tokenizer": "qname_path_hierarchy_tokenizer",
+              "type": "custom"
+            }
+          },
+          "tokenizer": {
+            "qname_path_hierarchy_tokenizer": {
+              "delimiter": ".",
+              "reverse": "true",
+              "type": "path_hierarchy"
+            }
+          }
+        },
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

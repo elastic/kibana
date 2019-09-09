@@ -25,6 +25,7 @@ describe('GenericDetails', () => {
           text="generic-text-123"
           browserFields={browserFields}
           data={mockTimelineData[21].ecs}
+          timelineId="test"
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -38,6 +39,7 @@ describe('GenericDetails', () => {
             text="generic-text-123"
             browserFields={mockBrowserFields}
             data={mockTimelineData[19].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -54,6 +56,7 @@ describe('GenericDetails', () => {
             text="generic-text-123"
             browserFields={mockBrowserFields}
             data={mockTimelineData[0].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );

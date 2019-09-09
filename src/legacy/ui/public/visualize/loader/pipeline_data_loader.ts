@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { RequestHandlerParams, Vis } from '../../vis';
+import { Vis } from '../../vis';
 import { buildPipeline, runPipeline } from './pipeline_helpers';
+import { RequestHandlerParams } from './embedded_visualize_handler';
 
 export class PipelineDataLoader {
   constructor(private readonly vis: Vis) {}
