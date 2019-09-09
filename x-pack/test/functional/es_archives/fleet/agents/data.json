@@ -5,12 +5,24 @@
     "index": ".kibana",
     "source": {
       "agents": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiQUNDRVNTX1RPS0VOIiwiYWdlbnRJZCI6ImIzNWQ2ZDIwLWQwYTAtMTFlOS1iNTkwLThiMGEzYWY4NzUwZCIsImNvbmZpZyI6eyJpZCI6ImNvbmZpZzEiLCJzaGFyZWRJZCI6ImNvbmZpZzEifSwiaWF0IjoxNTY3NzcyNDIzfQ.UQJjI9Ki6JL3iX6zMGhd-LFZynq8a6-Fti1qcq9poFQ",
         "active": true,
         "shared_id": "agent1_filebeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "user_provided_metadata": "{}",
+        "events": [],
+        "actions": [{
+          "id": "37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
+          "created_at": "2019-09-04T15:04:07+0000",
+          "type": "RESUME"
+        },
+        {
+          "id": "b400439c-bbbf-43d5-83cb-cf8b7e32506f",
+          "type": "PAUSE",
+          "created_at": "2019-09-04T15:01:07+0000",
+          "sent_at": "2019-09-04T15:03:07+0000"
+        }]
       },
       "type": "agents"
     }
@@ -29,7 +41,9 @@
         "shared_id": "agent2_filebeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "user_provided_metadata": "{}",
+        "events": [],
+        "actions": []
       },
       "type": "agents"
     }
@@ -48,7 +62,9 @@
         "shared_id": "agent3_metricbeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "user_provided_metadata": "{}",
+        "events": [],
+        "actions": []
       },
       "type": "agents"
     }
@@ -67,7 +83,9 @@
         "shared_id": "agent4_metricbeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "user_provided_metadata": "{}",
+        "events": [],
+        "actions": []
       },
       "type": "agents"
     }
@@ -81,7 +99,7 @@
     "index": ".kibana",
     "source": {
       "tokens": {
-        "type": 0,
+        "type": "ENROLMENT_TOKEN",
         "tokenHash": "7129fcd665a3e9f9976d6d67d993178ab9267c4739e2f38c3459806a95252b5ebd245c9c2d7ebbe9f2077be24f7556076bb9c34d3269568e0434253dcde9b8ad",
         "config_id": "config1",
         "config_shared_id": "config1",

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
+import Boom from 'boom';
 import {
   AgentAdapter,
   Agent,
   SortOptions,
   NewAgent,
   AgentType,
+  AgentEvent,
+  AgentAction,
 } from './adapters/agent/adapter_type';
 import { TokenLib } from './token';
 
@@ -39,7 +41,7 @@ export class AgentLib {
       throw new Error('Impossible to enroll an already active agent');
     }
 
-    const enrolledAt = moment().toISOString();
+    const enrolledAt = new Date().toISOString();
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
@@ -97,6 +99,45 @@ export class AgentLib {
   }
 
   /**
+   * Agent checkin, update events, get new actions to perfomed.
+   * @param agent
+   * @param events
+   * @param metadata
+   */
+  public async checkin(
+    agentId: string,
+    events: AgentEvent[],
+    localMetadata?: any
+  ): Promise<{ actions: AgentAction[] }> {
+    const agent = await this.agentAdater.getById(agentId);
+
+    if (!agent || !agent.active) {
+      throw Boom.notFound('Agent not found or inactive');
+    }
+
+    const actions = this._filterActionsForCheckin(agent);
+
+    const now = new Date().toISOString();
+    const updatedActions = actions.map(a => {
+      return { ...a, sent_at: now };
+    });
+
+    const updateData: Partial<Agent> = {
+      events: events.concat(agent.events),
+      last_checkin: now,
+      actions: updatedActions,
+    };
+
+    if (localMetadata) {
+      updateData.local_metadata = localMetadata;
+    }
+
+    await this.agentAdater.update(agent.id, updateData);
+
+    return { actions };
+  }
+
+  /**
    * List agents
    *
    * @param sortOptions
@@ -109,6 +150,10 @@ export class AgentLib {
     perPage?: number
   ): Promise<{ agents: Agent[]; total: number }> {
     return this.agentAdater.list(sortOptions, page, perPage);
+  }
+
+  public _filterActionsForCheckin(agent: Agent): AgentAction[] {
+    return agent.actions.filter(a => !a.sent_at);
   }
 
   private async _createParentForEphemeral(

@@ -39,6 +39,14 @@ export interface ReturnTypeDelete extends BaseReturnType {
   action: 'deleted';
 }
 
+export interface ReturnTypeCheckin extends BaseReturnType {
+  action: 'checkin';
+  actions: Array<{
+    type: string;
+    data?: object;
+  }>;
+}
+
 export interface ReturnTypeBulkDelete extends BaseReturnType {
   results: Array<{
     success: boolean;
