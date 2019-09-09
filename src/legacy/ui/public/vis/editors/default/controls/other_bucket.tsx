@@ -17,22 +17,26 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { SwitchParamEditor } from './switch';
+import { AggParamEditorProps } from '..';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
-
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
+function OtherBucketParamEditor(props: AggParamEditorProps<boolean>) {
+  return (
+    <SwitchParamEditor
+      dataTestSubj="otherBucketSwitch"
+      displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
+        defaultMessage: 'Group other values in separate bucket',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
+        defaultMessage:
+          'Values not in the top N are grouped in this bucket. ' +
+          "To include documents with missing values, enable 'Show missing values'.",
+      })}
+      {...props}
+    />
+  );
 }
+
+export { OtherBucketParamEditor };
