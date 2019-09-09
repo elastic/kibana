@@ -105,7 +105,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     return null;
   }
 
-  private constructor(props: ScrollableLogTextStreamViewProps) {
+  constructor(props: ScrollableLogTextStreamViewProps) {
     super(props);
     this.state = {
       target: null,
