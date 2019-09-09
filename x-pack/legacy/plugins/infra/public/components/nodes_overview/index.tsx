@@ -36,7 +36,6 @@ interface Props {
   timeRange: InfraTimerangeInput;
   onViewChange: (view: string) => void;
   view: string;
-
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
 }
@@ -91,7 +90,6 @@ export const NodesOverview = class extends React.Component<Props, {}> {
       nodes,
       nodeType,
       reload,
-
       view,
       options,
       timeRange,

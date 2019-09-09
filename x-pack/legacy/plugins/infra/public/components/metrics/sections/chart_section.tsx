@@ -47,7 +47,6 @@ export const ChartSection = ({
   onChangeRangeTime,
   section,
   metric,
-
   stopLiveStreaming,
   isLiveStreaming,
 }: Props) => {

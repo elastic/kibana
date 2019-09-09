@@ -28,7 +28,6 @@ interface Props {
   nodeType: InfraNodeType;
   isPopoverOpen: boolean;
   closePopover: () => void;
-
   uiCapabilities: UICapabilities;
   popoverPosition: EuiPopoverProps['anchorPosition'];
 }

@@ -26,7 +26,6 @@ interface Props {
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
   timeRange: InfraTimerangeInput;
-
   onFilter: (filter: string) => void;
 }
 

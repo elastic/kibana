@@ -28,7 +28,6 @@ interface Props {
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
-
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
