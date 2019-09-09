@@ -176,14 +176,6 @@ export function SettingsList() {
   const failurePrompt = (
     <EuiEmptyPrompt
       iconType="alert"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.apm.settings.agentConf.configTable.failurePromptTitle',
-            { defaultMessage: 'Failed to initialize settings.' }
-          )}
-        </h2>
-      }
       body={
         <>
           <p>
@@ -191,7 +183,7 @@ export function SettingsList() {
               'xpack.apm.settings.agentConf.configTable.failurePromptText',
               {
                 defaultMessage:
-                  'Whoops! The settings management failed to initialize. This might be because the user that is logged in does not have permission to read or write the APM agent configuration index. The next time a user with adequate privileges loads this screen, Kibana will complete this step.'
+                  'The list of agent configurations could not be fetched'
               }
             )}
           </p>
@@ -321,20 +313,21 @@ export function SettingsList() {
         </EuiCallOut>
 
         <EuiSpacer size="m" />
-        {status === 'failure' ? (
-          failurePrompt
-        ) : hasConfigurations ? (
-          <ManagedTable
-            noItemsMessage={<LoadingStatePrompt />}
-            columns={COLUMNS}
-            items={data}
-            initialSortField="service.name"
-            initialSortDirection="asc"
-            initialPageSize={50}
-          />
-        ) : (
-          emptyStatePrompt
-        )}
+        {status === 'failure' ? failurePrompt : null}
+        {status === 'success' ? (
+          hasConfigurations ? (
+            <ManagedTable
+              noItemsMessage={<LoadingStatePrompt />}
+              columns={COLUMNS}
+              items={data}
+              initialSortField="service.name"
+              initialSortDirection="asc"
+              initialPageSize={50}
+            />
+          ) : (
+            emptyStatePrompt
+          )
+        ) : null}
       </EuiPanel>
     </>
   );
