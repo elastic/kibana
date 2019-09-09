@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
@@ -30,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../api/context';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
 
 export interface ActionBarProps {
   /**
@@ -59,14 +59,10 @@ export interface ActionBarProps {
    */
   onChangeCount: (count: number) => void;
   /**
-   * is triggered the 'Load' button is clicked
-   */
-  onLoadMoreClick: () => void;
-  /**
    * can be `predecessors` or `successors`, usage in context:
-   * predecessors action bar + records
+   * predecessors action bar + records (these are newer records)
    * anchor record
-   * successors records + action bar
+   * successors records + action bar (these are older records)
    */
   type: SurrDocType;
 }
@@ -78,16 +74,20 @@ export function ActionBar({
   isDisabled,
   isLoading,
   onChangeCount,
-  onLoadMoreClick,
   type,
 }: ActionBarProps) {
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === 'successors';
   const [newDocCount, setNewDocCount] = useState(docCount);
-  const onChangeDebouncedRef = useRef(debounce((val: number) => onChangeCount(val), 500));
+  const onSubmit = (ev: any) => {
+    ev.preventDefault();
+    if (newDocCount !== docCount) {
+      onChangeCount(newDocCount);
+    }
+  };
 
   return (
-    <>
+    <form onSubmit={onSubmit}>
       {isSuccessor && <EuiSpacer size="s" />}
       {isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
       {isSuccessor && showWarning && <EuiSpacer size="s" />}
@@ -99,8 +99,9 @@ export function ActionBar({
             isDisabled={isDisabled}
             isLoading={isLoading}
             onClick={() => {
-              onLoadMoreClick();
-              setNewDocCount(newDocCount + defaultStepSize);
+              const value = newDocCount + defaultStepSize;
+              setNewDocCount(value);
+              onChangeCount(value);
             }}
             flush="right"
           >
@@ -122,11 +123,14 @@ export function ActionBar({
               className="cxtSizePicker"
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
+              min={MIN_CONTEXT_SIZE}
+              max={MAX_CONTEXT_SIZE}
               onChange={ev => {
-                const value = ev.target.valueAsNumber;
-                setNewDocCount(value);
-                if (value >= 0) {
-                  onChangeDebouncedRef.current(value);
+                setNewDocCount(ev.target.valueAsNumber);
+              }}
+              onBlur={() => {
+                if (newDocCount !== docCount) {
+                  onChangeCount(newDocCount);
                 }
               }}
               type="number"
@@ -152,6 +156,6 @@ export function ActionBar({
       </EuiFlexGroup>
       {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
       {!isSuccessor && <EuiSpacer size="s" />}
-    </>
+    </form>
   );
 }

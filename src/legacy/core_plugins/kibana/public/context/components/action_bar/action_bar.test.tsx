@@ -25,27 +25,30 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('Test Discover Context ActionBar for successor records', () => {
   const props = {
+    defaultStepSize: 5,
     docCount: 20,
     docCountAvailable: 0,
     isDisabled: false,
     isLoading: false,
     onChangeCount: jest.fn(),
-    onLoadMoreClick: jest.fn(),
     type: 'successors',
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
-  test('Count input', () => {
-    expect(findTestSubject(wrapper, 'successorsCountPicker').props().value).toBe(20);
-    findTestSubject(wrapper, 'successorsCountPicker').simulate('change', {
-      target: { value: 123 },
-    });
-    expect(props.onChangeCount).toHaveBeenCalledTimes(1);
-  });
-
   test('Load button ', () => {
     findTestSubject(wrapper, 'successorsLoadMoreButton').simulate('click');
-    expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
+    expect(props.onChangeCount).toHaveBeenCalledWith(25);
+  });
+
+  test('Count input', () => {
+    expect(findTestSubject(wrapper, 'successorsCountPicker').props().value).toBe(25);
+    findTestSubject(wrapper, 'successorsCountPicker').simulate('change', {
+      target: { value: '123' },
+    });
+    findTestSubject(wrapper, 'successorsCountPicker').simulate('blur');
+    expect(props.onChangeCount).toHaveBeenCalledTimes(2);
+    findTestSubject(wrapper, 'successorsCountPicker').simulate('submit');
+    expect(props.onChangeCount).toHaveBeenCalledTimes(3);
   });
 
   test('Warning about limitation of additional records', () => {
@@ -57,6 +60,7 @@ describe('Test Discover Context ActionBar for successor records', () => {
 
 describe('Test Discover Context ActionBar for predecessor records', () => {
   const props = {
+    defaultStepSize: 5,
     docCount: 20,
     docCountAvailable: 1,
     isDisabled: false,
@@ -67,17 +71,20 @@ describe('Test Discover Context ActionBar for predecessor records', () => {
   } as ActionBarProps;
   const wrapper = mountWithIntl(<ActionBar {...props} />);
 
-  test('Count input', () => {
-    expect(findTestSubject(wrapper, 'predecessorsCountPicker').props().value).toBe(20);
-    findTestSubject(wrapper, 'predecessorsCountPicker').simulate('change', {
-      target: { value: 123 },
-    });
+  test('Load button ', () => {
+    findTestSubject(wrapper, 'predecessorsLoadMoreButton').simulate('click');
     expect(props.onChangeCount).toHaveBeenCalledTimes(1);
   });
 
-  test('Load button ', () => {
-    findTestSubject(wrapper, 'predecessorsLoadMoreButton').simulate('click');
-    expect(props.onLoadMoreClick).toHaveBeenCalledTimes(1);
+  test('Count input', () => {
+    expect(findTestSubject(wrapper, 'predecessorsCountPicker').props().value).toBe(25);
+    findTestSubject(wrapper, 'predecessorsCountPicker').simulate('change', {
+      target: { value: 123 },
+    });
+    findTestSubject(wrapper, 'predecessorsCountPicker').simulate('blur');
+    expect(props.onChangeCount).toHaveBeenCalledTimes(2);
+    findTestSubject(wrapper, 'predecessorsCountPicker').simulate('submit');
+    expect(props.onChangeCount).toHaveBeenCalledTimes(3);
   });
 
   test('Warning about limitation of additional records', () => {
