@@ -16,7 +16,6 @@ export interface UptimeUrlParams {
   pagination?: string;
   search: string;
   selectedPingStatus: string;
-  overviewPageIndex: number;
 }
 
 const {
@@ -66,7 +65,6 @@ export const getSupportedUrlParams = (params: {
     search,
     selectedPingStatus,
     pagination,
-    overviewPageIndex,
   } = filteredParams;
 
   return {
@@ -74,15 +72,9 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
-    // TODO: reintroduce for pagination and sorting
-    // monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
-    // monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
-    // monitorListSortDirection: monitorListSortDirection || MONITOR_LIST_SORT_DIRECTION,
-    // monitorListSortField: monitorListSortField || MONITOR_LIST_SORT_FIELD,
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     pagination,
-    overviewPageIndex: parseUrlInt(overviewPageIndex, OVERVIEW_PAGE_INDEX),
   };
 };

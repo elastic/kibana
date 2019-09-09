@@ -6,6 +6,7 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
 }
@@ -17,6 +18,7 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
 }
@@ -28,6 +30,7 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "bar",
   "dateRangeStart": "foo",
+  "pagination": undefined,
   "search": "monitor.status: down",
   "selectedPingStatus": "up",
 }
@@ -39,6 +42,7 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
 }
@@ -50,6 +54,7 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-18d",
+  "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
 }

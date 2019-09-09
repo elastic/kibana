@@ -83,6 +83,24 @@ exports[`MonitorList component renders a no items message when no data is provid
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <span>
+            <EuiIcon
+              color="ghost"
+              type="arrowLeft"
+            />
+            <EuiIcon
+              color="ghost"
+              type="arrowRight"
+            />
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   </EuiPanel>
 </Fragment>
 `;
@@ -232,6 +250,24 @@ exports[`MonitorList component renders the monitor list 1`] = `
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <span>
+            <EuiIcon
+              color="ghost"
+              type="arrowLeft"
+            />
+            <EuiIcon
+              color="ghost"
+              type="arrowRight"
+            />
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   </EuiPanel>
 </Fragment>
 `;
