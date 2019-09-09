@@ -396,10 +396,10 @@ export class MBMapContainer extends React.Component {
         }
       });
       mbMap.on('load', () => {
-        mbMap.loadImage(TRANSPARENT_1x1_BASE64_URI, (error, data) => {
-          emptyImage = data;
-          resolve(mbMap);
-        });
+        emptyImage = new Image();
+        emptyImage.src = TRANSPARENT_1x1_BASE64_URI;
+        emptyImage.crossOrigin = 'anonymous';
+        resolve(mbMap);
       });
     });
   }
