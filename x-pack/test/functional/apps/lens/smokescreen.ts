@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects }: FtrProviderContext) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -18,6 +18,8 @@ export default function({ getPageObjects }: FtrProviderContext) {
     'timePicker',
     'lens',
   ]);
+  const find = getService('find');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   async function assertExpectedMetric() {
     await PageObjects.lens.assertExactText(
@@ -49,9 +51,9 @@ export default function({ getPageObjects }: FtrProviderContext) {
     it('should be embeddable in dashboards', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations([
-        { name: 'Artistpreviouslyknownaslens', embeddableType: 'lens' },
-      ]);
+      await dashboardAddPanel.clickOpenAddPanel();
+      await find.clickByButtonText('Artistpreviouslyknownaslens');
+      await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
     });
