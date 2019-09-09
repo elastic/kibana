@@ -456,7 +456,7 @@ describe('SIEM Super Date Picker', () => {
           },
         ];
         const props2 = mapStateToProps(clone, { id: 'global' });
-        expect(props1.refetch).not.toBe(props2.refetch);
+        expect(props1.queries).not.toBe(props2.queries);
       });
     });
   });

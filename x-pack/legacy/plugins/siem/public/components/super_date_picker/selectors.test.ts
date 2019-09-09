@@ -13,7 +13,6 @@ import {
   fromStrSelector,
   toStrSelector,
   isLoadingSelector,
-  refetchSelector,
 } from './selectors';
 import { InputsRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
 import { cloneDeep } from 'lodash/fp';
@@ -45,7 +44,6 @@ describe('selectors', () => {
   const getFromStrSelector = fromStrSelector();
   const getToStrSelector = toStrSelector();
   const getIsLoadingSelector = isLoadingSelector();
-  const getRefetchSelector = refetchSelector();
 
   beforeEach(() => {
     absoluteTime = {
@@ -360,40 +358,6 @@ describe('selectors', () => {
       };
       const result = getIsLoadingSelector(inputsRange);
       expect(result).toBe(true);
-    });
-  });
-
-  describe('#refetchSelector', () => {
-    test('returns the same reference given the same identical input twice', () => {
-      const result1 = getRefetchSelector(inputState);
-      const result2 = getRefetchSelector(inputState);
-      expect(result1).toBe(result2);
-    });
-
-    test('DOES NOT return the same reference given different input twice but with different deep copies since the query is not a primitive', () => {
-      const clone = cloneDeep(inputState);
-      const result1 = getRefetchSelector(inputState);
-      const result2 = getRefetchSelector(clone);
-      expect(result1).not.toBe(result2);
-    });
-
-    test('returns a different reference even if the contents are the same since query is an array and not a primitive', () => {
-      const result1 = getRefetchSelector(inputState);
-      const change: InputsRange = {
-        ...inputState,
-        query: [
-          {
-            loading: false,
-            id: '1',
-            inspect: { dsl: [], response: [] },
-            isInspected: false,
-            refetch: null,
-            selectedInspectIndex: 0,
-          },
-        ],
-      };
-      const result2 = getRefetchSelector(change);
-      expect(result1).not.toBe(result2);
     });
   });
 });

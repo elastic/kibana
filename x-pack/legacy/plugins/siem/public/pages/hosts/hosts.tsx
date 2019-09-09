@@ -13,44 +13,35 @@ import { StickyContainer } from 'react-sticky';
 import { ActionCreator } from 'typescript-fsa';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { FiltersGlobal } from '../../components/filters_global';
-import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
-import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
 import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import {
-  hostsModel,
-  hostsSelectors,
-  State,
-  KueryFilterQuery,
-  SerializedFilterQuery,
-} from '../../store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import { HostsType } from '../../store/hosts/model';
-import { useUpdateKql } from '../../utils/kql/use_update_kql';
-import { SpyRoute } from '../../utils/route/spy_routes';
+import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { SiemNavigation } from '../../components/navigation';
+import { SpyRoute } from '../../utils/route/spy_routes';
+import { FiltersGlobal } from '../../components/filters_global';
+
 import * as i18n from './translations';
 import {
   navTabsHosts,
   AnomaliesQueryTabBodyProps,
   HostsComponentsQueryProps,
 } from './hosts_navigations';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
-  kueryFilterQuery: KueryFilterQuery | null;
-  KueryFilterQueryDraft: KueryFilterQuery | null;
 }
 
 interface HostsComponentDispatchProps {
@@ -58,10 +49,6 @@ interface HostsComponentDispatchProps {
     id: InputsModelId;
     from: number;
     to: number;
-  }>;
-  applyHostsFilterQuery: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    hostsType: HostsType;
   }>;
 }
 
@@ -75,36 +62,20 @@ export type HostsComponentProps = HostsComponentReduxProps &
   HostsQueryProps;
 
 const HostsComponent = React.memo<HostsComponentProps>(
-  ({
-    filterQuery,
-    isInitializing,
-    kueryFilterQuery,
-    KueryFilterQueryDraft,
-    from,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-  }) => {
+  ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
+    const capabilities = useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) => {
-            setQuery({
-              id: 'kql',
-              inspect: null,
-              loading: false,
-              refetch: useUpdateKql({
-                indexPattern,
-                kueryFilterQuery,
-                KueryFilterQueryDraft,
-                storeType: 'hostsType',
-                type: hostsModel.HostsType.page,
-              }),
-            });
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          {({ indicesExist, indexPattern }) =>
+            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+                  <HostsKql
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    type={hostsModel.HostsType.page}
+                  />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -156,8 +127,8 @@ const HostsComponent = React.memo<HostsComponentProps>(
                 <HeaderPage title={i18n.PAGE_TITLE} />
                 <HostsEmptyPage />
               </>
-            );
-          }}
+            )
+          }
         </WithSource>
         <SpyRoute />
       </>
@@ -169,12 +140,8 @@ HostsComponent.displayName = 'HostsComponent';
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
-  const getHostsKueryFilterQuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getHostsKueryFilterQueryDraft = hostsSelectors.hostsFilterQueryDraft();
   const mapStateToProps = (state: State): HostsComponentReduxProps => ({
     filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
-    kueryFilterQuery: getHostsKueryFilterQuery(state, hostsModel.HostsType.page),
-    KueryFilterQueryDraft: getHostsKueryFilterQueryDraft(state, hostsModel.HostsType.page),
   });
   return mapStateToProps;
 };

@@ -66,7 +66,7 @@ interface SuperDatePickerStateRedux {
 
 interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
-  kql?: inputsModel.GlobalKql | undefined;
+  kql?: inputsModel.GlobalQuery | undefined;
   timelineId?: string;
 }
 
@@ -280,7 +280,7 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
 
   if (kql) {
     return {
-      kqlHaveBeenUpdated: kql.refetch(dispatch),
+      kqlHaveBeenUpdated: (kql.refetch as inputsModel.RefetchKql)(dispatch),
     };
   }
 
