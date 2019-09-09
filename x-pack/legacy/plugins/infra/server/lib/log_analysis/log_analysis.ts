@@ -6,6 +6,9 @@
 
 import * as rt from 'io-ts';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
@@ -132,10 +135,11 @@ export class InfraLogAnalysis {
       );
     }
 
-    const mlModelPlotBuckets = logRateModelPlotResponseRT
-      .decode(mlModelPlotResponse)
-      .map(response => response.aggregations.timestamp_buckets.buckets)
-      .getOrElseL(throwErrors(createPlainError));
+    const mlModelPlotBuckets = pipe(
+      logRateModelPlotResponseRT.decode(mlModelPlotResponse),
+      map(response => response.aggregations.timestamp_buckets.buckets),
+      fold(throwErrors(createPlainError), identity)
+    );
 
     return mlModelPlotBuckets.map(bucket => ({
       anomalies: bucket.filter_records.top_hits_record.hits.hits.map(({ _source: record }) => ({

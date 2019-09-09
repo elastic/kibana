@@ -5,6 +5,8 @@
  */
 
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
+import { HostsType } from '../../../store/hosts/model';
+import { CONSTANTS } from '../../url_state/constants';
 
 describe('rison_helpers', () => {
   // Suppress warnings about invalid RISON as this is what we are testing
@@ -29,8 +31,8 @@ describe('rison_helpers', () => {
       );
       expect(expected).toEqual({
         filterQuery: { expression: 'process.name: "process-name-1"', kind: 'kuery' },
-        queryLocation: 'hosts.details',
-        type: 'details',
+        queryLocation: CONSTANTS.hostsDetails,
+        type: HostsType.details,
       });
     });
   });

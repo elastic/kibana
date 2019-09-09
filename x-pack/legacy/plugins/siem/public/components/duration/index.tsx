@@ -23,7 +23,7 @@ export const Duration = pure<{
   value?: string | null;
 }>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
-    id={`${contextId}-${eventId}-${fieldName}-${value}`}
+    id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     name={name}
     field={fieldName}
     tooltipContent={null}
