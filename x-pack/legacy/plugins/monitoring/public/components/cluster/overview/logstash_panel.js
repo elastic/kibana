@@ -7,7 +7,7 @@
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
-import { LOGSTASH } from '../../../../common/constants';
+import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 import {
   EuiFlexGrid,
@@ -46,7 +46,7 @@ export function LogstashPanel(props) {
     ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        useNodeIdentifier
+        productName={LOGSTASH_SYSTEM_ID}
         badgeClickAction={goToNodes}
       />
     )

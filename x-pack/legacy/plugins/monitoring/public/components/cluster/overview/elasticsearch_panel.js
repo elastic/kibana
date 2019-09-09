@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -165,7 +166,7 @@ export function ElasticsearchPanel(props) {
     ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        useNodeIdentifier
+        productName={ELASTICSEARCH_SYSTEM_ID}
         badgeClickAction={goToNodes}
       />
     )

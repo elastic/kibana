@@ -248,7 +248,7 @@ export class Flyout extends Component {
     const instanceName = (instance && instance.name) || formatProductName(productName);
 
     let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-      defaultMessage: 'Monitor {instanceIdentifier} `{instanceName}` with Metricbeat',
+      defaultMessage: 'Monitor `{instanceName}` {instanceIdentifier} with Metricbeat',
       values: {
         instanceName,
         instanceIdentifier

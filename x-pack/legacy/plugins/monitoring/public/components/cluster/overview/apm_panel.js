@@ -24,7 +24,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function ApmPanel(props) {
@@ -43,8 +43,8 @@ export function ApmPanel(props) {
     ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        useNodeIdentifier={false}
         badgeClickAction={goToInstances}
+        productName={APM_SYSTEM_ID}
       />
     )
     : null;

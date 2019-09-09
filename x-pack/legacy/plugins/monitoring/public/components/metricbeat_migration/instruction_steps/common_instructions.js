@@ -114,7 +114,7 @@ export function getDisableStatusStep(product, meta) {
       lastInternallyCollectedMessage = i18n.translate(
         'xpack.monitoring.metricbeatMigration.disableInternalCollection.partiallyMigratedStatusDescription',
         {
-          defaultMessage: 'Last internal collection occurred {secondsSinceLastInternalCollectionLabel} ago.',
+          defaultMessage: 'Last internal collection was {secondsSinceLastInternalCollectionLabel} ago.',
           values: {
             secondsSinceLastInternalCollectionLabel
           }
@@ -131,14 +131,13 @@ export function getDisableStatusStep(product, meta) {
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusTitle',
             {
-              defaultMessage: `We still see data coming from internal collection of Elasticsearch.`
+              defaultMessage: `Data is still coming from internal collection`
             }
           )}
         >
           <p>
             {i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusDescription', {
-              defaultMessage: `Note that it can take up to {secondsAgo} seconds to detect,
-              but we will continuously check in the background.`,
+              defaultMessage: `It can take up to {secondsAgo} seconds to detect data, and we’ll continue checking.`,
               values: {
                 secondsAgo: meta.secondsAgo
               }

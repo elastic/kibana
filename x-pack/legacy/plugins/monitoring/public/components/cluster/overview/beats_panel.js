@@ -23,6 +23,7 @@ import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './help
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export function BeatsPanel(props) {
   const { setupMode } = props;
@@ -40,7 +41,7 @@ export function BeatsPanel(props) {
     ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        useNodeIdentifier={false}
+        productName={BEATS_SYSTEM_ID}
         badgeClickAction={goToInstances}
       />
     )

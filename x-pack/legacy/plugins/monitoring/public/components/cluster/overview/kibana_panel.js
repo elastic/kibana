@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
@@ -43,7 +44,7 @@ export function KibanaPanel(props) {
     ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
-        useNodeIdentifier={false}
+        productName={KIBANA_SYSTEM_ID}
         badgeClickAction={goToInstances}
       />
     )
