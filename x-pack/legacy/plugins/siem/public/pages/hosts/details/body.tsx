@@ -44,6 +44,7 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
                 startDate: from,
                 type,
                 indexPattern,
+                hostName: detailName,
                 narrowDateRange: (score: Anomaly, interval: string) => {
                   const fromTo = scoreIntervalToDateTime(score, interval);
                   setAbsoluteRangeDatePicker({
