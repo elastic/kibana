@@ -5,19 +5,23 @@
  */
 
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
+import { KibanaCore } from '../../framework';
 
 describe('KibanaTelemetryAdapter', () => {
-  let server: any;
+  let server: KibanaCore;
   let collector: { type: string; fetch: () => Promise<any>; isReady: () => boolean };
   beforeEach(() => {
     server = {
-      usage: {
+      elasticsearch: {},
+      route: {},
+      usageCollector: {
         collectorSet: {
           makeUsageCollector: (val: any) => {
             collector = val;
           },
         },
       },
+      xpack: {},
     };
   });
 
