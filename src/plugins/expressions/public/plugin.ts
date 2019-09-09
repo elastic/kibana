@@ -37,7 +37,7 @@ export class ExpressionsPublicPlugin
     };
   }
 
-  public start(core: CoreStart): ExpressionsSetupContract {
+  public start(core: CoreStart): ExpressionsStartContract {
     const expressions = this.expressions.start();
     return {
       ...expressions,
