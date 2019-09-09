@@ -53,6 +53,8 @@ export const displayErrorToast = (
  * Temporary Embeddables API configuration override until ability to edit actions is addressed:
  * https://github.com/elastic/kibana/issues/43643
  *
+ * @param applyFilterQueryFromKueryExpression function for updating KQL as provided by NetworkFilter
+ *
  * @throws Error if action is already registered
  */
 export const setupEmbeddablesAPI = (

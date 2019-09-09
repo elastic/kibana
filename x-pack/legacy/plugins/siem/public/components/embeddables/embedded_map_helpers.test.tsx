@@ -17,6 +17,11 @@ jest.mock(
       registerAction: jest.fn(),
       attachAction: jest.fn(),
       detachAction: jest.fn(),
+      getEmbeddableFactory: () => ({
+        createFromState: () => ({
+          reload: jest.fn(),
+        }),
+      }),
     },
   })
 );
@@ -56,9 +61,9 @@ describe('embedded_map_helpers', () => {
   });
 
   describe('createEmbeddable', () => {
-    test('attaches refresh action', () => {
+    test('attaches refresh action', async () => {
       const setQueryMock = jest.fn();
-      createEmbeddable([], '', 0, 0, setQueryMock());
+      await createEmbeddable([], '', 0, 0, setQueryMock);
       expect(setQueryMock).toHaveBeenCalledTimes(1);
     });
   });
