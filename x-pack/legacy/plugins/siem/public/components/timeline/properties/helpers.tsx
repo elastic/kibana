@@ -158,8 +158,8 @@ const getNewNoteId = (): string => uuid.v4();
 
 const NotesButtonIcon = styled(EuiButtonIcon)`
   svg {
-    height: 24px;
-    width: 24px;
+    height: 19px;
+    width: 19px;
   }
 `;
 
