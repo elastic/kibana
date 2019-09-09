@@ -22,10 +22,10 @@ export const useAnalysisSetupState = ({ setupModule, retrySetup }: Props) => {
   const [endTime, setEndTime] = useState<Moment | null>(null);
   const setup = useCallback(() => {
     return setupModule(selectedDateToParam(startTime), selectedDateToParam(endTime));
-  }, [setupModule]);
+  }, [setupModule, startTime, endTime]);
   const retry = useCallback(() => {
     return retrySetup(selectedDateToParam(startTime), selectedDateToParam(endTime));
-  }, [retrySetup]);
+  }, [retrySetup, startTime, endTime]);
   return {
     setup,
     retry,
