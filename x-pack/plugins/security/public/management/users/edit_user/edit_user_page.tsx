@@ -384,7 +384,6 @@ export class EditUserPage extends Component<Props, State> {
       <FormattedMessage
         id="xpack.security.management.users.editUser.deprecatedRolesAssignedWarning"
         defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role as soon as possible."
-        values={{ userName: user.username }}
       />
     ) : (
       undefined
