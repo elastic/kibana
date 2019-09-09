@@ -182,7 +182,6 @@ interface Link {
   basePath: string;
   sectionId: string;
   order?: number;
-  destroy: () => Promise<void> | void; // de-registers & calls unmount()
 }
 
 interface Section {
@@ -194,7 +193,6 @@ interface Section {
   order?: number;
   euiIconType?: string;
   icon?: string;
-  destroy: () => Promise<void> | void; // de-registers and destroys all links
 }
 ```
 
