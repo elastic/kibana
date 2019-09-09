@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
@@ -68,7 +68,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
               setupMode={setupMode}
               status={status}
               instance={instance}
-              productName={ELASTICSEARCH_CUSTOM_ID}
+              productName={ELASTICSEARCH_SYSTEM_ID}
             />
           </div>
         );
@@ -271,7 +271,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
       <ListingCallOut
         setupModeData={setupMode.data}
         useNodeIdentifier
-        productName={ELASTICSEARCH_CUSTOM_ID}
+        productName={ELASTICSEARCH_SYSTEM_ID}
         customRenderer={() => {
           const customRenderResponse = {
             shouldRender: false,
@@ -345,7 +345,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}
-            useNodeIdentifier
+            productName={ELASTICSEARCH_SYSTEM_ID}
             search={{
               box: {
                 incremental: true,

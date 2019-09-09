@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from 'ui/storage';
-import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { STORAGE_KEY, ELASTICSEARCH_SYSTEM_ID, KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -34,8 +34,8 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getIdentifier, formatProductName } from '../../setup_mode/formatting';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
@@ -142,7 +142,7 @@ export class Flyout extends Component {
     let willShowNextButton = activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL;
 
     if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
-      if (productName === ELASTICSEARCH_CUSTOM_ID) {
+      if (productName === ELASTICSEARCH_SYSTEM_ID) {
         willShowNextButton = false;
         // ES can be fully migrated for net new users
         willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
@@ -222,7 +222,7 @@ export class Flyout extends Component {
     if (productName === KIBANA_SYSTEM_ID) {
       documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`;
     }
-    else if (productName === ELASTICSEARCH_CUSTOM_ID) {
+    else if (productName === ELASTICSEARCH_SYSTEM_ID) {
       documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`;
     }
 
@@ -244,59 +244,29 @@ export class Flyout extends Component {
   render() {
     const { onClose, instance, productName, product } = this.props;
 
-    let instanceType = null;
-    let instanceName = instance ? instance.name : null;
-
-    if (productName === KIBANA_SYSTEM_ID) {
-      instanceType = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.kibanaInstance', {
-        defaultMessage: 'instance',
-      });
-    }
-    else if (productName === ELASTICSEARCH_CUSTOM_ID) {
-      if (instance) {
-        instanceType = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.elasticsearchNode', {
-          defaultMessage: 'node',
-        });
-      }
-      else {
-        instanceName = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.elasticsearchNodesTitle', {
-          defaultMessage: 'Elasticsearch nodes',
-        });
-      }
-    }
+    const instanceIdentifier = getIdentifier(productName);
+    const instanceName = (instance && instance.name) || formatProductName(productName);
 
     let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-      defaultMessage: 'Migrate {instanceType} `{instanceName}` with Metricbeat',
+      defaultMessage: 'Monitor {instanceIdentifier} `{instanceName}` with Metricbeat',
       values: {
         instanceName,
-        instanceType
+        instanceIdentifier
       }
     });
 
     if (product.isNetNewUser) {
       title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitleNewUser', {
-        defaultMessage: 'Monitor {instanceType} `{instanceName}` with Metricbeat',
+        defaultMessage: 'Monitor {instanceName} {instanceIdentifier} with Metricbeat',
         values: {
-          instanceName,
-          instanceType
+          instanceIdentifier,
+          instanceName
         }
       });
     }
 
     let noClusterUuidPrompt = null;
     if (product.isFullyMigrated && product.clusterUuid === null) {
-      const nodeText = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.node', {
-        defaultMessage: 'node'
-      });
-      const instanceText = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.instance', {
-        defaultMessage: 'instance'
-      });
-
-      let typeText = nodeText;
-      if (productName === BEATS_SYSTEM_ID) {
-        typeText = instanceText;
-      }
-
       noClusterUuidPrompt = (
         <Fragment>
           <EuiCallOut
@@ -312,11 +282,11 @@ export class Flyout extends Component {
             <p>
               <FormattedMessage
                 id="xpack.monitoring.metricbeatMigration.flyout.noClusterUuidDescription"
-                defaultMessage="This {productName} {typeText} is not connected to an Elasticsearch cluster so once fully migrated,
-                this {productName} {typeText} will appear in the Standalone cluster instead of this one. {link}"
+                defaultMessage="This {productName} {instanceIdentifier} is not connected to an Elasticsearch cluster so once fully migrated,
+                this {productName} {instanceIdentifier} will appear in the Standalone cluster instead of this one. {link}"
                 values={{
                   productName,
-                  typeText,
+                  instanceIdentifier,
                   link: (
                     <EuiLink href={`#/overview?_g=(cluster_uuid:__standalone_cluster__)`} target="_blank">
                       Click here to view the Standalone cluster.
@@ -332,10 +302,10 @@ export class Flyout extends Component {
                 'xpack.monitoring.metricbeatMigration.flyout.noClusterUuidCheckboxLabel',
                 {
                   defaultMessage: `Yes, I understand that I will need to look in the Standalone cluster for
-                  this {productName} {typeText}.`,
+                  this {productName} {instanceIdentifier}.`,
                   values: {
                     productName,
-                    typeText
+                    instanceIdentifier
                   }
                 }
               )}

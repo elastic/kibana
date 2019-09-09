@@ -5,8 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import {
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
+  ELASTICSEARCH_SYSTEM_ID,
+  APM_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID
+} from '../../../../common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
@@ -144,13 +150,13 @@ async function detectProducts(req) {
     [KIBANA_SYSTEM_ID]: {
       doesExist: true,
     },
-    [ELASTICSEARCH_CUSTOM_ID]: {
+    [ELASTICSEARCH_SYSTEM_ID]: {
       doesExist: true,
     },
     [BEATS_SYSTEM_ID]: {
       mightExist: false,
     },
-    [APM_CUSTOM_ID]: {
+    [APM_SYSTEM_ID]: {
       mightExist: false,
     },
     [LOGSTASH_SYSTEM_ID]: {
@@ -174,7 +180,7 @@ async function detectProducts(req) {
       ]
     },
     {
-      id: APM_CUSTOM_ID,
+      id: APM_SYSTEM_ID,
       indices: [
         'apm-*'
       ]
@@ -194,12 +200,12 @@ async function detectProducts(req) {
 
 function getUuidBucketName(productName) {
   switch (productName) {
-    case ELASTICSEARCH_CUSTOM_ID:
+    case ELASTICSEARCH_SYSTEM_ID:
       return 'es_uuids';
     case KIBANA_SYSTEM_ID:
       return 'kibana_uuids';
     case BEATS_SYSTEM_ID:
-    case APM_CUSTOM_ID:
+    case APM_SYSTEM_ID:
       return 'beats_uuids';
     case LOGSTASH_SYSTEM_ID:
       return 'logstash_uuids';
@@ -232,7 +238,7 @@ function shouldSkipBucket(product, bucket) {
   if (product.name === BEATS_SYSTEM_ID && isBeatFromAPM(bucket)) {
     return true;
   }
-  if (product.name === APM_CUSTOM_ID && !isBeatFromAPM(bucket)) {
+  if (product.name === APM_SYSTEM_ID && !isBeatFromAPM(bucket)) {
     return true;
   }
   return false;
@@ -313,8 +319,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
     { name: LOGSTASH_SYSTEM_ID },
-    { name: APM_CUSTOM_ID, token: '-beats-' },
-    { name: ELASTICSEARCH_CUSTOM_ID, token: '-es-' },
+    { name: APM_SYSTEM_ID, token: '-beats-' },
+    { name: ELASTICSEARCH_SYSTEM_ID, token: '-es-' },
   ];
 
   const [
@@ -348,7 +354,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     const internalCollectorsUuidsMap = {};
     const partiallyMigratedUuidsMap = {};
 
-    if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
+    if (product.name === ELASTICSEARCH_SYSTEM_ID && liveEsNodes.length) {
       productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
         ...accum,
         [esNode.id]: {
@@ -435,7 +441,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
-      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_CUSTOM_ID &&
+      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_SYSTEM_ID &&
         clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {

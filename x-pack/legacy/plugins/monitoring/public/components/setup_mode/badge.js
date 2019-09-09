@@ -11,7 +11,7 @@ import {
   EuiIcon
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
 const clickToMonitorWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.clickToMonitorWithMetricbeat', {
   defaultMessage: 'Click to monitor with Metricbeat'
@@ -23,7 +23,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance }) {
   // Migrating from partially to fully for Elasticsearch involves changing a cluster
   // setting which impacts all nodes in the cluster, which we have a separate callout
   // for. Since it does not make sense to do this on a per node basis, show nothing here
-  const explicitlyAvoidLink = status.isPartiallyMigrated && productName === ELASTICSEARCH_CUSTOM_ID;
+  const explicitlyAvoidLink = status.isPartiallyMigrated && productName === ELASTICSEARCH_SYSTEM_ID;
   if (!explicitlyAvoidLink && (status.isInternalCollector || status.isPartiallyMigrated || status.isNetNewUser)) {
     useLink = true;
   }
@@ -64,7 +64,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance }) {
       <Fragment>
         <EuiIcon type="flag" color="primary"/>
         &nbsp;
-        <EuiTextColor color="primary" size="xs">
+        <EuiTextColor color="secondary" size="xs">
           {i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
             defaultMessage: 'Monitored with Metricbeat'
           })}

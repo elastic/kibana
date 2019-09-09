@@ -154,30 +154,10 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
-export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
-export const APM_CUSTOM_ID = 'apm';
-/**
- * The name of the Kibana System ID used to publish and look up Kibana stats through the Monitoring system.
- * @type {string}
- */
+export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
 export const KIBANA_SYSTEM_ID = 'kibana';
-
-/**
- * The name of the Beats System ID used to publish and look up Beats stats through the Monitoring system.
- * @type {string}
- */
 export const BEATS_SYSTEM_ID = 'beats';
-
-/**
- * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
- * @type {string}
- */
-export const APM_SYSTEM_ID = 'beats';
-
-/**
- * The name of the Kibana System ID used to look up Logstash stats through the Monitoring system.
- * @type {string}
- */
+export const APM_SYSTEM_ID = 'apm';
 export const LOGSTASH_SYSTEM_ID = 'logstash';
 /**
  * The id of the infra source owned by the monitoring plugin.

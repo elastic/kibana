@@ -9,49 +9,18 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiLink,
-  EuiCallOut,
   EuiText
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle, statusTitleNewUser } from './common_elasticsearch_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getSecurityStep, getMigrationStatusStep } from '../common_instructions';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
 }) {
-  const securitySetup = (
-    <Fragment>
-      <EuiSpacer size="m"/>
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        title={(
-          <EuiText>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetup"
-              defaultMessage="If security is enabled, you might require {link}."
-              values={{
-                link: (
-                  <Fragment>
-                    {` `}
-                    <EuiLink
-                      href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetupLinkText"
-                        defaultMessage="additional setup"
-                      />
-                    </EuiLink>
-                  </Fragment>
-                )
-              }}
-            />
-          </EuiText>
-        )}
-      />
-    </Fragment>
+  const securitySetup = getSecurityStep(
+    `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
   );
 
   const installMetricbeatStep = {
@@ -176,47 +145,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     )
   };
 
-  let migrationStatusStep = null;
-  if (product.isInternalCollector || product.isNetNewUser) {
-    migrationStatusStep = {
-      title: product.isNetNewUser ? statusTitleNewUser : statusTitle,
-      status: 'incomplete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
-            defaultMessage: `No monitoring data detected, but we’ll continue checking.`,
-          })}
-        />
-      )
-    };
-  }
-  else if (product.isPartiallyMigrated || product.isFullyMigrated) {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusDescription"
-              defaultMessage="Metricbeat is shipping monitoring data."
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getMigrationStatusStep(product);
 
   return [
     installMetricbeatStep,

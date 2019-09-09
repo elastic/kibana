@@ -5,20 +5,15 @@
  */
 
 import React, { Fragment } from 'react';
-import { capitalize, get } from 'lodash';
+import { get } from 'lodash';
 import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  NODE_IDENTIFIER_PLURAL,
-  INSTANCE_IDENTIFIER_PLURAL,
-  NODE_IDENTIFIER_SINGULAR,
-  INSTANCE_IDENTIFIER_SINGULAR
-} from './common_text';
+import { formatProductName, getIdentifier } from './formatting';
 
-export function ListingCallOut({ setupModeData, productName, useNodeIdentifier = false, customRenderer = null }) {
+export function ListingCallOut({ setupModeData, productName, customRenderer = null }) {
   if (customRenderer) {
     const { shouldRender, componentToRender } = customRenderer();
     if (shouldRender) {
@@ -37,8 +32,8 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
             title={i18n.translate('xpack.monitoring.setupMode.detectedNodeTitle', {
               defaultMessage: '{product} {identifier} detected',
               values: {
-                product: capitalize(productName),
-                identifier: useNodeIdentifier ? NODE_IDENTIFIER_SINGULAR : INSTANCE_IDENTIFIER_SINGULAR
+                product: formatProductName(productName),
+                identifier: getIdentifier(productName)
               }
             })}
             color="warning"
@@ -49,8 +44,8 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
                 defaultMessage: `Based on your indices, we think you might have a {product} {identifier}. Click 'Set up monitoring'
                 below to start monitoring this {identifier}.`,
                 values: {
-                  product: capitalize(productName),
-                  identifier: useNodeIdentifier ? NODE_IDENTIFIER_SINGULAR : INSTANCE_IDENTIFIER_SINGULAR
+                  product: formatProductName(productName),
+                  identifier: getIdentifier(productName)
                 }
               })}
             </p>
@@ -63,17 +58,20 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.noMonitoringDataFound', {
-            defaultMessage: 'No monitoring data found',
+            defaultMessage: 'We did not detect any {product} {identifier}.',
+            values: {
+              product: formatProductName(productName),
+              identifier: getIdentifier(productName, true)
+            }
           })}
-          color="danger"
           iconType="flag"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
-              defaultMessage: `But we did find the following {product} {identifier} that require monitoring setup.`,
+              defaultMessage: `If you have {product} {identifier}, click 'Set up monitoring' below to monitor with Metricbeat.`,
               values: {
-                product: capitalize(productName),
-                identifier: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+                product: formatProductName(productName),
+                identifier: getIdentifier(productName, true)
               }
             })}
           </p>
@@ -88,9 +86,9 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.setupMode.metricbeatAllNodes', {
-            defaultMessage: 'Metricbeat is monitoring all {identifer}.',
+            defaultMessage: 'Metricbeat is monitoring all {identifier}.',
             values: {
-              identifier: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+              identifier: getIdentifier(productName, true)
             }
           })}
           color="success"
@@ -116,8 +114,8 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
               defaultMessage: `Metricbeat is now monitoring your {product} {identifier}.
               Disable internal collection to finish the migration.`,
               values: {
-                product: capitalize(productName),
-                identifier: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+                product: formatProductName(productName),
+                identifier: getIdentifier(productName, true)
               }
             })}
           </p>
@@ -142,8 +140,8 @@ export function ListingCallOut({ setupModeData, productName, useNodeIdentifier =
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
               defaultMessage: `These {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
               values: {
-                product: capitalize(productName),
-                identifier: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+                product: formatProductName(productName),
+                identifier: getIdentifier(productName, true)
               }
             })}
           </p>

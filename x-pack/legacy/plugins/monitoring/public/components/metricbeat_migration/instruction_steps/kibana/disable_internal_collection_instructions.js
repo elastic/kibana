@@ -11,11 +11,9 @@ import {
   EuiCallOut,
   EuiText
 } from '@elastic/eui';
-import { formatTimestampToDuration } from '../../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../../common/constants';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_kibana_instructions';
+import { getDisableStatusStep } from '../common_instructions';
 
 export function getKibanaInstructionsForDisablingInternalCollection(product, meta) {
   let restartWarning = null;
@@ -94,80 +92,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
     )
   };
 
-  let migrationStatusStep = null;
-  if (!product || !product.isFullyMigrated) {
-    let lastInternallyCollectedMessage = '';
-    // It is possible that, during the migration steps, products are not reporting
-    // monitoring data for a period of time outside the window of our server-side check
-    // and this is most likely temporary so we want to be defensive and not error out
-    // and hopefully wait for the next check and this state will be self-corrected.
-    if (product) {
-      const lastInternallyCollectedTimestamp = product.lastInternallyCollectedTimestamp || product.lastTimestamp;
-      const secondsSinceLastInternalCollectionLabel =
-        formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
-      lastInternallyCollectedMessage = (<FormattedMessage
-        id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.partiallyMigratedStatusDescription"
-        defaultMessage="Last internal collection was {secondsSinceLastInternalCollectionLabel} ago."
-        values={{
-          secondsSinceLastInternalCollectionLabel,
-        }}
-      />);
-    }
-
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'incomplete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusTitle',
-            {
-              defaultMessage: `Data is still coming from internal collection`
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusDescription"
-              defaultMessage="It can take up to {secondsAgo} seconds to detect data, and we’ll continue checking."
-              values={{
-                secondsAgo: meta.secondsAgo
-              }}
-            />
-          </p>
-          <p>
-            {lastInternallyCollectedMessage}
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
-  else {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.fullyMigratedStatusDescription"
-              defaultMessage="Internal collection is disabled. Migration complete!"
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getDisableStatusStep(product, meta);
 
   return [
     disableInternalCollectionStep,

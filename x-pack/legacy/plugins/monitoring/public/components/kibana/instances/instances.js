@@ -236,7 +236,7 @@ export class KibanaInstances extends PureComponent {
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}
-              useNodeIdentifier={false}
+              productName={KIBANA_SYSTEM_ID}
               search={{
                 box: {
                   incremental: true,

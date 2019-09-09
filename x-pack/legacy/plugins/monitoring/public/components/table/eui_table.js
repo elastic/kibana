@@ -11,7 +11,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NODE_IDENTIFIER_SINGULAR, INSTANCE_IDENTIFIER_SINGULAR } from '../setup_mode/common_text';
+import { getIdentifier } from '../setup_mode/formatting';
 
 export class EuiMonitoringTable extends React.PureComponent {
   render() {
@@ -20,7 +20,7 @@ export class EuiMonitoringTable extends React.PureComponent {
       search = {},
       columns: _columns,
       setupMode,
-      useNodeIdentifier,
+      productName,
       ...props
     } = this.props;
 
@@ -45,151 +45,6 @@ export class EuiMonitoringTable extends React.PureComponent {
 
     let footerContent = null;
     if (setupMode && setupMode.enabled) {
-      // columns.push({
-      //   name: i18n.translate('xpack.monitoring.euiTable.setupStatusTitle', {
-      //     defaultMessage: 'Set up Status'
-      //   }),
-      //   sortable: product => {
-      //     const list = get(setupMode, 'data.byUuid', {});
-      //     const status = list[get(product, uuidField)] || {};
-
-      //     if (status.isInternalCollector) {
-      //       return 4;
-      //     }
-
-      //     if (status.isPartiallyMigrated) {
-      //       return 3;
-      //     }
-
-      //     if (status.isFullyMigrated) {
-      //       return 2;
-      //     }
-
-      //     if (status.isNetNewUser) {
-      //       return 1;
-      //     }
-
-      //     return 0;
-      //   },
-      //   render: (product) => {
-      //     const list = get(setupMode, 'data.byUuid', {});
-      //     const status = list[get(product, uuidField)] || {};
-
-      //     let statusBadge = null;
-      //     if (status.isInternalCollector) {
-      //       statusBadge = (
-      //         <EuiHealth color="danger">
-      //           {i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
-      //             defaultMessage: 'Internal collection'
-      //           })}
-      //         </EuiHealth>
-      //       );
-      //     }
-      //     else if (status.isPartiallyMigrated) {
-      //       statusBadge = (
-      //         <EuiHealth color="warning">
-      //           {i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-      //             defaultMessage: 'Internal collection and Metricbeat collection'
-      //           })}
-      //         </EuiHealth>
-      //       );
-      //     }
-      //     else if (status.isFullyMigrated) {
-      //       statusBadge = (
-      //         <EuiBadge color="primary">
-      //           {i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
-      //             defaultMessage: 'Metricbeat collection'
-      //           })}
-      //         </EuiBadge>
-      //       );
-      //     }
-      //     else if (status.isNetNewUser) {
-      //       statusBadge = (
-      //         <EuiHealth color="danger">
-      //           {i18n.translate('xpack.monitoring.euiTable.isNetNewUserLabel', {
-      //             defaultMessage: 'No monitoring detected'
-      //           })}
-      //         </EuiHealth>
-      //       );
-      //     }
-      //     else {
-      //       statusBadge = i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
-      //         defaultMessage: 'N/A'
-      //       });
-      //     }
-
-      //     return statusBadge;
-      //   }
-      // });
-
-      // columns.push({
-      //   name: i18n.translate('xpack.monitoring.euiTable.setupActionTitle', {
-      //     defaultMessage: 'Set up'
-      //   }),
-      //   sortable: product => {
-      //     const list = get(setupMode, 'data.byUuid', {});
-      //     const status = list[get(product, uuidField)] || {};
-
-      //     if (status.isInternalCollector || status.isNetNewUser) {
-      //       return 1;
-      //     }
-
-      //     if (status.isPartiallyMigrated) {
-      //       if (setupMode.productName === ELASTICSEARCH_CUSTOM_ID) {
-      //         // See comment for same conditional in render function
-      //         return 0;
-      //       }
-      //       return 1;
-      //     }
-
-      //     return 0;
-      //   },
-      //   render: (product) => {
-      //     const uuid = get(product, uuidField);
-      //     const list = get(setupMode, 'data.byUuid', {});
-      //     const status = list[uuid] || {};
-      //     const instance = {
-      //       uuid: get(product, uuidField),
-      //       name: get(product, nameField),
-      //     };
-
-      //     // Migrating from partially to fully for Elasticsearch involves changing a cluster
-      //     // setting which impacts all nodes in the cluster, which we have a separate callout
-      //     // for. Since it does not make sense to do this on a per node basis, show nothing here
-      //     if (status.isPartiallyMigrated && setupMode.productName === ELASTICSEARCH_CUSTOM_ID) {
-      //       return null;
-      //     }
-
-      //     if (status.isInternalCollector || status.isPartiallyMigrated) {
-      //       return (
-      //         <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
-      //           {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
-      //             defaultMessage: 'Migrate `{name}` to use Metricbeat',
-      //             values: {
-      //               name: product.name
-      //             }
-      //           })}
-      //         </EuiButtonEmpty>
-      //       );
-      //     }
-
-      //     if (status.isNetNewUser) {
-      //       return (
-      //         <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
-      //           {i18n.translate('xpack.monitoring.euiTable.setupButtonLabel', {
-      //             defaultMessage: 'Set up `{name}` to use Metricbeat',
-      //             values: {
-      //               name: product.name
-      //             }
-      //           })}
-      //         </EuiButtonEmpty>
-      //       );
-      //     }
-
-      //     return null;
-      //   }
-      // });
-
       footerContent = (
         <Fragment>
           <EuiSpacer size="m"/>
@@ -197,7 +52,7 @@ export class EuiMonitoringTable extends React.PureComponent {
             {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
               defaultMessage: 'Set up monitoring for new {identifier}',
               values: {
-                identifier: useNodeIdentifier ? NODE_IDENTIFIER_SINGULAR : INSTANCE_IDENTIFIER_SINGULAR
+                identifier: getIdentifier(productName)
               }
             })}
           </EuiButton>

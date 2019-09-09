@@ -14,7 +14,7 @@ import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { APM_CUSTOM_ID, CODE_PATH_APM } from '../../../../common/constants';
+import { APM_SYSTEM_ID, CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -67,7 +67,7 @@ uiRoutes.when('/apm/instances', {
           <SetupModeRenderer
             scope={this.scope}
             injector={this.injector}
-            productName={APM_CUSTOM_ID}
+            productName={APM_SYSTEM_ID}
             render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}

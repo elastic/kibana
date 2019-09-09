@@ -8,14 +8,11 @@ import React, { Fragment } from 'react';
 import {
   EuiSpacer,
   EuiCodeBlock,
-  EuiCallOut,
   EuiText
 } from '@elastic/eui';
-import { formatTimestampToDuration } from '../../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../../common/constants';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_logstash_instructions';
+import { getDisableStatusStep } from '../common_instructions';
 
 export function getLogstashInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
@@ -57,81 +54,7 @@ export function getLogstashInstructionsForDisablingInternalCollection(product, m
     )
   };
 
-  let migrationStatusStep = null;
-  if (!product || !product.isFullyMigrated) {
-    let lastInternallyCollectedMessage = '';
-    // It is possible that, during the migration steps, products are not reporting
-    // monitoring data for a period of time outside the window of our server-side check
-    // and this is most likely temporary so we want to be defensive and not error out
-    // and hopefully wait for the next check and this state will be self-corrected.
-    if (product) {
-      const lastInternallyCollectedTimestamp = product.lastInternallyCollectedTimestamp || product.lastTimestamp;
-      const secondsSinceLastInternalCollectionLabel =
-        formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
-      lastInternallyCollectedMessage = (<FormattedMessage
-        id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.partiallyMigratedStatusDescription"
-        defaultMessage="Last internal collection occurred {secondsSinceLastInternalCollectionLabel} ago."
-        values={{
-          secondsSinceLastInternalCollectionLabel,
-        }}
-      />);
-    }
-
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'incomplete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.logstashInstructions.partiallyMigratedStatusTitle',
-            {
-              defaultMessage: `We still see data coming from internal collection of Logstash.`
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.logstashInstructions.partiallyMigratedStatusDescription"
-              defaultMessage="Note that it can take up to {secondsAgo} seconds to detect, but
-              we will continuously check in the background."
-              values={{
-                secondsAgo: meta.secondsAgo,
-              }}
-            />
-          </p>
-          <p>
-            {lastInternallyCollectedMessage}
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
-  else {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.fullyMigratedStatusDescription"
-              defaultMessage="We are not seeing any documents from internal collection. Migration complete!"
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getDisableStatusStep(product, meta);
 
   return [
     disableInternalCollectionStep,

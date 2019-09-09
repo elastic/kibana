@@ -177,7 +177,7 @@ export class Listing extends PureComponent {
               className="logstashNodesTable"
               rows={flattenedData}
               setupMode={setupMode}
-              useNodeIdentifier
+              productName={LOGSTASH_SYSTEM_ID}
               columns={columns}
               sorting={{
                 ...sorting,

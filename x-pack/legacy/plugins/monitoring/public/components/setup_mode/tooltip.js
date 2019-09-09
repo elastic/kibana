@@ -13,9 +13,9 @@ import {
   EuiLink
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NODE_IDENTIFIER_SINGULAR, INSTANCE_IDENTIFIER_SINGULAR, NODE_IDENTIFIER_PLURAL, INSTANCE_IDENTIFIER_PLURAL } from './common_text';
+import { getIdentifier } from './formatting';
 
-export function SetupModeTooltip({ setupModeData, badgeClickAction, useNodeIdentifier = false }) {
+export function SetupModeTooltip({ setupModeData, badgeClickAction, productName }) {
   if (!setupModeData) {
     return null;
   }
@@ -56,7 +56,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, useNodeIdent
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.monitoring.setupMode.tooltip.mightExist', {
-            defaultMessage: `We did not detect any usage of this product.`,
+            defaultMessage: `We did not detect any usage.`,
           })}
         >
           <EuiLink onClick={badgeClickAction}>
@@ -79,7 +79,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, useNodeIdent
           defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat.
           Click this icon to get the status of each {identifier}.`,
           values: {
-            identifier: useNodeIdentifier ? NODE_IDENTIFIER_SINGULAR : INSTANCE_IDENTIFIER_SINGULAR
+            identifier: getIdentifier(productName)
           }
         })}
       >
@@ -101,7 +101,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, useNodeIdent
           defaultMessage: `Metricbeat is monitoring all {identifierPlural}.
           Click this icon to go to the {identifierPlural} view and disable internal collection.`,
           values: {
-            identifierPlural: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+            identifierPlural: getIdentifier(productName, true)
           }
         })}
       >
@@ -122,7 +122,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, useNodeIdent
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.allSet', {
           defaultMessage: `Metricbeat is monitoring all {identifierPlural}.`,
           values: {
-            identifierPlural: useNodeIdentifier ? NODE_IDENTIFIER_PLURAL : INSTANCE_IDENTIFIER_PLURAL
+            identifierPlural: getIdentifier(productName, true)
           }
         })}
       >

@@ -9,50 +9,20 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiLink,
-  EuiCallOut,
   EuiText
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle, statusTitleNewUser } from './common_kibana_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
 }) {
-  const securitySetup = (
-    <Fragment>
-      <EuiSpacer size="m"/>
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        title={(
-          <EuiText>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetup"
-              defaultMessage="If security features are enabled, there may be more setup required.{link}"
-              values={{
-                link: (
-                  <Fragment>
-                    {` `}
-                    <EuiLink
-                      href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetupLinkText"
-                        defaultMessage="View more information."
-                      />
-                    </EuiLink>
-                  </Fragment>
-                )
-              }}
-            />
-          </EuiText>
-        )}
-      />
-    </Fragment>
+  const securitySetup = getSecurityStep(
+    `${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
   );
+
   const installMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatTitle', {
       defaultMessage: 'Install Metricbeat on the same server as Kibana'
@@ -165,48 +135,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
     )
   };
 
-  let migrationStatusStep = null;
-  if (product.isInternalCollector || product.isNetNewUser) {
-    migrationStatusStep = {
-      title: product.isNetNewUser ? statusTitleNewUser : statusTitle,
-      status: 'incomplete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.isInternalCollectorStatusTitle', {
-            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Kibana instance.
-            We will continuously check in the background.`,
-          })}
-        />
-      )
-    };
-  }
-  else if (product.isPartiallyMigrated || product.isFullyMigrated) {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.fullyMigratedStatusDescription"
-              defaultMessage="We are now seeing monitoring data shipping from Metricbeat!"
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getMigrationStatusStep(product);
 
   return [
     installMetricbeatStep,
