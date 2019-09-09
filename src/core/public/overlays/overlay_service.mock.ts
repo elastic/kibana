@@ -20,7 +20,7 @@ import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<OverlayStart> = {
+  const startContract: DeeplyMockedKeys<OverlayStart> = {
     openFlyout: jest.fn(),
     openModal: jest.fn(),
     banners: overlayBannersServiceMock.createStartContract(),
