@@ -89,13 +89,11 @@ fi
 ###
 export PATH="$nodeBin:$PATH"
 
-###
-### downloading yarn
-###
-yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-currentYarnVersion=$(yarn --version || true)
-
-if [[ "$yarnVersion" != "$currentYarnVersion" ]]; then
+if [[ "$installNode" == "true" || ! $(which yarn) ]]; then
+  ###
+  ### downloading yarn
+  ###
+  yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
   npm install -g "yarn@^${yarnVersion}"
 fi
 
