@@ -18,17 +18,14 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import { tickFormatters } from '../../services/tick_formatters';
 
 describe('Tick Formatters', function () {
-
   let formatters;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function () {
+  beforeEach(function () {
     formatters = tickFormatters();
-  }));
+  });
 
   describe('Bits mode', function () {
     let bitFormatter;
