@@ -31,7 +31,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-  const { driver, Key, LegacyActionSequence, browserType, By } = await getService(
+  const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
 
@@ -205,29 +205,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param opts - from and to selectors
-     * @return {Promise<void>}
-     */
-    public async dragAndDropSelector(opts: { from: string; to: string }) {
-      const draggedEl = await driver.findElement(By.css(opts.from));
-      const dropTarget = await driver.findElement(By.css(opts.to));
-
-      return this.getActions()
-        .dragAndDrop(draggedEl, dropTarget)
-        .perform();
-    }
-
-    /**
-     * Does a drag-and-drop action from one point to another
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
-     *
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset?: { x: any; y: any }; location: any },
-      to: { offset?: { x: any; y: any }; location: any }
+      from: { offset: { x: any; y: any }; location: any },
+      to: { offset: { x: any; y: any }; location: any }
     ) {
       // tslint:disable-next-line:variable-name
       let _from;

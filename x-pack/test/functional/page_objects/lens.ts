@@ -103,10 +103,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param fieldName - the name of the field to be dropped in the workspace
      */
     async dragToWorkspace(fieldName: string) {
-      await browser.dragAndDropSelector({
-        from: `[data-test-subj="lnsFieldListPanelField"] [title="${fieldName}"]`,
-        to: '[data-test-subj="lnsWorkspace"]',
-      });
+      const workspace = await testSubjects.find('lnsWorkspace');
+      const timestampField = await find.byCssSelector(
+        `[data-test-subj="lnsFieldListPanelField"] [title="${fieldName}"]`
+      );
+
+      await browser.dragAndDrop(
+        { location: timestampField, offset: { x: 0, y: 0 } },
+        { location: workspace, offset: { x: 40, y: 40 } }
+      );
     },
 
     /**
