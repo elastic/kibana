@@ -8,11 +8,11 @@ import { DataFrameTransformId, DataFrameTransformPivotConfig } from './transform
 import { DataFrameTransformStats } from './transform_stats';
 
 // Used to pass on attribute names to table columns
-export enum DataFrameTransformListColumn {
-  configDestIndex = 'config.dest.index',
-  configSourceIndex = 'config.source.index',
-  description = 'config.description',
-  id = 'id',
+export enum DATA_FRAME_TRANSFORM_LIST_COLUMN {
+  CONFIG_DEST_INDEX = 'config.dest.index',
+  CONFIG_SOURCE_INDEX = 'config.source.index',
+  DESCRIPTION = 'config.description',
+  ID = 'id',
 }
 
 export interface DataFrameTransformListRow {

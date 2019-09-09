@@ -26,11 +26,11 @@ import {
 
 import {
   DataFrameTransformId,
-  DataFrameTransformListColumn,
   DataFrameTransformListRow,
   moveToDataFrameWizard,
-  DATA_FRAME_TRANSFORM_STATE,
   DATA_FRAME_MODE,
+  DATA_FRAME_TRANSFORM_LIST_COLUMN,
+  DATA_FRAME_TRANSFORM_STATE,
 } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
@@ -94,7 +94,7 @@ export const DataFrameTransformList: SFC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const [sortField, setSortField] = useState<string>(DataFrameTransformListColumn.id);
+  const [sortField, setSortField] = useState<string>(DATA_FRAME_TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
@@ -340,7 +340,7 @@ export const DataFrameTransformList: SFC<Props> = ({
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameTransformListColumn.id, direction: SORT_DIRECTION.ASC },
+    sort = { field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
   }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
@@ -367,7 +367,7 @@ export const DataFrameTransformList: SFC<Props> = ({
         isExpandable={true}
         isSelectable={false}
         items={filterActive ? filteredTransforms : transforms}
-        itemId={DataFrameTransformListColumn.id}
+        itemId={DATA_FRAME_TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onTableChange={onTableChange}
         pagination={pagination}

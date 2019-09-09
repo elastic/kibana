@@ -27,9 +27,9 @@ import {
 import {
   getTransformProgress,
   DataFrameTransformId,
-  DataFrameTransformListColumn,
   DataFrameTransformListRow,
   DataFrameTransformStats,
+  DATA_FRAME_TRANSFORM_LIST_COLUMN,
   DATA_FRAME_TRANSFORM_STATE,
 } from '../../../../common';
 import { getActions } from './actions';
@@ -120,25 +120,25 @@ export const getColumns = (
       ),
     },
     {
-      field: DataFrameTransformListColumn.id,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID,
       name: 'ID',
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.description,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.DESCRIPTION,
       name: i18n.translate('xpack.ml.dataframe.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.configSourceIndex,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.CONFIG_SOURCE_INDEX,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.configDestIndex,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.CONFIG_DEST_INDEX,
       name: i18n.translate('xpack.ml.dataframe.destinationIndex', {
         defaultMessage: 'Destination index',
       }),

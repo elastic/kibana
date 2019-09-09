@@ -29,7 +29,7 @@ export {
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
-export { DataFrameTransformListColumn, DataFrameTransformListRow } from './transform_list';
+export { DATA_FRAME_TRANSFORM_LIST_COLUMN, DataFrameTransformListRow } from './transform_list';
 export {
   getTransformProgress,
   isCompletedBatchTransform,
