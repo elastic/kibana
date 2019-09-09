@@ -108,7 +108,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
                 onChange={date => setEndTime(selectedDateToParam(date))}
                 placeholder={endTimeDefaultDescription}
                 openToDate={now}
-                minDate={now}
+                minDate={moment(startTime).add(1, 'day')}
                 minTime={
                   selectedEndTimeIsToday
                     ? now
