@@ -16,12 +16,12 @@ const RoundedBadge = styled(EuiBadge)`
   border-radius: 100%;
   display: inline-flex;
   font-size: 9px;
-  height: 19px;
+  height: 34px;
   justify-content: center;
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
   user-select: none;
-  width: 19px;
+  width: 34px;
 
   .euiBadge__content {
     position: relative;
