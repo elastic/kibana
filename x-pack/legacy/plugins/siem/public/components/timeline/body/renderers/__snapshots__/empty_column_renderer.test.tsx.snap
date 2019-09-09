@@ -8,7 +8,7 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
         "and": Array [],
         "enabled": true,
         "excluded": true,
-        "id": "id-timeline-column-source_ip-for-event-1-source_ip",
+        "id": "empty-column-renderer-draggable-wrapper-test-source_ip-1-source_ip",
         "kqlQuery": "",
         "name": "source.ip: ",
         "queryMatch": Object {
@@ -19,7 +19,7 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
         },
       }
     }
-    key="timeline-draggable-column-source.ip-for-event-1-source.ip"
+    key="empty-column-renderer-draggable-wrapper-test-source.ip-1-source.ip"
     render={[Function]}
   />
 </span>

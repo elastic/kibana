@@ -24,9 +24,6 @@ const ProviderBadgeStyled = styled(EuiBadge)`
       padding: 0px 3px;
     }
   }
-  .field-value {
-    font-weight: 200;
-  }
   &.globalFilterItem {
     white-space: nowrap;
     &.globalFilterItem-isDisabled {
