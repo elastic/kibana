@@ -18,12 +18,13 @@ import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
-
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { StatefulEventChild } from './stateful_event_child';
+import { eventIsPinned } from '../helpers';
 
 interface Props {
   actionsColumnWidth: number;
@@ -33,6 +34,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  isEventViewer?: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
@@ -105,6 +107,8 @@ export const EmptyRow = styled.div`
 `;
 
 export class StatefulEvent extends React.Component<Props, State> {
+  private _isMounted: boolean = false;
+
   public readonly state: State = {
     expanded: {},
     showNotes: {},
@@ -120,14 +124,20 @@ export class StatefulEvent extends React.Component<Props, State> {
    * its initialRender to true.
    */
   public componentDidMount() {
+    this._isMounted = true;
+
     requestIdleCallbackViaScheduler(
       () => {
-        if (!this.state.initialRender) {
+        if (!this.state.initialRender && this._isMounted) {
           this.setState({ initialRender: true });
         }
       },
       { timeout: this.props.maxDelay ? this.props.maxDelay : 0 }
     );
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   public render() {
@@ -140,6 +150,7 @@ export class StatefulEvent extends React.Component<Props, State> {
       event,
       eventIdToNoteIds,
       getNotesByIds,
+      isEventViewer = false,
       onColumnResized,
       onPinEvent,
       onUpdateColumns,
@@ -178,6 +189,7 @@ export class StatefulEvent extends React.Component<Props, State> {
               >
                 {({ detailsData, loading }) => (
                   <div
+                    className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
                     ref={divElement => {
                       if (divElement != null) {
@@ -201,16 +213,19 @@ export class StatefulEvent extends React.Component<Props, State> {
                           data={event.data}
                           eventIdToNoteIds={eventIdToNoteIds}
                           getNotesByIds={getNotesByIds}
+                          isEventViewer={isEventViewer}
                           loading={loading}
                           onColumnResized={onColumnResized}
                           onToggleExpanded={this.onToggleExpanded}
                           onUnPinEvent={onUnPinEvent}
                           pinnedEventIds={pinnedEventIds}
                           showNotes={!!this.state.showNotes[event._id]}
+                          timelineId={timelineId}
                           onToggleShowNotes={this.onToggleShowNotes}
                           updateNote={updateNote}
                         />
                       ),
+                      timelineId,
                     })}
                     <EuiFlexItem data-test-subj="event-details" grow={true}>
                       <ExpandableEvent
@@ -269,6 +284,8 @@ export class StatefulEvent extends React.Component<Props, State> {
     onPinEvent: OnPinEvent
   ): ((noteId: string) => void) => (noteId: string) => {
     addNoteToEvent({ eventId, noteId });
-    onPinEvent(eventId); // pin the event, because it has notes
+    if (!eventIsPinned({ eventId, pinnedEventIds: this.props.pinnedEventIds })) {
+      onPinEvent(eventId); // pin the event, because it has notes
+    }
   };
 }

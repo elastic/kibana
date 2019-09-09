@@ -47,7 +47,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: 'dns.question.etld_plus_one',
+                field: 'dns.question.registered_domain',
                 value: dnsName,
                 operator: IS_OPERATOR,
               },

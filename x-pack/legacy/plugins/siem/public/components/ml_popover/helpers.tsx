@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigTemplate, Job } from './types';
+import { ConfigTemplate, IndexPatternSavedObject, Job } from './types';
 
 /**
  * Returns all `jobIds` for each configTemplate provided
@@ -67,3 +67,35 @@ export const searchFilter = (jobs: Job[], filterQuery?: string): Job[] =>
       ? true
       : job.id.includes(filterQuery) || job.description.includes(filterQuery)
   );
+
+/**
+ * Returns a string array of Index Pattern Titles
+ *
+ * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook
+ */
+export const getIndexPatternTitles = (indexPatterns: IndexPatternSavedObject[]): string[] =>
+  indexPatterns.reduce((acc: string[], v) => [...acc, v.attributes.title], []);
+
+/**
+ * Given an array of titles this will always return the same string for usage within
+ * useEffect and other shallow compare areas.
+ * This won't return a stable reference for case sensitive strings intentionally for speed.
+ * @param patterns string[] string array that will return a stable reference regardless of ordering or case sensitivity.
+ */
+export const getStablePatternTitles = (patterns: string[]) => patterns.sort().join();
+
+/**
+ * Returns a mapping of indexPatternTitle to indexPatternId
+ *
+ * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook
+ */
+export const getIndexPatternTitleIdMapping = (
+  indexPatterns: IndexPatternSavedObject[]
+): Array<{ title: string; id: string }> =>
+  indexPatterns.reduce((acc: Array<{ title: string; id: string }>, v) => {
+    if (v.attributes && v.attributes.title) {
+      return [...acc, { title: v.attributes.title, id: v.id }];
+    } else {
+      return acc;
+    }
+  }, []);

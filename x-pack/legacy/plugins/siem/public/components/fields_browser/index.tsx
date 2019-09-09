@@ -6,7 +6,7 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -22,6 +22,8 @@ import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory }
 
 import * as i18n from './translations';
 import { timelineActions } from '../../store/actions';
+
+const fieldsButtonClassName = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;
@@ -39,12 +41,16 @@ interface State {
   show: boolean;
 }
 
-const FieldsBrowserButtonContainer = styled.div`
-  button {
+const FieldsBrowserButtonContainer = styled.div<{ show: boolean }>`
+  ${({ show }) => (show ? 'position: absolute;' : '')}
+
+  .${fieldsButtonClassName} {
     border-color: ${({ theme }) => theme.eui.euiColorLightShade};
     color: ${({ theme }) => theme.eui.euiColorDarkestShade};
     font-size: 14px;
     margin: 1px 5px 2px 0;
+    ${({ show }) => (show ? 'position: absolute;' : '')}
+    ${({ show }) => (show ? 'top: -15px;' : '')}
   }
 `;
 
@@ -97,6 +103,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
       columnHeaders,
       browserFields,
       height,
+      isEventViewer = false,
       onFieldSelected,
       timelineId,
       toggleColumn,
@@ -117,45 +124,56 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
 
     return (
       <>
-        <FieldsBrowserButtonContainer>
+        <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container" show={show}>
           <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
-            <EuiButton
-              color="primary"
-              data-test-subj="show-field-browser"
-              iconSide="right"
-              iconType="arrowDown"
-              onClick={this.toggleShow}
-              size="s"
-            >
-              {i18n.FIELDS}
-            </EuiButton>
+            {isEventViewer ? (
+              <EuiButtonIcon
+                aria-label={i18n.CUSTOMIZE_COLUMNS}
+                className={fieldsButtonClassName}
+                data-test-subj="show-field-browser-gear"
+                iconType="gear"
+                onClick={this.toggleShow}
+              />
+            ) : (
+              <EuiButton
+                className={fieldsButtonClassName}
+                color="primary"
+                data-test-subj="show-field-browser"
+                iconSide="right"
+                iconType="arrowDown"
+                onClick={this.toggleShow}
+                size="s"
+              >
+                {i18n.FIELDS}
+              </EuiButton>
+            )}
           </EuiToolTip>
-        </FieldsBrowserButtonContainer>
 
-        {show && (
-          <FieldsBrowser
-            columnHeaders={columnHeaders}
-            browserFields={browserFieldsWithDefaultCategory}
-            filteredBrowserFields={
-              filteredBrowserFields != null
-                ? filteredBrowserFields
-                : browserFieldsWithDefaultCategory
-            }
-            searchInput={filterInput}
-            height={height}
-            isSearching={isSearching}
-            onCategorySelected={this.updateSelectedCategoryId}
-            onFieldSelected={onFieldSelected}
-            onHideFieldBrowser={this.hideFieldBrowser}
-            onOutsideClick={show ? this.hideFieldBrowser : noop}
-            onUpdateColumns={this.updateColumnsAndSelectCategoryId}
-            onSearchInputChange={this.updateFilter}
-            selectedCategoryId={selectedCategoryId}
-            timelineId={timelineId}
-            toggleColumn={toggleColumn}
-            width={width}
-          />
-        )}
+          {show && (
+            <FieldsBrowser
+              browserFields={browserFieldsWithDefaultCategory}
+              columnHeaders={columnHeaders}
+              filteredBrowserFields={
+                filteredBrowserFields != null
+                  ? filteredBrowserFields
+                  : browserFieldsWithDefaultCategory
+              }
+              height={height}
+              isSearching={isSearching}
+              onCategorySelected={this.updateSelectedCategoryId}
+              onFieldSelected={onFieldSelected}
+              onHideFieldBrowser={this.hideFieldBrowser}
+              onOutsideClick={show ? this.hideFieldBrowser : noop}
+              onSearchInputChange={this.updateFilter}
+              onUpdateColumns={this.updateColumnsAndSelectCategoryId}
+              searchInput={filterInput}
+              selectedCategoryId={selectedCategoryId}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+              width={width}
+            />
+          )}
+        </FieldsBrowserButtonContainer>
       </>
     );
   }
