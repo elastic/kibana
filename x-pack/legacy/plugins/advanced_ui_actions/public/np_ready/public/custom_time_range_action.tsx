@@ -14,7 +14,6 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_
 import {
   Action,
   IEmbeddable,
-  ActionContext,
   IncompatibleActionError,
   Embeddable,
   EmbeddableInput,
@@ -41,7 +40,11 @@ function isVisualizeEmbeddable(
   return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
-export class CustomTimeRangeAction extends Action {
+interface ActionContext {
+  embeddable: Embeddable<TimeRangeInput>;
+}
+
+export class CustomTimeRangeAction extends Action<ActionContext> {
   public readonly type = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
   private dateFormat?: string;
@@ -76,10 +79,11 @@ export class CustomTimeRangeAction extends Action {
   public async isCompatible({ embeddable }: ActionContext) {
     const isInputControl =
       isVisualizeEmbeddable(embeddable) &&
-      embeddable.getOutput().visTypeName === 'input_control_vis';
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
 
     const isMarkdown =
-      isVisualizeEmbeddable(embeddable) && embeddable.getOutput().visTypeName === 'markdown';
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
     return Boolean(
       embeddable &&
         hasTimeRange(embeddable) &&

@@ -77,14 +77,16 @@ export class GoServerLauncher extends AbstractLauncher {
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger) {
-    const launchersFound = glob.sync('go-langserver', {
-      cwd: installationPath,
-    });
+    const launchersFound = glob.sync(
+      process.platform === 'win32' ? 'go-langserver.exe' : 'go-langserver',
+      {
+        cwd: installationPath,
+      }
+    );
     if (!launchersFound.length) {
       throw new Error('Cannot find executable go language server');
     }
 
-    let envPath = process.env.PATH;
     const goToolchain = await this.getBundledGoToolchain(installationPath, log);
     if (!goToolchain) {
       throw new Error('Cannot find go toolchain in bundle installation');
@@ -92,24 +94,26 @@ export class GoServerLauncher extends AbstractLauncher {
     // Construct $GOROOT from the bundled go toolchain.
     const goRoot = goToolchain;
     const goHome = path.resolve(goToolchain, 'bin');
-    envPath = envPath + ':' + goHome;
     // Construct $GOPATH under 'kibana/data/code'.
     const goPath = this.options.goPath;
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
+    const goCache = path.resolve(goPath, '.cache');
     const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(installationPath, launchersFound[0]);
+    const env = Object.create(process.env);
+    env.PATH = process.platform === 'win32' ? goHome + ';' + env.PATH : goHome + ':' + env.PATH;
     const p = spawn(golsp, params, {
       detached: false,
       stdio: 'pipe',
       env: {
-        ...process.env,
+        ...env,
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         GOROOT: goRoot,
         GOPATH: goPath,
-        PATH: envPath,
+        GOCACHE: goCache,
         CGO_ENABLED: '0',
       },
     });

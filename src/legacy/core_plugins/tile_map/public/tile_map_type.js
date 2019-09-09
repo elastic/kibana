@@ -27,7 +27,7 @@ import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
-import { visFactory } from '../../visualizations/public';
+import { visFactory } from '../../visualizations/public/np_ready/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 
@@ -69,27 +69,32 @@ export function createTileMapTypeDefinition(dependencies) {
     editorConfig: {
       collections: {
         colorSchemas,
-        legendPositions: [{
-          value: 'bottomleft',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
-            defaultMessage: 'Bottom left',
-          }),
-        }, {
-          value: 'bottomright',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
-            defaultMessage: 'Bottom right',
-          }),
-        }, {
-          value: 'topleft',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
-            defaultMessage: 'Top left',
-          }),
-        }, {
-          value: 'topright',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
-            defaultMessage: 'Top right',
-          }),
-        }],
+        legendPositions: [
+          {
+            value: 'bottomleft',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
+              defaultMessage: 'Bottom left',
+            }),
+          },
+          {
+            value: 'bottomright',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
+              defaultMessage: 'Bottom right',
+            }),
+          },
+          {
+            value: 'topleft',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
+              defaultMessage: 'Top left',
+            }),
+          },
+          {
+            value: 'topright',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
+              defaultMessage: 'Top right',
+            }),
+          },
+        ],
         mapTypes: [
           {
             value: MapTypes.ScaledCircleMarkers,
@@ -129,9 +134,7 @@ export function createTileMapTypeDefinition(dependencies) {
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' },
-          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',

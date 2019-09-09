@@ -25,10 +25,10 @@ interface Props {
 const PinButtonIcon = styled(EuiButtonIcon)<{ pinned: string }>`
   svg {
     ${({ pinned, theme }) => (pinned === 'true' ? `fill: ${theme.eui.euiColorPrimary};` : '')}
-    height: 22px;
+    height: 19px;
     ${({ pinned }) => `left: ${pinned === 'true' ? '-2' : '-1'}`}px;
     position: relative;
-    width: 22px;
+    width: 19px;
   }
 `;
 
