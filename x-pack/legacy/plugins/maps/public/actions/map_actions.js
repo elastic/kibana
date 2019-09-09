@@ -17,7 +17,11 @@ import {
   getTooltipState
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { getCancelRequestCallbacks } from '../reducers/non_serializable_instances';
+import {
+  getCancelRequestCallbacks,
+  registerCancelCallback,
+  unregisterCancelCallback
+} from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
@@ -58,7 +62,7 @@ export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 
-function getLayerLoadingCallbacks(dispatch, state, layerId) {
+function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
@@ -66,7 +70,7 @@ function getLayerLoadingCallbacks(dispatch, state, layerId) {
     updateSourceData: (newData) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
-    registerCancelCallback: (requestToken, callback) => registerCancelCallback(requestToken, callback, state)
+    registerCancelCallback: (requestToken, callback) => dispatch(registerCancelCallback(requestToken, callback)),
   };
 }
 
@@ -80,13 +84,13 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
   const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, state, layer.getId());
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
 }
 
-function cancelRequest(requestToken, state) {
+function cancelRequest(requestToken, state, dispatch) {
   if (!requestToken) {
     return;
   }
@@ -94,23 +98,15 @@ function cancelRequest(requestToken, state) {
   const cancelCallback = getCancelRequestCallbacks(state).get(requestToken);
   if (cancelCallback) {
     cancelCallback();
-    unregisterCancelCallback(requestToken, state);
+    dispatch(unregisterCancelCallback(requestToken));
   }
 }
 
-function registerCancelCallback(requestToken, callback, state) {
-  getCancelRequestCallbacks(state).set(requestToken, callback);
-}
-
-function unregisterCancelCallback(requestToken, state) {
-  getCancelRequestCallbacks(state).delete(requestToken);
-}
-
 export function cancelAllInFlightRequests() {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     getLayerList(getState()).forEach(layer => {
       layer.getInFlightRequestTokens().forEach(requestToken => {
-        cancelRequest(requestToken, getState());
+        cancelRequest(requestToken, getState(), dispatch);
       });
     });
   };
@@ -443,7 +439,7 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   return (dispatch, getState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      cancelRequest(layer.getPrevRequestToken(dataId), getState());
+      cancelRequest(layer.getPrevRequestToken(dataId), getState(), dispatch);
     }
 
     dispatch({
@@ -470,8 +466,8 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return async (dispatch, getState) => {
-    unregisterCancelCallback(requestToken, getState());
+  return async (dispatch) => {
+    dispatch(unregisterCancelCallback(requestToken));
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
@@ -492,8 +488,8 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return async (dispatch, getState) => {
-    unregisterCancelCallback(requestToken, getState());
+  return async (dispatch) => {
+    dispatch(unregisterCancelCallback(requestToken));
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
@@ -525,7 +521,7 @@ export function syncDataForLayer(layerId) {
     const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState(), layerId);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
       await targetLayer.syncData({
         ...loadingFunctions,
         dataFilters
@@ -613,7 +609,7 @@ export function removeLayer(layerId) {
     }
 
     layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
-      cancelRequest(requestToken, getState());
+      cancelRequest(requestToken, getState(), dispatch);
     });
     dispatch(clearTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();

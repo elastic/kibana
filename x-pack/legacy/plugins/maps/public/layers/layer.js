@@ -261,7 +261,7 @@ export class AbstractLayer {
   }
 
   getInFlightRequestTokens() {
-    if (!this._dataRequests || this._dataRequests.length === 0) {
+    if (!this._dataRequests) {
       return [];
     }
 
