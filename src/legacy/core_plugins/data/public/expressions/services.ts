@@ -17,6 +17,25 @@
  * under the License.
  */
 
-export { Registry } from './lib/registry';
+import { IInterpreter } from './lib/_types';
+import { Start as IInspector } from '../../../../../plugins/inspector/public';
 
-export { fromExpression, toExpression, Ast } from './lib/ast';
+let interpreter: IInterpreter | undefined;
+let inspector: IInspector;
+
+export const getInterpreter = (): IInterpreter => {
+  if (!interpreter) throw new Error('interpreter was not set');
+  return interpreter;
+};
+
+export const setInterpreter = (inspectorInstance: IInterpreter) => {
+  interpreter = inspectorInstance;
+};
+
+export const getInspector = (): IInspector => {
+  return inspector;
+};
+
+export const setInspector = (inspectorInstance: IInspector) => {
+  inspector = inspectorInstance;
+};
