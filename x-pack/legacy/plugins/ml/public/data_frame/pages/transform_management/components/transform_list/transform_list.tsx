@@ -24,22 +24,21 @@ import {
   SORT_DIRECTION,
 } from '../../../../../../common/types/eui/in_memory_table';
 
-import { DataFrameTransformId, moveToDataFrameWizard } from '../../../../common';
+import {
+  DataFrameTransformId,
+  DataFrameTransformListColumn,
+  DataFrameTransformListRow,
+  moveToDataFrameWizard,
+  DATA_FRAME_TRANSFORM_STATE,
+  DATA_FRAME_MODE,
+} from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import {
-  DataFrameTransformListColumn,
-  DataFrameTransformListRow,
-  ItemIdToExpandedRowMap,
-  DATA_FRAME_TRANSFORM_STATE,
-  DATA_FRAME_MODE,
-  Query,
-  Clause,
-} from './common';
+import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, TransformTable } from './transform_table';

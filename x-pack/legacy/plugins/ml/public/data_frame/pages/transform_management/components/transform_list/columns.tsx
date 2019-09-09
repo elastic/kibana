@@ -24,14 +24,14 @@ import {
   FieldDataColumnType,
 } from '../../../../../../common/types/eui/in_memory_table';
 
-import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
-  DATA_FRAME_TRANSFORM_STATE,
+  DataFrameTransformId,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   DataFrameTransformStats,
-} from './common';
+  DATA_FRAME_TRANSFORM_STATE,
+} from '../../../../common';
 import { getActions } from './actions';
 
 enum STATE_COLOR {
@@ -167,7 +167,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: getTransformProgress || 0,
+      sortable: (item: DataFrameTransformListRow) => getTransformProgress(item) || 0,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
         const progress = getTransformProgress(item);
