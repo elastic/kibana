@@ -48,7 +48,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       // Sometimes Geckodriver throws MoveTargetOutOfBoundsError here
       // https://github.com/mozilla/geckodriver/issues/776
       try {
-        await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+        await (parent ? parent.moveMouseTo() : testSubjects.moveMouseTo('dashboardPanelTitle'));
       } catch(err) {
         log.error(err);
       }

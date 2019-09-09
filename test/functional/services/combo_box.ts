@@ -45,7 +45,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     private async clickOption(isMouseClick: boolean, element: WebElementWrapper) {
-      return isMouseClick ? await browser.clickMouseButton(element) : await element.click();
+      return isMouseClick ? await element.clickMouseButton() : await element.click();
     }
 
     /**
