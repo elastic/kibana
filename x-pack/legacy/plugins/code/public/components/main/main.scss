@@ -171,6 +171,10 @@
   white-space: nowrap;
 }
 
+.codeSearch__suggestion-text-container {
+  min-width: 0;
+}
+
 .codeSearch__suggestion-text {
   color: $euiColorFullShade;
   display: flex;
