@@ -42,7 +42,7 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
           <StepText>
             <FormattedMessage
               id="xpack.infra.analysisSetup.timeRangeByDefault"
-              defaultMessage="By default, we'll analyze all past and future log messages in your logs indices."
+              defaultMessage="By default, Machine Learning will analyze all past and future log messages in your logs indices."
             />{' '}
             <EuiButtonEmpty onClick={() => setShowTimeRangeForm(true)}>
               <FormattedMessage
