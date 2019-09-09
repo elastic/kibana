@@ -46,9 +46,6 @@ const TOOLTIP_TYPE = {
   LOCKED: 'LOCKED'
 };
 
-// eslint-disable-next-line max-len,camelcase
-const TRANSPARENT_1x1_BASE64_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
-
 export class MBMapContainer extends React.Component {
 
   state = {
@@ -397,7 +394,8 @@ export class MBMapContainer extends React.Component {
       });
       mbMap.on('load', () => {
         emptyImage = new Image();
-        emptyImage.src = TRANSPARENT_1x1_BASE64_URI;
+        // eslint-disable-next-line max-len
+        emptyImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);
       });
