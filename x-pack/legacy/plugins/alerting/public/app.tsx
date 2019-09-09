@@ -6,10 +6,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { some } from 'fp-ts/lib/Option';
 
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
+import { AlertingApi } from './lib';
 
 class ShareRouter extends Component {
   static contextTypes = {
@@ -36,20 +38,24 @@ class ShareRouter extends Component {
   }
 }
 
-export const App = () => {
+interface AppProps {
+  api: AlertingApi;
+}
+
+export const App = ({ api }: AppProps) => {
   return (
     <HashRouter>
       <ShareRouter>
-        <AppWithoutRouter />
+        <AppWithoutRouter api={api} />
       </ShareRouter>
     </HashRouter>
   );
 };
 
 // Export this so we can test it with a different router.
-export const AppWithoutRouter = () => (
+export const AppWithoutRouter = ({ api }: AppProps) => (
   <Switch>
-    <Route exact path={`${BASE_PATH}alerts`} component={AlertsList} />
+    <Route exact path={`${BASE_PATH}alerts`} render={() => <AlertsList api={some(api)} />} />
     <Redirect from={BASE_PATH} to={`${BASE_PATH}alerts`} />
   </Switch>
 );

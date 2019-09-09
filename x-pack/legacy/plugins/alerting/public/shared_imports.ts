@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getApiUsingHttpClient, AlertingApi } from './api';
-export { goToAlertsList, registerRouter } from './navigation';
-export { manageAngularLifecycle } from './manage_angular_lifecycle';
+export {
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
+  sendRequest,
+  useRequest,
+} from '../../../../../src/plugins/es_ui_shared/public/request';

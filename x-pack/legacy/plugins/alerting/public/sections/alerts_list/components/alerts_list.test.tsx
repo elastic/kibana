@@ -1,28 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 import React from 'react';
+import { some, none } from 'fp-ts/lib/Option';
 import { shallow } from 'enzyme';
 import { Chrome } from 'ui/chrome';
-import { AlertsList, NoAlerts } from './alerts_list';
+import { AlertsList, NoAlerts, AlertsLoadingIndicator, AlertsTable } from './alerts_list';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
+import { AlertingApi, RequestStatus } from '../../../lib/api';
 
 describe('Alerts List', () => {
   it.skip('should set the breadcrumbs', () => {
@@ -46,6 +35,32 @@ describe('Alerts List', () => {
     const comp = shallow(<AlertsList />);
     expect(comp.contains(<NoAlerts />)).toBeTruthy();
   });
+
+  it('should indicate that Alerts are loading when the api indicates that to be the case', () => {
+    const api: AlertingApi = {
+      loadAlerts: (pollIntervalMs: number): RequestStatus<any> => {
+        return { isLoading: true, error: none, data: none };
+      },
+    };
+    const comp = shallow(<AlertsList api={some(api)} />);
+    expect(comp.contains(<AlertsLoadingIndicator />)).toBeTruthy();
+  });
+
+  it('should render the Alerts table when the api has finished loading the alerts', () => {
+    const api: AlertingApi = {
+      loadAlerts: (pollIntervalMs: number): RequestStatus<any> => {
+        return {
+          isLoading: false,
+          error: none,
+          data: some({
+            data: DUMMY_ALERTS_DATA,
+          }),
+        };
+      },
+    };
+    const comp = shallow(<AlertsList api={some(api)} />);
+    expect(comp.contains(<AlertsTable alerts={DUMMY_ALERTS_DATA} />)).toBeTruthy();
+  });
 });
 
 describe('Alerts List: Empty List', () => {
@@ -54,3 +69,57 @@ describe('Alerts List: Empty List', () => {
     expect(comp).toMatchSnapshot();
   });
 });
+
+describe('Alerts List: Alerts Table', () => {
+  it('should render a list', () => {
+    const comp = shallow(<AlertsTable alerts={DUMMY_ALERTS_DATA} />);
+    expect(comp).toMatchSnapshot();
+  });
+});
+
+const DUMMY_ALERTS_DATA = [
+  {
+    id: '0f73f885-ee6d-4693-8ba1-f545bff26834',
+    alertTypeId: '.always-firing',
+    interval: '1s',
+    actions: [
+      {
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+        },
+        id: '21d865f7-32bc-4428-b08d-25614cd30294',
+      },
+    ],
+    alertTypeParams: {
+      index: 'test_alert_from_cli',
+    },
+    enabled: true,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic',
+    scheduledTaskId: 'a574d2e0-d2d3-11e9-964e-d30e64b0a254',
+  },
+  {
+    id: '0c1268ed-b19f-446f-9eb8-9f4987432ef4',
+    alertTypeId: '.always-firing',
+    interval: '1s',
+    actions: [
+      {
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+        },
+        id: 'b6bd4b41-bd2c-47b9-975c-b408b0a0e8be',
+      },
+    ],
+    alertTypeParams: {
+      index: 'test_alert_from_cli',
+    },
+    enabled: true,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic',
+    scheduledTaskId: 'c05f6340-d2d3-11e9-964e-d30e64b0a254',
+  },
+];

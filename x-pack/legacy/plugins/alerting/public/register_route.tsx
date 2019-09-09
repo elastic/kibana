@@ -11,12 +11,12 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { I18nContext } from 'ui/i18n';
 import template from './app.html';
 import { App } from './app';
-import { setHttpClient, manageAngularLifecycle } from './lib';
+import { getApiUsingHttpClient, AlertingApi, manageAngularLifecycle } from './lib';
 
-const renderReact = async (element: any) => {
+const renderReact = async (element: any, api: AlertingApi) => {
   render(
     <I18nContext>
-      <App />
+      <App api={api} />
     </I18nContext>,
     element
   );
@@ -35,10 +35,10 @@ routes.when('/management/elasticsearch/alerting/:param1?/:param2?/:param3?/:para
       }
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
-      setHttpClient($http);
+      const api = getApiUsingHttpClient($http);
       $scope.$$postDigest(() => {
         elReactRoot = document.getElementById('alertingReactRoot');
-        renderReact(elReactRoot);
+        renderReact(elReactRoot, api);
         manageAngularLifecycle($scope, $route, elReactRoot);
       });
     };

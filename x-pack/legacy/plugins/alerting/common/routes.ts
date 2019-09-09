@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getApiUsingHttpClient, AlertingApi } from './api';
-export { goToAlertsList, registerRouter } from './navigation';
-export { manageAngularLifecycle } from './manage_angular_lifecycle';
+export const ROUTES: { [key: string]: string } = {
+  API_ROOT: '/api/alert',
+};

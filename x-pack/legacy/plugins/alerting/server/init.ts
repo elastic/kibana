@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { ActionsPlugin } from '../../actions';
 import { TaskManager } from '../../task_manager';
-import { AlertingPlugin, Services } from './types';
+import { AlertExecutorOptions, AlertType, AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
 import { SpacesPlugin } from '../../spaces';
@@ -166,4 +166,24 @@ export function init(server: Server) {
     listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),
   };
   server.expose(exposedFunctions);
+  alertTypeRegistry.register(alwaysFiringAlertType);
 }
+
+const alwaysFiringAlertType: AlertType = {
+  id: '.always-firing',
+  name: 'Alert that always fires actions when run',
+  async executor({ services, params, state }: AlertExecutorOptions) {
+    if (state == null) state = {};
+    if (state.count == null) state.count = 0;
+
+    const context = {
+      date: new Date().toISOString(),
+      count: state.count,
+    };
+
+    services.alertInstanceFactory('').fire('default', context);
+
+    state.count++;
+    return state;
+  },
+};

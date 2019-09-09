@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Alerts List: Alerts Table should render a list 1`] = `
+<ul>
+  <li
+    key="0"
+  >
+    [{"id":"0f73f885-ee6d-4693-8ba1-f545bff26834","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"21d865f7-32bc-4428-b08d-25614cd30294"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"a574d2e0-d2d3-11e9-964e-d30e64b0a254"},{"id":"0c1268ed-b19f-446f-9eb8-9f4987432ef4","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"b6bd4b41-bd2c-47b9-975c-b408b0a0e8be"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"c05f6340-d2d3-11e9-964e-d30e64b0a254"}]
+  </li>
+  <li
+    key="1"
+  >
+    [{"id":"0f73f885-ee6d-4693-8ba1-f545bff26834","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"21d865f7-32bc-4428-b08d-25614cd30294"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"a574d2e0-d2d3-11e9-964e-d30e64b0a254"},{"id":"0c1268ed-b19f-446f-9eb8-9f4987432ef4","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"b6bd4b41-bd2c-47b9-975c-b408b0a0e8be"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"c05f6340-d2d3-11e9-964e-d30e64b0a254"}]
+  </li>
+</ul>
+`;
+
 exports[`Alerts List: Empty List should render an Empty Prompt 1`] = `
 <EuiPageContent
   panelPaddingSize="l"

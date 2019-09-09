@@ -5,30 +5,52 @@
  */
 
 import React, { useEffect } from 'react';
-
+import { Option, none } from 'fp-ts/lib/Option';
 import { EuiPageContent, EuiText, EuiEmptyPrompt } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import chrome, { Chrome } from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
+import { SectionLoading } from '../../../components';
+import { AlertingApi } from '../../../lib/api';
 
-type AlertsListProps = {
+interface AlertsListProps {
   breadcrumbs: Chrome['breadcrumbs'];
-};
+  api: Option<AlertingApi>;
+}
 
-export const AlertsList = ({ breadcrumbs }: AlertsListProps) => {
+const SIXTY_SECONDS = 60 * 1000;
+
+export const AlertsList = ({ breadcrumbs, api }: AlertsListProps) => {
   useEffect(() => {
     breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
   }, []);
 
-  return <NoAlerts />;
+  return api
+    .mapNullable(alertingApi => {
+      const { isLoading: isAlertsLoading, data: alerts } = alertingApi.loadAlerts(SIXTY_SECONDS);
+      if (isAlertsLoading) {
+        return <AlertsLoadingIndicator />;
+      }
+      // yuck! Should be cleaner with newer fp-ts, pull master
+      return alerts.map(({ data }) => <AlertsTable alerts={data} />).getOrElse(<NoAlerts />);
+    })
+    .getOrElse(<NoAlerts />);
 };
 
 AlertsList.defaultProps = {
   breadcrumbs: chrome.breadcrumbs,
+  api: none,
 };
+
+export const AlertsLoadingIndicator = () => (
+  <SectionLoading>
+    <FormattedMessage
+      id="xpack.watcher.sections.alertsList.loadingAlertsDescription"
+      defaultMessage="Loading alerts,,,"
+    />
+  </SectionLoading>
+);
 
 export const NoAlerts = () => {
   const alertingDescriptionText = (
@@ -60,5 +82,15 @@ export const NoAlerts = () => {
         data-test-subj="emptyPrompt"
       />
     </EuiPageContent>
+  );
+};
+
+export const AlertsTable = ({ alerts }: { alerts: any[] }) => {
+  return (
+    <ul>
+      {alerts.map((alert, i) => (
+        <li key={i}>{JSON.stringify(alerts)}</li>
+      ))}
+    </ul>
   );
 };
