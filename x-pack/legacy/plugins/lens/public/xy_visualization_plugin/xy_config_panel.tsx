@@ -214,7 +214,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           </EuiFormRow>
           <EuiFormRow
             className="lnsConfigPanel__axis"
-            data-test-subj="lnsXY_YDimensionPanel"
+            data-test-subj="lnsXY_yDimensionPanel"
             label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
               defaultMessage: 'Y-axis',
             })}

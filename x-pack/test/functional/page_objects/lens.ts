@@ -10,7 +10,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const browser = getService('browser');
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -98,35 +97,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Drags and drops a field into the Lens workspace.
-     *
-     * @param fieldName - the name of the field to be dropped in the workspace
-     */
-    async dragToWorkspace(fieldName: string) {
-      const workspace = await testSubjects.find('lnsWorkspace');
-      const timestampField = await find.byCssSelector(
-        `[data-test-subj="lnsFieldListPanelField"] [title="${fieldName}"]`
-      );
-
-      await browser.dragAndDrop(
-        { location: timestampField, offset: { x: 0, y: 0 } },
-        { location: workspace, offset: { x: 40, y: 40 } }
-      );
-    },
-
-    /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
      * @param opts.from - the text of the dimension being changed
      * @param opts.to - the desired operation for the dimension
      * @param opts.field - the desired field for the dimension
      */
-    async changeDimension(opts: { from: string; to: string; field?: string }) {
-      await find.clickByButtonText(opts.from);
-      await find.clickByCssSelector(
-        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.to}"],
-         [data-test-subj="lns-indexPatternDimension-${opts.to}"]`
-      );
+    async configureDimension(opts: { dimension: string; operation?: string; field?: string }) {
+      await find.clickByCssSelector(opts.dimension);
+
+      if (opts.operation) {
+        await find.clickByCssSelector(
+          `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
+           [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
+        );
+      }
 
       if (opts.field) {
         await testSubjects.click('indexPattern-dimension-field');

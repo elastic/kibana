@@ -75,28 +75,29 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.toggleExistenceFilter();
       await PageObjects.lens.goToTimeRange();
 
-      // Drag the @timestamp field to the workspace
-      await PageObjects.lens.dragToWorkspace('@timestamp');
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+        operation: 'date_histogram',
+      });
 
-      // Change the y from count to average of bytes
-      await PageObjects.lens.changeDimension({
-        from: 'Count of documents',
-        to: 'avg',
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+        operation: 'avg',
         field: 'bytes',
       });
 
-      // Change the title
       await PageObjects.lens.setTitle('Afancilenstest');
 
-      // Save the chart
       await PageObjects.lens.save();
 
-      // Ensure the visualization shows up in the visualize list
+      // Ensure the visualization shows up in the visualize list, and takes
+      // us back to the visualization as we configured it.
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
 
-      // Expect to see the visualization editor for the saved visualization
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
