@@ -47,7 +47,7 @@ export class AggParamType extends BaseParamType {
       };
     }
     if (!config.editorComponent) {
-      this.editorComponent = require('../controls/sub_agg');
+      this.editorComponent = require('../../vis/editors/default/controls/sub_agg');
     }
     this.makeAgg = config.makeAgg;
     this.valueType = AggConfig;
