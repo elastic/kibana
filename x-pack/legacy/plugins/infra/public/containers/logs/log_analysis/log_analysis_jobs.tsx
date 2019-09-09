@@ -151,11 +151,9 @@ export const useLogAnalysisJobs = ({
       setIsRetrying(true);
       cleanupMLResources()
         .then(() => {
-          setupMlModule(start, end).then(() => {
-            setIsRetrying(false);
-          });
+          setupMlModule(start, end);
         })
-        .catch(() => {
+        .finally(() => {
           setIsRetrying(false);
         });
     },
