@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
 import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
@@ -14,23 +14,20 @@ import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 import { replaceKqlQueryLocationForNetworkPage } from './replace_kql_query_location_for_network_page';
 
-interface MlNetworkConditionalProps {
-  match: RouteMatch<{}>;
-  location: Location;
-}
-
 interface QueryStringType {
   '?_g': string;
   kqlQuery: string | null;
   timerange: string | null;
 }
 
-export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ match }) => (
+type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
       exact
-      path={match.url}
+      path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
@@ -43,7 +40,7 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
       }}
     />
     <Route
-      path={`${match.url}/ip/:ip`}
+      path={`${url}/ip/:ip`}
       render={({
         location,
         match: {
@@ -63,24 +60,32 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          return <Redirect to={`/network/anomalies?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
+          console.log('queryStringDecoded is', queryStringDecoded);
+          console.log('found ips of:', ips);
           if (queryStringDecoded.kqlQuery != null) {
+            console.log('queryStringDecoded.kqlQuery != null', queryStringDecoded.kqlQuery);
             queryStringDecoded.kqlQuery = addEntitiesToKql(
               ['source.ip', 'destination.ip'],
               ips,
               queryStringDecoded.kqlQuery
             );
+            console.log('entities added to kql is:', queryStringDecoded.kqlQuery);
             queryStringDecoded.kqlQuery = replaceKqlQueryLocationForNetworkPage(
               queryStringDecoded.kqlQuery
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          console.log(
+            'multi-entities detected, redirecting to:',
+            `/network/anomalies?${reEncoded}`
+          );
+          return <Redirect to={`/network/anomalies?${reEncoded}`} />;
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network/ip/${ip}?${reEncoded}`} />;
+          return <Redirect to={`/network/ip/${ip}/anomalies?${reEncoded}`} />;
         }
       }}
     />
