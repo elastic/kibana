@@ -15,7 +15,7 @@ import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
-// @ts-ignore no declaration file
+
 import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
@@ -33,7 +33,7 @@ export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) =
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} started successfully.',
+            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );

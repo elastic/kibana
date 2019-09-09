@@ -6,18 +6,23 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
-
-import { isNumber } from 'lodash/fp';
+import { isNumber, isString } from 'lodash/fp';
 import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import { Bytes, BYTES_FORMAT } from '../../../bytes';
 
-import { getOrEmptyTagFromValue } from '../../../empty_value';
+import { Bytes, BYTES_FORMAT } from '../../../bytes';
+import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
+import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
+import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
 
-import { DATE_FIELD_TYPE, IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
+import {
+  DATE_FIELD_TYPE,
+  HOST_NAME_FIELD_NAME,
+  IP_FIELD_TYPE,
+  MESSAGE_FIELD_NAME,
+} from './constants';
 
 export const FormattedFieldValue = pure<{
   contextId: string;
@@ -26,7 +31,8 @@ export const FormattedFieldValue = pure<{
   fieldName: string;
   fieldType: string;
   value: string | number | undefined | null;
-}>(({ eventId, contextId, fieldFormat, fieldName, fieldType, value }) => {
+  width?: string;
+}>(({ eventId, contextId, fieldFormat, fieldName, fieldType, value, width }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -45,6 +51,18 @@ export const FormattedFieldValue = pure<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return (
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === HOST_NAME_FIELD_NAME) {
+    const hostname = `${value}`;
+
+    return isString(value) && hostname.length > 0 ? (
+      <EuiToolTip content={value}>
+        <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
+          {value}
+        </HostDetailsLink>
+      </EuiToolTip>
+    ) : (
+      getEmptyTagValue()
     );
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
@@ -66,7 +84,7 @@ export const FormattedFieldValue = pure<{
           </EuiFlexGroup>
         }
       >
-        <>{value}</>
+        <span data-test-subj="truncatable-message">{value}</span>
       </EuiToolTip>
     );
   } else {

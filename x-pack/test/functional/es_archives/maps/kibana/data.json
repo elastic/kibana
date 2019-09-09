@@ -112,6 +112,26 @@
 {
   "type": "doc",
   "value": {
+    "id": "index-pattern:dedd3180-c8d8-11e9-b36c-81f9f9da524f",
+    "index": ".kibana",
+    "source": {
+      "index-pattern" : {
+        "title" : "connections",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"destination\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"source\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "6.5.0"
+      },
+      "updated_at" : "2019-08-27T14:42:20.061Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:d2e73f40-e14a-11e8-a35a-370a8516603a",
     "index": ".kibana",
     "source": {
@@ -620,6 +640,62 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:3c9949f0-c8dc-11e9-9ea1-8b2710d4a86b",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "pew pew demo",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":5.5,\"center\":{\"lon\":-71.34293,\"lat\":40.33097},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#1EA593\"}},\"lineColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineWidth\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"sourceDescriptor\":{\"type\":\"ES_PEW_PEW\",\"id\":\"d7ca27a8-dba2-4f5b-857c-8f529511ad81\",\"sourceGeoField\":\"source\",\"destGeoField\":\"destination\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"67c1de2c-2fc5-4425-8983-094b589afe61\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"applyGlobalQuery\":true,\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -83.72374,
+                44.30172
+              ],
+              [
+                -83.72374,
+                36.11211
+              ],
+              [
+                -58.96211,
+                36.11211
+              ],
+              [
+                -58.96211,
+                44.30172
+              ],
+              [
+                -83.72374,
+                44.30172
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_0_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "dedd3180-c8d8-11e9-b36c-81f9f9da524f"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.4.0"
+      },
+      "updated_at" : "2019-08-27T15:06:24.654Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
     "index": ".kibana",
     "source": {
@@ -683,6 +759,27 @@
         "dashboard" : "7.0.0"
       },
       "updated_at" : "2019-06-14T14:09:25.039Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "query:okjpgs",
+    "source": {
+      "query": {
+        "title": "OKJpgs",
+        "description": "Ok responses for jpg files",
+        "query": {
+          "query": "response:200",
+          "language": "kuery"
+        },
+        "filters": [{"meta":{"index":"b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b","alias":null,"negate":false,"type":"phrase","key":"extension.raw","value":"jpg","params":{"query":"jpg"},"disabled":false},"query":{"match":{"extension.raw":{"query":"jpg","type":"phrase"}}},"$state":{"store":"appState"}}]
+      },
+      "type": "query",
+      "updated_at": "2019-07-17T17:54:26.378Z"
     }
   }
 }

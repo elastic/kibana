@@ -24,7 +24,6 @@ import {
   EmbeddableFactory,
   ExecuteTriggerActions,
   GetEmbeddableFactories,
-  TriggerContext,
 } from '../lib';
 
 export interface EmbeddableApi {
@@ -35,7 +34,7 @@ export interface EmbeddableApi {
   getEmbeddableFactories: GetEmbeddableFactories;
   getTrigger: (id: string) => Trigger;
   getTriggerActions: (id: string) => Action[];
-  getTriggerCompatibleActions: (triggerId: string, context: TriggerContext) => Promise<Action[]>;
+  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<Action<C>>>;
   registerAction: (action: Action) => void;
   // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
   registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;

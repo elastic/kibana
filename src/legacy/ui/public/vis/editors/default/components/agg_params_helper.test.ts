@@ -31,10 +31,8 @@ import { EditorConfig } from '../../config/types';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {
-    byType: {
-      metrics: [],
-      buckets: [],
-    },
+    metrics: [],
+    buckets: [],
   },
 }));
 jest.mock('../utils', () => ({
@@ -58,14 +56,14 @@ describe('DefaultEditorAggParams helpers', () => {
           params: [{ name: 'interval' }],
         },
         schema: {},
-      };
+      } as AggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
-      agg = {};
+      agg = {} as AggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
@@ -76,7 +74,7 @@ describe('DefaultEditorAggParams helpers', () => {
         type: {
           params: [{ name: 'interval' }],
         },
-      };
+      } as AggConfig;
       editorConfig = {
         interval: {
           hidden: true,
@@ -95,7 +93,7 @@ describe('DefaultEditorAggParams helpers', () => {
         schema: {
           hideCustomLabel: true,
         },
-      };
+      } as AggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
@@ -103,7 +101,7 @@ describe('DefaultEditorAggParams helpers', () => {
 
     it('should create a basic params field and orderBy', () => {
       const filterFieldTypes = ['number', 'boolean', 'date'];
-      agg = {
+      agg = ({
         type: {
           params: [
             {
@@ -129,7 +127,7 @@ describe('DefaultEditorAggParams helpers', () => {
           orderBy: 'orderBy',
           field: 'field',
         },
-      };
+      } as any) as AggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual({
@@ -163,13 +161,13 @@ describe('DefaultEditorAggParams helpers', () => {
 
   describe('getError', () => {
     it('should not have any errors', () => {
-      const errors = getError({ schema: { title: 'Split series' } }, false);
+      const errors = getError({ schema: { title: 'Split series' } } as AggConfig, false);
 
       expect(errors).toEqual([]);
     });
 
     it('should push an error if an agg is too low', () => {
-      const errors = getError({ schema: { title: 'Split series' } }, true);
+      const errors = getError({ schema: { title: 'Split series' } } as AggConfig, true);
 
       expect(errors).toEqual(['"Split series" aggs must run before all other buckets!']);
     });
@@ -178,7 +176,7 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
       const indexPattern = {} as IndexPattern;
-      const aggs = getAggTypeOptions({}, indexPattern, 'metrics');
+      const aggs = getAggTypeOptions({} as AggConfig, indexPattern, 'metrics');
 
       expect(aggs).toEqual(['indexedFields']);
     });
@@ -208,14 +206,14 @@ describe('DefaultEditorAggParams helpers', () => {
     });
 
     it('should return false if there is no invalid params', () => {
-      aggType = 'type';
+      aggType = 'type' as any;
       const isTouched = isInvalidParamsTouched(aggType, aggTypeState, aggParams);
 
       expect(isTouched).toBeFalsy();
     });
 
     it('should return true if there is an invalid param, but not every still touched', () => {
-      aggType = 'type';
+      aggType = 'type' as any;
       aggParams.orderAgg.valid = false;
       const isTouched = isInvalidParamsTouched(aggType, aggTypeState, aggParams);
 

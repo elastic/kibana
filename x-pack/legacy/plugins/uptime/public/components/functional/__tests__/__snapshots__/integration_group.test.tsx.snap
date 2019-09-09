@@ -62,7 +62,7 @@ exports[`IntegrationGroup will not display infra links when infra is unavailable
   <EuiFlexItem>
     <IntegrationLink
       ariaLabel="Search APM for this monitor"
-      href="/foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
+      href="foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
       iconType="apmApp"
       message="Check APM for domain"
       tooltipContent="Click here to check APM for the domain \\"\\"."
@@ -102,7 +102,7 @@ exports[`IntegrationGroup will not display logging links when logging is unavail
   <EuiFlexItem>
     <IntegrationLink
       ariaLabel="Search APM for this monitor"
-      href="/foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
+      href="foo/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-12m&rangeTo=now-1m"
       iconType="apmApp"
       message="Check APM for domain"
       tooltipContent="Click here to check APM for the domain \\"\\"."
