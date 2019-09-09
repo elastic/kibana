@@ -72,7 +72,7 @@ describe('visualize loader', () => {
   }
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
-  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, interpreterConfig, Private) => {
+  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, Private) => {
     $rootScope = _$rootScope_;
     searchSource = Private(FixturesStubbedSearchSourceProvider);
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
