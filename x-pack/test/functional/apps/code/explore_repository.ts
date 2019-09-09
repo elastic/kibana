@@ -26,8 +26,7 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/42111
-  describe.skip('Explore Repository', function() {
+  describe('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
@@ -268,7 +267,13 @@ export default function exploreRepositoryFunctionalTests({
         });
 
         // Click the structure tree tab
+        await retry.try(async () => {
+          expect(await testSubjects.isEnabled('codeStructureTreeTab')).to.be.ok();
+        });
         await testSubjects.click('codeStructureTreeTab');
+        await retry.try(async () => {
+          expect(await testSubjects.isSelected('codeStructureTreeTab')).to.be.ok();
+        });
         await retry.tryForTime(300000, async () => {
           expect(await exists('codeStructureTreeNode-User')).to.be(true);
 
