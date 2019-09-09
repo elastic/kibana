@@ -6,5 +6,6 @@
 
 interface Duration {
   asSeconds(): number;
+  asMilliseconds(): number;
 }
 export function parseInterval(interval: string): Duration;
