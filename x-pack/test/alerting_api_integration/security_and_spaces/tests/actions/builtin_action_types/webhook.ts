@@ -162,6 +162,27 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('ok');
     });
 
+    it('should handle target webhooks that are not whitelisted', async () => {
+      const { body: result } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'test')
+        .send({
+          description: 'A generic Webhook action',
+          actionTypeId: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: 'http://a.none.whitelisted.webhook/endpoint',
+          },
+        })
+        .expect(400);
+
+      expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.match(/not in the Kibana whitelist/);
+    });
+
     it('should handle unreachable webhook targets', async () => {
       const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
       const { body: result } = await supertest
@@ -177,7 +198,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/Unreachable Remote Webhook/);
     });
-
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
