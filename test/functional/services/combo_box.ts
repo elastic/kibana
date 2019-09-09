@@ -46,13 +46,21 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       await this.setElement(comboBox, value);
     }
 
+    private async clickOption(isMouseClick: boolean, element: WebElementWrapper) {
+      return isMouseClick ? await element.clickMouseButton() : await element.click();
+    }
+
     /**
      * set value inside combobox element
      *
      * @param comboBoxElement
      * @param value
      */
-    public async setElement(comboBoxElement: WebElementWrapper, value: string): Promise<void> {
+    public async setElement(
+      comboBoxElement: WebElementWrapper,
+      value: string,
+      options = { clickWithMouse: false }
+    ): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
       const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
 
@@ -65,21 +73,22 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       await this.openOptionsList(comboBoxElement);
 
       if (value !== undefined) {
-        const options = await find.allByCssSelector(
+        const selectOptions = await find.allByCssSelector(
           `.euiFilterSelectItem[title^="${value.toString().trim()}"]`,
           WAIT_FOR_EXISTS_TIME
         );
 
-        if (options.length > 0) {
-          await options[0].click();
+        if (selectOptions.length > 0) {
+          await this.clickOption(options.clickWithMouse, selectOptions[0]);
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          await find.clickByCssSelector('.euiFilterSelectItem');
+          const firstOption = await find.byCssSelector('.euiFilterSelectItem');
+          await this.clickOption(options.clickWithMouse, firstOption);
         }
       } else {
-        await find.clickByCssSelector('.euiFilterSelectItem');
+        const firstOption = await find.byCssSelector('.euiFilterSelectItem');
+        await this.clickOption(options.clickWithMouse, firstOption);
       }
-
       await this.closeOptionsList(comboBoxElement);
     }
 
@@ -241,11 +250,11 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       value: string
     ): Promise<boolean> {
       log.debug(`comboBox.isOptionSelected, value: ${value}`);
-      const selectedOptions = await comboBoxElement.findAllByClassName(
-        'euiComboBoxPill',
-        WAIT_FOR_EXISTS_TIME
-      );
-      return selectedOptions.length === 1 && (await selectedOptions[0].getVisibleText()) === value;
+      const $ = await comboBoxElement.parseDomContent();
+      const selectedOptions = $('.euiComboBoxPill')
+        .toArray()
+        .map(option => $(option).text());
+      return selectedOptions.length === 1 && selectedOptions[0] === value;
     }
   }
 
