@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaDatatableRow } from 'src/plugins/data/common';
+import { KibanaDatatableRow } from 'src/plugins/expressions/common';
 import { AggConfig } from '../agg_config';
 import { RequestHandler } from './request_handlers';
 

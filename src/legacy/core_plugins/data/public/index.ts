@@ -30,7 +30,6 @@ export function plugin() {
 export type DataSetup = DataSetup;
 export type DataStart = DataStart;
 
-export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,

@@ -17,26 +17,21 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { ExpressionsService } from './expressions/expressions_service';
+
+export class ExpressionsPublicPlugin implements Plugin<{}> {
+  expressions = new ExpressionsService();
+
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    const expressions = this.expressions.setup();
+    return {
+      ...expressions,
+    };
+  }
+
+  public start(core: CoreStart) {}
+  public stop() {}
+}

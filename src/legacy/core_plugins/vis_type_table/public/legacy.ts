@@ -27,7 +27,7 @@ import { LegacyDependenciesPlugin } from './shim';
 
 const plugins: Readonly<TablePluginSetupDependencies> = {
   visualizations: setupVisualizations,
-  data: npSetup.plugins.data,
+  expressions: npSetup.plugins.expressions,
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.

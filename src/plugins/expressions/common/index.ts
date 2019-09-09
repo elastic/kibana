@@ -17,26 +17,4 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+export * from './expressions';

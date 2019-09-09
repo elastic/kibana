@@ -18,6 +18,8 @@
  */
 
 // @ts-ignore
+import { AggType } from './agg_type';
+// @ts-ignore
 import { countMetricAgg } from './metrics/count';
 // @ts-ignore
 import { avgMetricAgg } from './metrics/avg';
@@ -127,3 +129,4 @@ aggTypes.buckets.forEach(aggType => (aggType.type = 'buckets'));
 export { AggParam } from './agg_params';
 export { AggType } from './agg_type';
 export { FieldParamType } from './param_types';
+export { BucketAggType } from './buckets/_bucket_agg_type';

@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export * from './types';
+import { PluginInitializerContext } from '../../../core/server';
+import { DataServerPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataServerPlugin(initializerContext);
+}
+
+export { DataServerPlugin as Plugin };

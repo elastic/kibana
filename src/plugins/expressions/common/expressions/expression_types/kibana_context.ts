@@ -17,26 +17,32 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+import { Filter } from '@kbn/es-query';
+import { TimeRange, Query } from 'src/plugins/data/public';
+
+const name = 'kibana_context';
+
+export interface KibanaContext {
+  type: typeof name;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+export const kibanaContext = () => ({
+  name,
+  from: {
+    null: () => {
+      return {
+        type: name,
+      };
+    },
+  },
+  to: {
+    null: () => {
+      return {
+        type: 'null',
+      };
+    },
+  },
+});

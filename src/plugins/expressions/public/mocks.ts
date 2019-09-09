@@ -16,20 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Plugin } from '.';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
-import { setup as setupVisualizations } from '../../visualizations/public/np_ready/public/legacy';
-import { MetricsPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
-
-const plugins: Readonly<MetricsPluginSetupDependencies> = {
-  visualizations: setupVisualizations,
-  expressions: npSetup.plugins.expressions,
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = {
+    registerFunction: jest.fn(),
+    registerRenderer: jest.fn(),
+    registerType: jest.fn(),
+    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      functions: {
+        register: () => {},
+      } as any,
+      renderers: {
+        register: () => {},
+      } as any,
+      types: {
+        register: () => {},
+      } as any,
+    },
+  };
+  return setupContract;
 };
 
-const pluginInstance = plugin({} as PluginInitializerContext);
+const createStartContract = (): Start => {
+  const startContract: Start = undefined;
+  return startContract;
+};
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const expressionsPluginMock = {
+  createSetupContract,
+  createStartContract,
+};

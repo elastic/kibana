@@ -17,33 +17,13 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from '../../query/types';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 
-const name = 'kibana_context';
-
-export interface KibanaContext {
-  type: typeof name;
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
+export class DataServerPlugin implements Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup) {}
+  public start(core: CoreStart) {}
+  public stop() {}
 }
 
-export const kibanaContext = () => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: name,
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  },
-});
+export { DataServerPlugin as Plugin };

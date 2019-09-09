@@ -17,26 +17,13 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+const expressionsPlugin = plugin();
+
+export const setup = expressionsPlugin.setup(npSetup.core);
+
+export const start = expressionsPlugin.start(npStart.core, {
+  inspector: npStart.plugins.inspector,
+});

@@ -18,3 +18,4 @@
  */
 
 export * from './timefilter/types';
+export * from './query/types';

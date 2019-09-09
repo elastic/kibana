@@ -17,26 +17,25 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+
+// eslint-disable-next-line import/no-default-export
+export default function DataExpressionsPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'expressions',
+    require: ['elasticsearch'],
+    publicDir: resolve(__dirname, 'public'),
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      injectDefaultVars: () => ({}),
+    },
+  };
+
+  return new kibana.Plugin(config);
+}

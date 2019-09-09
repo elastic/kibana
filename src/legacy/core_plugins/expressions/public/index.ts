@@ -17,26 +17,21 @@
  * under the License.
  */
 
-export {
-  getType,
-  interpreterProvider,
-  serializeProvider,
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-  DatatableColumnType,
-  ExpressionImage,
-  Filter,
-  InterpreterErrorType,
-  isDatatable,
-  KibanaContext,
-  KibanaDatatable,
-  PointSeries,
-  PointSeriesColumns,
-  PointSeriesColumn,
-  PointSeriesColumnName,
-  Render,
-  Style,
-  Type,
-} from '../../../../plugins/expressions/common';
-export const API_ROUTE = '/api/interpreter';
+// /// Define plugin function
+import {
+  DataExpressionsPlugin as Plugin,
+  DataExpressionsSetup,
+  DataExpressionsStart,
+} from './plugin';
+
+export function plugin() {
+  return new Plugin();
+}
+
+// /// Export types & static code
+
+/** @public types */
+export type DataExpressionsSetup = DataExpressionsSetup;
+export type DataExpressionsStart = DataExpressionsStart;
+
+export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
