@@ -7,6 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 import {
@@ -79,9 +81,11 @@ async function slackExecutor(
 
     // special handling for rate limiting
     if (status === 429) {
-      return getRetryAfterIntervalFromHeaders(headers)
-        .map(retry => retryResultSeconds(id, err.message, retry))
-        .getOrElse(retryResult(id, err.message));
+      return pipe(
+        getRetryAfterIntervalFromHeaders(headers),
+        map(retry => retryResultSeconds(id, err.message, retry)),
+        getOrElse(() => retryResult(id, err.message))
+      );
     }
 
     return errorResult(id, `${err.message} - ${statusText}`);

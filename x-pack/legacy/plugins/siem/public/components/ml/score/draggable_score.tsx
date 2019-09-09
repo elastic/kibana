@@ -19,7 +19,7 @@ export const DraggableScore = React.memo<{
 }>(
   ({ id, index = 0, score }): JSX.Element => (
     <DraggableWrapper
-      key={id}
+      key={`draggable-score-draggable-wrapper-${id}`}
       dataProvider={{
         and: [],
         enabled: true,
