@@ -33,6 +33,7 @@ import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_que
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
+import { TimeHistoryContract } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -57,6 +58,7 @@ export interface SearchBarProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
+  timeHistory: TimeHistoryContract;
   // Filter bar
   showFilterBar?: boolean;
   filters?: Filter[];
@@ -377,6 +379,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          timeHistory={this.props.timeHistory}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}

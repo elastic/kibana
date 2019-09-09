@@ -28,6 +28,13 @@ import { IndexPattern } from '../../../index';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+timefilterSetupMock.history.get.mockImplementation(() => {
+  return [];
+});
+
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case 'timepicker:quickRanges':
@@ -100,6 +107,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -121,6 +129,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -142,6 +151,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -160,6 +170,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -179,6 +190,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -201,6 +213,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -223,6 +236,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -246,6 +260,7 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}

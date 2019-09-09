@@ -17,21 +17,15 @@
  * under the License.
  */
 
+import moment from 'moment';
 import _ from 'lodash';
+import { TimefilterContract } from '../../../timefilter';
 
-export async function extractTimeFilter(indexPatterns, filters) {
-  // Assume all the index patterns are the same since they will be added
-  // from the same visualization.
-  const id = _.get(filters, '[0].meta.index');
-  if (id == null) return;
-
-  const indexPattern = await indexPatterns.get(id);
-
-  const filter = _.find(filters, function (obj) {
-    const key = _.keys(obj.range)[0];
-    return key === indexPattern.timeFieldName;
+export function changeTimeFilter(timefilter: TimefilterContract, filter: any) {
+  const key = _.keys(filter.range)[0];
+  const values = filter.range[key];
+  timefilter.setTime({
+    from: moment(values.gt || values.gte),
+    to: moment(values.lt || values.lte),
   });
-  if (filter && filter.range) {
-    return filter;
-  }
 }

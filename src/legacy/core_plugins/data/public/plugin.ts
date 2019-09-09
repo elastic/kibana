@@ -21,6 +21,7 @@ import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
+import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
 
@@ -43,6 +44,7 @@ export interface DataSetup {
   filter: FilterSetup;
   query: QuerySetup;
   search: SearchSetup;
+  timefilter: TimefilterSetup;
 }
 
 /**
@@ -62,6 +64,7 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
+  private readonly timefilter: TimefilterService = new TimefilterService();
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
@@ -71,14 +74,21 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
       uiSettings,
       savedObjectsClient,
     });
+
+    const timefilterService = this.timefilter.setup({
+      uiSettings,
+    });
+
     return {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
+        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
+      timefilter: timefilterService,
     };
   }
 
@@ -91,5 +101,6 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
     this.filter.stop();
     this.query.stop();
     this.search.stop();
+    this.timefilter.stop();
   }
 }
