@@ -12,14 +12,8 @@ import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 // @ts-ignore untyped local
 import { setWriteable } from '../../state/actions/workpad';
-import { CanvasWorkpad } from '../../../types';
+import { State, CanvasWorkpad } from '../../../types';
 import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header';
-
-interface State {
-  transient: { canUserWrite: boolean };
-
-  persistent: { workpad: CanvasWorkpad };
-}
 
 interface StateProps {
   isWriteable: boolean;
