@@ -19,21 +19,6 @@
 
 import { rangeControlFactory } from './range_control_factory';
 
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
-
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myNumberField: mockField,
-    }
-  }
-};
-
 let esSearchResponse;
 class MockSearchSource {
   setParent() {}
@@ -44,19 +29,6 @@ class MockSearchSource {
 }
 
 const mockKbnApi = {
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
-    },
-    getGlobalFilters: () => {
-      return [];
-    }
-  },
   SearchSource: MockSearchSource,
 };
 

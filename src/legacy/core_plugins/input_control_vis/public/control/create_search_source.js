@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { timefilter } from 'ui/timefilter';
 
 export function createSearchSource(kbnApi, initialState, indexPattern, aggs, useTimeFilter, filters = []) {
   const searchSource = new kbnApi.SearchSource(initialState);
@@ -25,7 +25,7 @@ export function createSearchSource(kbnApi, initialState, indexPattern, aggs, use
   searchSource.setField('filter', () => {
     const activeFilters = [...filters];
     if (useTimeFilter) {
-      activeFilters.push(kbnApi.timeFilter.createFilter(indexPattern));
+      activeFilters.push(timefilter.createFilter(indexPattern));
     }
     return activeFilters;
   });

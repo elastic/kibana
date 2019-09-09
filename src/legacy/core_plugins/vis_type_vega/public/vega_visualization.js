@@ -23,8 +23,8 @@ import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { timefilter } from 'ui/timefilter';
-import { setup } from '../../../core_plugins/data/public/legacy';
-const filterManager = setup.filter.filterManager;
+import { setup as data } from '../../../core_plugins/data/public/legacy';
+const filterManager = data.filter.filterManager;
 
 export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {

@@ -26,6 +26,7 @@ import {
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -103,13 +104,13 @@ class RangeControl extends Control {
 export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
   let indexPattern;
   try {
-    indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await data.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
   return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter),
+    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
     kbnApi,
     useTimeFilter
   );

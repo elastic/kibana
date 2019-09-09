@@ -27,21 +27,6 @@ chrome.getInjected.mockImplementation((key) => {
   }
 });
 
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
-
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myField: mockField,
-    }
-  }
-};
-
 function MockSearchSource() {
   return {
     setParent: () => {},
@@ -68,19 +53,6 @@ function MockSearchSource() {
 }
 
 const getMockKbnApi = () => ({
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
-    },
-    getGlobalFilters: () => {
-      return [];
-    }
-  },
   SearchSource: jest.fn(MockSearchSource),
 });
 
