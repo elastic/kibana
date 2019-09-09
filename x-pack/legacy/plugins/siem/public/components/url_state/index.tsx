@@ -7,7 +7,6 @@
 import React from 'react';
 import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
 import { isEqual } from 'lodash/fp';
 import {
@@ -20,6 +19,8 @@ import {
   timelineSelectors,
 } from '../../store';
 import { hostsActions, inputsActions, networkActions, timelineActions } from '../../store/actions';
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, UrlStateProps, KqlQuery, LocationTypes } from './types';
@@ -28,13 +29,12 @@ import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { getCurrentLocation } from './helpers';
 
 export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
-  props => {
+  (props: UrlStateContainerPropTypes) => {
     useUrlStateHooks(props);
     return null;
   },
   (prevProps, nextProps) =>
-    prevProps.location.pathname === nextProps.location.pathname &&
-    isEqual(prevProps.urlState, nextProps.urlState)
+    prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
 );
 
 UrlStateContainer.displayName = 'UrlStateContainer';
@@ -44,12 +44,12 @@ const makeMapStateToProps = () => {
   const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
   const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
   const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State, { location }: UrlStateContainerPropTypes) => {
+  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const page: LocationTypes | null = getCurrentLocation(location.pathname);
+    const page: LocationTypes | null = getCurrentLocation(pageName, detailName);
     const kqlQueryInitialState: KqlQuery = {
       filterQuery: null,
       queryLocation: page,
@@ -121,10 +121,15 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   dispatch,
 });
 
-export const UseUrlState = compose<React.ComponentClass<UrlStateProps>>(
-  withRouter,
+export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
   connect(
     makeMapStateToProps,
     mapDispatchToProps
   )
 )(UrlStateContainer);
+
+export const UseUrlState = React.memo<UrlStateProps>(props => {
+  const [routeProps] = useRouteSpy();
+  const urlStateReduxProps: RouteSpyState & UrlStateProps = { ...routeProps, ...props };
+  return <UrlStateRedux {...urlStateReduxProps} />;
+});

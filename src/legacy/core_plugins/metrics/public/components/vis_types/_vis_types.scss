@@ -3,4 +3,8 @@
   flex-direction: column;
   flex: 1 1 100%;
   padding: $euiSizeS;
+
+  .tvbVisTimeSeries {
+    overflow: hidden;
+  }
 }

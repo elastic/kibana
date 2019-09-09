@@ -14,12 +14,17 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 
 import { hostsModel, hostsSelectors, State } from '../../store';
 
-import { HostsComponentProps } from './hosts';
+import { HostsComponentProps, CommonChildren, AnonamaliesChildren } from './hosts';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { Anomaly } from '../../components/ml/types';
 
-const HostsBodyComponent = pure<HostsComponentProps>(
+interface HostsBodyComponentProps extends HostsComponentProps {
+  kqlQueryExpression: string;
+  children: CommonChildren | AnonamaliesChildren;
+}
+
+const HostsBodyComponent = pure<HostsBodyComponentProps>(
   ({ filterQuery, kqlQueryExpression, setAbsoluteRangeDatePicker, children }) => {
     return (
       <WithSource sourceId="default">
