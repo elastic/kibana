@@ -7,10 +7,11 @@
 import { map, uniq } from 'lodash';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { ViewStrings } from '../../strings';
 
 export const pie = () => ({
   name: 'pie',
-  displayName: 'Chart style',
+  displayName: ViewStrings.Pie.getDisplayName(),
   modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [
     {
@@ -19,8 +20,8 @@ export const pie = () => ({
     },
     {
       name: 'hole',
-      displayName: 'Inner radius',
-      help: 'Radius of the hole',
+      displayName: ViewStrings.Pie.args.hole.getDisplayName(),
+      help: ViewStrings.Pie.args.hole.getHelp(),
       argType: 'range',
       default: 50,
       options: {
@@ -30,15 +31,15 @@ export const pie = () => ({
     },
     {
       name: 'labels',
-      displayName: 'Labels',
-      help: 'Show/hide labels',
+      displayName: ViewStrings.Pie.args.labels.getDisplayName(),
+      help: ViewStrings.Pie.args.labels.getHelp(),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'labelRadius',
-      displayName: 'Label radius',
-      help: 'Distance of the labels from the center of the pie',
+      displayName: ViewStrings.Pie.args.labelRadius.getDisplayName(),
+      help: ViewStrings.Pie.args.labelRadius.getHelp(),
       argType: 'range',
       default: 100,
       options: {
@@ -48,8 +49,8 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend position',
-      help: 'Disable or position the legend',
+      displayName: ViewStrings.Pie.args.legend.getDisplayName(),
+      help: ViewStrings.Pie.args.legend.getHelp(),
       argType: 'select',
       default: 'ne',
       options: {
@@ -58,8 +59,8 @@ export const pie = () => ({
     },
     {
       name: 'radius',
-      displayName: 'Radius',
-      help: 'Radius of the pie',
+      displayName: ViewStrings.Pie.args.radius.getDisplayName(),
+      help: ViewStrings.Pie.args.radius.getHelp(),
       argType: 'percentage',
       default: 1,
     },
@@ -74,8 +75,8 @@ export const pie = () => ({
     },
     {
       name: 'tilt',
-      displayName: 'Tilt angle',
-      help: 'Percentage of tilt where 100 is fully vertical and 0 is completely flat',
+      displayName: ViewStrings.Pie.args.tilt.getDisplayName(),
+      help: ViewStrings.Pie.args.tilt.getHelp(),
       argType: 'percentage',
       default: 1,
     },

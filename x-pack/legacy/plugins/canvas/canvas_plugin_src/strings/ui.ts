@@ -61,6 +61,16 @@ export const ArgumentStrings = {
         }),
     },
   },
+  Palette: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.displayName', {
+        defaultMessage: 'Color palette',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.help', {
+        defaultMessage: 'Choose a color palette',
+      }),
+  },
 };
 
 export const ViewStrings = {
@@ -223,6 +233,75 @@ export const ViewStrings = {
         getHelp: () =>
           i18n.translate('xpack.canvas.uis.views.metric.args.metricFormat.help', {
             defaultMessage: 'Fonts, alignment and color',
+          }),
+      },
+    },
+  },
+  Pie: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.pie.displayName', {
+        defaultMessage: 'Chart style',
+      }),
+    args: {
+      hole: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.hole.displayName', {
+            defaultMessage: 'Inner radius',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.hole.help', {
+            defaultMessage: 'Radius of the hole',
+          }),
+      },
+      labels: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.labels.displayName', {
+            defaultMessage: 'Labels',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.labels.help', {
+            defaultMessage: 'Show/hide labels',
+          }),
+      },
+      labelRadius: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.labelRadius.displayName', {
+            defaultMessage: 'Label radius',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.labelRadius.help', {
+            defaultMessage: 'Distance of the labels from the center of the pie',
+          }),
+      },
+      legend: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.legend.displayName', {
+            defaultMessage: 'Legend position',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.legend.help', {
+            defaultMessage: 'Disable or position the legend',
+          }),
+      },
+      radius: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.radius.displayName', {
+            defaultMessage: 'Radius',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.radius.help', {
+            defaultMessage: 'Radius of the pie',
+          }),
+      },
+      tilt: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.tilt.displayName', {
+            defaultMessage: 'Tilt angle',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.pie.args.tilt.help', {
+            defaultMessage:
+              'Percentage of tilt where 100 is fully vertical and 0 is completely flat',
           }),
       },
     },
