@@ -36,7 +36,7 @@ This section summarizes the changes in each release.
 See also <<breaking-changes-7.3, breaking changes in 7.3>>.
 
 Platform::
-* Fixes Import API so it doesn't override SavedObjectClient errors {pull}41125[#41125]
+* Fixes import API so it doesn't override SavedObjectClient errors {pull}41125[#41125]
 
 [float]
 [[bug-7.3.1]]
