@@ -465,13 +465,11 @@ export class DashboardAppController {
       }
     };
 
-    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
       if (!newSavedQuery) return;
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
-      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-        updateStateFromSavedQuery(newSavedQuery);
-      }
+      updateStateFromSavedQuery(newSavedQuery);
     });
 
     $scope.$watch(
@@ -483,13 +481,14 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-
-        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
-          $scope.$evalAsync(() => {
-            $scope.savedQuery = savedQuery;
-            updateStateFromSavedQuery(savedQuery);
+        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
           });
-        });
+        }
       }
     );
 

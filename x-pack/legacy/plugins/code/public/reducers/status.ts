@@ -13,6 +13,7 @@ import {
   WorkerReservedProgress,
   IndexWorkerProgress,
   CloneWorkerProgress,
+  RepoState,
 } from '../../model';
 import {
   deleteRepoFinished,
@@ -26,7 +27,6 @@ import {
   updateIndexProgress,
   StatusSuccessPayload,
   RepoStatus,
-  RepoState,
   FetchRepoFileStatus,
 } from '../actions';
 import { StatusReport } from '../../common/repo_file_status';

@@ -7,6 +7,9 @@
 import { useMemo, useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import {
   getLogEntryRateRequestPayloadRT,
   getLogEntryRateSuccessReponsePayloadRT,
@@ -53,9 +56,10 @@ export const useLogEntryRate = ({
         });
       },
       onResolve: response => {
-        const { data } = getLogEntryRateSuccessReponsePayloadRT
-          .decode(response)
-          .getOrElseL(throwErrors(createPlainError));
+        const { data } = pipe(
+          getLogEntryRateSuccessReponsePayloadRT.decode(response),
+          fold(throwErrors(createPlainError), identity)
+        );
 
         setLogEntryRate(data);
       },
