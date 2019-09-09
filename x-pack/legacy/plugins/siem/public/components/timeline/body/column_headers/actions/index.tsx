@@ -52,6 +52,7 @@ export const CloseButton = pure<{
   <WrappedCloseButton data-test-subj="wrapped-close-button" show={show}>
     <EuiButtonIcon
       aria-label={i18n.REMOVE_COLUMN}
+      color="subdued"
       data-test-subj="remove-column"
       iconType="cross"
       onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
