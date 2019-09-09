@@ -2,7 +2,7 @@
 [[maps-search]]
 == Searching your data
 
-The **Maps** application embeds the query bar for real-time ad hoc search.
+**Elastic Maps** embeds the query bar for real-time ad hoc search.
 Only layers requesting data from {es} are filtered when you submit a search request.
 
 You can create a layer that requests data from {es} from the following:
