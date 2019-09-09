@@ -19,4 +19,5 @@ export const spaceSchema = Joi.object({
     .items(Joi.string())
     .default([]),
   _reserved: Joi.boolean(),
+  avatarImage: Joi.string().allow(''),
 }).default();

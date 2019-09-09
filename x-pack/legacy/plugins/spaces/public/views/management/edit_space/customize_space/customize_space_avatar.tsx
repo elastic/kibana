@@ -5,8 +5,15 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, isValidHex } from '@elastic/eui';
-import { EuiFilePicker } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFilePicker,
+  isValidHex,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { get } from 'lodash';
@@ -35,11 +42,19 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     super(props);
     this.state = {
       initialsHasFocus: false,
+      avatarImage: props.space.avatarImage,
     };
   }
 
-  private _handleChange = (value: string) => {
-    this.setState({ avatarImage: value });
+  private _handleChange = (avImg: string) => {
+    this.setState({ avatarImage: avImg });
+
+    if (avImg) {
+      this.props.onChange({
+        ...this.props.space,
+        avatarImage: avImg,
+      });
+    }
   };
 
   private onFileUpload = (files: File[]) => {
@@ -95,8 +110,17 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     );
   }
 
+  private removeAvatarImage() {
+    this.setState({ avatarImage: '' });
+    this.props.onChange({
+      ...this.props.space,
+      avatarImage: '',
+    });
+  }
+
   public filePickerOrImage() {
     const { intl } = this.props;
+    const avImage = this.state.avatarImage;
 
     if (!this.state.avatarImage) {
       return (
@@ -115,7 +139,14 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         </EuiFormRow>
       );
     } else {
-      return '<div>File uploaded</div>';
+      if (avImage) {
+        return (
+          <EuiButton color="danger" onClick={() => this.removeAvatarImage()}>
+            Remove Avatar Image
+          </EuiButton>
+        );
+      }
+      return '';
     }
   }
 
