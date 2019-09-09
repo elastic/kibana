@@ -5,14 +5,18 @@
  */
 
 import React, { useEffect } from 'react';
-import { Option, none } from 'fp-ts/lib/Option';
+import { Option, option, none, some, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { EuiPageContent, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome, { Chrome } from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
+import { flatMap } from '../../../lib/flat_map';
 import { SectionLoading } from '../../../components';
 import { AlertingApi } from '../../../lib/api';
+
+const map = option.map;
 
 interface AlertsListProps {
   breadcrumbs: Chrome['breadcrumbs'];
@@ -26,16 +30,17 @@ export const AlertsList = ({ breadcrumbs, api }: AlertsListProps) => {
     breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
   }, []);
 
-  return api
-    .mapNullable(alertingApi => {
+  return pipe(
+    api,
+    flatMap(alertingApi => {
       const { isLoading: isAlertsLoading, data: alerts } = alertingApi.loadAlerts(SIXTY_SECONDS);
-      if (isAlertsLoading) {
-        return <AlertsLoadingIndicator />;
-      }
-      // yuck! Should be cleaner with newer fp-ts, pull master
-      return alerts.map(({ data }) => <AlertsTable alerts={data} />).getOrElse(<NoAlerts />);
-    })
-    .getOrElse(<NoAlerts />);
+
+      return isAlertsLoading
+        ? some(<AlertsLoadingIndicator />)
+        : map(alerts, ({ data }) => <AlertsTable alerts={data} />);
+    }),
+    getOrElse(() => <NoAlerts />)
+  );
 };
 
 AlertsList.defaultProps = {
