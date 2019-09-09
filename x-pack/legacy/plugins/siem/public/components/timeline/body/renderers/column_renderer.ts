@@ -15,11 +15,13 @@ export interface ColumnRenderer {
     values,
     field,
     width,
+    timelineId,
   }: {
     columnName: string;
     eventId: string;
     values: string[] | null | undefined;
     field: ColumnHeader;
     width?: string;
+    timelineId: string;
   }) => React.ReactNode;
 }

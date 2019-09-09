@@ -29,7 +29,7 @@ export class ESSearchSource extends AbstractESSource {
     defaultMessage: 'Documents'
   });
   static description = i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Geospatial data from a Kibana index pattern'
+    defaultMessage: 'Vector data from a Kibana index pattern'
   });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
