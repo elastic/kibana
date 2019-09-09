@@ -27,7 +27,6 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
         await PageObjects.security.logout();

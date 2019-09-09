@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureKibanaPrivileges } from '../../../../../../xpack_main/types';
+import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugins/features/server';
 import { Actions } from '../../actions';
 
 export interface FeaturePrivilegeBuilder {

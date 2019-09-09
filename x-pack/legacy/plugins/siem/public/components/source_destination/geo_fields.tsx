@@ -92,7 +92,7 @@ const GeoFieldValues = pure<{
               <DefaultDraggable
                 data-test-subj={fieldName}
                 field={fieldName}
-                id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
                 tooltipContent={fieldName}
                 value={value}
               />
