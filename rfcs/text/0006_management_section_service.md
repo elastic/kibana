@@ -1,6 +1,6 @@
 - Start Date: 2019-08-20
 - RFC PR: TBD
-- Kibana Issue: #43499
+- Kibana Issue: [#43499](https://github.com/elastic/kibana/issues/43499)
 
 # Summary
 Management is one of the four primary "domains" covered by @elastic/kibana-app-arch (along with Data, Embeddables, and Visualizations). There are two main purposes for this service:
@@ -305,7 +305,7 @@ interface Options {
 # Notes
 
 - The hide/show/disable/enable options were dropped with the assumption that we will be working with uiCapabilities to determine this instead... so people shouldn't need to manage it manually as they can look up a pre-filtered list of sections.
-- This was updated to add flexibility for custom (non-EUI) icons as outlined in #32661. Much like the Core Application Service, you either choose an EUI icon, or provide a URL to an icon.
+- This was updated to add flexibility for custom (non-EUI) icons as outlined in [#32661](https://github.com/elastic/kibana/issues/32661). Much like the Core Application Service, you either choose an EUI icon, or provide a URL to an icon.
 
 # Drawbacks
 
