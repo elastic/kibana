@@ -6,20 +6,147 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function LensPageProvider({ getService }: FtrProviderContext) {
+export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const find = getService('find');
+  const browser = getService('browser');
+  const PageObjects = getPageObjects([
+    'header',
+    'common',
+    'visualize',
+    'dashboard',
+    'header',
+    'timePicker',
+  ]);
 
   return {
-    async openIndexPatternFiltersPopover() {
+    /**
+     * Clicks the index pattern filters toggle.
+     */
+    async toggleIndexPatternFiltersPopover() {
       await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
+    /**
+     * Toggles the field existence checkbox.
+     */
     async toggleExistenceFilter() {
+      await this.toggleIndexPatternFiltersPopover();
       await testSubjects.click('lnsEmptyFilter');
+      await this.toggleIndexPatternFiltersPopover();
     },
 
     async findAllFields() {
       return await testSubjects.findAll('lnsFieldListPanelField');
+    },
+
+    /**
+     * Move the date filter to the specified time range, defaults to
+     * a range that has data in our dataset.
+     */
+    goToTimeRange(fromTime = '2015-09-19 06:31:44.000', toTime = '2015-09-23 18:31:44.000') {
+      return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    },
+
+    /**
+     * Wait for the specified element to have text that passes the specified test.
+     *
+     * @param selector - the element selector
+     * @param test - the test function to run on the element's text
+     */
+    async assertExpectedText(selector: string, test: (value?: string) => boolean) {
+      let actualText: string | undefined;
+
+      await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
+        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        return test(actualText);
+      });
+
+      if (!test(actualText)) {
+        throw new Error(`"${actualText}" did not match expectation.`);
+      }
+    },
+
+    /**
+     * Asserts that the specified element has the expected inner text.
+     *
+     * @param selector - the element selector
+     * @param expectedText - the expected text
+     */
+    assertExactText(selector: string, expectedText: string) {
+      return this.assertExpectedText(selector, value => value === expectedText);
+    },
+
+    /**
+     * Uses the Lens visualization switcher to switch visualizations.
+     *
+     * @param dataTestSubj - the data-test-subj of the visualization to switch to
+     */
+    async switchToVisualization(dataTestSubj: string) {
+      await testSubjects.click('lnsChartSwitchPopover');
+      await testSubjects.click(dataTestSubj);
+    },
+
+    /**
+     * Clicks a visualize list item's title (in the visualize app).
+     *
+     * @param title - the title of the list item to be clicked
+     */
+    clickVisualizeListItemTitle(title: string) {
+      return testSubjects.click(`visListingTitleLink-${title}`);
+    },
+
+    /**
+     * Drags and drops a field into the Lens workspace.
+     *
+     * @param fieldName - the name of the field to be dropped in the workspace
+     */
+    async dragToWorkspace(fieldName: string) {
+      const workspace = await testSubjects.find('lnsWorkspace');
+      const timestampField = await find.byCssSelector(
+        `[data-test-subj="lnsFieldListPanelField"] [title="${fieldName}"]`
+      );
+
+      await browser.dragAndDrop(
+        { location: timestampField, offset: { x: 0, y: 0 } },
+        { location: workspace, offset: { x: 40, y: 40 } }
+      );
+    },
+
+    /**
+     * Changes the specified dimension to the specified operation and (optinally) field.
+     *
+     * @param opts.from - the text of the dimension being changed
+     * @param opts.to - the desired operation for the dimension
+     * @param opts.field - the desired field for the dimension
+     */
+    async changeDimension(opts: { from: string; to: string; field?: string }) {
+      await find.clickByButtonText(opts.from);
+      await find.clickByCssSelector(
+        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.to}"],
+         [data-test-subj="lns-indexPatternDimension-${opts.to}"]`
+      );
+
+      if (opts.field) {
+        await testSubjects.click('indexPattern-dimension-field');
+        await testSubjects.click(`lns-fieldOption-${opts.field}`);
+      }
+    },
+
+    /**
+     * Save the current Lens visualization.
+     */
+    save() {
+      return testSubjects.click('lnsApp_saveButton');
+    },
+
+    setTitle(title: string) {
+      return testSubjects.setValue('lns_ChartTitle', title);
+    },
+
+    getTitle() {
+      return testSubjects.getAttribute('lns_ChartTitle', 'value');
     },
   };
 }
