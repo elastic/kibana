@@ -153,7 +153,7 @@ type Register = (
   order?: number,
   euiIconType?: string, // takes precedence over `icon` property.
   icon?: string, // URL to image file; fallback if no `euiIconType`
-) => Section | Error;
+) => Section;
  
 type RegisterLink = (
   id: string;
@@ -161,7 +161,7 @@ type RegisterLink = (
   description: string; // not used in current UI, but possibly in future
   order?: number;
   mount: ManagementSectionMount;
-) => Link | Error;
+) => Link;
  
 type Unmount = () => Promise<void> | void;
  
@@ -283,7 +283,7 @@ interface API {
 class ManagementSection {
   get visibleItems,
   addListener: (fn: function) => void,
-  register: (id: string, options: Options) => ManagementSection | Error,
+  register: (id: string, options: Options) => ManagementSection,
   deregister: (id: string) => void,
   hasItem: (id: string) => boolean,
   getSection: (id: string) => ManagementSection,
