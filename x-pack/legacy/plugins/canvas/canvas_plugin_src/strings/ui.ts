@@ -678,4 +678,38 @@ export const ViewStrings = {
       },
     },
   },
+  Timefilter: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.timefilter.displayName', {
+        defaultMessage: 'Time filter',
+      }),
+
+    args: {
+      Column: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.column.displayName', {
+            defaultMessage: 'Column',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.column.help', {
+            defaultMessage: 'Column to which selected time is applied',
+          }),
+        getConfirm: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.column.confirm', {
+            defaultMessage: 'Set',
+          }),
+      },
+      FilterGroup: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.filterGroup.displayName', {
+            defaultMessage: 'Filter group name',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.filterGroup.help', {
+            defaultMessage:
+              "Apply the selected group name to an element's filters function to target this filter",
+          }),
+      },
+    },
+  },
 };
