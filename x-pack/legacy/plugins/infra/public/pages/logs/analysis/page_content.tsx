@@ -18,13 +18,11 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { isLoadingSetupStatus, setup, retry, setupStatus, viewResults } = useContext(
-    LogAnalysisJobs.Context
-  );
+  const { setup, retry, setupStatus, viewResults } = useContext(LogAnalysisJobs.Context);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
-  } else if (isLoadingSetupStatus) {
+  } else if (setupStatus === 'unknown') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -32,7 +30,14 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'required') {
+  } else if (setupStatus === 'skipped' || setupStatus === 'hiddenAfterSuccess') {
+    return (
+      <AnalysisResultsContent
+        sourceId={sourceId}
+        isFirstUse={setupStatus === 'hiddenAfterSuccess'}
+      />
+    );
+  } else {
     return (
       <AnalysisSetupContent
         setup={setup}
@@ -40,13 +45,6 @@ export const AnalysisPageContent = () => {
         setupStatus={setupStatus}
         indexPattern={source ? source.configuration.logAlias : ''}
         viewResults={viewResults}
-      />
-    );
-  } else {
-    return (
-      <AnalysisResultsContent
-        sourceId={sourceId}
-        isFirstUse={setupStatus === 'hiddenAfterSuccess'}
       />
     );
   }

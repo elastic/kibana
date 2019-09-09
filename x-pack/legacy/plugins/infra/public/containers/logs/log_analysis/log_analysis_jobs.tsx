@@ -103,12 +103,12 @@ export const useLogAnalysisJobs = ({
         return callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
-        if (response && response.length) {
+        if (response) {
           const logEntryRate = response.find(
             (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
           );
           setJobStatus({
-            logEntryRate: logEntryRate ? logEntryRate.jobState : 'unknown',
+            logEntryRate: logEntryRate ? logEntryRate.jobState : 'missing',
           });
         }
       },

@@ -42,7 +42,8 @@ export const useLogAnalysisCleanup = ({
         return deleteJobs();
       },
       err => {
-        if (err.statusCode === 404) {
+        // Datafeed has been deleted, or just doesn't exist, proceed with deleting jobs anyway
+        if (err && err.res && err.res.status === 404) {
           return deleteJobs();
         } else {
           throw err;
