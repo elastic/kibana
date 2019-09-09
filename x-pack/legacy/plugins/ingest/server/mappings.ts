@@ -21,7 +21,7 @@ export const mappings = {
       },
       data_sources: {
         properties: {
-          id: {
+          uuid: {
             type: 'keyword',
           },
           meta: {
@@ -63,6 +63,16 @@ export const mappings = {
         type: 'keyword',
       },
       updated_by: {
+        type: 'keyword',
+      },
+    },
+  },
+  inputs: {
+    properties: {
+      other: {
+        type: 'text',
+      },
+      data_source_id: {
         type: 'keyword',
       },
     },
