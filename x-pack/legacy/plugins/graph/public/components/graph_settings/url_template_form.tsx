@@ -262,7 +262,11 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                 selected={icon === currentTemplate.icon}
                 icon={icon}
                 onClick={() => {
-                  setValue('icon', icon);
+                  if (currentTemplate.icon === icon) {
+                    setValue('icon', null);
+                  } else {
+                    setValue('icon', icon);
+                  }
                 }}
               />
             ))}
