@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -109,6 +109,8 @@ export const NodeDetails = ({ metadata }: Props) => {
     [isOpen]
   );
 
+  const fields = useMemo(() => (isOpen ? FIELDS : FIELDS.slice(0, 4)), [isOpen]);
+
   if (!metadata) {
     return null;
   }
@@ -125,7 +127,7 @@ export const NodeDetails = ({ metadata }: Props) => {
         />
       </Controls>
       <EuiFlexGrid columns={4} style={{ flexGrow: 1 }}>
-        {FIELDS.slice(0, isOpen ? FIELDS.length : 4).map(field => (
+        {fields.map(field => (
           <EuiFlexItem key={field.field} style={{ minWidth: 0 }}>
             <EuiTitle size="xs">
               <h4>{getLabelForField(field)}</h4>
