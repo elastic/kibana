@@ -49,10 +49,10 @@ export default function({ getPageObjects }: FtrProviderContext) {
     it('should be embeddable in dashboards', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.dashboard.addVisualizations([
         { name: 'Artistpreviouslyknownaslens', embeddableType: 'lens' },
       ]);
+      await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
     });
 
