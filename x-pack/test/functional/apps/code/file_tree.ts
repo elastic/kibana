@@ -4,48 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { load as repoLoad, unload as repoUnload } from './repo_archiver';
 
 export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
+  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/43492
+  // FLAKY: https://github.com/elastic/kibana/issues/45079
   describe.skip('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     before(async () => {
-      // Navigate to the code app.
-      await PageObjects.common.navigateToApp('code');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // Prepare a git repository for the test
-      await PageObjects.code.fillImportRepositoryUrlInputBox(
-        'https://github.com/elastic/code-examples_flatten-directory.git'
+      await repoLoad(
+        'github.com/elastic/code-examples_flatten-directory',
+        'code_examples_flatten_directory',
+        config.get('kbnTestServer.installDir') || REPO_ROOT
       );
-      // Click the import repository button.
-      await PageObjects.code.clickImportRepositoryButton();
-
-      await retry.tryForTime(10000, async () => {
-        const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-        expect(repositoryItems).to.have.length(1);
-        expect(await repositoryItems[0].getVisibleText()).to.equal(
-          'elastic/code-examples_flatten-directory'
-        );
-      });
-
-      // Wait for the index to end.
-      await retry.try(async () => {
-        expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
-      });
+      await esArchiver.load('code/repositories/code_examples_flatten_directory');
     });
 
     beforeEach(async () => {
@@ -58,32 +45,19 @@ export default function exploreRepositoryFunctionalTests({
     });
 
     after(async () => {
-      // Navigate to the code app.
-      await PageObjects.common.navigateToApp('code');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // Clean up the imported repository
-      await PageObjects.code.clickDeleteRepositoryButton();
-
-      await retry.try(async () => {
-        expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
-      });
-
-      await testSubjects.click('confirmModalConfirmButton');
-
-      await retry.tryForTime(300000, async () => {
-        const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-        expect(repositoryItems).to.have.length(0);
-      });
-
       await PageObjects.security.logout();
+      await repoUnload(
+        'github.com/elastic/code-examples_flatten-directory',
+        config.get('kbnTestServer.installDir') || REPO_ROOT
+      );
+      await esArchiver.unload('code/repositories/code_examples_flatten_directory');
     });
 
     it('tree should be loaded', async () => {
       await retry.tryForTime(5000, async () => {
-        expect(await testSubjects.exists('codeFileTreeNode-Directory-elastic/src/code')).ok();
-        expect(await testSubjects.exists('codeFileTreeNode-Directory-kibana/src/code')).ok();
-        expect(await testSubjects.exists('codeFileTreeNode-File-README.MD')).ok();
+        expect(await exists('codeFileTreeNode-Directory-elastic/src/code')).ok();
+        expect(await exists('codeFileTreeNode-Directory-kibana/src/code')).ok();
+        expect(await exists('codeFileTreeNode-File-README.MD')).ok();
       });
     });
 
@@ -92,48 +66,36 @@ export default function exploreRepositoryFunctionalTests({
 
       await retry.tryForTime(1000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')).ok();
       });
 
       await browser.refresh();
 
-      await retry.tryForTime(15000, async () => {
+      await PageObjects.header.awaitKibanaChrome();
+
+      await testSubjects.waitForDeleted('.euiLoadingSpinner');
+
+      await retry.tryForTime(30000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')).ok();
       });
 
       await testSubjects.click('codeFileTreeNode-Directory-kibana/src/code');
 
       await retry.tryForTime(1000, async () => {
         // should open two folders at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')).ok();
       });
 
       await testSubjects.click('codeFileTreeNode-Directory-elastic/src/code');
 
       await retry.tryForTime(1000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-closed')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-closed')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')).ok();
       });
     });
   });

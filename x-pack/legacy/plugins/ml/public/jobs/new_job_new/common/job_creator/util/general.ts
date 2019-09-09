@@ -12,6 +12,9 @@ import {
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { mlJobService } from '../../../../../services/job_service';
+import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
+import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(job: Job, datafeed: Datafeed) {
@@ -120,4 +123,55 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
     }
   }
   return false;
+}
+
+function stashCombinedJob(
+  jobCreator: JobCreatorType,
+  skipTimeRangeStep: boolean = false,
+  advanced: boolean = false
+) {
+  const combinedJob = {
+    ...jobCreator.jobConfig,
+    datafeed_config: jobCreator.datafeedConfig,
+  };
+  if (advanced === true) {
+    mlJobService.currentJob = combinedJob;
+  } else {
+    mlJobService.tempJobCloningObjects.job = combinedJob;
+  }
+
+  if (skipTimeRangeStep === true) {
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+  }
+}
+
+export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
+  jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+  stashCombinedJob(jobCreator, true, false);
+
+  window.location.href = window.location.href.replace(
+    JOB_TYPE.SINGLE_METRIC,
+    JOB_TYPE.MULTI_METRIC
+  );
+}
+
+export function convertToAdvancedJob(jobCreator: JobCreatorType) {
+  jobCreator.createdBy = null;
+  stashCombinedJob(jobCreator, false, true);
+
+  let jobType = JOB_TYPE.SINGLE_METRIC;
+  if (isMultiMetricJobCreator(jobCreator)) {
+    jobType = JOB_TYPE.MULTI_METRIC;
+  } else if (isPopulationJobCreator(jobCreator)) {
+    jobType = JOB_TYPE.POPULATION;
+  }
+
+  window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
+}
+
+export function resetJob(jobCreator: JobCreatorType) {
+  jobCreator.jobId = '';
+  stashCombinedJob(jobCreator, true, false);
+
+  window.location.href = '#/jobs/new_job';
 }

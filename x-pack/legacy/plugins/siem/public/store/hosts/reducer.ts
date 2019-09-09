@@ -41,6 +41,7 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.anomalies]: null,
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -65,6 +66,7 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.anomalies]: null,
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -104,8 +106,8 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        hosts: {
-          ...state[hostsType].queries.hosts,
+        [HostsTableType.hosts]: {
+          ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
         },

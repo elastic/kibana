@@ -17,132 +17,60 @@
  * under the License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   type: string;
+  label: string;
 }
 
-export function FieldNameIcon({ type }: Props) {
+export function FieldNameIcon({ type, label }: Props) {
   switch (type) {
     case 'boolean':
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.booleanAriaLabel', {
-            defaultMessage: 'Boolean field',
-          })}
-          className="dscField__icon kuiIcon fa-adjust"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-adjust"></span>;
 
     case 'conflict':
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.conflictFieldAriaLabel', {
-            defaultMessage: 'Conflicting field',
-          })}
-          className="dscField__icon kuiIcon fa-warning"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-warning"></span>;
 
     case 'date':
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.dateFieldAriaLabel', {
-            defaultMessage: 'Date field',
-          })}
-          className="dscField__icon kuiIcon fa-clock-o"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-clock-o"></span>;
 
     case 'geo_point':
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
-            defaultMessage: 'Geo Point',
-          })}
-          className="dscField__icon kuiIcon fa-globe"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
 
     case 'geo_shape':
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.geoShapeFieldAriaLabel', {
-            defaultMessage: 'Geo Shape',
-          })}
-          className="dscField__icon kuiIcon fa-globe"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-globe"></span>;
 
     case 'ip':
-      return (
-        <span
-          aria-label={i18n.translate(
-            'common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel',
-            {
-              defaultMessage: 'IP address field',
-            }
-          )}
-          className="dscField__icon kuiIcon fa-laptop"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-laptop"></span>;
 
     case 'murmur3':
       return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.murmur3FieldAriaLabel', {
-            defaultMessage: 'Murmur3 field',
-          })}
-          className="dscField__icon"
-        >
+        <span aria-label={label} className="dscField__icon">
           <strong aria-hidden="true">h</strong>
         </span>
       );
 
     case 'number':
       return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.numberFieldAriaLabel', {
-            defaultMessage: 'Number field',
-          })}
-          className="dscField__icon"
-        >
+        <span aria-label={label} className="dscField__icon">
           <strong aria-hidden="true">#</strong>
         </span>
       );
 
     case 'source':
       // Note that this type is currently not provided, type for _source is undefined
-      return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
-            defaultMessage: 'Source field',
-          })}
-          className="dscField__icon kuiIcon fa-file-text-o"
-        ></span>
-      );
+      return <span aria-label={label} className="dscField__icon kuiIcon fa-file-text-o"></span>;
 
     case 'string':
       return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
-            defaultMessage: 'String field',
-          })}
-          className="dscField__icon"
-        >
+        <span aria-label={label} className="dscField__icon">
           <strong aria-hidden="true">t</strong>
         </span>
       );
 
     default:
       return (
-        <span
-          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
-            defaultMessage: 'Unknown field',
-          })}
-          className="dscField__icon"
-        >
+        <span aria-label={label} className="dscField__icon">
           <strong aria-hidden="true">?</strong>
         </span>
       );

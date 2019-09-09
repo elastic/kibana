@@ -39,7 +39,7 @@ We'll start with an overview of how plugins work in the new platform, and we'll 
 
 Plugins in the new platform are not especially novel or complicated to describe. Our intention wasn't to build some clever system that magically solved problems through abstractions and layers of obscurity, and we wanted to make sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
-New platform plugins exist in the `src/plugins` and `x-pack/legacy/plugins` directories.
+New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories.
 
 ### Architecture
 
@@ -1093,7 +1093,18 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 ### Configure plugin
 Kibana provides ConfigService if a plugin developer may want to support adjustable runtime behavior for their plugins. Access to Kibana config in New platform has been subject to significant refactoring.
-In order to have access to a config, plugin *should*:
+
+Config service does not provide access to the whole config anymore. New platform plugin cannot read configuration parameters of the core services nor other plugins directly. Use plugin contract to provide data.
+
+```js
+// your-plugin.js
+// in Legacy platform
+const basePath = config.get('server.basePath');
+// in New platform
+const basePath = core.http.basePath.get(request);
+```
+
+In order to have access to your plugin config, you *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
 ```typescript

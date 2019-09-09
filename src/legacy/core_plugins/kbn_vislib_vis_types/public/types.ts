@@ -30,6 +30,13 @@ interface Labels {
   show: boolean;
   truncate: number;
 }
+interface ThresholdLine {
+  show: boolean;
+  value: number;
+  width: number;
+  style: 'full' | 'dashed' | 'dot-dashed';
+  color: string;
+}
 export interface ValueAxis {
   id: string;
   labels: Labels;
@@ -46,6 +53,7 @@ export interface BasicVislibParams extends CommonVislibParams {
   addTimeMarker: boolean;
   orderBucketsBySum?: boolean;
   labels: Labels;
+  thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
   grid: {
     categoryLines: boolean;

@@ -10,19 +10,17 @@ import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { nullableType } from './lib/nullable';
+import { portSchema } from './lib/schemas';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
-const PORT_MAX = 256 * 256 - 1;
-
 // config definition
-
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchema = schema.object(
   {
     service: nullableType(schema.string()),
     host: nullableType(schema.string()),
-    port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
+    port: nullableType(portSchema()),
     secure: nullableType(schema.boolean()),
     from: schema.string(),
   },
@@ -99,17 +97,18 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-
-export const actionType: ActionType = {
-  id: '.email',
-  name: 'email',
-  validate: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(): ActionType {
+  return {
+    id: '.email',
+    name: 'email',
+    validate: {
+      config: ConfigSchema,
+      secrets: SecretsSchema,
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 

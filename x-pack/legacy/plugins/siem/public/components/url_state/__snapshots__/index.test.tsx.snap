@@ -198,55 +198,11 @@ exports[`UrlStateContainer mounts and renders 1`] = `
             messages={Object {}}
             textComponent={Symbol(react.fragment)}
           >
-            <ApolloProvider
-              client={
-                ApolloClient {
-                  "__operations_cache__": Map {},
-                  "cache": InMemoryCache {
-                    "addTypename": true,
-                    "cacheKeyRoot": KeyTrie {
-                      "weakness": true,
-                    },
-                    "config": Object {
-                      "addTypename": true,
-                      "dataIdFromObject": [Function],
-                      "fragmentMatcher": HeuristicFragmentMatcher {},
-                      "freezeResults": false,
-                      "resultCaching": true,
-                    },
-                    "data": DepTrackingCache {
-                      "data": Object {},
-                      "depend": [Function],
-                    },
-                    "maybeBroadcastWatch": [Function],
-                    "optimisticData": DepTrackingCache {
-                      "data": Object {},
-                      "depend": [Function],
-                    },
-                    "silenceBroadcast": false,
-                    "storeReader": StoreReader {
-                      "executeSelectionSet": [Function],
-                      "executeStoreQuery": [Function],
-                      "executeSubSelectedArray": [Function],
-                      "freezeResults": false,
-                    },
-                    "storeWriter": StoreWriter {},
-                    "typenameDocumentCache": Map {},
-                    "watches": Set {},
-                  },
-                  "defaultOptions": Object {},
-                  "disableNetworkFetches": false,
-                  "link": ApolloLink {
-                    "request": [Function],
-                  },
-                  "mutate": [Function],
-                  "query": [Function],
-                  "queryDeduplication": true,
-                  "reFetchObservableQueries": [Function],
-                  "resetStore": [Function],
-                  "resetStoreCallbacks": Array [],
-                  "ssrMode": false,
-                  "store": DataStore {
+            <PseudoLocaleWrapper>
+              <ApolloProvider
+                client={
+                  ApolloClient {
+                    "__operations_cache__": Map {},
                     "cache": InMemoryCache {
                       "addTypename": true,
                       "cacheKeyRoot": KeyTrie {
@@ -279,146 +235,156 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                       "typenameDocumentCache": Map {},
                       "watches": Set {},
                     },
-                  },
-                  "version": "2.3.8",
-                  "watchQuery": [Function],
-                }
-              }
-            >
-              <Provider
-                store={
-                  Object {
-                    "dispatch": [Function],
-                    "getState": [Function],
-                    "replaceReducer": [Function],
-                    "subscribe": [Function],
-                    Symbol(observable): [Function],
+                    "defaultOptions": Object {},
+                    "disableNetworkFetches": false,
+                    "link": ApolloLink {
+                      "request": [Function],
+                    },
+                    "mutate": [Function],
+                    "query": [Function],
+                    "queryDeduplication": true,
+                    "reFetchObservableQueries": [Function],
+                    "resetStore": [Function],
+                    "resetStoreCallbacks": Array [],
+                    "ssrMode": false,
+                    "store": DataStore {
+                      "cache": InMemoryCache {
+                        "addTypename": true,
+                        "cacheKeyRoot": KeyTrie {
+                          "weakness": true,
+                        },
+                        "config": Object {
+                          "addTypename": true,
+                          "dataIdFromObject": [Function],
+                          "fragmentMatcher": HeuristicFragmentMatcher {},
+                          "freezeResults": false,
+                          "resultCaching": true,
+                        },
+                        "data": DepTrackingCache {
+                          "data": Object {},
+                          "depend": [Function],
+                        },
+                        "maybeBroadcastWatch": [Function],
+                        "optimisticData": DepTrackingCache {
+                          "data": Object {},
+                          "depend": [Function],
+                        },
+                        "silenceBroadcast": false,
+                        "storeReader": StoreReader {
+                          "executeSelectionSet": [Function],
+                          "executeStoreQuery": [Function],
+                          "executeSubSelectedArray": [Function],
+                          "freezeResults": false,
+                        },
+                        "storeWriter": StoreWriter {},
+                        "typenameDocumentCache": Map {},
+                        "watches": Set {},
+                      },
+                    },
+                    "version": "2.3.8",
+                    "watchQuery": [Function],
                   }
                 }
               >
-                <ThemeProvider
-                  theme={[Function]}
+                <Provider
+                  store={
+                    Object {
+                      "dispatch": [Function],
+                      "getState": [Function],
+                      "replaceReducer": [Function],
+                      "subscribe": [Function],
+                      Symbol(observable): [Function],
+                    }
+                  }
                 >
-                  <DragDropContext
-                    onDragEnd={[MockFunction]}
+                  <ThemeProvider
+                    theme={[Function]}
                   >
-                    <Router
-                      history={
-                        Object {
-                          "action": "POP",
-                          "block": [MockFunction],
-                          "createHref": [MockFunction],
-                          "go": [MockFunction],
-                          "goBack": [MockFunction],
-                          "goForward": [MockFunction],
-                          "length": 2,
-                          "listen": [MockFunction] {
-                            "calls": Array [
-                              Array [
-                                [Function],
+                    <DragDropContext
+                      onDragEnd={[MockFunction]}
+                    >
+                      <Router
+                        history={
+                          Object {
+                            "action": "POP",
+                            "block": [MockFunction],
+                            "createHref": [MockFunction],
+                            "go": [MockFunction],
+                            "goBack": [MockFunction],
+                            "goForward": [MockFunction],
+                            "length": 2,
+                            "listen": [MockFunction] {
+                              "calls": Array [
+                                Array [
+                                  [Function],
+                                ],
                               ],
-                            ],
-                            "results": Array [
-                              Object {
-                                "type": "return",
-                                "value": undefined,
-                              },
-                            ],
-                          },
-                          "location": Object {
-                            "hash": "",
-                            "pathname": "/network",
-                            "search": "",
-                            "state": "",
-                          },
-                          "push": [MockFunction],
-                          "replace": [MockFunction] {
-                            "calls": Array [
-                              Array [
+                              "results": Array [
                                 Object {
-                                  "hash": "",
-                                  "pathname": "/network",
-                                  "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
-                                  "state": "",
+                                  "type": "return",
+                                  "value": undefined,
                                 },
                               ],
-                            ],
-                            "results": Array [
-                              Object {
-                                "type": "return",
-                                "value": undefined,
-                              },
-                            ],
-                          },
-                        }
-                      }
-                    >
-                      <withRouter(Connect(UrlStateContainer))
-                        indexPattern={
-                          Object {
-                            "fields": Array [
-                              Object {
-                                "aggregatable": true,
-                                "name": "response",
-                                "searchable": true,
-                                "type": "number",
-                              },
-                            ],
-                            "title": "logstash-*",
+                            },
+                            "location": Object {
+                              "hash": "",
+                              "pathname": "/network",
+                              "search": "",
+                              "state": "",
+                            },
+                            "push": [MockFunction],
+                            "replace": [MockFunction],
                           }
                         }
                       >
-                        <Route>
-                          <Connect(UrlStateContainer)
-                            history={
-                              Object {
-                                "action": "POP",
-                                "block": [MockFunction],
-                                "createHref": [MockFunction],
-                                "go": [MockFunction],
-                                "goBack": [MockFunction],
-                                "goForward": [MockFunction],
-                                "length": 2,
-                                "listen": [MockFunction] {
-                                  "calls": Array [
-                                    Array [
-                                      [Function],
-                                    ],
-                                  ],
-                                  "results": Array [
-                                    Object {
-                                      "type": "return",
-                                      "value": undefined,
-                                    },
-                                  ],
+                        <Memo()
+                          indexPattern={
+                            Object {
+                              "fields": Array [
+                                Object {
+                                  "aggregatable": true,
+                                  "name": "response",
+                                  "searchable": true,
+                                  "type": "number",
                                 },
-                                "location": Object {
-                                  "hash": "",
-                                  "pathname": "/network",
-                                  "search": "",
-                                  "state": "",
-                                },
-                                "push": [MockFunction],
-                                "replace": [MockFunction] {
-                                  "calls": Array [
-                                    Array [
-                                      Object {
-                                        "hash": "",
-                                        "pathname": "/network",
-                                        "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
-                                        "state": "",
-                                      },
-                                    ],
-                                  ],
-                                  "results": Array [
-                                    Object {
-                                      "type": "return",
-                                      "value": undefined,
-                                    },
-                                  ],
-                                },
-                              }
+                              ],
+                              "title": "logstash-*",
                             }
+                          }
+                          navTabs={
+                            Object {
+                              "hosts": Object {
+                                "disabled": false,
+                                "href": "#/link-to/hosts",
+                                "id": "hosts",
+                                "name": "Hosts",
+                                "urlKey": "host",
+                              },
+                              "network": Object {
+                                "disabled": false,
+                                "href": "#/link-to/network",
+                                "id": "network",
+                                "name": "Network",
+                                "urlKey": "network",
+                              },
+                              "overview": Object {
+                                "disabled": false,
+                                "href": "#/link-to/overview",
+                                "id": "overview",
+                                "name": "Overview",
+                                "urlKey": "overview",
+                              },
+                              "timelines": Object {
+                                "disabled": false,
+                                "href": "#/link-to/timelines",
+                                "id": "timelines",
+                                "name": "Timelines",
+                                "urlKey": "timeline",
+                              },
+                            }
+                          }
+                        >
+                          <Connect(UrlStateContainer)
                             indexPattern={
                               Object {
                                 "fields": Array [
@@ -432,73 +398,46 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                 "title": "logstash-*",
                               }
                             }
-                            location={
+                            navTabs={
                               Object {
-                                "hash": "",
-                                "pathname": "/network",
-                                "search": "",
-                                "state": "",
+                                "hosts": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/hosts",
+                                  "id": "hosts",
+                                  "name": "Hosts",
+                                  "urlKey": "host",
+                                },
+                                "network": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/network",
+                                  "id": "network",
+                                  "name": "Network",
+                                  "urlKey": "network",
+                                },
+                                "overview": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/overview",
+                                  "id": "overview",
+                                  "name": "Overview",
+                                  "urlKey": "overview",
+                                },
+                                "timelines": Object {
+                                  "disabled": false,
+                                  "href": "#/link-to/timelines",
+                                  "id": "timelines",
+                                  "name": "Timelines",
+                                  "urlKey": "timeline",
+                                },
                               }
                             }
-                            match={
-                              Object {
-                                "isExact": false,
-                                "params": Object {},
-                                "path": "/",
-                                "url": "/",
-                              }
-                            }
+                            pageName="network"
+                            pathName="/network"
+                            search=""
                           >
                             <Component
-                              history={
-                                Object {
-                                  "action": "POP",
-                                  "block": [MockFunction],
-                                  "createHref": [MockFunction],
-                                  "go": [MockFunction],
-                                  "goBack": [MockFunction],
-                                  "goForward": [MockFunction],
-                                  "length": 2,
-                                  "listen": [MockFunction] {
-                                    "calls": Array [
-                                      Array [
-                                        [Function],
-                                      ],
-                                    ],
-                                    "results": Array [
-                                      Object {
-                                        "type": "return",
-                                        "value": undefined,
-                                      },
-                                    ],
-                                  },
-                                  "location": Object {
-                                    "hash": "",
-                                    "pathname": "/network",
-                                    "search": "",
-                                    "state": "",
-                                  },
-                                  "push": [MockFunction],
-                                  "replace": [MockFunction] {
-                                    "calls": Array [
-                                      Array [
-                                        Object {
-                                          "hash": "",
-                                          "pathname": "/network",
-                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
-                                          "state": "",
-                                        },
-                                      ],
-                                    ],
-                                    "results": Array [
-                                      Object {
-                                        "type": "return",
-                                        "value": undefined,
-                                      },
-                                    ],
-                                  },
-                                }
-                              }
+                              addGlobalLinkTo={[Function]}
+                              addTimelineLinkTo={[Function]}
+                              dispatch={[Function]}
                               indexPattern={
                                 Object {
                                   "fields": Array [
@@ -512,51 +451,56 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                   "title": "logstash-*",
                                 }
                               }
-                              location={
+                              navTabs={
                                 Object {
-                                  "hash": "",
-                                  "pathname": "/network",
-                                  "search": "",
-                                  "state": "",
+                                  "hosts": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/hosts",
+                                    "id": "hosts",
+                                    "name": "Hosts",
+                                    "urlKey": "host",
+                                  },
+                                  "network": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/network",
+                                    "id": "network",
+                                    "name": "Network",
+                                    "urlKey": "network",
+                                  },
+                                  "overview": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/overview",
+                                    "id": "overview",
+                                    "name": "Overview",
+                                    "urlKey": "overview",
+                                  },
+                                  "timelines": Object {
+                                    "disabled": false,
+                                    "href": "#/link-to/timelines",
+                                    "id": "timelines",
+                                    "name": "Timelines",
+                                    "urlKey": "timeline",
+                                  },
                                 }
                               }
-                              match={
-                                Object {
-                                  "isExact": false,
-                                  "params": Object {},
-                                  "path": "/",
-                                  "url": "/",
-                                }
-                              }
+                              pageName="network"
+                              pathName="/network"
+                              removeGlobalLinkTo={[Function]}
+                              removeTimelineLinkTo={[Function]}
+                              search=""
                               setAbsoluteTimerange={[Function]}
                               setHostsKql={[Function]}
                               setNetworkKql={[Function]}
                               setRelativeTimerange={[Function]}
-                              toggleTimelineLinkTo={[Function]}
+                              updateTimeline={[Function]}
+                              updateTimelineIsLoading={[Function]}
                               urlState={
                                 Object {
                                   "kqlQuery": Object {
-                                    "hosts.details": Object {
-                                      "filterQuery": null,
-                                      "queryLocation": "hosts.details",
-                                      "type": "details",
-                                    },
-                                    "hosts.page": Object {
-                                      "filterQuery": null,
-                                      "queryLocation": "hosts.page",
-                                      "type": "page",
-                                    },
-                                    "network.details": Object {
-                                      "filterQuery": null,
-                                      "queryLocation": "network.details",
-                                      "type": "details",
-                                    },
-                                    "network.page": Object {
-                                      "filterQuery": null,
-                                      "queryLocation": "network.page",
-                                      "type": "page",
-                                    },
+                                    "filterQuery": null,
+                                    "queryLocation": "network.page",
                                   },
+                                  "timelineId": "",
                                   "timerange": Object {
                                     "global": Object {
                                       "linkTo": Array [
@@ -585,17 +529,15 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                   },
                                 }
                               }
-                            >
-                              <span />
-                            </Component>
+                            />
                           </Connect(UrlStateContainer)>
-                        </Route>
-                      </withRouter(Connect(UrlStateContainer))>
-                    </Router>
-                  </DragDropContext>
-                </ThemeProvider>
-              </Provider>
-            </ApolloProvider>
+                        </Memo()>
+                      </Router>
+                    </DragDropContext>
+                  </ThemeProvider>
+                </Provider>
+              </ApolloProvider>
+            </PseudoLocaleWrapper>
           </IntlProvider>
         </I18nProvider>
       </Component>

@@ -4,12 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
+import React, { Component, FC, Fragment, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
+import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
+import { TimeHistory } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
+
+interface ComponentWithConstructor<T> extends Component {
+  new (): Component<T>;
+}
+
+const MlSuperDatePicker = (EuiSuperDatePicker as any) as ComponentWithConstructor<
+  EuiSuperDatePickerProps
+>;
+
+// This part fixes a problem with EuiSuperDater picker where it would not reflect
+// a prop change of isPaused on the internal interval. This fix will be released
+// with EUI 13.7.0 but only 13.6.1 without the fix made it into Kibana 7.4 so
+// it's copied here.
+export class MlSuperDatePickerWithUpdate extends MlSuperDatePicker {
+  componentDidUpdate = () => {
+    // @ts-ignore
+    this.stopInterval();
+    if (!this.props.isPaused) {
+      // @ts-ignore
+      this.startInterval(this.props.refreshInterval);
+    }
+  };
+}
 
 interface Duration {
   start: string;
@@ -44,14 +69,13 @@ export const TopNav: FC = () => {
   const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
-    timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
-    timefilter.on('timeUpdate', timefilterUpdateListener);
-    timefilter.on('enabledUpdated', timefilterUpdateListener);
+    const subscriptions = new Subscription();
+    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
 
     return function cleanup() {
-      timefilter.off('refreshIntervalUpdate', timefilterUpdateListener);
-      timefilter.off('timeUpdate', timefilterUpdateListener);
-      timefilter.off('enabledUpdated', timefilterUpdateListener);
+      subscriptions.unsubscribe();
     };
   }, []);
 
@@ -96,7 +120,7 @@ export const TopNav: FC = () => {
     <Fragment>
       {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
         <div className="mlNavigationMenu__topNav">
-          <EuiSuperDatePicker
+          <MlSuperDatePickerWithUpdate
             start={time.from}
             end={time.to}
             isPaused={refreshInterval.pause}

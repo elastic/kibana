@@ -30,13 +30,13 @@ import {
   EuiModalBody,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../../../../';
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
   updateTitle: (newTitle: string | undefined) => void;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -44,7 +44,7 @@ interface State {
   hideTitle: boolean;
 }
 
-export class CustomizePanelModalUi extends Component<CustomizePanelProps, State> {
+export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
   constructor(props: CustomizePanelProps) {
     super(props);
     this.state = {
@@ -53,23 +53,23 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
     };
   }
 
-  updateTitle = (title: string | undefined) => {
+  private updateTitle = (title: string | undefined) => {
     // An empty string will mean "use the default value", which is represented by setting
     // title to undefined (where as an empty string is actually used to indicate "hide title").
     this.setState({ title: title === '' ? undefined : title });
   };
 
-  reset = () => {
+  private reset = () => {
     this.setState({ title: undefined });
   };
 
-  onHideTitleToggle = () => {
+  private onHideTitleToggle = () => {
     this.setState(prevState => ({
       hideTitle: !prevState.hideTitle,
     }));
   };
 
-  save = () => {
+  private save = () => {
     if (this.state.hideTitle) {
       this.props.updateTitle('');
     } else {
@@ -88,7 +88,6 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
         </EuiModalHeader>
 
         <EuiModalBody>
-          {' '}
           <EuiFormRow>
             <EuiSwitch
               checked={!this.state.hideTitle}
@@ -104,10 +103,12 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
             />
           </EuiFormRow>
           <EuiFormRow
-            label={this.props.intl.formatMessage({
-              id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
-              defaultMessage: 'Panel title',
-            })}
+            label={i18n.translate(
+              'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
+              {
+                defaultMessage: 'Panel title',
+              }
+            )}
           >
             <EuiFieldText
               id="panelTitleInput"
@@ -118,10 +119,12 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
               placeholder={this.props.embeddable.getOutput().defaultTitle}
               value={this.state.title || ''}
               onChange={e => this.updateTitle(e.target.value)}
-              aria-label={this.props.intl.formatMessage({
-                id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
-                defaultMessage: 'Enter a custom title for your panel',
-              })}
+              aria-label={i18n.translate(
+                'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
+                {
+                  defaultMessage: 'Enter a custom title for your panel',
+                }
+              )}
               append={
                 <EuiButtonEmpty
                   data-test-subj="resetCustomEmbeddablePanelTitle"
@@ -141,7 +144,6 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
           <EuiButtonEmpty
             onClick={() => this.props.updateTitle(this.props.embeddable.getOutput().title)}
           >
-            {' '}
             <FormattedMessage
               id="embeddableApi.customizePanel.modal.cancel"
               defaultMessage="Cancel"
@@ -159,5 +161,3 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
     );
   }
 }
-
-export const CustomizePanelModal = injectI18n(CustomizePanelModalUi);

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { formatdate } from '../../functions/common/formatdate';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { ISO8601, MOMENTJS } from '../constants';
+import { ISO8601, MOMENTJS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
   help: i18n.translate('xpack.canvas.functions.formatdateHelpText', {

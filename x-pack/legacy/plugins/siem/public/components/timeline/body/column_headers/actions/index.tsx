@@ -52,6 +52,7 @@ export const CloseButton = pure<{
   <WrappedCloseButton data-test-subj="wrapped-close-button" show={show}>
     <EuiButtonIcon
       aria-label={i18n.REMOVE_COLUMN}
+      color="subdued"
       data-test-subj="remove-column"
       iconType="cross"
       onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -67,7 +68,7 @@ export const CloseButton = pure<{
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, show, sort }) => {
-  const { isLoading } = useContext(TimelineContext);
+  const isLoading = useContext(TimelineContext);
   return (
     <ActionsContainer
       alignItems="center"

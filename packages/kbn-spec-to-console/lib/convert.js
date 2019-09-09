@@ -70,7 +70,7 @@ module.exports = spec => {
         convertedSpec.url_components = convertParts(urlComponents);
       }
     }
-    if (source.documentation) {
+    if (source.documentation && source.documentation.url) {
       convertedSpec.documentation = source.documentation.url;
     }
   });

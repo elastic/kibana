@@ -27,13 +27,13 @@ import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
-import { brushHandler } from '../lib/create_brush_handler';
+import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
-import { CoreSetupContextProvider } from '../contexts/query_input_bar_context';
+import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 const localStorage = new Storage(window.localStorage);
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
@@ -51,7 +51,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = brushHandler(props.vis.API.timeFilter);
+    this.onBrush = createBrushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -59,7 +59,8 @@ export class VisEditor extends Component {
     // core dependencies required by React components downstream.
     this.coreContext = {
       appName: APP_NAME,
-      uiSettings: npSetup.core.uiSettings,
+      uiSettings: npStart.core.uiSettings,
+      savedObjectsClient: npStart.core.savedObjects.client,
       store: localStorage,
     };
   }
@@ -181,7 +182,7 @@ export class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
-            <CoreSetupContextProvider value={this.coreContext}>
+            <CoreStartContextProvider value={this.coreContext}>
               <PanelConfig
                 fields={this.state.visFields}
                 model={model}
@@ -190,7 +191,7 @@ export class VisEditor extends Component {
                 onChange={this.handleChange}
                 getConfig={this.getConfig}
               />
-            </CoreSetupContextProvider>
+            </CoreStartContextProvider>
           </div>
         </div>
       );

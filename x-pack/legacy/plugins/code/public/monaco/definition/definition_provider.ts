@@ -72,7 +72,7 @@ export const definitionProvider: monaco.languages.DefinitionProvider = {
     if (result) {
       if (result.length > 1) {
         openDefinitionsPanel();
-        return [];
+        return result.filter(l => l.location !== undefined).map(l => handleLocation(l.location!));
       } else {
         const l = result[0];
         const location = l.location;

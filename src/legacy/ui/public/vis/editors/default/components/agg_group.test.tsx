@@ -57,54 +57,37 @@ describe('DefaultEditorAgg component', () => {
     setValidity = jest.fn();
     reorderAggs = jest.fn();
 
-    aggs = [
-      {
-        id: 1,
-        title: 'Metrics',
-        params: {
-          field: {
-            type: 'number',
+    aggs = {
+      aggs: [
+        {
+          id: '1',
+          params: {
+            field: {
+              type: 'number',
+            },
           },
-        },
-        group: 'metrics',
-        schema: {},
-      },
-      {
-        id: 3,
-        title: 'Agg',
-        params: {
-          field: {
-            type: 'string',
+          schema: { group: 'metrics' },
+        } as AggConfig,
+        {
+          id: '3',
+          params: {
+            field: {
+              type: 'string',
+            },
           },
-        },
-        group: 'metrics',
-        schema: {},
-      },
-      {
-        id: 2,
-        title: 'Buckets',
-        params: {
-          field: {
-            type: 'number',
+          schema: { group: 'metrics' },
+        } as AggConfig,
+        {
+          id: '2',
+          params: {
+            field: {
+              type: 'number',
+            },
           },
-        },
-        group: 'buckets',
-        schema: {},
-      },
-    ] as AggConfigs;
-
-    Object.defineProperty(aggs, 'bySchemaGroup', {
-      get: () =>
-        aggs.reduce((acc: { [key: string]: AggConfig }, option: AggConfig) => {
-          if (acc[option.group]) {
-            acc[option.group].push(option);
-          } else {
-            acc[option.group] = [option];
-          }
-
-          return acc;
-        }, {}),
-    });
+          schema: { group: 'buckets' },
+        } as AggConfig,
+      ],
+    } as AggConfigs;
 
     defaultProps = {
       formIsTouched: false,
@@ -200,8 +183,8 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith([
-      defaultProps.state.aggs[1],
-      defaultProps.state.aggs[0],
+      defaultProps.state.aggs.aggs[1],
+      defaultProps.state.aggs.aggs[0],
     ]);
   });
 

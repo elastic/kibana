@@ -98,7 +98,7 @@ describe('createApi', () => {
       expect(() =>
         route.handler({
           query: {
-            _debug: true
+            _debug: 'true'
           }
         })
       ).not.toThrow();
@@ -124,7 +124,7 @@ describe('createApi', () => {
       expect(() =>
         route.handler({
           query: {
-            _debug: true,
+            _debug: 'true',
             extra: ''
           }
         })
@@ -221,13 +221,15 @@ describe('createApi', () => {
     });
 
     it('validates query parameters', () => {
-      const { handler, route } = initApi({ query: t.type({ bar: t.string }) });
+      const { handler, route } = initApi({
+        query: t.type({ bar: t.string })
+      });
 
       expect(() =>
         route.handler({
           query: {
             bar: '',
-            _debug: true
+            _debug: 'true'
           }
         })
       ).not.toThrow();

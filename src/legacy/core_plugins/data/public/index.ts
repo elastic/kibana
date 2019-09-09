@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -28,7 +28,9 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+export type DataStart = DataStart;
+
+export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
@@ -38,7 +40,7 @@ export {
   StaticIndexPattern,
 } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
-export { SearchBar, SearchBarProps } from './search';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
 export * from '../common';

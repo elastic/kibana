@@ -194,7 +194,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getDocTableField(index) {
-      const field = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`);
+      const field = await find.byCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+      );
       return await field.getVisibleText();
     }
 
