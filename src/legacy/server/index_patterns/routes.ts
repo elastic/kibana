@@ -19,7 +19,7 @@
 
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { InternalCoreSetup, KibanaRequest } from 'kibana/server';
+import { InternalCoreSetup, KibanaRequest, RequestHandlerContext } from '../../../core/server';
 import { IndexPatternsService } from './service';
 
 export function registerRoutes(core: InternalCoreSetup) {
@@ -41,7 +41,7 @@ export function registerRoutes(core: InternalCoreSetup) {
         }),
       },
     },
-    async (context, request, response) => {
+    async (context: RequestHandlerContext, request: any, response: any) => {
       const indexPatterns = await getIndexPatternsService(request);
       const { pattern, meta_fields: metaFields } = request.query;
 
@@ -78,7 +78,7 @@ export function registerRoutes(core: InternalCoreSetup) {
         }),
       },
     },
-    async (context, request, response) => {
+    async (context: RequestHandlerContext, request: any, response: any) => {
       const indexPatterns = await getIndexPatternsService(request);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
