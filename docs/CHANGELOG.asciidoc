@@ -29,7 +29,14 @@ This section summarizes the changes in each release.
 [[release-notes-7.3.1]]
 == {kib} 7.3.1
 
+[float]
+[[breaking-7.3.1]]
+=== Breaking Changes
+
 See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+
+Platform::
+* Fixes Import API so it doesn't override SavedObjectClient errors {pull}41125[#41125]
 
 [float]
 [[bug-7.3.1]]
@@ -70,7 +77,6 @@ Operations::
 * Overrides `org.label-schema.license` Docker label {pull}42836[#42836]
 Platform::
 * Fixes CSV export of saved searches that have _source field {pull}43123[#43123]
-* Fixes Import API so it doesn't override SavedObjectClient errors {pull}41125[#41125]
 * Correctly sets `kibanaRoot` on {kib} plugin helpers for new generated plugins {pull}42616[#42616]
 * Fixes scaling logic to check agg type instead schema {pull}42574[#42574]
 Reporting::
