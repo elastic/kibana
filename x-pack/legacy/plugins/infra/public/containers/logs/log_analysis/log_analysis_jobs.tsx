@@ -150,10 +150,6 @@ export const useLogAnalysisJobs = ({
     fetchJobStatusRequest.state,
   ]);
 
-  // const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
-  //   setupMlModuleRequest.state,
-  // ]);
-
   const viewResults = useCallback(() => {
     setSetupStatus('hiddenAfterSuccess');
   }, [setSetupStatus]);
