@@ -25,7 +25,7 @@ export const useAnalysisSetupState = ({ setupModule, retrySetup }: Props) => {
   }, [setupModule, startTime, endTime]);
   const retry = useCallback(() => {
     return retrySetup(selectedDateToParam(startTime), selectedDateToParam(endTime));
-  }, [retrySetup]);
+  }, [retrySetup, startTime, endTime]);
   return {
     setup,
     retry,
