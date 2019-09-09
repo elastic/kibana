@@ -59,7 +59,7 @@ export const args = ({
     flags.push('--no-sandbox');
   }
 
-  // Dead code?
+  // TODO remove conditional
   if (verboseLogging) {
     flags.push('--enable-logging');
     flags.push('--v=1');

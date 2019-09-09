@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BrowserConfig } from '../../../types';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
-import { BrowserConfig } from '../../../types';
 
 export { paths } from './paths';
 

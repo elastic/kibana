@@ -44,7 +44,7 @@ export class HeadlessChromiumDriverFactory {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
-    this.logger = logger; // TODO: just pass logger into each method from outside, like test() has it
+    this.logger = logger;
   }
 
   type = 'chromium';
