@@ -26,7 +26,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     hasFilter(key, value, enabled = true) {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
       return testSubjects.exists(
-        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`,
+        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value}`,
         {
           allowHidden: true
         }
@@ -34,7 +34,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async removeFilter(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`deleteFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
@@ -47,19 +47,19 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async toggleFilterEnabled(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`disableFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`pinFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async getFilterCount() {
-      const filters = await testSubjects.findAll('filter');
+      const filters = await testSubjects.findAll('~filter');
       return filters.length;
     }
 
@@ -110,13 +110,13 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async clickEditFilter(key, value) {
-      await testSubjects.click(`filter & filter-key-${key} & filter-value-${value}`);
+      await testSubjects.click(`~filter & ~filter-key-${key} & ~filter-value-${value}`);
       await testSubjects.click(`editFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async getFilterEditorSelectedPhrases() {
-      return await comboBox.getComboBoxSelectedOptions('filterParamsComboBox');
+      return await comboBox.getComboBoxSelectedOptions('~filterParamsComboBox');
     }
 
     async getFilterEditorFields() {

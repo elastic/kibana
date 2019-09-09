@@ -38,12 +38,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertAggAndFieldInputExists() {
-      await testSubjects.existOrFail('mlJobWizardAggSelection comboBoxInput');
+      await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
     },
 
     async assertAggAndFieldSelection(identifier: string) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlJobWizardAggSelection comboBoxInput'
+        'mlJobWizardAggSelection > comboBoxInput'
       );
       expect(comboBoxSelectedOptions.length).to.eql(1);
       expect(comboBoxSelectedOptions[0]).to.eql(identifier);
@@ -82,12 +82,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertJobGroupInputExists() {
-      await testSubjects.existOrFail('mlJobWizardComboBoxJobGroups comboBoxInput');
+      await testSubjects.existOrFail('mlJobWizardComboBoxJobGroups > comboBoxInput');
     },
 
     async assertJobGroupSelection(jobGroups: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlJobWizardComboBoxJobGroups comboBoxInput'
+        'mlJobWizardComboBoxJobGroups > comboBoxInput'
       );
       expect(comboBoxSelectedOptions.length).to.eql(jobGroups.length);
       expect(comboBoxSelectedOptions).to.eql(jobGroups);
@@ -95,7 +95,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async assertModelPlotSwitchExists() {
       await this.ensureAdvancedSectionOpen();
-      await testSubjects.existOrFail('mlJobWizardAdvancedSection mlJobWizardSwitchModelPlot', {
+      await testSubjects.existOrFail('mlJobWizardAdvancedSection > mlJobWizardSwitchModelPlot', {
         allowHidden: true,
       });
     },
@@ -103,7 +103,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async assertDedicatedIndexSwitchExists() {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.existOrFail(
-        'mlJobWizardAdvancedSection mlJobWizardSwitchUseDedicatedIndex',
+        'mlJobWizardAdvancedSection > mlJobWizardSwitchUseDedicatedIndex',
         { allowHidden: true }
       );
     },
@@ -121,19 +121,21 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async getDedicatedIndexSwitchCheckedState() {
       await this.ensureAdvancedSectionOpen();
       return await testSubjects.isSelected(
-        'mlJobWizardAdvancedSection mlJobWizardSwitchUseDedicatedIndex'
+        'mlJobWizardAdvancedSection > mlJobWizardSwitchUseDedicatedIndex'
       );
     },
 
     async assertModelMemoryLimitInputExists() {
       await this.ensureAdvancedSectionOpen();
-      await testSubjects.existOrFail('mlJobWizardAdvancedSection mlJobWizardInputModelMemoryLimit');
+      await testSubjects.existOrFail(
+        'mlJobWizardAdvancedSection > mlJobWizardInputModelMemoryLimit'
+      );
     },
 
     async assertModelMemoryLimitValue(expectedValue: string) {
       await this.ensureAdvancedSectionOpen();
       const actualModelMemoryLimit = await testSubjects.getAttribute(
-        'mlJobWizardAdvancedSection mlJobWizardInputModelMemoryLimit',
+        'mlJobWizardAdvancedSection > mlJobWizardInputModelMemoryLimit',
         'value'
       );
       expect(actualModelMemoryLimit).to.eql(expectedValue);
@@ -152,7 +154,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async selectAggAndField(identifier: string) {
-      await comboBox.set('mlJobWizardAggSelection comboBoxInput', identifier);
+      await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
     },
 
     async setBucketSpan(bucketSpan: string) {
@@ -168,7 +170,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async addJobGroup(jobGroup: string) {
-      await comboBox.setCustom('mlJobWizardComboBoxJobGroups comboBoxInput', jobGroup);
+      await comboBox.setCustom('mlJobWizardComboBoxJobGroups > comboBoxInput', jobGroup);
     },
 
     async ensureAdvancedSectionOpen() {

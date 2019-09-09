@@ -24,11 +24,11 @@ export function GlobalNavProvider({ getService }) {
 
   return new class GlobalNav {
     async moveMouseToLogo() {
-      await testSubjects.moveMouseTo('headerGlobalNav logo');
+      await testSubjects.moveMouseTo('headerGlobalNav > logo');
     }
 
     async clickLogo() {
-      return await testSubjects.click('headerGlobalNav logo');
+      return await testSubjects.click('headerGlobalNav > logo');
     }
 
     async exists() {
@@ -36,11 +36,11 @@ export function GlobalNavProvider({ getService }) {
     }
 
     async getFirstBreadcrumb() {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
+      return await testSubjects.getVisibleText('headerGlobalNav > breadcrumbs > ~breadcrumb & ~first');
     }
 
     async getLastBreadcrumb() {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
+      return await testSubjects.getVisibleText('headerGlobalNav > breadcrumbs > ~breadcrumb & ~last');
     }
 
     async badgeExistsOrFail(expectedLabel) {

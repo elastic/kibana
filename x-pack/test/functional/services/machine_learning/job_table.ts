@@ -118,12 +118,12 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public rowSelector(jobId: string, subSelector?: string) {
-      const row = `mlJobListTable row-${jobId}`;
+      const row = `~mlJobListTable > row-${jobId}`;
       return !subSelector ? row : `${row} ${subSelector}`;
     }
 
     public detailsSelector(jobId: string, subSelector?: string) {
-      const row = `mlJobListTable details-${jobId}`;
+      const row = `~mlJobListTable > details-${jobId}`;
       return !subSelector ? row : `${row} ${subSelector}`;
     }
 
@@ -158,12 +158,12 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async waitForJobsToLoad() {
       await retry.waitFor(
         'jobs table to exist',
-        async () => await testSubjects.exists('mlJobListTable')
+        async () => await testSubjects.exists('~mlJobListTable')
       );
 
       await retry.waitFor(
         'jobs table to be done loading',
-        async () => await testSubjects.exists('mlJobListTable&loaded')
+        async () => await testSubjects.exists('mlJobListTable loaded')
       );
     }
 

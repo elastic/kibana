@@ -29,7 +29,7 @@ export default function manageRepositoriesFunctionalTests({
 
   describe('History', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
       let driver: any;
