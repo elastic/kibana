@@ -5,22 +5,19 @@
  */
 
 import React, { useState } from 'react';
-import { Moment } from 'moment';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnalysisSetupTimerangeForm } from '../analysis_setup_timerange_form';
 import { StepText } from './step_text';
 
 interface InitialConfigurationProps {
-  hasAttemptedSetup: boolean;
-  setStartTime: (startTime: Moment | null) => void;
-  setEndTime: (endTime: Moment | null) => void;
-  startTime: Moment | null;
-  endTime: Moment | null;
+  setStartTime: (startTime: number | undefined) => void;
+  setEndTime: (endTime: number | undefined) => void;
+  startTime: number | undefined;
+  endTime: number | undefined;
 }
 
 export const InitialConfiguration: React.FunctionComponent<InitialConfigurationProps> = ({
-  hasAttemptedSetup,
   setStartTime,
   setEndTime,
   startTime,

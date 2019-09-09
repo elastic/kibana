@@ -37,14 +37,21 @@ const endTimeDefaultDescription = i18n.translate(
   }
 );
 
+function selectedDateToParam(selectedDate: Moment | null) {
+  if (selectedDate) {
+    return selectedDate.valueOf(); // To ms unix timestamp
+  }
+  return undefined;
+}
+
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  setStartTime: (startTime: Moment | null) => void;
-  setEndTime: (endTime: Moment | null) => void;
-  startTime: Moment | null;
-  endTime: Moment | null;
+  setStartTime: (startTime: number | undefined) => void;
+  setEndTime: (endTime: number | undefined) => void;
+  startTime: number | undefined;
+  endTime: number | undefined;
 }> = ({ setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
-  const selectedEndTimeIsToday = !endTime || endTime.isSame(now, 'day');
+  const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
 
   return (
     <EuiForm>
@@ -72,12 +79,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         >
           <EuiFlexGroup gutterSize="s">
             <EuiFormControlLayout
-              clear={startTime ? { onClick: () => setStartTime(null) } : undefined}
+              clear={startTime ? { onClick: () => setStartTime(undefined) } : undefined}
             >
               <EuiDatePicker
                 showTimeSelect
-                selected={startTime}
-                onChange={setStartTime}
+                selected={moment(startTime)}
+                onChange={date => setStartTime(selectedDateToParam(date))}
                 placeholder={startTimeDefaultDescription}
                 maxDate={now}
               />
@@ -92,11 +99,13 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={endTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiFormControlLayout clear={endTime ? { onClick: () => setEndTime(null) } : undefined}>
+            <EuiFormControlLayout
+              clear={endTime ? { onClick: () => setEndTime(undefined) } : undefined}
+            >
               <EuiDatePicker
                 showTimeSelect
-                selected={endTime}
-                onChange={setEndTime}
+                selected={moment(endTime)}
+                onChange={date => setEndTime(selectedDateToParam(date))}
                 placeholder={endTimeDefaultDescription}
                 openToDate={now}
                 minDate={now}

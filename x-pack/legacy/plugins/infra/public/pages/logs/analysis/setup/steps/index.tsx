@@ -18,7 +18,6 @@ interface AnalysisSetupStepsProps {
   retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
   isRetrying: boolean;
   hasCompletedSetup: boolean;
-  hasAttemptedSetup: boolean;
   viewResults: () => void;
   indexPattern: string;
 }
@@ -30,7 +29,6 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
   didSetupFail,
   isRetrying,
   hasCompletedSetup,
-  hasAttemptedSetup,
   viewResults,
   indexPattern,
 }: AnalysisSetupStepsProps) => {
@@ -46,7 +44,6 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
       }),
       children: (
         <InitialConfiguration
-          hasAttemptedSetup={hasAttemptedSetup}
           setStartTime={setStartTime}
           setEndTime={setEndTime}
           startTime={startTime}
