@@ -49,9 +49,6 @@ export interface DataFrameTransformPivotConfig extends CreateRequestBody {
   id: DataFrameTransformId;
 }
 
-// Don't allow intervals of '0', don't allow floating intervals.
-export const delayFormatRegex = /^[1-9][0-9]*(nanos|micros|ms|s|m|h|d)$/;
-
 export enum REFRESH_TRANSFORM_LIST_STATE {
   ERROR = 'error',
   IDLE = 'idle',
