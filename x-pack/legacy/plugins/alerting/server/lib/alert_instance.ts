@@ -10,7 +10,7 @@ import { parseDuration } from './parse_duration';
 interface Meta {
   lastFired?: {
     group: string;
-    epocTime: number;
+    date: Date;
   };
 }
 
@@ -47,7 +47,7 @@ export class AlertInstance {
     if (
       this.meta.lastFired &&
       this.meta.lastFired.group === actionGroup &&
-      this.meta.lastFired.epocTime + throttleMills > Date.now()
+      new Date(this.meta.lastFired.date).getTime() + throttleMills > Date.now()
     ) {
       return false;
     }

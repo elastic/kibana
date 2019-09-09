@@ -25,7 +25,7 @@ describe('shouldFire()', () => {
     const alertInstance = new AlertInstance({
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -39,7 +39,7 @@ describe('shouldFire()', () => {
     const alertInstance = new AlertInstance({
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -53,7 +53,7 @@ describe('shouldFire()', () => {
     const alertInstance = new AlertInstance({
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -115,7 +115,7 @@ describe('fire()', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -129,7 +129,7 @@ describe('fire()', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -143,7 +143,7 @@ describe('fire()', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -188,13 +188,13 @@ describe('replaceMeta()', () => {
     expect(alertInstance.getMeta()).toEqual({});
     alertInstance.replaceMeta({
       lastFired: {
-        epocTime: Date.now(),
+        date: new Date(),
         group: 'default',
       },
     });
     expect(alertInstance.getMeta()).toEqual({
       lastFired: {
-        epocTime: Date.now(),
+        date: new Date(),
         group: 'default',
       },
     });
@@ -207,13 +207,13 @@ describe('toJSON', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
     });
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastFired":{"epocTime":0,"group":"default"}}}'
+      '{"state":{"foo":true},"meta":{"lastFired":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
     );
   });
 });
@@ -241,7 +241,7 @@ describe('isResolved', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },
@@ -254,7 +254,7 @@ describe('isResolved', () => {
       state: { foo: true },
       meta: {
         lastFired: {
-          epocTime: Date.now(),
+          date: new Date(),
           group: 'default',
         },
       },

@@ -139,7 +139,7 @@ export function getCreateTaskRunnerFunction({
                 ...previousMeta,
                 lastFired: {
                   group: actionGroup,
-                  epocTime: Date.now(),
+                  date: new Date(),
                 },
               });
               alertInstance.resetFire();
