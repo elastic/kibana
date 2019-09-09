@@ -41,6 +41,6 @@ describe('rendering', () => {
       .find('[data-test-subj="coolzies"]')
       .dive()
       .find('[data-test-subj="page_headline_draggable"]');
-    expect(draggableHeader.exists).toBeTruthy();
+    expect(draggableHeader.exists()).toBeTruthy();
   });
 });
