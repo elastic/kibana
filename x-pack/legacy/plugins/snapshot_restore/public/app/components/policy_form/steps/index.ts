@@ -19,4 +19,5 @@ export interface StepProps {
 
 export { PolicyStepLogistics } from './step_logistics';
 export { PolicyStepSettings } from './step_settings';
+export { PolicyStepRetention } from './step_retention';
 export { PolicyStepReview } from './step_review';

@@ -31,7 +31,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { name, snapshotName, schedule, repository, config } = policy;
+  const { name, snapshotName, schedule, repository, config, retention } = policy;
   const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
     indices: undefined,
     includeGlobalState: undefined,
@@ -48,6 +48,21 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   const hiddenIndicesCount =
     displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
+  const EditStepTooltip = ({ step }: { step: number }) => (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
+          defaultMessage="Edit"
+        />
+      }
+    >
+      <EuiLink onClick={() => updateCurrentStep(step)}>
+        <EuiIcon type="pencil" />
+      </EuiLink>
+    </EuiToolTip>
+  );
+
   const renderSummaryTab = () => (
     <Fragment>
       <EuiSpacer size="m" />
@@ -57,18 +72,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionLogisticsTitle"
             defaultMessage="Logistics"
           />{' '}
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
-                defaultMessage="Edit"
-              />
-            }
-          >
-            <EuiLink onClick={() => updateCurrentStep(1)}>
-              <EuiIcon type="pencil" />
-            </EuiLink>
-          </EuiToolTip>
+          <EditStepTooltip step={1} />
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -131,18 +135,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionSettingsTitle"
             defaultMessage="Snapshot settings"
           />{' '}
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
-                defaultMessage="Edit"
-              />
-            }
-          >
-            <EuiLink onClick={() => updateCurrentStep(2)}>
-              <EuiIcon type="pencil" />
-            </EuiLink>
-          </EuiToolTip>
+          <EditStepTooltip step={2} />
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -279,6 +272,45 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {retention ? (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionRetentionTitle"
+                defaultMessage="Snapshot retention"
+              />{' '}
+              <EditStepTooltip step={3} />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.expireAfterLabel"
+                defaultMessage="Expire after"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{retention.expireAfter}</EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.minCountLabel"
+                defaultMessage="Min count"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{retention.minCount}</EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.maxCountLabel"
+                defaultMessage="Max count"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{retention.maxCount}</EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </Fragment>
+      ) : null}
     </Fragment>
   );
 

@@ -15,7 +15,12 @@ import {
 import { SlmPolicyPayload } from '../../../../common/types';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
 import { useAppDependencies } from '../../index';
-import { PolicyStepLogistics, PolicyStepSettings, PolicyStepReview } from './steps';
+import {
+  PolicyStepLogistics,
+  PolicyStepSettings,
+  PolicyStepRetention,
+  PolicyStepReview,
+} from './steps';
 import { PolicyNavigation } from './navigation';
 
 interface Props {
@@ -53,7 +58,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const stepMap: { [key: number]: any } = {
     1: PolicyStepLogistics,
     2: PolicyStepSettings,
-    3: PolicyStepReview,
+    3: PolicyStepRetention,
+    4: PolicyStepReview,
   };
   const CurrentStepForm = stepMap[currentStep];
 
@@ -161,6 +167,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                     fill
                     iconType="arrowRight"
                     onClick={() => onNext()}
+                    iconSide="right"
                     disabled={!validation.isValid}
                   >
                     <FormattedMessage
