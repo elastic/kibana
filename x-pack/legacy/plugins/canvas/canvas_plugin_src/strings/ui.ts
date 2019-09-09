@@ -523,4 +523,62 @@ export const ViewStrings = {
       },
     },
   },
+  RevealImage: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.displayName', {
+        defaultMessage: 'Reveal image',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.help', {
+        defaultMessage: ' ',
+      }),
+    args: {
+      Image: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.image.displayName', {
+            defaultMessage: 'Image',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.image.help', {
+            defaultMessage: 'An image to reveal given the function input. Eg, a full glass',
+          }),
+      },
+      EmptyImage: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.emptyImage.displayName', {
+            defaultMessage: 'Background image',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.emptyImage.help', {
+            defaultMessage: 'A background image. Eg, an empty glass',
+          }),
+      },
+      Origin: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.displayName', {
+            defaultMessage: 'Reveal from',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.help', {
+            defaultMessage: 'The direction from which to start the reveal',
+          }),
+        getOptionTop: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.options.top', {
+            defaultMessage: 'Top',
+          }),
+        getOptionLeft: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.options.left', {
+            defaultMessage: 'Left',
+          }),
+        getOptionBottom: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.options.bottom', {
+            defaultMessage: 'Bottom',
+          }),
+        getOptionRight: () =>
+          i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.options.right', {
+            defaultMessage: 'Right',
+          }),
+      },
+    },
+  },
 };

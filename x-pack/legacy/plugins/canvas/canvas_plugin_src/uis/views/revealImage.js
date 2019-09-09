@@ -3,36 +3,37 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../strings';
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Reveal image',
-  help: '',
+  displayName: ViewStrings.RevealImage.getDisplayName(),
+  help: ViewStrings.RevealImage.getHelp(),
   modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
-      displayName: 'Image',
-      help: 'An image to reveal given the function input. Eg, a full glass',
+      displayName: ViewStrings.RevealImage.args.Image.getDisplayName(),
+      help: ViewStrings.RevealImage.args.Image.getHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: 'Background image',
-      help: 'A background image. Eg, an empty glass',
+      displayName: ViewStrings.RevealImage.args.EmptyImage.getDisplayName(),
+      help: ViewStrings.RevealImage.args.EmptyImage.getHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'origin',
-      displayName: 'Reveal from',
-      help: 'The direction from which to start the reveal',
+      displayName: ViewStrings.RevealImage.args.Origin.getDisplayName(),
+      help: ViewStrings.RevealImage.args.Origin.getHelp(),
       argType: 'select',
       options: {
         choices: [
-          { value: 'top', name: 'Top' },
-          { value: 'left', name: 'Left' },
-          { value: 'bottom', name: 'Bottom' },
-          { value: 'right', name: 'Right' },
+          { value: 'top', name: ViewStrings.RevealImage.args.Origin.getOptionTop() },
+          { value: 'left', name: ViewStrings.RevealImage.args.Origin.getOptionLeft() },
+          { value: 'bottom', name: ViewStrings.RevealImage.args.Origin.getOptionBottom() },
+          { value: 'right', name: ViewStrings.RevealImage.args.Origin.getOptionRight() },
         ],
       },
     },
