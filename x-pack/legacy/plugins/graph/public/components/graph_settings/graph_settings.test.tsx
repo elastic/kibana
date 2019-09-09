@@ -159,7 +159,7 @@ describe('graph_settings', () => {
         .at(0)
         .prop('extraAction')!.onClick!({} as any);
 
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes[0]);
+      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
@@ -168,8 +168,8 @@ describe('graph_settings', () => {
         .find(EuiButton)
         .simulate('click');
 
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes[0]);
-      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes[1]);
+      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![0]);
+      expect(props.unblacklistNode).toHaveBeenCalledWith(props.blacklistedNodes![1]);
     });
   });
 
