@@ -34,14 +34,15 @@ describe('iteration', () => {
     }
   };
 
-  describe('with various numbers of results', () => {
+  describe('matching', () => {
     [
-      { name: 'no results', numGroups: 0 },
+      { name: 'zero results', numGroups: 0 },
+      { name: 'one result', numGroups: 1 },
       { name: 'less than chunk', numGroups: CHUNK_SIZE - 1 },
       { name: 'multiple full chunks', numGroups: CHUNK_SIZE * 3 },
       { name: 'multiple full chunks + partial', numGroups: CHUNK_SIZE * 3 + 3 },
     ].forEach(({ name, numGroups }) => {
-      describe(`scenario where ${name}`, () => {
+      describe(`scenario given ${name}`, () => {
         beforeEach(async () => {
           await setup(numGroups);
         });
@@ -50,9 +51,8 @@ describe('iteration', () => {
           expect(fetched.length).toEqual(numGroups);
         });
 
-        it('should search after the last item', async () => {
-          const searchAfter = await iterator!.paginationAfterCurrent();
-          expect(searchAfter).toEqual({ monitor_id: fetched[fetched.length - 1].id });
+        it('should have no remaining pages', async () => {
+          expect(await iterator!.paginationAfterCurrent()).toBeNull();
         });
       });
     });

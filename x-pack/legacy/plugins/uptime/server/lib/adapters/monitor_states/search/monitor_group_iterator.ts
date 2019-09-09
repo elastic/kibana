@@ -87,7 +87,9 @@ export class MonitorGroupIterator {
           : CursorDirection.AFTER,
     };
 
-    return current ? new MonitorGroupIterator(reverseContext, [current], 0) : null;
+    return current
+      ? new MonitorGroupIterator(reverseContext, [current], 0, this.chunkFetcher)
+      : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
@@ -97,42 +99,39 @@ export class MonitorGroupIterator {
   }
 
   async next(): Promise<MonitorGroups | null> {
-    while (true) {
-      const found = this.buffer[this.bufferPos + 1];
-      if (found) {
-        this.bufferPos++;
-        return found;
-      }
+    await this.bufferNext(CHUNK_SIZE, false);
 
-      // Keep searching if we haven't matched
-      const fetchedMore = await this.queryNextAndBuffer();
-      if (!fetchedMore) {
-        return null;
-      }
+    const found = this.buffer[this.bufferPos + 1];
+    if (found) {
+      this.bufferPos++;
+      return found;
     }
+    return null;
   }
 
   async peek(): Promise<MonitorGroups | null> {
-    let bufAheadPos = this.bufferPos + 1;
+    await this.bufferNext(CHUNK_SIZE, false);
+    return this.buffer[this.bufferPos + 1];
+  }
+
+  async bufferNext(size: number = CHUNK_SIZE, trim: boolean = true): Promise<void> {
+    // The next element is already buffered.
+    if (this.buffer[this.bufferPos + 1]) {
+      return;
+    }
+
     while (true) {
-      const bufAhead = this.buffer[bufAheadPos];
-
-      if (!bufAhead) {
-        const fetchedMore = await this.queryNextAndBuffer(500, false);
-        if (!fetchedMore) {
-          return null;
-        }
+      const result = await this.attemptBufferMore(CHUNK_SIZE, trim);
+      if (result.gotHit || !result.hasMore) {
+        return;
       }
-
-      if (bufAhead) {
-        return bufAhead;
-      }
-
-      bufAheadPos++;
     }
   }
 
-  async queryNextAndBuffer(size: number = CHUNK_SIZE, trim: boolean = true): Promise<boolean> {
+  async attemptBufferMore(
+    size: number = CHUNK_SIZE,
+    trim: boolean = true
+  ): Promise<{ hasMore: boolean; gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.current();
     if (current && trim) {
@@ -141,13 +140,16 @@ export class MonitorGroupIterator {
     }
 
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
-    if (results.monitorGroups.length === 0) {
-      return false;
-    }
+    // If we've hit the end of the stream searchAfter will be empty
 
     results.monitorGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
-    this.searchAfter = results.searchAfter;
+    if (results.searchAfter) {
+      this.searchAfter = results.searchAfter;
+    }
 
-    return true;
+    return {
+      gotHit: results.monitorGroups.length > 0,
+      hasMore: !!results.searchAfter,
+    };
   }
 }

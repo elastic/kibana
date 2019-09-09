@@ -28,7 +28,7 @@ export const simpleQueryContext = (): QueryContext => {
     dateRangeEnd: '',
     dateRangeStart: '',
     filterClause: undefined,
-    pagination: prevPagination('something'),
+    pagination: nextPagination('something'),
     request: undefined,
     size: 0,
     statusFilter: '',

@@ -7,7 +7,7 @@
 import { get, set } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
-import {INDEX_NAMES} from "../../../../../common/constants";
+import { INDEX_NAMES } from '../../../../../common/constants';
 
 export const findPotentialMatches = async (
   queryContext: QueryContext,
@@ -97,6 +97,7 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
   if (searchAfter) {
     set(body, 'aggs.monitors.composite.after', searchAfter);
   }
+
   return body;
 };
 

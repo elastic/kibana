@@ -7,7 +7,7 @@
 import { refinePotentialMatches } from './refine_potential_matches';
 import { findPotentialMatches } from './find_potential_matches';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { ChunkFetcher, ChunkResult } from './iterator';
+import { ChunkFetcher, ChunkResult } from './monitor_group_iterator';
 
 export const fetchChunk: ChunkFetcher = async (
   queryContext: QueryContext,
@@ -22,7 +22,7 @@ export const fetchChunk: ChunkFetcher = async (
   const matching = await refinePotentialMatches(queryContext, monitorIds, checkGroups);
 
   return {
-    monitorIdGroups: matching,
+    monitorGroups: matching,
     searchAfter: foundSearchAfter,
   };
 };
