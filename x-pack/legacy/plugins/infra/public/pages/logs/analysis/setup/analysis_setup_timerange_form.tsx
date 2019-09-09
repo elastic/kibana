@@ -38,12 +38,11 @@ const endTimeDefaultDescription = i18n.translate(
 );
 
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  hasAttemptedSetup: boolean;
   setStartTime: (startTime: Moment | null) => void;
   setEndTime: (endTime: Moment | null) => void;
   startTime: Moment | null;
   endTime: Moment | null;
-}> = ({ hasAttemptedSetup, setStartTime, setEndTime, startTime, endTime }) => {
+}> = ({ setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || endTime.isSame(now, 'day');
 

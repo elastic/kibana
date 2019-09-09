@@ -33,7 +33,6 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
         <>
           <EuiSpacer size="l" />
           <AnalysisSetupTimerangeForm
-            hasAttemptedSetup={hasAttemptedSetup}
             setStartTime={setStartTime}
             setEndTime={setEndTime}
             startTime={startTime}
