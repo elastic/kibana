@@ -223,8 +223,14 @@ describe('graph_settings', () => {
     });
 
     it('should add url template', async () => {
+      act(() => {
+        instance.find('EuiButton[data-test-subj="graphAddNewTemplate"]').simulate('click');
+      });
+      instance.update();
+
       insert(1, 'URL', 'test-url');
       insert(1, 'Title', 'Title');
+
       act(() => {
         templateForm(1)
           .find('form')

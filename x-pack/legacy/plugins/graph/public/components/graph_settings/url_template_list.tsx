@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiText, EuiAccordion, EuiSpacer, EuiIcon, EuiTextAlign, EuiButton } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiText, EuiSpacer, EuiTextAlign, EuiButton, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { UrlTemplateForm } from './url_template_form';
 import { useListKeys } from './use_list_keys';
+
+const generateId = htmlIdGenerator();
 
 export function UrlTemplateList({
   removeUrlTemplate,
   saveUrlTemplate,
   urlTemplates,
 }: Pick<GraphSettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
+  const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
   const getListKey = useListKeys(urlTemplates);
+
+  function removeUncommittedForm(id: string) {
+    setUncommittedForms(uncommittedForms.filter(formId => formId !== id));
+  }
 
   return (
     <>
@@ -28,55 +35,46 @@ export function UrlTemplateList({
       </EuiText>
       <EuiSpacer />
       {urlTemplates.map((template, index) => (
-        <Fragment key={getListKey(template)}>
-          <EuiAccordion
-            id={getListKey(template)}
-            buttonContent={template.description}
-            // TODO: Change the icon below to the template.icon
-            extraAction={<EuiIcon type="alert" />}
-            className="gphUrlTemplateList__accordion"
-            buttonClassName="gphUrlTemplateList__accordionbutton"
-            onToggle={isOpen => {
-              /* TODO: Use this to set a classname .gphUrlTemplateList__accordion-isOpen for the background color change */
-            }}
-            paddingSize="m"
-          >
-            <UrlTemplateForm
-              initialTemplate={template}
-              onSubmit={newTemplate => {
-                saveUrlTemplate(index, newTemplate);
-              }}
-              onRemove={() => {
-                removeUrlTemplate(template);
-              }}
-            />
-          </EuiAccordion>
-        </Fragment>
-      ))}
-
-      {/* TODO: Only show the following accordion when the user clicked "Add template" and auto-expand */}
-      <EuiAccordion
-        id="accordion-new"
-        buttonContent={i18n.translate('xpack.graph.templates.addLabel', {
-          defaultMessage: 'New template',
-        })}
-        className="gphUrlTemplateList__accordion"
-        buttonClassName="gphUrlTemplateList__accordionbutton"
-        paddingSize="m"
-      >
         <UrlTemplateForm
+          key={getListKey(template)}
+          id={getListKey(template)}
+          initialTemplate={template}
           onSubmit={newTemplate => {
-            saveUrlTemplate(-1, newTemplate);
+            saveUrlTemplate(index, newTemplate);
+          }}
+          onRemove={() => {
+            removeUrlTemplate(template);
           }}
         />
-      </EuiAccordion>
+      ))}
+
+      {uncommittedForms.map(id => (
+        <UrlTemplateForm
+          id={`accordion-new-${id}`}
+          key={id}
+          onSubmit={newTemplate => {
+            saveUrlTemplate(-1, newTemplate);
+            removeUncommittedForm(id);
+          }}
+          onRemove={removeUncommittedForm.bind(undefined, id)}
+        />
+      ))}
 
       <EuiSpacer />
 
-      {/* TODO: Hook this up */}
       <EuiTextAlign textAlign="center">
-        <EuiButton size="s" fill iconType="plusInCircle">
-          Add template
+        <EuiButton
+          size="s"
+          fill
+          iconType="plusInCircle"
+          data-test-subj="graphAddNewTemplate"
+          onClick={() => {
+            setUncommittedForms([...uncommittedForms, generateId()]);
+          }}
+        >
+          {i18n.translate('xpack.graph.templates.newTemplateFormLabel', {
+            defaultMessage: 'Add template',
+          })}
         </EuiButton>
       </EuiTextAlign>
     </>

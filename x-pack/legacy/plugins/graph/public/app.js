@@ -897,7 +897,8 @@ app.controller('graphuiPlugin', function (
         closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
         'data-test-subj': 'graphSettingsFlyout',
         ownFocus: true,
-        className: 'gphSettingsFlyout'
+        className: 'gphSettingsFlyout',
+        maxWidth: 520,
       });
       currentSettingsFlyout.onClose.then(() => { currentSettingsFlyout = null; });
     },

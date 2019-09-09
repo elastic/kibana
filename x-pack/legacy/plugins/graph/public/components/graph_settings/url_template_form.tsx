@@ -14,8 +14,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiLink,
+  EuiAccordion,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { UrlTemplate } from '../../types';
 import { LegacyIcon } from './legacy_icon';
 import { getOutlinkEncoders } from '../../services/outlink_encoders';
@@ -30,12 +32,15 @@ const encoders = getOutlinkEncoders();
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
+  onRemove: () => void;
+  id: string;
 }
 
 export interface UpdateFormProps {
   onSubmit: (template: UrlTemplate) => void;
   initialTemplate: UrlTemplate;
   onRemove: () => void;
+  id: string;
 }
 
 export type UrlTemplateFormProps = NewFormProps | UpdateFormProps;
@@ -69,6 +74,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
     description: false,
     url: false,
   });
+
+  const [open, setOpen] = useState(!isUpdateForm(props));
 
   const [autoformatUrl, setAutoformatUrl] = useState(false);
 
@@ -104,182 +111,202 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
   const formIncomplete = !Boolean(currentTemplate.description && currentTemplate.url);
 
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault();
-        onSubmit(currentTemplate);
-        if (!isUpdateForm(props)) {
-          reset();
-        }
+    <EuiAccordion
+      id={props.id}
+      initialIsOpen={!isUpdateForm(props)}
+      buttonContent={
+        isUpdateForm(props)
+          ? props.initialTemplate.description
+          : i18n.translate('xpack.graph.templates.addLabel', {
+              defaultMessage: 'New template',
+            })
+      }
+      extraAction={
+        isUpdateForm(props) &&
+        props.initialTemplate.icon && <LegacyIcon asListIcon icon={props.initialTemplate.icon} />
+      }
+      className={classNames('gphUrlTemplateList__accordion', {
+        'gphUrlTemplateList__accordion--isOpen': open,
+      })}
+      buttonClassName="gphUrlTemplateList__accordionbutton"
+      onToggle={isOpen => {
+        setOpen(isOpen);
       }}
+      paddingSize="m"
     >
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.graph.settings.drillDowns.urlDescriptionInputLabel', {
-          defaultMessage: 'Title',
-        })}
-        isInvalid={touched.description && !currentTemplate.description}
-        onBlur={() => setTouched({ ...touched, description: true })}
-      >
-        <EuiFieldText
-          fullWidth
-          value={currentTemplate.description}
-          isInvalid={touched.description && !currentTemplate.description}
-          onChange={e => setValue('description', e.target.value)}
-          placeholder={i18n.translate(
-            'xpack.graph.settings.drillDowns.urlDescriptionInputPlaceholder',
-            { defaultMessage: 'Search on Google' }
-          )}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.graph.settings.drillDowns.urlInputLabel', {
-          defaultMessage: 'URL',
-        })}
-        helpText={
-          <>
-            {autoformatUrl && (
-              <p>
-                <strong>
-                  {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
-                    defaultMessage: 'Possible Kibana URL pasted, ',
-                  })}
-                  <EuiLink onClick={convertUrl}>
-                    <strong>
-                      {i18n.translate(
-                        'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                        { defaultMessage: 'convert it' }
-                      )}
-                    </strong>
-                  </EuiLink>
-                </strong>
-              </p>
-            )}
-            {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
-              defaultMessage:
-                'Define template URLs using {gquery} where the selected vertex terms are inserted',
-              values: { gquery: '{{gquery}}' },
-            })}
-          </>
-        }
-        onBlur={() => setTouched({ ...touched, url: true })}
-        isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
-        error={
-          urlPlaceholderMissing
-            ? [
-                i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                  defaultMessage: 'The URL must contain a {placeholder} string',
-                  values: { placeholder: '{{gquery}}' },
-                }),
-              ]
-            : []
-        }
-      >
-        <EuiFieldText
-          fullWidth
-          placeholder="https://www.google.co.uk/#q={{gquery}}"
-          value={currentTemplate.url}
-          onChange={e => {
-            setValue('url', e.target.value);
-            setAutoformatUrl(false);
-          }}
-          onPaste={e => {
-            e.preventDefault();
-            const pastedUrl = e.clipboardData.getData('text/plain');
-            if (isKibanaUrl(pastedUrl)) {
-              setAutoformatUrl(true);
-            }
-            setValue('url', pastedUrl);
-          }}
-          isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        helpText={currentTemplate.encoder.description}
-        label={i18n.translate('xpack.graph.settings.drillDowns.urlEncoderInputLabel', {
-          defaultMessage: 'URL parameter type',
-        })}
-      >
-        <EuiComboBox
-          fullWidth
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          options={encoders.map(encoder => ({ label: encoder.title, value: encoder }))}
-          selectedOptions={[
-            {
-              label: currentTemplate.encoder.title,
-              value: currentTemplate.encoder,
-            },
-          ]}
-          onChange={choices => {
-            // choices[0].value can't be null because `isClearable` is set to false above
-            setValue('encoder', choices[0].value!);
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.graph.settings.drillDowns.toolbarIconPickerLabel', {
-          defaultMessage: 'Toolbar icon',
-        })}
-      >
-        <div>
-          {urlTemplateIconChoices.map(icon => (
-            <LegacyIcon
-              key={icon.class}
-              selected={icon === currentTemplate.icon}
-              icon={icon}
-              onClick={() => {
-                setValue('icon', icon);
-              }}
-            />
-          ))}
-        </div>
-      </EuiFormRow>
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        {isUpdateForm(props) && (
-          <>
-            <EuiFlexItem grow={null}>
-              {
-                <EuiButtonEmpty
-                  color="danger"
-                  onClick={() => {
-                    props.onRemove();
-                  }}
-                  data-test-subj="graphRemoveUrlTemplate"
-                >
-                  {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
-                    defaultMessage: 'Remove',
-                  })}
-                </EuiButtonEmpty>
-              }
-            </EuiFlexItem>
-            <EuiFlexItem></EuiFlexItem>
-          </>
-        )}
-        <EuiFlexItem grow={null}>
-          {
-            <EuiButtonEmpty onClick={reset}>
-              {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
-                defaultMessage: 'Reset',
-              })}
-            </EuiButtonEmpty>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          onSubmit(currentTemplate);
+          if (!isUpdateForm(props)) {
+            reset();
           }
-        </EuiFlexItem>
-        <EuiFlexItem grow={null}>
-          <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
-            {isUpdateForm(props)
-              ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
-                  defaultMessage: 'Update template',
-                })
-              : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
-                  defaultMessage: 'Add template',
+        }}
+      >
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.graph.settings.drillDowns.urlDescriptionInputLabel', {
+            defaultMessage: 'Title',
+          })}
+          isInvalid={touched.description && !currentTemplate.description}
+          onBlur={() => setTouched({ ...touched, description: true })}
+        >
+          <EuiFieldText
+            fullWidth
+            value={currentTemplate.description}
+            isInvalid={touched.description && !currentTemplate.description}
+            onChange={e => setValue('description', e.target.value)}
+            placeholder={i18n.translate(
+              'xpack.graph.settings.drillDowns.urlDescriptionInputPlaceholder',
+              { defaultMessage: 'Search on Google' }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.graph.settings.drillDowns.urlInputLabel', {
+            defaultMessage: 'URL',
+          })}
+          helpText={
+            <>
+              {autoformatUrl && (
+                <p>
+                  <strong>
+                    {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
+                      defaultMessage: 'Possible Kibana URL pasted, ',
+                    })}
+                    <EuiLink onClick={convertUrl}>
+                      <strong>
+                        {i18n.translate(
+                          'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
+                          { defaultMessage: 'convert it' }
+                        )}
+                      </strong>
+                    </EuiLink>
+                  </strong>
+                </p>
+              )}
+              {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
+                defaultMessage:
+                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
+                values: { gquery: '{{gquery}}' },
+              })}
+            </>
+          }
+          onBlur={() => setTouched({ ...touched, url: true })}
+          isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
+          error={
+            urlPlaceholderMissing
+              ? [
+                  i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
+                    defaultMessage: 'The URL must contain a {placeholder} string',
+                    values: { placeholder: '{{gquery}}' },
+                  }),
+                ]
+              : []
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            placeholder="https://www.google.co.uk/#q={{gquery}}"
+            value={currentTemplate.url}
+            onChange={e => {
+              setValue('url', e.target.value);
+              setAutoformatUrl(false);
+            }}
+            onPaste={e => {
+              e.preventDefault();
+              const pastedUrl = e.clipboardData.getData('text/plain');
+              if (isKibanaUrl(pastedUrl)) {
+                setAutoformatUrl(true);
+              }
+              setValue('url', pastedUrl);
+            }}
+            isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          helpText={currentTemplate.encoder.description}
+          label={i18n.translate('xpack.graph.settings.drillDowns.urlEncoderInputLabel', {
+            defaultMessage: 'URL parameter type',
+          })}
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            options={encoders.map(encoder => ({ label: encoder.title, value: encoder }))}
+            selectedOptions={[
+              {
+                label: currentTemplate.encoder.title,
+                value: currentTemplate.encoder,
+              },
+            ]}
+            onChange={choices => {
+              // choices[0].value can't be null because `isClearable` is set to false above
+              setValue('encoder', choices[0].value!);
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.graph.settings.drillDowns.toolbarIconPickerLabel', {
+            defaultMessage: 'Toolbar icon',
+          })}
+        >
+          <div>
+            {urlTemplateIconChoices.map(icon => (
+              <LegacyIcon
+                key={icon.class}
+                selected={icon === currentTemplate.icon}
+                icon={icon}
+                onClick={() => {
+                  setValue('icon', icon);
+                }}
+              />
+            ))}
+          </div>
+        </EuiFormRow>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={null}>
+            {
+              <EuiButtonEmpty
+                color="danger"
+                onClick={() => {
+                  props.onRemove();
+                }}
+                data-test-subj="graphRemoveUrlTemplate"
+              >
+                {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
+                  defaultMessage: 'Remove',
                 })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </form>
+              </EuiButtonEmpty>
+            }
+          </EuiFlexItem>
+          <EuiFlexItem></EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            {
+              <EuiButtonEmpty onClick={reset}>
+                {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
+                  defaultMessage: 'Reset',
+                })}
+              </EuiButtonEmpty>
+            }
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
+              {isUpdateForm(props)
+                ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
+                    defaultMessage: 'Update template',
+                  })
+                : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
+                    defaultMessage: 'Add template',
+                  })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </form>
+    </EuiAccordion>
   );
 }
