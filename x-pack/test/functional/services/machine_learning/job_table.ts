@@ -12,7 +12,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
 
   return new (class MlJobTable {
     public async parseJobTable() {
-      const table = await testSubjects.find('mlJobListTable');
+      const table = await testSubjects.find('~mlJobListTable');
       const $ = await table.parseDomContent();
       const rows = [];
 
