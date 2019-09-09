@@ -19,14 +19,16 @@
 
 function selectorToTerms(selector) {
   return selector
-    .replace(/\s*>\s*/g, '>') // remove all whitespace around joins
+    .replace(/\s*~\s*/g, '~') // css locator with '~' operator cannot contain spaces
+    .replace(/\s*>\s*/g, '>') // remove all whitespace around joins >
+    .replace(/\s*&\s*/g, '&') // remove all whitespace around joins &
     .split(/>+/);
 }
 
 function termToCssSelector(term) {
   if (term) {
     return term.startsWith('~')
-      ? '[data-test-subj~="' + term.substring(1) + '"]'
+      ? '[data-test-subj~="' + term.substring(1).replace(/\s/g, '') + '"]'
       : '[data-test-subj="' + term + '"]';
   } else {
     return '';
@@ -42,7 +44,6 @@ module.exports = function testSubjSelector(selector) {
     // split each term by joins/& and map to css selectors
     cssSelectors.push(
       term
-        .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
         .split('&')
         .map(termToCssSelector)
         .join('')
