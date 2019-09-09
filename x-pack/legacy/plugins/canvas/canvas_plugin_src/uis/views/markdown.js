@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../strings';
 
 export const markdown = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  help: 'Generate markup using markdown',
+  displayName: ViewStrings.Markdown.getDisplayName(),
+  help: ViewStrings.Markdown.getHelp(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: 'Markdown content',
-      help: 'Markdown formatted text',
+      displayName: ViewStrings.Markdown.args.content.getDisplayName(),
+      help: ViewStrings.Markdown.args.content.getHelp(),
       argType: 'textarea',
       default: '""',
       options: {

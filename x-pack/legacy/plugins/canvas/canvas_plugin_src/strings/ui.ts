@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { URL } from '../../i18n';
+import { URL, MARKDOWN } from '../../i18n';
 
 export const ArgumentStrings = {
   FilterGroup: {
@@ -142,6 +142,40 @@ export const ViewStrings = {
               defaultMessage: 'Stretch',
             }),
         },
+      },
+    },
+  },
+  Markdown: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.markdown.displayName', {
+        defaultMessage: '{markdown}',
+        values: {
+          markdown: MARKDOWN,
+        },
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.markdown.help', {
+        defaultMessage: 'Generate markup using {markdown}',
+        values: {
+          markdown: MARKDOWN,
+        },
+      }),
+    args: {
+      content: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.markdown.args.content.displayName', {
+            defaultMessage: '{markdown} content',
+            values: {
+              markdown: MARKDOWN,
+            },
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.markdown.args.content.help', {
+            defaultMessage: '{markdown} formatted text',
+            values: {
+              markdown: MARKDOWN,
+            },
+          }),
       },
     },
   },
