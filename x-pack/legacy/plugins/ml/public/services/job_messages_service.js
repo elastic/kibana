@@ -32,7 +32,8 @@ const anomalyDetectorTypeFilter = {
           }
         }
       }
-    ]
+    ],
+    minimum_should_match: 1
   }
 };
 
