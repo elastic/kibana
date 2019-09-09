@@ -18,50 +18,45 @@ import * as Rx from 'rxjs';
 import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { puppeteerLaunch } from '../puppeteer';
+import { BrowserConfig } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
-import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
+import { puppeteerLaunch } from '../puppeteer';
 import { getChromeLogLocation } from '../paths';
+import { args } from './args';
 
 type binaryPath = string;
 type queueTimeout = number;
-interface IBrowserConfig {
-  [key: string]: any;
-}
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
   private logger: Logger;
-  private browserConfig: IBrowserConfig;
+  private browserConfig: BrowserConfig;
   private queueTimeout: queueTimeout;
 
   constructor(
     binaryPath: binaryPath,
     logger: Logger,
-    browserConfig: IBrowserConfig,
+    browserConfig: BrowserConfig,
     queueTimeout: queueTimeout
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
-    this.logger = logger;
+    this.logger = logger; // TODO: just pass logger into each method from outside, like test() has it
   }
 
   type = 'chromium';
 
-  test(
-    { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: Logger
-  ) {
+  test({ viewport }: { viewport: BrowserConfig['viewport'] }, logger: Logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
       viewport,
       verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
-      proxyConfig: this.browserConfig.proxy,
+      proxy: this.browserConfig.proxy,
     });
 
     return puppeteerLaunch({
@@ -69,9 +64,6 @@ export class HeadlessChromiumDriverFactory {
       executablePath: this.binaryPath,
       ignoreHTTPSErrors: true,
       args: chromiumArgs,
-      env: {
-        TZ: browserTimezone,
-      },
     } as LaunchOptions).catch((error: Error) => {
       logger.error(
         `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
@@ -86,7 +78,7 @@ export class HeadlessChromiumDriverFactory {
     viewport,
     browserTimezone,
   }: {
-    viewport: IArgOptions['viewport'];
+    viewport: BrowserConfig['viewport'];
     browserTimezone: string;
   }): Rx.Observable<{
     driver$: Rx.Observable<HeadlessChromiumDriver>;
@@ -101,7 +93,7 @@ export class HeadlessChromiumDriverFactory {
         viewport,
         verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
-        proxyConfig: this.browserConfig.proxy,
+        proxy: this.browserConfig.proxy,
       });
 
       let browser: Browser;

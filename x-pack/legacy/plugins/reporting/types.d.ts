@@ -38,6 +38,19 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
+export interface BrowserConfig {
+  inspect: boolean;
+  userDataDir: string;
+  viewport: { width: number; height: number };
+  disableSandbox: boolean;
+  proxy: {
+    enabled: boolean;
+    server: string;
+    bypass?: string[];
+  };
+  verboseLogging?: boolean;
+}
+
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
