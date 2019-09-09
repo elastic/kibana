@@ -34,7 +34,6 @@ describe('chart_switch', () => {
             score: 1,
             title: '',
             state: `suggestion ${id}`,
-            datasourceSuggestionId: options.tables[0].datasourceSuggestionId,
             previewIcon: 'empty',
           },
         ];
@@ -91,7 +90,6 @@ describe('chart_switch', () => {
         state: {},
         table: {
           columns: [],
-          datasourceSuggestionId: 0,
           isMultiRow: true,
           layerId: 'a',
           changeType: 'unchanged',
@@ -217,7 +215,6 @@ describe('chart_switch', () => {
               },
             },
           ],
-          datasourceSuggestionId: 0,
           layerId: 'first',
           isMultiRow: true,
           changeType: 'unchanged',
@@ -446,7 +443,6 @@ describe('chart_switch', () => {
               },
             },
           ],
-          datasourceSuggestionId: 0,
           layerId: 'a',
           isMultiRow: true,
           changeType: 'unchanged',

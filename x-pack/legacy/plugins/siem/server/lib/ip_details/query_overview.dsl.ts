@@ -25,17 +25,17 @@ const getAggs = (type: string, ip: string) => {
             field: '@timestamp',
           },
         },
-        autonomous_system: {
+        as: {
           filter: {
             exists: {
-              field: 'autonomous_system',
+              field: `${type}.as`,
             },
           },
           aggs: {
             results: {
               top_hits: {
                 size: 1,
-                _source: ['autonomous_system'],
+                _source: [`${type}.as`],
                 sort: [
                   {
                     '@timestamp': 'desc',

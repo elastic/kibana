@@ -50,6 +50,7 @@ class IndexPatternDatasourcePlugin {
       toastNotifications: toast,
       data,
       storage: new Storage(localStorage),
+      savedObjectsClient: chrome.getSavedObjectsClient(),
     });
   }
 

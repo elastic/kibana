@@ -9,6 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
+import { FieldFormat } from 'ui/registry/field_formats';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -26,6 +27,7 @@ function sampleArgs() {
     accessor: 'a',
     layerId: 'l1',
     title: 'My fanci metric chart',
+    mode: 'full',
   };
 
   return { data, args };
@@ -48,8 +50,58 @@ describe('metric_expression', () => {
     test('it renders the title and value', () => {
       const { data, args } = sampleArgs();
 
-      expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x} />))
+      expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
         .toMatchInlineSnapshot(`
+                <div
+                  style={
+                    Object {
+                      "alignItems": "center",
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "justifyContent": "center",
+                      "maxHeight": "100%",
+                      "maxWidth": "100%",
+                      "textAlign": "center",
+                    }
+                  }
+                >
+                  <AutoScale>
+                    <div
+                      style={
+                        Object {
+                          "fontSize": "60pt",
+                          "fontWeight": 600,
+                        }
+                      }
+                    >
+                      10110
+                    </div>
+                    <div
+                      style={
+                        Object {
+                          "fontSize": "24pt",
+                        }
+                      }
+                    >
+                      My fanci metric chart
+                    </div>
+                  </AutoScale>
+                </div>
+            `);
+    });
+
+    test('it does not render title in reduced mode', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={{ ...args, mode: 'reduced' }}
+            formatFactory={x => x as FieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
         <div
           style={
             Object {
@@ -63,7 +115,9 @@ describe('metric_expression', () => {
             }
           }
         >
-          <AutoScale>
+          <AutoScale
+            minScale={0}
+          >
             <div
               style={
                 Object {
@@ -73,15 +127,6 @@ describe('metric_expression', () => {
               }
             >
               10110
-            </div>
-            <div
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
-            >
-              My fanci metric chart
             </div>
           </AutoScale>
         </div>

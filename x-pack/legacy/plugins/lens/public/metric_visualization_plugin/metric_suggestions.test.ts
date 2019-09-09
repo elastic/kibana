@@ -5,7 +5,7 @@
  */
 
 import { getSuggestions } from './metric_suggestions';
-import { TableSuggestionColumn } from '..';
+import { TableSuggestionColumn, TableSuggestion } from '..';
 
 describe('metric_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {
@@ -49,71 +49,63 @@ describe('metric_suggestions', () => {
     };
 
     expect(
-      getSuggestions({
-        tables: [
-          {
-            columns: [dateCol('a')],
-            datasourceSuggestionId: 0,
-            isMultiRow: true,
-            layerId: 'l1',
-            changeType: 'unchanged',
-          },
-          {
-            columns: [strCol('foo'), strCol('bar')],
-            datasourceSuggestionId: 1,
-            isMultiRow: true,
-            layerId: 'l1',
-            changeType: 'unchanged',
-          },
-          {
-            layerId: 'l1',
-            datasourceSuggestionId: 2,
-            isMultiRow: true,
-            columns: [numCol('bar')],
-            changeType: 'unchanged',
-          },
-          {
-            columns: [unknownCol(), numCol('bar')],
-            datasourceSuggestionId: 3,
-            isMultiRow: true,
-            layerId: 'l1',
-            changeType: 'unchanged',
-          },
-          {
-            columns: [numCol('bar'), numCol('baz')],
-            datasourceSuggestionId: 4,
-            isMultiRow: false,
-            layerId: 'l1',
-            changeType: 'unchanged',
-          },
-        ],
-      })
-    ).toEqual([]);
-  });
-
-  test('suggests a basic metric chart', () => {
-    const [suggestion, ...rest] = getSuggestions({
-      tables: [
+      ([
         {
-          columns: [numCol('bytes')],
-          datasourceSuggestionId: 0,
+          columns: [dateCol('a')],
+          isMultiRow: true,
+          layerId: 'l1',
+          changeType: 'unchanged',
+        },
+        {
+          columns: [strCol('foo'), strCol('bar')],
+          isMultiRow: true,
+          layerId: 'l1',
+          changeType: 'unchanged',
+        },
+        {
+          layerId: 'l1',
+          isMultiRow: true,
+          columns: [numCol('bar')],
+          changeType: 'unchanged',
+        },
+        {
+          columns: [unknownCol(), numCol('bar')],
+          isMultiRow: true,
+          layerId: 'l1',
+          changeType: 'unchanged',
+        },
+        {
+          columns: [numCol('bar'), numCol('baz')],
           isMultiRow: false,
           layerId: 'l1',
           changeType: 'unchanged',
         },
-      ],
+      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+    );
+  });
+
+  test('suggests a basic metric chart', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        columns: [numCol('bytes')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
     });
 
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "datasourceSuggestionId": 0,
         "previewExpression": Object {
           "chain": Array [
             Object {
               "arguments": Object {
                 "accessor": Array [
                   "bytes",
+                ],
+                "mode": Array [
+                  "reduced",
                 ],
                 "title": Array [
                   "",

@@ -19,7 +19,7 @@
 
 jest.useFakeTimers();
 
-import { EventEmitter } from 'events';
+import { Subject } from 'rxjs';
 
 jest.mock('ui/notify', () => ({
   toastNotifications: jest.fn(),
@@ -34,7 +34,16 @@ jest.mock('./pipeline_helpers/utilities', () => ({
   getTableAggs: jest.fn(),
 }));
 
-export const timefilter = new EventEmitter();
+const autoRefreshFetchSub = new Subject();
+
+export const timefilter = {
+  _triggerAutoRefresh: () => {
+    autoRefreshFetchSub.next();
+  },
+  getAutoRefreshFetch$: () => {
+    return autoRefreshFetchSub.asObservable();
+  },
+};
 jest.doMock('../../timefilter', () => ({ timefilter }));
 
 jest.mock('../../inspector', () => ({
@@ -61,7 +70,4 @@ const MockDataLoader = class {
 
 jest.mock('./pipeline_data_loader', () => ({
   PipelineDataLoader: MockDataLoader,
-}));
-jest.mock('./visualize_data_loader', () => ({
-  VisualizeDataLoader: MockDataLoader,
 }));

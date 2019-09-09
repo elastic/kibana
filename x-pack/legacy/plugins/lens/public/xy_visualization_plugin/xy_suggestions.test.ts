@@ -5,7 +5,12 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableSuggestionColumn, VisualizationSuggestion, DataType } from '../types';
+import {
+  TableSuggestionColumn,
+  VisualizationSuggestion,
+  DataType,
+  TableSuggestion,
+} from '../types';
 import { State, XYState } from './types';
 import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
@@ -67,53 +72,44 @@ describe('xy_suggestions', () => {
     };
 
     expect(
-      getSuggestions({
-        tables: [
-          {
-            datasourceSuggestionId: 0,
-            isMultiRow: true,
-            columns: [dateCol('a')],
-            layerId: 'first',
-            changeType: 'unchanged',
-          },
-          {
-            datasourceSuggestionId: 1,
-            isMultiRow: true,
-            columns: [strCol('foo'), strCol('bar')],
-            layerId: 'first',
-            changeType: 'unchanged',
-          },
-          {
-            datasourceSuggestionId: 2,
-            isMultiRow: false,
-            columns: [strCol('foo'), numCol('bar')],
-            layerId: 'first',
-            changeType: 'unchanged',
-          },
-          {
-            datasourceSuggestionId: 3,
-            isMultiRow: true,
-            columns: [unknownCol(), numCol('bar')],
-            layerId: 'first',
-            changeType: 'unchanged',
-          },
-        ],
-      })
-    ).toEqual([]);
+      ([
+        {
+          isMultiRow: true,
+          columns: [dateCol('a')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        {
+          isMultiRow: true,
+          columns: [strCol('foo'), strCol('bar')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        {
+          isMultiRow: false,
+          columns: [strCol('foo'), numCol('bar')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        {
+          isMultiRow: true,
+          columns: [unknownCol(), numCol('bar')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+    );
   });
 
   test('suggests a basic x y chart with date on x', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: [numCol('bytes'), dateCol('date')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     expect(rest).toHaveLength(0);
@@ -133,21 +129,18 @@ describe('xy_suggestions', () => {
 
   test('does not suggest multiple splits', () => {
     const suggestions = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [
-            numCol('price'),
-            numCol('quantity'),
-            dateCol('date'),
-            strCol('product'),
-            strCol('city'),
-          ],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('price'),
+          numCol('quantity'),
+          dateCol('date'),
+          strCol('product'),
+          strCol('city'),
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     expect(suggestions).toHaveLength(0);
@@ -155,15 +148,12 @@ describe('xy_suggestions', () => {
 
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     expect(rest).toHaveLength(0);
@@ -184,16 +174,13 @@ describe('xy_suggestions', () => {
 
   test('uses datasource provided title if available', () => {
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-          layerId: 'first',
-          changeType: 'unchanged',
-          label: 'Datasource title',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+        label: 'Datasource title',
+      },
     });
 
     expect(rest).toHaveLength(0);
@@ -202,15 +189,12 @@ describe('xy_suggestions', () => {
 
   test('hides reduced suggestions if there is a current state', () => {
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'reduced',
+      },
       state: {
         isHorizontal: false,
         legend: { isVisible: true, position: 'bottom' },
@@ -233,15 +217,12 @@ describe('xy_suggestions', () => {
 
   test('does not hide reduced suggestions if xy visualization is not active', () => {
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'reduced',
+      },
     });
 
     expect(rest).toHaveLength(0);
@@ -264,15 +245,12 @@ describe('xy_suggestions', () => {
       ],
     };
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
       state: currentState,
     });
 
@@ -303,15 +281,12 @@ describe('xy_suggestions', () => {
       ],
     };
     const [suggestion, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('price'), numCol('quantity'), strCol('product')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
       state: currentState,
     });
 
@@ -323,66 +298,15 @@ describe('xy_suggestions', () => {
     expect(suggestion.title).toEqual('Flip');
   });
 
-  test('supports multiple suggestions', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('bbb').mockReturnValueOnce('ccc');
-    const [s1, s2, ...rest] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: [numCol('price'), dateCol('date')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('count'), strCol('country')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
-    });
-
-    expect(rest).toHaveLength(0);
-    expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "seriesType": "area",
-            "splitAccessor": "bbb",
-            "x": "date",
-            "y": Array [
-              "price",
-            ],
-          },
-        ],
-        Array [
-          Object {
-            "seriesType": "bar",
-            "splitAccessor": "ccc",
-            "x": "country",
-            "y": Array [
-              "count",
-            ],
-          },
-        ],
-      ]
-    `);
-  });
-
   test('handles two numeric values', () => {
     (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [numCol('quantity'), numCol('price')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('quantity'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -402,25 +326,22 @@ describe('xy_suggestions', () => {
   test('handles unbucketed suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('eee');
     const [suggestion] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 1,
-          isMultiRow: true,
-          columns: [
-            numCol('num votes'),
-            {
-              columnId: 'mybool',
-              operation: {
-                dataType: 'boolean',
-                isBucketed: false,
-                label: 'Yes / No',
-              },
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('num votes'),
+          {
+            columnId: 'mybool',
+            operation: {
+              dataType: 'boolean',
+              isBucketed: false,
+              label: 'Yes / No',
             },
-          ],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+          },
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -439,15 +360,12 @@ describe('xy_suggestions', () => {
 
   test('adds a preview expression with disabled axes and legend', () => {
     const [suggestion] = getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: [numCol('bytes'), dateCol('date')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ],
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
     });
 
     const expression = suggestion.previewExpression! as Ast;

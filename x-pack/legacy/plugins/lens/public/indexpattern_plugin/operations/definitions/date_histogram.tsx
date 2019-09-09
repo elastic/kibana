@@ -228,14 +228,16 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   label: interval,
                   value: index,
                 }))}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
+                ) =>
                   setState(
                     updateColumnParam({
                       state,
                       layerId,
                       currentColumn,
                       paramName: 'interval',
-                      value: numericToInterval(Number(e.target.value)),
+                      value: numericToInterval(Number((e.target as HTMLInputElement).value)),
                     })
                   )
                 }

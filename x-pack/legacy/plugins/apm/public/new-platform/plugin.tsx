@@ -8,9 +8,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
+import { KibanaCoreContextProvider } from '../../../observability/public';
 import { history } from '../utils/history';
-import { CoreProvider } from '../context/CoreContext';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { px, unit, units } from '../style/variables';
@@ -54,10 +54,10 @@ const App = () => {
 };
 
 export class Plugin {
-  public start(core: InternalCoreStart) {
+  public start(core: LegacyCoreStart) {
     const { i18n } = core;
     ReactDOM.render(
-      <CoreProvider core={core}>
+      <KibanaCoreContextProvider core={core}>
         <i18n.Context>
           <Router history={history}>
             <LocationProvider>
@@ -65,7 +65,7 @@ export class Plugin {
             </LocationProvider>
           </Router>
         </i18n.Context>
-      </CoreProvider>,
+      </KibanaCoreContextProvider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
   }

@@ -12,20 +12,25 @@ import { State } from './types';
  *
  * @param opts
  */
-export function getSuggestions(
-  opts: SuggestionRequest<State>
-): Array<VisualizationSuggestion<State>> {
-  return (
-    opts.tables
-      .filter(
-        ({ isMultiRow, columns }) =>
-          // We only render metric charts for single-row queries. We require a single, numeric column.
-          !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
-      )
-      // don't suggest current table if visualization is active
-      .filter(({ changeType }) => !opts.state || changeType !== 'unchanged')
-      .map(table => getSuggestion(table))
-  );
+export function getSuggestions({
+  table,
+  state,
+}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+  // We only render metric charts for single-row queries. We require a single, numeric column.
+  if (
+    table.isMultiRow ||
+    table.columns.length > 1 ||
+    table.columns[0].operation.dataType !== 'number'
+  ) {
+    return [];
+  }
+
+  // don't suggest current table if visualization is active
+  if (state && table.changeType === 'unchanged') {
+    return [];
+  }
+
+  return [getSuggestion(table)];
 }
 
 function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
@@ -35,7 +40,6 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   return {
     title,
     score: 0.5,
-    datasourceSuggestionId: table.datasourceSuggestionId,
     previewIcon: 'visMetric',
     previewExpression: {
       type: 'expression',
@@ -46,6 +50,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
           arguments: {
             title: [''],
             accessor: [col.columnId],
+            mode: ['reduced'],
           },
         },
       ],

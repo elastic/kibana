@@ -24,6 +24,7 @@ import angular from 'angular';
 import { uniq } from 'lodash';
 
 import chrome from 'ui/chrome';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
@@ -32,8 +33,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
@@ -431,7 +431,7 @@ export class DashboardAppController {
     };
 
     $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = savedQuery;
+      $scope.savedQuery = { ...savedQuery };
     };
 
     $scope.onClearSavedQuery = () => {
@@ -446,7 +446,6 @@ export class DashboardAppController {
         },
         []
       );
-      courier.fetch();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -464,16 +463,13 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      courier.fetch();
     };
 
-    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
       if (!newSavedQuery) return;
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
-      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-        updateStateFromSavedQuery(newSavedQuery);
-      }
+      updateStateFromSavedQuery(newSavedQuery);
     });
 
     $scope.$watch(
@@ -485,13 +481,14 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-
-        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
-          $scope.$evalAsync(() => {
-            $scope.savedQuery = savedQuery;
-            updateStateFromSavedQuery(savedQuery);
+        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
           });
-        });
+        }
       }
     );
 
@@ -515,23 +512,25 @@ export class DashboardAppController {
       }
     );
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      // The only reason this is here is so that search embeddables work on a dashboard with
-      // a refresh interval turned on. This kicks off the search poller. It should be
-      // refactored so no embeddables need to listen to the timefilter directly but instead
-      // the container tells it when to reload.
-      courier.fetch();
-    });
+    $scope.timefilterSubscriptions$ = new Subscription();
 
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
     function updateViewMode(newMode: ViewMode) {
       $scope.topNavMenu = getTopNavConfig(
@@ -603,7 +602,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<{ id?: string } | { error: Error }> {
+    function save(saveOptions: SaveOptions): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -694,7 +693,7 @@ export class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
+        return save(saveOptions).then((response: SaveResult) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);
@@ -799,6 +798,8 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      $scope.timefilterSubscriptions$.unsubscribe();
+
       dashboardStateManager.destroy();
       if (inputSubscription) {
         inputSubscription.unsubscribe();

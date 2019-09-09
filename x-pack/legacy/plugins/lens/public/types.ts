@@ -33,10 +33,13 @@ export interface EditorFrameInstance {
 }
 
 export interface EditorFrameSetup {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
+}
+
+export interface EditorFrameStart {
+  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -53,11 +56,6 @@ export interface TableSuggestionColumn {
  * is possible, the visualization returns a `VisualizationSuggestion` object
  */
 export interface TableSuggestion {
-  /**
-   * The id of this table. This id has to be included in the `VisualizationSuggestion` to map
-   * the visualization to the right table as there can be multiple tables in a single `SuggestionRequest`.
-   */
-  datasourceSuggestionId: number;
   /**
    * Flag indicating whether the table will include more than one column.
    * This is not the case for example for a single metric aggregation
@@ -222,10 +220,23 @@ export interface VisualizationProps<T = unknown> {
   setState: (newState: T) => void;
 }
 
+/**
+ * Object passed to `getSuggestions` of a visualization.
+ * It contains a possible table the current datasource could
+ * provide and the state of the visualization if it is currently active.
+ *
+ * If the current datasource suggests multiple tables, `getSuggestions`
+ * is called multiple times with separate `SuggestionRequest` objects.
+ */
 export interface SuggestionRequest<T = unknown> {
-  // It is up to the Visualization to rank these tables
-  tables: TableSuggestion[];
-  state?: T; // State is only passed if the visualization is active
+  /**
+   * A table configuration the datasource could provide.
+   */
+  table: TableSuggestion;
+  /**
+   * State is only passed if the visualization is active.
+   */
+  state?: T;
 }
 
 /**
@@ -256,11 +267,6 @@ export interface VisualizationSuggestion<T = unknown> {
    * The new state of the visualization if this suggestion is applied.
    */
   state: T;
-  /**
-   * The id of the `TableSuggestion` object this visualization suggestion is based on.
-   * This is used to switch the datasource configuration to the right table.
-   */
-  datasourceSuggestionId: number;
   /**
    * The expression of the preview of the chart rendered if the suggestion is advertised to the user.
    * If there is no expression provided, the preview icon is used.
@@ -316,5 +322,5 @@ export interface Visualization<T = unknown, P = unknown> {
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data
-  getSuggestions: (options: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
+  getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 }

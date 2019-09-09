@@ -8,8 +8,8 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { KibanaLink } from './KibanaLink';
-import * as hooks from '../../../hooks/useCore';
-import { InternalCoreStart } from 'src/core/public';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'src/core/public';
 
 describe('KibanaLink', () => {
   beforeEach(() => {
@@ -19,9 +19,9 @@ describe('KibanaLink', () => {
           prepend: (path: string) => `/basepath${path}`
         }
       }
-    } as unknown) as InternalCoreStart;
+    } as unknown) as LegacyCoreStart;
 
-    jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });
 
   afterEach(() => {

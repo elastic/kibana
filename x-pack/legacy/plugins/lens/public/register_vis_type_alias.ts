@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
+import { setup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { BASE_APP_URL, getEditPath } from '../common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
-visualizations.types.visTypeAliasRegistry.add({
+setup.types.visTypeAliasRegistry.add({
   aliasUrl: BASE_APP_URL,
   name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {

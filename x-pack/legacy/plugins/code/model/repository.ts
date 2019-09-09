@@ -168,3 +168,14 @@ export interface IndexWorkerProgress extends WorkerProgress {
   // Index progress for commit indexing.
   commitIndexProgress?: IndexProgress;
 }
+
+export enum RepoState {
+  CLONING,
+  DELETING,
+  INDEXING,
+  READY,
+  CLONE_ERROR,
+  DELETE_ERROR,
+  INDEX_ERROR,
+  UNKNOWN,
+}
