@@ -49,7 +49,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
         <>
           <FormattedMessage
             id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
-            defaultMessage="Something went wrong creating the necessary Machine Learning jobs.
+            defaultMessage="Something went wrong creating the necessary ML jobs.
             Please ensure your configured logs indices ({indexPattern}) exist."
             values={{
               indexPattern,
@@ -64,12 +64,19 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
           </EuiButton>
         </>
       ) : hasCompletedSetup ? (
-        <EuiButton fill onClick={viewResults}>
+        <>
           <FormattedMessage
-            id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
-            defaultMessage="View results"
+            id="xpack.infra.analysisSetup.steps.setupProcess.successText"
+            defaultMessage="The ML jobs have been set up successfully"
           />
-        </EuiButton>
+          <EuiSpacer />
+          <EuiButton fill onClick={viewResults}>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
+              defaultMessage="View results"
+            />
+          </EuiButton>
+        </>
       ) : (
         <CreateMLJobsButton isDisabled={isSettingUp} onClick={setup} />
       )}
