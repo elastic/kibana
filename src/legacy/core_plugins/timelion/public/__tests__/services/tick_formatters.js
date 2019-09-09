@@ -19,19 +19,21 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import { tickFormatters } from '../../services/tick_formatters';
+
 describe('Tick Formatters', function () {
 
-  let tickFormatters;
+  let formatters;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    tickFormatters = Private(require('plugins/timelion/services/tick_formatters'));
+  beforeEach(ngMock.inject(function () {
+    formatters = tickFormatters();
   }));
 
   describe('Bits mode', function () {
     let bitFormatter;
     beforeEach(function () {
-      bitFormatter = tickFormatters.bits;
+      bitFormatter = formatters.bits;
     });
 
     it('is a function', function () {
@@ -56,7 +58,7 @@ describe('Tick Formatters', function () {
   describe('Bits/s mode', function () {
     let bitsFormatter;
     beforeEach(function () {
-      bitsFormatter = tickFormatters['bits/s'];
+      bitsFormatter = formatters['bits/s'];
     });
 
     it('is a function', function () {
@@ -81,7 +83,7 @@ describe('Tick Formatters', function () {
   describe('Bytes mode', function () {
     let byteFormatter;
     beforeEach(function () {
-      byteFormatter = tickFormatters.bytes;
+      byteFormatter = formatters.bytes;
     });
 
     it('is a function', function () {
@@ -106,7 +108,7 @@ describe('Tick Formatters', function () {
   describe('Bytes/s mode', function () {
     let bytesFormatter;
     beforeEach(function () {
-      bytesFormatter = tickFormatters['bytes/s'];
+      bytesFormatter = formatters['bytes/s'];
     });
 
     it('is a function', function () {
@@ -131,7 +133,7 @@ describe('Tick Formatters', function () {
   describe('Currency mode', function () {
     let currencyFormatter;
     beforeEach(function () {
-      currencyFormatter = tickFormatters.currency;
+      currencyFormatter = formatters.currency;
     });
 
     it('is a function', function () {
@@ -163,7 +165,7 @@ describe('Tick Formatters', function () {
   describe('Percent mode', function () {
     let percentFormatter;
     beforeEach(function () {
-      percentFormatter = tickFormatters.percent;
+      percentFormatter = formatters.percent;
     });
 
     it('is a function', function () {
@@ -197,7 +199,7 @@ describe('Tick Formatters', function () {
   describe('Custom mode', function () {
     let customFormatter;
     beforeEach(function () {
-      customFormatter = tickFormatters.custom;
+      customFormatter = formatters.custom;
     });
 
     it('is a function', function () {

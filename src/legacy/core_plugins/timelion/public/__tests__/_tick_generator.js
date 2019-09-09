@@ -19,6 +19,8 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import { generateTicksProvider } from '../panels/timechart/tick_generator';
+
 describe('Tick Generator', function () {
 
   let generateTicks;
@@ -40,8 +42,8 @@ describe('Tick Generator', function () {
     }
   ];
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
+  beforeEach(ngMock.inject(function () {
+    generateTicks = generateTicksProvider();
   }));
 
   it('returns a function', function () {
