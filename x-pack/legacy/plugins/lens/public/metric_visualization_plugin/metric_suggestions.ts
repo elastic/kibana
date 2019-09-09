@@ -41,20 +41,6 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
     title,
     score: 0.5,
     previewIcon: 'visMetric',
-    previewExpression: {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'lens_metric_chart',
-          arguments: {
-            title: [''],
-            accessor: [col.columnId],
-            mode: ['reduced'],
-          },
-        },
-      ],
-    },
     state: {
       layerId: table.layerId,
       accessor: col.columnId,

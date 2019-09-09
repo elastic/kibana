@@ -14,7 +14,7 @@ import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes } from './types';
-import { toExpression } from './to_expression';
+import { toExpression, toPreviewExpression } from './to_expression';
 import { generateId } from '../id_generator';
 
 const defaultIcon = 'visBarVertical';
@@ -104,4 +104,5 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     ),
 
   toExpression,
+  toPreviewExpression,
 };

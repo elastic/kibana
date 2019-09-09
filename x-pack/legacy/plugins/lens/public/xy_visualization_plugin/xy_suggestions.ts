@@ -13,12 +13,10 @@ import {
   VisualizationSuggestion,
   TableSuggestionColumn,
   TableSuggestion,
-  OperationMetadata,
   TableChangeType,
 } from '../types';
 import { State, SeriesType, XYState } from './types';
 import { generateId } from '../id_generator';
-import { buildExpression } from './to_expression';
 
 const columnSortOrder = {
   date: 0,
@@ -76,13 +74,15 @@ function getSuggestionForColumns(
   table: TableSuggestion,
   currentState?: State
 ): VisualizationSuggestion<State> | undefined {
-  const [buckets, values] = partition(
-    prioritizeColumns(table.columns),
-    col => col.operation.isBucketed
-  );
+  const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
+
+  // reverse the buckets before prioritization to always use the most inner
+  // bucket of the highest-prioritized group as x value (don't use nested
+  // buckets as split series)
+  const prioritizedBuckets = prioritizeColumns(buckets.reverse());
 
   if (buckets.length === 1 || buckets.length === 2) {
-    const [x, splitBy] = buckets;
+    const [x, splitBy] = prioritizedBuckets;
     return getSuggestion(
       table.layerId,
       table.changeType,
@@ -193,7 +193,7 @@ function getSeriesType(
   xValue: TableSuggestionColumn,
   changeType: TableChangeType
 ): SeriesType {
-  const defaultType = xValue.operation.dataType === 'date' ? 'area' : 'bar';
+  const defaultType = xValue.operation.dataType === 'date' ? 'area_stacked' : 'bar_stacked';
   if (changeType === 'initial') {
     return defaultType;
   } else {
@@ -258,7 +258,7 @@ function buildSuggestion({
   xValue: TableSuggestionColumn;
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
-  changeType: string;
+  changeType: TableChangeType;
 }) {
   const newLayer = {
     ...(getExistingLayer(currentState, layerId) || {}),
@@ -281,54 +281,25 @@ function buildSuggestion({
 
   return {
     title,
-    // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
-    score: ((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3,
+    score: getScore(yValues, splitBy, changeType),
     // don't advertise chart of same type but with less data
     hide: currentState && changeType === 'reduced',
     state,
     previewIcon: getIconForSeries(seriesType),
-    previewExpression: buildPreviewExpression(state, layerId, xValue, yValues, splitBy),
   };
 }
 
-function buildPreviewExpression(
-  state: XYState,
-  layerId: string,
-  xValue: TableSuggestionColumn,
+function getScore(
   yValues: TableSuggestionColumn[],
-  splitBy: TableSuggestionColumn | undefined
+  splitBy: TableSuggestionColumn | undefined,
+  changeType: TableChangeType
 ) {
-  return buildExpression(
-    {
-      ...state,
-      // only show changed layer in preview and hide axes
-      layers: state.layers
-        .filter(layer => layer.layerId === layerId)
-        .map(layer => ({ ...layer, hide: true })),
-      // hide legend for preview
-      legend: {
-        ...state.legend,
-        isVisible: false,
-      },
-    },
-    { [layerId]: collectColumnMetaData(xValue, yValues, splitBy) }
-  );
+  // Unchanged table suggestions half the score because the underlying data doesn't change
+  const changeFactor = changeType === 'unchanged' ? 0.5 : 1;
+  // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
+  return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {
   return currentState && currentState.layers.find(layer => layer.layerId === layerId);
-}
-
-function collectColumnMetaData(
-  xValue: TableSuggestionColumn,
-  yValues: TableSuggestionColumn[],
-  splitBy: TableSuggestionColumn | undefined
-) {
-  const metadata: Record<string, OperationMetadata> = {};
-  [xValue, ...yValues, splitBy].forEach(col => {
-    if (col) {
-      metadata[col.columnId] = col.operation;
-    }
-  });
-  return metadata;
 }

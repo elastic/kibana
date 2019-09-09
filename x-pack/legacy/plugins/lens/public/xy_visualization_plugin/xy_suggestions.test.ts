@@ -357,24 +357,4 @@ describe('xy_suggestions', () => {
                         ]
                 `);
   });
-
-  test('adds a preview expression with disabled axes and legend', () => {
-    const [suggestion] = getSuggestions({
-      table: {
-        isMultiRow: true,
-        columns: [numCol('bytes'), dateCol('date')],
-        layerId: 'first',
-        changeType: 'unchanged',
-      },
-    });
-
-    const expression = suggestion.previewExpression! as Ast;
-
-    expect(
-      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.isVisible[0]
-    ).toBeFalsy();
-    expect(
-      (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.hide[0]
-    ).toBeTruthy();
-  });
 });

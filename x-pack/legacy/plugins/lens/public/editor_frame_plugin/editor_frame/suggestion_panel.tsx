@@ -17,12 +17,12 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { toExpression, Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
-import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
+import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
@@ -49,26 +49,30 @@ export interface SuggestionPanelProps {
 }
 
 const SuggestionPreview = ({
-  suggestion,
-  previewExpression,
+  preview,
   ExpressionRenderer: ExpressionRendererComponent,
   selected,
   onSelect,
+  showTitleAsLabel,
 }: {
   onSelect: () => void;
-  suggestion: Suggestion;
+  preview: {
+    expression?: string | Ast;
+    icon: string;
+    title: string;
+  };
   ExpressionRenderer: ExpressionRenderer;
-  previewExpression?: string;
   selected: boolean;
+  showTitleAsLabel?: boolean;
 }) => {
   const [expressionError, setExpressionError] = useState<boolean>(false);
 
   useEffect(() => {
     setExpressionError(false);
-  }, [previewExpression]);
+  }, [preview.expression]);
 
   return (
-    <EuiToolTip content={suggestion.title}>
+    <EuiToolTip content={preview.title}>
       <EuiPanel
         className={classNames('lnsSuggestionPanel__button', {
           'lnsSuggestionPanel__button-isSelected': selected,
@@ -91,12 +95,12 @@ const SuggestionPreview = ({
               })}
             />
           </div>
-        ) : previewExpression ? (
+        ) : preview.expression ? (
           <ExpressionRendererComponent
-            className={classNames('lnsSuggestionChartWrapper', [
-              `lnsSuggestionChartWrapper--${suggestion.previewIcon}`,
-            ])}
-            expression={previewExpression}
+            className={classNames('lnsSuggestionChartWrapper', {
+              'lnsSuggestionChartWrapper--withLabel': showTitleAsLabel,
+            })}
+            expression={preview.expression}
             onRenderFailure={(e: unknown) => {
               // eslint-disable-next-line no-console
               console.error(`Failed to render preview: `, e);
@@ -105,8 +109,11 @@ const SuggestionPreview = ({
           />
         ) : (
           <span className="lnsSidebar__suggestionIcon">
-            <EuiIcon size="xxl" type={suggestion.previewIcon} />
+            <EuiIcon size="xxl" type={preview.icon} />
           </span>
+        )}
+        {showTitleAsLabel && (
+          <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
         )}
       </EuiPanel>
     </EuiToolTip>
@@ -129,16 +136,54 @@ function InnerSuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
 }: SuggestionPanelProps) {
-  const stagedSuggestions = useMemo(() => {
-    if (!stagedPreview) return;
-    return getSuggestions({
+  const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
+  const currentVisualizationState = stagedPreview
+    ? stagedPreview.visualization.state
+    : visualizationState;
+  const currentVisualizationId = stagedPreview
+    ? stagedPreview.visualization.activeId
+    : activeVisualizationId;
+
+  const { suggestions, currentStateExpression } = useMemo(() => {
+    const newSuggestions = getSuggestions({
       datasourceMap,
-      datasourceStates: stagedPreview.datasourceStates,
+      datasourceStates: currentDatasourceStates,
       visualizationMap,
-      activeVisualizationId: stagedPreview.visualization.activeId,
-      visualizationState: stagedPreview.visualization.state,
-    });
-  }, [stagedPreview, datasourceMap, visualizationMap]);
+      activeVisualizationId: currentVisualizationId,
+      visualizationState: currentVisualizationState,
+    })
+      .map(suggestion => ({
+        ...suggestion,
+        previewExpression: preparePreviewExpression(
+          suggestion,
+          visualizationMap[suggestion.visualizationId],
+          datasourceMap,
+          currentDatasourceStates,
+          frame
+        ),
+      }))
+      .filter(suggestion => !suggestion.hide)
+      .slice(0, MAX_SUGGESTIONS_DISPLAYED);
+
+    const newStateExpression =
+      currentVisualizationState && currentVisualizationId
+        ? preparePreviewExpression(
+            { visualizationState: currentVisualizationState },
+            visualizationMap[currentVisualizationId],
+            datasourceMap,
+            currentDatasourceStates,
+            frame
+          )
+        : undefined;
+
+    return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
+  }, [
+    currentDatasourceStates,
+    currentVisualizationState,
+    currentVisualizationId,
+    datasourceMap,
+    visualizationMap,
+  ]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -155,22 +200,26 @@ function InnerSuggestionPanel({
     return null;
   }
 
-  const suggestions = (
-    stagedSuggestions ||
-    getSuggestions({
-      datasourceMap,
-      datasourceStates,
-      visualizationMap,
-      activeVisualizationId,
-      visualizationState,
-    })
-  )
-    .filter(suggestion => !suggestion.hide)
-    .slice(0, MAX_SUGGESTIONS_DISPLAYED);
-
   if (suggestions.length === 0) {
     return null;
   }
+
+  function rollbackToCurrentVisualization() {
+    if (lastSelectedSuggestion !== -1) {
+      setLastSelectedSuggestion(-1);
+      dispatch({
+        type: 'ROLLBACK_SUGGESTION',
+      });
+    }
+  }
+
+  const expressionContext = {
+    query: frame.query,
+    timeRange: {
+      from: frame.dateRange.fromDate,
+      to: frame.dateRange.toDate,
+    },
+  };
 
   return (
     <div className="lnsSuggestionsPanel">
@@ -202,46 +251,42 @@ function InnerSuggestionPanel({
       </EuiFlexGroup>
 
       <div className="lnsSuggestionsPanel__suggestions">
-        <EuiPanel
-          className={classNames('lnsSuggestionPanel__button', {
-            'lnsSuggestionPanel__button-isSelected': lastSelectedSuggestion === -1,
-          })}
-          paddingSize="none"
-          data-test-subj="lnsSuggestion"
-          onClick={() => {
-            setLastSelectedSuggestion(-1);
-            dispatch({
-              type: 'ROLLBACK_SUGGESTION',
-            });
-          }}
-        >
-          <div className="lnsSuggestionChartWrapper lnsSuggestionChartWrapper--withLabel">
-            &lt;- Render vis here -&gt;
-          </div>
-          <span className="lnsSuggestionPanel__buttonLabel">Current</span>
-        </EuiPanel>
-
+        {currentStateExpression && (
+          <SuggestionPreview
+            preview={{
+              expression: currentStateExpression
+                ? prependKibanaContext(currentStateExpression, expressionContext)
+                : undefined,
+              icon: 'empty',
+              title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+                defaultMessage: 'Current',
+              }),
+            }}
+            ExpressionRenderer={ExpressionRendererComponent}
+            onSelect={rollbackToCurrentVisualization}
+            selected={lastSelectedSuggestion === -1}
+            showTitleAsLabel
+          />
+        )}
         {suggestions.map((suggestion, index) => {
           return (
             <SuggestionPreview
-              suggestion={suggestion}
+              preview={{
+                expression: suggestion.previewExpression
+                  ? prependKibanaContext(suggestion.previewExpression, expressionContext)
+                  : undefined,
+                icon: suggestion.previewIcon,
+                title: suggestion.title,
+              }}
               ExpressionRenderer={ExpressionRendererComponent}
-              previewExpression={
-                suggestion.previewExpression
-                  ? preparePreviewExpression(
-                      suggestion.previewExpression,
-                      datasourceMap,
-                      datasourceStates,
-                      frame,
-                      suggestion.datasourceId,
-                      suggestion.datasourceState
-                    )
-                  : undefined
-              }
               key={index}
               onSelect={() => {
-                setLastSelectedSuggestion(index);
-                switchToSuggestion(frame, dispatch, suggestion);
+                if (lastSelectedSuggestion === index) {
+                  rollbackToCurrentVisualization();
+                } else {
+                  setLastSelectedSuggestion(index);
+                  switchToSuggestion(frame, dispatch, suggestion);
+                }
               }}
               selected={index === lastSelectedSuggestion}
             />
@@ -252,14 +297,75 @@ function InnerSuggestionPanel({
   );
 }
 
+interface VisualizableState {
+  visualizationState: unknown;
+  datasourceState?: unknown;
+  datasourceId?: string;
+  keptLayerIds?: string[];
+}
+
+function getPreviewExpression(
+  visualizableState: VisualizableState,
+  visualization: Visualization,
+  datasources: Record<string, Datasource>,
+  frame: FramePublicAPI
+) {
+  if (!visualization.toPreviewExpression) {
+    return null;
+  }
+
+  const suggestionFrameApi: FramePublicAPI = {
+    ...frame,
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
+
+  // use current frame api and patch apis for changed datasource layers
+  if (
+    visualizableState.keptLayerIds &&
+    visualizableState.datasourceId &&
+    visualizableState.datasourceState
+  ) {
+    const datasource = datasources[visualizableState.datasourceId];
+    const datasourceState = visualizableState.datasourceState;
+    const updatedLayerApis: Record<string, DatasourcePublicAPI> = _.pick(
+      frame.datasourceLayers,
+      visualizableState.keptLayerIds
+    );
+    const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+    changedLayers.forEach(layerId => {
+      if (updatedLayerApis[layerId]) {
+        updatedLayerApis[layerId] = datasource.getPublicAPI(datasourceState, () => {}, layerId);
+      }
+    });
+  }
+
+  return visualization.toPreviewExpression(
+    visualizableState.visualizationState,
+    suggestionFrameApi
+  );
+}
+
 function preparePreviewExpression(
-  expression: string | Ast,
+  visualizableState: VisualizableState,
+  visualization: Visualization,
   datasourceMap: Record<string, Datasource<unknown, unknown>>,
   datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
-  framePublicAPI: FramePublicAPI,
-  suggestionDatasourceId?: string,
-  suggestionDatasourceState?: unknown
+  framePublicAPI: FramePublicAPI
 ) {
+  const suggestionDatasourceId = visualizableState.datasourceId;
+  const suggestionDatasourceState = visualizableState.datasourceState;
+
+  const expression = getPreviewExpression(
+    visualizableState,
+    visualization,
+    datasourceMap,
+    framePublicAPI
+  );
+
+  if (!expression) {
+    return;
+  }
+
   const expressionWithDatasource = prependDatasourceExpression(
     expression,
     datasourceMap,
@@ -274,15 +380,5 @@ function preparePreviewExpression(
       : datasourceStates
   );
 
-  const expressionContext = {
-    query: framePublicAPI.query,
-    timeRange: {
-      from: framePublicAPI.dateRange.fromDate,
-      to: framePublicAPI.dateRange.toDate,
-    },
-  };
-
-  return expressionWithDatasource
-    ? toExpression(prependKibanaContext(expressionWithDatasource, expressionContext))
-    : undefined;
+  return expressionWithDatasource;
 }

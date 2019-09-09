@@ -24,7 +24,6 @@ export interface Suggestion {
   score: number;
   title: string;
   visualizationState: unknown;
-  previewExpression?: Ast | string;
   previewIcon: string;
   hide?: boolean;
   changeType: TableChangeType;
