@@ -20,8 +20,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
-import { FormattedMessage } from 'packages/kbn-i18n/target/types/react';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { NumberRow, NumberRowModel } from './number_row';
 import {
   parse,

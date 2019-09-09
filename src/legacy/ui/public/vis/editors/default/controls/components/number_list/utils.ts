@@ -18,7 +18,7 @@
  */
 
 import { last } from 'lodash';
-import { i18n } from 'packages/kbn-i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
 import { parseRange, Range } from '../../../../../../utils/range';
