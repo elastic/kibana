@@ -23,7 +23,7 @@ import { dateRange } from '../../utils/date_range';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';
-import { DateRangesParamEditor } from '../controls/date_ranges';
+import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();

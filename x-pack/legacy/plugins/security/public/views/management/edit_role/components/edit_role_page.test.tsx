@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../plugins/features/server';
 import { RawKibanaPrivileges, Role } from '../../../../../common/model';
 import { actionsFactory } from '../../../../../server/lib/authorization/actions';
 import { privilegesFactory } from '../../../../../server/lib/authorization/privileges';
