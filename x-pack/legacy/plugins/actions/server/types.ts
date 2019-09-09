@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
+import { ActionsKibanaConfig } from './actions_config';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
+export type GetServicesFunction = (request: any) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
+export type GetBasePathFunction = (spaceId?: string) => string;
+export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
@@ -57,6 +60,7 @@ interface ValidatorType {
   validate<T>(value: any): any;
 }
 
+export type ActionTypeCreator = (config?: ActionsKibanaConfig) => ActionType;
 export interface ActionType {
   id: string;
   name: string;
@@ -67,4 +71,17 @@ export interface ActionType {
     secrets?: ValidatorType;
   };
   executor: ExecutorType;
+}
+
+export interface RawAction extends SavedObjectAttributes {
+  actionTypeId: string;
+  description: string;
+  config: SavedObjectAttributes;
+  secrets: SavedObjectAttributes;
+}
+
+export interface ActionTaskParams extends SavedObjectAttributes {
+  actionId: string;
+  params: Record<string, any>;
+  apiKey?: string;
 }

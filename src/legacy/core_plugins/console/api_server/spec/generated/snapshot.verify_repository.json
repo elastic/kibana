@@ -10,6 +10,6 @@
     "patterns": [
       "_snapshot/{repository}/_verify"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
   }
 }

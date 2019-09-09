@@ -1,0 +1,288 @@
+[role="xpack"]
+[[spaces-api-copy-saved-objects]]
+=== Copy saved objects to space API
+++++
+<titleabbrev>Copy saved objects to space</titleabbrev>
+++++
+
+Copies saved objects from one space to other spaces.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+////
+Use the appropriate heading levels for your book.
+Add anchors for each section.
+FYI: The section titles use attributes in case those terms change.
+////
+
+[[spaces-api-copy-saved-objects-request]]
+==== {api-request-title}
+////
+This section show the basic endpoint, without the body or optional parameters.
+Variables should use <...> syntax.
+If an API supports both PUT and POST, include both here.
+////
+
+`POST /api/spaces/_copy_saved_objects`
+
+`POST /s/<space_id>/api/spaces/_copy_saved_objects`
+
+
+////
+[[spaces-api-copy-saved-objects-prereqs]]
+==== {api-prereq-title}
+////
+////
+Optional list of prerequisites.
+
+For example:
+
+* A snapshot of an index created in 5.x can be restored to 6.x. You must...
+* If the {es} {security-features} are enabled, you must have `write`, `monitor`,
+and `manage_follow_index` index privileges...
+////
+
+
+[[spaces-api-copy-saved-objects-desc]]
+==== {api-description-title}
+
+Copy saved objects between spaces.
+
+It also allows you to automatically copy related objects, so when you copy a `dashboard`, this can automatically copy over the
+associated visualizations, index patterns, and saved searches, as required.
+
+You can request to overwrite any objects that already exist in the target space if they share an ID, or you can use the 
+<<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>> to do this on a per-object basis.
+
+////
+Add a more detailed description the context.
+Link to related APIs if appropriate.
+
+Guidelines for parameter documentation
+***************************************
+* Use a definition list.
+* End each definition with a period.
+* Include whether the parameter is Optional or Required and the data type.
+* Include default values as the last sentence of the first paragraph.
+* Include a range of valid values, if applicable.
+* If the parameter requires a specific delimiter for multiple values, say so.
+* If the parameter supports wildcards, ditto.
+* For large or nested objects, consider linking to a separate definition list.
+***************************************
+////
+
+
+[[spaces-api-copy-saved-objects-path-params]]
+==== {api-path-parms-title}
+////
+A list of all the parameters within the path of the endpoint (before the query string (?)).
+
+For example:
+`<follower_index>`::
+(Required, string) Name of the follower index
+////
+`space_id`::
+(Optional, string) Identifies the source space from which saved objects will be copied. If `space_id` is not specified in the URL, the default space is used.
+
+//// 
+[[spaces-api-copy-saved-objects-params]]
+==== {api-query-parms-title}
+////
+////
+A list of the parameters in the query string of the endpoint (after the ?).
+
+For example:
+`wait_for_active_shards`::
+(Optional, integer) Specifies the number of shards to wait on being active before
+responding. A shard must be restored from the leader index being active.
+Restoring a follower shard requires transferring all the remote Lucene segment
+files to the follower index. The default is `0`, which means waiting on none of
+the shards to be active.
+////
+
+[[spaces-api-copy-saved-objects-request-body]]
+==== {api-request-body-title}
+////
+A list of the properties you can specify in the body of the request.
+
+For example:
+`remote_cluster`::
+(Required, string) The <<modules-remote-clusters,remote cluster>> that contains
+the leader index.
+
+`leader_index`::
+(Required, string) The name of the index in the leader cluster to follow.
+////
+`spaces` ::
+  (Required, string array) The ids of the spaces the specified object(s) will be copied into.
+
+`objects` ::
+  (Required, object array) The saved objects to copy.
+  `type` :::
+    (Required, string) The saved object type.
+  `id` :::
+    (Required, string) The saved object id.
+
+`includeReferences` ::
+  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target spaces. The default value is `false`.
+
+`overwrite` ::
+  (Optional, boolean) When set to `true`, all conflicts will be automatically overidden. If a saved object with a matching `type` and `id` exists in the target space, then that version will be replaced with the version from the source space. The default value is `false`.
+
+
+[[spaces-api-copy-saved-objects-response-body]]
+==== {api-response-body-title}
+////
+Response body is only required for detailed responses.
+
+For example:
+`auto_follow_stats`::
+  (object) An object representing stats for the auto-follow coordinator. This
+  object consists of the following fields:
+
+`auto_follow_stats.number_of_successful_follow_indices`:::
+  (long) the number of indices that the auto-follow coordinator successfully
+  followed
+...
+
+////
+
+`<space_id>`::
+  (object) Specifies the dynamic keys that are included in the response. An object describing the result of the copy operation for this particular space.
+  `success`:::
+    (boolean) Indicates if the copy operation was successful. Note that some objects may have been copied even if this is set to `false`. Consult the `successCount` and `errors` properties of the response for additional information.
+  `successCount`:::
+    (number) The number of objects that were successfully copied.
+  `errors`:::
+    (Optional, array) Collection of any errors that were encountered during the copy operation. If any errors are reported, then the `success` flag will be set to `false`.
+    `id`::::
+      (string) The saved object id which failed to copy.
+    `type`::::
+      (string) The type of saved object which failed to copy.
+    `error`::::
+      (object) The error which caused the copy operation to fail.
+      `type`:::::
+        (string) Indicates the type of error. May be one of: `conflict`, `unsupported_type`, `missing_references`, `unknown`. Errors marked as `conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>>.
+
+//// 
+[[spaces-api-copy-saved-objects-response-codes]]
+==== {api-response-codes-title}
+////
+////
+Response codes are only required when needed to understand the response body.
+
+For example:
+`200`::
+Indicates all listed indices or index aliases exist.
+
+ `404`::
+Indicates one or more listed indices or index aliases **do not** exist.
+////
+
+
+[[spaces-api-copy-saved-objects-example]]
+==== {api-examples-title}
+////
+Optional brief example.
+Use an 'Examples' heading if you include multiple examples.
+
+
+[source,js]
+----
+PUT /follower_index/_ccr/follow?wait_for_active_shards=1
+{
+  "remote_cluster" : "remote_cluster",
+  "leader_index" : "leader_index",
+  "max_read_request_operation_count" : 1024,
+  "max_outstanding_read_requests" : 16,
+  "max_read_request_size" : "1024k",
+  "max_write_request_operation_count" : 32768,
+  "max_write_request_size" : "16k",
+  "max_outstanding_write_requests" : 8,
+  "max_write_buffer_count" : 512,
+  "max_write_buffer_size" : "512k",
+  "max_retry_delay" : "10s",
+  "read_poll_timeout" : "30s"
+}
+----
+// CONSOLE
+// TEST[setup:remote_cluster_and_leader_index]
+
+The API returns the following result:
+
+[source,js]
+----
+{
+  "follow_index_created" : true,
+  "follow_index_shards_acked" : true,
+  "index_following_started" : true
+}
+----
+// TESTRESPONSE
+////
+
+The following example attempts to copy a dashboard with id `my-dashboard`, including all references from the `default` space to the `marketing` and `sales` spaces. The `marketing` space succeeds, while the `sales` space fails due to a conflict on the underlying index pattern:
+
+[source,js]
+----
+POST /api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing", "sales"],
+  "includeReferences": true
+}
+----
+// KIBANA
+
+The API returns the following result:
+
+[source,js]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 5
+  },
+  "sales": {
+    "success": false,
+    "successCount": 4,
+    "errors": [{
+      "id": "my-index-pattern",
+      "type": "index-pattern",
+      "error": {
+        "type": "conflict"
+      }
+    }]
+  }
+}
+----
+
+The following example successfully copies a visualization with id `my-viz` from the `marketing` space to the `default` space:
+
+[source,js]
+----
+POST /s/marketing/api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "visualization",
+    "id": "my-viz"
+  }],
+  "spaces": ["default"]
+}
+----
+// KIBANA
+
+The API returns the following result:
+
+[source,js]
+----
+{
+  "default": {
+    "success": true,
+    "successCount": 1
+  }
+}
+----

@@ -21,6 +21,8 @@ import { mocksSource } from '../../containers/source/mock';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ActionCreator } from 'typescript-fsa';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
@@ -68,7 +70,8 @@ const getMockProps = (ip: string) => ({
     state: '',
     hash: '',
   },
-  match: { params: { ip, search: '' }, isExact: true, path: '', url: '' },
+  detailName: ip,
+  match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
   setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
     id: InputsModelId;
     from: number;

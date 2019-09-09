@@ -5,19 +5,19 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
+    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/**",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "7.4.4",
+    "@babel/cli": "^7.5.5",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
+    "chalk": "^2.4.2",
     "dedent": "^0.7.0",
-    "del": "^4.0.0",
+    "del": "^4.1.1",
     "getopts": "^2.2.4",
     "glob": "^7.1.2",
     "rxjs": "^6.2.1",

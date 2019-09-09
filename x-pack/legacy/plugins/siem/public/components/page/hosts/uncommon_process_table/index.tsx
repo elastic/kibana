@@ -18,6 +18,7 @@ import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
+import { HostsType } from '../../../../store/hosts/model';
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface OwnProps {
   data: UncommonProcessesEdges[];
@@ -94,7 +95,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     type,
   }) => (
     <PaginatedTable
-      columns={getUncommonColumns()}
+      columns={getUncommonColumnsCurated(type)}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
@@ -151,6 +152,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         attrName: 'process.name',
         idPrefix: `uncommon-process-table-${node._id}-processName`,
       }),
+    width: '15%',
   },
   {
     name: i18n.NUMBER_OF_HOSTS,
@@ -175,6 +177,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
+    width: '15%',
   },
   {
     name: i18n.LAST_COMMAND,
@@ -187,6 +190,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processArgs`,
         displayCount: 1, // TODO: Change this back once we have improved the UI
       }),
+    width: '35%',
   },
   {
     name: i18n.LAST_USER,
@@ -208,5 +212,17 @@ export const getHostNames = (node: UncommonProcessItem): string[] => {
       .map(host => (host.name != null && host.name[0] != null ? host.name[0] : ''));
   } else {
     return [];
+  }
+};
+
+export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
+  const columns: UncommonProcessTableColumns = getUncommonColumns();
+  if (pageType === HostsType.details) {
+    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
+      acc.splice(acc.findIndex(column => column.name === name), 1);
+      return acc;
+    }, columns);
+  } else {
+    return columns;
   }
 };

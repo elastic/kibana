@@ -9,32 +9,29 @@ import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
-import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
 import { ChartGrid } from './chart_grid';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
 
 type DetectorFieldValues = Record<number, string[]>;
 
-export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
+export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,
     jobCreatorUpdated,
     chartLoader,
     chartInterval,
-    resultsLoader,
   } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
@@ -49,14 +46,14 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
-  const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
-  const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
+  const [pageReady, setPageReady] = useState(false);
   const updateByFields = () => setByFieldsUpdated(0);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
@@ -82,17 +79,8 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     updateByFields();
   }
 
-  function setResultsWrapper(results: Results) {
-    setModelData(results.model);
-    setAnomalyData(results.anomalies);
-  }
-
   useEffect(() => {
-    // subscribe to progress and results
-    const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
-    return () => {
-      subscription.unsubscribe();
-    };
+    setPageReady(true);
   }, []);
 
   // watch for changes in detector list length
@@ -116,7 +104,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   // if the split field or by fields have changed
   useEffect(() => {
     loadCharts();
-  }, [JSON.stringify(fieldValuesPerDetector), splitField]);
+  }, [JSON.stringify(fieldValuesPerDetector), splitField, pageReady]);
 
   // watch for change in jobCreator
   useEffect(() => {
@@ -125,6 +113,12 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setEnd(jobCreator.end);
       loadCharts();
     }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
+      loadCharts();
+    }
+
     setSplitField(jobCreator.splitField);
 
     // update by fields and their by fields
@@ -150,42 +144,25 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     loadFieldExamples();
   }, [splitField, byFieldsUpdated]);
 
-  function getChartSettings(): ChartSettings {
-    const interval = new MlTimeBuckets();
-    interval.setInterval('auto');
-    interval.setBounds(chartInterval.getBounds());
-
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: interval.getInterval().asMilliseconds(),
-    };
-    if (aggFieldPairList.length > 2) {
-      cs.cols = 3;
-      cs.height = '150px';
-      cs.intervalMs = cs.intervalMs * 3;
-    } else if (aggFieldPairList.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
-    }
-    return cs;
-  }
-
   async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
-    if (aggFieldPairList.length > 0) {
+    if (allDataReady()) {
       setLoadingData(true);
-      const resp: LineChartData = await chartLoader.loadPopulationCharts(
-        jobCreator.start,
-        jobCreator.end,
-        aggFieldPairList,
-        jobCreator.splitField,
-        cs.intervalMs
-      );
+      try {
+        const cs = getChartSettings(jobCreator, chartInterval);
+        setChartSettings(cs);
+        const resp: LineChartData = await chartLoader.loadPopulationCharts(
+          jobCreator.start,
+          jobCreator.end,
+          aggFieldPairList,
+          jobCreator.splitField,
+          cs.intervalMs
+        );
 
-      setLineChartsData(resp);
+        setLineChartsData(resp);
+      } catch (error) {
+        mlMessageBarService.notify.error(error);
+        setLineChartsData([]);
+      }
       setLoadingData(false);
     }
   }
@@ -225,21 +202,21 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setFieldValuesPerDetector(fieldValues);
   }
 
+  function allDataReady() {
+    let ready = aggFieldPairList.length > 0;
+    aggFieldPairList.forEach(af => {
+      if (af.by !== undefined && af.by.field !== null) {
+        // if a by field is set, it's only ready when the value is loaded
+        ready = ready && af.by.value !== null;
+      }
+    });
+    return ready;
+  }
+
   return (
     <Fragment>
-      {isActive === true && (
-        <Fragment>
-          <SplitFieldSelector />
-          {splitField !== null && <EuiHorizontalRule margin="l" />}
-        </Fragment>
-      )}
-
-      {isActive === false && splitField === null && (
-        <Fragment>
-          {/* Population label TODO */}
-          {splitField !== null && <EuiHorizontalRule margin="l" />}
-        </Fragment>
-      )}
+      <SplitFieldSelector />
+      {splitField !== null && <EuiHorizontalRule margin="l" />}
 
       {splitField !== null && (
         <ChartGrid
@@ -247,15 +224,15 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           chartSettings={chartSettings}
           splitField={splitField}
           lineChartsData={lineChartsData}
-          modelData={modelData}
-          anomalyData={anomalyData}
-          deleteDetector={isActive ? deleteDetector : undefined}
+          modelData={[]}
+          anomalyData={[]}
+          deleteDetector={deleteDetector}
           jobType={jobCreator.type}
           fieldValuesPerDetector={fieldValuesPerDetector}
           loading={loadingData}
         />
       )}
-      {isActive === true && splitField !== null && (
+      {splitField !== null && (
         <MetricSelector
           fields={fields}
           detectorChangeHandler={detectorChangeHandler}

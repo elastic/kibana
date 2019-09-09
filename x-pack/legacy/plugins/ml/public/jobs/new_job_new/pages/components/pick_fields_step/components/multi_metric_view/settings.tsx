@@ -11,13 +11,13 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
 import { SplitFieldSelector } from '../split_field';
 import { Influencers } from '../influencers';
+import { SparseDataSwitch } from '../sparse_data';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (proceed: boolean) => void;
 }
 
-export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
+export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
@@ -33,24 +33,22 @@ export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
 
   return (
     <Fragment>
-      {isActive && (
-        <Fragment>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <SplitFieldSelector />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Influencers />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <BucketSpan setIsValid={setIsValid} />
-            </EuiFlexItem>
-            <EuiFlexItem />
-          </EuiFlexGroup>
-        </Fragment>
-      )}
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <SplitFieldSelector />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Influencers />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <BucketSpan setIsValid={setIsValid} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SparseDataSwitch />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 };

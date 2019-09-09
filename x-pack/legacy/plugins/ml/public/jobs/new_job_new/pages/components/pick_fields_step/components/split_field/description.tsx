@@ -23,16 +23,16 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
     });
     return (
       <EuiDescribedFormGroup
-        idAria="single-example-aria"
+        idAria="description"
         title={<h3>{title}</h3>}
         description={
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
-            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+            defaultMessage="Select a field to partition analysis by. Each value of this field will be modeled independently individually."
           />
         }
       >
-        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+        <EuiFormRow label={title} describedByIds={['description']}>
           {children}
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -43,16 +43,16 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
     });
     return (
       <EuiDescribedFormGroup
-        idAria="single-example-aria"
+        idAria="description"
         title={<h3>{title}</h3>}
         description={
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
-            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+            defaultMessage="All values in the selected field will be modeled together as a population. This analysis type is recommended for high cardinality data."
           />
         }
       >
-        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+        <EuiFormRow label={title} describedByIds={['description']}>
           {children}
         </EuiFormRow>
       </EuiDescribedFormGroup>

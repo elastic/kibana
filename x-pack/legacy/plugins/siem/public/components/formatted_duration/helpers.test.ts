@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getEmptyValue } from '../empty_value';
 import {
   getFormattedDurationString,
   getHumanizedDuration,
@@ -15,17 +16,16 @@ import {
   ONE_SECOND,
   ONE_YEAR,
 } from './helpers';
-
 import * as i18n from './translations';
 
 describe('FormattedDurationHelpers', () => {
   describe('#getFormattedDurationString', () => {
     test('it returns a placeholder when the input is undefined', () => {
-      expect(getFormattedDurationString(undefined)).toEqual('--');
+      expect(getFormattedDurationString(undefined)).toEqual(getEmptyValue());
     });
 
     test('it returns a placeholder when the input is null', () => {
-      expect(getFormattedDurationString(null)).toEqual('--');
+      expect(getFormattedDurationString(null)).toEqual(getEmptyValue());
     });
 
     test('it echos back the input as a string when the input is not a number', () => {

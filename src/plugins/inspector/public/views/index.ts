@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { RequestsView } from './requests';
+export { getDataViewDescription } from './data';
+export { getRequestsViewDescription } from './requests';

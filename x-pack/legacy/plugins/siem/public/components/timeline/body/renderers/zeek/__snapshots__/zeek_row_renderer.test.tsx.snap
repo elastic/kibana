@@ -2,13 +2,13 @@
 
 exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <ZeekDetails
         browserFields={
           Object {
@@ -483,6 +483,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
             },
           }
         }
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>

@@ -18,6 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -73,6 +74,12 @@ class TableUI extends PureComponent {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
+    activeAction: null,
+  }
+
+  constructor(props) {
+    super(props);
+    this.extraActions = SavedObjectsManagementActionRegistry.get();
   }
 
   onChange = ({ query, error }) => {
@@ -238,6 +245,24 @@ class TableUI extends PureComponent {
             icon: 'kqlSelector',
             onClick: object => onShowRelationships(object),
           },
+          ...this.extraActions.map(action => {
+            return {
+              ...action.euiAction,
+              onClick: (object) => {
+                this.setState({
+                  activeAction: action
+                });
+
+                action.registerOnFinishCallback(() => {
+                  this.setState({
+                    activeAction: null,
+                  });
+                });
+
+                action.euiAction.onClick(object);
+              }
+            };
+          })
         ],
       },
     ];
@@ -269,8 +294,11 @@ class TableUI extends PureComponent {
       </EuiButton>
     );
 
+    const activeActionContents = this.state.activeAction ? this.state.activeAction.render() : null;
+
     return (
       <Fragment>
+        {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters}

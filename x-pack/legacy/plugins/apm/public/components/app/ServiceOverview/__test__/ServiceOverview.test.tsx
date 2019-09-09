@@ -8,11 +8,11 @@ import React from 'react';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
-import * as apmRestServices from '../../../../services/rest/apm/services';
+import * as callApmApi from '../../../../services/rest/callApmApi';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as coreHooks from '../../../../hooks/useCore';
-import { InternalCoreStart } from 'src/core/public';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'src/core/public';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 
@@ -30,7 +30,7 @@ describe('Service Overview -> View', () => {
           prepend: (path: string) => `/basepath${path}`
         }
       }
-    } as unknown) as InternalCoreStart;
+    } as unknown) as LegacyCoreStart;
 
     // mock urlParams
     spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
@@ -39,7 +39,7 @@ describe('Service Overview -> View', () => {
         end: 'myEnd'
       }
     });
-    spyOn(coreHooks, 'useCore').and.returnValue(coreMock);
+    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
 
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
       filters: [],
@@ -66,7 +66,7 @@ describe('Service Overview -> View', () => {
   it('should render services, when list is not empty', async () => {
     // mock rest requests
     const dataFetchingSpy = jest
-      .spyOn(apmRestServices, 'loadServiceList')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,
@@ -101,7 +101,7 @@ describe('Service Overview -> View', () => {
 
   it('should render getting started message, when list is empty and no historical data is found', async () => {
     const dataFetchingSpy = jest
-      .spyOn(apmRestServices, 'loadServiceList')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: false,
@@ -125,7 +125,7 @@ describe('Service Overview -> View', () => {
 
   it('should render empty message, when list is empty and historical data is found', async () => {
     const dataFetchingSpy = jest
-      .spyOn(apmRestServices, 'loadServiceList')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,
@@ -145,7 +145,7 @@ describe('Service Overview -> View', () => {
     // create spies
     const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
     const dataFetchingSpy = jest
-      .spyOn(apmRestServices, 'loadServiceList')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: true,
         hasHistoricalData: true,
@@ -168,7 +168,7 @@ describe('Service Overview -> View', () => {
     // create spies
     const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
     const dataFetchingSpy = jest
-      .spyOn(apmRestServices, 'loadServiceList')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,

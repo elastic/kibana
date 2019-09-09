@@ -7,12 +7,15 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { isSparseDataJob } from './util/general';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -23,15 +26,17 @@ export class JobCreator {
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
+  protected _bucketSpanMs: number = 0;
   protected _useDedicatedIndex: boolean = false;
   protected _start: number = 0;
   protected _end: number = 0;
-  protected _subscribers: ProgressSubscriber[];
+  protected _subscribers: ProgressSubscriber[] = [];
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
+  protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
     stop: boolean;
-  };
+  } = { stop: false };
 
   constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
@@ -48,8 +53,6 @@ export class JobCreator {
     }
 
     this._datafeed_config.query = query;
-    this._subscribers = [];
-    this._stopAllRefreshPolls = { stop: false };
   }
 
   public get type(): JOB_TYPE {
@@ -60,6 +63,7 @@ export class JobCreator {
     this._detectors.push(detector);
     this._aggs.push(agg);
     this._fields.push(field);
+    this._updateSparseDataDetectors();
   }
 
   protected _editDetector(detector: Detector, agg: Aggregation, field: Field, index: number) {
@@ -67,6 +71,7 @@ export class JobCreator {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
       this._fields[index] = field;
+      this._updateSparseDataDetectors();
     }
   }
 
@@ -110,10 +115,20 @@ export class JobCreator {
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
+    this._setBucketSpanMs(bucketSpan);
   }
 
   public get bucketSpan(): BucketSpan {
     return this._job_config.analysis_config.bucket_span;
+  }
+
+  protected _setBucketSpanMs(bucketSpan: BucketSpan) {
+    const bs = parseInterval(bucketSpan);
+    this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
+  }
+
+  public get bucketSpanMs(): number {
+    return this._bucketSpanMs;
   }
 
   public addInfluencer(influencer: string) {
@@ -228,6 +243,53 @@ export class JobCreator {
     } else {
       return null;
     }
+  }
+
+  public get sparseData(): boolean {
+    return this._sparseData;
+  }
+
+  public set sparseData(sparseData: boolean) {
+    this._sparseData = sparseData;
+    this._updateSparseDataDetectors();
+  }
+
+  private _updateSparseDataDetectors() {
+    // loop through each detector, if the aggregation in the corresponding detector index is a count or sum
+    // change the detector to be a non-zer or non-null count or sum.
+    // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
+    this._detectors.forEach((d, i) => {
+      switch (this._aggs[i].id) {
+        case ML_JOB_AGGREGATION.COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.COUNT;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.HIGH_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.LOW_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.LOW_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.SUM:
+          d.function = this._sparseData ? ML_JOB_AGGREGATION.NON_NULL_SUM : ML_JOB_AGGREGATION.SUM;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.HIGH_SUM;
+          break;
+        case ML_JOB_AGGREGATION.LOW_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.LOW_SUM;
+          break;
+      }
+    });
   }
 
   public setTimeRange(start: number, end: number) {
@@ -379,5 +441,6 @@ export class JobCreator {
     if (this._job_config.analysis_config.influencers !== undefined) {
       this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
     }
+    this._sparseData = isSparseDataJob(job, datafeed);
   }
 }

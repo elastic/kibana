@@ -21,18 +21,18 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   });
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          defaultMessage="Set the interval for time series analysis, typically between 15m to 1h."
         />
       }
     >
       <EuiFormRow
         label={title}
-        describedByIds={['single-example-aria']}
+        describedByIds={['description']}
         error={validation.message}
         isInvalid={validation.valid === false}
       >

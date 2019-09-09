@@ -19,16 +19,16 @@ export const Description: FC<Props> = memo(({ children }) => {
   });
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.influencers.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          defaultMessage="Select which categorical fields have influence on the results. Who/what might you 'blame' for an anomaly? Recommend 1-3 influencers."
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+      <EuiFormRow label={title} describedByIds={['description']}>
         {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>

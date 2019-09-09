@@ -36,11 +36,12 @@ import {
 
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'src/plugins/data/public';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
+import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
-import { StaticIndexPattern, Query } from '../../../data/public';
+import { Subscription } from 'rxjs';
 
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
@@ -63,6 +64,7 @@ export interface DashboardAppScope extends ng.IScope {
       | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
     refreshInterval: any;
   };
+  savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: StaticIndexPattern[];
@@ -80,15 +82,18 @@ export interface DashboardAppScope extends ng.IScope {
     refreshInterval: any;
   }) => void;
   onFiltersUpdated: (filters: Filter[]) => void;
-  $listenAndDigestAsync: any;
   onCancelApplyFilters: () => void;
   onApplyFilters: (filters: Filter[]) => void;
+  onQuerySaved: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
+  onClearSavedQuery: () => void;
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;
+  showSaveQuery: boolean;
   kbnTopNav: any;
   enterEditMode: () => void;
-  $listen: any;
+  timefilterSubscriptions$: Subscription;
 }
 
 const app = uiModules.get('app/dashboard', [

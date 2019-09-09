@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { lte } from '../../functions/common/lte';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT } from '../constants';
+import { CONTEXT } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof lte>> = {
   help: i18n.translate('xpack.canvas.functions.lteHelpText', {

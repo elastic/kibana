@@ -16,11 +16,11 @@ export const zeekRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },
-  renderRow: ({ browserFields, data, width, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
-      <RowRendererContainer width={width}>
-        <ZeekDetails data={data} browserFields={browserFields} />
+      <RowRendererContainer>
+        <ZeekDetails data={data} browserFields={browserFields} timelineId={timelineId} />
       </RowRendererContainer>
     </Row>
   ),

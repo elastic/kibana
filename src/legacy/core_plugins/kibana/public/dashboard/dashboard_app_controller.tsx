@@ -24,6 +24,7 @@ import angular from 'angular';
 import { uniq } from 'lodash';
 
 import chrome from 'ui/chrome';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
@@ -32,8 +33,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
@@ -51,11 +51,14 @@ import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query } from 'src/legacy/core_plugins/data/public';
+import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
+import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { data } from '../../../data/public/setup';
+
 import {
   DashboardContainer,
   DASHBOARD_CONTAINER_TYPE,
@@ -84,6 +87,8 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+
+const { savedQueryService } = data.search.services;
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -150,6 +155,7 @@ export class DashboardAppController {
     if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
+    $scope.showSaveQuery = capabilities.get().dashboard.saveQuery as boolean;
 
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
@@ -420,6 +426,72 @@ export class DashboardAppController {
       $scope.appState.$newFilters = [];
     };
 
+    $scope.onQuerySaved = savedQuery => {
+      $scope.savedQuery = savedQuery;
+    };
+
+    $scope.onSavedQueryUpdated = savedQuery => {
+      $scope.savedQuery = { ...savedQuery };
+    };
+
+    $scope.onClearSavedQuery = () => {
+      delete $scope.savedQuery;
+      dashboardStateManager.setSavedQueryId(undefined);
+      queryFilter.removeAll();
+      dashboardStateManager.applyFilters(
+        {
+          query: '',
+          language:
+            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+        },
+        []
+      );
+    };
+
+    const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
+      queryFilter.setFilters(savedQuery.attributes.filters || []);
+      dashboardStateManager.applyFilters(
+        savedQuery.attributes.query,
+        savedQuery.attributes.filters || []
+      );
+      if (savedQuery.attributes.timefilter) {
+        timefilter.setTime({
+          from: savedQuery.attributes.timefilter.from,
+          to: savedQuery.attributes.timefilter.to,
+        });
+        if (savedQuery.attributes.timefilter.refreshInterval) {
+          timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
+      }
+    };
+
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
+      if (!newSavedQuery) return;
+      dashboardStateManager.setSavedQueryId(newSavedQuery.id);
+
+      updateStateFromSavedQuery(newSavedQuery);
+    });
+
+    $scope.$watch(
+      () => {
+        return dashboardStateManager.getSavedQueryId();
+      },
+      newSavedQueryId => {
+        if (!newSavedQueryId) {
+          $scope.savedQuery = undefined;
+          return;
+        }
+        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
+          });
+        }
+      }
+    );
+
     $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
       if (filters.length === 1) {
         $scope.onApplyFilters(filters);
@@ -433,23 +505,32 @@ export class DashboardAppController {
       $scope.updateQueryAndFetch({ query });
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      // The only reason this is here is so that search embeddables work on a dashboard with
-      // a refresh interval turned on. This kicks off the search poller. It should be
-      // refactored so no embeddables need to listen to the timefilter directly but instead
-      // the container tells it when to reload.
-      courier.fetch();
-    });
+    $scope.$watch(
+      () => capabilities.get().dashboard.saveQuery,
+      newCapability => {
+        $scope.showSaveQuery = newCapability as boolean;
+      }
+    );
 
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$ = new Subscription();
 
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
+
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
     function updateViewMode(newMode: ViewMode) {
       $scope.topNavMenu = getTopNavConfig(
@@ -521,7 +602,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<{ id?: string } | { error: Error }> {
+    function save(saveOptions: SaveOptions): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -612,7 +693,7 @@ export class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
+        return save(saveOptions).then((response: SaveResult) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);
@@ -717,6 +798,8 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      $scope.timefilterSubscriptions$.unsubscribe();
+
       dashboardStateManager.destroy();
       if (inputSubscription) {
         inputSubscription.unsubscribe();

@@ -64,7 +64,7 @@ interface HeaderCompProps {
 }
 
 const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
-  const { isLoading } = useContext(TimelineContext);
+  const isLoading = useContext(TimelineContext);
   return (
     <HeaderDiv
       data-test-subj="header"

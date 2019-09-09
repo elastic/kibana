@@ -31,6 +31,7 @@
 
 var resolve = require('path').resolve;
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.integration.js'));
+process.argv.push('--runInBand');
 
 require('../src/setup_node_env');
 require('../src/dev/jest/cli');

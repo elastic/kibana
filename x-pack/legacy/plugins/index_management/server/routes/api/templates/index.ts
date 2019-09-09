@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerTemplatesRoutes } from './register_templates_routes';
+export { registerTemplateRoutes } from './register_template_routes';

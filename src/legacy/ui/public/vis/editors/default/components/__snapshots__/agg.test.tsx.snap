@@ -45,7 +45,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       Object {
         "brandNew": true,
         "getIndexPattern": [Function],
-        "id": 1,
+        "id": "1",
         "params": Object {},
         "schema": Object {
           "title": "Schema name",

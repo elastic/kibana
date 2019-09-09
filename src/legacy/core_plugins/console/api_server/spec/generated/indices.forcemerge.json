@@ -20,6 +20,6 @@
       "_forcemerge",
       "{indices}/_forcemerge"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
   }
 }

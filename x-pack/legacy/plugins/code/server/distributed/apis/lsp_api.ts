@@ -14,7 +14,7 @@ import { WorkspaceStatus } from '../../lsp/request_expander';
 export const LspServiceDefinitionOption = { routePrefix: '/api/code/internal/lsp' };
 export const LspServiceDefinition = {
   sendRequest: {
-    request: {} as { method: string; params: any; timeoutForInitializeMs?: number },
+    request: {} as { method: string; params: any },
     response: {} as ResponseMessage,
   },
   languageSeverDef: {
@@ -34,8 +34,8 @@ export const LspServiceDefinition = {
 export const getLspServiceHandler = (
   lspService: LspService
 ): ServiceHandlerFor<typeof LspServiceDefinition> => ({
-  async sendRequest({ method, params, timeoutForInitializeMs }) {
-    return await lspService.sendRequest(method, params, timeoutForInitializeMs);
+  async sendRequest({ method, params }) {
+    return await lspService.sendRequest(method, params);
   },
   async languageSeverDef({ lang }) {
     return lspService.getLanguageSeverDef(lang);

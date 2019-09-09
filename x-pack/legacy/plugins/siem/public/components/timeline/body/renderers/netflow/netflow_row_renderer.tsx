@@ -57,7 +57,7 @@ import {
 } from '../../../../source_destination/field_names';
 
 const Details = styled.div`
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 Details.displayName = 'Details';
@@ -84,13 +84,13 @@ export const netflowRowRenderer: RowRenderer = {
       eventActionMatches(get(EVENT_ACTION_FIELD, ecs))
     );
   },
-  renderRow: ({ data, width, children }) => (
-    <Row>
+  renderRow: ({ data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <Details>
           <Netflow
-            contextId={NETWORK_FLOW}
+            contextId={`netflow-row-renderer-render-row-${timelineId}-${data._id}`}
             destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
             destinationGeoContinentName={asArrayIfExists(
               get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { RequestsViewComponent } from './components/requests_view';
 import { Adapters, InspectorViewDescription } from '../../types';
 
-export const RequestsView: InspectorViewDescription = {
+export const getRequestsViewDescription = (): InspectorViewDescription => ({
   title: i18n.translate('inspector.requests.requestsTitle', {
     defaultMessage: 'Requests',
   }),
@@ -33,4 +33,4 @@ export const RequestsView: InspectorViewDescription = {
     return Boolean(adapters.requests);
   },
   component: RequestsViewComponent,
-};
+});

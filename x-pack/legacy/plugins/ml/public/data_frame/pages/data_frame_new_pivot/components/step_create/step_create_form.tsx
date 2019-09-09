@@ -84,7 +84,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.createDataFrameTransform(transformId, transformConfig);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} created successfully.',
+            defaultMessage: 'Request to create data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
@@ -111,10 +111,10 @@ export const StepCreateForm: SFC<Props> = React.memo(
       setStarted(true);
 
       try {
-        await ml.dataFrame.startDataFrameTransform(transformId);
+        await ml.dataFrame.startDataFrameTransforms([{ id: transformId }]);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} started successfully.',
+            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
