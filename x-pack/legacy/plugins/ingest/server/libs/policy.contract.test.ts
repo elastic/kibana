@@ -199,12 +199,82 @@ describe('Policies Lib', () => {
   });
   describe.skip('rollForward', () => {});
 
-  describe.skip('requestAddDataSource', () => {
+  describe('requestAddDataSource', () => {
     it('Should add data sources and inputs to the policy', async () => {
-      //
+      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+
+      try {
+        await libs.policy.requestAddDataSource(newPolicy.id, {
+          ref_source: undefined,
+          ref: undefined,
+          output: '43hi34hi5y3i53o4',
+          queue: {},
+          inputs: [{}, {}],
+        });
+      } catch (e) {
+        expect(e).toBe(undefined);
+      }
+
+      const fullPolicy = await libs.policy.get(newPolicy.id);
+      expect(fullPolicy.name).toBe('test');
+      expect(fullPolicy.data_sources.length).toBe(1);
+      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
+      expect(fullPolicy.data_sources[0].inputs.length).toBe(2);
+      expect(typeof fullPolicy.data_sources[0].inputs[0]).toBe('string');
     });
   });
-  describe.skip('requestDeleteDataSource', () => {});
+  describe('requestDeleteDataSource', () => {
+    it('Should delete data sources', async () => {
+      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+
+      try {
+        await libs.policy.requestAddDataSource(newPolicy.id, {
+          ref_source: undefined,
+          ref: undefined,
+          output: '43hi34hi5y3i53o4',
+          queue: {},
+          inputs: [{}, {}],
+        });
+      } catch (e) {
+        expect(e).toBe(undefined);
+      }
+
+      const fullPolicy = await libs.policy.get(newPolicy.id);
+      expect(fullPolicy.data_sources.length).toBe(1);
+      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
+
+      await libs.policy.requestDeleteDataSource(newPolicy.id, fullPolicy.data_sources[0].uuid);
+      const fullPolicy2 = await libs.policy.get(newPolicy.id);
+      expect(fullPolicy2.data_sources.length).toBe(0);
+    });
+  });
+  describe('getFull', () => {
+    it('Should return a policy with all inputs, not just refs to the inputs', async () => {
+      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+
+      try {
+        await libs.policy.requestAddDataSource(newPolicy.id, {
+          ref_source: undefined,
+          ref: undefined,
+          output: '43hi34hi5y3i53o4',
+          queue: {},
+          inputs: [{ foo: 'bar' }],
+        });
+      } catch (e) {
+        expect(e).toBe(undefined);
+      }
+
+      const fullPolicy = await libs.policy.getFull(newPolicy.id);
+      expect(fullPolicy.name).toBe('test');
+      expect(fullPolicy.data_sources.length).toBe(1);
+      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
+      expect(fullPolicy.data_sources[0].inputs.length).toBe(1);
+      expect(typeof fullPolicy.data_sources[0].inputs[0]).not.toBe('string');
+      expect(typeof fullPolicy.data_sources[0].inputs[0].other).toBe('string');
+      expect(fullPolicy.data_sources[0].inputs[0].other).toBe('bar');
+    });
+  });
+
   describe.skip('listDataSources', () => {});
 
   describe.skip('update / change hooks', () => {});

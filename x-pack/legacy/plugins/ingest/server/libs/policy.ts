@@ -7,13 +7,9 @@ import { merge, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
 import { BackendFrameworkLib } from './framework';
-import {
-  PolicyFile,
-  Datasource,
-  NewPolicyFile,
-  FullPolicyFile,
-} from './adapters/policy/adapter_types';
+import { PolicyFile, NewPolicyFile, FullPolicyFile } from './adapters/policy/adapter_types';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
+import { NewDatasource } from './adapters/policy/adapter_types';
 
 export class PolicyLib {
   constructor(
@@ -206,16 +202,25 @@ export class PolicyLib {
   /**
    * request* because in the future with an approval flow it will not directly make the change
    */
-  public async requestAddDataSource(policyId: string, datasource: Datasource) {
+  public async requestAddDataSource(policyId: string, datasource: NewDatasource) {
     const oldPolicy = await this.adapter.get(policyId);
 
-    if (oldPolicy.status === 'active') {
+    if (oldPolicy.status !== 'active') {
       throw new Error(
         `Policy ${oldPolicy.id} can not be updated becuase it is ${oldPolicy.status}`
       );
     }
+    const uuid = uuidv4();
 
-    // TODO add inputs, and replace in array with IDs
+    datasource.inputs = await this.adapter.addInputs(
+      datasource.inputs.map(input => {
+        return {
+          id: uuidv4(),
+          other: JSON.stringify(input),
+          data_source_id: uuid,
+        };
+      })
+    );
 
     await this._update(oldPolicy, {
       data_sources: [...oldPolicy.data_sources, datasource],
@@ -230,7 +235,7 @@ export class PolicyLib {
   public async requestDeleteDataSource(policyId: string, datasourceUUID: string) {
     const oldPolicy = await this.adapter.get(policyId);
 
-    if (oldPolicy.status === 'active') {
+    if (oldPolicy.status !== 'active') {
       throw new Error(
         `Policy ${oldPolicy.id} can not be updated becuase it is ${oldPolicy.status}`
       );
