@@ -14,51 +14,55 @@ monitoring-shard-allocation {
   cluster-view {
     display: block;
   }
-  .parent {
-    padding-top: 14px;
-    border-left: 3px solid $euiColorSuccess !important;
-    &.red {
-      border-left: 3px solid $euiColorDanger !important;
-    }
-    &.yellow {
-      border-left: 3px solid $euiColorWarning !important;
-    }
-  }
-  td.unassigned {
+
+  .unassigned {
     vertical-align: middle;
     width: 150px;
+  }
+
+  .children {
+    padding-top: $euiSizeL;
   }
 
   .child {
     float: left;
     align-self: center;
+    background-color: $euiColorLightestShade;
+    margin: $euiSizeS;
+    border: 1px solid $euiColorLightShade;
+    border-radius: $euiSizeXS;
 
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
+
       &.red {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
+
       &.yellow {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
-    background-color: $euiColorDarkShade;
-    margin: 5px;
+
     .title {
-      padding: 5px 7px;
-      display: inline-block;
+      padding: $euiSizeXS $euiSizeS;
       text-align: center;
-      font-size: 12px;
-      font: 10px sans-serif;
+      font-size: $euiSizeM;
       color: $euiColorGhost;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
       a {
-        color: $euiColorGhost;
         text-decoration: none;
       }
+
+      .euiIcon,
       i {
-        margin-left: 5px;
+        margin-left: $euiSizeXS;
       }
     }
+
     &.unassigned {
       .title {
         display: none;
@@ -76,27 +80,9 @@ monitoring-shard-allocation {
 
   .shard {
     align-self: center;
-    padding: 5px 7px;
-    font: 10px sans-serif;
-    border-left: 1px solid $euiColorEmptyShade;
+    padding: $euiSizeXS $euiSizeS;
+    font: $euiSizeM;
     position: relative;
     display: inline-block;
-  }
-
-  .legend {
-    font-size: 12px;
-    background-color: $euiColorEmptyShade;
-    .title {
-      margin-left: 5px;
-      font-weight: bold;
-    }
-    color: $euiColorDarkestShade;
-    padding: 5px;
-    span.shard {
-      float: none;
-      display: inline-block;
-      margin: 0 5px 0 10px;
-      padding: 0 4px;
-    }
   }
 }

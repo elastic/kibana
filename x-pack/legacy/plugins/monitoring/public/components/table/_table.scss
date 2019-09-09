@@ -39,3 +39,8 @@
 .monTableCell__splitNumber {
   @include euiFontSizeM;
 }
+
+.statusColumn {
+  display: flex;
+  align-items: center;
+}
