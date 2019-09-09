@@ -2,14 +2,16 @@
 
 exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
     <RowRendererContainer>
       <AuditdGenericDetails
         browserFields={Object {}}
-        contextId="connected-to"
+        contextId="connected-to-test"
         data={
           Object {
             "_id": "27",
@@ -118,6 +120,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
           }
         }
         text="some text"
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>
@@ -126,14 +129,16 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
     <RowRendererContainer>
       <AuditdGenericFileDetails
         browserFields={Object {}}
-        contextId="opened-file"
+        contextId="opened-file-test"
         data={
           Object {
             "_id": "28",
@@ -268,6 +273,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         }
         fileIcon="document"
         text="some text"
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>

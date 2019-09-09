@@ -148,3 +148,9 @@ export const calculateBodyHeight = ({
   timelineFooterHeight = 0,
 }: CalculateBodyHeightParams): number =>
   flyoutHeight - (flyoutHeaderHeight + timelineHeaderHeight + timelineFooterHeight);
+
+/**
+ * The CSS class name of a "stateful event", which appears in both
+ * the `Timeline` and the `Events Viewer` widget
+ */
+export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';

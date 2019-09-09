@@ -8,7 +8,7 @@ import path from 'path';
 
 export const paths = {
   archivesPath: path.resolve(__dirname, '../../../.chromium'),
-  baseUrl: 'https://s3.amazonaws.com/headless-shell/',
+  baseUrl: 'https://storage.googleapis.com/headless_shell/',
   packages: [
     {
       platforms: ['darwin', 'freebsd', 'openbsd'],

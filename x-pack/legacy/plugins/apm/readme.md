@@ -1,4 +1,18 @@
-# Documentation for APM UI
+# Documentation for APM UI developers
+
+### Setup local environment
+
+#### Kibana
+```
+git clone git@github.com:elastic/kibana.git
+cd kibana/
+yarn kbn bootstrap
+yarn start
+```
+
+#### Connect to Elasticsearch on Cloud (internal devs only)
+Add the following to the kibana config file (config/kibana.dev.yml):
+https://p.elstc.co/paste/fqorvbJi#Yf6tQ8Bxk4nYMWpoPXr1iZ-QnJ1EbKBEM+H/kdPsmBg
 
 Note: Run the following commands from `kibana/x-pack`.
 
