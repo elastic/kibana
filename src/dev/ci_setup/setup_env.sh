@@ -36,6 +36,9 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
+###
+### download node
+###
 UNAME=$(uname)
 OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
@@ -48,14 +51,49 @@ nodeDir="$cacheDir/node/$nodeVersion"
 
 if [[ "$OS" == "win" ]]; then
   nodeBin="$HOME/node"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
 else
   nodeBin="$nodeDir/bin"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+fi
+
+echo " -- node: version=v${nodeVersion} dir=$nodeDir"
+
+echo " -- setting up node.js"
+if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
+  echo " -- reusing node.js install"
+else
+  if [ -d "$nodeDir" ]; then
+    echo " -- clearing previous node.js install"
+    rm -rf "$nodeDir"
+  fi
+
+  echo " -- downloading node.js from $nodeUrl"
+  mkdir -p "$nodeDir"
+  if [[ "$OS" == "win" ]]; then
+    nodePkg="$nodeDir/${nodeUrl##*/}"
+    curl --silent -o "$nodePkg" "$nodeUrl"
+    unzip -qo "$nodePkg" -d "$nodeDir"
+    mv "${nodePkg%.*}" "$nodeBin"
+  else
+    curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  fi
 fi
 
 ###
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
+
+###
+### downloading yarn
+###
+yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+currentYarnVersion=$(yarn --version || true)
+
+if [[ "$yarnVersion" != "$currentYarnVersion" ]]; then
+  npm install -g "yarn@^${yarnVersion}"
+fi
 
 ###
 ### setup yarn offline cache
