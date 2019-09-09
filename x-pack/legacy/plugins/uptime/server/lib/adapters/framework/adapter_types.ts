@@ -29,6 +29,13 @@ export interface UMFrameworkRouteOptions<
   config?: any;
 }
 
+export interface KibanaCore {
+  elasticsearch: any;
+  usageCollector: any;
+  xpack: any;
+  route: any;
+}
+
 export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (
   request: UMFrameworkRequest,
   h: ResponseToolkit

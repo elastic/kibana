@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana, KibanaServer } from './server';
+import { KibanaCore } from './server/lib/adapters/framework';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -33,6 +34,13 @@ export const uptime = (kibana: any) =>
       home: ['plugins/uptime/register_feature'],
     },
     init(server: KibanaServer) {
-      initServerWithKibana(server, server.plugins.elasticsearch, server.plugins.xpack_main);
+      const { elasticsearch, xpack_main } = server.plugins;
+      const kbnServ: KibanaCore = {
+        elasticsearch,
+        usageCollector: server.usage,
+        xpack: xpack_main,
+        route: (arg: any) => server.route(arg),
+      };
+      initServerWithKibana(kbnServ);
     },
   });

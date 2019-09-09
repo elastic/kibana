@@ -8,8 +8,9 @@ import { i18n } from '@kbn/i18n';
 import { Request, Server } from 'hapi';
 import { PLUGIN } from '../common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
-import { compose, ServerFascade } from './lib/compose/kibana';
+import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
+import { KibanaCore } from './lib/adapters/framework';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -28,19 +29,12 @@ export interface KibanaServer extends Server {
   };
 }
 
-export const initServerWithKibana = (server: ServerFascade, es: any, xpack: any) => {
-  console.log('plugsin', Object.keys(server.plugins));
-  const libs = compose(
-    server,
-    es,
-    xpack,
-    server.register,
-    server.route
-  );
-  server.usage.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(server));
+export const initServerWithKibana = (server: KibanaCore) => {
+  const libs = compose(server);
+  server.usageCollector.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(server));
   initUptimeServer(libs);
 
-  xpack.registerFeature({
+  server.xpack.registerFeature({
     id: PLUGIN.ID,
     name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
       defaultMessage: 'Uptime',

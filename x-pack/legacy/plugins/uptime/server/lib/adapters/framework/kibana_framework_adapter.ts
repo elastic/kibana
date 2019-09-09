@@ -5,8 +5,9 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, Server, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
 import { runHttpQuery } from 'apollo-server-core';
+import { KibanaCore } from './adapter_types';
 import {
   UMBackendFrameworkAdapter,
   UMFrameworkRequest,
@@ -16,10 +17,8 @@ import {
 import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  private server: Server;
-
-  constructor(hapiServer: Server) {
-    this.server = hapiServer;
+  constructor(private readonly server: KibanaCore) {
+    this.server = server;
   }
 
   public registerRoute<
