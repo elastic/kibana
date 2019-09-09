@@ -92,16 +92,9 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-// params that come into a request
-export interface JobParams {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-}
-
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: JobParams;
+  jobParams: object;
   title: string;
   type: string | null;
 }
@@ -147,10 +140,10 @@ export interface ESQueueWorker {
 }
 
 export type ESQueueCreateJobFn = (
-  jobParams: JobParams,
+  jobParams: object,
   headers: ConditionalHeaders,
   request: Request
-) => Promise<JobParams>;
+) => Promise<object>;
 
 export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
 
