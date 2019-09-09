@@ -93,7 +93,7 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
         refetch: useUpdateKql({
           indexPattern,
           kueryFilterQuery,
-          KueryFilterQueryDraft: hostsFilterQueryDraft,
+          kueryFilterQueryDraft: hostsFilterQueryDraft,
           storeType: 'hostsType',
           type,
         }),
@@ -142,7 +142,7 @@ const makeMapStateToProps = () => {
     return {
       hostsFilterQueryDraft: getHostsFilterQueryDraft(state, type),
       isHostFilterQueryDraftValid: getIsHostFilterQueryDraftValid(state, type),
-      kueryFilterQuery: getHostsKueryFilterQuery(state, hostsModel.HostsType.page),
+      kueryFilterQuery: getHostsKueryFilterQuery(state, type),
     };
   };
   return mapStateToProps;

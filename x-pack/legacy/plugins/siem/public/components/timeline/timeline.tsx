@@ -170,7 +170,14 @@ export const Timeline = React.memo<Props>(
                   getUpdatedAt,
                   refetch,
                 }) => (
-                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
+                  <TimelineRefetch
+                    loading={loading}
+                    id={id}
+                    indexPattern={indexPattern}
+                    inputId="timeline"
+                    inspect={inspect}
+                    refetch={refetch}
+                  >
                     <TimelineContext.Provider value={loading}>
                       <TimelineWidthContext.Provider value={width}>
                         <StatefulBody

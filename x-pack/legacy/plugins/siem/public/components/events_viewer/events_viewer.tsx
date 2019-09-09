@@ -138,7 +138,14 @@ export const EventsViewer = React.memo<Props>(
                     refetch,
                     totalCount = 0,
                   }) => (
-                    <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
+                    <TimelineRefetch
+                      loading={loading}
+                      id={id}
+                      inputId="global"
+                      inspect={inspect}
+                      indexPattern={indexPattern}
+                      refetch={refetch}
+                    >
                       <EventsViewerHeader
                         id={id}
                         showInspect={showInspect}
