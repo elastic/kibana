@@ -106,14 +106,19 @@ export const addTimelineNoteToEvent = ({
 interface AddTimelineParams {
   id: string;
   timeline: TimelineModel;
+  timelineById: TimelineById;
 }
 
 /**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
  */
-export const addTimelineToStore = ({ id, timeline }: AddTimelineParams): TimelineById => ({
-  //  TODO: revisit this when we support multiple timelines
+export const addTimelineToStore = ({
+  id,
+  timeline,
+  timelineById,
+}: AddTimelineParams): TimelineById => ({
+  ...timelineById,
   [id]: {
     ...timeline,
     show: true,

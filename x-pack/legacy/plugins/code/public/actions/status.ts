@@ -7,25 +7,15 @@
 import { createAction } from 'redux-actions';
 
 import {
-  RepositoryUri,
-  CloneWorkerProgress,
-  WorkerProgress,
-  Repository,
   CloneProgress,
+  CloneWorkerProgress,
+  Repository,
+  RepositoryUri,
+  RepoState,
+  WorkerProgress,
 } from '../../model';
 import { FetchFilePayload } from './file';
 import { StatusReport } from '../../common/repo_file_status';
-
-export enum RepoState {
-  CLONING,
-  DELETING,
-  INDEXING,
-  READY,
-  CLONE_ERROR,
-  DELETE_ERROR,
-  INDEX_ERROR,
-  UNKNOWN,
-}
 
 export interface RepoStatus {
   uri: string;
