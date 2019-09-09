@@ -24,13 +24,16 @@ const INDEXING_STAGE = {
   WRITING_TO_INDEX: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.writingToIndex',
     { defaultMessage: 'Writing to index' }),
+  INDEXING_COMPLETE: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.indexingComplete',
+    { defaultMessage: 'Indexing complete' }),
   CREATING_INDEX_PATTERN: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern',
     { defaultMessage: 'Creating index pattern' }),
   INDEX_PATTERN_COMPLETE: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.indexPatternComplete',
     { defaultMessage: 'Index pattern complete' }),
-  DATA_INDEXING_ERROR: i18n.translate(
+  INDEXING_ERROR: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.dataIndexingError',
     { defaultMessage: 'Data indexing error' }),
   INDEX_PATTERN_ERROR: i18n.translate(
@@ -134,11 +137,11 @@ export class JsonUploadAndParse extends Component {
         indexedFile: null,
         indexDataResp,
         indexRequestInFlight: false,
-        currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
+        currentIndexingStage: INDEXING_STAGE.INDEXING_ERROR,
       });
       this._resetFileAndIndexSettings();
       if (onIndexingComplete) {
-        onIndexingComplete();
+        onIndexingComplete({ indexDataResp });
       }
       return;
     }
@@ -147,6 +150,7 @@ export class JsonUploadAndParse extends Component {
     this.setState({
       indexDataResp,
       indexedFile: parsedFile,
+      currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
     });
     let indexPatternResp;
     if (boolCreateIndexPattern) {
@@ -225,6 +229,7 @@ export class JsonUploadAndParse extends Component {
             indexPatternResp={indexPatternResp}
             complete={
               currentIndexingStage === INDEXING_STAGE.INDEX_PATTERN_COMPLETE
+                || currentIndexingStage === INDEXING_STAGE.INDEXING_ERROR
             }
             indexName={indexName}
           />
