@@ -110,10 +110,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await this.startLayout();
     }
 
-    async selectLinkedNodes() {
-      await testSubjects.click('graphLinkedSelection');
-    }
-
     async stopLayout() {
       if (await testSubjects.exists('graphPauseLayout')) {
         await testSubjects.click('graphPauseLayout');
