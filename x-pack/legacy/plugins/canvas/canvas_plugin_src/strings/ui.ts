@@ -179,4 +179,52 @@ export const ViewStrings = {
       },
     },
   },
+  Metric: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metric.displayName', {
+        defaultMessage: 'Metric',
+      }),
+    args: {
+      label: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.label.displayName', {
+            defaultMessage: 'Label',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.label.help', {
+            defaultMessage: 'Describes the metric',
+          }),
+      },
+      labelFont: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.labelFont.displayName', {
+            defaultMessage: 'Label text settings',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.labelFont.help', {
+            defaultMessage: 'Fonts, alignment and color',
+          }),
+      },
+      metricFont: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.metricFont.displayName', {
+            defaultMessage: 'Metric text settings',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.metricFont.help', {
+            defaultMessage: 'Fonts, alignment and color',
+          }),
+      },
+      metricFormat: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.metricFormat.displayName', {
+            defaultMessage: 'Metric Format',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.metric.args.metricFormat.help', {
+            defaultMessage: 'Fonts, alignment and color',
+          }),
+      },
+    },
+  },
 };
