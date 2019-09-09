@@ -28,7 +28,8 @@ declare module 'elasticsearch' {
     | 'extended_stats'
     | 'filter'
     | 'filters'
-    | 'cardinality';
+    | 'cardinality'
+    | 'sampler';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -70,6 +71,10 @@ declare module 'elasticsearch' {
       } & SubAggregation<SubAggregationMap>
     >;
   };
+
+  type SamplerAggregation<SubAggregationMap> = SubAggregation<
+    SubAggregationMap
+  >;
 
   interface AggregatedValue {
     value: number | null;
@@ -128,6 +133,7 @@ declare module 'elasticsearch' {
         cardinality: {
           value: number;
         };
+        sampler: SamplerAggregation<AggregationOption[AggregationName]>;
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;

@@ -146,7 +146,7 @@ export async function initStatsRoute(setup: CoreSetup) {
         if (field.type === 'number') {
           return res.ok({
             body: await getNumberHistogram(
-              (aggBody: unknown) =>
+              (aggBody: unknown): Promise<unknown> =>
                 requestClient.callAsCurrentUser('search', {
                   index: req.params.indexPatternTitle,
                   body: {
@@ -161,7 +161,7 @@ export async function initStatsRoute(setup: CoreSetup) {
         } else if (field.type === 'string') {
           return res.ok({
             body: await getStringSamples(
-              (aggBody: unknown) =>
+              (aggBody: unknown): Promise<unknown> =>
                 requestClient.callAsCurrentUser('search', {
                   index: req.params.indexPatternTitle,
                   body: {
@@ -176,7 +176,7 @@ export async function initStatsRoute(setup: CoreSetup) {
         } else if (field.type === 'date') {
           return res.ok({
             body: await getDateHistogram(
-              (aggBody: unknown) =>
+              (aggBody: unknown): Promise<unknown> =>
                 requestClient.callAsCurrentUser('search', {
                   index: req.params.indexPatternTitle,
                   body: {
@@ -277,31 +277,10 @@ export function recursiveFlatten(
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (
-    body: unknown
-  ) => Promise<AggregationSearchResponse<unknown, { body: { aggs: unknown } }>>,
+  aggSearchWithBody: (body: unknown) => Promise<unknown>,
   field: { name: string; type: string; esTypes?: string[] }
 ) {
-  const minMaxResult: AggregationSearchResponse<
-    unknown,
-    {
-      body: {
-        aggs: {
-          sample: {
-            sampler: { shard_size: 5000 };
-            aggs: {
-              min_value: {
-                min: { field: string };
-              };
-              max_value: {
-                max: { field: string };
-              };
-            };
-          };
-        };
-      };
-    }
-  > = await aggSearchWithBody({
+  const minMaxResult = (await aggSearchWithBody({
     sample: {
       sampler: { shard_size: 5000 },
       aggs: {
@@ -316,26 +295,57 @@ export async function getNumberHistogram(
         },
       },
     },
-  });
+  })) as AggregationSearchResponse<
+    unknown,
+    {
+      body: {
+        aggs: {
+          sample: {
+            sampler: {};
+            aggs: {
+              min_value: {
+                min: { field: string };
+              };
+              max_value: {
+                max: { field: string };
+              };
+            };
+          };
+        };
+      };
+    }
+  >;
 
-  const minValue = minMaxResult.aggregations.sample.min_value.value;
-  const maxValue = minMaxResult.aggregations.sample.max_value.value;
-  const terms = minMaxResult.aggregations.sample.top_values;
+  const minValue = minMaxResult.aggregations!.sample.min_value.value;
+  const maxValue = minMaxResult.aggregations!.sample.max_value.value;
+  const terms = minMaxResult.aggregations!.sample.top_values;
 
-  let histogramInterval = (maxValue - minValue) / 10;
+  let histogramInterval = (maxValue! - minValue!) / 10;
 
-  if (Number.isInteger(minValue) && Number.isInteger(maxValue)) {
+  if (Number.isInteger(minValue!) && Number.isInteger(maxValue!)) {
     histogramInterval = Math.ceil(histogramInterval);
   }
 
   if (histogramInterval === 0) {
     return {
       top_values: terms,
-      histogram: { buckets: [], doc_count: minMaxResult.aggregations.sample.doc_count },
+      histogram: { buckets: [], doc_count: minMaxResult.aggregations!.sample.doc_count },
     };
   }
 
-  const histogramResult: AggregationSearchResponse<
+  const histogramResult = (await aggSearchWithBody({
+    sample: {
+      sampler: { shard_size: 5000 },
+      aggs: {
+        histo: {
+          histogram: {
+            field: field.name,
+            interval: histogramInterval,
+          },
+        },
+      },
+    },
+  })) as AggregationSearchResponse<
     unknown,
     {
       body: {
@@ -351,45 +361,19 @@ export async function getNumberHistogram(
         };
       };
     }
-  > = await aggSearchWithBody({
-    sample: {
-      sampler: { shard_size: 5000 },
-      aggs: {
-        histo: {
-          histogram: {
-            field: field.name,
-            interval: histogramInterval,
-          },
-        },
-      },
-    },
-  });
+  >;
 
   return {
-    histogram: histogramResult.aggregations.sample,
+    histogram: histogramResult.aggregations!.sample,
     top_values: terms,
   };
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
+  aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string }
 ) {
-  const topValuesResult: AggregationSearchResponse<
-    unknown,
-    {
-      aggregations: {
-        sample: {
-          sampler: { shard_size: 5000 };
-          aggs: {
-            top_values: {
-              terms: { field: string };
-            };
-          };
-        };
-      };
-    }
-  > = await aggSearchWithBody({
+  const topValuesResult = (await aggSearchWithBody({
     sample: {
       sampler: { shard_size: 5000 },
       aggs: {
@@ -398,14 +382,30 @@ export async function getStringSamples(
         },
       },
     },
-  });
+  })) as AggregationSearchResponse<
+    unknown,
+    {
+      body: {
+        aggs: {
+          sample: {
+            sampler: {};
+            aggs: {
+              top_values: {
+                terms: { field: string };
+              };
+            };
+          };
+        };
+      };
+    }
+  >;
 
-  return topValuesResult.aggregations.sample;
+  return topValuesResult.aggregations!.sample;
 }
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
+  aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string },
   range: { earliest: string; latest: string }
 ) {
@@ -421,7 +421,11 @@ export async function getDateHistogram(
   // TODO: Respect rollup intervals
   const fixedInterval = `${Math.round((latest.valueOf() - earliest.valueOf()) / 10)}ms`;
 
-  const results: AggregationSearchResponse<
+  const results = (await aggSearchWithBody({
+    histo: {
+      date_histogram: { field: field.name, fixed_interval: fixedInterval, min_doc_count: 1 },
+    },
+  })) as AggregationSearchResponse<
     unknown,
     {
       body: {
@@ -432,11 +436,7 @@ export async function getDateHistogram(
         };
       };
     }
-  > = await aggSearchWithBody({
-    histo: {
-      date_histogram: { field: field.name, fixed_interval: fixedInterval, min_doc_count: 1 },
-    },
-  });
+  >;
 
   return {
     histogram: results.aggregations,

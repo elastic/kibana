@@ -26,7 +26,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
 
     return (
       <EuiButton
-        size={this.props.size || 's'}
+        size={'s'}
         className={this.props.className}
         isDisabled={this.props.isDisabled}
         onClick={this.navigateToManageSpaces}

@@ -433,7 +433,6 @@ export class CodeQueryBar extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-            {/* position:relative required on container so the suggestions appear under the query bar*/}
             <div
               style={{ position: 'relative' }}
               role="combobox"
@@ -442,6 +441,7 @@ export class CodeQueryBar extends Component<Props, State> {
               aria-owns="typeahead-items"
               aria-controls="typeahead-items"
             >
+              {/* position:relative required on container so the suggestions appear under the query bar*/}
               <form name="queryBarForm">
                 <div className="kuiLocalSearch" role="search">
                   <div className="kuiLocalSearchAssistedInput">

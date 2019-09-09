@@ -14,6 +14,7 @@ import {
   EuiKeyboardAccessible,
   EuiText,
   EuiToolTip,
+  EuiComboBox,
 } from '@elastic/eui';
 import {
   Chart,
@@ -56,6 +57,7 @@ export interface BucketedAggregation {
     key: number;
     doc_count: number;
   }>;
+  sum_other_doc_count?: number;
 }
 
 export interface NumberStatsResult {
@@ -242,7 +244,53 @@ export function FieldItem({
         <div>
           {state.isLoading && <EuiLoadingSpinner />}
 
-          {state.histogram && (
+          {state.histogram && state.topValues && (
+            <EuiComboBox
+              data-test-subj="indexPattern-switcher"
+              options={[
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+                    defaultMessage: 'Top Values',
+                  }),
+                  value: 'top values',
+                },
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
+                    defaultMessage: 'Histogram',
+                  }),
+                  value: 'histogram',
+                },
+              ]}
+              selectedOptions={
+                showingHistogram
+                  ? [
+                      {
+                        label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
+                          defaultMessage: 'Histogram',
+                        }),
+                        value: 'histogram',
+                      },
+                    ]
+                  : [
+                      {
+                        label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+                          defaultMessage: 'Top Values',
+                        }),
+                        value: 'top values',
+                      },
+                    ]
+              }
+              singleSelection={{ asPlainText: true }}
+              isClearable={false}
+              onChange={choices => {
+                if (choices.length) {
+                  setShowingHistogram(choices[0].value === 'histogram');
+                }
+              }}
+            />
+          )}
+
+          {state.histogram && (!state.topValues || showingHistogram) && (
             <Chart className="lnsDistributionChart">
               <Settings rotation={90} />
 
@@ -251,7 +299,6 @@ export function FieldItem({
                 position={Position.Left}
                 tickFormat={d => formatter.convert(d)}
               />
-              <Axis id={getAxisId('doc_count')} position={Position.Bottom} />
 
               <BarSeries
                 data={state.histogram.buckets}
@@ -265,7 +312,7 @@ export function FieldItem({
             </Chart>
           )}
 
-          {state.topValues && (
+          {state.topValues && (!state.histogram || !showingHistogram) && (
             <div>
               {state.doc_count && (
                 <div>
@@ -285,7 +332,10 @@ export function FieldItem({
                         </EuiFlexItem>
                         <EuiFlexItem grow={1}>
                           <EuiProgress
-                            value={topValue.doc_count / state.doc_count!}
+                            value={
+                              topValue.doc_count /
+                              (state.doc_count! + (state.topValues!.sum_other_doc_count || 0))
+                            }
                             max={1}
                             size="l"
                             color={
@@ -303,24 +353,68 @@ export function FieldItem({
                           className="eui-textTruncate"
                         >
                           <EuiText size="s" textAlign="left">
-                            {((topValue.doc_count / state.doc_count!) * 100).toFixed(1)}%
+                            {(
+                              (topValue.doc_count /
+                                (state.doc_count! + (state.topValues!.sum_other_doc_count || 0))) *
+                              100
+                            ).toFixed(1)}
+                            %
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     ))}
+                    {state.topValues.sum_other_doc_count ? (
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" key={'otther'}>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ width: 100 }}
+                          className="eui-textTruncate"
+                        >
+                          <EuiText size="s" textAlign="right">
+                            {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
+                              defaultMessage: 'Other',
+                            })}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={1}>
+                          <EuiProgress
+                            value={
+                              state.topValues!.sum_other_doc_count /
+                              (state.doc_count! + (state.topValues!.sum_other_doc_count || 0))
+                            }
+                            max={1}
+                            size="l"
+                            color={
+                              field.type === 'string'
+                                ? 'accent'
+                                : field.type === 'number'
+                                ? 'secondary'
+                                : 'primary'
+                            }
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ width: 70 }}
+                          className="eui-textTruncate"
+                        >
+                          <EuiText size="s" textAlign="left">
+                            {(
+                              (state.topValues!.sum_other_doc_count /
+                                (state.doc_count! + state.topValues!.sum_other_doc_count || 0)) *
+                              100
+                            ).toFixed(1)}
+                            %
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-          )}
-
-          {state.doc_count && (
-            <EuiText size="s">
-              {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
-                defaultMessage: 'Sampled from {sampleCount} documents',
-                values: { sampleCount: state.doc_count },
-              })}
-            </EuiText>
           )}
         </div>
       </EuiPopover>
