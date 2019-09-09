@@ -265,6 +265,7 @@ describe('SIEM Super Date Picker', () => {
         const wrapperFixedEuiFieldSearch = wrapper.find(
           'input[data-test-subj="superDatePickerRefreshIntervalInput"]'
         );
+
         wrapperFixedEuiFieldSearch.simulate('change', { target: { value: '2' } });
         wrapper.update();
 

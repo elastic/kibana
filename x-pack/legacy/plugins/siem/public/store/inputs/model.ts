@@ -64,10 +64,16 @@ export interface GlobalGenericQuery {
   selectedInspectIndex: number;
 }
 
-export interface GlobalQuery extends GlobalGenericQuery {
+export interface GlobalGraphqlQuery extends GlobalGenericQuery {
   id: string | 'kql';
   refetch: null | Refetch | RefetchWithParams | RefetchKql;
 }
+export interface GlobalKqlQuery extends GlobalGenericQuery {
+  id: string | 'kql';
+  refetch: RefetchKql;
+}
+
+export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;

@@ -15,7 +15,6 @@ import {
 import { getOr, take } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
 
 import { Dispatch } from 'redux';
 import { inputsModel, State } from '../../store';
@@ -66,7 +65,7 @@ interface SuperDatePickerStateRedux {
 
 interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
-  kql?: inputsModel.GlobalQuery | undefined;
+  kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
 
@@ -84,9 +83,9 @@ type DispatchUpdateReduxTime = ({
 }: UpdateReduxTime) => ReturnUpdateReduxTime;
 
 interface SuperDatePickerDispatchProps {
-  startAutoReload: ActionCreator<{ id: InputsModelId }>;
-  stopAutoReload: ActionCreator<{ id: InputsModelId }>;
-  setDuration: ActionCreator<{ id: InputsModelId; duration: number }>;
+  startAutoReload: ({ id }: { id: InputsModelId }) => void;
+  stopAutoReload: ({ id }: { id: InputsModelId }) => void;
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -151,7 +150,7 @@ export const SuperDatePickerComponent = class extends Component<
       id: this.props.id,
       isInvalid: false,
       isQuickSelection: this.state.isQuickSelection,
-      kql: this.props.queries.find(q => q.id === 'kql'),
+      kql: this.props.queries.find(q => q.id === 'kql') as inputsModel.GlobalKqlQuery,
       start,
       timelineId: this.props.timelineId,
     });
@@ -170,7 +169,6 @@ export const SuperDatePickerComponent = class extends Component<
 
   private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
     const { id, duration, policy, stopAutoReload, startAutoReload } = this.props;
-
     if (duration !== refreshInterval) {
       this.props.setDuration({ id, duration: refreshInterval });
     }
@@ -203,7 +201,7 @@ export const SuperDatePickerComponent = class extends Component<
         id: this.props.id,
         isInvalid,
         isQuickSelection,
-        kql: this.props.queries.find(q => q.id === 'kql'),
+        kql: this.props.queries.find(q => q.id === 'kql') as inputsModel.GlobalKqlQuery,
         start,
         timelineId: this.props.timelineId,
       });
@@ -280,7 +278,7 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
 
   if (kql) {
     return {
-      kqlHaveBeenUpdated: (kql.refetch as inputsModel.RefetchKql)(dispatch),
+      kqlHaveBeenUpdated: kql.refetch(dispatch),
     };
   }
 
@@ -316,9 +314,11 @@ export const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  startAutoReload: inputsActions.startAutoReload,
-  stopAutoReload: inputsActions.stopAutoReload,
-  setDuration: inputsActions.setDuration,
+  startAutoReload: ({ id }: { id: InputsModelId }) =>
+    dispatch(inputsActions.startAutoReload({ id })),
+  stopAutoReload: ({ id }: { id: InputsModelId }) => dispatch(inputsActions.stopAutoReload({ id })),
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) =>
+    dispatch(inputsActions.setDuration({ id, duration })),
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
@@ -326,7 +326,3 @@ export const SuperDatePicker = connect(
   makeMapStateToProps,
   mapDispatchToProps
 )(SuperDatePickerComponent);
-
-// setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
-// setRelativeSuperDatePicker: inputsActions.setRelativeRangeDatePicker,
-// updateTimelineRange: timelineActions.updateRange,
