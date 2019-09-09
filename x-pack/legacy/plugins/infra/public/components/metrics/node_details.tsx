@@ -104,9 +104,10 @@ const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDe
 export const NodeDetails = ({ metadata }: Props) => {
   const [isOpen, setControlState] = useState<boolean>(false);
 
-  const handleClick = useCallback(() => (isOpen ? setControlState(false) : setControlState(true)), [
-    isOpen,
-  ]);
+  const toggleIsOpen = useCallback(
+    () => (isOpen ? setControlState(false) : setControlState(true)),
+    [isOpen]
+  );
 
   if (!metadata) {
     return null;
@@ -117,7 +118,7 @@ export const NodeDetails = ({ metadata }: Props) => {
       <Controls>
         <EuiButtonIcon
           iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-          onClick={handleClick}
+          onClick={toggleIsOpen}
           aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
             defaultMessage: 'Show more details',
           })}
