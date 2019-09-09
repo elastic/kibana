@@ -5,11 +5,13 @@
  */
 
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
+import { CSS } from '../../../i18n/constants';
+import { ViewStrings } from '../../strings';
 
 export const render = () => ({
   name: 'render',
-  displayName: 'Element style',
-  help: 'Setting for the container around your element',
+  displayName: ViewStrings.Render.getDisplayName(),
+  help: ViewStrings.Render.getHelp(),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -19,12 +21,12 @@ export const render = () => ({
     },
     {
       name: 'css',
-      displayName: 'CSS',
-      help: 'A CSS stylesheet scoped to your element',
+      displayName: CSS,
+      help: ViewStrings.Render.args.CSS.getHelp(),
       argType: 'textarea',
       default: `"${DEFAULT_ELEMENT_CSS}"`,
       options: {
-        confirm: 'Apply stylesheet',
+        confirm: ViewStrings.Render.args.CSS.getApply(),
       },
     },
   ],

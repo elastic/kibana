@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { URL, MARKDOWN } from '../../i18n';
+import { CSS, URL, MARKDOWN } from '../../i18n';
 
 export const ArgumentStrings = {
   FilterGroup: {
@@ -440,6 +440,31 @@ export const ViewStrings = {
           i18n.translate('xpack.canvas.uis.views.progress.args.font.help', {
             defaultMessage:
               'Font settings for the label. Technically, you can add other styles as well',
+          }),
+      },
+    },
+  },
+  Render: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.render.displayName', {
+        defaultMessage: 'Element style',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.render.help', {
+        defaultMessage: 'Setting for the container around your element',
+      }),
+    args: {
+      CSS: {
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.render.args.css.help', {
+            defaultMessage: 'A {css} stylesheet scoped to your element',
+            values: {
+              css: CSS,
+            },
+          }),
+        getApply: () =>
+          i18n.translate('xpack.canvas.uis.views.render.args.css.apply', {
+            defaultMessage: 'Apply Stylesheet',
           }),
       },
     },
