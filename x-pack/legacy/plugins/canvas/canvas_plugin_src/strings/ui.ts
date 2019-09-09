@@ -355,4 +355,93 @@ export const ViewStrings = {
       },
     },
   },
+  Progress: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.displayName', {
+        defaultMessage: 'Progress',
+      }),
+    args: {
+      Shape: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.shape.displayName', {
+            defaultMessage: 'Shape',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.shape.help', {
+            defaultMessage: 'Shape of the progress indicator',
+          }),
+      },
+      Max: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.max.displayName', {
+            defaultMessage: 'Maximum value',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.max.help', {
+            defaultMessage: 'Maximum value of the progress element',
+          }),
+      },
+      ValueColor: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.valueColor.displayName', {
+            defaultMessage: 'Progress color',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.valueColor.help', {
+            defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+          }),
+      },
+      ValueWeight: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.valueWeight.displayName', {
+            defaultMessage: 'Progress weight',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.valueWeight.help', {
+            defaultMessage: 'Thickness of the progress bar',
+          }),
+      },
+      BarColor: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.barColor.displayName', {
+            defaultMessage: 'Background color',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.barColor.help', {
+            defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+          }),
+      },
+      BarWeight: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.barWeight.displayName', {
+            defaultMessage: 'Background weight',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.barWeight.help', {
+            defaultMessage: 'Thickness of the background bar',
+          }),
+      },
+      Label: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.label.displayName', {
+            defaultMessage: 'Label',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.label.help', {
+            defaultMessage: `Set true/false to show/hide label or provide a string to display as the label`,
+          }),
+      },
+      Font: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.font.displayName', {
+            defaultMessage: 'Label settings',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.progress.args.font.help', {
+            defaultMessage:
+              'Font settings for the label. Technically, you can add other styles as well',
+          }),
+      },
+    },
+  },
 };

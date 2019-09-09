@@ -6,17 +6,18 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
+import { ViewStrings } from '../../strings';
 
 export const progress = () => ({
   name: 'progress',
-  displayName: 'Progress',
+  displayName: ViewStrings.Progress.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   requiresContext: false,
   args: [
     {
       name: 'shape',
-      displayName: 'Shape',
-      help: 'Shape of the progress indicator',
+      displayName: ViewStrings.Progress.args.Shape.getDisplayName(),
+      help: ViewStrings.Progress.args.Shape.getHelp(),
       argType: 'select',
       options: {
         choices: Object.keys(shapes).map(key => ({
@@ -28,50 +29,50 @@ export const progress = () => ({
     },
     {
       name: 'max',
-      displayName: 'Maximum value',
-      help: 'Maximum value of the progress element',
+      displayName: ViewStrings.Progress.args.Max.getDisplayName(),
+      help: ViewStrings.Progress.args.Max.getHelp(),
       argType: 'number',
       default: '1',
     },
     {
       name: 'valueColor',
-      displayName: 'Progress color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      displayName: ViewStrings.Progress.args.ValueColor.getDisplayName(),
+      help: ViewStrings.Progress.args.ValueColor.getHelp(),
       argType: 'color',
       default: `#1785b0`,
     },
     {
       name: 'valueWeight',
-      displayName: 'Progress weight',
-      help: 'Thickness of the progress bar',
+      displayName: ViewStrings.Progress.args.ValueWeight.getDisplayName(),
+      help: ViewStrings.Progress.args.ValueWeight.getHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'barColor',
-      displayName: 'Background color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      displayName: ViewStrings.Progress.args.BarColor.getDisplayName(),
+      help: ViewStrings.Progress.args.BarColor.getHelp(),
       argType: 'color',
       default: `#f0f0f0`,
     },
     {
       name: 'barWeight',
-      displayName: 'Background weight',
-      help: 'Thickness of the background bar',
+      displayName: ViewStrings.Progress.args.BarWeight.getDisplayName(),
+      help: ViewStrings.Progress.args.BarWeight.getHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'label',
-      displayName: 'Label',
-      help: `Set true/false to show/hide label or provide a string to display as the label`,
+      displayName: ViewStrings.Progress.args.Label.getDisplayName(),
+      help: ViewStrings.Progress.args.Label.getHelp(),
       argType: 'toggle',
       default: 'true',
     },
     {
       name: 'font',
-      displayName: 'Label settings',
-      help: 'Font settings for the label. Technically, you can add other styles as well',
+      displayName: ViewStrings.Progress.args.Font.getDisplayName(),
+      help: ViewStrings.Progress.args.Font.getHelp(),
       argType: 'font',
       default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
     },
