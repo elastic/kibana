@@ -38,10 +38,12 @@ export function getTopNavConfig(
       return hideWriteControls
         ? [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            getExportConfig(actions[TopNavIds.EXPORT]),
             getShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            getExportConfig(actions[TopNavIds.EXPORT]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
@@ -174,6 +176,23 @@ function getShareConfig(action: NavAction) {
       defaultMessage: 'Share Dashboard',
     }),
     testId: 'shareTopNavButton',
+    run: action,
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getExportConfig(action: NavAction) {
+  return {
+    id: 'export',
+    label: i18n.translate('kbn.dashboard.topNave.exportButtonAriaLabel', {
+      defaultMessage: 'export',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.exportConfigDescription', {
+      defaultMessage: 'Export Dashboard',
+    }),
+    testId: 'exportTopNavButton',
     run: action,
   };
 }

@@ -27,7 +27,9 @@ import { ShareAction, ShareActionProvider, ShareContextMenuPanelItem } from 'ui/
 import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
+  actionType: string;
   allowEmbed: boolean;
+  allowPermalink: boolean;
   allowShortUrl: boolean;
   objectId?: string;
   objectType: string;
@@ -56,31 +58,33 @@ class ShareContextMenuUI extends Component<Props> {
     const menuItems: ShareContextMenuPanelItem[] = [];
     const { intl } = this.props;
 
-    const permalinkPanel = {
-      id: panels.length + 1,
-      title: intl.formatMessage({
-        id: 'common.ui.share.contextMenu.permalinkPanelTitle',
-        defaultMessage: 'Permalink',
-      }),
-      content: (
-        <UrlPanelContent
-          allowShortUrl={this.props.allowShortUrl}
-          objectId={this.props.objectId}
-          objectType={this.props.objectType}
-          getUnhashableStates={this.props.getUnhashableStates}
-        />
-      ),
-    };
-    menuItems.push({
-      name: intl.formatMessage({
-        id: 'common.ui.share.contextMenu.permalinksLabel',
-        defaultMessage: 'Permalinks',
-      }),
-      icon: 'link',
-      panel: permalinkPanel.id,
-      sortOrder: 0,
-    });
-    panels.push(permalinkPanel);
+    if (this.props.allowPermalink) {
+      const permalinkPanel = {
+        id: panels.length + 1,
+        title: intl.formatMessage({
+          id: 'common.ui.share.contextMenu.permalinkPanelTitle',
+          defaultMessage: 'Permalink',
+        }),
+        content: (
+          <UrlPanelContent
+            allowShortUrl={this.props.allowShortUrl}
+            objectId={this.props.objectId}
+            objectType={this.props.objectType}
+            getUnhashableStates={this.props.getUnhashableStates}
+          />
+        ),
+      };
+      menuItems.push({
+        name: intl.formatMessage({
+          id: 'common.ui.share.contextMenu.permalinksLabel',
+          defaultMessage: 'Permalinks',
+        }),
+        icon: 'link',
+        panel: permalinkPanel.id,
+        sortOrder: 0,
+      });
+      panels.push(permalinkPanel);
+    }
 
     if (this.props.allowEmbed) {
       const embedPanel = {
@@ -150,10 +154,11 @@ class ShareContextMenuUI extends Component<Props> {
         title: intl.formatMessage(
           {
             id: 'common.ui.share.contextMenuTitle',
-            defaultMessage: 'Share this {objectType}',
+            defaultMessage: '{actionType} this {objectType}',
           },
           {
             objectType: this.props.objectType,
+            actionType: this.props.actionType,
           }
         ),
         items: menuItems

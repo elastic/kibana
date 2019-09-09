@@ -767,15 +767,35 @@ export class DashboardAppController {
         },
       });
     };
-    navActions[TopNavIds.SHARE] = anchorElement => {
+
+    navActions[TopNavIds.EXPORT] = anchorElement => {
       showShareContextMenu({
+        actionType: 'Export',
         anchorElement,
-        allowEmbed: true,
-        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowEmbed: false,
+        allowShortUrl: false,
+        allowPermalink: false,
         getUnhashableStates,
         objectId: dash.id,
         objectType: 'dashboard',
         shareContextMenuExtensions: shareContextMenuExtensions.raw,
+        sharingData: {
+          title: dash.title,
+        },
+        isDirty: dashboardStateManager.getIsDirty(),
+      });
+    };
+
+    navActions[TopNavIds.SHARE] = anchorElement => {
+      showShareContextMenu({
+        actionType: 'Share',
+        anchorElement,
+        allowEmbed: true,
+        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowPermalink: true,
+        getUnhashableStates,
+        objectId: dash.id,
+        objectType: 'dashboard',
         sharingData: {
           title: dash.title,
         },
