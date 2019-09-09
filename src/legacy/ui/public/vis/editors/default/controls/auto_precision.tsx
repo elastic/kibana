@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import React from 'react';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
+import { EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from '..';
 
-  constructor(config: Record<string, any>) {
-    super(config);
+function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
+  const label = i18n.translate('common.ui.aggTypes.changePrecisionLabel', {
+    defaultMessage: 'Change precision on map zoom',
+  });
 
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
+  return (
+    <EuiFormRow compressed>
+      <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
+    </EuiFormRow>
+  );
 }
+
+export { AutoPrecisionParamEditor };

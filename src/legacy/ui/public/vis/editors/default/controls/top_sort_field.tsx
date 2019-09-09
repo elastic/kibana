@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { Field } from '../../../../index_patterns';
+import { FieldParamEditor } from './field';
+import { AggParamEditorProps } from '..';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
+function TopSortFieldParamEditor(props: AggParamEditorProps<Field>) {
+  const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
+    defaultMessage: 'Sort on',
+  });
 
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
+  return <FieldParamEditor {...props} customLabel={customLabel} />;
 }
+
+export { TopSortFieldParamEditor };

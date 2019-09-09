@@ -17,22 +17,25 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
-import { BaseParamType } from './base';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { SwitchParamEditor } from './switch';
+import { AggParamEditorProps } from '..';
 
-export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
-
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
-        }
-      };
-    }
-  }
+function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
+  return (
+    <SwitchParamEditor
+      dataTestSubj="dropPartialBucketsCheckbox"
+      displayLabel={i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
+        defaultMessage: 'Drop partial buckets',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
+        defaultMessage:
+          "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
+      })}
+      {...props}
+    />
+  );
 }
+
+export { DropPartialsParamEditor };
