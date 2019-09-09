@@ -246,9 +246,7 @@
 .codeSearch-suggestion__token {
   color: $euiColorFullShade;
   box-sizing: border-box;
-  flex-grow: 0;
-  flex-basis: auto;
-  width: $euiSizeXL;
+  flex: 0 0 $euiSizeXL;
   height: $euiSizeXL;
   text-align: center;
   overflow: hidden;
