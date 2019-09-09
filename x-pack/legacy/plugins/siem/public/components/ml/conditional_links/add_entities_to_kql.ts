@@ -40,10 +40,8 @@ export const addEntitiesToKql = (
   kqlQuery: string
 ): string => {
   const value: RisonValue = decodeRison(kqlQuery);
-  console.log('is this a rison object?', isRisonObject(value));
   if (isRisonObject(value)) {
     const filterQuery = value.filterQuery;
-    console.log('is filterQuery a rison object?', value, filterQuery, isRisonObject(filterQuery));
     if (isRisonObject(filterQuery)) {
       if (isRegularString(filterQuery.expression)) {
         const entitiesKql = entitiesToKql(entityNames, entities);
@@ -54,8 +52,10 @@ export const addEntitiesToKql = (
         }
         return encode(value);
       }
-    } else if (filterQuery == null) {
-      // TODO: null testing and null stuff here.
+    } else if (value.filterQuery == null) {
+      const entitiesKql = entitiesToKql(entityNames, entities);
+      value.filterQuery = { expression: `(${entitiesKql})` };
+      return encode(value);
     }
   }
   return kqlQuery;

@@ -60,32 +60,24 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network/anomalies?${reEncoded}`} />;
+          return <Redirect to={`/network?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
-          console.log('queryStringDecoded is', queryStringDecoded);
-          console.log('found ips of:', ips);
           if (queryStringDecoded.kqlQuery != null) {
-            console.log('queryStringDecoded.kqlQuery != null', queryStringDecoded.kqlQuery);
             queryStringDecoded.kqlQuery = addEntitiesToKql(
               ['source.ip', 'destination.ip'],
               ips,
               queryStringDecoded.kqlQuery
             );
-            console.log('entities added to kql is:', queryStringDecoded.kqlQuery);
             queryStringDecoded.kqlQuery = replaceKqlQueryLocationForNetworkPage(
               queryStringDecoded.kqlQuery
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          console.log(
-            'multi-entities detected, redirecting to:',
-            `/network/anomalies?${reEncoded}`
-          );
-          return <Redirect to={`/network/anomalies?${reEncoded}`} />;
+          return <Redirect to={`/network?${reEncoded}`} />;
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network/ip/${ip}/anomalies?${reEncoded}`} />;
+          return <Redirect to={`/network/ip/${ip}?${reEncoded}`} />;
         }
       }}
     />
