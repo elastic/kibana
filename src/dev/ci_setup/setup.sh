@@ -2,7 +2,7 @@
 
 set -e
 
-source src/dev/ci_setup/setup_env.sh
+source src/dev/ci_setup/setup_env.sh true
 
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
 echo " -- XPACK_DIR='$XPACK_DIR'"

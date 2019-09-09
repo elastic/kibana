@@ -2,6 +2,8 @@
 
 set -e
 
+installNode=$1
+
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
@@ -57,26 +59,28 @@ else
   nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 fi
 
-echo " -- node: version=v${nodeVersion} dir=$nodeDir"
+if [[ "$installNode" == "true" ]]; then
+  echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
-echo " -- setting up node.js"
-if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
-  echo " -- reusing node.js install"
-else
-  if [ -d "$nodeDir" ]; then
-    echo " -- clearing previous node.js install"
-    rm -rf "$nodeDir"
-  fi
-
-  echo " -- downloading node.js from $nodeUrl"
-  mkdir -p "$nodeDir"
-  if [[ "$OS" == "win" ]]; then
-    nodePkg="$nodeDir/${nodeUrl##*/}"
-    curl --silent -o "$nodePkg" "$nodeUrl"
-    unzip -qo "$nodePkg" -d "$nodeDir"
-    mv "${nodePkg%.*}" "$nodeBin"
+  echo " -- setting up node.js"
+  if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
+    echo " -- reusing node.js install"
   else
-    curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+    if [ -d "$nodeDir" ]; then
+      echo " -- clearing previous node.js install"
+      rm -rf "$nodeDir"
+    fi
+
+    echo " -- downloading node.js from $nodeUrl"
+    mkdir -p "$nodeDir"
+    if [[ "$OS" == "win" ]]; then
+      nodePkg="$nodeDir/${nodeUrl##*/}"
+      curl --silent -o "$nodePkg" "$nodeUrl"
+      unzip -qo "$nodePkg" -d "$nodeDir"
+      mv "${nodePkg%.*}" "$nodeBin"
+    else
+      curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+    fi
   fi
 fi
 
