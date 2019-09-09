@@ -5,7 +5,7 @@ exports[`Header renders correctly against snapshot 1`] = `
   data-test-subj="header-container"
   gutterSize="none"
   key="@timestamp"
-  width="240px"
+  width="190px"
 >
   <Resizeable
     handle={

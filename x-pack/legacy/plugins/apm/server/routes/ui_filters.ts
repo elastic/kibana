@@ -9,7 +9,10 @@ import { omit } from 'lodash';
 import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../../common/projections/typings';
-import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
+import {
+  localUIFilterNames,
+  LocalUIFilterName
+} from '../lib/ui_filters/local_ui_filters/config';
 import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../../common/projections/services';
@@ -40,7 +43,11 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
 
 const filterNamesRt = t.type({
   filterNames: jsonRt.pipe(
-    t.array(t.union(localUIFilterNames.map(name => t.literal(name))))
+    t.array(
+      t.keyof(Object.fromEntries(
+        localUIFilterNames.map(filterName => [filterName, null])
+      ) as Record<LocalUIFilterName, null>)
+    )
   )
 });
 

@@ -38,7 +38,7 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         authentications: { activePage: 0, limit: 10 },
-        hosts: {
+        allHosts: {
           activePage: 0,
           limit: 10,
           direction: Direction.desc,
@@ -54,7 +54,7 @@ export const mockGlobalState: State = {
     details: {
       queries: {
         authentications: { activePage: 0, limit: 10 },
-        hosts: {
+        allHosts: {
           activePage: 0,
           limit: 10,
           direction: Direction.desc,
