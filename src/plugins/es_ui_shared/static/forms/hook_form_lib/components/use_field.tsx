@@ -19,7 +19,7 @@
 
 import React, { useEffect, FunctionComponent } from 'react';
 
-import { Field as FieldType, FieldConfig } from '../types';
+import { FieldHook, FieldConfig } from '../types';
 import { useField } from '../hooks';
 import { useFormContext } from '../form_context';
 
@@ -29,7 +29,7 @@ interface Props {
   defaultValue?: unknown;
   component?: FunctionComponent<any> | 'input';
   componentProps?: Record<string, any>;
-  children?: (field: FieldType) => JSX.Element;
+  children?: (field: FieldHook) => JSX.Element;
 }
 
 export const UseField = ({

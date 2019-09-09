@@ -19,10 +19,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import { Form, Field, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
+import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-export const useField = (form: Form, path: string, config: FieldConfig = {}) => {
+export const useField = (form: FormHook, path: string, config: FieldConfig = {}) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '',
@@ -246,7 +246,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   // -- API
   // ----------------------------------
-  const clearErrors: Field['clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
+  const clearErrors: FieldHook['clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
     setErrors(previousErrors => filterErrors(previousErrors, validationType));
   };
 
@@ -255,7 +255,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    * If a validationType is provided then only that validation will be executed,
    * skipping the other type of validation that might exist.
    */
-  const validate: Field['validate'] = (validationData = {}) => {
+  const validate: FieldHook['validate'] = (validationData = {}) => {
     const {
       formData = form.getFormData({ unflatten: false }),
       value: valueToValidate = value,
@@ -304,7 +304,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: Field['setValue'] = newValue => {
+  const setValue: FieldHook['setValue'] = newValue => {
     if (isPristine) {
       setPristine(false);
     }
@@ -313,7 +313,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setStateValue(formattedValue);
   };
 
-  const _setErrors: Field['setErrors'] = _errors => {
+  const _setErrors: FieldHook['setErrors'] = _errors => {
     setErrors(_errors.map(error => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
   };
 
@@ -322,7 +322,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    *
    * @param event Form input change event
    */
-  const onChange: Field['onChange'] = event => {
+  const onChange: FieldHook['onChange'] = event => {
     const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
       ? event.target.checked
       : event.target.value;
@@ -340,7 +340,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    *
    * @param validationType The validation type to return error messages from
    */
-  const getErrorsMessages: Field['getErrorsMessages'] = (args = {}) => {
+  const getErrorsMessages: FieldHook['getErrorsMessages'] = (args = {}) => {
     const { errorCode, validationType = VALIDATION_TYPES.FIELD } = args;
     const errorMessages = errors.reduce((messages, error) => {
       const isSameErrorCode = errorCode && error.code === errorCode;
@@ -358,7 +358,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return errorMessages ? errorMessages : null;
   };
 
-  const serializeOutput: Field['__serializeOutput'] = (rawValue = value) => serializer(rawValue);
+  const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
+    serializer(rawValue);
 
   // -- EFFECTS
   // ----------------------------------
@@ -377,7 +378,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     };
   }, [value]);
 
-  const field: Field = {
+  const field: FieldHook = {
     path,
     type,
     label,

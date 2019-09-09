@@ -18,7 +18,7 @@
  */
 
 import { set } from 'lodash';
-import { Field } from '../types';
+import { FieldHook } from '../types';
 
 export const unflattenObject = (object: any) =>
   Object.entries(object).reduce((acc, [key, value]) => {
@@ -46,7 +46,10 @@ export const flattenObject = (
  * @param formFields key value pair of path and form Fields
  * @param fn Iterator function to execute on the field
  */
-export const mapFormFields = (formFields: Record<string, Field>, fn: (field: Field) => any) =>
+export const mapFormFields = (
+  formFields: Record<string, FieldHook>,
+  fn: (field: FieldHook) => any
+) =>
   Object.entries(formFields).reduce(
     (acc, [key, field]) => {
       acc[key] = fn(field);

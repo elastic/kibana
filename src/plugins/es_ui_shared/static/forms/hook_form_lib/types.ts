@@ -20,7 +20,7 @@
 import { ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
 import { Subject } from './lib';
 
-export interface Form<T = FormData> {
+export interface FormHook<T = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
@@ -32,7 +32,7 @@ export interface Form<T = FormData> {
   getFieldDefaultValue: (fieldName: string) => unknown;
   readonly __options: FormOptions;
   readonly __formData$: MutableRefObject<Subject<T>>;
-  __addField: (field: Field) => void;
+  __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (fieldNames?: string[]) => Promise<boolean>;
   __updateFormDataAt: (field: string, value: unknown) => T;
@@ -64,7 +64,7 @@ export interface FormOptions {
   stripEmptyFields: boolean;
 }
 
-export interface Field {
+export interface FieldHook {
   readonly path: string;
   readonly label?: string;
   readonly helpText?: string;
@@ -74,7 +74,7 @@ export interface Field {
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isChangingValue: boolean;
-  readonly form: Form<any>;
+  readonly form: FormHook<any>;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
     errorCode?: string;
@@ -106,7 +106,7 @@ export interface FieldConfig<T = any> {
 }
 
 export interface FieldsMap {
-  [key: string]: Field;
+  [key: string]: FieldHook;
 }
 
 export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<void>;
@@ -121,7 +121,7 @@ export interface ValidationError {
 export type ValidationFunc<T = any> = (data: {
   path: string;
   value: unknown;
-  form: Form<T>;
+  form: FormHook<T>;
   formData: T;
   errors: readonly ValidationError[];
 }) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;

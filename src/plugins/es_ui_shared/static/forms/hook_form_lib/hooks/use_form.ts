@@ -20,13 +20,13 @@
 import { useState, useRef } from 'react';
 import { get } from 'lodash';
 
-import { Form, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { FormHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
 interface UseFormReturn<T> {
-  form: Form<T>;
+  form: FormHook<T>;
 }
 
 export function useForm<T = FormData>(
@@ -75,7 +75,7 @@ export function useForm<T = FormData>(
 
   // -- API
   // ----------------------------------
-  const getFormData: Form<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
+  const getFormData: FormHook<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
           mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__serializeOutput())
@@ -88,7 +88,7 @@ export function useForm<T = FormData>(
           {} as T
         );
 
-  const updateFormDataAt: Form<T>['__updateFormDataAt'] = (path, value) => {
+  const updateFormDataAt: FormHook<T>['__updateFormDataAt'] = (path, value) => {
     const currentFormData = formData$.current.value;
     formData$.current.next({ ...currentFormData, [path]: value });
     return formData$.current.value;
@@ -101,7 +101,7 @@ export function useForm<T = FormData>(
    * When this method is called _without_ providing any fieldNames, we only need to validate fields that are pristine
    * as the fields that are dirty have already been validated when their value changed.
    */
-  const validateFields: Form<T>['__validateFields'] = async fieldNames => {
+  const validateFields: FormHook<T>['__validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
       ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
       : fieldsToArray().filter(field => field.isPristine); // only validate fields that haven't been changed
@@ -118,7 +118,7 @@ export function useForm<T = FormData>(
     return isFormValid;
   };
 
-  const addField: Form<T>['__addField'] = field => {
+  const addField: FormHook<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
     // Only update the formData if the path does not exist (it is the _first_ time
@@ -128,7 +128,7 @@ export function useForm<T = FormData>(
     }
   };
 
-  const removeField: Form<T>['__removeField'] = _fieldNames => {
+  const removeField: FormHook<T>['__removeField'] = _fieldNames => {
     const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
     const currentFormData = { ...formData$.current.value } as FormData;
 
@@ -140,26 +140,26 @@ export function useForm<T = FormData>(
     formData$.current.next(currentFormData as T);
   };
 
-  const setFieldValue: Form<T>['setFieldValue'] = (fieldName, value) => {
+  const setFieldValue: FormHook<T>['setFieldValue'] = (fieldName, value) => {
     fieldsRefs.current[fieldName].setValue(value);
   };
 
-  const setFieldErrors: Form<T>['setFieldErrors'] = (fieldName, errors) => {
+  const setFieldErrors: FormHook<T>['setFieldErrors'] = (fieldName, errors) => {
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 
-  const getFields: Form<T>['getFields'] = () => fieldsRefs.current;
+  const getFields: FormHook<T>['getFields'] = () => fieldsRefs.current;
 
-  const getFieldDefaultValue: Form['getFieldDefaultValue'] = fieldName =>
+  const getFieldDefaultValue: FormHook['getFieldDefaultValue'] = fieldName =>
     get(defaultValueDeserialized, fieldName);
 
-  const readFieldConfigFromSchema: Form<T>['__readFieldConfigFromSchema'] = fieldName => {
+  const readFieldConfigFromSchema: FormHook<T>['__readFieldConfigFromSchema'] = fieldName => {
     const config = (get(schema ? schema : {}, fieldName) as FieldConfig) || {};
 
     return config;
   };
 
-  const submitForm: Form<T>['submit'] = async e => {
+  const submitForm: FormHook<T>['submit'] = async e => {
     if (e) {
       e.preventDefault();
     }
@@ -181,7 +181,7 @@ export function useForm<T = FormData>(
     return { data: formData, isValid: isFormValid };
   };
 
-  const form: Form<T> = {
+  const form: FormHook<T> = {
     isSubmitted,
     isSubmitting,
     isValid,

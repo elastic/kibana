@@ -19,12 +19,12 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { Form } from './types';
+import { FormHook } from './types';
 
-const FormContext = createContext<Form<any> | undefined>(undefined);
+const FormContext = createContext<FormHook<any> | undefined>(undefined);
 
 interface Props {
-  form: Form<any>;
+  form: FormHook<any>;
   children: React.ReactNode;
 }
 
@@ -33,7 +33,7 @@ export const FormProvider = ({ children, form }: Props) => (
 );
 
 export const useFormContext = function<T = Record<string, unknown>>() {
-  const context = useContext(FormContext) as Form<T>;
+  const context = useContext(FormContext) as FormHook<T>;
   if (context === undefined) {
     throw new Error('useFormContext must be used within a <FormProvider />');
   }

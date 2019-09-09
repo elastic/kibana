@@ -21,10 +21,10 @@ import React, { ReactNode } from 'react';
 import { EuiForm } from '@elastic/eui';
 
 import { FormProvider } from '../form_context';
-import { Form as FormType } from '../types';
+import { FormHook } from '../types';
 
 interface Props {
-  form: FormType<any>;
+  form: FormHook<any>;
   FormWrapper?: (props: any) => JSX.Element;
   children: ReactNode | ReactNode[];
   className: string;
