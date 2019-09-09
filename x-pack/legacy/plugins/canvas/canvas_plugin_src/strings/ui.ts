@@ -469,4 +469,58 @@ export const ViewStrings = {
       },
     },
   },
+  RepeatImage: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.displayName', {
+        defaultMessage: 'Repeating image',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.help', {
+        defaultMessage: ' ',
+      }),
+    args: {
+      Image: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.image.displayName', {
+            defaultMessage: 'Image',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.image.help', {
+            defaultMessage: 'An image to repeat',
+          }),
+      },
+      EmptyImage: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImage.displayName', {
+            defaultMessage: 'Empty image',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImage.help', {
+            defaultMessage:
+              'An image to fill up the difference between the value and the max count',
+          }),
+      },
+      Size: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.size.displayName', {
+            defaultMessage: 'Image size',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.size.help', {
+            defaultMessage:
+              'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
+          }),
+      },
+      Max: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.max.displayName', {
+            defaultMessage: 'Max count',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.repeatImage.args.max.help', {
+            defaultMessage: 'The maximum number of repeated images',
+          }),
+      },
+    },
+  },
 };

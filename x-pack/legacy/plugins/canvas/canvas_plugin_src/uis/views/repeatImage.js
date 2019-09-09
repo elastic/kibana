@@ -3,37 +3,37 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../strings';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Repeating image',
-  help: '',
+  displayName: ViewStrings.RepeatImage.getDisplayName(),
+  help: ViewStrings.RepeatImage.getHelp(),
   modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
-      displayName: 'Image',
-      help: 'An image to repeat',
+      displayName: ViewStrings.RepeatImage.args.Image.getDisplayName(),
+      help: ViewStrings.RepeatImage.args.Image.getHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: 'Empty image',
-      help: 'An image to fill up the difference between the value and the max count',
+      displayName: ViewStrings.RepeatImage.args.EmptyImage.getDisplayName(),
+      help: ViewStrings.RepeatImage.args.EmptyImage.getHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'size',
-      displayName: 'Image size',
-      help:
-        'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
+      displayName: ViewStrings.RepeatImage.args.Size.getDisplayName(),
+      help: ViewStrings.RepeatImage.args.Size.getHelp(),
       argType: 'number',
       default: '100',
     },
     {
       name: 'max',
-      displayName: 'Max count',
-      help: 'The maximum number of repeated images',
+      displayName: ViewStrings.RepeatImage.args.Max.getDisplayName(),
+      help: ViewStrings.RepeatImage.args.Max.getHelp(),
       argType: 'number',
       default: '1000',
     },
