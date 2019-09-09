@@ -245,7 +245,9 @@ function InnerSuggestionPanel({
                 });
               }}
             >
-              Confirm and reload suggestions
+              {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
+                defaultMessage: 'Confirm and reload suggestions',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
