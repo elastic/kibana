@@ -42,10 +42,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
               'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
-            // TODO make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
           ])
         } finally {
-          sendMail()
+          // TODO is there a better way to do this?
+          node('flyweight') {
+            sendMail()
+          }
         }
       }
     }
@@ -180,9 +182,9 @@ def jobRunner(label, closure) {
 
 // TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
-def uploadGcsArtifact(jobName, pattern) {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}" // TODO
-  // def storageLocation = "gs://kibana-pipeline-testing/jobs/pipeline-test/${BUILD_NUMBER}/${jobName}"
+def uploadGcsArtifact(workerName, pattern) {
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}" // TODO
+  // def storageLocation = "gs://kibana-pipeline-testing/jobs/pipeline-test/${BUILD_NUMBER}/${workerName}"
 
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
@@ -193,7 +195,7 @@ def uploadGcsArtifact(jobName, pattern) {
   )
 }
 
-def uploadAllGcsArtifacts(jobName) {
+def uploadAllGcsArtifacts(workerName) {
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
     'target/junit/**/*',
@@ -205,7 +207,7 @@ def uploadAllGcsArtifacts(jobName) {
   ]
 
   ARTIFACT_PATTERNS.each { pattern ->
-    uploadGcsArtifact(jobName, pattern)
+    uploadGcsArtifact(workerName, pattern)
   }
 }
 
