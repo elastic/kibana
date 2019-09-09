@@ -20,24 +20,9 @@
 import { IndexPatternsService } from './service';
 import KbnServer from '../kbn_server';
 import { Legacy } from '../../../../kibana';
-
-// @ts-ignore
-import { createFieldsForWildcardRoute, createFieldsForTimePatternRoute } from './routes';
+import { registerRoutes } from './routes';
 
 export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) {
-  const pre = {
-    /**
-     *  Create an instance of the `indexPatterns` service
-     *  @type {Hapi.Pre}
-     */
-    getIndexPatternsService: {
-      assign: 'indexPatterns',
-      method(request: Legacy.Request) {
-        return (request as any).getIndexPatternsService();
-      },
-    },
-  };
-
   /**
    *  Create an instance of the IndexPatternsService
    *
@@ -64,8 +49,7 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
     }
   );
 
-  server.route(createFieldsForWildcardRoute(pre));
-  server.route(createFieldsForTimePatternRoute(pre));
+  registerRoutes(kbnServer.newPlatform.setup.core);
 }
 
 export type IndexPatternsServiceFactory = (args: {

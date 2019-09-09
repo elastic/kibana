@@ -27,16 +27,26 @@ export default function ({ getService }) {
     before(() => esArchiver.load('index_patterns/daily_index'));
     after(() => esArchiver.unload('index_patterns/daily_index'));
 
-    it('requires `pattern` and `look_back` query params', () =>
+    it('requires `pattern` query param', () =>
       supertest
         .get('/api/index_patterns/_fields_for_time_pattern')
-        .query({ pattern: null })
+        .query({ look_back: 1 })
         .expect(400)
         .then(resp => {
-          expect(resp.body.validation).to.eql({
-            keys: ['pattern', 'look_back'],
-            source: 'query',
-          });
+          expect(resp.body.message).to.contain(
+            '[request query.pattern]: expected value of type [string] but got [undefined]'
+          );
+        }));
+
+    it('requires `look_back` query param', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_time_pattern')
+        .query({ pattern: 'pattern-*' })
+        .expect(400)
+        .then(resp => {
+          expect(resp.body.message).to.contain(
+            '[request query.look_back]: expected value of type [number] but got [undefined]'
+          );
         }));
 
     it('supports `meta_fields` query param', () =>
@@ -58,7 +68,9 @@ export default function ({ getService }) {
         })
         .expect(400)
         .then(resp => {
-          expect(resp.body.message).to.contain('"look_back" must be a number');
+          expect(resp.body.message).to.contain(
+            '[request query.look_back]: expected value of type [number] but got [string]'
+          );
         }));
 
     it('requires `look_back` to be greater than one', () =>
@@ -70,7 +82,9 @@ export default function ({ getService }) {
         })
         .expect(400)
         .then(resp => {
-          expect(resp.body.message).to.contain('"look_back" must be larger than or equal to 1');
+          expect(resp.body.message).to.contain(
+            '[request query.look_back]: Value is [0] but it must be equal to or greater than [1].'
+          );
         }));
   });
 }
