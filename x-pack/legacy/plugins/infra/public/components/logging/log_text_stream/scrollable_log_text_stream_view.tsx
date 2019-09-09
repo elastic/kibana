@@ -105,11 +105,14 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     return null;
   }
 
-  public readonly state = {
-    target: null,
-    targetId: null,
-    items: [],
-  };
+  private constructor(props: ScrollableLogTextStreamViewProps) {
+    super(props);
+    this.state = {
+      target: null,
+      targetId: null,
+      items: props.items,
+    };
+  }
 
   public render() {
     const {

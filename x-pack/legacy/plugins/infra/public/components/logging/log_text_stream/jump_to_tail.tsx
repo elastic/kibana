@@ -6,7 +6,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
