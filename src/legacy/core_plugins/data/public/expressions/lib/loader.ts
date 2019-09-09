@@ -20,7 +20,7 @@
 import { Observable, Subject } from 'rxjs';
 import { first, share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
-import { execute, ExpressionDataHandler } from './execute';
+import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
 import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './_types';
 import { getInspector } from '../services';
@@ -57,9 +57,10 @@ export class ExpressionLoader {
       this.render(data);
     });
 
-    this.execute(expression, params);
-    // @ts-ignore
-    this.dataHandler = this.dataHandler;
+    this.dataHandler = new ExpressionDataHandler(expression, params);
+    this.dataHandler.getData().then(data => {
+      this.dataSubject.next(data);
+    });
   }
 
   destroy() {}
@@ -108,7 +109,7 @@ export class ExpressionLoader {
     if (this.dataHandler) {
       this.dataHandler.cancel();
     }
-    this.dataHandler = execute(expression, params);
+    this.dataHandler = new ExpressionDataHandler(expression, params);
     const data = await this.dataHandler.getData();
     this.dataSubject.next(data);
     return data;

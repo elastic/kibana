@@ -33,13 +33,13 @@ jest.mock('../services', () => ({
 
 describe('execute helper function', () => {
   it('returns ExpressionDataHandler instance', () => {
-    const response = execute('');
+    const response = execute('test');
     expect(response).toBeInstanceOf(ExpressionDataHandler);
   });
 });
 
 describe('ExpressionDataHandler', () => {
-  const expressionString = '';
+  const expressionString = 'test';
 
   describe('constructor', () => {
     it('accepts expression string', () => {

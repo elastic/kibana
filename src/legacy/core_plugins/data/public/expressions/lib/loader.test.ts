@@ -54,13 +54,13 @@ jest.mock('../../../../interpreter/public/registries', () => {
 
 describe('execute helper function', () => {
   it('returns ExpressionDataHandler instance', () => {
-    const response = loader(element, '', {});
+    const response = loader(element, 'test', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });
 
 describe('ExpressionDataHandler', () => {
-  const expressionString = '';
+  const expressionString = 'test';
 
   describe('constructor', () => {
     it('accepts expression string', () => {
