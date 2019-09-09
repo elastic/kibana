@@ -59,6 +59,9 @@ export function BlacklistForm({
                   'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
                     defaultMessage: 'Remove',
                   }),
+                  title: i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
+                    defaultMessage: 'Remove',
+                  }),
                   color: 'danger',
                   onClick: () => {
                     unblacklistNode(node);
@@ -72,6 +75,8 @@ export function BlacklistForm({
             data-test-subj="graphUnblacklistAll"
             color="danger"
             iconType="trash"
+            size="s"
+            fill
             onClick={() => {
               blacklistedNodes.forEach(node => {
                 unblacklistNode(node);
@@ -79,7 +84,7 @@ export function BlacklistForm({
             }}
           >
             {i18n.translate('xpack.graph.settings.blacklist.clearButtonLabel', {
-              defaultMessage: 'Clear all',
+              defaultMessage: 'Remove all',
             })}
           </EuiButton>
         </>

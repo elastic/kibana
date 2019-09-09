@@ -6,15 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
   EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UrlTemplate } from '../../types';
@@ -114,7 +113,6 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         }
       }}
     >
-      <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.graph.settings.drillDowns.urlDescriptionInputLabel', {
@@ -134,68 +132,69 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           )}
         />
       </EuiFormRow>
-      <EuiForm>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.graph.settings.drillDowns.urlInputLabel', {
-            defaultMessage: 'URL',
-          })}
-          helpText={
-            <>
-              {autoformatUrl && (
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.graph.settings.drillDowns.urlInputLabel', {
+          defaultMessage: 'URL',
+        })}
+        helpText={
+          <>
+            {autoformatUrl && (
+              <p>
                 <strong>
                   {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
                     defaultMessage: 'Possible Kibana URL pasted, ',
                   })}
-                  <button className="gphSettings__helpTextButton" onClick={convertUrl}>
-                    {i18n.translate(
-                      'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                      { defaultMessage: 'convert it' }
-                    )}
-                  </button>
-                  <br />
+                  <EuiLink onClick={convertUrl}>
+                    <strong>
+                      {i18n.translate(
+                        'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
+                        { defaultMessage: 'convert it' }
+                      )}
+                    </strong>
+                  </EuiLink>
                 </strong>
-              )}
-              {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
-                defaultMessage:
-                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
-                values: { gquery: '{{gquery}}' },
-              })}
-            </>
-          }
-          onBlur={() => setTouched({ ...touched, url: true })}
+              </p>
+            )}
+            {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
+              defaultMessage:
+                'Define template URLs using {gquery} where the selected vertex terms are inserted',
+              values: { gquery: '{{gquery}}' },
+            })}
+          </>
+        }
+        onBlur={() => setTouched({ ...touched, url: true })}
+        isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
+        error={
+          urlPlaceholderMissing
+            ? [
+                i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
+                  defaultMessage: 'The URL must contain a {placeholder} string',
+                  values: { placeholder: '{{gquery}}' },
+                }),
+              ]
+            : []
+        }
+      >
+        <EuiFieldText
+          fullWidth
+          placeholder="https://www.google.co.uk/#q={{gquery}}"
+          value={currentTemplate.url}
+          onChange={e => {
+            setValue('url', e.target.value);
+            setAutoformatUrl(false);
+          }}
+          onPaste={e => {
+            e.preventDefault();
+            const pastedUrl = e.clipboardData.getData('text/plain');
+            if (isKibanaUrl(pastedUrl)) {
+              setAutoformatUrl(true);
+            }
+            setValue('url', pastedUrl);
+          }}
           isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
-          error={
-            urlPlaceholderMissing
-              ? [
-                  i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                    defaultMessage: 'The URL must contain a {placeholder} string',
-                    values: { placeholder: '{{gquery}}' },
-                  }),
-                ]
-              : []
-          }
-        >
-          <EuiFieldText
-            fullWidth
-            placeholder="https://www.google.co.uk/#q={{gquery}}"
-            value={currentTemplate.url}
-            onChange={e => {
-              setValue('url', e.target.value);
-              setAutoformatUrl(false);
-            }}
-            onPaste={e => {
-              e.preventDefault();
-              const pastedUrl = e.clipboardData.getData('text/plain');
-              if (isKibanaUrl(pastedUrl)) {
-                setAutoformatUrl(true);
-              }
-              setValue('url', pastedUrl);
-            }}
-            isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
-          />
-        </EuiFormRow>
-      </EuiForm>
+        />
+      </EuiFormRow>
       <EuiFormRow
         fullWidth
         helpText={currentTemplate.encoder.description}
@@ -239,7 +238,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           ))}
         </div>
       </EuiFormRow>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         {isUpdateForm(props) && (
           <>
             <EuiFlexItem grow={null}>
