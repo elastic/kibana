@@ -635,4 +635,47 @@ export const ViewStrings = {
       },
     },
   },
+  Table: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.table.displayName', {
+        defaultMessage: 'Table style',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.table.help', {
+        defaultMessage: 'Set styling for a Table element',
+      }),
+    args: {
+      Paginate: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.paginate.displayName', {
+            defaultMessage: 'Pagination',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.paginate.help', {
+            defaultMessage:
+              'Show or hide pagination controls. If disabled only the first page will be shown',
+          }),
+      },
+      PerPage: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.perPage.displayName', {
+            defaultMessage: 'Rows per page',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.perPage.help', {
+            defaultMessage: 'Number of rows to display per table page',
+          }),
+      },
+      ShowHeader: {
+        getDisplayName: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.showHeader.displayName', {
+            defaultMessage: 'Header',
+          }),
+        getHelp: () =>
+          i18n.translate('xpack.canvas.uis.views.table.args.showHeader.help', {
+            defaultMessage: 'Show or hide the header row with titles for each column',
+          }),
+      },
+    },
+  },
 };

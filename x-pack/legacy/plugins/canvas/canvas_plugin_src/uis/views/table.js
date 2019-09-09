@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../strings';
 
 export const table = () => ({
   name: 'table',
-  displayName: 'Table style',
-  help: 'Set styling for a Table element',
+  displayName: ViewStrings.Table.getDisplayName(),
+  help: ViewStrings.Table.getHelp(),
   modelArgs: [],
   args: [
     {
@@ -16,8 +17,8 @@ export const table = () => ({
     },
     {
       name: 'perPage',
-      displayName: 'Rows per page',
-      help: 'Number of rows to display per table page',
+      displayName: ViewStrings.Table.args.PerPage.getDisplayName(),
+      help: ViewStrings.Table.args.PerPage.getHelp(),
       argType: 'select',
       default: 10,
       options: {
@@ -26,15 +27,15 @@ export const table = () => ({
     },
     {
       name: 'paginate',
-      displayName: 'Pagination',
-      help: 'Show or hide pagination controls. If disabled only the first page will be shown',
+      displayName: ViewStrings.Table.args.Paginate.getDisplayName(),
+      help: ViewStrings.Table.args.Paginate.getHelp(),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'showHeader',
-      displayName: 'Header',
-      help: 'Show or hide the header row with titles for each column',
+      displayName: ViewStrings.Table.args.ShowHeader.getDisplayName(),
+      help: ViewStrings.Table.args.ShowHeader.getHelp(),
       argType: 'toggle',
       default: true,
     },
