@@ -64,7 +64,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       endDate,
       flowTarget,
       filterQuery,
-      id = ID + flowTarget,
+      id = `${ID}-${flowTarget}`,
       isInspected,
       limit,
       skip,
@@ -132,7 +132,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (state: State, { flowTarget, id = ID + flowTarget }: OwnProps) => {
+const mapStateToProps = (state: State, { flowTarget, id = `${ID}-${flowTarget}` }: OwnProps) => {
   const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const { isInspected } = getQuery(state, id);
