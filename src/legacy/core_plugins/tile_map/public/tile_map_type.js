@@ -33,11 +33,7 @@ import { MapTypes } from './map_types';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings, collections } = dependencies;
-  const wms = uiSettings.get('visualization:tileMap:WMSdefaults');
-  if (!wms.selectedTmsLayer && collections.tmsLayers.length) {
-    wms.selectedTmsLayer = collections.tmsLayers[0];
-  }
+  const { uiSettings, serviceSettings } = dependencies;
 
   return visFactory.createBaseVisualization({
     name: 'tile_map',
@@ -59,7 +55,7 @@ export function createTileMapTypeDefinition(dependencies) {
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
-        wms,
+        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
@@ -121,7 +117,7 @@ export function createTileMapTypeDefinition(dependencies) {
             }),
           },
         ],
-        tmsLayers: collections.tmsLayers,
+        tmsLayers: [],
       },
       optionsTemplate: (props) => <TileMapOptions {...props} />,
       schemas: new Schemas([
@@ -147,6 +143,22 @@ export function createTileMapTypeDefinition(dependencies) {
           max: 1,
         },
       ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+      let tmsLayers;
+
+      try {
+        tmsLayers = await serviceSettings.getTMSServices();
+      } catch (e) {
+        return savedVis;
+      }
+
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+      return savedVis;
     },
   });
 }

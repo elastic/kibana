@@ -19,12 +19,11 @@
 
 import chrome from 'ui/chrome';
 import 'ui/vis/map/service_settings';
-import { ServiceSettings, TmsLayer } from 'ui/vis/map/service_settings';
 import { CoreStart, Plugin } from 'kibana/public';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  serviceSettings: ServiceSettings;
+  serviceSettings: any;
   $injector: any;
 }
 
@@ -32,20 +31,14 @@ export class LegacyDependenciesPlugin
   implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
   public async setup() {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    // Settings for EMSClient.
-    // EMSClient, which currently lives in the tile_map vis,
-    //  will probably end up being exposed from the future vis_type_maps plugin,
-    //  which would register both the tile_map and the region_map vis plugins.
-    const serviceSettings: ServiceSettings = $injector.get('serviceSettings');
-
-    const tmsLayers: TmsLayer[] = await serviceSettings.getTMSServices();
 
     return {
       $injector,
-      serviceSettings,
-      collections: {
-        tmsLayers,
-      },
+      // Settings for EMSClient.
+      // EMSClient, which currently lives in the tile_map vis,
+      //  will probably end up being exposed from the future vis_type_maps plugin,
+      //  which would register both the tile_map and the region_map vis plugins.
+      serviceSettings: $injector.get('serviceSettings'),
     } as LegacyDependenciesPluginSetup;
   }
 

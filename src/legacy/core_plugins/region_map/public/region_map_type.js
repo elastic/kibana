@@ -20,19 +20,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
+import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { RegionMapOptions } from './components/region_map_options';
 
 import { visFactory } from '../../visualizations/public/np_ready/public';
 
+// TODO: reference to TILE_MAP plugin should be removed
+import { ORIGIN } from '../../tile_map/common/origin';
+
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, serviceSettings, visConfig, collections } = dependencies;
+  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
-  const wms = uiSettings.get('visualization:tileMap:WMSdefaults');
-  if (!wms.selectedTmsLayer && collections.tmsLayers.length) {
-    wms.selectedTmsLayer = collections.tmsLayers[0];
-  }
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
@@ -48,11 +48,9 @@ provided base maps, or add your own. Darker colors represent higher values.',
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        emsHotLink: visConfig.emsHotLink,
-        selectedLayer: visConfig.selectedLayer,
-        selectedJoinField: visConfig.selectedJoinField,
+        emsHotLink: '',
         isDisplayWarning: true,
-        wms,
+        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
@@ -69,8 +67,8 @@ provided base maps, or add your own. Darker colors represent higher values.',
         />),
       collections: {
         colorSchemas,
-        vectorLayers: collections.vectorLayers,
-        tmsLayers: collections.tmsLayers,
+        vectorLayers: [],
+        tmsLayers: [],
       },
       schemas: new Schemas([
         {
@@ -107,6 +105,55 @@ provided base maps, or add your own. Darker colors represent higher values.',
           aggFilter: ['terms'],
         },
       ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+
+      const tmsLayers = await serviceSettings.getTMSServices();
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+
+      const vectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
+      );
+      let selectedLayer = vectorLayers[0];
+      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      if (regionmapsConfig.includeElasticMapsService) {
+        const layers = await serviceSettings.getFileLayers();
+        const newLayers = layers
+          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+          .filter(
+            (layer) =>
+              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+          );
+
+        // backfill v1 manifest for now
+        newLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+          }
+        });
+
+        vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+
+        [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+
+        if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
+          vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
+        }
+      }
+
+      if (!vis.params.selectedLayer) {
+        vis.params.selectedLayer = selectedLayer;
+        vis.params.selectedJoinField = selectedJoinField;
+      }
+
+      return savedVis;
     },
   });
 }

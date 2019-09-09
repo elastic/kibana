@@ -48,10 +48,8 @@ export type RegionMapOptionsProps = {
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
   const { serviceSettings, stateParams, vis, setValue } = props;
-  const vectorLayerOptions = useMemo(
-    () => vis.type.editorConfig.collections.vectorLayers.map(mapLayerForOption),
-    [vis.type.editorConfig.collections.vectorLayers]
-  );
+  const { vectorLayers } = vis.type.editorConfig.collections;
+  const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
   const fieldOptions = useMemo(
     () =>
       ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
@@ -70,9 +68,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   const setLayer = useCallback(
     async (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
-      const newLayer = vis.type.editorConfig.collections.vectorLayers.find(
-        ({ layerId }: VectorLayer) => layerId === value
-      );
+      const newLayer = vectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
 
       if (newLayer) {
         setValue(paramName, newLayer);
@@ -80,7 +76,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setEmsHotLink(newLayer);
       }
     },
-    [vis.type.editorConfig.collections.vectorLayers, setEmsHotLink, setValue]
+    [vectorLayers, setEmsHotLink, setValue]
   );
 
   const setField = useCallback(

@@ -20,17 +20,12 @@
 import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
 import 'ui/vis/map/service_settings';
-import { VectorLayer, ServiceSettings, TmsLayer } from 'ui/vis/map/service_settings';
 import { RegionMapsConfig } from '../plugin';
-
-import { mapToLayerWithId } from '../util';
-// TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../tile_map/common/origin';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
   $injector: any;
-  serviceSettings: ServiceSettings;
+  serviceSettings: any;
   regionmapsConfig: RegionMapsConfig;
 }
 
@@ -40,61 +35,15 @@ export class LegacyDependenciesPlugin
 
   public async setup() {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    // Settings for EMSClient.
-    // EMSClient, which currently lives in the tile_map vis,
-    //  will probably end up being exposed from the future vis_type_maps plugin,
-    //  which would register both the tile_map and the region_map vis plugins.
-    const serviceSettings: ServiceSettings = $injector.get('serviceSettings');
-
-    let vectorLayers = this.regionmapsConfig.layers.map(
-      mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
-    );
-    let selectedLayer = vectorLayers[0];
-    let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
-    let emsHotLink = '';
-
-    if (this.regionmapsConfig.includeElasticMapsService) {
-      const layers = await serviceSettings.getFileLayers();
-      const newLayers = layers
-        .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
-        .filter(
-          (layer: VectorLayer) =>
-            !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
-        );
-
-      // backfill v1 manifest for now
-      newLayers.forEach((layer: VectorLayer) => {
-        if (layer.format === 'geojson') {
-          layer.format = {
-            type: 'geojson',
-          };
-        }
-      });
-
-      vectorLayers = [...vectorLayers, ...newLayers];
-      [selectedLayer] = vectorLayers;
-      selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
-
-      if (selectedLayer.isEMS) {
-        emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
-      }
-    }
-
-    const tmsLayers: TmsLayer[] = await serviceSettings.getTMSServices();
 
     return {
       $injector,
       regionmapsConfig: this.regionmapsConfig,
-      serviceSettings,
-      visConfig: {
-        emsHotLink,
-        selectedLayer,
-        selectedJoinField,
-      },
-      collections: {
-        vectorLayers,
-        tmsLayers,
-      },
+      // Settings for EMSClient.
+      // EMSClient, which currently lives in the tile_map vis,
+      //  will probably end up being exposed from the future vis_type_maps plugin,
+      //  which would register both the tile_map and the region_map vis plugins.
+      serviceSettings: $injector.get('serviceSettings'),
     } as LegacyDependenciesPluginSetup;
   }
 
