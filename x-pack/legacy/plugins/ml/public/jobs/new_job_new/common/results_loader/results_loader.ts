@@ -6,7 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../job_creator';
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
@@ -241,7 +241,11 @@ export class ResultsLoader {
   }
 
   private async _populateDetectorSplitFieldFilters() {
-    if (isMultiMetricJobCreator(this._jobCreator) || isPopulationJobCreator(this._jobCreator)) {
+    // only apply a split filter for multi-metric jobs
+    // for population jobs, the swimlane will not be 100% accurate as it's not
+    // filtering for the front card. this is a trade off to save loading
+    // lots of data.
+    if (isMultiMetricJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
           this._jobCreator.splitField

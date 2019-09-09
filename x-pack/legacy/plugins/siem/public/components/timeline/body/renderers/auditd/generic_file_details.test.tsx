@@ -27,6 +27,7 @@ describe('GenericFileDetails', () => {
             browserFields={browserFields}
             data={mockTimelineData[27].ecs}
             fileIcon="document"
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -42,6 +43,7 @@ describe('GenericFileDetails', () => {
             browserFields={mockBrowserFields}
             data={mockTimelineData[19].ecs}
             fileIcon="document"
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -59,6 +61,7 @@ describe('GenericFileDetails', () => {
             browserFields={mockBrowserFields}
             data={mockTimelineData[0].ecs}
             fileIcon="document"
+            timelineId="test"
           />
         </TestProviders>
       );

@@ -41,8 +41,6 @@ export {
 
 export {
   visTypes,
-  visResponseHandlers,
-  visRequestHandlers,
   visEditorTypes,
   interpreter,
   savedObjectTypes,
