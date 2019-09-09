@@ -11,7 +11,15 @@ import { Chrome } from 'ui/chrome';
 import { AlertsList, NoAlerts, AlertsLoadingIndicator, AlertsTable } from './alerts_list';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
-import { AlertingApi, RequestStatus } from '../../../lib/api';
+import { Result, asOk, asErr } from '../../../lib/result_type';
+import {
+  AlertingApi,
+  RequestData,
+  LoadAlertsResponse,
+  AlertResponse,
+  LoadAlertsErrorResponse,
+} from '../../../lib/api';
+import { PageError } from '../../../components';
 
 describe('Alerts List', () => {
   it.skip('should set the breadcrumbs', () => {
@@ -38,8 +46,8 @@ describe('Alerts List', () => {
 
   it('should indicate that Alerts are loading when the api indicates that to be the case', () => {
     const api: AlertingApi = {
-      loadAlerts: (pollIntervalMs: number): RequestStatus<any> => {
-        return { isLoading: true, error: none, data: none };
+      loadAlerts: (pollIntervalMs: number): Result<RequestData<LoadAlertsResponse>, any> => {
+        return asOk({ isLoading: true, data: none });
       },
     };
     const comp = shallow(<AlertsList api={some(api)} />);
@@ -48,18 +56,50 @@ describe('Alerts List', () => {
 
   it('should render the Alerts table when the api has finished loading the alerts', () => {
     const api: AlertingApi = {
-      loadAlerts: (pollIntervalMs: number): RequestStatus<any> => {
-        return {
+      loadAlerts: (
+        pollIntervalMs: number
+      ): Result<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse> => {
+        return asOk({
           isLoading: false,
-          error: none,
           data: some({
+            page: 1,
+            perPage: 1,
+            total: 1,
             data: DUMMY_ALERTS_DATA,
           }),
-        };
+        });
       },
     };
     const comp = shallow(<AlertsList api={some(api)} />);
     expect(comp.contains(<AlertsTable alerts={DUMMY_ALERTS_DATA} />)).toBeTruthy();
+  });
+
+  it('should handle a 404 error result from the api', () => {
+    const api: AlertingApi = {
+      loadAlerts: (
+        pollIntervalMs: number
+      ): Result<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse> => {
+        return asErr({
+          status: 404,
+        });
+      },
+    };
+    const comp = shallow(<AlertsList api={some(api)} />);
+    expect(comp.contains(<PageError errorCode={{ status: 404 }} />)).toBeTruthy();
+  });
+
+  it('should handle a 403 error result from the api', () => {
+    const api: AlertingApi = {
+      loadAlerts: (
+        pollIntervalMs: number
+      ): Result<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse> => {
+        return asErr({
+          status: 403,
+        });
+      },
+    };
+    const comp = shallow(<AlertsList api={some(api)} />);
+    expect(comp.contains(<PageError errorCode={{ status: 403 }} />)).toBeTruthy();
   });
 });
 
@@ -77,7 +117,7 @@ describe('Alerts List: Alerts Table', () => {
   });
 });
 
-const DUMMY_ALERTS_DATA = [
+const DUMMY_ALERTS_DATA: AlertResponse[] = [
   {
     id: '0f73f885-ee6d-4693-8ba1-f545bff26834',
     alertTypeId: '.always-firing',

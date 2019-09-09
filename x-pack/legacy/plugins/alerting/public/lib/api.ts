@@ -12,39 +12,68 @@ import {
 } from '../shared_imports';
 
 import { ROUTES } from '../../common/routes';
-import { RawAlert } from '../../server/types';
+import { Alert } from '../../server/types';
+import { Result, asOk, asErr } from './result_type';
 
-export interface RequestStatus<T> {
+export interface RequestData<T> {
   isLoading: boolean;
-  error: Option<any>;
   data: Option<T>;
   sendRequest?: any;
 }
 
-interface UnsafeRequestStatus<T> {
+interface RequestStatus<T, E> {
   isLoading: boolean;
-  error?: any;
+  error?: E;
   data?: T;
   sendRequest?: any;
 }
 
-function makeRequestNullSafe<T>(status: UnsafeRequestStatus<T>): RequestStatus<T> {
-  return {
-    ...status,
-    data: fromNullable(status.data),
-    error: fromNullable(status.error),
-  };
+export interface LoadAlertsError {
+  status: number;
+}
+export type LoadAlertsErrorResponse = LoadAlertsError | LoadAlertsError[];
+
+export function hasReceivedAErrorCode(
+  errorOrErrors: any
+): errorOrErrors is LoadAlertsErrorResponse {
+  const errors = Array.isArray(errorOrErrors) ? errorOrErrors : [errorOrErrors];
+  const firstError = errors.find((error: any) => {
+    if (error) {
+      return [403, 404].includes(error.status);
+    }
+
+    return false;
+  });
+
+  if (firstError) {
+    return true;
+  }
+  return false;
 }
 
+function wrapInResult<T, E>(status: RequestStatus<T, E>): Result<RequestData<T>, E> {
+  return hasReceivedAErrorCode(status.error)
+    ? asErr(status.error)
+    : asOk({
+        ...status,
+        data: fromNullable(status.data),
+      });
+}
+
+export interface AlertResponse extends Alert {
+  id: string;
+}
 export interface LoadAlertsResponse {
   page: number;
   perPage: number;
   total: number;
-  data: RawAlert[];
+  data: AlertResponse[];
 }
 
 export interface AlertingApi {
-  loadAlerts: (pollIntervalMs: number) => RequestStatus<LoadAlertsResponse>;
+  loadAlerts: (
+    pollIntervalMs: number
+  ) => Result<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse>;
 }
 
 const basePath = chrome.addBasePath(ROUTES.API_ROOT);
@@ -55,8 +84,10 @@ export function getApiUsingHttpClient(httpClient: ng.IHttpService): AlertingApi 
   const useRequest = (config: UseRequestConfig) => _useRequest(httpClient, config);
 
   return {
-    loadAlerts(pollIntervalMs: number): RequestStatus<LoadAlertsResponse> {
-      return makeRequestNullSafe(
+    loadAlerts(
+      pollIntervalMs: number
+    ): Result<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse> {
+      return wrapInResult<LoadAlertsResponse, LoadAlertsErrorResponse>(
         useRequest({
           path: `${basePath}/_find`,
           method: 'get',

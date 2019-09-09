@@ -7,14 +7,20 @@
 import React, { useEffect } from 'react';
 import { Option, option, none, some, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EuiPageContent, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiText, EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome, { Chrome } from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import { flatMap } from '../../../lib/flat_map';
-import { SectionLoading } from '../../../components';
-import { AlertingApi } from '../../../lib/api';
+import { mapResult } from '../../../lib/result_type';
+import { PageError, SectionLoading } from '../../../components';
+import {
+  AlertingApi,
+  RequestData,
+  LoadAlertsResponse,
+  LoadAlertsErrorResponse,
+} from '../../../lib/api';
 
 const map = option.map;
 
@@ -32,13 +38,21 @@ export const AlertsList = ({ breadcrumbs, api }: AlertsListProps) => {
 
   return pipe(
     api,
-    flatMap(alertingApi => {
-      const { isLoading: isAlertsLoading, data: alerts } = alertingApi.loadAlerts(SIXTY_SECONDS);
-
-      return isAlertsLoading
-        ? some(<AlertsLoadingIndicator />)
-        : map(alerts, ({ data }) => <AlertsTable alerts={data} />);
-    }),
+    flatMap(alertingApi =>
+      mapResult<RequestData<LoadAlertsResponse>, LoadAlertsErrorResponse, Option<JSX.Element>>(
+        alertingApi.loadAlerts(SIXTY_SECONDS),
+        ({ isLoading: isAlertsLoading, data: alerts }) =>
+          isAlertsLoading
+            ? some(<AlertsLoadingIndicator />)
+            : map(alerts, ({ data }) => <AlertsTable alerts={data} />),
+        error =>
+          some(
+            <EuiPageContent>
+              <PageError errorCode={error} />
+            </EuiPageContent>
+          )
+      )
+    ),
     getOrElse(() => <NoAlerts />)
   );
 };
@@ -52,7 +66,7 @@ export const AlertsLoadingIndicator = () => (
   <SectionLoading>
     <FormattedMessage
       id="xpack.watcher.sections.alertsList.loadingAlertsDescription"
-      defaultMessage="Loading alerts,,,"
+      defaultMessage="Loading alerts…"
     />
   </SectionLoading>
 );
