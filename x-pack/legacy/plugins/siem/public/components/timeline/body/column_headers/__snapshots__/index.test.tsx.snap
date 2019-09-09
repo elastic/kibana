@@ -440,7 +440,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
                   Object {
                     "columnHeaderType": "not-filtered",
                     "id": "@timestamp",
-                    "width": 240,
+                    "width": 190,
                   },
                   Object {
                     "columnHeaderType": "not-filtered",
@@ -497,7 +497,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     >
       <DroppableWrapper
         droppableId="droppableId.timelineColumns.test"
-        height="38px"
+        height="39px"
         isDropDisabled={false}
         type="drag-type-field"
       >

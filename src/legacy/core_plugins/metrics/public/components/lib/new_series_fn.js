@@ -20,6 +20,7 @@
 import uuid from 'uuid';
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
+import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 export const newSeriesFn = (obj = {}) => {
   return _.assign(
@@ -35,7 +36,7 @@ export const newSeriesFn = (obj = {}) => {
       line_width: 1,
       point_size: 1,
       fill: 0.5,
-      stacked: 'none',
+      stacked: STACKED_OPTIONS.NONE,
     },
     obj
   );

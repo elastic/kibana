@@ -10,6 +10,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
+import { isLeft } from 'fp-ts/lib/Either';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -87,7 +88,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
 
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-    if (assertData.isLeft()) {
+    if (isLeft(assertData)) {
       throw new Error(
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
@@ -98,7 +99,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
       const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
-      if (assertUser.isLeft()) {
+      if (isLeft(assertUser)) {
         throw new Error(
           `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
         );
