@@ -19,6 +19,7 @@ import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { fromExpression } from '@kbn/interpreter/target/common';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('./suggestion_helpers');
 
@@ -75,6 +76,7 @@ describe('suggestion_panel', () => {
       activeVisualizationId: 'vis',
       visualizationMap: {
         vis: mockVisualization,
+        vis2: createMockVisualization(),
       },
       visualizationState: {},
       dispatch: dispatchMock,
@@ -104,7 +106,7 @@ describe('suggestion_panel', () => {
 
     expect(dispatchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'SWITCH_VISUALIZATION',
+        type: 'SELECT_SUGGESTION',
         initialState: suggestion1State,
       })
     );
@@ -113,12 +115,29 @@ describe('suggestion_panel', () => {
   it('should remove unused layers if suggestion is clicked', () => {
     defaultProps.frame.datasourceLayers.a = mockDatasource.publicAPIMock;
     defaultProps.frame.datasourceLayers.b = mockDatasource.publicAPIMock;
-    const wrapper = mount(<SuggestionPanel {...defaultProps} activeVisualizationId="vis2" />);
+    const wrapper = mount(
+      <SuggestionPanel
+        {...defaultProps}
+        stagedPreview={{ visualization: { state: {}, activeId: 'vis' }, datasourceStates: {} }}
+        activeVisualizationId="vis2"
+      />
+    );
 
-    wrapper
-      .find('[data-test-subj="lnsSuggestion"]')
-      .first()
-      .simulate('click');
+    act(() => {
+      wrapper
+        .find('[data-test-subj="lnsSuggestion"]')
+        .first()
+        .simulate('click');
+    });
+
+    wrapper.update();
+
+    act(() => {
+      wrapper
+        .find('[data-test-subj="lensSubmitSuggestion"]')
+        .first()
+        .simulate('click');
+    });
 
     expect(defaultProps.frame.removeLayers).toHaveBeenCalledWith(['b']);
   });
@@ -141,18 +160,18 @@ describe('suggestion_panel', () => {
         visualizationState: suggestion2State,
         visualizationId: 'vis',
         title: 'Suggestion2',
-        previewExpression: 'test | expression',
       },
     ] as Suggestion[]);
 
+    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce(undefined);
+    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
     mount(<SuggestionPanel {...defaultProps} />);
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-    const passedExpression = fromExpression(
-      (expressionRendererMock as jest.Mock).mock.calls[0][0].expression
-    );
+    const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
+
     expect(passedExpression).toMatchInlineSnapshot(`
       Object {
         "chain": Array [
@@ -163,6 +182,7 @@ describe('suggestion_panel', () => {
           },
           Object {
             "arguments": Object {
+              "filters": Array [],
               "query": Array [
                 "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
               ],
@@ -232,6 +252,8 @@ describe('suggestion_panel', () => {
       },
     ] as Suggestion[]);
 
+    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce(undefined);
+    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);

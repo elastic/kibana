@@ -116,7 +116,7 @@ describe('xy_suggestions', () => {
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "seriesType": "area",
+          "seriesType": "area_stacked",
           "splitAccessor": "aaa",
           "x": "date",
           "y": Array [
@@ -160,7 +160,7 @@ describe('xy_suggestions', () => {
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "seriesType": "area",
+          "seriesType": "area_stacked",
           "splitAccessor": "product",
           "x": "date",
           "y": Array [
@@ -310,17 +310,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "seriesType": "bar",
-                            "splitAccessor": "ddd",
-                            "x": "quantity",
-                            "y": Array [
-                              "price",
-                            ],
-                          },
-                        ]
-                `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "ddd",
+          "x": "quantity",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -345,16 +345,16 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "seriesType": "bar",
-                            "splitAccessor": "eee",
-                            "x": "mybool",
-                            "y": Array [
-                              "num votes",
-                            ],
-                          },
-                        ]
-                `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "eee",
+          "x": "num votes",
+          "y": Array [
+            "mybool",
+          ],
+        },
+      ]
+    `);
   });
 });

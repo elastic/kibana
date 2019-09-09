@@ -237,6 +237,7 @@ function InnerSuggestionPanel({
         {stagedPreview && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="lensSubmitSuggestion"
               size="xs"
               onClick={() => {
                 dispatch({

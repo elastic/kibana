@@ -97,26 +97,6 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "previewExpression": Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {
-                "accessor": Array [
-                  "bytes",
-                ],
-                "mode": Array [
-                  "reduced",
-                ],
-                "title": Array [
-                  "",
-                ],
-              },
-              "function": "lens_metric_chart",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        },
         "previewIcon": "visMetric",
         "score": 0.5,
         "state": Object {
