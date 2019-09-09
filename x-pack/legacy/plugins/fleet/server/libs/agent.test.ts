@@ -205,4 +205,150 @@ describe('Agent lib', () => {
       expect(res.agents).toHaveLength(2);
     });
   });
+
+  describe('checkin', () => {
+    it('should throw if the agens do not exists', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await expect(
+        agentLib.checkin('agent:1', [
+          {
+            timestamp: '2019-09-05T15:41:26+0000',
+            type: 'STATE',
+            event: {
+              message: 'State changed from PAUSE to STARTING',
+              type: 'STARTING',
+            },
+          },
+        ])
+      ).rejects.toThrowError(/Agent not found/);
+    });
+
+    it('should update events', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = ({
+        id: 'agent:1',
+        actions: [],
+        active: true,
+        events: [
+          {
+            timestamp: '2019-09-05T15:43:26+0000',
+            type: 'STATE',
+            event: {
+              message: 'State changed from RUNNING to STOPPED',
+              type: 'STOPPED',
+            },
+          },
+        ],
+      } as unknown) as Agent;
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await agentLib.checkin('agent:1', [
+        {
+          timestamp: '2019-09-05T15:41:26+0000',
+          type: 'STATE',
+          event: {
+            message: 'State changed from PAUSE to STARTING',
+            type: 'STARTING',
+          },
+        },
+      ]);
+
+      const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
+      expect(refreshAgent.events).toHaveLength(2);
+      expect(refreshAgent.events[0]).toMatchObject({
+        type: 'STATE',
+        event: {
+          type: 'STARTING',
+        },
+      });
+
+      expect(refreshAgent.events[1]).toMatchObject({
+        type: 'STATE',
+        event: {
+          type: 'STOPPED',
+        },
+      });
+    });
+
+    it('should not update agent metadata if none are provided', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = ({
+        id: 'agent:1',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+      } as unknown) as Agent;
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await agentLib.checkin('agent:1', []);
+
+      const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
+      expect(refreshAgent.local_metadata).toMatchObject({
+        key: 'local1',
+      });
+    });
+
+    it('should update agent metadata if provided', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = ({
+        id: 'agent:1',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+      } as unknown) as Agent;
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await agentLib.checkin('agent:1', [], { key: 'local2' });
+
+      const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
+      expect(refreshAgent.local_metadata).toMatchObject({
+        key: 'local2',
+      });
+    });
+
+    it('should return new actions', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = ({
+        id: 'agent:1',
+        active: true,
+        actions: [
+          {
+            created_at: '2019-09-05T15:43:26+0000',
+            type: 'PAUSE',
+            id: 'this-a-unique-id',
+          },
+          {
+            created_at: '2019-09-05T15:41:26+0000',
+            type: 'PAUSE',
+            sent_at: '2019-09-05T15:42:26+0000',
+            id: 'this-a-unique-id-already-sent',
+          },
+        ],
+        events: [],
+      } as unknown) as Agent;
+
+      const agentLib = new AgentLib(agentAdapter, token);
+      const { actions } = await agentLib.checkin('agent:1', []);
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        type: 'PAUSE',
+        id: 'this-a-unique-id',
+      });
+
+      const refreshAgent = (await agentAdapter.getById('agent:1')) as Agent;
+      expect(refreshAgent.actions[0].sent_at).toBeDefined();
+    });
+  });
 });

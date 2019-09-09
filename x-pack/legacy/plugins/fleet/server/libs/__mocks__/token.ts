@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TokenVerificationResponse } from '../adapters/tokens/adapter_types';
+import { TokenVerificationResponse, TokenType } from '../adapters/tokens/adapter_types';
 
 export class TokenLib {
   private accessTokenId = 1;
@@ -12,7 +12,11 @@ export class TokenLib {
   public async verify(token: any): Promise<TokenVerificationResponse> {
     switch (token) {
       case 'valid-enrollment-token': {
-        return { valid: true, token: { config: { id: 'configId', sharedId: 'configSharedId' } } };
+        return {
+          valid: true,
+          type: TokenType.ENROLMENT_TOKEN,
+          token: { config: { id: 'configId', sharedId: 'configSharedId' } },
+        };
       }
       default: {
         return { valid: false, reason: 'token does not exists' };

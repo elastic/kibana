@@ -41,6 +41,8 @@ export class AgentAdapter implements AgentAdapterType {
       attributes: {
         id: so.id,
         ...so.attributes,
+        actions: [],
+        events: [],
       },
     });
   }
@@ -93,13 +95,17 @@ export class AgentAdapter implements AgentAdapterType {
    * @param newData
    */
   public async update(id: string, newData: Partial<Agent>) {
-    const { error } = await this.soAdapter.update('agents', id, {
-      ...newData,
-      local_metadata: newData.local_metadata ? JSON.stringify(newData.local_metadata) : undefined,
-      user_provided_metadata: newData.local_metadata
-        ? JSON.stringify(newData.user_provided_metadata)
-        : undefined,
-    });
+    const updateData: Partial<SavedObjectAgentAttributes> = ({ ...newData } as unknown) as Partial<
+      SavedObjectAgentAttributes
+    >;
+    if (newData.local_metadata) {
+      updateData.local_metadata = JSON.stringify(newData.local_metadata);
+    }
+    if (updateData.user_provided_metadata) {
+      updateData.user_provided_metadata = JSON.stringify(newData.user_provided_metadata);
+    }
+
+    const { error } = await this.soAdapter.update('agents', id, updateData);
 
     if (error) {
       throw new Error(error.message);
