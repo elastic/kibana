@@ -50,7 +50,15 @@ describe('dev/mocha/junit report generation', () => {
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
     const report = await fcb(cb =>
-      parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/TEST-test.xml')), cb)
+      parseString(
+        readFileSync(
+          resolve(
+            PROJECT_DIR,
+            `target/junit/TEST-${process.env.JOB ? process.env.JOB + '-' : ''}test.xml`
+          )
+        ),
+        cb
+      )
     );
 
     // test case results are wrapped in <testsuites></testsuites>
