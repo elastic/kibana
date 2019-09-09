@@ -8,7 +8,7 @@ import React from 'react';
 import { some, none } from 'fp-ts/lib/Option';
 import { shallow } from 'enzyme';
 import { Chrome } from 'ui/chrome';
-import { AlertsList, NoAlerts, AlertsLoadingIndicator, AlertsTable } from './alerts_list';
+import { AlertsList, NoAlerts, AlertsTable, AlertsLoadingIndicator } from './alerts_list';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import { Result, asOk, asErr } from '../../../lib/result_type';

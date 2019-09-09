@@ -1,18 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Alerts List: Alerts Table should render a list 1`] = `
-<ul>
-  <li
-    key="0"
-  >
-    [{"id":"0f73f885-ee6d-4693-8ba1-f545bff26834","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"21d865f7-32bc-4428-b08d-25614cd30294"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"a574d2e0-d2d3-11e9-964e-d30e64b0a254"},{"id":"0c1268ed-b19f-446f-9eb8-9f4987432ef4","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"b6bd4b41-bd2c-47b9-975c-b408b0a0e8be"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"c05f6340-d2d3-11e9-964e-d30e64b0a254"}]
-  </li>
-  <li
-    key="1"
-  >
-    [{"id":"0f73f885-ee6d-4693-8ba1-f545bff26834","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"21d865f7-32bc-4428-b08d-25614cd30294"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"a574d2e0-d2d3-11e9-964e-d30e64b0a254"},{"id":"0c1268ed-b19f-446f-9eb8-9f4987432ef4","alertTypeId":".always-firing","interval":"1s","actions":[{"group":"default","params":{"message":"from alert 1s"},"id":"b6bd4b41-bd2c-47b9-975c-b408b0a0e8be"}],"alertTypeParams":{"index":"test_alert_from_cli"},"enabled":true,"createdBy":"elastic","updatedBy":"elastic","apiKeyOwner":"elastic","scheduledTaskId":"c05f6340-d2d3-11e9-964e-d30e64b0a254"}]
-  </li>
-</ul>
+<EuiInMemoryTable
+  cellProps={[Function]}
+  columns={
+    Array [
+      Object {
+        "field": "id",
+        "name": "ID",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "alertTypeId",
+        "name": "Alert Type ID",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "interval",
+        "name": "Interval",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "createdBy",
+        "name": "Created By",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "updatedBy",
+        "name": "Updated By",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "apiKeyOwner",
+        "name": "Api Key Owner",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "scheduledTaskId",
+        "name": "Scheduled Task Id",
+        "sortable": true,
+        "truncateText": true,
+      },
+    ]
+  }
+  data-test-subj="alertsTable"
+  executeQueryOptions={Object {}}
+  isSelectable={true}
+  itemId="id"
+  items={
+    Array [
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "21d865f7-32bc-4428-b08d-25614cd30294",
+            "params": Object {
+              "message": "from alert 1s",
+            },
+          },
+        ],
+        "alertTypeId": ".always-firing",
+        "alertTypeParams": Object {
+          "index": "test_alert_from_cli",
+        },
+        "apiKeyOwner": "elastic",
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "0f73f885-ee6d-4693-8ba1-f545bff26834",
+        "interval": "1s",
+        "scheduledTaskId": "a574d2e0-d2d3-11e9-964e-d30e64b0a254",
+        "updatedBy": "elastic",
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "b6bd4b41-bd2c-47b9-975c-b408b0a0e8be",
+            "params": Object {
+              "message": "from alert 1s",
+            },
+          },
+        ],
+        "alertTypeId": ".always-firing",
+        "alertTypeParams": Object {
+          "index": "test_alert_from_cli",
+        },
+        "apiKeyOwner": "elastic",
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "0c1268ed-b19f-446f-9eb8-9f4987432ef4",
+        "interval": "1s",
+        "scheduledTaskId": "c05f6340-d2d3-11e9-964e-d30e64b0a254",
+        "updatedBy": "elastic",
+      },
+    ]
+  }
+  message={
+    <FormattedMessage
+      defaultMessage="No Alerts to show"
+      id="xpack.alerting.sections.alertsList.alertTable.noAlertsMessage"
+      values={Object {}}
+    />
+  }
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        10,
+        50,
+        100,
+      ],
+    }
+  }
+  responsive={true}
+  rowProps={[Function]}
+  sorting={true}
+/>
 `;
 
 exports[`Alerts List: Empty List should render an Empty Prompt 1`] = `
@@ -25,11 +134,7 @@ exports[`Alerts List: Empty List should render an Empty Prompt 1`] = `
         color="subdued"
       >
         <p>
-          <FormattedMessage
-            defaultMessage="Watch for changes or anomalies in your data and take action if needed."
-            id="xpack.alerting.sections.alertsList.subhead"
-            values={Object {}}
-          />
+          <AlertingDescriptionText />
         </p>
       </EuiText>
     }

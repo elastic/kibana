@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BASE_PATH } from './base_path';
-export { PAGINATION } from './pagination';
+export const PAGINATION: { initialPageSize: number; pageSizeOptions: number[] } = {
+  initialPageSize: 10,
+  pageSizeOptions: [10, 50, 100],
+};

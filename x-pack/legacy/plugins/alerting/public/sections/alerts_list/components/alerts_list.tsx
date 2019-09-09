@@ -7,19 +7,31 @@
 import React, { useEffect } from 'react';
 import { Option, option, none, some, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EuiText, EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPageContent,
+  EuiEmptyPrompt,
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome, { Chrome } from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import { flatMap } from '../../../lib/flat_map';
 import { mapResult } from '../../../lib/result_type';
 import { PageError, SectionLoading } from '../../../components';
+import { PAGINATION } from '../../../constants';
 import {
   AlertingApi,
   RequestData,
   LoadAlertsResponse,
   LoadAlertsErrorResponse,
+  AlertResponse,
 } from '../../../lib/api';
 
 const map = option.map;
@@ -44,7 +56,11 @@ export const AlertsList = ({ breadcrumbs, api }: AlertsListProps) => {
         ({ isLoading: isAlertsLoading, data: alerts }) =>
           isAlertsLoading
             ? some(<AlertsLoadingIndicator />)
-            : map(alerts, ({ data }) => <AlertsTable alerts={data} />),
+            : map(alerts, ({ data }) => (
+                <ContentWrapper>
+                  <AlertsTable alerts={data} />
+                </ContentWrapper>
+              )),
         error =>
           some(
             <EuiPageContent>
@@ -62,6 +78,13 @@ AlertsList.defaultProps = {
   api: none,
 };
 
+export const AlertingDescriptionText = () => (
+  <FormattedMessage
+    id="xpack.alerting.sections.alertsList.subhead"
+    defaultMessage="Watch for changes or anomalies in your data and take action if needed."
+  />
+);
+
 export const AlertsLoadingIndicator = () => (
   <SectionLoading>
     <FormattedMessage
@@ -72,16 +95,11 @@ export const AlertsLoadingIndicator = () => (
 );
 
 export const NoAlerts = () => {
-  const alertingDescriptionText = (
-    <FormattedMessage
-      id="xpack.alerting.sections.alertsList.subhead"
-      defaultMessage="Watch for changes or anomalies in your data and take action if needed."
-    />
-  );
-
   const emptyPromptBody = (
     <EuiText color="subdued">
-      <p>{alertingDescriptionText}</p>
+      <p>
+        <AlertingDescriptionText />
+      </p>
     </EuiText>
   );
 
@@ -104,12 +122,120 @@ export const NoAlerts = () => {
   );
 };
 
-export const AlertsTable = ({ alerts }: { alerts: any[] }) => {
+const alertsTableColumns = [
+  {
+    field: 'id',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.idHeader', {
+      defaultMessage: 'ID',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'alertTypeId',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.alertTypeIdHeader', {
+      defaultMessage: 'Alert Type ID',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'interval',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.intervalHeader', {
+      defaultMessage: 'Interval',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'createdBy',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.createdByHeader', {
+      defaultMessage: 'Created By',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'updatedBy',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.updatedByHeader', {
+      defaultMessage: 'Updated By',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'apiKeyOwner',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.apiKeyOwnerHeader', {
+      defaultMessage: 'Api Key Owner',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'scheduledTaskId',
+    name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.scheduledTaskIdHeader', {
+      defaultMessage: 'Scheduled Task Id',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+];
+
+export const AlertsTable = ({ alerts }: { alerts: AlertResponse[] }) => {
   return (
-    <ul>
-      {alerts.map((alert, i) => (
-        <li key={i}>{JSON.stringify(alerts)}</li>
-      ))}
-    </ul>
+    <EuiInMemoryTable
+      items={alerts}
+      itemId="id"
+      columns={alertsTableColumns}
+      //   search={searchConfig}
+      pagination={PAGINATION}
+      sorting={true}
+      //   selection={selectionConfig}
+      isSelectable={true}
+      message={
+        <FormattedMessage
+          id="xpack.alerting.sections.alertsList.alertTable.noAlertsMessage"
+          defaultMessage="No Alerts to show"
+        />
+      }
+      rowProps={() => ({
+        'data-test-subj': 'row',
+      })}
+      cellProps={() => ({
+        'data-test-subj': 'cell',
+      })}
+      data-test-subj="alertsTable"
+    />
+  );
+};
+
+export const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <EuiPageContent>
+      <EuiTitle size="l">
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={true}>
+            <h1 data-test-subj="appTitle">
+              <FormattedMessage
+                id="xpack.alerting.sections.alertsList.header"
+                defaultMessage="Alerting"
+              />
+            </h1>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <EuiText color="subdued">
+        <p>
+          <AlertingDescriptionText />
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="xl" />
+
+      {children}
+    </EuiPageContent>
   );
 };
