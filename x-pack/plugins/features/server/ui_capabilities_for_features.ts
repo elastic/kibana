@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
-import { Feature } from '../../types';
+import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { Feature } from './feature';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
 
@@ -14,9 +14,7 @@ interface FeatureCapabilities {
   [featureId: string]: Record<string, boolean>;
 }
 
-export function uiCapabilitiesForFeatures(xpackMainPlugin: Record<string, any>): UICapabilities {
-  const features: Feature[] = xpackMainPlugin.getFeatures();
-
+export function uiCapabilitiesForFeatures(features: Feature[]): UICapabilities {
   const featureCapabilities: FeatureCapabilities[] = features.map(getCapabilitiesFromFeature);
 
   return buildCapabilities(...featureCapabilities);

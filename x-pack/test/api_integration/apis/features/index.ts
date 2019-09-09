@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  Feature,
-  FeatureKibanaPrivileges,
-  uiCapabilitiesRegex,
-} from './server/lib/feature_registry';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('features', () => {
+    loadTestFile(require.resolve('./features'));
+  });
+}
