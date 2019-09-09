@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { EmbeddedMap } from './embedded_map';
-import { inputsModel } from '../../store/inputs';
+import { SetQuery } from './types';
 
 jest.mock('ui/new_platform', () => ({
   npStart: {
@@ -29,17 +29,7 @@ jest.mock('ui/new_platform', () => ({
 
 describe('EmbeddedMap', () => {
   let applyFilterQueryFromKueryExpression: (expression: string) => void;
-  let setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  let setQuery: SetQuery;
 
   beforeEach(() => {
     applyFilterQueryFromKueryExpression = jest.fn(expression => {});
@@ -56,6 +46,20 @@ describe('EmbeddedMap', () => {
         setQuery={setQuery}
       />
     );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
+  test('renders error correctly against snapshot', () => {
+    const wrapper = shallow(
+      <EmbeddedMap
+        applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+        queryExpression={''}
+        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
+        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        setQuery={setQuery}
+      />
+    );
+    wrapper.update();
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });
