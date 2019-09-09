@@ -10,27 +10,22 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { InitialConfiguration } from './initial_configuration';
 import { SetupProcess } from './setup_process';
 import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import { SetupStatus } from '../../../../../containers/logs/log_analysis';
 
 interface AnalysisSetupStepsProps {
   setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  isSettingUp: boolean;
-  didSetupFail: boolean;
   retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  isRetrying: boolean;
-  hasCompletedSetup: boolean;
   viewResults: () => void;
   indexPattern: string;
+  setupStatus: SetupStatus;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
   setup: setupModule,
   retry: retrySetup,
-  isSettingUp,
-  didSetupFail,
-  isRetrying,
-  hasCompletedSetup,
   viewResults,
   indexPattern,
+  setupStatus,
 }: AnalysisSetupStepsProps) => {
   const { setup, retry, setStartTime, setEndTime, startTime, endTime } = useAnalysisSetupState({
     setupModule,
@@ -57,10 +52,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
       }),
       children: (
         <SetupProcess
-          isSettingUp={isSettingUp}
-          didSetupFail={didSetupFail}
-          isRetrying={isRetrying}
-          hasCompletedSetup={hasCompletedSetup}
+          setupStatus={setupStatus}
           viewResults={viewResults}
           setup={setup}
           retry={retry}
@@ -68,11 +60,11 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         />
       ),
       status:
-        isSettingUp || isRetrying
+        setupStatus === 'pending' || setupStatus === 'retrying'
           ? ('incomplete' as EuiStepStatus)
-          : didSetupFail
+          : setupStatus === 'failed'
           ? ('danger' as EuiStepStatus)
-          : hasCompletedSetup
+          : setupStatus === 'succeeded'
           ? ('complete' as EuiStepStatus)
           : undefined,
     },

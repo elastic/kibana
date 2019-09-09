@@ -20,29 +20,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup/steps';
+import { SetupStatus } from '../../../containers/logs/log_analysis';
 
 interface AnalysisSetupContentProps {
   setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  isSettingUp: boolean;
-  didSetupFail: boolean;
   retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  isRetrying: boolean;
   indexPattern: string;
-  hasCompletedSetup: boolean;
-  hasAttemptedSetup: boolean;
   viewResults: () => void;
+  setupStatus: SetupStatus;
 }
 
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
   setup,
-  isSettingUp,
-  didSetupFail,
-  isRetrying,
   indexPattern,
-  hasCompletedSetup,
-  hasAttemptedSetup,
   viewResults,
   retry,
+  setupStatus,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -77,14 +70,10 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             <EuiSpacer />
             <AnalysisSetupSteps
               setup={setup}
-              isSettingUp={isSettingUp}
-              didSetupFail={didSetupFail}
               retry={retry}
-              isRetrying={isRetrying}
-              hasCompletedSetup={hasCompletedSetup}
-              hasAttemptedSetup={hasAttemptedSetup}
               viewResults={viewResults}
               indexPattern={indexPattern}
+              setupStatus={setupStatus}
             />
           </EuiPageContentBody>
         </AnalysisPageContent>

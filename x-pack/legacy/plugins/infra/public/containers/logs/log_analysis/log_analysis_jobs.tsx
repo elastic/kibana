@@ -23,6 +23,16 @@ type JobStatus =
   | 'opened'
   | 'failed';
 
+export type SetupStatus =
+  | 'unknown' // initial state, we're still waiting to load the job status
+  | 'required' // jobs are missing
+  | 'pending' // called module setup, waiting for response
+  | 'retrying' // cleaning up and calling module setup again
+  | 'succeeded' // setup succeeded, notifying user
+  | 'failed' // setup failed, notifying user
+  | 'hiddenAfterSuccess' // hide the setup screen and we show the results for the first time
+  | 'skipped'; // setup hidden because the module is in a correct state already
+
 interface AllJobStatuses {
   [key: string]: JobStatus;
 }
@@ -46,8 +56,8 @@ export const useLogAnalysisJobs = ({
 }) => {
   const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
   const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
+  const [setupStatus, setSetupStatus] = useState<SetupStatus>('unknown');
   const [hasAttemptedSetup, setHasAttemptedSetup] = useState<boolean>(false);
-  const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
@@ -113,64 +123,71 @@ export const useLogAnalysisJobs = ({
     fetchJobStatus();
   }, []);
 
-  const isSetupRequired = useMemo(() => {
+  useEffect(() => {
     const jobStates = Object.values(jobStatus);
-    return (
-      jobStates.filter(state => ['opened', 'opening', 'created', 'started'].includes(state))
-        .length < jobStates.length
-    );
-  }, [jobStatus]);
+    const jobsWithStatuses = (statuses: string[]) => {
+      return jobStates.filter(state => statuses.includes(state)).length;
+    };
+    if (jobsWithStatuses(['unknown']) > 0) {
+      setSetupStatus('unknown');
+    } else if (jobsWithStatuses(['failed']) > 0) {
+      setSetupStatus('failed');
+    } else if (jobsWithStatuses(['opened', 'opening', 'created', 'started']) < jobStates.length) {
+      setSetupStatus('required');
+    } else if (
+      hasAttemptedSetup &&
+      jobsWithStatuses(['opened', 'opening', 'created', 'started']) === jobStates.length
+    ) {
+      setSetupStatus('succeeded');
+    } else if (jobsWithStatuses(['opened', 'opening', 'created', 'started']) === jobStates.length) {
+      setSetupStatus('skipped');
+    } else {
+      setSetupStatus('unknown');
+    }
+  }, [jobStatus, setSetupStatus]);
 
   const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [
     fetchJobStatusRequest.state,
   ]);
 
-  const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
-    setupMlModuleRequest.state,
-  ]);
+  // const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
+  //   setupMlModuleRequest.state,
+  // ]);
 
-  const didSetupFail = useMemo(() => {
-    const jobStates = Object.values(jobStatus);
-    return jobStates.filter(state => state === 'failed').length > 0;
-  }, [jobStatus]);
-
-  const hasCompletedSetup = useMemo(() => {
-    return hasAttemptedSetup && !isSetupRequired;
-  }, [isSetupRequired, hasAttemptedSetup]);
+  const viewResults = useCallback(() => {
+    setSetupStatus('hiddenAfterSuccess');
+  }, [setSetupStatus]);
 
   const setup = useCallback(
     (start, end) => {
+      setSetupStatus('pending');
       setHasAttemptedSetup(true);
       setupMlModule(start, end);
     },
-    [setHasAttemptedSetup, setupMlModule]
+    [setSetupStatus, setHasAttemptedSetup, setupMlModule]
   );
 
   const retry = useCallback(
     (start, end) => {
-      setIsRetrying(true);
+      setSetupStatus('retrying');
       cleanupMLResources()
         .then(() => {
           setupMlModule(start, end);
         })
-        .finally(() => {
-          setIsRetrying(false);
+        .catch(() => {
+          setSetupStatus('failed');
         });
     },
-    [setIsRetrying, cleanupMLResources, setupMlModule]
+    [setSetupStatus, cleanupMLResources, setupMlModule]
   );
 
   return {
     jobStatus,
-    isSetupRequired,
     isLoadingSetupStatus,
-    isSettingUpMlModule,
-    didSetupFail,
-    hasCompletedSetup,
-    hasAttemptedSetup,
     setup,
     retry,
-    isRetrying,
+    setupStatus,
+    viewResults,
   };
 };
 

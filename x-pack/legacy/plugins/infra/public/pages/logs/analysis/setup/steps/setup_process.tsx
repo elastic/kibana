@@ -9,31 +9,26 @@ import { EuiLoadingSpinner, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } fr
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
 import { StepText } from './step_text';
+import { SetupStatus } from '../../../../../containers/logs/log_analysis';
 
 interface Props {
-  isSettingUp: boolean;
-  isRetrying: boolean;
-  didSetupFail: boolean;
-  hasCompletedSetup: boolean;
   viewResults: () => void;
   setup: () => void;
   retry: () => void;
   indexPattern: string;
+  setupStatus: SetupStatus;
 }
 
 export const SetupProcess: React.FunctionComponent<Props> = ({
-  isSettingUp,
-  didSetupFail,
-  hasCompletedSetup,
   viewResults,
   setup,
   retry,
-  isRetrying,
   indexPattern,
+  setupStatus,
 }: Props) => {
   return (
     <StepText>
-      {isSettingUp || isRetrying ? (
+      {setupStatus === 'pending' || setupStatus === 'retrying' ? (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
@@ -45,7 +40,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : didSetupFail ? (
+      ) : setupStatus === 'failed' ? (
         <>
           <FormattedMessage
             id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
@@ -56,14 +51,14 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
             }}
           />
           <EuiSpacer />
-          <EuiButton fill onClick={retry} disabled={isRetrying}>
+          <EuiButton fill onClick={retry}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
               defaultMessage="Try again"
             />
           </EuiButton>
         </>
-      ) : hasCompletedSetup ? (
+      ) : setupStatus === 'succeeded' ? (
         <>
           <FormattedMessage
             id="xpack.infra.analysisSetup.steps.setupProcess.successText"
@@ -78,7 +73,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
           </EuiButton>
         </>
       ) : (
-        <CreateMLJobsButton isDisabled={isSettingUp} onClick={setup} />
+        <CreateMLJobsButton onClick={setup} />
       )}
     </StepText>
   );

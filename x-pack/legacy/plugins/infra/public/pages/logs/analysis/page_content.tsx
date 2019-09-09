@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext } from 'react';
 
 import { LoadingPage } from '../../../components/loading_page';
 import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
@@ -18,20 +18,9 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const {
-    isSetupRequired,
-    isLoadingSetupStatus,
-    setup,
-    isSettingUpMlModule,
-    didSetupFail,
-    hasCompletedSetup,
-    hasAttemptedSetup,
-    retry,
-    isRetrying,
-  } = useContext(LogAnalysisJobs.Context);
-
-  const [isViewingResults, setIsViewingResults] = useState<boolean>(false);
-  const viewResults = useCallback(() => setIsViewingResults(true), [setIsViewingResults]);
+  const { isLoadingSetupStatus, setup, retry, setupStatus, viewResults } = useContext(
+    LogAnalysisJobs.Context
+  );
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
@@ -43,21 +32,22 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (isSetupRequired || (hasCompletedSetup && !isViewingResults)) {
+  } else if (setupStatus === 'required') {
     return (
       <AnalysisSetupContent
-        didSetupFail={didSetupFail}
-        isSettingUp={isSettingUpMlModule}
         setup={setup}
         retry={retry}
-        isRetrying={isRetrying}
-        hasCompletedSetup={hasCompletedSetup}
-        hasAttemptedSetup={hasAttemptedSetup}
+        setupStatus={setupStatus}
         indexPattern={source ? source.configuration.logAlias : ''}
         viewResults={viewResults}
       />
     );
   } else {
-    return <AnalysisResultsContent sourceId={sourceId} isFirstUse={isViewingResults} />;
+    return (
+      <AnalysisResultsContent
+        sourceId={sourceId}
+        isFirstUse={setupStatus === 'hiddenAfterSuccess'}
+      />
+    );
   }
 };

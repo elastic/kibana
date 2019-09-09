@@ -9,11 +9,10 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const CreateMLJobsButton: React.FunctionComponent<{
-  isDisabled: boolean;
   onClick: () => void;
-}> = ({ isDisabled, onClick }) => {
+}> = ({ onClick }) => {
   return (
-    <EuiButton fill isDisabled={isDisabled} onClick={onClick}>
+    <EuiButton fill onClick={onClick}>
       <FormattedMessage
         id="xpack.infra.analysisSetup.createMlJobButton"
         defaultMessage="Create ML jobs"
