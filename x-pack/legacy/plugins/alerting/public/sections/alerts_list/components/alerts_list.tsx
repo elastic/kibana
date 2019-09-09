@@ -65,7 +65,7 @@ AlertsList.defaultProps = {
 export const AlertsLoadingIndicator = () => (
   <SectionLoading>
     <FormattedMessage
-      id="xpack.watcher.sections.alertsList.loadingAlertsDescription"
+      id="xpack.alerting.sections.alertsList.loadingAlertsDescription"
       defaultMessage="Loading alerts…"
     />
   </SectionLoading>
