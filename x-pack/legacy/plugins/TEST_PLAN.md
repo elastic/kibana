@@ -14,7 +14,14 @@ The first week after feature freeze (FF) all known bugs and blockers will be fix
  - [Find the list](https://github.com/elastic/kibana/pulls?q=is%3Apr+label%3Av7.4.0+label%3Ain-test-plan+label%3ATeam%3Aapm+-label%3Atested-after-ff+no%3Aassignee) of unassigned, untested issues in the test plan
  - Assign yourself to an issue as you start testing it to avoid duplicate work
  - Testing a PR can have two outcomes:
-   - It worked as expected => Apply `tested-after-ff` label
-   - It did not work as expected => Create a bug report and link to it from the PR
+   - It worked as expected:
+     - Apply `tested-after-ff` label
+   - It did not work as expected: 
+     - Create a new issue: 
+        - Link back to the original PR
+        - Add the version labels to the issue and on Zube move it to "Scheduled for release"-column
+     - The original PR should be marked as tested with `tested-after-ff` (the new issue will ensure that the bug is prioritized and later tested)
+   
+   
 
 
