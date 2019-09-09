@@ -1,0 +1,52 @@
+[[spaces-api-get-all]]
+=== Get all {kib} spaces API
+++++
+<titleabbrev>Get all spaces</titleabbrev>
+++++
+
+Retrieves all {kib} spaces.
+
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
+
+[[spaces-api-get-all-request]]
+==== Request
+
+`GET /api/spaces/space`
+
+[[spaces-api-get-all-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[spaces-api-get-all-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "id": "default",
+    "name": "Default",
+    "description" : "This is the Default Space",
+    "disabledFeatures": [],
+    "_reserved": true
+  },
+  {
+    "id": "marketing",
+    "name": "Marketing",
+    "description" : "This is the Marketing Space",
+    "color": "#aabbcc",
+    "disabledFeatures": ["apm"],
+    "initials": "MK"
+  },
+  {
+    "id": "sales",
+    "name": "Sales",
+    "initials": "MK",
+    "disabledFeatures": ["discover", "timelion"],
+  },
+]
+--------------------------------------------------
