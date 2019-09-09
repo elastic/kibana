@@ -17,9 +17,15 @@
  * under the License.
  */
 
-export type ResponseHandler = <Response, Data>(response: Response, dimensions?: any) => Data;
+import { kfetch } from 'ui/kfetch';
 
-export interface ResponseHandlerDescription {
-  name: string;
-  handler: ResponseHandler;
+export async function fetchExportByType(types, includeReferencesDeep = false) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      type: types,
+      includeReferencesDeep,
+    }),
+  });
 }
