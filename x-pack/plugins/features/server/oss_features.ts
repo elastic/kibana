@@ -51,7 +51,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       privileges: {
         all: {
           savedObject: {
-            all: ['visualization', 'url', 'query'],
+            all: ['visualization', 'url', 'query', 'lens'],
             read: ['index-pattern', 'search'],
           },
           ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
@@ -59,7 +59,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
           },
           ui: ['show'],
         },

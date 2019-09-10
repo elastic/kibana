@@ -18,3 +18,4 @@
  */
 
 export * from './expressions';
+export * from './query';

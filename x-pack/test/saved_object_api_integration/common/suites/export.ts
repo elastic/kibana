@@ -60,7 +60,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, map, query, search, url, visualization]]]]`,
+      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, lens, map, query, search, url, visualization]]]]`,
       validation: {
         source: 'payload',
         keys: ['objects.0.type'],

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore - Interpreter not typed yet
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -58,7 +57,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       if (commitValue === '%%CANVAS_MATCH_ALL%%') {
         handlers.setFilter('');
       } else {
-        const newFilterAST = {
+        const newFilterAST: Ast = {
           type: 'expression',
           chain: [
             {

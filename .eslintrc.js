@@ -638,6 +638,16 @@ module.exports = {
     },
 
     /**
+     * Lens overrides
+     */
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * disable jsx-a11y for kbn-ui-framework
      */
     {
