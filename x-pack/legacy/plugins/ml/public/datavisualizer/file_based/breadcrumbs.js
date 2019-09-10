@@ -5,14 +5,16 @@
  */
 
 
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB } from '../../breadcrumbs';
 
 
 export function getFileDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
   return [
-    ML_BREADCRUMB
+    ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    DATA_VISUALIZER_BREADCRUMB
   ];
 }
 

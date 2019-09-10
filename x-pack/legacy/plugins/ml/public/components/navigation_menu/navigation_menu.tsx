@@ -39,7 +39,7 @@ export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
   const showTabs = Object.keys(tabSupport).includes(tabId);
   const mainTabId = tabSupport[tabId as tabSupportId] || tabId;
-  // show horizontal rule if there are now subtabs
+  // show horizontal rule if there are no subtabs
   const showHorizontalRule = tabSupport[tabId as tabSupportId] === null;
 
   return (

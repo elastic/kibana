@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import {
+  ML_BREADCRUMB,
+  ANOMALY_DETECTION_BREADCRUMB,
+  DATA_VISUALIZER_BREADCRUMB,
+  // @ts-ignore
+} from '../../breadcrumbs';
 
 export function getDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
-  return [ML_BREADCRUMB];
+  return [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
 }

@@ -5,7 +5,7 @@
  */
 
 
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../breadcrumbs';
 import { i18n } from '@kbn/i18n';
 
 
@@ -20,6 +20,7 @@ export function getJobManagementBreadcrumbs() {
 export function getCreateJobBreadcrumbs() {
   return [
     ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
         defaultMessage: 'Create job'
@@ -90,6 +91,8 @@ export function getCreateRecognizerJobBreadcrumbs($routeParams) {
 export function getDataVisualizerIndexOrSearchBreadcrumbs() {
   return [
     ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    DATA_VISUALIZER_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
         defaultMessage: 'Select index or search'
