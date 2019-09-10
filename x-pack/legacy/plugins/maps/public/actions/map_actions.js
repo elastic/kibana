@@ -18,7 +18,7 @@ import {
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
-  getCancelRequestCallbacks,
+  cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback
 } from '../reducers/non_serializable_instances';
@@ -90,23 +90,11 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   await Promise.all(syncs);
 }
 
-function cancelRequest(requestToken, state, dispatch) {
-  if (!requestToken) {
-    return;
-  }
-
-  const cancelCallback = getCancelRequestCallbacks(state).get(requestToken);
-  if (cancelCallback) {
-    cancelCallback();
-    dispatch(unregisterCancelCallback(requestToken));
-  }
-}
-
 export function cancelAllInFlightRequests() {
   return (dispatch, getState) => {
     getLayerList(getState()).forEach(layer => {
       layer.getInFlightRequestTokens().forEach(requestToken => {
-        cancelRequest(requestToken, getState(), dispatch);
+        dispatch(cancelRequest(requestToken));
       });
     });
   };
@@ -439,7 +427,7 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   return (dispatch, getState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      cancelRequest(layer.getPrevRequestToken(dataId), getState(), dispatch);
+      dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
     }
 
     dispatch({
@@ -609,7 +597,7 @@ export function removeLayer(layerId) {
     }
 
     layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
-      cancelRequest(requestToken, getState(), dispatch);
+      dispatch(cancelRequest(requestToken));
     });
     dispatch(clearTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();

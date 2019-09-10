@@ -72,3 +72,17 @@ export const unregisterCancelCallback = (requestToken) => {
     requestToken,
   };
 };
+
+export const cancelRequest = (requestToken) => {
+  return (dispatch, getState) => {
+    if (!requestToken) {
+      return;
+    }
+
+    const cancelCallback = getCancelRequestCallbacks(getState()).get(requestToken);
+    if (cancelCallback) {
+      cancelCallback();
+      dispatch(unregisterCancelCallback(requestToken));
+    }
+  };
+};
