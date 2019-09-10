@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -60,9 +61,17 @@ interface NetworkFilterDispatchProps {
 
 export type NetworkFilterProps = OwnProps & NetworkFilterReduxProps & NetworkFilterDispatchProps;
 
-class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps> {
+interface NetworkFilterState {
+  isInitialization: boolean;
+}
+
+class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps, NetworkFilterState> {
   private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
   private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
+
+  public readonly state = {
+    isInitialization: true,
+  };
 
   constructor(props: NetworkFilterProps) {
     super(props);
@@ -74,18 +83,16 @@ class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps> {
     );
   }
 
-  public render() {
-    const {
-      children,
-      networkFilterQueryDraft,
-      indexPattern,
-      kueryFilterQuery,
-      isNetworkFilterQueryDraftValid,
-      setQuery,
-      type,
-    } = this.props;
+  public componentDidUpdate(prevProps: NetworkFilterProps) {
+    const { indexPattern, networkFilterQueryDraft, kueryFilterQuery, setQuery, type } = this.props;
 
-    if (setQuery) {
+    if (
+      setQuery &&
+      (this.state.isInitialization ||
+        !isEqual(prevProps.networkFilterQueryDraft, networkFilterQueryDraft) ||
+        !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
+        prevProps.type !== type)
+    ) {
       setQuery({
         id: 'kql',
         inspect: null,
@@ -98,7 +105,15 @@ class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps> {
           type,
         }),
       });
+
+      if (this.state.isInitialization) {
+        this.setState({ isInitialization: false });
+      }
     }
+  }
+
+  public render() {
+    const { children, networkFilterQueryDraft, isNetworkFilterQueryDraftValid } = this.props;
 
     return (
       <>

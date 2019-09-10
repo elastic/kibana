@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -58,11 +59,19 @@ interface HostsFilterDispatchProps {
   }>;
 }
 
+interface HostsFilterState {
+  isInitialization: boolean;
+}
+
 export type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
 
-class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
+class HostsFilterComponent extends React.PureComponent<HostsFilterProps, HostsFilterState> {
   private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
   private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
+
+  public readonly state = {
+    isInitialization: true,
+  };
 
   constructor(props: HostsFilterProps) {
     super(props);
@@ -74,18 +83,15 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
     );
   }
 
-  public render() {
-    const {
-      children,
-      hostsFilterQueryDraft,
-      indexPattern,
-      kueryFilterQuery,
-      isHostFilterQueryDraftValid,
-      setQuery,
-      type,
-    } = this.props;
-
-    if (setQuery) {
+  public componentDidUpdate(prevProps: HostsFilterProps) {
+    const { indexPattern, hostsFilterQueryDraft, kueryFilterQuery, setQuery, type } = this.props;
+    if (
+      setQuery &&
+      (this.state.isInitialization ||
+        !isEqual(prevProps.hostsFilterQueryDraft, hostsFilterQueryDraft) ||
+        !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
+        prevProps.type !== type)
+    ) {
       setQuery({
         id: 'kql',
         inspect: null,
@@ -98,7 +104,14 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
           type,
         }),
       });
+      if (this.state.isInitialization) {
+        this.setState({ isInitialization: false });
+      }
     }
+  }
+
+  public render() {
+    const { children, hostsFilterQueryDraft, isHostFilterQueryDraftValid } = this.props;
 
     return (
       <>
@@ -112,6 +125,7 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
       </>
     );
   }
+
   private applyFilterQueryFromKueryExpression = (expression: string) =>
     this.props.applyHostsFilterQuery({
       filterQuery: {
