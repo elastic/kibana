@@ -28,7 +28,7 @@ export {
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
-export { moveToDataFrameTransformList, moveToDataFrameWizard, moveToDiscover } from './navigation';
+export { moveToDataFrameWizard, getDiscoverHref } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,

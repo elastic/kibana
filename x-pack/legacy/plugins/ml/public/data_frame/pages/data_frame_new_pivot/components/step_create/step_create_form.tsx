@@ -35,7 +35,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_cont
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
+import { getDiscoverHref } from '../../../../common';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -364,7 +364,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                       defaultMessage: 'Return to the data frame transform management page.',
                     }
                   )}
-                  onClick={moveToDataFrameTransformList}
+                  href="#/data_frames"
                 />
               </EuiFlexItem>
               {started === true && createIndexPattern === true && indexPatternId === undefined && (
@@ -397,7 +397,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the data frame pivot.',
                       }
                     )}
-                    onClick={() => moveToDiscover(indexPatternId, baseUrl)}
+                    href={getDiscoverHref(indexPatternId, baseUrl)}
                   />
                 </EuiFlexItem>
               )}
