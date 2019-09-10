@@ -19,8 +19,7 @@
 
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { Field, FieldList, FieldType } from './fields';
-// @ts-ignore
-import { createFlattenHitWrapper } from './index_patterns/flatten_hit';
+import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import {
   formatHitProvider,
