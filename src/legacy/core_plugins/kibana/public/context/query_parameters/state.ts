@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import contextLoadingButtonTemplate from './loading_button.html';
-
-
-const module = uiModules.get('apps/context', [
-  'kibana',
-  'ngRoute',
-]);
-
-module.directive('contextLoadingButton', function ContextLoadingButton() {
+export function createInitialQueryParametersState(
+  defaultStepSize: number = 5,
+  tieBreakerField: string = '_doc'
+) {
   return {
-    replace: true,
-    restrict: 'E',
-    scope: {
-      isDisabled: '=',
-      icon: '=',
-    },
-    template: contextLoadingButtonTemplate,
-    transclude: true,
+    anchorId: null,
+    columns: [],
+    defaultStepSize,
+    filters: [],
+    indexPatternId: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+    tieBreakerField,
   };
-});
+}

@@ -17,16 +17,10 @@
  * under the License.
  */
 
-export function createInitialQueryParametersState(defaultStepSize, tieBreakerField) {
-  return {
-    anchorId: null,
-    columns: [],
-    defaultStepSize,
-    filters: [],
-    indexPatternId: null,
-    predecessorCount: 0,
-    successorCount: 0,
-    sort: [],
-    tieBreakerField,
-  };
+import chrome from 'ui/chrome';
+import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+
+export function getChartTheme(): Theme {
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  return isDarkMode ? DARK_THEME : LIGHT_THEME;
 }
