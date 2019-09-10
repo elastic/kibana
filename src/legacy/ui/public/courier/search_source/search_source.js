@@ -73,11 +73,8 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
-import { createDefer } from 'ui/promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { SearchRequestProvider } from '../fetch/request';
 
-import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
@@ -114,7 +111,6 @@ function isIndexPattern(val) {
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
-  const SearchRequest = Private(SearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -299,39 +295,19 @@ export function SearchSourceProvider(Promise, Private, config) {
      *
      * @async
      */
-    fetch() {
-      const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        const errorHandler = (request, error) => {
-          request.defer.reject(error);
-          request.abort();
-        };
-        req = self._createRequest({ errorHandler });
-      }
-
-      fetchSoon.fetchSearchRequests([req]);
-      return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch all pending requests for this source ASAP
-     * @async
-     */
-    fetchQueued() {
-      return fetchSoon.fetchSearchRequests(this._myStartableQueued());
+    async fetch(options) {
+      const searchRequest = await this._flatten();
+      return fetchSoon.fetch(searchRequest, {
+        ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
+        ...options,
+      });
     }
 
     /**
      * Cancel all pending requests for this searchSource
      * @return {undefined}
      */
-    cancelQueued() {
-      searchRequestQueue.getAll()
-        .filter(req => req.source === this)
-        .forEach(req => req.abort());
-    }
+    cancelQueued() {}
 
     /**
      *  Add a handler that will be notified whenever requests start
@@ -367,38 +343,9 @@ export function SearchSourceProvider(Promise, Private, config) {
         .then(_.noop);
     }
 
-    /**
-     * Put a request in to the courier that this Source should
-     * be fetched on the next run of the courier
-     * @return {Promise}
-     */
-    onResults() {
-      const self = this;
-
-      return new Promise(function (resolve, reject) {
-        const defer = createDefer(Promise);
-        defer.promise.then(resolve, reject);
-
-        const errorHandler = (request, error) => {
-          reject(error);
-          request.abort();
-        };
-        self._createRequest({ defer, errorHandler });
-      });
-    }
-
     async getSearchRequestBody() {
       const searchRequest = await this._flatten();
       return searchRequest.body;
-    }
-
-    /**
-     *  Called by requests of this search source when they are done
-     *  @param  {Courier.Request} request
-     *  @return {undefined}
-     */
-    requestIsStopped() {
-      this.activeFetchCount -= 1;
     }
 
     /**
@@ -413,25 +360,6 @@ export function SearchSourceProvider(Promise, Private, config) {
     /******
      * PRIVATE APIS
      ******/
-
-    _myStartableQueued() {
-      return searchRequestQueue
-        .getStartable()
-        .filter(req => req.source === this);
-    }
-
-    /**
-     * Create a common search request object, which should
-     * be put into the pending request queue, for this search
-     * source
-     *
-     * @param {Deferred} defer - the deferred object that should be resolved
-     *                         when the request is complete
-     * @return {SearchRequest}
-     */
-    _createRequest({ defer, errorHandler }) {
-      return new SearchRequest({ source: this, defer, errorHandler });
-    }
 
     /**
      * Used to merge properties into the data within ._flatten().

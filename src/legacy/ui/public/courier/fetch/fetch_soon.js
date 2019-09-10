@@ -17,41 +17,57 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { searchRequestQueue } from '../search_request_queue';
-import { FetchNowProvider } from './fetch_now';
+import { callClient } from './call_client';
 
 /**
  * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
  */
-export function FetchSoonProvider(Private, Promise, config) {
+export function FetchSoonProvider(Promise, es, config, sessionId, esShardTimeout) {
+  /**
+   * Delays executing a function for a given amount of time, and returns a promise that resolves
+   * with the result.
+   * @param fn The function to invoke
+   * @param ms The number of milliseconds to wait
+   * @return Promise<any> A promise that resolves with the result of executing the function
+   */
+  function delay(fn, ms) {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(fn()), ms);
+    });
+  }
 
-  const fetchNow = Private(FetchNowProvider);
+  // The current batch/queue of requests to fetch
+  let requestsToFetch = [];
+  let requestOptions = [];
 
-  const fetch = () => fetchNow(searchRequestQueue.getPending());
-  const debouncedFetch = _.debounce(fetch, {
-    wait: 10,
-    maxWait: 50
-  });
+  // The in-progress fetch (if there is one)
+  let fetchInProgress = null;
 
   /**
-   * Fetch a list of requests
-   * @param {array} requests - the requests to fetch
-   * @async
+   * Delay fetching for a given amount of time, while batching up the requests to be fetched.
+   * Returns a promise that resolves with the response for the given request.
+   * @param request The request to fetch
+   * @param ms The number of milliseconds to wait (and batch requests)
+   * @return Promise<SearchResponse> The response for the given request
    */
-  this.fetchSearchRequests = (requests) => {
-    requests.forEach(req => req._setFetchRequested());
-    config.get('courier:batchSearches') ? debouncedFetch() : fetch();
-    return Promise.all(requests.map(req => req.getCompletePromise()));
-  };
+  async function delayedFetch(request, options, ms) {
+    const i = requestsToFetch.length;
+    requestsToFetch = [...requestsToFetch, request];
+    requestOptions = [...requestOptions, options];
+    const responses = await (fetchInProgress = fetchInProgress || delay(() => {
+      const response = callClient(requestsToFetch, requestOptions, { Promise, es, config, sessionId, esShardTimeout });
+      requestsToFetch = [];
+      requestOptions = [];
+      fetchInProgress = null;
+      return response;
+    }, ms));
+    return responses[i];
+  }
 
-  /**
-   * Return a promise that resembles the success of the fetch completing so we can execute
-   * logic based on this state change. Individual errors are routed to their respective requests.
-   */
-  this.fetchQueued = () => {
-    return this.fetchSearchRequests(searchRequestQueue.getStartable());
+  this.fetch = (request, options) => {
+    const delay = config.get('courier:batchSearches') ? 50 : 0;
+    return delayedFetch(request, options, delay);
   };
 }

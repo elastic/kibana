@@ -27,15 +27,14 @@ import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
 
-import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
-import { SearchPollProvider } from './search_poll';
+import { SearchPoll } from './search_poll';
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   const fetchSoon = Private(FetchSoonProvider);
 
   // This manages the doc fetch interval.
-  const searchPoll = Private(SearchPollProvider);
+  const searchPoll = new SearchPoll();
 
   class Courier {
     constructor() {
@@ -61,13 +60,6 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         // clearTimer because if the search results come back after the fatal error then we'll
         // resume polling.
         searchPoll.pause();
-
-        // And abort all pending requests.
-        searchRequestQueue.abortAll();
-
-        if (searchRequestQueue.getCount()) {
-          throw new Error('Aborting all pending requests failed.');
-        }
 
         refreshIntervalSubscription.unsubscribe();
       });

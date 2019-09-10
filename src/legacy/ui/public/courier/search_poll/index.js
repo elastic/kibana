@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchPollProvider } from './search_poll';
+export { SearchPoll } from './search_poll';
