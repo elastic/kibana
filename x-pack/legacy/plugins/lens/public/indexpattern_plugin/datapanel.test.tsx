@@ -16,6 +16,7 @@ import { npStart as npStartMock } from 'ui/new_platform';
 
 jest.mock('ui/new_platform');
 jest.mock('./loader');
+jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 

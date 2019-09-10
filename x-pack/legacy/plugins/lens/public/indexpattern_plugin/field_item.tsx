@@ -205,7 +205,8 @@ export function FieldItem({
     >
       <EuiPopover
         id="lnsFieldListPanel__field"
-        display="block"
+        // Wait until @elastic/eui is at least version 13.7.0 to use display="block"
+        // display="block"
         button={
           <EuiKeyboardAccessible>
             <div
