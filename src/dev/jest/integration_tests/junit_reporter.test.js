@@ -29,7 +29,10 @@ const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = resolve(TARGET_DIR, 'junit/TEST-Jest Tests.xml');
+const XML_PATH = resolve(
+  TARGET_DIR,
+  `junit/TEST-${process.env.JOB ? process.env.JOB + '-' : ''}Jest Tests.xml`
+);
 
 afterAll(async () => {
   await del(TARGET_DIR);
@@ -78,16 +81,14 @@ it(
                 $: {
                   classname: 'Jest Tests.·',
                   name: 'fails',
-                  time: expect.anything()
+                  time: expect.anything(),
                 },
-                failure: [
-                  expect.stringMatching(/Error: failure\s+at /m)
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                failure: [expect.stringMatching(/Error: failure\s+at /m)],
+              },
+            ],
+          },
+        ],
+      },
     });
   },
   3 * MINUTE
