@@ -146,7 +146,6 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               color={spaceColor}
               onChange={this.onColorChange}
               isInvalid={isInvalidSpaceColor}
-              disabled={this.state.imageUrl && this.state.imageUrl !== '' ? true : false}
             />
           </EuiFormRow>
           {this.filePickerOrImage()}
