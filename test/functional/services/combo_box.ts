@@ -53,7 +53,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param isMouseClick if 'true', click will be done with mouse
      * @param element element that wraps up option
      */
-     private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
+    private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
       return isMouseClick ? await element.clickMouseButton() : await element.click();
     }
 
