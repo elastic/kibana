@@ -23,7 +23,7 @@ import { EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RangesParamEditor } from 'ui/agg_types/controls/ranges';
+import { RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
 import { SelectOption, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 

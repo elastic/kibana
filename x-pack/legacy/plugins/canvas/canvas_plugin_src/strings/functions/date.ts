@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { date } from '../../functions/common/date';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { ISO8601, MOMENTJS, JS } from '../constants';
+import { ISO8601, MOMENTJS, JS } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof date>> = {
   help: i18n.translate('xpack.canvas.functions.dateHelpText', {

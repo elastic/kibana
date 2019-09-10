@@ -6,7 +6,7 @@
 
 import { indexPatternDatasourceSetup } from './indexpattern_plugin';
 import { xyVisualizationSetup } from './xy_visualization_plugin';
-import { editorFrameSetup } from './editor_frame_plugin';
+import { editorFrameSetup, editorFrameStart } from './editor_frame_plugin';
 import { datatableVisualizationSetup } from './datatable_visualization_plugin';
 import { metricVisualizationSetup } from './metric_visualization_plugin';
 
@@ -17,3 +17,4 @@ datatableVisualizationSetup();
 xyVisualizationSetup();
 metricVisualizationSetup();
 editorFrameSetup();
+editorFrameStart();
