@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LabelOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xxs"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="Labels"
+        id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <SwitchOption
+    label="Show labels"
+    paramName="show"
+    setValue={[Function]}
+    value={true}
+  />
+  <SwitchOption
+    dataTestSubj="xAxisFilterLabelsCheckbox-undefined"
+    disabled={false}
+    label="Filter labels"
+    paramName="filter"
+    setValue={[Function]}
+    value={false}
+  />
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <SelectOption
+        disabled={false}
+        label="Align"
+        options={
+          Array [
+            Object {
+              "text": "Horizontal",
+              "value": 0,
+            },
+            Object {
+              "text": "Vertical",
+              "value": 90,
+            },
+            Object {
+              "text": "Angled",
+              "value": 75,
+            },
+          ]
+        }
+        paramName="rotate"
+        setValue={[Function]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <TruncateLabelsOption
+        disabled={false}
+        setValue={[Function]}
+        value={0}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
