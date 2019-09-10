@@ -1257,7 +1257,10 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+        instance
+          .find('[data-test-subj="lnsWorkspace"]')
+          .last()
+          .simulate('drop');
       });
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
