@@ -255,7 +255,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             defaultMessage: 'Toolbar icon',
           })}
         >
-          <div>
+          <div role="listbox">
             {urlTemplateIconChoices.map(icon => (
               <LegacyIcon
                 key={icon.class}

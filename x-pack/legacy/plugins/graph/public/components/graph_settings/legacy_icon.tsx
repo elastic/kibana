@@ -27,6 +27,7 @@ export function LegacyIcon(props: LegacyIconProps) {
         gphNoUserSelect: !!props.onClick,
         'gphLegacyIcon--list': props.asListIcon,
       })}
+      aria-label={props.icon.label}
     >
       {props.icon.code}
     </i>
@@ -34,7 +35,12 @@ export function LegacyIcon(props: LegacyIconProps) {
 
   if (props.onClick) {
     return (
-      <EuiButtonEmpty color={props.selected ? 'primary' : 'text'} onClick={props.onClick}>
+      <EuiButtonEmpty
+        role="option"
+        aria-selected={props.selected}
+        color={props.selected ? 'primary' : 'text'}
+        onClick={props.onClick}
+      >
         {icon}
       </EuiButtonEmpty>
     );
