@@ -18,7 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricsFn } from './metrics_fn';
 import { createMetricsTypeDefinition } from './metrics_type';
