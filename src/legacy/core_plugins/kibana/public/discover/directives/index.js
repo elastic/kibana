@@ -23,12 +23,9 @@ import { uiModules } from 'ui/modules';
 import '../../../../../ui/public/render_complete/directive';
 
 import { DiscoverNoResults } from './no_results';
-
 import { DiscoverUninitialized } from './uninitialized';
-
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
-
-import './timechart';
+import { DiscoverHistogram } from './histogram';
 
 const app = uiModules.get('apps/discover', ['react']);
 
@@ -43,3 +40,5 @@ app.directive('discoverUninitialized', reactDirective =>
 app.directive('discoverUnsupportedIndexPattern', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
 );
+
+app.directive('discoverHistogram', reactDirective => reactDirective(DiscoverHistogram));

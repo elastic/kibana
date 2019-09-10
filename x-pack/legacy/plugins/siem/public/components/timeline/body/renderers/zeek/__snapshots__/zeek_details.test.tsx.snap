@@ -493,5 +493,6 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
       },
     }
   }
+  timelineId="test"
 />
 `;

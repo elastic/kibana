@@ -9,6 +9,7 @@ jest.mock('./lib/post_pagerduty', () => ({
 }));
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
@@ -21,6 +22,12 @@ const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
 const NO_OP_FN = () => {};
+const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
+  isWhitelistedHostname: _ => true,
+  isWhitelistedUri: _ => true,
+  ensureWhitelistedHostname: _ => {},
+  ensureWhitelistedUri: _ => {},
+};
 
 const services: Services = {
   log: NO_OP_FN,
@@ -46,7 +53,7 @@ beforeAll(() => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
-  registerBuiltInActionTypes(actionTypeRegistry);
+  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG_UTILS);
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 

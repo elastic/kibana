@@ -41,7 +41,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup } from '../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
 const THRESHOLD = 0.1;
@@ -65,7 +65,7 @@ describe('VegaVisualizations', () => {
         uiSettings: $injector.get('config'),
       };
 
-      setup.types.registerVisualization(() =>
+      visualizationsSetup.types.registerVisualization(() =>
         createVegaTypeDefinition(vegaVisualizationDependencies)
       );
 
