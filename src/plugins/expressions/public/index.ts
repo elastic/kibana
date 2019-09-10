@@ -25,3 +25,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { ExpressionsPublicPlugin as Plugin };
+
+export * from '../common';

@@ -27,3 +27,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataPublicPlugin as Plugin };
+
+export * from '../common';
