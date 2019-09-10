@@ -19,6 +19,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
@@ -77,28 +78,6 @@ function ChartOptions({
   return (
     <>
       <SelectOption
-        id={`seriesType${index}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.chartTypeLabel', {
-          defaultMessage: 'Chart type',
-        })}
-        options={vis.type.editorConfig.collections.chartTypes}
-        paramName="type"
-        value={chart.type}
-        setValue={setChart}
-      />
-
-      <SelectOption
-        id={`seriesMode${index}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.modeLabel', {
-          defaultMessage: 'Mode',
-        })}
-        options={vis.type.editorConfig.collections.chartModes}
-        paramName="mode"
-        value={chart.mode}
-        setValue={setChart}
-      />
-
-      <SelectOption
         id={`seriesValueAxis${index}`}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel', {
           defaultMessage: 'Value axis',
@@ -109,9 +88,35 @@ function ChartOptions({
         setValue={setValueAxis}
       />
 
-      {(chart.type === ChartTypes.LINE || chart.type === ChartTypes.AREA) && (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <SelectOption
+            id={`seriesType${index}`}
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.chartTypeLabel', {
+              defaultMessage: 'Chart type',
+            })}
+            options={vis.type.editorConfig.collections.chartTypes}
+            paramName="type"
+            value={chart.type}
+            setValue={setChart}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SelectOption
+            id={`seriesMode${index}`}
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.modeLabel', {
+              defaultMessage: 'Mode',
+            })}
+            options={vis.type.editorConfig.collections.chartModes}
+            paramName="mode"
+            value={chart.mode}
+            setValue={setChart}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {chart.type === ChartTypes.AREA && (
         <SelectOption
-          id={`lineMode${index}`}
           label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
             defaultMessage: 'Line mode',
           })}
@@ -122,7 +127,9 @@ function ChartOptions({
         />
       )}
 
-      {chart.type === ChartTypes.LINE && <LineOptions chart={chart} setChart={setChart} />}
+      {chart.type === ChartTypes.LINE && (
+        <LineOptions chart={chart} vis={vis} setChart={setChart} />
+      )}
     </>
   );
 }

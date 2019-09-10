@@ -108,9 +108,12 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
                 defaultMessage: 'Line color',
               }
             )}
+            fullWidth
+            compressed
           >
             <EuiColorPicker
               color={stateParams.thresholdLine.color}
+              fullWidth
               onChange={setThresholdLineColor}
             />
           </EuiFormRow>

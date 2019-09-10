@@ -70,7 +70,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
       <SwitchOption
         disabled={hasHistogramAgg}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
-          defaultMessage: 'Show x-axis lines',
+          defaultMessage: 'Show X-axis lines',
         })}
         paramName="categoryLines"
         tooltip={

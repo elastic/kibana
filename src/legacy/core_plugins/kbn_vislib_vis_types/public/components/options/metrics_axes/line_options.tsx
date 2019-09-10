@@ -17,19 +17,29 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { Vis } from 'ui/vis';
 import { SeriesParam } from '../../../types';
-import { NumberInputOption, SwitchOption } from '../../common';
+import { NumberInputOption, SelectOption, SwitchOption } from '../../common';
 import { SetChart } from './chart_options';
 
 interface LineOptionsParams {
   chart: SeriesParam;
+  vis: Vis;
   setChart: SetChart;
 }
 
-function LineOptions({ chart, setChart }: LineOptionsParams) {
+function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
+  const setLineWidth = useCallback(
+    (paramName: 'lineWidth', value: number | '') => {
+      setChart(paramName, value === '' ? undefined : value);
+    },
+    [setChart]
+  );
+
   return (
     <>
       <SwitchOption
@@ -41,23 +51,41 @@ function LineOptions({ chart, setChart }: LineOptionsParams) {
         setValue={setChart}
       />
 
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <SelectOption
+            disabled={!chart.drawLinesBetweenPoints}
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
+              defaultMessage: 'Line mode',
+            })}
+            options={vis.type.editorConfig.collections.interpolationModes}
+            paramName="interpolate"
+            value={chart.interpolate}
+            setValue={setChart}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <NumberInputOption
+            disabled={!chart.drawLinesBetweenPoints}
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineWidthLabel', {
+              defaultMessage: 'Line width',
+            })}
+            paramName="lineWidth"
+            step={0.5}
+            min={0}
+            value={chart.lineWidth}
+            setValue={setLineWidth}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel', {
-          defaultMessage: 'Show circles',
+        disabled={!chart.drawLinesBetweenPoints}
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showDotsLabel', {
+          defaultMessage: 'Show dots',
         })}
         paramName="showCircles"
         value={chart.showCircles}
-        setValue={setChart}
-      />
-
-      <NumberInputOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineWidthLabel', {
-          defaultMessage: 'Line width',
-        })}
-        paramName="lineWidth"
-        step={0.5}
-        min={0}
-        value={chart.lineWidth}
         setValue={setChart}
       />
     </>

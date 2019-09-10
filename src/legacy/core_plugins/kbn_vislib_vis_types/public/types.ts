@@ -24,6 +24,7 @@ import {
   AxisModes,
   InterpolationModes,
   Rotates,
+  ScaleTypes,
   ThresholdLineStyles,
 } from './utils/collections';
 
@@ -46,7 +47,7 @@ export interface Scale {
   min?: number | null;
   mode?: AxisModes;
   setYExtents?: boolean;
-  type: string;
+  type: ScaleTypes;
 }
 
 interface ThresholdLine {
@@ -76,7 +77,7 @@ export interface SeriesParam {
   data: { label: string; id: string };
   drawLinesBetweenPoints: boolean;
   interpolate: InterpolationModes;
-  lineWidth: number | '';
+  lineWidth?: number;
   mode: ChartModes;
   show: boolean;
   showCircles: boolean;

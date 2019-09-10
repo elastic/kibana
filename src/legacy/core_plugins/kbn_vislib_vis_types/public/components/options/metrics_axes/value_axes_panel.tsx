@@ -61,7 +61,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   const removeButtonTooltip = useMemo(
     () =>
       i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonTooltip', {
-        defaultMessage: 'Remove Y axis',
+        defaultMessage: 'Remove Y-axis',
       }),
     []
   );
@@ -83,7 +83,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   const addButtonTooltip = useMemo(
     () =>
       i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonTooltip', {
-        defaultMessage: 'Add Y axis',
+        defaultMessage: 'Add Y-axis',
       }),
     []
   );
@@ -111,7 +111,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
             <h2>
               <FormattedMessage
                 id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
-                defaultMessage="Y-Axes"
+                defaultMessage="Y-axes"
               />
             </h2>
           </EuiTitle>

@@ -103,6 +103,7 @@ export default function PointSeriesVisType(Private) {
               id: '1'
             },
             drawLinesBetweenPoints: true,
+            lineWidth: 2,
             showCircles: true,
             interpolate: InterpolationModes.LINEAR,
             valueAxis: 'ValueAxis-1',

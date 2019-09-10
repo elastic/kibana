@@ -81,7 +81,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
 
       <SwitchOption
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabel', {
-          defaultMessage: 'Show axes lines and labels',
+          defaultMessage: 'Show axis lines and labels',
         })}
         paramName="show"
         value={axis.show}
