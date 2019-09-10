@@ -155,24 +155,23 @@ export default function ({ getService, getPageObjects }) {
       it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
-        const rowData0 = await PageObjects.discover.getDocTableField(1);
-        const hoursDuration = await PageObjects.timePicker.getTimeDurationInHours();
-        console.log(`------------------`);
-        console.log(`rowData0=${rowData0}`);
-        console.log(`hoursDuration0=${hoursDuration}`);
-        console.log(`------------------`);
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        //expect(Math.round(newDurationHours)).to.be(3);
-        const rowData = await PageObjects.discover.getDocTableField(1);
-        console.log(`------------------`);
-        console.log(`rowData1=${rowData}`);
-        console.log(`hoursDuration1=${newDurationHours}`);
-        console.log(`------------------`);
-        //expect(rowData).to.have.string('Sep 20, 2015 @ 04:12:45.861');
-        //expect(rowData).to.have.string('Sep 20, 2015 @ 04:11:49.921');
+        expect(Math.round(newDurationHours)).to.be(3);
+        const fieldDate = await PageObjects.discover.getDocTableField(1);
+
+        /**
+         * we use range to test it across different OS
+         * minDate is Windows Chrome head (with display scaling at 175%)
+         * maxDate is Linux Firefox headless
+         */
+        const minDate = 'Sep 20, 2015 @ 04:09:39.411';
+        const maxDate = 'Sep 20, 2015 @ 04:15:02.326';
+        if (new Date(fieldDate) < new Date(minDate) || new Date(fieldDate) > new Date(maxDate)) {
+          throw new Error(`${fieldDate} is not in [${minDate}, ${maxDate}] range`);
+        }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
