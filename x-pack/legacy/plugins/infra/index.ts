@@ -7,9 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
-
-import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
+import { PluginInitializerContext } from 'src/core/server';
+import KbnServer from 'src/legacy/server/kbn_server';
+import { Observable } from 'rxjs';
+import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
+import { plugin } from './server/new_platform_index';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -71,7 +74,27 @@ export function infra(kibana: any) {
       return getConfigSchema(Joi);
     },
     init(server: any) {
-      initServerWithKibana(server);
+      // convert hapi instance to KbnServer
+      // `kbnServer.server` is the same hapi instance
+      // `kbnServer.newPlatform` has important values
+      const kbnServer = (server as unknown) as KbnServer;
+      const { core } = kbnServer.newPlatform.setup;
+
+      const getConfig$ = <T>() =>
+        new Observable<T>(observer => {
+          observer.next(server.config().get('xpack.infra'));
+        });
+
+      const initContext = {
+        config: {
+          create: getConfig$,
+          createIfExists: getConfig$,
+        },
+      } as PluginInitializerContext;
+
+      plugin(initContext).setup(core);
+
+      // NP_TODO: How do we move this to new platform?
       server.addAppLinksToSampleDataset('logs', [
         {
           path: `/app/${APP_ID}#/logs`,
