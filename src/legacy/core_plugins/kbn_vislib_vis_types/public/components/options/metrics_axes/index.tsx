@@ -202,7 +202,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           isSeriesUpdated = true;
           return { ...ser, valueAxis: newValueAxes[0].id };
         }
-        return { ...ser };
+        return ser;
       });
 
       if (isSeriesUpdated) {

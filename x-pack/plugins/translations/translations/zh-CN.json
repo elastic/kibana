@@ -2488,7 +2488,6 @@
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel": "筛选标签",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle": "标签",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel": "位置",
-    "kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel": "旋转",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabelsLabel": "显示标签",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle": "X 轴",
     "kbnVislibVisTypes.controls.pointSeries.gridAxis.dontShowLabel": "不显示",

@@ -2488,7 +2488,6 @@
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel": "フィルターラベル",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle": "ラベル",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel": "配置",
-    "kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel": "回転",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabelsLabel": "ラベルを表示",
     "kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle": "X 軸",
     "kbnVislibVisTypes.controls.pointSeries.gridAxis.dontShowLabel": "非表示",

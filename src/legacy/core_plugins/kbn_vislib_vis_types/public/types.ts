@@ -24,6 +24,7 @@ import {
   AxisModes,
   InterpolationModes,
   Rotates,
+  ScaleTypes,
   ThresholdLineStyles,
 } from './utils/collections';
 
@@ -46,7 +47,7 @@ export interface Scale {
   min?: number | null;
   mode?: AxisModes;
   setYExtents?: boolean;
-  type: string;
+  type: ScaleTypes;
 }
 
 interface ThresholdLine {
