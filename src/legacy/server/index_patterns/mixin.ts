@@ -19,6 +19,7 @@
 
 import { IndexPatternsService } from './service';
 import KbnServer from '../kbn_server';
+import { APICaller } from '../../../core/server';
 import { Legacy } from '../../../../kibana';
 import { registerRoutes } from './routes';
 
@@ -40,14 +41,12 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
    *  @method request.getIndexPatternsService
    *  @type {IndexPatternsService}
    */
-  (server as any).addMemoizedFactoryToRequest(
-    'getIndexPatternsService',
-    (request: Legacy.Request) => {
-      const { callWithRequest } = (request as any).server.plugins.elasticsearch.getCluster('data');
-      const callCluster = (...args: any) => callWithRequest(request, ...args);
-      return server.indexPatternsServiceFactory({ callCluster });
-    }
-  );
+  server.addMemoizedFactoryToRequest('getIndexPatternsService', (request: Legacy.Request) => {
+    const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+    const callCluster: APICaller = (endpoint, params, options) =>
+      callWithRequest(request, endpoint, params, options);
+    return server.indexPatternsServiceFactory({ callCluster });
+  });
 
   registerRoutes(kbnServer.newPlatform.setup.core);
 }

@@ -73,6 +73,10 @@ declare module 'hapi' {
     savedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
+    addMemoizedFactoryToRequest: (
+      name: string,
+      factoryFn: (request: Request) => Record<string, any>
+    ) => void;
   }
 
   interface Request {
