@@ -318,7 +318,7 @@ describe('xy_suggestions', () => {
         },
       ],
     };
-    const [_, suggestion, ...rest] = getSuggestions({
+    const suggestion = getSuggestions({
       table: {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), strCol('product')],
@@ -326,9 +326,8 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
-    });
+    })[1];
 
-    expect(rest).toHaveLength(0);
     expect(suggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'bar_stacked',
@@ -339,7 +338,7 @@ describe('xy_suggestions', () => {
         },
       ],
     });
-    expect(suggestion.title).toEqual('Stacked');
+    expect(suggestion.title).toEqual('Stack');
   });
 
   test('keeps column to dimension mappings on extended tables', () => {
