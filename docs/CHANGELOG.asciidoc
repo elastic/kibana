@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.3.2>>
 * <<release-notes-7.3.1>>
 * <<release-notes-7.3.0>>
 * <<release-notes-7.2.1>>
@@ -25,6 +26,30 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.3.2]]
+== {kib} 7.3.2
+
+See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+
+[float]
+[[bug-7.3.2]]
+=== Bug fixes
+Monitoring::
+* Ensures all the parameters for fetching logs are passed down {pull}43869[#43869]
+
+SIEM::
+* Fixes the Suricata row renderer not being activated {pull}44728[#44728]
+* When adding the 2*nth note on an event, does not unpin it {pull}44941[#44941]
+* Fixes duplicate columns in timeline and the errors on multiple click on pinned event {pull}44010[#44010]
+
+Security::
+* In Spaces, allows for hex color codes that include uppercase characters {pull}43470[#43470]
+
+Platform::
+* Resolves filter index references when importing saved objects {pull}42974[#42974]
+
+
 
 [[release-notes-7.3.1]]
 == {kib} 7.3.1
