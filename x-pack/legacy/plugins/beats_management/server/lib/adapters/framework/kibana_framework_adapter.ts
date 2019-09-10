@@ -7,6 +7,7 @@
 import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
+import { isLeft } from 'fp-ts/lib/Either';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
@@ -137,7 +138,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return null;
     }
     const assertKibanaUser = RuntimeKibanaUser.decode(user);
-    if (assertKibanaUser.isLeft()) {
+    if (isLeft(assertKibanaUser)) {
       throw new Error(
         `Error parsing user info in ${this.PLUGIN_ID},   ${
           PathReporter.report(assertKibanaUser)[0]
@@ -186,7 +187,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
 
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-    if (assertData.isLeft()) {
+    if (isLeft(assertData)) {
       throw new Error(
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );

@@ -221,7 +221,9 @@ describe('createApi', () => {
     });
 
     it('validates query parameters', () => {
-      const { handler, route } = initApi({ query: t.type({ bar: t.string }) });
+      const { handler, route } = initApi({
+        query: t.type({ bar: t.string })
+      });
 
       expect(() =>
         route.handler({

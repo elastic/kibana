@@ -128,11 +128,6 @@ export default function ({ getService, getPageObjects }) {
       it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
       });
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        expect(await queryBar.getQueryString()).to.eql('');
-      });
 
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -140,6 +135,13 @@ export default function ({ getService, getPageObjects }) {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
+
+      it('allows clearing the currently loaded saved query', async () =>   {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
+
     });
   });
 }

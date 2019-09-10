@@ -15,6 +15,7 @@ import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 import { isSparseDataJob } from './util/general';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -25,6 +26,7 @@ export class JobCreator {
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
+  protected _bucketSpanMs: number = 0;
   protected _useDedicatedIndex: boolean = false;
   protected _start: number = 0;
   protected _end: number = 0;
@@ -113,10 +115,20 @@ export class JobCreator {
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
+    this._setBucketSpanMs(bucketSpan);
   }
 
   public get bucketSpan(): BucketSpan {
     return this._job_config.analysis_config.bucket_span;
+  }
+
+  protected _setBucketSpanMs(bucketSpan: BucketSpan) {
+    const bs = parseInterval(bucketSpan);
+    this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
+  }
+
+  public get bucketSpanMs(): number {
+    return this._bucketSpanMs;
   }
 
   public addInfluencer(influencer: string) {
