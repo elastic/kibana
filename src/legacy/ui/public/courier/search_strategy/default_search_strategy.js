@@ -55,8 +55,11 @@ function msearch({ searchRequests, es, config, sessionId, esShardTimeout }) {
   const searching = es.msearch({
     ...getMSearchParams(config),
     body: `${inlineRequests.join('\n')}\n`,
-  }).then(({ responses }) => responses);
-  return { searching, abort: searching.abort };
+  });
+  return {
+    searching: searching.then(({ responses }) => responses),
+    abort: searching.abort
+  };
 }
 
 function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout }) {

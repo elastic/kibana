@@ -81,9 +81,6 @@ export const termsBucketAgg = new BucketAggType({
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       if (!filterAgg) return resp;
-      if (abortSignal) {
-        abortSignal.addEventListener('abort', () => nestedSearchSource.cancelQueued());
-      }
 
       nestedSearchSource.setField('aggs', filterAgg);
 
@@ -101,7 +98,7 @@ export const termsBucketAgg = new BucketAggType({
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
-      const response = await nestedSearchSource.fetch();
+      const response = await nestedSearchSource.fetch({ abortSignal });
       request
         .stats(getResponseInspectorStats(nestedSearchSource, response))
         .ok({ json: response });

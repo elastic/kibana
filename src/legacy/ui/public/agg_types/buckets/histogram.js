@@ -76,7 +76,7 @@ export const histogramBucketAgg = new BucketAggType({
     {
       name: 'interval',
       editorComponent: NumberIntervalParamEditor,
-      modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, searchRequest) {
+      modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, searchRequest, options) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
           ? { script: { source: field.script, lang: field.lang } }
@@ -94,9 +94,7 @@ export const histogramBucketAgg = new BucketAggType({
             }
           });
 
-        searchRequest.whenAborted(() => childSearchSource.cancelQueued());
-
-        return childSearchSource.fetch()
+        return childSearchSource.fetch(options)
           .then((resp) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),

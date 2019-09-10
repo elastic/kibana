@@ -297,17 +297,12 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     async fetch(options) {
       const searchRequest = await this._flatten();
+      await this.requestIsStarting(searchRequest, options);
       return fetchSoon.fetch(searchRequest, {
         ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
         ...options,
       });
     }
-
-    /**
-     * Cancel all pending requests for this searchSource
-     * @return {undefined}
-     */
-    cancelQueued() {}
 
     /**
      *  Add a handler that will be notified whenever requests start
@@ -321,9 +316,10 @@ export function SearchSourceProvider(Promise, Private, config) {
     /**
      *  Called by requests of this search source when they are started
      *  @param  {Courier.Request} request
+     *  @param options
      *  @return {Promise<undefined>}
      */
-    requestIsStarting(request) {
+    requestIsStarting(request, options) {
       this.activeFetchCount = (this.activeFetchCount || 0) + 1;
       this.history = [request];
 
@@ -339,7 +335,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
 
       return Promise
-        .map(handlers, fn => fn(this, request))
+        .map(handlers, fn => fn(this, request, options))
         .then(_.noop);
     }
 
@@ -353,7 +349,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     destroy() {
-      this.cancelQueued();
       this._requestStartHandlers.length = 0;
     }
 

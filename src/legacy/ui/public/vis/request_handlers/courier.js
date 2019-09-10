@@ -70,8 +70,8 @@ const CourierRequestHandlerProvider = function () {
         return aggs.toDsl(metricsAtAllLevels);
       });
 
-      requestSearchSource.onRequestStart((searchSource, searchRequest) => {
-        return aggs.onSearchRequestStart(searchSource, searchRequest);
+      requestSearchSource.onRequestStart((searchSource, searchRequest, options) => {
+        return aggs.onSearchRequestStart(searchSource, searchRequest, options);
       });
 
       if (timeRange) {
@@ -102,12 +102,7 @@ const CourierRequestHandlerProvider = function () {
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         try {
-          // Abort any in-progress requests before fetching again
-          if (abortSignal) {
-            abortSignal.addEventListener('abort', () => requestSearchSource.cancelQueued());
-          }
-
-          const response = await requestSearchSource.fetch();
+          const response = await requestSearchSource.fetch({ abortSignal });
 
           searchSource.lastQuery = queryHash;
 

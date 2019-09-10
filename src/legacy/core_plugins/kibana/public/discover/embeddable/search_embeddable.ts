@@ -107,6 +107,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterGen: FilterManager;
+  private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -191,7 +192,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
-    this.savedSearch.searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
   }
 
   private initializeSearchScope() {
@@ -273,7 +274,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const { searchSource } = this.savedSearch;
 
     // Abort any in-progress requests
-    searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
 
     searchSource.setField('size', config.get('discover:sampleSize'));
     searchSource.setField('sort', getSort(this.searchScope.sort, this.searchScope.indexPattern));
@@ -296,7 +298,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     try {
       // Make the request
-      const resp = await searchSource.fetch();
+      const resp = await searchSource.fetch({
+        abortSignal: this.abortController.signal,
+      });
 
       this.searchScope.isLoading = false;
 

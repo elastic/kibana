@@ -527,11 +527,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         });
     };
 
-    this.destroy = () => {
-      if (this.searchSource) {
-        this.searchSource.cancelQueued();
-      }
-    };
+    this.destroy = () => {};
 
     /**
      * Delete this object from Elasticsearch
