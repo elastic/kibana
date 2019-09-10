@@ -9,19 +9,13 @@ two airports, and the lightning hot spots on that route. You'll learn to:
 * Index the files in {es}
 * Display the data in a multi-layer map
 
-////
-[role="screenshot"]
-image::maps/images/fu_gs_select_source_file_upload.png[]
-////
-
-
 [float]
 === Before you begin
 
 This tutorial requires you to download the following GeoJSON sample data files.
 These files are good examples of the types
 of vector data that you can upload to Kibana and index in
-Elasticsearch for display in *Maps*. 
+Elasticsearch for display in *Elastic Maps*. 
 
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]
@@ -130,8 +124,13 @@ image::maps/images/fu_gs_lightning_intensity.png[]
 [float]
 === Organize the layers
 
-You can improve the appearance of the map with a few final tweaks to the layers:
+Consider ways you might improve the appearance of the final map.
+Small changes in how and when layers are shown can help tell a 
+better story with your data. Here are a few final tweaks
+you might make:
 
+* Update layer names
+* Adjust styles for each layer
 * Adjust the layer order
 * Decide which layers to show at different zoom levels 
 
