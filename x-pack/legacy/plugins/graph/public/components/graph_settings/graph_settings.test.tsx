@@ -33,6 +33,7 @@ describe('graph_settings', () => {
         icon: {
           class: 'test',
           code: '1',
+          label: 'test',
         },
       },
       {
@@ -44,6 +45,7 @@ describe('graph_settings', () => {
         icon: {
           class: 'test',
           code: '1',
+          label: 'test',
         },
       },
     ],
@@ -62,6 +64,7 @@ describe('graph_settings', () => {
         icon: {
           class: 'test',
           code: '1',
+          label: 'test',
         },
       },
     ],
@@ -74,6 +77,7 @@ describe('graph_settings', () => {
         icon: {
           class: 'test',
           code: '1',
+          label: 'test',
         },
       },
       {
@@ -82,6 +86,7 @@ describe('graph_settings', () => {
         icon: {
           class: 'test',
           code: '1',
+          label: 'test',
         },
       },
     ],
