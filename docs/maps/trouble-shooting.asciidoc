@@ -1,13 +1,13 @@
 [role="xpack"]
 [[maps-troubleshooting]]
-== Maps troubleshooting
+== Elastic Maps troubleshooting
 
 Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
 
 [float]
 === Inspect Elasticsearch requests
 
-The Maps application uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
+*Elastic Maps* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
 
 [role="screenshot"]
 image::maps/images/inspector.png[]

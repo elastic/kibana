@@ -138,7 +138,7 @@ export const getAnomaliesNetworkTableColumnsCurated = (
   const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
 
   // Columns to exclude from ip details pages
-  if (pageType === 'details') {
+  if (pageType === NetworkType.details) {
     return columns.filter(column => column.name !== i18n.NETWORK_NAME);
   } else {
     return columns;

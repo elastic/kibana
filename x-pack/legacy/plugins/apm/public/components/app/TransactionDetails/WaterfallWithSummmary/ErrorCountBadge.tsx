@@ -8,12 +8,10 @@ import { EuiBadge } from '@elastic/eui';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 
-type Props = React.ComponentProps<typeof EuiBadge> & {
-  errorCount: number;
-};
+type Props = React.ComponentProps<typeof EuiBadge>;
 
-export const ErrorCountBadge = ({ errorCount = 0, ...rest }: Props) => (
+export const ErrorCountBadge = ({ children, ...rest }: Props) => (
   <EuiBadge color={euiThemeLight.euiColorDanger} {...rest}>
-    {errorCount}
+    {children}
   </EuiBadge>
 );
