@@ -59,6 +59,11 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     });
   }
 
+  //
+  // images below 64x64 pixels are left untouched
+  // images above that threshold are resized
+  //
+
   private handleImageUpload = (imgUrl: string, fname: string) => {
     const thisInstance = this;
     const image = new Image();
@@ -70,6 +75,22 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         const imgDimy = image.height;
         if (imgDimx <= MAX_IMAGE_SIZE && imgDimy <= MAX_IMAGE_SIZE) {
           thisInstance.storeImageChanges(imgUrl, fname);
+        } else {
+          const oc = document.createElement('canvas');
+          const octx = oc.getContext('2d');
+          if (imgDimx >= imgDimy) {
+            oc.width = MAX_IMAGE_SIZE;
+            oc.height = Math.floor((imgDimy * MAX_IMAGE_SIZE) / imgDimx);
+            octx.drawImage(image, 0, 0, oc.width, oc.height);
+            const resizedImageUrl = oc.toDataURL();
+            thisInstance.storeImageChanges(resizedImageUrl, fname);
+          } else {
+            oc.height = MAX_IMAGE_SIZE;
+            oc.width = Math.floor((imgDimx * MAX_IMAGE_SIZE) / imgDimy);
+            octx.drawImage(image, 0, 0, oc.width, oc.height);
+            const resizedImageUrl = oc.toDataURL();
+            thisInstance.storeImageChanges(resizedImageUrl, fname);
+          }
         }
       },
       false

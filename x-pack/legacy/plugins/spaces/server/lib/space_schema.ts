@@ -19,6 +19,8 @@ export const spaceSchema = Joi.object({
     .items(Joi.string())
     .default([]),
   _reserved: Joi.boolean(),
-  imageUrl: Joi.string().allow(''),
+  imageUrl: Joi.string()
+    .allow('')
+    .regex(/^data:image.*$/, `Image URL should start with 'data:image'`),
   imageFilename: Joi.string().allow(''),
 }).default();
