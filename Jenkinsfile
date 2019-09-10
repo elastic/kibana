@@ -8,7 +8,16 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
-        try {
+        node('flyweight') {
+          // TODO remove this after testing
+          emailext(
+            to: 'brian.seeders@elastic.co',
+            subject: "Test",
+            body: '${SCRIPT,template="groovy-html.template"}',
+            mimeType: 'text/html',
+          )
+        }
+        catchError {
           parallel([
             'kibana-intake-agent': legacyJobRunner('kibana-intake'),
             'x-pack-intake-agent': legacyJobRunner('x-pack-intake'),
@@ -43,11 +52,17 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
-        } finally {
-          // TODO is there a better way to do this?
-          node('flyweight') {
-            sendMail()
-          }
+        }
+        node('flyweight') {
+          sendMail()
+
+          // TODO remove this after testing
+          emailext(
+            to: 'brian.seeders@elastic.co',
+            subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+            body: '${SCRIPT,template="groovy-html.template"}',
+            mimeType: 'text/html',
+          )
         }
       }
     }
@@ -220,12 +235,33 @@ def publishJunit() {
 }
 
 def sendMail() {
-  step([
-    $class: 'Mailer',
-    notifyEveryUnstableBuild: true,
-    recipients: 'infra-root+build@elastic.co',
-    sendToIndividuals: false
-  ])
+  sendInfraMail()
+  sendKibanaMail()
+}
+
+def sendInfraMail() {
+  catchError {
+    step([
+      $class: 'Mailer',
+      notifyEveryUnstableBuild: true,
+      recipients: 'infra-root+build@elastic.co',
+      sendToIndividuals: false
+    ])
+  }
+}
+
+def sendKibanaMail() {
+  catchError {
+    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS') {
+      emailext(
+        // to: 'build-kibana@elastic.co',
+        to: 'brian.seeders@elastic.co', // TODO switch this out after testing
+        subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        body: '${SCRIPT,template="groovy-html.template"}',
+        mimeType: 'text/html',
+      )
+    }
+  }
 }
 
 def runbld(script) {
