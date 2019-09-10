@@ -136,7 +136,7 @@ const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef
     {loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" color="primary" size="xs" />)}
     {/* Show a progress bar with progress 0% when not loading.
         If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
-    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value="0" max="100" color="primary" size="xs" />)}
+    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value={0} max={100} color="primary" size="xs" />)}
     <JobSelector {...jobSelectorProps} />
     <div className="ml-time-series-explorer" ref={resizeRef} >
       {children}
@@ -293,6 +293,11 @@ export class TimeSeriesExplorer extends React.Component {
         entities,
         modelPlotEnabled,
       } = this.state;
+
+      this.setState({
+        loading: true,
+        fullRefresh: false,
+      });
 
       getFocusData(
         criteriaFields,
@@ -969,6 +974,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
+      loading,
       svgWidth,
       zoomFrom,
       zoomTo,
