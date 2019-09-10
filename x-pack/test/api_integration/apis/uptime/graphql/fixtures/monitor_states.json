@@ -1,5 +1,7 @@
 {
   "monitorStates": {
+    "prevPagePagination": null,
+    "nextPagePagination": null,
     "totalSummaryCount": {
       "count": 9234
     },
