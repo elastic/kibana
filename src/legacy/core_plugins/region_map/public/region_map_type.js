@@ -25,7 +25,7 @@ import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { RegionMapOptions } from './components/region_map_options';
 
-import { visFactory } from '../../visualizations/public';
+import { visFactory } from '../../visualizations/public/np_ready/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';
@@ -40,8 +40,11 @@ export function createRegionMapTypeDefinition(dependencies) {
   return visFactory.createBaseVisualization({
     name: 'region_map',
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
-    description: i18n.translate('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
-provided base maps, or add your own. Darker colors represent higher values.' }),
+    description: i18n.translate('regionMap.mapVis.regionMapDescription', {
+      defaultMessage:
+        'Show metrics on a thematic map. Use one of the \
+provided base maps, or add your own. Darker colors represent higher values.',
+    }),
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
@@ -56,45 +59,59 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
-        showAllShapes: true//still under consideration
-      }
+        showAllShapes: true, //still under consideration
+      },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization,
     editorConfig: {
-      optionsTemplate: (props) =>
-        (<RegionMapOptions
+      optionsTemplate: props => (
+        <RegionMapOptions
           {...props}
           serviceSettings={serviceSettings}
           includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
-        />),
+        />
+      ),
       collections: {
         colorSchemas,
         vectorLayers,
-        tmsLayers: []
+        tmsLayers: [],
       },
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', {
+            defaultMessage: 'Value',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
-            'sum_bucket', 'min_bucket', 'max_bucket', 'avg_bucket'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          aggFilter: [
+            'count',
+            'avg',
+            'sum',
+            'min',
+            'max',
+            'cardinality',
+            'top_hits',
+            'sum_bucket',
+            'min_bucket',
+            'max_bucket',
+            'avg_bucket',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'Shape field' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', {
+            defaultMessage: 'Shape field',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['terms']
-        }
-      ])
-    }
+          aggFilter: ['terms'],
+        },
+      ]),
+    },
   });
 }

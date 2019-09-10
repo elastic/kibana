@@ -29,11 +29,6 @@ export interface ChromeNavLink {
   readonly id: string;
 
   /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  readonly order: number;
-
-  /**
    * The title of the application.
    */
   readonly title: string;
@@ -42,6 +37,11 @@ export interface ChromeNavLink {
    * The base route used to open the root of an application.
    */
   readonly baseUrl: string;
+
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  readonly order?: number;
 
   /**
    * A tooltip shown when hovering over an app link.
