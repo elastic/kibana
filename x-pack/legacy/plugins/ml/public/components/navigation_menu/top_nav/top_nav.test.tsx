@@ -42,9 +42,8 @@ describe('Navigation Menu: <TopNav />', () => {
   });
 
   // The following tests are written against EuiSuperDatePicker
-  // instead of TopNav. TopNav uses hooks and we cannot writing tests
+  // instead of TopNav. TopNav uses hooks and we cannot write tests
   // with async hook updates yet until React 16.9 is available.
-
   test('Listen for consecutive super date picker refreshs.', async () => {
     const onRefresh = jest.fn();
 
