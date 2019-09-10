@@ -80,7 +80,7 @@ export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
   const tabs = getTabs(mainTabId, disableLinks);
 
   return (
-    <EuiTabs size="s">
+    <EuiTabs size="s" className={tabId === 'settings' ? 'mlSubTabs' : ''}>
       {tabs.map((tab: Tab) => {
         const id = tab.id;
         return (
