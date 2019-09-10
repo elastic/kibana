@@ -33,12 +33,11 @@ export class ExplainCollectionInterval extends React.Component {
 
   render() {
     const {
-      context,
-      property,
-      data,
+      reason,
       isCollectionIntervalUpdated,
       isCollectionIntervalUpdating
     } = this.props;
+    const { context, property, data } = reason;
 
     const renderButton = () => (
       <Fragment>
@@ -131,9 +130,7 @@ export class ExplainCollectionInterval extends React.Component {
 
 ExplainCollectionInterval.propTypes = {
   enabler: PropTypes.object.isRequired,
-  context: PropTypes.string.isRequired,
-  property: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired,
+  reason: PropTypes.object.isRequired,
   isCollectionIntervalUpdated: PropTypes.bool,
   isCollectionIntervalUpdating: PropTypes.bool
 };

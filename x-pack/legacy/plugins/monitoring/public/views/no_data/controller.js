@@ -13,7 +13,6 @@ import {
 } from 'plugins/monitoring/lib/elasticsearch_settings';
 import { ModelUpdater } from './model_updater';
 import { NoData } from 'plugins/monitoring/components';
-import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
@@ -29,8 +28,6 @@ export class NoDataController extends MonitoringViewBaseController {
       new ClusterSettingsChecker($http),
       new NodeSettingsChecker($http)
     ];
-
-    let watcherSet;
 
     const getData = async () => {
       let catchReason;
@@ -50,19 +47,17 @@ export class NoDataController extends MonitoringViewBaseController {
         }
       }
 
-      const { updateModel } = new ModelUpdater($scope, this);
-      const enabler = new Enabler($http, updateModel);
-      if (!watcherSet) {
-        watcherSet = $scope.$watch(() => this, () => this.render(enabler), true);
-      }
-
       if (catchReason) {
         this.reason = catchReason;
       } else if (!this.isCollectionEnabledUpdating
         && !this.isCollectionEnabledUpdated
         && !this.isCollectionIntervalUpdating
         && !this.isCollectionIntervalUpdated) {
-        await startChecks(checkers, updateModel);
+        /**
+         * `no-use-before-define` is fine here, since getData is an async function.
+         * Needs to be done this way, since there is no `this` before super is executed
+         * */
+        await startChecks(checkers, updateModel); // eslint-disable-line no-use-before-define
       }
     };
 
@@ -75,9 +70,12 @@ export class NoDataController extends MonitoringViewBaseController {
       $scope,
       $injector
     });
-
-    this.enableTimefilter();
     Object.assign(this, this.getDefaultModel());
+
+    //Need to set updateModel after super since there is no `this` otherwise
+    const { updateModel } = new ModelUpdater($scope, this);
+    const enabler = new Enabler($http, updateModel);
+    $scope.$watch(() => this, () => this.render(enabler), true);
   }
 
   getDefaultModel() {
@@ -94,23 +92,11 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
-    /**
-     * Need to do this because {data} can either be an array or string, because of
-     * some race condtions.
-     */
-    if (typeof props.data !== 'string') {
-      props.data = props.reason && props.reason.data || '';
-    }
     this.renderReact(
       <I18nContext>
         <NoData {...props} enabler={enabler} />
       </I18nContext>
     );
-  }
-
-  enableTimefilter() {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
   }
 
 }
