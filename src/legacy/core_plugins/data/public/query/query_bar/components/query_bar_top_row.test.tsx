@@ -21,8 +21,8 @@ import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import './query_bar.test.mocks';
-import { QueryBar } from './query_bar';
+import './query_bar_top_row.test.mocks';
+import { QueryBarTopRow } from './query_bar_top_row';
 import { IndexPattern } from '../../../index';
 
 import { coreMock } from '../../../../../../../core/public/mocks';
@@ -88,8 +88,8 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
-describe('QueryBar', () => {
-  const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarInputUI)';
+describe('QueryBarTopRowTopRow', () => {
+  const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarTopRowInputUI)';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
   beforeEach(() => {
     jest.clearAllMocks();
@@ -97,7 +97,7 @@ describe('QueryBar', () => {
 
   it('Should render the given query', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
@@ -118,7 +118,7 @@ describe('QueryBar', () => {
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
@@ -139,7 +139,7 @@ describe('QueryBar', () => {
 
   it('Should render only timepicker when no options provided', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
@@ -157,7 +157,7 @@ describe('QueryBar', () => {
 
   it('Should not show timepicker when asked', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
@@ -176,7 +176,7 @@ describe('QueryBar', () => {
 
   it('Should render timepicker with options', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
@@ -198,7 +198,7 @@ describe('QueryBar', () => {
 
   it('Should render only query input bar', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
@@ -220,7 +220,7 @@ describe('QueryBar', () => {
 
   it('Should NOT render query input bar if disabled', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
@@ -243,7 +243,7 @@ describe('QueryBar', () => {
 
   it('Should NOT render query input bar if missing options', () => {
     const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
+      <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
