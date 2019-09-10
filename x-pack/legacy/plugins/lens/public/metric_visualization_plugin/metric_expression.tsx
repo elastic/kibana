@@ -116,9 +116,15 @@ export function MetricChart({
         textAlign: 'center',
       }}
     >
-      <AutoScale minScale={mode === 'reduced' ? 0 : undefined}>
-        <div style={{ fontSize: '60pt', fontWeight: 600 }}>{value}</div>
-        {mode === 'full' && <div style={{ fontSize: '24pt' }}>{title}</div>}
+      <AutoScale>
+        <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
+          {value}
+        </div>
+        {mode === 'full' && (
+          <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
+            {title}
+          </div>
+        )}
       </AutoScale>
     </div>
   );

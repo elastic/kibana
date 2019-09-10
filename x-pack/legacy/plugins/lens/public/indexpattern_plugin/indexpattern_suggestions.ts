@@ -15,7 +15,12 @@ import {
   IndexPatternPrivateState,
   IndexPattern,
 } from './indexpattern';
-import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
+import {
+  buildColumn,
+  getOperationTypesForField,
+  operationDefinitionMap,
+  IndexPatternColumn,
+} from './operations';
 import { hasField } from './utils';
 
 function buildSuggestion({
@@ -31,21 +36,36 @@ function buildSuggestion({
   updatedLayer?: IndexPatternLayer;
   label?: string;
 }): DatasourceSuggestion<IndexPatternPrivateState> {
-  const columnOrder = (updatedLayer || state.layers[layerId]).columnOrder;
-  const columnMap = (updatedLayer || state.layers[layerId]).columns;
+  const updatedState = updatedLayer
+    ? {
+        ...state,
+        layers: {
+          ...state.layers,
+          [layerId]: updatedLayer,
+        },
+      }
+    : state;
 
+  // It's fairly easy to accidentally introduce a mismatch between
+  // columnOrder and columns, so this is a safeguard to ensure the
+  // two match up.
+  const layers = _.mapValues(updatedState.layers, layer => ({
+    ...layer,
+    columns: _.pick<Record<string, IndexPatternColumn>, Record<string, IndexPatternColumn>>(
+      layer.columns,
+      layer.columnOrder
+    ),
+  }));
+
+  const columnOrder = layers[layerId].columnOrder;
+  const columnMap = layers[layerId].columns;
   const isMultiRow = Object.values(columnMap).some(column => column.isBucketed);
 
   return {
-    state: updatedLayer
-      ? {
-          ...state,
-          layers: {
-            ...state.layers,
-            [layerId]: updatedLayer,
-          },
-        }
-      : state,
+    state: {
+      ...updatedState,
+      layers,
+    },
 
     table: {
       columns: columnOrder.map(columnId => ({
@@ -410,9 +430,11 @@ function createAlternativeMetricSuggestions(
       field,
       suggestedPriority: undefined,
     });
-    const updatedLayer = buildLayerByColumnOrder({ ...layer, columns: { [newId]: newColumn } }, [
-      newId,
-    ]);
+    const updatedLayer = {
+      ...layer,
+      columns: { [newId]: newColumn },
+      columnOrder: [newId],
+    };
     suggestions.push(
       buildSuggestion({
         state,
@@ -441,10 +463,11 @@ function createSuggestionWithDefaultDateHistogram(
     field: indexPattern.fields.find(({ name }) => name === indexPattern.timeFieldName),
     suggestedPriority: undefined,
   });
-  const updatedLayer = buildLayerByColumnOrder(
-    { ...layer, columns: { ...layer.columns, [newId]: timeColumn } },
-    [...buckets, newId, ...metrics]
-  );
+  const updatedLayer = {
+    ...layer,
+    columns: { ...layer.columns, [newId]: timeColumn },
+    columnOrder: [...buckets, newId, ...metrics],
+  };
   return buildSuggestion({
     state,
     layerId,
@@ -465,15 +488,15 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     availableBucketedColumns.map((_col, index) => {
       // build suggestions with fewer buckets
       const bucketedColumns = availableBucketedColumns.slice(0, index + 1);
-      const allMetricsSuggestion = buildLayerByColumnOrder(layer, [
-        ...bucketedColumns,
-        ...availableMetricColumns,
-      ]);
+      const allMetricsSuggestion = {
+        ...layer,
+        columnOrder: [...bucketedColumns, ...availableMetricColumns],
+      };
 
       if (availableMetricColumns.length > 1) {
         return [
           allMetricsSuggestion,
-          buildLayerByColumnOrder(layer, [...bucketedColumns, availableMetricColumns[0]]),
+          { ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] },
         ];
       } else {
         return allMetricsSuggestion;
@@ -483,7 +506,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     .concat(
       availableMetricColumns.map(columnId => {
         // build suggestions with only metrics
-        return buildLayerByColumnOrder(layer, [columnId]);
+        return { ...layer, columnOrder: [columnId] };
       })
     )
     .map(updatedLayer => {
@@ -515,15 +538,4 @@ function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean)
 
 function separateBucketColumns(layer: IndexPatternLayer) {
   return partition(layer.columnOrder, columnId => layer.columns[columnId].isBucketed);
-}
-
-function buildLayerByColumnOrder(
-  layer: IndexPatternLayer,
-  columnOrder: string[]
-): IndexPatternLayer {
-  return {
-    ...layer,
-    columns: _.pick(layer.columns, columnOrder),
-    columnOrder,
-  };
 }

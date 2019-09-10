@@ -119,6 +119,7 @@ describe('metric_expression', () => {
             minScale={0}
           >
             <div
+              data-test-subj="lns_metric_value"
               style={
                 Object {
                   "fontSize": "60pt",
@@ -127,6 +128,16 @@ describe('metric_expression', () => {
               }
             >
               10110
+            </div>
+            <div
+              data-test-subj="lns_metric_title"
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
             </div>
           </AutoScale>
         </div>

@@ -197,7 +197,7 @@ export function FieldItem({
   return (
     <DragDrop
       value={{ field, indexPatternId: indexPattern.id } as DraggedField}
-      dataTestSubj="lnsFieldListPanelField"
+      data-test-subj="lnsFieldListPanelField"
       draggable
       className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${
         field.type
