@@ -28,6 +28,15 @@ export {
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
+export { DATA_FRAME_TRANSFORM_LIST_COLUMN, DataFrameTransformListRow } from './transform_list';
+export {
+  getTransformProgress,
+  isCompletedBatchTransform,
+  isDataFrameTransformStats,
+  DataFrameTransformStats,
+  DATA_FRAME_MODE,
+  DATA_FRAME_TRANSFORM_STATE,
+} from './transform_stats';
 export { moveToDataFrameTransformList, moveToDataFrameWizard, moveToDiscover } from './navigation';
 export {
   getEsAggFromAggConfig,
