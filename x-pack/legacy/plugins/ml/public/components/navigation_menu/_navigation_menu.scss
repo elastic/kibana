@@ -4,8 +4,13 @@
 
 .mlNavigationMenu__mainTab {
   margin-left: $euiSizeM;
+  padding-bottom: 0;
 }
 
 .mlNavigationMenu__topNav {
   padding-top: $euiSizeS;
+}
+
+.mlNavHorizontalRule {
+  margin: $euiSizeM 0 0 0;
 }

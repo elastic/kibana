@@ -17,14 +17,15 @@ import { Tabs } from './tabs';
 export type TabId = string;
 
 const tabSupport = {
+  // overview: null,
   jobs: 'anomaly_detection',
   settings: 'anomaly_detection',
-  data_frames: 'main_data_frame_analytics',
-  data_frame_analytics: 'main_data_frame_analytics',
-  datavisualizer: 'data_visualizer',
-  filedatavisualizer: 'data_visualizer',
+  data_frames: null,
+  data_frame_analytics: null,
+  datavisualizer: null,
+  filedatavisualizer: null,
   timeseriesexplorer: 'anomaly_detection',
-  'access-denied': '',
+  'access-denied': null,
   explorer: 'anomaly_detection',
 };
 
@@ -34,18 +35,12 @@ interface Props {
   tabId: TabId;
 }
 
-function getMainTabId(tabId: TabId): string {
-  if (tabId === 'datavisualizer' || tabId === 'access-denied') {
-    return tabId;
-  }
-  return tabSupport[tabId as tabSupportId];
-}
-
 export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
   const showTabs = Object.keys(tabSupport).includes(tabId);
-  const mainTabId = getMainTabId(tabId);
-  const showHorizontalRule = tabId === 'datavisualizer';
+  const mainTabId = tabSupport[tabId as tabSupportId] || tabId;
+  // show horizontal rule if there are now subtabs
+  const showHorizontalRule = tabSupport[tabId as tabSupportId] === null;
 
   return (
     <Fragment>
@@ -57,7 +52,7 @@ export const NavigationMenu: FC<Props> = ({ tabId }) => {
           <TopNav />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showHorizontalRule && <EuiHorizontalRule />}
+      {showHorizontalRule && <EuiHorizontalRule className="mlNavHorizontalRule" />}
       {showTabs && <Tabs tabId={tabId} mainTabId={mainTabId} disableLinks={disableLinks} />}
     </Fragment>
   );

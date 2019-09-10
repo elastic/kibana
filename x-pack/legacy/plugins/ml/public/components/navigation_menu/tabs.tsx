@@ -19,8 +19,10 @@ interface Props {
 
 function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
   const TAB_MAP = {
-    overview: [],
+    // overview: [],
     datavisualizer: [],
+    data_frames: [],
+    data_frame_analytics: [],
     anomaly_detection: [
       {
         id: 'jobs',
@@ -51,22 +53,6 @@ function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
         disabled: disableLinks,
       },
     ],
-    main_data_frame_analytics: [
-      {
-        id: 'data_frames',
-        name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
-          defaultMessage: 'Transforms',
-        }),
-        disabled: false,
-      },
-      {
-        id: 'data_frame_analytics',
-        name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-          defaultMessage: 'Analytics',
-        }),
-        disabled: disableLinks,
-      },
-    ],
   };
 
   type TAB_MAP_ID = keyof typeof TAB_MAP;
@@ -75,11 +61,10 @@ function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
 }
 
 enum TAB_TEST_SUBJECT {
+  // overview = 'mlOverview',
   jobs = 'mlTabJobManagement',
   explorer = 'mlTabAnomalyExplorer',
   timeseriesexplorer = 'mlTabSingleMetricViewer',
-  data_frames = 'mlTabDataFrames', // eslint-disable-line
-  data_frame_analytics = 'mlTabDataFrameAnalytics', // eslint-disable-line
   datavisualizer = 'mlTabDataVisualizer',
   settings = 'mlTabSettings',
 }

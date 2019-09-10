@@ -38,8 +38,15 @@ function getTabs(disableLinks: boolean): Tab[] {
       disabled: disableLinks,
     },
     {
-      id: 'main_data_frame_analytics',
-      name: i18n.translate('xpack.ml.navMenu.mainDataFrameAnalyticsTabLinkText', {
+      id: 'data_frames',
+      name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
+        defaultMessage: 'Transforms',
+      }),
+      disabled: false,
+    },
+    {
+      id: 'data_frame_analytics',
+      name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
         defaultMessage: 'Data Frame Analytics',
       }),
       disabled: disableLinks,
@@ -53,12 +60,17 @@ function getTabs(disableLinks: boolean): Tab[] {
     },
   ];
 }
+interface TabData {
+  testSubject: string;
+  pathId?: string;
+}
 
-const TAB_DATA = {
+const TAB_DATA: { [key: string]: TabData } = {
   // overview: { testSubject: 'mlTabOverview', pathId: 'overview' },
   anomaly_detection: { testSubject: 'mlTabAnomalyDetection', pathId: 'jobs' },
-  main_data_frame_analytics: { testSubject: 'mlTabMainDataFrameAnalytics', pathId: 'data_frames' },
-  datavisualizer: { testSubject: 'mlTabDataVisualizer', pathId: 'datavisualizer' },
+  data_frames: { testSubject: 'mlTabDataFrames' },
+  data_frame_analytics: { testSubject: 'mlTabDataFrameAnalytics' },
+  datavisualizer: { testSubject: 'mlTabDataVisualizer' },
 };
 
 type TAB_DATA_PROPERTY = keyof typeof TAB_DATA;
@@ -76,7 +88,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
       {tabs.map((tab: Tab) => {
         const id = tab.id;
         const testSubject = TAB_DATA[id as TAB_DATA_PROPERTY].testSubject;
-        const defaultPathId = TAB_DATA[id as TAB_DATA_PROPERTY].pathId;
+        const defaultPathId = TAB_DATA[id as TAB_DATA_PROPERTY].pathId || id;
         return (
           <EuiLink
             data-test-subj={testSubject}
