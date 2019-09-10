@@ -470,14 +470,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async selectVectorSource() {
-      log.debug(`Select vector source`);
-      await testSubjects.click('vectorShapes');
+    async selectEMSBoundariesSource() {
+      log.debug(`Select EMS boundaries source`);
+      await testSubjects.click('emsBoundaries');
     }
 
     async selectGeoJsonUploadSource() {
-      log.debug(`Select upload geojson vector file`);
-      await testSubjects.click('uploadGeoJsonVectorFile');
+      log.debug(`Select upload geojson source`);
+      await testSubjects.click('uploadedGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
@@ -601,8 +601,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async lockTooltipAtPosition(xOffset, yOffset) {
       await retry.try(async () => {
         const mapContainerElement = await testSubjects.find('mapContainer');
-        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
-        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        await mapContainerElement.moveMouseTo({ xOffset, yOffset });
+        await mapContainerElement.clickMouseButton({ xOffset, yOffset });
         // Close button is only displayed with tooltip is locked
         const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
         if (!hasCloseButton) {
