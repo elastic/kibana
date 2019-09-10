@@ -12,15 +12,17 @@ import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { InternalCoreSetup } from '../../../../../src/core/server';
 
 export interface KbnServer extends Server {
   usage: any;
 }
 
-export const initServerWithKibana = (kbnServer: KbnServer) => {
+export const initServerWithKibana = (core: InternalCoreSetup) => {
   const libs = compose(kbnServer);
   initInfraServer(libs);
 
+  // NP_TODO how do we replace this?
   kbnServer.expose(
     'defineInternalSourceConfiguration',
     libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
