@@ -16,25 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ReactNode } from 'react';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 // TODO: Remove once typescript definitions are in EUI
-interface EuiSideNavItem {
-  id: string;
-  name: string;
-  isSelected?: boolean;
-  renderItem?: () => ReactNode;
-  forceOpen?: boolean;
-  items?: EuiSideNavItem[];
-  onClick: () => void;
-}
 
 declare module '@elastic/eui' {
-  export const EuiSideNav: React.Component<{
-    items: EuiSideNavItem[];
-    renderItem: () => ReactNode;
-  }>;
+  export const EuiSideNav: React.SFC<any>;
 
   export interface EuiTableCriteria {
     page: { index: number; size: number };
@@ -48,6 +35,4 @@ declare module '@elastic/eui' {
     sorting: { sort?: EuiTableCriteria['sort'] };
     [key: string]: any;
   }>;
-
-  // export const EuiBasicTable: React.SFC<any>;
 }

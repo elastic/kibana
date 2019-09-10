@@ -9,6 +9,10 @@
  *       package includes them.
  */
 
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+}
+
 import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
@@ -41,12 +45,12 @@ declare module '@elastic/eui' {
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
 
-  // interface EuiOutsideClickDetectorProps {
-  //   children: React.ReactNode;
-  //   isDisabled?: boolean;
-  //   onOutsideClick: React.MouseEventHandler<Element>;
-  // }
-  // export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
+  interface EuiOutsideClickDetectorProps {
+    children: React.ReactNode;
+    isDisabled?: boolean;
+    onOutsideClick: React.MouseEventHandler<Element>;
+  }
+  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 
   interface EuiFormControlLayoutIconProps {
     type: IconType;
@@ -58,22 +62,22 @@ declare module '@elastic/eui' {
     onClick?: React.MouseEventHandler<Element>;
   }
 
-  // type EuiSideNavProps = CommonProps & {
-  //   style?: any;
-  //   items: Array<{
-  //     id: string | number;
-  //     name: string;
-  //     items: Array<{
-  //       id: string;
-  //       name: string;
-  //       onClick: () => void;
-  //     }>;
-  //   }>;
-  //   mobileTitle?: React.ReactNode;
-  //   toggleOpenOnMobile?: () => void;
-  //   isOpenOnMobile?: boolean;
-  // };
-  // export const EuiSideNav: React.SFC<EuiSideNavProps>;
+  type EuiSideNavProps = CommonProps & {
+    style?: any;
+    items: Array<{
+      id: string | number;
+      name: string;
+      items: Array<{
+        id: string;
+        name: string;
+        onClick: () => void;
+      }>;
+    }>;
+    mobileTitle?: React.ReactNode;
+    toggleOpenOnMobile?: () => void;
+    isOpenOnMobile?: boolean;
+  };
+  export const EuiSideNav: React.SFC<EuiSideNavProps>;
 
   type EuiErrorBoundaryProps = CommonProps & {
     children: React.ReactNode;

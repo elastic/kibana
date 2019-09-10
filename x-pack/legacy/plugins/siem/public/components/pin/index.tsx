@@ -41,7 +41,7 @@ export const Pin = pure<Props>(({ allowUnpinning, pinned, onClick = noop }) => (
     onClick={onClick}
     pinned={pinned.toString()}
     role="button"
-    size="m"
+    size="l"
     iconType={getPinIcon(pinned)}
   />
 ));

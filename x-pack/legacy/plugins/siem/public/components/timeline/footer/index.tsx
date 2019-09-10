@@ -100,7 +100,7 @@ interface FooterState {
 export const EventsCount = pure<{
   closePopover: () => void;
   isOpen: boolean;
-  items: NonNullable<React.ReactNode[]>;
+  items: React.ReactNode[];
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
