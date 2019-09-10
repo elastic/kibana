@@ -106,7 +106,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxSelector data-test-subj selector
      * @param value option text
      */
-    public async setCustom(comboBoxSelector: string, value: string) {
+    public async setCustom(comboBoxSelector: string, value: string): Promise<void> {
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
       await this.setFilterValue(comboBoxElement, value);
