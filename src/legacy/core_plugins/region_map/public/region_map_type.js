@@ -25,7 +25,7 @@ import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { RegionMapOptions } from './components/region_map_options';
 
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';

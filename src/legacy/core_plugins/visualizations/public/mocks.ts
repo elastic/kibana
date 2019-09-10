@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
 jest.mock('ui/vis/index.js');
@@ -26,23 +25,18 @@ jest.mock('ui/registry/vis_types');
 // @ts-ignore
 import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
 // @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-// @ts-ignore
 import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
 jest.mock('./types/vis_type_alias_registry');
-import { visTypeAliasRegistry } from './types/vis_type_alias_registry';
+import { PluginInitializerContext } from 'src/core/public';
 
-import { Plugin } from '.';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { VisualizationsSetup, VisualizationsStart } from './';
+import { VisualizationsPlugin } from './np_ready/plugin';
+import { coreMock } from '../../../../core/public/mocks';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
-
-const createSetupContract = (): Setup => ({
+const createSetupContract = (): VisualizationsSetup => ({
   filters: {
     VisFiltersProvider: jest.fn(),
     createFilter: jest.fn(),
@@ -51,7 +45,6 @@ const createSetupContract = (): Setup => ({
     Vis,
     VisFactoryProvider: jest.fn(),
     registerVisualization: jest.fn(),
-    defaultFeedbackMessage,
     visTypeAliasRegistry: {
       add: jest.fn(),
       get: jest.fn(),
@@ -59,10 +52,10 @@ const createSetupContract = (): Setup => ({
   },
 });
 
-const createStartContract = (): Start => {};
+const createStartContract = (): VisualizationsStart => ({});
 
 const createInstance = () => {
-  const plugin = new Plugin({} as any);
+  const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
   const setup = plugin.setup(coreMock.createSetup(), {
     __LEGACY: {
@@ -72,11 +65,9 @@ const createInstance = () => {
       Vis,
       VisFactoryProvider,
       VisTypesRegistryProvider,
-      defaultFeedbackMessage,
-      visTypeAliasRegistry,
     },
   });
-  const doStart = () => plugin.start(coreMock.createStart());
+  const doStart = () => plugin.start(coreMock.createStart(), {});
 
   return {
     plugin,
