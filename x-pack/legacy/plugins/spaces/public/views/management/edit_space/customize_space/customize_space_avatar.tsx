@@ -6,7 +6,7 @@
 
 import React, { ChangeEvent, Component } from 'react';
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiColorPicker,
   EuiFieldText,
   EuiFlexItem,
@@ -17,11 +17,13 @@ import {
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { get } from 'lodash';
-import { encode } from '../../../../../../canvas/common/lib/dataurl';
+import { encode } from '../../../../../common/lib/dataurl';
 
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
 import { Space } from '../../../../../common/model/space';
 import { getSpaceColor, getSpaceInitials } from '../../../../../common/space_attributes';
+
+const VALID_IMAGE_TYPES = ['gif', 'jpeg', 'png', 'svg+xml'];
 
 interface Props {
   space: Partial<Space>;
@@ -32,7 +34,8 @@ interface Props {
 interface State {
   initialsHasFocus: boolean;
   pendingInitials?: string | null;
-  avatarImage?: string | null;
+  imageUrl?: string | null;
+  imageFilename?: string | null;
 }
 
 class CustomizeSpaceAvatarUI extends Component<Props, State> {
@@ -42,25 +45,44 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     super(props);
     this.state = {
       initialsHasFocus: false,
-      avatarImage: props.space.avatarImage,
+      imageUrl: props.space.imageUrl,
+      imageFilename: props.space.imageFilename,
     };
   }
 
-  private _handleChange = (avImg: string) => {
-    this.setState({ avatarImage: avImg });
+  private storeImageChanges(imgUrl: string, fname: string) {
+    this.setState({ imageUrl: imgUrl });
+    this.props.onChange({
+      ...this.props.space,
+      imageUrl: imgUrl,
+      imageFilename: fname,
+    });
+  }
 
-    if (avImg) {
-      this.props.onChange({
-        ...this.props.space,
-        avatarImage: avImg,
-      });
-    }
+  private handleImageUpload = (imgUrl: string, fname: string) => {
+    const thisInstance = this;
+    const image = new Image();
+    image.addEventListener(
+      'load',
+      function() {
+        const MAX_IMAGE_SIZE = 64;
+        const imgDimx = image.width;
+        const imgDimy = image.height;
+        if (imgDimx <= MAX_IMAGE_SIZE && imgDimy <= MAX_IMAGE_SIZE) {
+          thisInstance.storeImageChanges(imgUrl, fname);
+        }
+      },
+      false
+    );
+    image.src = imgUrl;
   };
 
   private onFileUpload = (files: File[]) => {
     const [file] = files;
     const [type, subtype] = get(file, 'type', '').split('/');
-    encode(file).then((dataurl: string) => this._handleChange(dataurl));
+    if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
+      encode(file).then((dataurl: string) => this.handleImageUpload(dataurl, file.name));
+    }
   };
 
   public render() {
@@ -87,6 +109,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               // without defaulting to the derived initials provided by `getSpaceInitials`
               value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
               onChange={this.onInitialsChange}
+              disabled={this.state.imageUrl && this.state.imageUrl !== '' ? true : false}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -102,6 +125,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               color={spaceColor}
               onChange={this.onColorChange}
               isInvalid={isInvalidSpaceColor}
+              disabled={this.state.imageUrl && this.state.imageUrl !== '' ? true : false}
             />
           </EuiFormRow>
           {this.filePickerOrImage()}
@@ -110,43 +134,59 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     );
   }
 
-  private removeAvatarImage() {
-    this.setState({ avatarImage: '' });
+  private removeImageUrl() {
+    this.setState({ imageUrl: '' });
     this.props.onChange({
       ...this.props.space,
-      avatarImage: '',
+      imageUrl: '',
+      imageFilename: '',
     });
   }
 
   public filePickerOrImage() {
     const { intl } = this.props;
-    const avImage = this.state.avatarImage;
 
-    if (!this.state.avatarImage) {
+    if (!this.state.imageUrl) {
       return (
         <EuiFormRow
           label={intl.formatMessage({
-            id: 'xpack.spaces.management.customizeSpaceAvatar.avatarImage',
-            defaultMessage: 'Pick an image for your space',
+            id: 'xpack.spaces.management.customizeSpaceAvatar.imageUrl',
+            defaultMessage: 'Custom image',
           })}
         >
           <EuiFilePicker
-            compressed
-            initialPromptText="Select avatar image"
+            display="default"
+            initialPromptText={intl.formatMessage({
+              id: 'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
+              defaultMessage: 'Select image file',
+            })}
             onChange={this.onFileUpload}
             accept="image/*"
           />
         </EuiFormRow>
       );
     } else {
-      if (avImage) {
-        return (
-          <EuiButton color="danger" onClick={() => this.removeAvatarImage()}>
-            Remove Avatar Image
-          </EuiButton>
-        );
-      }
-      return '';
+      return (
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.management.customizeSpaceAvatar.imageUrl',
+            defaultMessage: 'Custom image',
+          })}
+        >
+          <div>
+            <div style={{ float: 'left' }}>{this.props.space.imageFilename}</div>
+            <div style={{ float: 'right' }}>
+              <EuiButtonIcon
+                iconType="trash"
+                aria-label="Remove image"
+                color="danger"
+                onClick={() => this.removeImageUrl()}
+                title="Remove image"
+              />
+            </div>
+          </div>
+        </EuiFormRow>
+      );
     }
   }
 

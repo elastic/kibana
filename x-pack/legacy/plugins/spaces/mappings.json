@@ -22,6 +22,12 @@
       "disabledFeatures": {
         "type": "keyword"
       },
+      "imageUrl": {
+        "type": "text"
+      },
+      "imageFilename": {
+        "type": "text"
+      },
       "_reserved": {
         "type": "boolean"
       }

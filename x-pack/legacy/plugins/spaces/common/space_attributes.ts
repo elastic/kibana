@@ -58,11 +58,11 @@ export function getSpaceInitials(space: Partial<Space> = {}) {
  *
  * @param {Space} space
  */
-export function getSpaceAvatarImage(space: Partial<Space> = {}) {
-  const { avatarImage, name = '' } = space;
+export function getSpaceImageUrl(space: Partial<Space> = {}) {
+  const { imageUrl } = space;
 
-  if (avatarImage) {
-    return avatarImage;
+  if (imageUrl) {
+    return imageUrl;
   }
 
   return '';

@@ -12,5 +12,6 @@ export interface Space {
   initials?: string;
   disabledFeatures: string[];
   _reserved?: boolean;
-  avatarImage?: string;
+  imageUrl?: string;
+  imageFilename?: string;
 }

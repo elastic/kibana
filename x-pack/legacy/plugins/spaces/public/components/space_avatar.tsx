@@ -8,7 +8,7 @@ import { EuiAvatar, isValidHex } from '@elastic/eui';
 import React, { SFC } from 'react';
 import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
-import { getSpaceAvatarImage } from '../../common/space_attributes';
+import { getSpaceImageUrl } from '../../common/space_attributes';
 
 interface Props {
   space: Partial<Space>;
@@ -38,7 +38,7 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}
       color={isValidHex(spaceColor) ? spaceColor : ''}
-      imageUrl={getSpaceAvatarImage(space)}
+      imageUrl={getSpaceImageUrl(space)}
       {...rest}
     />
   );
