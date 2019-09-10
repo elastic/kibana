@@ -14,7 +14,7 @@ import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
   getConditionalHeaders,
-  addForceNowQuerystring,
+  getFullUrls,
 } from '../../../common/execute_job/';
 
 function executeJobFn(server) {
@@ -40,7 +40,7 @@ function executeJobFn(server) {
       }),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
-      mergeMap(addForceNowQuerystring),
+      mergeMap(getFullUrls),
       mergeMap(({ job, conditionalHeaders, urls }) => {
         const hashUrl = urls[0];
         return generatePngObservable(

@@ -1,28 +1,23 @@
 [role="xpack"]
 [[logstash-configuration-management-api-list]]
-=== List Pipelines
+=== List Logstash pipeline API
+++++
+<titleabbrev>List pipeline</titleabbrev>
+++++
+
+List all centrally-managed Logstash pipelines.
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The List Pipelines API enables you to list all centrally-managed Logstash pipelines.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[float]
+[[logstash-configuration-management-api-list-request]]
 ==== Request
 
 `GET /api/logstash/pipelines`
 
-[float]
-==== Examples
+[[logstash-configuration-management-api-list-example]]
+==== Example
 
-[source,js]
---------------------------------------------------
-GET api/logstash/pipelines
---------------------------------------------------
-// KIBANA
-
-A successful call returns a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -43,4 +38,4 @@ A successful call returns a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-<1> The username property may or may not be present, depending on whether Elastic Security was enabled when the pipeline was created or last updated.
+<1> The `username` property may or may not be present, depending on if security was enabled when the pipeline was created or last updated.

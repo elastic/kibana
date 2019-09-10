@@ -11,6 +11,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
+import { isLeft } from 'fp-ts/lib/Either';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import {
   ConfigurationBlock,
@@ -35,7 +36,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
     const result = await Promise.all<any>(
       request.payload.map(async (block: ConfigurationBlock) => {
         const assertData = createConfigurationBlockInterface().decode(block);
-        if (assertData.isLeft()) {
+        if (isLeft(assertData)) {
           return {
             error: `Error parsing block info, ${PathReporter.report(assertData)[0]}`,
           };
