@@ -21,7 +21,6 @@ import {
   getLayerList,
   getMapReady,
   getGoto,
-  isDrawingFilter,
   getScrollZoom
 } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
@@ -33,7 +32,6 @@ function mapStateToProps(state = {}) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
-    isDrawingFilter: isDrawingFilter(state),
     scrollZoom: getScrollZoom(state)
   };
 }
