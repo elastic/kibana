@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getDiscoverHref } from './navigation';
+import { getDiscoverUrl } from './navigation';
 
 describe('navigation', () => {
-  test('getDiscoverHref should provide encoded href', () => {
-    expect(getDiscoverHref('farequote-airline', 'http://showcase.ml-qa.com:5601/app/ml')).toBe(
-      "http://showcase.ml-qa.com:5601/app/ml#/discover?_g=()&_a=(index:'farequote-airline')"
+  test('getDiscoverUrl should provide encoded url to Discover page', () => {
+    expect(getDiscoverUrl('farequote-airline', 'http://example.com')).toBe(
+      "http://example.com#/discover?_g=()&_a=(index:'farequote-airline')"
     );
   });
 });

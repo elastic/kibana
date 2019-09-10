@@ -34,7 +34,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_cont
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-import { getTransformProgress, getDiscoverHref } from '../../../../common';
+import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -396,7 +396,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the data frame pivot.',
                       }
                     )}
-                    href={getDiscoverHref(indexPatternId, baseUrl)}
+                    href={getDiscoverUrl(indexPatternId, baseUrl)}
                   />
                 </EuiFlexItem>
               )}

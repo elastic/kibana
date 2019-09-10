@@ -11,11 +11,11 @@ export function moveToDataFrameWizard() {
 }
 
 /**
- * Gets a href for navigating to Discover page.
+ * Gets a url for navigating to Discover page.
  * @param indexPatternId Index pattern id.
  * @param baseUrl Base url.
  */
-export function getDiscoverHref(indexPatternId: string, baseUrl: string): string {
+export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string {
   const _g = rison.encode({});
 
   // Add the index pattern ID to the appState part of the URL.
