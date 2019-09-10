@@ -45,6 +45,11 @@ const merge = require('lodash.merge');
 module.exports = merge({
   active: false,
   serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+  // The secretToken below is intended to be hardcoded in this file even though
+  // it makes it public. This is not a security/privacy issue. Normally we'd
+  // instead disable the need for a secretToken in the APM Server config where
+  // the data is transmitted to, but due to how it's being hosted, it's easier,
+  // for now, to simply leave it in.
   secretToken: 'R0Gjg46pE9K9wGestd',
   globalLabels: {},
   centralConfig: false
