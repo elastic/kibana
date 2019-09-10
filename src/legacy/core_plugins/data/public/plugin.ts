@@ -69,7 +69,7 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
 
   private setupApi!: DataSetup;
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
+  public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
@@ -78,7 +78,9 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
       savedObjectsClient,
     });
     this.setupApi = {
-      expressions: this.expressions.setup(),
+      expressions: this.expressions.setup({
+        interpreter,
+      }),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
@@ -94,7 +96,6 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
   public start(core: CoreStart, plugins: DataPluginStartDependencies) {
     return {
       ...this.setupApi!,
-      expressions: this.expressions.start({ inspector: plugins.inspector }),
     };
   }
 
