@@ -140,6 +140,15 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
+    it('should throw an error if the saved query does not have a title', async () => {
+      let error = null;
+      try {
+        await saveQuery({ ...savedQueryAttributes, title: '' });
+      } catch (e) {
+        error = e;
+      }
+      expect(error).not.toBe(null);
+    });
   });
   describe('findSavedQueries', function() {
     it('should find and return saved queries without search text', async () => {

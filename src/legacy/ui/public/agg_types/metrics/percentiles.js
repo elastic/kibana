@@ -18,7 +18,7 @@
  */
 
 import { ordinalSuffix } from '../../utils/ordinal_suffix';
-import { PercentilesEditor } from '../controls/percentiles';
+import { PercentilesEditor } from '../../vis/editors/default/controls/percentiles';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';

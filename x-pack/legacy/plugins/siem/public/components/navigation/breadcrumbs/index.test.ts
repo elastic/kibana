@@ -6,13 +6,11 @@
 import chrome from 'ui/chrome';
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { TIMELINES_PAGE_NAME } from '../../link_to/redirect_to_timelines';
 
-import { getBreadcrumbsForRoute, rootBreadcrumbs, setBreadcrumbs } from '.';
+import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../store/hosts/model';
-import { SiemPageName } from '../../../pages/home/home_navigations';
+import { RouteSpyState } from '../../../utils/route/types';
+import { TabNavigationProps } from '../tab_navigation/types';
 
 jest.mock('ui/chrome', () => ({
   getBasePath: () => {
@@ -26,96 +24,184 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
+const getMockObject = (
+  pageName: string,
+  pathName: string,
+  detailName: string | undefined
+): RouteSpyState & TabNavigationProps => ({
+  detailName,
+  hostDetails: { filterQuery: null, queryLocation: null },
+  hosts: { filterQuery: null, queryLocation: null },
+  navTabs: {
+    hosts: {
+      disabled: false,
+      href: '#/link-to/hosts',
+      id: 'hosts',
+      name: 'Hosts',
+      urlKey: 'host',
+    },
+    network: {
+      disabled: false,
+      href: '#/link-to/network',
+      id: 'network',
+      name: 'Network',
+      urlKey: 'network',
+    },
+    overview: {
+      disabled: false,
+      href: '#/link-to/overview',
+      id: 'overview',
+      name: 'Overview',
+      urlKey: 'overview',
+    },
+    timelines: {
+      disabled: false,
+      href: '#/link-to/timelines',
+      id: 'timelines',
+      name: 'Timelines',
+      urlKey: 'timeline',
+    },
+  },
+  network: { filterQuery: null, queryLocation: null },
+  pageName,
+  pathName,
+  search: '',
+  tabName: HostsTableType.authentications,
+  timelineId: '',
+  timerange: {
+    global: {
+      linkTo: ['timeline'],
+      timerange: {
+        from: 1558048243696,
+        fromStr: 'now-24h',
+        kind: 'relative',
+        to: 1558134643697,
+        toStr: 'now',
+      },
+    },
+    timeline: {
+      linkTo: ['global'],
+      timerange: {
+        from: 1558048243696,
+        fromStr: 'now-24h',
+        kind: 'relative',
+        to: 1558134643697,
+        toStr: 'now',
+      },
+    },
+  },
+});
+
 describe('Navigation Breadcrumbs', () => {
   const hostName = 'siem-kibana';
-  const hostDetailsParams = {
-    pageName: SiemPageName.hosts,
-    hostName,
-    tabName: HostsTableType.authentications,
-  };
-  const hostBreadcrumbs = [
-    ...rootBreadcrumbs.overview,
-    ...getHostDetailsBreadcrumbs(hostDetailsParams),
-  ];
+
   const ipv4 = '192.0.2.255';
-  const ipv4Breadcrumbs = [...rootBreadcrumbs.overview, ...getIPDetailsBreadcrumbs(ipv4)];
   const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
   const ipv6Encoded = encodeIpv6(ipv6);
-  const ipv6Breadcrumbs = [...rootBreadcrumbs.overview, ...getIPDetailsBreadcrumbs(ipv6Encoded)];
+
   describe('getBreadcrumbsForRoute', () => {
-    test('should return Host breadcrumbs when supplied link-to host pathname', () => {
-      const pathname = '/link-to/hosts';
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
-    });
-
     test('should return Host breadcrumbs when supplied host pathname', () => {
-      const pathname = '/hosts';
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
-    });
-
-    test('should return Host breadcrumbs when supplied host pathname with trailing slash', () => {
-      const pathname = '/hosts/';
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
+      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('hosts', '/hosts', undefined));
+      expect(breadcrumbs).toEqual([
+        {
+          href: '#/link-to/overview',
+          text: 'SIEM',
+        },
+        {
+          href:
+            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+          text: 'Hosts',
+        },
+        {
+          href: '',
+          text: 'Authentications',
+        },
+      ]);
     });
 
     test('should return Network breadcrumbs when supplied network pathname', () => {
-      const pathname = '/network';
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.network);
-    });
-
-    test('should return Timelines breadcrumbs when supplied link-to timelines pathname', () => {
-      const pathname = `/link-to/${TIMELINES_PAGE_NAME}`;
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.timelines);
+      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', undefined));
+      expect(breadcrumbs).toEqual([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        {
+          text: 'Network',
+          href:
+            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+      ]);
     });
 
     test('should return Timelines breadcrumbs when supplied timelines pathname', () => {
-      const pathname = '/timelines';
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(rootBreadcrumbs.timelines);
-    });
-
-    test('should return Host Details breadcrumbs when supplied link-to pathname with hostName', () => {
-      const pathname = `/link-to/hosts/${hostName}`;
-
-      const breadcrumbs = getBreadcrumbsForRoute(pathname, hostDetailsParams);
-      expect(breadcrumbs).toEqual(hostBreadcrumbs);
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('timelines', '/timelines', undefined)
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Timelines', href: '' },
+      ]);
     });
 
     test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
-      const pathname = `/hosts/${hostName}`;
-
-      const breadcrumbs = getBreadcrumbsForRoute(pathname, hostDetailsParams);
-      expect(breadcrumbs).toEqual(hostBreadcrumbs);
-    });
-
-    test('should return IP Details breadcrumbs when supplied link-to pathname with ipv4', () => {
-      const pathname = `link-to/network/ip/${ipv4}`;
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(ipv4Breadcrumbs);
+      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('hosts', '/hosts', hostName));
+      expect(breadcrumbs).toEqual([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        {
+          text: 'Hosts',
+          href:
+            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        {
+          text: 'siem-kibana',
+          href:
+            '#/link-to/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        { text: 'Authentications', href: '' },
+      ]);
     });
 
     test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
-      const pathname = `/network/ip/${ipv4}`;
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(ipv4Breadcrumbs);
+      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv4));
+      expect(breadcrumbs).toEqual([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        {
+          text: 'Network',
+          href:
+            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        { text: '192.0.2.255', href: '' },
+      ]);
     });
 
     test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
-      const pathname = `/network/ip/${ipv6Encoded}`;
-      const breadcrumbs = getBreadcrumbsForRoute(pathname);
-      expect(breadcrumbs).toEqual(ipv6Breadcrumbs);
+      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv6Encoded));
+      expect(breadcrumbs).toEqual([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        {
+          text: 'Network',
+          href:
+            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        { text: '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff', href: '' },
+      ]);
     });
   });
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      const pathname = `/hosts/${hostName}`;
-      setBreadcrumbs(pathname, hostDetailsParams);
-      expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);
+      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName));
+      expect(chrome.breadcrumbs.set).toBeCalledWith([
+        { text: 'SIEM', href: '#/link-to/overview' },
+        {
+          text: 'Hosts',
+          href:
+            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        {
+          text: 'siem-kibana',
+          href:
+            '#/link-to/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+        },
+        { text: 'Authentications', href: '' },
+      ]);
     });
   });
 });

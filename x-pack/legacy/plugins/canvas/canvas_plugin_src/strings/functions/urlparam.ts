@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { urlparam } from '../../functions/browser/urlparam';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { TYPE_STRING, URL } from '../constants';
+import { TYPE_STRING, URL } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
