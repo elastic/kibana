@@ -196,7 +196,13 @@ export const ComponentStrings = {
       }),
     getFormHelpText: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formDescription', {
-        defaultMessage: 'Use shorthand notation, like 30s, 10m, or 1h',
+        defaultMessage:
+          'Use shorthand notation, like {secondsExample}, {minutesExample}, or {hoursExample}',
+        values: {
+          secondsExample: '30s',
+          minutesExample: '10m',
+          hoursExample: '1h',
+        },
       }),
     getButtonText: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
