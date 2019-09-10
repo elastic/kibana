@@ -8,7 +8,6 @@ import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
@@ -22,7 +21,7 @@ interface QueryStringType {
 
 type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ url }) => (
+export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
