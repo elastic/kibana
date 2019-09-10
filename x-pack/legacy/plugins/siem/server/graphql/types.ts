@@ -890,6 +890,8 @@ export interface EventsOverTimeHistogramData {
   x: number;
 
   y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -5273,6 +5275,8 @@ export namespace EventsOverTimeHistogramDataResolvers {
     x?: XResolver<number, TypeParent, Context>;
 
     y?: YResolver<number, TypeParent, Context>;
+
+    g?: GResolver<string, TypeParent, Context>;
   }
 
   export type XResolver<
@@ -5282,6 +5286,11 @@ export namespace EventsOverTimeHistogramDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type YResolver<
     R = number,
+    Parent = EventsOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GResolver<
+    R = string,
     Parent = EventsOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

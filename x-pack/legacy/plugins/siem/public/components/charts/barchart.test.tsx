@@ -12,7 +12,8 @@ import { ChartSeriesData, ChartHolder } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
-
+const customHeight = '100px';
+const customWidth = '120px';
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
   const mockBarChartData: ChartSeriesData[] = [
@@ -31,7 +32,7 @@ describe('BarChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} />
+        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
@@ -54,7 +55,12 @@ describe('BarChartBaseComponent', () => {
 
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} configs={configs} />
+        <BarChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockBarChartData}
+          configs={configs}
+        />
       );
     });
 
@@ -103,7 +109,7 @@ describe('BarChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={100} width={120} data={mockBarChartData} />
+        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
@@ -198,7 +204,11 @@ describe.each([
   describe('renders barchart', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartWithCustomPrompt height={100} width={120} data={mockBarChartData} />
+        <BarChartWithCustomPrompt
+          height={customHeight}
+          width={customWidth}
+          data={mockBarChartData}
+        />
       );
     });
 
@@ -274,7 +284,9 @@ describe.each([
 ])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
   let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
+    shallowWrapper = shallow(
+      <BarChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+    );
   });
 
   it('render Chart Holder', () => {

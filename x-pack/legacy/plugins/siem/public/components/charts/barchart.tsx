@@ -27,14 +27,16 @@ import {
   ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  getChartHeight,
+  getChartWidth,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
   data: ChartSeriesData[];
-  width: number | null | undefined;
-  height: number | null | undefined;
+  width: string | null | undefined;
+  height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
@@ -87,8 +89,8 @@ BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
 export const BarChartWithCustomPrompt = React.memo<{
   data: ChartSeriesData[] | null | undefined;
-  height: number | null | undefined;
-  width: number | null | undefined;
+  height: string | null | undefined;
+  width: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, height, width, configs }) => {
   return data &&
@@ -108,14 +110,23 @@ BarChartWithCustomPrompt.displayName = 'BarChartWithCustomPrompt';
 export const BarChart = React.memo<{
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ barChart, configs }) => (
-  <AutoSizer detectAnyWindowResize={false} content>
-    {({ measureRef, content: { height, width } }) => (
-      <WrappedByAutoSizer innerRef={measureRef}>
-        <BarChartWithCustomPrompt height={height} width={width} data={barChart} configs={configs} />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-));
+}>(({ barChart, configs }) => {
+  const customHeight = get('customHeight', configs);
+  const customWidth = get('customWidth', configs);
+  return (
+    <AutoSizer detectAnyWindowResize={false} content>
+      {({ measureRef, content: { height, width } }) => (
+        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+          <BarChartWithCustomPrompt
+            height={getChartHeight(customHeight, height)}
+            width={getChartWidth(customWidth, width)}
+            data={barChart}
+            configs={configs}
+          />
+        </WrappedByAutoSizer>
+      )}
+    </AutoSizer>
+  );
+});
 
 BarChart.displayName = 'BarChart';

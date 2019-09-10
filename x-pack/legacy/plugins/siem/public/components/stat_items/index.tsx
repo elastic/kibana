@@ -79,6 +79,7 @@ export interface StatItemsProps extends StatItems {
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
 const statItemBarchartRotation: Rotation = 90;
+const statItemChartCustomHeight = 74;
 
 export const areachartConfigs = (config?: {
   xTickFormatter: (value: number) => string;
@@ -95,6 +96,7 @@ export const areachartConfigs = (config?: {
   settings: {
     onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
@@ -109,6 +111,7 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
     onElementClick: getOr(() => {}, 'onElementClick', config),
     rotation: statItemBarchartRotation,
   },
+  customHeight: statItemChartCustomHeight,
 });
 
 export const addValueToFields = (

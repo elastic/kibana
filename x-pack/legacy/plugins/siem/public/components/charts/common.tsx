@@ -24,8 +24,8 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
 import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
-
-const chartHeight = 74;
+export const defaultChartHeight = '100%';
+export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
@@ -65,6 +65,7 @@ export interface ChartData {
 }
 
 export interface ChartSeriesConfigs {
+  customHeight?: number;
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -82,8 +83,11 @@ export interface ChartSeriesData {
   color?: string | undefined;
 }
 
-export const WrappedByAutoSizer = styled.div`
-  height: ${chartHeight}px;
+export const WrappedByAutoSizer = styled.div<{ height?: string }>`
+  ${style =>
+    `
+    height: ${style.height != null ? style.height : defaultChartHeight};
+  `}
   position: relative;
 
   &:hover {
@@ -144,3 +148,13 @@ export const getTheme = () => {
 
 const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
 export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+
+export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {
+  const height = customHeight || autoSizerHeight;
+  return height ? `${height}px` : defaultChartHeight;
+};
+
+export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): string => {
+  const height = customWidth || autoSizerWidth;
+  return height ? `${height}px` : defaultChartWidth;
+};

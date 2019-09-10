@@ -7,6 +7,7 @@
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { getOr, omit } from 'lodash/fp';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { HostsTable, UncommonProcessTable } from '../../components/page/hosts';
@@ -375,6 +376,7 @@ export const EventsTabBody = ({
           />
         )}
       </EventsOverTimeQuery>
+      <EuiSpacer size="l" />
       <StatefulEventsViewer
         end={endDate}
         id={HOSTS_PAGE_TIMELINE_ID}

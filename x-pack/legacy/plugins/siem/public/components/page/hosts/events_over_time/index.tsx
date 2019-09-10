@@ -5,17 +5,17 @@
  */
 
 import React, { useState } from 'react';
-import { ScaleType, niceTimeFormatter } from '@elastic/charts';
+import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 
 import { getOr, head, last } from 'lodash/fp';
+import { EuiPanel, EuiLoadingContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { BarChart } from '../../../charts/barchart';
 import { EventsOverTimeData } from '../../../../graphql/types';
-import { LoadingPanel } from '../../../loading';
 import * as i18n from './translation';
 import { HeaderPanel } from '../../../header_panel';
 import { ChartSeriesData } from '../../../charts/common';
 
-const loadingPanelHeight = '274px';
 export const getBarchartConfigs = (from: number, to: number) => ({
   series: {
     xScaleType: ScaleType.Time,
@@ -25,7 +25,25 @@ export const getBarchartConfigs = (from: number, to: number) => ({
     xTickFormatter: niceTimeFormatter([from, to]),
     yTickFormatter: (value: string | number): string => value.toLocaleString(),
   },
+  settings: {
+    legendPosition: Position.Bottom,
+    showLegend: true,
+  },
 });
+
+const Panel = styled(EuiPanel)<{ loading: { loading: boolean } }>`
+  height: 388px;
+  position: relative;
+  ${({ loading }) =>
+    loading &&
+    `
+    overflow: hidden;
+  `}
+`;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
+`;
 
 export const EventsOverTimeHistogram = ({
   id,
@@ -46,9 +64,7 @@ export const EventsOverTimeHistogram = ({
   const bucketEndDate = getOr(endDate, 'x', last(eventsOverTime));
   const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!);
   const [showInspect, setShowInspect] = useState(false);
-  const onChartHover = () => {
-    setShowInspect(!showInspect);
-  };
+
   const barChartData: ChartSeriesData[] = [
     {
       key: 'eventsOverTime',
@@ -56,24 +72,31 @@ export const EventsOverTimeHistogram = ({
     },
   ];
   return (
-    <>
-      <HeaderPanel
-        id={id}
-        title={i18n.EVENT_COUNT_FREQUENCY}
-        showInspect={showInspect}
-        subtitle={<>{`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(totalCount)}`}</>}
-      />
-      {loading ? (
-        <LoadingPanel
-          text={i18n.LOADING_EVENTS_OVER_TIME}
-          height={loadingPanelHeight}
-          width="100%"
-        />
-      ) : (
-        <div onMouseOver={onChartHover} onFocus={onChartHover}>
-          <BarChart barChart={barChartData} configs={barchartConfigs} />
-        </div>
-      )}
-    </>
+    <Panel
+      data-test-subj="eventsOverTimePanel"
+      loading={{ loading }}
+      onMouseEnter={() => setShowInspect(true)}
+      onMouseLeave={() => setShowInspect(false)}
+    >
+      <FlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <HeaderPanel
+            id={id}
+            title={i18n.EVENT_COUNT_FREQUENCY}
+            showInspect={showInspect}
+            subtitle={
+              <>{`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(totalCount)}`}</>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          {loading ? (
+            <EuiLoadingContent data-test-subj="initialLoadingPanelEventsOverTime" lines={10} />
+          ) : (
+            <BarChart barChart={barChartData} configs={barchartConfigs} />
+          )}
+        </EuiFlexItem>
+      </FlexGroup>
+    </Panel>
   );
 };

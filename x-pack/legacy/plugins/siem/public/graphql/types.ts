@@ -861,6 +861,8 @@ export interface EventsOverTimeHistogramData {
   x: number;
 
   y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -2478,6 +2480,8 @@ export namespace GetEventsOverTimeQuery {
     x: number;
 
     y: number;
+
+    g: string;
   };
 
   export type Inspect = {

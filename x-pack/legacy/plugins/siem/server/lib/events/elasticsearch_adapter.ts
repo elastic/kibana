@@ -55,7 +55,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EventsOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getTimelineData(
     request: FrameworkRequest,
@@ -165,9 +165,10 @@ export const formatEventsOverTimeData = (
 ): EventsOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<EventsOverTimeHistogramData>(({ key, doc_count }) => ({
-      x: key,
-      y: doc_count,
-    }))
+        x: key,
+        y: doc_count,
+        g: 'eventsOverTime',
+      }))
     : [];
 };
 
@@ -247,22 +248,22 @@ const mergeTimelineFieldsWithHit = <T>(
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
             ? [
-              ...get('node.data', flattenedFields),
-              {
-                field: fieldName,
-                value: specialFields.includes(esField)
-                  ? get(esField, hit)
-                  : get(esField, hit._source),
-              },
-            ]
+                ...get('node.data', flattenedFields),
+                {
+                  field: fieldName,
+                  value: specialFields.includes(esField)
+                    ? get(esField, hit)
+                    : get(esField, hit._source),
+                },
+              ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
-              ...get('node.ecs', flattenedFields),
-              ...fieldName
-                .split('.')
-                .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
-            }
+                ...get('node.ecs', flattenedFields),
+                ...fieldName
+                  .split('.')
+                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+              }
             : get('node.ecs', flattenedFields),
         },
       };

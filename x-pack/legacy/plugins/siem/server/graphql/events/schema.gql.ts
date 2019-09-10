@@ -71,6 +71,7 @@ export const eventsSchema = gql`
   type EventsOverTimeHistogramData {
     x: Float!
     y: Float!
+    g: String!
   }
   type EventsOverTimeData {
     inspect: Inspect

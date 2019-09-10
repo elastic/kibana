@@ -27,6 +27,8 @@ import {
   ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  getChartHeight,
+  getChartWidth,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -53,8 +55,8 @@ const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
   data: ChartSeriesData[];
-  width: number | null | undefined;
-  height: number | null | undefined;
+  width: string | null | undefined;
+  height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
@@ -107,8 +109,8 @@ AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
 export const AreaChartWithCustomPrompt = React.memo<{
   data: ChartSeriesData[] | null | undefined;
-  height: number | null | undefined;
-  width: number | null | undefined;
+  height: string | null | undefined;
+  width: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, height, width, configs }) => {
   return data != null &&
@@ -130,19 +132,23 @@ AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
 export const AreaChart = React.memo<{
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ areaChart, configs }) => (
-  <AutoSizer detectAnyWindowResize={false} content>
-    {({ measureRef, content: { height, width } }) => (
-      <WrappedByAutoSizer innerRef={measureRef}>
-        <AreaChartWithCustomPrompt
-          data={areaChart}
-          height={height}
-          width={width}
-          configs={configs}
-        />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-));
+}>(({ areaChart, configs }) => {
+  const customHeight = get('customHeight', configs);
+
+  return (
+    <AutoSizer detectAnyWindowResize={false} content>
+      {({ measureRef, content: { height, width } }) => (
+        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+          <AreaChartWithCustomPrompt
+            data={areaChart}
+            height={getChartHeight(customHeight, height)}
+            width={getChartWidth(undefined, width)}
+            configs={configs}
+          />
+        </WrappedByAutoSizer>
+      )}
+    </AutoSizer>
+  );
+});
 
 AreaChart.displayName = 'AreaChart';

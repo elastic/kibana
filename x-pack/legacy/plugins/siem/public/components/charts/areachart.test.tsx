@@ -12,7 +12,8 @@ import { ChartHolder, ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('@elastic/charts');
-
+const customHeight = '100px';
+const customWidth = '120px';
 describe('AreaChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
   const mockAreaChartData: ChartSeriesData[] = [
@@ -39,7 +40,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -65,8 +70,8 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
-          height={100}
-          width={120}
+          height={customHeight}
+          width={customWidth}
           data={mockAreaChartData}
           configs={configs}
         />
@@ -118,7 +123,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -222,7 +231,9 @@ describe('AreaChartWithCustomPrompt', () => {
     ],
   ])('renders areachart', (data: ChartSeriesData[] | [] | null | undefined) => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(
+        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+      );
     });
 
     it('render AreaChartBaseComponent', () => {
@@ -312,7 +323,9 @@ describe('AreaChartWithCustomPrompt', () => {
     ],
   ])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(
+        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
+      );
     });
 
     it('render Chart Holder', () => {

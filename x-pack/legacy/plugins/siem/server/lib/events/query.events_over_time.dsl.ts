@@ -5,6 +5,7 @@
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
+import { calculateTimeseriesInterval } from './calculate_timeseries_interval';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
@@ -33,9 +34,9 @@ export const buildEventsOverTimeQuery = ({
     body: {
       aggregations: {
         events: {
-          auto_date_histogram: {
+          date_histogram: {
             field: '@timestamp',
-            buckets: '36',
+            fixed_interval: calculateTimeseriesInterval(from, to, 1) + 's',
           },
         },
       },
