@@ -14,14 +14,8 @@ import {
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv } from '../types';
+import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
 import { createGenerateCsv } from './lib';
-
-interface FakeRequest {
-  headers: any;
-  getBasePath: (opts: any) => string;
-  server: KbnServer;
-}
 
 type ExecuteJobFn = (
   jobId: string | null,
@@ -31,8 +25,6 @@ type ExecuteJobFn = (
 
 function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
-  const config = server.config();
-  const serverBasePath = config.get('server.basePath');
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
     CSV_FROM_SAVEDOBJECT_JOB_TYPE,
@@ -49,7 +41,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     // Use the jobID as a logging tag or "immediate"
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
-    const { basePath, jobParams } = job;
+    const { jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
@@ -80,7 +72,6 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
 
       requestObject = {
         headers: decryptedHeaders,
-        getBasePath: () => basePath || serverBasePath,
         server,
       };
     }

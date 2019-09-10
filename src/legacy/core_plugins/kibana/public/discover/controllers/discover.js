@@ -54,7 +54,6 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -196,8 +195,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -214,6 +211,13 @@ function discoverController(
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -794,15 +798,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -1047,13 +1043,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 

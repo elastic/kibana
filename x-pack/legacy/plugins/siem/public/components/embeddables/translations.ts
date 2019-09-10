@@ -7,9 +7,23 @@
 import { i18n } from '@kbn/i18n';
 
 export const MAP_TITLE = i18n.translate(
-  'xpack.siem.components.embeddables.maps.embeddablePanelTitle',
+  'xpack.siem.components.embeddables.embeddedMap.embeddablePanelTitle',
   {
     defaultMessage: 'Source -> Destination Point-to-Point Map',
+  }
+);
+
+export const ERROR_CONFIGURING_EMBEDDABLES_API = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.errorConfiguringEmbeddableApiTitle',
+  {
+    defaultMessage: 'Error configuring Embeddables API',
+  }
+);
+
+export const ERROR_CREATING_EMBEDDABLE = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.errorCreatingMapEmbeddableTitle',
+  {
+    defaultMessage: 'Error creating Map Embeddable',
   }
 );
 
