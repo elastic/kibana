@@ -24,22 +24,21 @@ import {
   SORT_DIRECTION,
 } from '../../../../../../common/types/eui/in_memory_table';
 
-import { DataFrameTransformId, moveToDataFrameWizard } from '../../../../common';
+import {
+  DataFrameTransformId,
+  DataFrameTransformListRow,
+  moveToDataFrameWizard,
+  DATA_FRAME_MODE,
+  DATA_FRAME_TRANSFORM_LIST_COLUMN,
+  DATA_FRAME_TRANSFORM_STATE,
+} from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import {
-  DataFrameTransformListColumn,
-  DataFrameTransformListRow,
-  ItemIdToExpandedRowMap,
-  DATA_FRAME_TRANSFORM_STATE,
-  DATA_FRAME_MODE,
-  Query,
-  Clause,
-} from './common';
+import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, TransformTable } from './transform_table';
@@ -95,7 +94,7 @@ export const DataFrameTransformList: SFC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const [sortField, setSortField] = useState<string>(DataFrameTransformListColumn.id);
+  const [sortField, setSortField] = useState<string>(DATA_FRAME_TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
@@ -341,7 +340,7 @@ export const DataFrameTransformList: SFC<Props> = ({
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameTransformListColumn.id, direction: SORT_DIRECTION.ASC },
+    sort = { field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
   }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
@@ -368,7 +367,7 @@ export const DataFrameTransformList: SFC<Props> = ({
         isExpandable={true}
         isSelectable={false}
         items={filterActive ? filteredTransforms : transforms}
-        itemId={DataFrameTransformListColumn.id}
+        itemId={DATA_FRAME_TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onTableChange={onTableChange}
         pagination={pagination}
