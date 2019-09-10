@@ -8,10 +8,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@ela
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { Provider } from '../timeline/data_providers/provider';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { DefaultDraggable } from '../draggables';
 
 const Header = styled.header`
   ${({ theme }) => `
@@ -48,32 +45,11 @@ export const HeaderPage = pure<HeaderPageProps>(
               {!draggableArguments ? (
                 title
               ) : (
-                <DraggableWrapper
+                <DefaultDraggable
                   data-test-subj="page_headline_draggable"
-                  dataProvider={{
-                    and: [],
-                    enabled: true,
-                    id: escapeDataProviderId(
-                      `header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`
-                    ),
-                    name: `${title}`,
-                    excluded: false,
-                    kqlQuery: '',
-                    queryMatch: {
-                      field: draggableArguments.field,
-                      value: `${draggableArguments.value}`,
-                      operator: IS_OPERATOR,
-                    },
-                  }}
-                  render={(dataProvider, _, snapshot) =>
-                    snapshot.isDragging ? (
-                      <DragEffects>
-                        <Provider dataProvider={dataProvider} />
-                      </DragEffects>
-                    ) : (
-                      title
-                    )
-                  }
+                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
+                  field={draggableArguments.field}
+                  value={`${draggableArguments.value}`}
                 />
               )}
               {badgeLabel && (
