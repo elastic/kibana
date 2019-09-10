@@ -28,7 +28,7 @@ export const ANOMALY_DETECTION_BREADCRUMB = Object.freeze({
 });
 
 export const DATA_VISUALIZER_BREADCRUMB = Object.freeze({
-  text: i18n.translate('xpack.ml.anomalyDetectionBreadcrumbLabel', {
+  text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer'
   }),
   href: '#/datavisualizer?'
