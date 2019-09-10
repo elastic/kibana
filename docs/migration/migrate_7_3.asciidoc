@@ -42,14 +42,14 @@ remove the unsupported attribute once the configuration gets applied.
 
 [float]
 [[breaking_73_dashboard_import_export]]
-=== Dashboards Import/Export API
+=== Dashboard import and export APIs
 
 [float]
-==== Dashboards Import/Export API error status codes
-*Details:* The Dashboards Import/Export API will return more accurate HTTP
+==== Dashboard import and export APIs error status codes
+*Details:* The dashboard import and export APIs will return more accurate HTTP
 status codes instead of returning a HTTP 400 status code for all failure
 scenarios. Specifically, authorization failures will now correctly return a
 HTTP 403 when the authenticated user lacks sufficient privileges.
 
 *Impact:* Review the error handling logic of any integrations with the
-Dashboards Import/Export API.
+dashboard import and export APIs.
