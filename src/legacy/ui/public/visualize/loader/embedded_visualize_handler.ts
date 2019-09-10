@@ -22,8 +22,13 @@ import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
+import { AggConfigs } from 'ui/vis/agg_configs';
+import { SearchSource } from 'ui/courier';
+import { QueryFilter } from 'ui/filter_manager/query_filter';
+import { TimeRange } from 'src/plugins/data/public';
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
@@ -32,13 +37,12 @@ import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { Vis } from '../../vis';
 // @ts-ignore untyped dependency
 import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { VisualizeDataLoader } from './visualize_data_loader';
-import { onlyDisabledFiltersChanged } from '../../../../core_plugins/data/public';
+import { onlyDisabledFiltersChanged, Query } from '../../../../core_plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -55,7 +59,22 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
   autoFetch?: boolean;
-  pipelineDataLoader?: boolean;
+}
+
+export interface RequestHandlerParams {
+  searchSource: SearchSource;
+  aggs: AggConfigs;
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  forceFetch: boolean;
+  queryFilter: QueryFilter;
+  uiState?: PersistedState;
+  partialRows?: boolean;
+  inspectorAdapters: Adapters;
+  metricsAtAllLevels?: boolean;
+  visParams?: any;
+  abortSignal?: AbortSignal;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -81,7 +100,6 @@ export class EmbeddedVisualizeHandler {
   private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
-  private pipelineDataLoader: boolean = false;
 
   private listeners = new EventEmitter();
   private firstRenderComplete: Promise<void>;
@@ -100,7 +118,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader | PipelineDataLoader;
+  private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
   private actions: any = {};
   private events$: Rx.Observable<any>;
@@ -123,7 +141,6 @@ export class EmbeddedVisualizeHandler {
       filters,
       query,
       autoFetch = true,
-      pipelineDataLoader = false,
       Private,
     } = params;
 
@@ -136,9 +153,8 @@ export class EmbeddedVisualizeHandler {
       uiState,
       aggs: vis.getAggConfig(),
       forceFetch: false,
+      inspectorAdapters: this.inspectorAdapters,
     };
-
-    this.pipelineDataLoader = pipelineDataLoader;
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
@@ -182,9 +198,7 @@ export class EmbeddedVisualizeHandler {
       });
     };
 
-    this.dataLoader = pipelineDataLoader
-      ? new PipelineDataLoader(vis)
-      : new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new PipelineDataLoader(vis);
     const visFilters: any = Private(VisFiltersProvider);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
@@ -512,25 +526,12 @@ export class EmbeddedVisualizeHandler {
   };
 
   private rendererProvider = (response: VisResponseData | null) => {
-    let renderer: any = null;
-    let args: any[] = [];
-
-    if (this.pipelineDataLoader) {
-      renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
-      args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
-    } else {
-      renderer = visualizationLoader;
-      args = [
-        this.element,
-        this.vis,
-        get(response, 'value.visData', null),
-        get(response, 'value.visConfig', this.vis.params),
-        this.uiState,
-        {
-          listenOnChange: false,
-        },
-      ];
-    }
+    const renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
+    const args = [
+      this.element,
+      get(response, 'value', { visType: this.vis.type.name }),
+      this.handlers,
+    ];
 
     if (!renderer) {
       return null;

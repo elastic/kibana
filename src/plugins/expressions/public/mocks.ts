@@ -26,7 +26,7 @@ const createSetupContract = (): Setup => {
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+    __LEGACY: {
       functions: {
         register: () => {},
       } as any,
@@ -42,7 +42,22 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const startContract: Start = {
+    registerFunction: jest.fn(),
+    registerRenderer: jest.fn(),
+    registerType: jest.fn(),
+    __LEGACY: {
+      functions: {
+        register: () => {},
+      } as any,
+      renderers: {
+        register: () => {},
+      } as any,
+      types: {
+        register: () => {},
+      } as any,
+    },
+  };
   return startContract;
 };
 
