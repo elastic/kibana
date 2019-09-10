@@ -125,6 +125,12 @@ if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then
 fi
 
 ###
+### Elastic APM Node.js Agent configuration
+###
+export ELASTIC_APM_ACTIVE=true
+export ELASTIC_APM_ENVIRONMENT=ci
+
+###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
 ### $@ - all arguments
 ###
