@@ -26,7 +26,6 @@ interface DraggableArguments {
 }
 
 export interface HeaderPageProps {
-  'data-test-subj'?: string;
   badgeLabel?: string;
   badgeTooltip?: string;
   children?: React.ReactNode;
