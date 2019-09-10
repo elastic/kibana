@@ -21,6 +21,14 @@ const clickToDisableInternalCollection = i18n.translate('xpack.monitoring.setupM
   defaultMessage: 'Disable internal collection'
 });
 
+const monitoredWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
+  defaultMessage: 'Monitored with Metricbeat'
+});
+
+const unknown = i18n.translate('xpack.monitoring.setupMode.unknown', {
+  defaultMessage: 'N/A'
+});
+
 export function SetupModeBadge({ setupMode, productName, status, instance, clusterUuid }) {
   let customAction = null;
   let customText = null;
@@ -62,6 +70,9 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
 
   let statusText = null;
   if (status.isInternalCollector) {
+    if (badgeProps.onClick) {
+      badgeProps.onClickAriaLabel = customText || clickToMonitorWithMetricbeat;
+    }
     statusText = (
       <EuiBadge color="danger" iconType="flag" {...badgeProps}>
         {customText || clickToMonitorWithMetricbeat}
@@ -69,6 +80,9 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     );
   }
   else if (status.isPartiallyMigrated) {
+    if (badgeProps.onClick) {
+      badgeProps.onClickAriaLabel = customText || clickToDisableInternalCollection;
+    }
     statusText = (
       <EuiBadge color="warning" iconType="flag" {...badgeProps}>
         {customText || clickToDisableInternalCollection}
@@ -76,15 +90,19 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     );
   }
   else if (status.isFullyMigrated) {
+    if (badgeProps.onClick) {
+      badgeProps.onClickAriaLabel = customText || monitoredWithMetricbeat;
+    }
     statusText = (
       <EuiBadge color="primary" iconType="flag" {...badgeProps}>
-        {customText || i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
-          defaultMessage: 'Monitored with Metricbeat'
-        })}
+        {customText || monitoredWithMetricbeat}
       </EuiBadge>
     );
   }
   else if (status.isNetNewUser) {
+    if (badgeProps.onClick) {
+      badgeProps.onClickAriaLabel = customText || clickToMonitorWithMetricbeat;
+    }
     statusText = (
       <EuiBadge color="danger" iconType="flag" {...badgeProps}>
         {customText || clickToMonitorWithMetricbeat}
@@ -92,11 +110,12 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     );
   }
   else {
+    if (badgeProps.onClick) {
+      badgeProps.onClickAriaLabel = customText || unknown;
+    }
     statusText = (
       <EuiBadge color="danger" iconType="flag" {...badgeProps}>
-        {customText || i18n.translate('xpack.monitoring.setupMode.unknown', {
-          defaultMessage: 'N/A'
-        })}
+        {customText || unknown}
       </EuiBadge>
     );
   }

@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiFlexItem,
   EuiToolTip,
-  EuiLink
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from './formatting';
@@ -34,6 +33,9 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
 
   if (totalUniqueInstanceCount === 0) {
     if (mightExist) {
+      const detectedText = i18n.translate('xpack.monitoring.setupMode.tooltip.detected', {
+        defaultMessage: 'Detected'
+      });
       tooltip = (
         <EuiToolTip
           position="top"
@@ -41,17 +43,17 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
             defaultMessage: `We detected usage of this product. Click to start monitoring.`,
           })}
         >
-          <EuiLink onClick={badgeClickAction}>
-            <EuiBadge color="warning" iconType="flag">
-              {i18n.translate('xpack.monitoring.setupMode.tooltip.detected', {
-                defaultMessage: 'Detected'
-              })}
-            </EuiBadge>
-          </EuiLink>
+          <EuiBadge color="warning" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={detectedText}>
+            {detectedText}
+          </EuiBadge>
         </EuiToolTip>
       );
     }
     else {
+      const noMonitoringText = i18n.translate('xpack.monitoring.setupMode.tooltip.noMonitoring', {
+        defaultMessage: 'No monitoring'
+      });
+
       tooltip = (
         <EuiToolTip
           position="top"
@@ -59,19 +61,18 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
             defaultMessage: `We did not detect any usage.`,
           })}
         >
-          <EuiLink onClick={badgeClickAction}>
-            <EuiBadge color="hollow" iconType="flag">
-              {i18n.translate('xpack.monitoring.setupMode.tooltip.noMonitoring', {
-                defaultMessage: 'No monitoring'
-              })}
-            </EuiBadge>
-          </EuiLink>
+          <EuiBadge color="hollow" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={noMonitoringText}>
+            {noMonitoringText}
+          </EuiBadge>
         </EuiToolTip>
       );
     }
   }
 
   else if (!allMonitoredByMetricbeat) {
+    const internalCollection = i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
+      defaultMessage: 'Internal collection'
+    });
     tooltip = (
       <EuiToolTip
         position="top"
@@ -83,17 +84,16 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
           }
         })}
       >
-        <EuiLink onClick={badgeClickAction}>
-          <EuiBadge color="danger" iconType="flag">
-            {i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
-              defaultMessage: 'Internal collection'
-            })}
-          </EuiBadge>
-        </EuiLink>
+        <EuiBadge color="danger" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={internalCollection}>
+          {internalCollection}
+        </EuiBadge>
       </EuiToolTip>
     );
   }
   else if (internalCollectionOn) {
+    const internalAndMB = i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
+      defaultMessage: 'Internal collection and Metricbeat collection'
+    });
     tooltip = (
       <EuiToolTip
         position="top"
@@ -105,17 +105,16 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
           }
         })}
       >
-        <EuiLink onClick={badgeClickAction}>
-          <EuiBadge color="warning" iconType="flag">
-            {i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-              defaultMessage: 'Internal collection and Metricbeat collection'
-            })}
-          </EuiBadge>
-        </EuiLink>
+        <EuiBadge color="warning" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={internalAndMB}>
+          {internalAndMB}
+        </EuiBadge>
       </EuiToolTip>
     );
   }
   else {
+    const metricbeatCollection = i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
+      defaultMessage: 'Metricbeat collection'
+    });
     tooltip = (
       <EuiToolTip
         position="top"
@@ -126,13 +125,9 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
           }
         })}
       >
-        <EuiLink onClick={badgeClickAction}>
-          <EuiBadge color="secondary" iconType="flag">
-            {i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
-              defaultMessage: 'Metricbeat collection'
-            })}
-          </EuiBadge>
-        </EuiLink>
+        <EuiBadge color="secondary" iconType="flag" onClick={badgeClickAction} onClickAriaLabel={metricbeatCollection}>
+          {metricbeatCollection}
+        </EuiBadge>
       </EuiToolTip>
     );
   }
