@@ -94,6 +94,7 @@ export class HistogramInner extends PureComponent {
       formatX,
       formatYShort,
       formatYLong,
+      tickValues,
       tooltipFooter,
       tooltipHeader,
       verticalLineHover,
@@ -149,6 +150,7 @@ export class HistogramInner extends PureComponent {
               tickSizeInner={0}
               tickTotal={X_TICK_TOTAL}
               tickFormat={formatX}
+              tickValues={tickValues}
             />
             <YAxis
               tickSize={0}
@@ -237,6 +239,7 @@ HistogramInner.propTypes = {
   formatYLong: PropTypes.func,
   formatYShort: PropTypes.func,
   onClick: PropTypes.func,
+  tickValues: PropTypes.array,
   tooltipFooter: PropTypes.func,
   tooltipHeader: PropTypes.func,
   verticalLineHover: PropTypes.func,

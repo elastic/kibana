@@ -79,6 +79,9 @@ export function ErrorDistribution({ distribution, title }: Props) {
         xType="time"
         buckets={buckets}
         bucketSize={distribution.bucketSize}
+        tickValues={
+          buckets && [...buckets.map(d => d.x0), buckets[buckets.length - 1].x]
+        }
         formatYShort={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
