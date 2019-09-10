@@ -265,16 +265,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       if (this.props.onSaved) {
         this.props.onSaved(response);
       }
-
-      if (this.props.onQuerySubmit) {
-        this.props.onQuerySubmit({
-          query: this.state.query,
-          dateRange: {
-            from: this.state.dateRangeFrom,
-            to: this.state.dateRangeTo,
-          },
-        });
-      }
     } catch (error) {
       toastNotifications.addDanger(`An error occured while saving your query: ${error.message}`);
       throw error;

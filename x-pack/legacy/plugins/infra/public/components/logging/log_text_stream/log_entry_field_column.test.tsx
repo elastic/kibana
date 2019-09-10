@@ -40,6 +40,32 @@ describe('LogEntryFieldColumn', () => {
       ])
     ).toBe(true);
   });
+
+  it('should output a text representation of a passed complex value', () => {
+    const column: LogEntryColumn = {
+      columnId: 'TEST_COLUMN',
+      field: 'TEST_FIELD',
+      value: JSON.stringify({
+        lat: 1,
+        lon: 2,
+      }),
+    };
+
+    const component = mount(
+      <LogEntryFieldColumn
+        columnValue={column}
+        highlights={[]}
+        isActiveHighlight={false}
+        isHighlighted={false}
+        isHovered={false}
+        isWrapped={false}
+      />,
+      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
+    );
+
+    expect(component.text()).toEqual('{"lat":1,"lon":2}');
+  });
+
   it('should output just text when passed a non-Array', () => {
     const column: LogEntryColumn = {
       columnId: 'TEST_COLUMN',

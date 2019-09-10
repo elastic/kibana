@@ -24,7 +24,6 @@ export {
   PreviewRequestBody,
   DataFrameTransformId,
   DataFrameTransformPivotConfig,
-  delayFormatRegex,
   IndexName,
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
