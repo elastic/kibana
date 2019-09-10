@@ -29,9 +29,11 @@ import {
   ScaleTypes,
   AxisModes,
   Rotates,
+  ThresholdLineStyles,
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
+import { palettes } from '@elastic/eui/lib/services';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -113,6 +115,13 @@ export default function PointSeriesVisType(Private) {
         times: [],
         addTimeMarker: false,
         labels: {},
+        thresholdLine: {
+          show: false,
+          value: 10,
+          width: 1,
+          style: ThresholdLineStyles.FULL,
+          color: palettes.euiPaletteColorBlind.colors[9]
+        },
       },
     },
     editorConfig: {
