@@ -120,7 +120,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxSelector data-test-subj selector
      * @param filterValue text
      */
-    public async filterOptionsList(comboBoxSelector: string, filterValue: string) {
+    public async filterOptionsList(comboBoxSelector: string, filterValue: string): Promise<void> {
       log.debug(
         `comboBox.filterOptionsList, comboBoxSelector: ${comboBoxSelector}, filter: ${filterValue}`
       );
