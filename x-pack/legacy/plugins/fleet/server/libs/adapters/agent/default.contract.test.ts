@@ -73,8 +73,8 @@ describe('Agent Adapter', () => {
         shared_id: 'agent1',
         active: false,
         access_token: 'TOKEN_1',
-        config_id: 'config_id_1',
-        config_shared_id: 'shared_config_id-1',
+        policy_id: 'policy_id_1',
+        policy_shared_id: 'shared_policy_id-1',
         type: 'EPHEMERAL',
         version: '1',
         local_metadata: {
@@ -90,8 +90,8 @@ describe('Agent Adapter', () => {
         shared_id: 'agent1',
         active: false,
         access_token: 'TOKEN_1',
-        config_id: 'config_id_1',
-        config_shared_id: 'shared_config_id-1',
+        policy_id: 'policy_id_1',
+        policy_shared_id: 'shared_policy_id-1',
         type: 'EPHEMERAL',
         version: '1',
         local_metadata: {
@@ -106,8 +106,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -131,8 +131,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -150,8 +150,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -178,8 +178,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -214,8 +214,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -236,15 +236,15 @@ describe('Agent Adapter', () => {
       expect(freshAgent).toBeNull();
     });
   });
-  describe('findEphemeralByConfigSharedId', () => {
+  describe('findEphemeralByPolicySharedId', () => {
     beforeAll(async () => {
       await loadFixtures([
         {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id_1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -259,8 +259,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent2',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -274,8 +274,8 @@ describe('Agent Adapter', () => {
       ]);
     });
 
-    it('should allow to find agent by config shared id', async () => {
-      const agent = await adapter.findEphemeralByConfigSharedId('shared_config_id_1');
+    it('should allow to find agent by policy shared id', async () => {
+      const agent = await adapter.findEphemeralByPolicySharedId('shared_policy_id_1');
       expect(agent).toBeDefined();
       expect((agent as Agent).shared_id).toBe('agent1');
     });
@@ -290,8 +290,8 @@ describe('Agent Adapter', () => {
             shared_id: `agent${idx}`,
             active: false,
             access_token: 'TOKEN_1',
-            config_id: 'config_id_1',
-            config_shared_id: 'shared_config_id_1',
+            policy_id: 'policy_id_1',
+            policy_shared_id: 'shared_policy_id_1',
             type: 'EPHEMERAL',
             version: '1',
             local_metadata: {
@@ -333,8 +333,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id_1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -349,8 +349,8 @@ describe('Agent Adapter', () => {
           shared_id: 'agent2',
           active: false,
           access_token: 'TOKEN_1',
-          config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          policy_id: 'policy_id_1',
+          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {

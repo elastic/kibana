@@ -34,8 +34,8 @@ export class TokenAdapter implements TokenAdapterType {
       created_at: moment().toISOString(),
       type,
       tokenHash,
-      config_id: config.id,
-      config_shared_id: config.sharedId,
+      policy_id: config.id,
+      policy_shared_id: config.sharedId,
       expire_at,
       active,
     });

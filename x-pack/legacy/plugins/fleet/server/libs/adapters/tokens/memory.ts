@@ -34,8 +34,8 @@ export class MemoryTokenAdapter implements TokenAdapterType {
       type,
       tokenHash,
       expire_at,
-      config_id: config.id,
-      config_shared_id: config.sharedId,
+      policy_id: config.id,
+      policy_shared_id: config.sharedId,
     };
 
     return this.tokens[id];

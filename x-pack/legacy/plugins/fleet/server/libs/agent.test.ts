@@ -46,8 +46,8 @@ describe('Agent lib', () => {
       expect(agent).toBeDefined();
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
-        config_id: 'configId',
-        config_shared_id: 'configSharedId',
+        policy_id: 'policyId',
+        policy_shared_id: 'configSharedId',
       });
     });
 
@@ -111,8 +111,8 @@ describe('Agent lib', () => {
       expect(agent).toBeDefined();
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
-        config_id: 'configId',
-        config_shared_id: 'configSharedId',
+        policy_id: 'policyId',
+        policy_shared_id: 'configSharedId',
       });
     });
 

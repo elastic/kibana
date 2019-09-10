@@ -35,8 +35,8 @@ export interface Token {
   created_at: string;
   expire_at?: string;
   active: boolean;
-  config_id: string;
-  config_shared_id: string;
+  policy_id: string;
+  policy_shared_id: string;
   [k: string]: any; // allow to use it as saved object attributes type
 }
 
