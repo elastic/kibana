@@ -17,19 +17,19 @@
  * under the License.
  */
 
-export {
-  TypesService,
-  visFactory,
-  DefaultEditorSize,
-  // types
-  TypesSetup,
-  Vis,
-  VisParams,
-  VisProvider,
-  VisState,
-  // VisualizationController,
-  // VisType,
-  VisTypeAlias,
-  VisTypesRegistry,
-  Status,
-} from './types_service';
+export function createInitialQueryParametersState(
+  defaultStepSize: number = 5,
+  tieBreakerField: string = '_doc'
+) {
+  return {
+    anchorId: null,
+    columns: [],
+    defaultStepSize,
+    filters: [],
+    indexPatternId: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+    tieBreakerField,
+  };
+}
