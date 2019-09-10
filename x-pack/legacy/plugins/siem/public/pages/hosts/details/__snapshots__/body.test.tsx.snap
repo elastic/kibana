@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`body render snapshot 1`] = `
+<Component>
+  <Connect(HostDetailsBodyComponent)
+    detailName="host-1"
+    from={0}
+    isInitializing={false}
+    setQuery={[Function]}
+    to={0}
+  >
+    <Component />
+  </Connect(HostDetailsBodyComponent)>
+</Component>
+`;

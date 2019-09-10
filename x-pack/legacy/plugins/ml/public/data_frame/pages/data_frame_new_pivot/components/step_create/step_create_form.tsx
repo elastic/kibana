@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -35,7 +34,11 @@ import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_cont
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
+import {
+  getTransformProgress,
+  moveToDataFrameTransformList,
+  moveToDiscover,
+} from '../../../../common';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -84,7 +87,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.createDataFrameTransform(transformId, transformConfig);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} created successfully.',
+            defaultMessage: 'Request to create data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
@@ -114,7 +117,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.startDataFrameTransforms([{ id: transformId }]);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} started successfully.',
+            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
@@ -198,12 +201,12 @@ export const StepCreateForm: SFC<Props> = React.memo(
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(transformId);
             if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
-              const percent = Math.round(
-                idx(
-                  stats,
-                  _ => _.transforms[0].checkpointing.next.checkpoint_progress.percent_complete
-                ) || 0
-              );
+              const percent =
+                getTransformProgress({
+                  id: transformConfig.id,
+                  config: transformConfig,
+                  stats: stats.transforms[0],
+                }) || 0;
               setProgressPercentComplete(percent);
               if (percent >= 100) {
                 clearInterval(interval);
