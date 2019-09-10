@@ -24,13 +24,13 @@ import { Filter } from '@kbn/es-query';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npSetup } from 'ui/new_platform';
-import { IndexPatterns } from 'src/legacy/core_plugins/data/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
 import template from './apply_filter_directive.html';
 
 // @ts-ignore
 import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
+import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
 export const initLegacyModule = once((): void => {
@@ -49,12 +49,14 @@ export const initLegacyModule = once((): void => {
           }
 
           child.setAttribute('ui-settings', 'uiSettings');
+          child.setAttribute('http', 'http');
 
           // Append helper directive
           elem.append(child);
 
           const linkFn = ($scope: any) => {
             $scope.uiSettings = npSetup.core.uiSettings;
+            $scope.http = npSetup.core.http;
           };
 
           return linkFn;
@@ -64,6 +66,7 @@ export const initLegacyModule = once((): void => {
     .directive('filterBarHelper', (reactDirective: any) => {
       return reactDirective(wrapInI18nContext(FilterBar), [
         ['uiSettings', { watchDepth: 'reference' }],
+        ['http', { watchDepth: 'reference' }],
         ['onFiltersUpdated', { watchDepth: 'reference' }],
         ['indexPatterns', { watchDepth: 'collection' }],
         ['filters', { watchDepth: 'collection' }],
@@ -98,4 +101,16 @@ export const initLegacyModule = once((): void => {
         },
       };
     });
+
+  const module = uiModules.get('kibana/index_patterns');
+  let _service: any;
+  module.service('indexPatterns', function(chrome: any) {
+    if (!_service)
+      _service = new IndexPatterns(
+        npStart.core.uiSettings,
+        npStart.core.savedObjects.client,
+        npStart.core.http
+      );
+    return _service;
+  });
 });

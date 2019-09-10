@@ -34,7 +34,7 @@ describe('IndexPatternsApiClient', () => {
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
-    indexPatternsApiClient = new IndexPatternsApiClient();
+    indexPatternsApiClient = new IndexPatternsApiClient(http);
   });
 
   test('uses the right URI to fetch fields for time patterns', async function() {
@@ -42,7 +42,7 @@ describe('IndexPatternsApiClient', () => {
 
     await indexPatternsApiClient.getFieldsForTimePattern();
 
-    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, requestData);
+    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
 
   test('uses the right URI to fetch fields for wildcard', async function() {
@@ -50,7 +50,7 @@ describe('IndexPatternsApiClient', () => {
 
     await indexPatternsApiClient.getFieldsForWildcard();
 
-    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, requestData);
+    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
 
   test('uses the right URI to fetch fields for wildcard given a type', async function() {
@@ -58,6 +58,6 @@ describe('IndexPatternsApiClient', () => {
 
     await indexPatternsApiClient.getFieldsForWildcard({ type: 'rollup' });
 
-    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, requestData);
+    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
 });

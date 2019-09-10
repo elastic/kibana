@@ -26,7 +26,11 @@ import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
@@ -49,6 +53,7 @@ export interface SearchBarProps {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns?: IndexPattern[];
+  http: HttpServiceBase;
   // Query bar
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -367,6 +372,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          http={this.props.http}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
           query={this.state.query}

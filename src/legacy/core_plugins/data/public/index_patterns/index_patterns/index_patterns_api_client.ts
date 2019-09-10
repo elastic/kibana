@@ -17,23 +17,8 @@
  * under the License.
  */
 
-import { kfetch, KFetchQuery } from 'ui/kfetch';
-
+import { HttpServiceBase } from 'kibana/public';
 import { IndexPatternMissingIndices } from '../errors';
-
-function request(url: string, query: KFetchQuery) {
-  return kfetch({
-    method: 'GET',
-    pathname: url,
-    query,
-  }).catch(resp => {
-    if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
-      throw new IndexPatternMissingIndices(resp.body.message);
-    }
-
-    throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
-  });
-}
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -46,7 +31,25 @@ export interface GetFieldsOptions {
 }
 
 export class IndexPatternsApiClient {
-  constructor() {}
+  private http: HttpServiceBase;
+
+  constructor(http: HttpServiceBase) {
+    this.http = http;
+  }
+
+  _request(url: string, query: any) {
+    return this.http
+      .fetch(url, {
+        query,
+      })
+      .catch(resp => {
+        if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
+          throw new IndexPatternMissingIndices(resp.body.message);
+        }
+
+        throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+      });
+  }
 
   _getUrl(path: string[]) {
     return (
@@ -63,7 +66,7 @@ export class IndexPatternsApiClient {
 
     const url = this._getUrl(['_fields_for_time_pattern']);
 
-    return request(url, {
+    return this._request(url, {
       pattern,
       look_back: lookBack,
       meta_fields: metaFields,
@@ -91,6 +94,6 @@ export class IndexPatternsApiClient {
       };
     }
 
-    return request(url, query).then(resp => resp.fields);
+    return this._request(url, query).then(resp => resp.fields);
   }
 }
