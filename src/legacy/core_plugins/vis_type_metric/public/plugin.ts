@@ -20,7 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { LegacyDependenciesPlugin } from './shim';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
 // @ts-ignore
@@ -48,7 +48,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
     __LEGACY.setup();
 
     data.expressions.registerFunction(createMetricVisFn);
-    visualizations.types.VisTypesRegistryProvider.register(createMetricVisTypeDefinition);
+    visualizations.types.registerVisualization(createMetricVisTypeDefinition);
   }
 
   public start(core: CoreStart) {

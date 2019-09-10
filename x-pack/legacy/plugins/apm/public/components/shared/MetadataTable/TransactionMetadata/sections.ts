@@ -41,9 +41,17 @@ export const TRANSACTION_METADATA_SECTIONS = [
     label: SECTION_LABELS.URL
   },
   {
+    key: 'transaction.page',
+    label: SECTION_LABELS.PAGE
+  },
+  {
     key: 'user',
     label: SECTION_LABELS.USER,
     required: true
+  },
+  {
+    key: 'user_agent',
+    label: SECTION_LABELS.USER_AGENT
   },
   {
     key: 'transaction.custom',

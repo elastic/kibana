@@ -1,7 +1,7 @@
 [[code-getting-started]]
 == Getting Started with Code
 
-The easiest way to get started with *Code* is to simply import a real-world repository.
+The easiest way to get started with *Code* is to import a real-world repository.
 
 [float]
 ==== Before you begin
@@ -11,7 +11,8 @@ If you are in an environment where you have multiple {kib} instances in a cluste
 
 [float]
 ==== Enable Code app
-In beta, Code needs to be turned on by adding the following line to `kibana.yaml`
+While in beta, you can turn on *Code* by adding the following line to `kibana.yaml`:
+
 [source,yaml]
 ----
 xpack.code.ui.enabled: true
@@ -19,7 +20,7 @@ xpack.code.ui.enabled: true
 
 [float]
 ==== Import your first repository
-. Navigate to the Code app.
+. In {Kib}, navigate to *Code*.
 
 . In the *Repository URL* field, paste the following GitHub clone URL:
 +
@@ -27,6 +28,8 @@ xpack.code.ui.enabled: true
 ----
 https://github.com/Microsoft/TypeScript-Node-Starter
 ----
+
+`https` is recommend for cloning git repositories.
 
 . Click *Import*.
 +

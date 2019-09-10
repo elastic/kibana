@@ -42,6 +42,7 @@ import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
 import { InfraLoadingPanel } from '../../components/loading';
+import { NodeDetails } from '../../components/metrics/node_details';
 
 const isApolloError = (subject: any): subject is ApolloError => {
   return subject.graphQLErrors != null;
@@ -92,7 +93,7 @@ export const MetricDetail = withMetricPageProviders(
         }
         const { sourceId, source } = useContext(Source.Context);
         const layouts = layoutCreator(theme);
-        const { name, filteredLayouts, loading: metadataLoading, cloudId } = useMetadata(
+        const { name, filteredLayouts, loading: metadataLoading, cloudId, metadata } = useMetadata(
           nodeId,
           nodeType,
           layouts,
@@ -238,7 +239,7 @@ export const MetricDetail = withMetricPageProviders(
                                         </MetricsTitleTimeRangeContainer>
                                       </EuiPageHeaderSection>
                                     </EuiPageHeader>
-
+                                    <NodeDetails metadata={metadata} />
                                     <EuiPageContentWithRelative>
                                       <Metrics
                                         label={name}

@@ -24,4 +24,19 @@ describe('rendering', () => {
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
+  test('renders as a draggable when provided arguments', () => {
+    const wrapper = shallow(
+      <HeaderPage
+        badgeLabel="Beta"
+        badgeTooltip="My test tooltip."
+        subtitle="My Test Subtitle"
+        title="My Test Title"
+        draggableArguments={{ field: 'neat', value: 'cool' }}
+      >
+        <p>{'My test supplement.'}</p>
+      </HeaderPage>
+    );
+    const draggableHeader = wrapper.dive().find('[data-test-subj="page_headline_draggable"]');
+    expect(draggableHeader.exists()).toBeTruthy();
+  });
 });
