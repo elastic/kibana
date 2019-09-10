@@ -14,7 +14,7 @@ import {
 } from '../../types';
 import { outlinkEncoders } from '../outlink_encoders';
 
-describe('deserialize', () => {
+describe('serialize', () => {
   let appState: AppState;
 
   beforeEach(() => {

@@ -60,7 +60,14 @@ function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: Ur
   return serializedTemplate;
 }
 
-function serializeField({ icon, hopSize, lastValidHopSize, color, selected }: WorkspaceField) {
+function serializeField({
+  name,
+  icon,
+  hopSize,
+  lastValidHopSize,
+  color,
+  selected,
+}: WorkspaceField) {
   return {
     name,
     hopSize,
