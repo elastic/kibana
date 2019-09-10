@@ -4,14 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { useEffect } from 'react';
 import * as rt from 'io-ts';
+import { identity, constant } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { useUrlState } from '../../../utils/use_url_state';
-import { timeRangeRT } from '../../../../common/http_api/shared/time_range';
 
-const autoRefreshRT = rt.union([rt.boolean, rt.undefined]);
-const urlTimeRangeRT = rt.union([timeRangeRT, rt.undefined]);
+const autoRefreshRT = rt.union([
+  rt.type({
+    interval: rt.number,
+    isPaused: rt.boolean,
+  }),
+  rt.undefined,
+]);
+
+export const stringTimeRangeRT = rt.type({
+  startTime: rt.string,
+  endTime: rt.string,
+});
+export type StringTimeRange = rt.TypeOf<typeof stringTimeRangeRT>;
+
+const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
@@ -19,13 +33,14 @@ const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
 export const useLogAnalysisResultsUrlState = () => {
   const [timeRange, setTimeRange] = useUrlState({
     defaultState: {
-      startTime: moment
-        .utc()
-        .subtract(2, 'weeks')
-        .valueOf(),
-      endTime: moment.utc().valueOf(),
+      startTime: 'now-2w',
+      endTime: 'now',
     },
-    decodeUrlState: (value: unknown) => urlTimeRangeRT.decode(value).getOrElse(undefined),
+    decodeUrlState: (value: unknown) =>
+      pipe(
+        urlTimeRangeRT.decode(value),
+        fold(constant(undefined), identity)
+      ),
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
   });
@@ -34,21 +49,28 @@ export const useLogAnalysisResultsUrlState = () => {
     setTimeRange(timeRange);
   }, []);
 
-  const [autoRefreshEnabled, setAutoRefresh] = useUrlState({
-    defaultState: false,
-    decodeUrlState: (value: unknown) => autoRefreshRT.decode(value).getOrElse(undefined),
+  const [autoRefresh, setAutoRefresh] = useUrlState({
+    defaultState: {
+      isPaused: false,
+      interval: 30000,
+    },
+    decodeUrlState: (value: unknown) =>
+      pipe(
+        autoRefreshRT.decode(value),
+        fold(constant(undefined), identity)
+      ),
     encodeUrlState: autoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
   });
 
   useEffect(() => {
-    setAutoRefresh(autoRefreshEnabled);
+    setAutoRefresh(autoRefresh);
   }, []);
 
   return {
     timeRange,
     setTimeRange,
-    autoRefreshEnabled,
+    autoRefresh,
     setAutoRefresh,
   };
 };
