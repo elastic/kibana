@@ -13,7 +13,7 @@ import { SectionError, SectionLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { editPolicy, useLoadPolicy, useLoadIndicies } from '../../services/http';
+import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
 
 interface MatchParams {
   name: string;
@@ -52,7 +52,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     data: { indices } = {
       indices: [],
     },
-  } = useLoadIndicies();
+  } = useLoadIndices();
 
   // Load policy
   const { error: errorLoadingPolicy, isLoading: isLoadingPolicy, data: policyData } = useLoadPolicy(

@@ -14,7 +14,7 @@ import {
   getIndicesHandler,
 } from './policy';
 
-describe('[Snapshot and Restore API Routes] Restore', () => {
+describe('[Snapshot and Restore API Routes] Policy', () => {
   const mockRequest = {} as Request;
   const mockResponseToolkit = {} as ResponseToolkit;
   const mockEsPolicy = {

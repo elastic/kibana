@@ -16,5 +16,5 @@ export const registerRoutes = (router: Router, plugins: Plugins): void => {
   registerRepositoriesRoutes(router, plugins);
   registerSnapshotsRoutes(router, plugins);
   registerRestoreRoutes(router);
-  registerPolicyRoutes(router);
+  registerPolicyRoutes(router, plugins);
 };

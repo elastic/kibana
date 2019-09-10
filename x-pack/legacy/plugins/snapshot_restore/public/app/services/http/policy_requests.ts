@@ -30,7 +30,7 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
   });
 };
 
-export const useLoadIndicies = () => {
+export const useLoadIndices = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}policies/indices`),
     method: 'get',
@@ -85,4 +85,11 @@ export const editPolicy = async (editedPolicy: SlmPolicyPayload) => {
   const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_POLICY_UPDATE);
   return result;
+};
+
+export const useLoadRetentionSettings = () => {
+  return useRequest({
+    path: httpService.addBasePath(`${API_BASE_PATH}policies/retention_settings`),
+    method: 'get',
+  });
 };

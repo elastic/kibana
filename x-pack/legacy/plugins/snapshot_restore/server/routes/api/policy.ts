@@ -10,8 +10,12 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
+import { Plugins } from '../../../shim';
 
-export function registerPolicyRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerPolicyRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('policies', getAllHandler);
   router.get('policy/{name}', getOneHandler);
   router.post('policy/{name}/run', executeHandler);
@@ -19,10 +23,11 @@ export function registerPolicyRoutes(router: Router) {
   router.put('policies', createHandler);
   router.put('policies/{name}', updateHandler);
   router.get('policies/indices', getIndicesHandler);
+  router.get('policies/retention_settings', getRetentionSettingsHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
-  req,
+  _req,
   callWithRequest
 ): Promise<{
   policies: SlmPolicy[];
@@ -144,7 +149,7 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
 };
 
 export const getIndicesHandler: RouterRouteHandler = async (
-  req,
+  _req,
   callWithRequest
 ): Promise<{
   indices: string[];
@@ -160,4 +165,29 @@ export const getIndicesHandler: RouterRouteHandler = async (
   return {
     indices: indices.map(({ index }) => index).sort(),
   };
+};
+
+export const getRetentionSettingsHandler: RouterRouteHandler = async (): Promise<
+  | {
+      [key: string]: string;
+    }
+  | undefined
+> => {
+  try {
+    const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
+      filterPath: '**.slm.retention*',
+      includeDefaults: true,
+    });
+    const { slm: retentionSettings = undefined } = {
+      ...defaults,
+      ...persistent,
+      ...transient,
+    };
+    return retentionSettings;
+  } catch (e) {
+    // Silently swallow error and return undefined for managed repository name
+    // so that downstream calls are not blocked. In a healthy environment we do
+    // not expect to reach here.
+    return;
+  }
 };
