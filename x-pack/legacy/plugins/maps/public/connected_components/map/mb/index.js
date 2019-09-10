@@ -13,7 +13,6 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTooltipState,
   setMapInitError,
 } from '../../../actions/map_actions';
 import {
@@ -57,9 +56,6 @@ function mapDispatchToProps(dispatch) {
     },
     clearGoto: () => {
       dispatch(clearGoto());
-    },
-    setTooltipState(tooltipState) {
-      dispatch(setTooltipState(tooltipState));
     },
     setMapInitError(errorMessage) {
       dispatch(setMapInitError(errorMessage));
