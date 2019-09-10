@@ -126,14 +126,14 @@ export function getCreateTaskRunnerFunction({
             const alertInstance = alertInstances[alertInstanceId];
 
             // Unpersist any alert instances that were not explicitly fired in this alert execution
-            if (!alertInstance.hasBeenEnqueued()) {
+            if (!alertInstance.hasSecheduledActions()) {
               delete alertInstances[alertInstanceId];
               return;
             }
 
-            const { actionGroup, context, state } = alertInstance.getEnqueuedFiringOptions()!;
+            const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
             alertInstance.replaceMeta({ lastFired: Date.now() });
-            alertInstance.dequeue();
+            alertInstance.unscheduleActions();
             return fireHandler(actionGroup, context, state);
           })
         );

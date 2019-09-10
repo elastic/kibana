@@ -12,7 +12,7 @@ interface ConstructorOptions {
 }
 
 export class AlertInstance {
-  private fireOptions?: Record<string, any>;
+  private scheduledExecutionOptions?: Record<string, any>;
   private meta: Record<string, any>;
   private state: Record<string, any>;
 
@@ -21,16 +21,16 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  hasBeenEnqueued() {
-    return this.fireOptions !== undefined;
+  hasSecheduledActions() {
+    return this.scheduledExecutionOptions !== undefined;
   }
 
-  getEnqueuedFiringOptions() {
-    return this.fireOptions;
+  getSechduledActionOptions() {
+    return this.scheduledExecutionOptions;
   }
 
-  dequeue() {
-    this.fireOptions = undefined;
+  unscheduleActions() {
+    this.scheduledExecutionOptions = undefined;
     return this;
   }
 
@@ -42,11 +42,11 @@ export class AlertInstance {
     return this.meta;
   }
 
-  enqueue(actionGroup: string, context: Context = {}) {
-    if (this.hasBeenEnqueued()) {
+  scheduleActions(actionGroup: string, context: Context = {}) {
+    if (this.hasSecheduledActions()) {
       throw new Error('Alert instance has already been enqueued to be fired, cannot enqueue twice');
     }
-    this.fireOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
