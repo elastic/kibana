@@ -31,13 +31,7 @@ const Overlay = ({
   // in this case
   //
   // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-  <div
-    ref={onMount}
-    onKeyDown={onKeyDown}
-    className="kbnUiAceKeyboardHint"
-    tabIndex={0}
-    role="application"
-  >
+  <div ref={onMount} onKeyDown={onKeyDown}>
     <EuiText size="s">Press Enter to start editing.</EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
   </div>
@@ -87,10 +81,17 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
   useEffect(() => {
     if (aceTextAreaElement) {
       const container = document.createElement('div');
+      container.className = 'kbnUiAceKeyboardHint';
+      container.setAttribute('role', 'application');
+      container.tabIndex = 0;
+      container.addEventListener('focus', () => {
+        enableOverlay();
+      });
       aceTextAreaElement.parentElement!.insertBefore(container, aceTextAreaElement);
 
       mountNode.current = container;
       textArea.current = aceTextAreaElement;
+      textArea.current.setAttribute('tabindex', '-1');
 
       // This listener fires on capture phase so that we get a look at the world before ace changes it.
       document.addEventListener('keydown', documentKeyDownListener, { capture: true });
