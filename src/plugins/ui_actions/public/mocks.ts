@@ -42,7 +42,7 @@ const createStartContract = (): Start => {
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
     getTrigger: jest.fn(),
-    getTriggerActions: jest.fn(),
+    getTriggerActions: jest.fn((id: string) => []),
     getTriggerCompatibleActions: jest.fn(),
   };
 
