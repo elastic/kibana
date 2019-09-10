@@ -59,7 +59,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 ### Example
 
-This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
+This example receives server and threshold as parameters. It will read the CPU usage of the server and schedule actions to be fired (by enqueueing them with the task manager) if the reading is greater than the threshold.
 
 ```
 import { schema } from '@kbn/config-schema';
@@ -101,8 +101,8 @@ server.plugins.alerting.registerType({
 				cpuUsage: currentCpuUsage,
 			});
 
-			// 'default' refers to a group of actions to fire, see 'actions' in create alert section
-			alertInstance.fire('default', {
+			// 'default' refers to a group of actions to enqueue to be fired, see 'actions' in create alert section
+			alertInstance.enqueue('default', {
 				server,
 				hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
 			});
@@ -119,7 +119,7 @@ server.plugins.alerting.registerType({
 });
 ```
 
-This example only receives threshold as a parameter. It will read the CPU usage of all the servers and fire individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
+This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```
 server.plugins.alerting.registerType({
@@ -160,8 +160,8 @@ server.plugins.alerting.registerType({
 					cpuUsage: currentCpuUsage,
 				});
 
-				// 'default' refers to a group of actions to fire, see 'actions' in create alert section
-				alertInstance.fire('default', {
+				// 'default' refers to a group of actions to enqueue to be fired, see 'actions' in create alert section
+				alertInstance.enqueue('default', {
 					server,
 					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
 				});
@@ -263,14 +263,14 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|fire(actionGroup, context)|Called to fire actions. The actionGroup relates to the group of alert `actions` to fire and the context will be used for templating purposes. This should only be called once per alert instance.|
-|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when fire isn't called during an execution.|
+|enqueue(actionGroup, context)|Called to schedule the firing of actions. The actionGroup relates to the group of alert `actions` to fire and the context will be used for templating purposes. This should only be called once per alert instance.|
+|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `enqueue` isn't called during an execution.|
 
 ## Templating actions
 
 There needs to be a way to map alert context into action parameters. For this, we started off by adding template support. Any string within the `params` of an alert saved object's `actions` will be processed as a template and can inject context or state values. 
 
-When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.fire(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
+When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.enqueue(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
 
 ### Examples
 
@@ -281,7 +281,7 @@ alertInstanceFactory('server_1')
   .replaceState({
     cpuUsage: 80,
   })
-  .fire('default', {
+  .enqueue('default', {
     server: 'server_1',
   });
 ```

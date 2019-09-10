@@ -6,39 +6,39 @@
 
 import { AlertInstance } from './alert_instance';
 
-describe('shouldFire()', () => {
+describe('hasBeenEnqueued()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    expect(alertInstance.hasBeenEnqueued()).toEqual(false);
   });
 });
 
-describe('getFireOptions()', () => {
+describe('getEnqueuedFiringOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    expect(alertInstance.getEnqueuedFiringOptions()).toBeUndefined();
   });
 });
 
-describe('resetFire()', () => {
-  test('makes shouldFire() return false', () => {
+describe('dequeue()', () => {
+  test('makes hasBeenEnqueued() return false', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.shouldFire()).toEqual(true);
-    alertInstance.resetFire();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    alertInstance.enqueue('default');
+    expect(alertInstance.hasBeenEnqueued()).toEqual(true);
+    alertInstance.dequeue();
+    expect(alertInstance.hasBeenEnqueued()).toEqual(false);
   });
 
-  test('makes getFireOptions() return undefined', () => {
+  test('makes getEnqueuedFiringOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.enqueue('default');
+    expect(alertInstance.getEnqueuedFiringOptions()).toEqual({
       actionGroup: 'default',
       context: {},
       state: {},
     });
-    alertInstance.resetFire();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    alertInstance.dequeue();
+    expect(alertInstance.getEnqueuedFiringOptions()).toBeUndefined();
   });
 });
 
@@ -58,29 +58,31 @@ describe('getMeta()', () => {
   });
 });
 
-describe('fire()', () => {
-  test('makes shouldFire() return true', () => {
+describe('enqueue()', () => {
+  test('makes hasBeenEnqueued() return true', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.shouldFire()).toEqual(true);
+    alertInstance.replaceState({ otherField: true }).enqueue('default', { field: true });
+    expect(alertInstance.hasBeenEnqueued()).toEqual(true);
   });
 
-  test('makes getFireOptions() return given options', () => {
+  test('makes getEnqueuedFiringOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.replaceState({ otherField: true }).enqueue('default', { field: true });
+    expect(alertInstance.getEnqueuedFiringOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },
       state: { otherField: true },
     });
   });
 
-  test('cannot fire twice', () => {
+  test('cannot enqueue for firing twice', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default', { field: true });
+    alertInstance.enqueue('default', { field: true });
     expect(() =>
-      alertInstance.fire('default', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(`"Alert instance already fired, cannot fire twice"`);
+      alertInstance.enqueue('default', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance has already been enqueued to be fired, cannot enqueue twice"`
+    );
   });
 });
 

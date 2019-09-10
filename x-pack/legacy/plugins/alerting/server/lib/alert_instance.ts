@@ -21,15 +21,15 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  shouldFire() {
+  hasBeenEnqueued() {
     return this.fireOptions !== undefined;
   }
 
-  getFireOptions() {
+  getEnqueuedFiringOptions() {
     return this.fireOptions;
   }
 
-  resetFire() {
+  dequeue() {
     this.fireOptions = undefined;
     return this;
   }
@@ -42,9 +42,9 @@ export class AlertInstance {
     return this.meta;
   }
 
-  fire(actionGroup: string, context: Context = {}) {
-    if (this.shouldFire()) {
-      throw new Error('Alert instance already fired, cannot fire twice');
+  enqueue(actionGroup: string, context: Context = {}) {
+    if (this.hasBeenEnqueued()) {
+      throw new Error('Alert instance has already been enqueued to be fired, cannot enqueue twice');
     }
     this.fireOptions = { actionGroup, context, state: this.state };
     return this;

@@ -172,7 +172,7 @@ export default function(kibana: any) {
           services
             .alertInstanceFactory('1')
             .replaceState({ instanceStateValue: true })
-            .fire(actionGroupToFire, {
+            .enqueue(actionGroupToFire, {
               instanceContextValue: true,
             });
           await services.callCluster('index', {
