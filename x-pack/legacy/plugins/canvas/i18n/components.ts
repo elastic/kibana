@@ -20,19 +20,19 @@ export const ComponentStrings = {
   },
   Asset: {
     getCopyAssetTooltipText: () =>
-      i18n.translate('xpack.canvas.asset.copyAssetTooltipText', {
+      i18n.translate('xpack.canvas.asset.copyAssetTooltip', {
         defaultMessage: 'Copy id to clipboard',
       }),
     getCreateImageTooltipText: () =>
-      i18n.translate('xpack.canvas.asset.createImageTooltipText', {
+      i18n.translate('xpack.canvas.asset.createImageTooltip', {
         defaultMessage: 'Create image element',
       }),
     getDeleteAssetTooltipText: () =>
-      i18n.translate('xpack.canvas.asset.deleteAssetTooltipText', {
+      i18n.translate('xpack.canvas.asset.deleteAssetTooltip', {
         defaultMessage: 'Delete',
       }),
     getDownloadAssetTooltipText: () =>
-      i18n.translate('xpack.canvas.asset.downloadAssetTooltipText', {
+      i18n.translate('xpack.canvas.asset.downloadAssetTooltip', {
         defaultMessage: 'Download',
       }),
     getThumbnailAltText: () =>
@@ -42,30 +42,30 @@ export const ComponentStrings = {
   },
   AssetManager: {
     getBtnText: () =>
-      i18n.translate('xpack.canvas.assetManager.buttonText', {
+      i18n.translate('xpack.canvas.assetManager.manageButtonLabel', {
         defaultMessage: 'Manage assets',
       }),
     getConfirmModalBtnText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalButtonText', {
+      i18n.translate('xpack.canvas.assetManager.confirmModalButtonLabel', {
         defaultMessage: 'Remove',
       }),
     getConfirmModalMessageText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalMessage', {
+      i18n.translate('xpack.canvas.assetManager.confirmModalDetail', {
         defaultMessage: 'Are you sure you want to remove this asset?',
       }),
     getConfirmModalTitleText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalTitleText', {
+      i18n.translate('xpack.canvas.assetManager.confirmModalTitle', {
         defaultMessage: 'Remove Asset',
       }),
   },
   AssetModal: {
     getDescriptionText: () =>
-      i18n.translate('xpack.canvas.assetModal.descriptionText', {
+      i18n.translate('xpack.canvas.assetModal.modalDescription', {
         defaultMessage:
           'Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.',
       }),
     getEmptyAssetsMessageText: () =>
-      i18n.translate('xpack.canvas.assetModal.emptyAssetsMessage', {
+      i18n.translate('xpack.canvas.assetModal.emptyAssetsDescription', {
         defaultMessage: 'Import your assets to get started',
       }),
     getFilePickerPromptText: () =>
@@ -77,11 +77,11 @@ export const ComponentStrings = {
         defaultMessage: 'Uploading images',
       }),
     getModalCloseBtnText: () =>
-      i18n.translate('xpack.canvas.assetModal.modalCloseButtonText', {
+      i18n.translate('xpack.canvas.assetModal.modalCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
     getModalTitleText: () =>
-      i18n.translate('xpack.canvas.assetModal.modalTitleText', {
+      i18n.translate('xpack.canvas.assetModal.modalTitle', {
         defaultMessage: 'Manage workpad assets',
       }),
     getSpaceUsedText: (percentageUsed: number) =>
@@ -130,46 +130,42 @@ export const ComponentStrings = {
   },
   WorkpadHeader: {
     getAddElementBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementButtonText', {
+      i18n.translate('xpack.canvas.workpadHeader.addElementButtonLabel', {
         defaultMessage: 'Add element',
       }),
     getAddElementModalCloseBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonText', {
+      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
     getEmbedObjectBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonText', {
+      i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonLabel', {
         defaultMessage: 'Embed object',
       }),
     getFullScreenTooltipText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltipText', {
+      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltip', {
         defaultMessage: 'Enter fullscreen mode',
       }),
     getFullScreenButtonLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonLabelText', {
+      i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
         defaultMessage: 'View fullscreen',
       }),
     getHideEditControlText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.hideEditControlText', {
+      i18n.translate('xpack.canvas.workpadHeader.hideEditControlTooltip', {
         defaultMessage: 'Hide editing controls',
       }),
     getNoWritePermText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.noWritePermissionText', {
+      i18n.translate('xpack.canvas.workpadHeader.noWritePermissionTooltip', {
         defaultMessage: "You don't have permission to edit this workpad",
       }),
     getShowEditControlText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.showEditControlText', {
+      i18n.translate('xpack.canvas.workpadHeader.showEditControlTooltip', {
         defaultMessage: 'Show editing controls',
       }),
   },
   WorkpadHeaderAutoRefreshControls: {
     getRefreshListTitleText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitleText', {
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitle', {
         defaultMessage: 'Refresh elements',
-      }),
-    getRefreshListDurationPrefix: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListDurationPrefix', {
-        defaultMessage: 'Every',
       }),
     getRefreshListDurationManualText: () =>
       i18n.translate(
@@ -179,7 +175,7 @@ export const ComponentStrings = {
         }
       ),
     getDisableTooltipText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltipText', {
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltip', {
         defaultMessage: 'Disable auto-refresh',
       }),
     getIntervalFormLabelText: () =>
@@ -189,49 +185,45 @@ export const ComponentStrings = {
   },
   WorkpadHeaderControlSettings: {
     getTooltipText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderControlSettings.tooltipText', {
+      i18n.translate('xpack.canvas.workpadHeaderControlSettings.settingsTooltip', {
         defaultMessage: 'Control settings',
       }),
   },
   WorkpadHeaderCustomInterval: {
     getFormLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabelText', {
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
         defaultMessage: 'Set a custom interval',
       }),
     getFormHelpText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formHelpText', {
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formDescription', {
         defaultMessage: 'Use shorthand notation, like 30s, 10m, or 1h',
       }),
     getButtonText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.buttonText', {
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
         defaultMessage: 'Set',
       }),
   },
   WorkpadHeaderKioskControls: {
     getTitleText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitleText', {
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
       }),
-    getCycleIntervalPrefix: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleIntervalPrefix', {
-        defaultMessage: 'Every',
-      }),
     getCycleSwitchLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleSwitchLabelText', {
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleToggleSwitch', {
         defaultMessage: 'Cycle slides automatically',
       }),
     getCycleFormLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabelText', {
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
         defaultMessage: 'Change cycling interval',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {
     getTooltipText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.tooltipText', {
+      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshTooltip', {
         defaultMessage: 'Refresh data',
       }),
     getButtonLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.buttonLabelText', {
+      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshAriaLabel', {
         defaultMessage: 'Refresh Elements',
       }),
   },

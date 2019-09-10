@@ -21,7 +21,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { timeDurationString } from '../../../lib/time_duration';
+import { timeDuration } from '../../../lib/time_duration';
 import { RefreshControl } from '../refresh_control';
 import { CustomInterval } from './custom_interval';
 
@@ -55,6 +55,8 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
     </li>
   );
 
+  const interval = timeDuration(refreshInterval);
+
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -65,9 +67,7 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
               <EuiDescriptionListDescription>
                 {refreshInterval > 0 ? (
                   <Fragment>
-                    <span>
-                      {strings.getRefreshListDurationPrefix()} {timeDurationString(refreshInterval)}
-                    </span>
+                    <span>{timeStrings.getCycleTimeText(interval.length, interval.format)}</span>
                   </Fragment>
                 ) : (
                   <span>{strings.getRefreshListDurationManualText()}</span>

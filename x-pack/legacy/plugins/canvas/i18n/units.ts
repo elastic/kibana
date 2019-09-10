@@ -27,5 +27,29 @@ export const UnitStrings = {
         defaultMessage: '{days} {days, plural, one {day} other {days}}',
         values: { days },
       }),
+    getCycleTimeText: (length: number, format: 'seconds' | 'days' | 'hours' | 'minutes') => {
+      switch (format) {
+        case 'seconds':
+          return i18n.translate('xpack.canvas.workpadHeader.cycleIntervalSecondsText', {
+            defaultMessage: 'Every {seconds} {seconds, plural, one {second} other {seconds}}',
+            values: { seconds: length },
+          });
+        case 'minutes':
+          return i18n.translate('xpack.canvas.workpadHeader.cycleIntervalMinutesText', {
+            defaultMessage: 'Every {minutes} {minutes, plural, one {minute} other {minutes}}',
+            values: { minutes: length },
+          });
+        case 'hours':
+          return i18n.translate('xpack.canvas.workpadHeader.cycleIntervalHoursText', {
+            defaultMessage: 'Every {hours} {hours, plural, one {hour} other {hours}}',
+            values: { hours: length },
+          });
+        case 'hours':
+          return i18n.translate('xpack.canvas.workpadHeader.cycleIntervalDaysText', {
+            defaultMessage: 'Every {days} {days, plural, one {day} other {days}}',
+            values: { days: length },
+          });
+      }
+    },
   },
 };

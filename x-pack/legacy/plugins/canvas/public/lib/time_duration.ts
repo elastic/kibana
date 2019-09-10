@@ -3,27 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UnitStrings } from '../../i18n';
+type UnitFormat = 'days' | 'hours' | 'minutes' | 'seconds';
 
-const { time: strings } = UnitStrings;
+interface Duration {
+  length: number;
+  format: UnitFormat;
+}
 
-type Format = 'days' | 'hours' | 'minutes' | 'seconds';
-
-export const timeDurationString = (time: number, format?: Format) => {
+export const timeDuration = (time: number, format?: UnitFormat): Duration => {
   const seconds = time / 1000;
   const minutes = seconds / 60;
   const hours = minutes / 60;
   const days = hours / 24;
 
   if (format === 'days' || days >= 1) {
-    return strings.getDaysText(days);
+    return { length: days, format: 'days' };
   }
   if (format === 'hours' || hours >= 1) {
-    return strings.getHoursText(hours);
+    return { length: hours, format: 'hours' };
   }
   if (format === 'minutes' || minutes >= 1) {
-    return strings.getMinutesText(minutes);
+    return { length: seconds / 60, format: 'minutes' };
   }
-
-  return strings.getSecondsText(seconds);
+  return { length: seconds, format: 'seconds' };
 };

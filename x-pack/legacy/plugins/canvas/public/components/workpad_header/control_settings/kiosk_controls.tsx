@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { timeDurationString } from '../../../lib/time_duration';
+import { timeDuration } from '../../../lib/time_duration';
 import { CustomInterval } from './custom_interval';
 
 import { ComponentStrings, UnitStrings } from '../../../../i18n';
@@ -59,15 +59,15 @@ export const KioskControls = ({
     </li>
   );
 
+  const interval = timeDuration(autoplayInterval);
+
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiDescriptionList textStyle="reverse">
           <EuiDescriptionListTitle>{strings.getTitleText()}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <span>
-              {strings.getCycleIntervalPrefix()} {timeDurationString(autoplayInterval)}
-            </span>
+            <span>{timeStrings.getCycleTimeText(interval.length, interval.format)}</span>
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
         <EuiHorizontalRule margin="m" />
