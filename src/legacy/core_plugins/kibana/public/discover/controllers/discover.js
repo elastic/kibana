@@ -320,10 +320,10 @@ function discoverController(
     const shareSearch = {
       id: 'share',
       label: i18n.translate('kbn.discover.localMenu.shareTitle', {
-        defaultMessage: 'Share',
+        defaultMessage: 'Export',
       }),
       description: i18n.translate('kbn.discover.localMenu.shareSearchDescription', {
-        defaultMessage: 'Share Search',
+        defaultMessage: 'Export Search',
       }),
       testId: 'shareTopNavButton',
       run: async (anchorElement) => {
