@@ -38,7 +38,6 @@ const Overlay = ({
 );
 
 export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
-  const textArea = useRef<HTMLTextAreaElement | null>(null);
   const mountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
 
@@ -46,7 +45,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
     if (ev.keyCode === keyCodes.ENTER) {
       ev.preventDefault();
       unmountComponentAtNode(mountNode.current!);
-      textArea.current!.focus();
+      aceTextAreaElement!.focus();
     }
   }
 
@@ -90,17 +89,16 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       aceTextAreaElement.parentElement!.insertBefore(container, aceTextAreaElement);
 
       mountNode.current = container;
-      textArea.current = aceTextAreaElement;
-      textArea.current.setAttribute('tabindex', '-1');
+      aceTextAreaElement.setAttribute('tabindex', '-1');
 
       // This listener fires on capture phase so that we get a look at the world before ace changes it.
       document.addEventListener('keydown', documentKeyDownListener, { capture: true });
-      textArea.current.addEventListener('keydown', aceKeydownListener);
+      aceTextAreaElement.addEventListener('keydown', aceKeydownListener);
     }
     return () => {
-      if (textArea.current) {
+      if (aceTextAreaElement) {
         document.removeEventListener('keydown', documentKeyDownListener);
-        textArea.current.removeEventListener('keydown', aceKeydownListener);
+        aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
         document.removeChild(mountNode.current!);
       }
     };

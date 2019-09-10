@@ -19,15 +19,15 @@
 import React, { useEffect, useRef } from 'react';
 import $ from 'jquery';
 
-import { EditorProps } from './editor';
-
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
 import { useAppContext } from '../../../../context';
 
-export type ReadOnlyEditorProps = Pick<EditorProps, 'onEditorReady'>;
+export interface EditorOutputProps {
+  onReady?: (ref: any) => void;
+}
 
-function ReadOnlyEditor({ onEditorReady }: ReadOnlyEditorProps) {
+function Component({ onReady }: EditorOutputProps) {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const {
     services: { settings },
@@ -36,8 +36,8 @@ function ReadOnlyEditor({ onEditorReady }: ReadOnlyEditorProps) {
   useEffect(() => {
     const editor$ = $(editorRef.current!);
     const outputEditor = initializeOutput(editor$, settings);
-    if (onEditorReady) {
-      onEditorReady({ editor: outputEditor, element: editorRef.current! });
+    if (onReady) {
+      onReady({ editor: outputEditor, element: editorRef.current! });
     }
   });
 
@@ -48,4 +48,4 @@ function ReadOnlyEditor({ onEditorReady }: ReadOnlyEditorProps) {
   );
 }
 
-export const MemoReadOnlyEditor = React.memo(ReadOnlyEditor);
+export const EditorOutput = React.memo(Component);

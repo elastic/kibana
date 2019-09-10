@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { ConsoleEditor } from './console_editor';
+export { Editor } from './editor';
+export { EditorOutput } from './editor_output';

@@ -27,7 +27,7 @@ import mappings from '../../../../../public/quarantined/src/mappings';
 // @ts-ignore
 import init from '../../../../../public/quarantined/src/app';
 
-import { ConsoleEditor, ConsoleHistory } from '../editor';
+import { EditorOutput, Editor, ConsoleHistory } from '../editor';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
 import {
@@ -88,13 +88,9 @@ export function Main() {
   ]);
 
   const onPanelWidthChange = useCallback(
-    debounce(
-      (widths: number[]) => {
-        storage.set(StorageKeys.WIDTH, widths);
-      },
-      300,
-      { trailing: true }
-    ),
+    debounce((widths: number[]) => {
+      storage.set(StorageKeys.WIDTH, widths);
+    }, 300),
     []
   );
 
@@ -228,7 +224,7 @@ export function Main() {
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={firstPanelWidth + '%'}
             >
-              <ConsoleEditor
+              <Editor
                 sendCurrentRequest={sendCurrentRequest}
                 onEditorReady={onInputEditorReady}
                 docLinkVersion={docLinkVersion}
@@ -238,11 +234,7 @@ export function Main() {
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={secondPanelWidth + '%'}
             >
-              <ConsoleEditor
-                onEditorReady={onOutputEditorReady}
-                docLinkVersion={docLinkVersion}
-                readOnly={true}
-              />
+              <EditorOutput onReady={onOutputEditorReady} />
             </Panel>
           </PanelsContainer>
         </EuiFlexItem>

@@ -47,7 +47,7 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
+function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
   const {
     services: { history, settings },
   } = useAppContext();
@@ -74,12 +74,6 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
     if (onEditorReady) {
       onEditorReady({ editor: editorInstanceRef.current, element: editorRef.current! });
     }
-
-    const session = editorInstanceRef.current.getSession();
-    session.getSelection().on('changeCursor', () => {
-      // Fire and forget
-      getDocumentation(editorInstanceRef.current!, docLinkVersion);
-    });
 
     setTextArea(editorRef.current!.querySelector('textarea'));
   }, []);
@@ -133,4 +127,4 @@ function Editor({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }
   );
 }
 
-export const MemoEditor = React.memo(Editor);
+export const Editor = React.memo(Component);

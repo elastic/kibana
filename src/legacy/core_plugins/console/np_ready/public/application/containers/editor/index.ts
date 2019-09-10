@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ConsoleEditor, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
+export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
