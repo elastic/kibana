@@ -4307,6 +4307,7 @@
     "xpack.code.repoItem.cancelButtonText": "否，取消",
     "xpack.code.repoItem.cloneErrorText": "克隆错误",
     "xpack.code.repoItem.cloningText": "克隆中...",
+    "xpack.code.repoItem.updatingText": "更新中...",
     "xpack.code.repoItem.confirmButtonText": "是，继续",
     "xpack.code.repoItem.deleteButtonLabel": "删除",
     "xpack.code.repoItem.deleteConfirmTitle": "确认删除仓库？",
