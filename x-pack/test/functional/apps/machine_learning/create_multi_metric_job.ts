@@ -64,7 +64,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertPickFieldsSectionExists();
     });
 
-    it('selects field + aggregation and shows detector preview with title + chart', async () => {
+    it('selects detectors and displays detector previews', async () => {
       for (const [index, aggAndFieldIdentifier] of aggAndFieldIdentifiers.entries()) {
         await ml.jobWizardCommon.assertAggAndFieldInputExists();
         await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier);
@@ -72,7 +72,7 @@ export default function({ getService }: FtrProviderContext) {
       }
     });
 
-    it('inputs the split field and shows split cards', async () => {
+    it('inputs the split field and displays split cards', async () => {
       await ml.jobWizardCommon.assertMultiMetricSplitFieldInputExists();
       await ml.jobWizardCommon.selectMultiMetricSplitField(splitField);
       await ml.jobWizardCommon.assertMultiMetricSplitFieldSelection(splitField);
