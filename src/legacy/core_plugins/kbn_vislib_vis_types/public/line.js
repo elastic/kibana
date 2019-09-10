@@ -30,6 +30,7 @@ import {
   AxisModes,
   Rotates,
   ThresholdLineStyles,
+  InterpolationModes,
   getConfigCollections,
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
@@ -103,6 +104,7 @@ export default function PointSeriesVisType(Private) {
             valueAxis: 'ValueAxis-1',
             drawLinesBetweenPoints: true,
             lineWidth: 2,
+            interpolate: InterpolationModes.LINEAR,
             showCircles: true
           }
         ],
