@@ -17,9 +17,20 @@
  * under the License.
  */
 
-import { createInitialQueryParametersState } from './state';
-
-
-export const MAX_CONTEXT_SIZE = 10000; // Elasticsearch's default maximum size limit
-export const MIN_CONTEXT_SIZE = 0;
-export const QUERY_PARAMETER_KEYS = Object.keys(createInitialQueryParametersState());
+export function createInitialQueryParametersState(
+  defaultStepSize: number = 5,
+  tieBreakerField: string = '_doc'
+) {
+  return {
+    anchorType: null,
+    anchorId: null,
+    columns: [],
+    defaultStepSize,
+    filters: [],
+    indexPatternId: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+    tieBreakerField,
+  };
+}
