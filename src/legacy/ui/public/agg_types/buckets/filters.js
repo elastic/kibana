@@ -22,7 +22,7 @@ import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { FiltersParamEditor } from '../controls/filters';
+import { FiltersParamEditor } from '../../vis/editors/default/controls/filters';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';

@@ -9,8 +9,11 @@ import rewind from 'geojson-rewind';
 
 export function geoJsonCleanAndValidate(parsedFile) {
 
+  // Remove bbox property pending fix of bbox parsing issue in jsts lib
+  const { bbox, ...handledGeoJsonProperties } = parsedFile; // eslint-disable-line no-unused-vars
+
   const reader = new jsts.io.GeoJSONReader();
-  const geoJson = reader.read(parsedFile);
+  const geoJson = reader.read(handledGeoJsonProperties);
   const isSingleFeature = parsedFile.type === 'Feature';
   const features = isSingleFeature
     ? [{ ...geoJson }]

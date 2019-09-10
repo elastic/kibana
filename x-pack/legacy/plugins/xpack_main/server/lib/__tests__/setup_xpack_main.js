@@ -39,6 +39,7 @@ describe('setupXPackMain()', () => {
         elasticsearch: mockElasticsearchPlugin,
         xpack_main: mockXPackMainPlugin
       },
+      newPlatform: { setup: { plugins: { features: {} } } },
       events: { on() {} },
       log() {},
       config() {},

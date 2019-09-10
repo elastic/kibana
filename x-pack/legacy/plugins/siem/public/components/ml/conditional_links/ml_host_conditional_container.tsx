@@ -84,7 +84,12 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
         }
       }}
     />
-    <Redirect from="/ml-hosts/" to="/ml-hosts" />
+    <Route
+      path="/ml-hosts/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-hosts/" to={`/ml-hosts${search}`} />
+      )}
+    />
   </Switch>
 ));
 
