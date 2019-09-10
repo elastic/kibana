@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '@kbn/elastic-idx';
-import { EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import {
   TRANSACTION_DURATION,
@@ -18,7 +17,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { asPercent, asTime } from '../../../../utils/formatters';
+import { asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
   StickyProperties
@@ -26,6 +25,7 @@ import {
 import { ErrorCountBadge } from './ErrorCountBadge';
 import { isRumAgentName } from '../../../../../common/agent_name';
 import { fontSize } from '../../../../style/variables';
+import { PercentOfTrace } from './PercentOfTrace';
 
 interface Props {
   transaction: Transaction;
@@ -96,22 +96,7 @@ export function StickyTransactionProperties({
           defaultMessage: '% of trace'
         }
       ),
-      val:
-        totalDuration !== undefined && duration > totalDuration ? (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
-              {
-                defaultMessage:
-                  'The % of trace exceeds 100% because this transaction takes longer than the root transaction.'
-              }
-            )}
-          >
-            <span>&gt;100%</span>
-          </EuiToolTip>
-        ) : (
-          asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL)
-        ),
+      val: <PercentOfTrace duration={duration} totalDuration={totalDuration} />,
       width: '25%'
     },
     {
@@ -131,7 +116,7 @@ export function StickyTransactionProperties({
       ),
       val: errorCount ? (
         <>
-          <ErrorCountBadge errorCount={errorCount} />
+          <ErrorCountBadge>{errorCount}</ErrorCountBadge>
           <ErrorTitle>
             &nbsp;
             {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
