@@ -72,10 +72,6 @@ export class AlertInstance {
     return this.state;
   }
 
-  getMeta() {
-    return this.meta;
-  }
-
   fire(actionGroup: string, context: Context = {}) {
     if (this.shouldFire()) {
       throw new Error('Alert instance already fired, cannot fire twice');
@@ -89,9 +85,8 @@ export class AlertInstance {
     return this;
   }
 
-  replaceMeta(meta: Meta) {
-    this.meta = meta;
-    return this;
+  updateLastFired(group: string) {
+    this.meta.lastFired = { group, date: new Date() };
   }
 
   /**

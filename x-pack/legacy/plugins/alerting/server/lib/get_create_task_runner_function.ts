@@ -134,14 +134,7 @@ export function getCreateTaskRunnerFunction({
 
             if (alertInstance.shouldFire(throttle)) {
               const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-              const previousMeta = alertInstance.getMeta();
-              alertInstance.replaceMeta({
-                ...previousMeta,
-                lastFired: {
-                  group: actionGroup,
-                  date: new Date(),
-                },
-              });
+              alertInstance.updateLastFired(actionGroup);
               alertInstance.resetFire();
               return fireHandler(actionGroup, context, state);
             }

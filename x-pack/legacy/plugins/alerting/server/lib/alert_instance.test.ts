@@ -101,14 +101,6 @@ describe('getState()', () => {
   });
 });
 
-describe('getMeta()', () => {
-  test('returns meta passed to constructor', () => {
-    const meta = {};
-    const alertInstance = new AlertInstance({ meta });
-    expect(alertInstance.getMeta()).toEqual(meta);
-  });
-});
-
 describe('fire()', () => {
   test('makes shouldFire() return true', () => {
     const alertInstance = new AlertInstance({
@@ -182,20 +174,17 @@ describe('replaceState()', () => {
   });
 });
 
-describe('replaceMeta()', () => {
-  test('replaces previous meta', () => {
+describe('updateLastFired()', () => {
+  test('replaces previous lastFired', () => {
     const alertInstance = new AlertInstance({ meta: {} });
-    expect(alertInstance.getMeta()).toEqual({});
-    alertInstance.replaceMeta({
-      lastFired: {
-        date: new Date(),
-        group: 'default',
-      },
-    });
-    expect(alertInstance.getMeta()).toEqual({
-      lastFired: {
-        date: new Date(),
-        group: 'default',
+    alertInstance.updateLastFired('default');
+    expect(alertInstance.toJSON()).toEqual({
+      state: {},
+      meta: {
+        lastFired: {
+          date: new Date(),
+          group: 'default',
+        },
       },
     });
   });
