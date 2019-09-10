@@ -10,9 +10,7 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import chrome from 'ui/chrome';
 
-import { i18n } from '@kbn/i18n';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -25,7 +23,6 @@ import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
-import { PageRoute } from '../../components/page_route/pageroute';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
@@ -33,7 +30,7 @@ import { MlHostConditionalContainer } from '../../components/ml/conditional_link
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 import { navTabs } from './home_navigations';
 import { UseUrlState } from '../../components/url_state';
-import { useGlobalLoading } from '../../utils/use_global_loading';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -64,10 +61,8 @@ NavGlobal.displayName = 'NavGlobal';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
-/** Returns true if we are running with the k7 design */
-const isK7Design = () => chrome.getUiSettingsClient().get('k7design');
 /** the global Kibana navigation at the top of every page */
-const globalHeaderHeightPx = isK7Design ? 48 : 0;
+const globalHeaderHeightPx = 48;
 
 const calculateFlyoutHeight = ({
   globalHeaderSize,
@@ -77,119 +72,110 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = pure(() => {
-  const isGlobalInitializing = useGlobalLoading();
-  return (
-    <AutoSizer detectAnyWindowResize={true} content>
-      {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-        <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
-          <Page data-test-subj="pageContainer">
-            <HelpMenu />
-            <WithSource sourceId="default">
-              {({ browserFields, indexPattern }) => (
-                <DragDropContextWrapper browserFields={browserFields}>
-                  <UseUrlState isInitializing={isGlobalInitializing} indexPattern={indexPattern} />
-                  <AutoSaveWarningMsg />
-                  <Flyout
+export const HomePage = pure(() => (
+  <AutoSizer detectAnyWindowResize={true} content>
+    {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
+      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
+        <Page data-test-subj="pageContainer">
+          <HelpMenu />
+          <WithSource sourceId="default">
+            {({ browserFields, indexPattern }) => (
+              <DragDropContextWrapper browserFields={browserFields}>
+                <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+                <AutoSaveWarningMsg />
+                <Flyout
+                  flyoutHeight={calculateFlyoutHeight({
+                    globalHeaderSize: globalHeaderHeightPx,
+                    windowHeight,
+                  })}
+                  headerHeight={flyoutHeaderHeight}
+                  timelineId="timeline-1"
+                  usersViewing={usersViewing}
+                >
+                  <StatefulTimeline
+                    flyoutHeaderHeight={flyoutHeaderHeight}
                     flyoutHeight={calculateFlyoutHeight({
                       globalHeaderSize: globalHeaderHeightPx,
                       windowHeight,
                     })}
-                    headerHeight={flyoutHeaderHeight}
-                    timelineId="timeline-1"
-                    usersViewing={usersViewing}
-                  >
-                    <StatefulTimeline
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      flyoutHeight={calculateFlyoutHeight({
-                        globalHeaderSize: globalHeaderHeightPx,
-                        windowHeight,
-                      })}
-                      id="timeline-1"
+                    id="timeline-1"
+                  />
+                </Flyout>
+
+                <EuiPageBody>
+                  <NavGlobal>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <SiemNavigation navTabs={navTabs} />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                          wrap={true}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <MlPopover />
+                          </EuiFlexItem>
+
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="add-data"
+                              href="kibana#home/tutorial_directory/siem"
+                              iconType="plusInCircle"
+                            >
+                              <FormattedMessage
+                                id="xpack.siem.global.addData"
+                                defaultMessage="Add data"
+                              />
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </NavGlobal>
+                  <Switch>
+                    <Redirect from="/" exact={true} to="/overview" />
+                    <Route path="/:pageName(overview)" render={() => <Overview />} />
+                    <Route
+                      path="/:pageName(hosts)"
+                      render={({ match, location }) => (
+                        <HostsContainer url={match.url} location={location} />
+                      )}
                     />
-                  </Flyout>
-
-                  <EuiPageBody>
-                    <NavGlobal>
-                      <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="m"
-                        justifyContent="spaceBetween"
-                      >
-                        <EuiFlexItem>
-                          <SiemNavigation navTabs={navTabs} />
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup
-                            alignItems="center"
-                            gutterSize="m"
-                            responsive={false}
-                            wrap={true}
-                          >
-                            <EuiFlexItem grow={false}>
-                              <MlPopover />
-                            </EuiFlexItem>
-
-                            <EuiFlexItem grow={false}>
-                              <EuiButton
-                                data-test-subj="add-data"
-                                href="kibana#home/tutorial_directory/siem"
-                                iconType="plusInCircle"
-                              >
-                                <FormattedMessage
-                                  id="xpack.siem.global.addData"
-                                  defaultMessage="Add data"
-                                />
-                              </EuiButton>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </NavGlobal>
-
-                    <Switch>
-                      <Redirect from="/" exact={true} to="/overview" />
-                      <Route
-                        path="/:pageName(overview)"
-                        render={props => (
-                          <PageRoute
-                            {...props}
-                            component={Overview}
-                            title={i18n.translate('xpack.siem.pages.home.overviewTitle', {
-                              defaultMessage: 'Overview',
-                            })}
-                          />
-                        )}
-                      />
-                      <Route path="/:pageName(hosts)" component={HostsContainer} />
-                      <Route path="/:pageName(network)" component={NetworkContainer} />
-                      <Route
-                        path="/:pageName(timelines)"
-                        render={props => (
-                          <PageRoute
-                            {...props}
-                            component={Timelines}
-                            title={i18n.translate('xpack.siem.pages.home.timelinesTitle', {
-                              defaultMessage: 'Timelines',
-                            })}
-                          />
-                        )}
-                      />
-                      <Route path="/link-to" component={LinkToPage} />
-                      <Route path="/ml-hosts" component={MlHostConditionalContainer} />
-                      <Route path="/ml-network" component={MlNetworkConditionalContainer} />
-                      <Route component={NotFoundPage} />
-                    </Switch>
-                  </EuiPageBody>
-                </DragDropContextWrapper>
-              )}
-            </WithSource>
-          </Page>
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
-  );
-});
+                    <Route
+                      path="/:pageName(network)"
+                      render={({ match, location }) => (
+                        <NetworkContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route path="/:pageName(timelines)" render={() => <Timelines />} />
+                    <Route path="/link-to" component={LinkToPage} />
+                    <Route
+                      path="/ml-hosts"
+                      render={({ match, location }) => (
+                        <MlHostConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route
+                      path="/ml-network"
+                      render={({ match, location }) => (
+                        <MlNetworkConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route component={NotFoundPage} />
+                  </Switch>
+                </EuiPageBody>
+              </DragDropContextWrapper>
+            )}
+          </WithSource>
+        </Page>
+        <SpyRoute />
+      </WrappedByAutoSizer>
+    )}
+  </AutoSizer>
+));
 
 HomePage.displayName = 'HomePage';
