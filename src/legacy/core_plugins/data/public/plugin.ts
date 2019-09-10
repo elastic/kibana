@@ -79,7 +79,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
 
-  private setupApi: DataSetup | null = null;
+  private setupApi!: DataSetup;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
@@ -106,10 +106,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
   public start(core: CoreStart, plugins: DataPluginStartDependencies) {
     return {
       ...this.setupApi!,
-      expressions: {
-        ...this.setupApi!.expressions,
-        ...this.expressions.start({ inspector: plugins.inspector }),
-      },
+      expressions: this.expressions.start({ inspector: plugins.inspector }),
     };
   }
 

@@ -23,7 +23,7 @@
     "tileMap": "src/legacy/core_plugins/tile_map",
     "timelion": "src/legacy/core_plugins/timelion",
     "visTypeTagCloud": "src/legacy/core_plugins/vis_type_tagcloud",
-    "tsvb": "src/legacy/core_plugins/metrics",
+    "visTypeTimeseries": "src/legacy/core_plugins/vis_type_timeseries",
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector",
     "kibana-react": "src/plugins/kibana_react",

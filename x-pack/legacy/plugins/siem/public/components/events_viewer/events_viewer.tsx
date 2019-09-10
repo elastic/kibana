@@ -162,6 +162,7 @@ export const EventsViewer = React.memo<Props>(
                               getUpdatedAt={getUpdatedAt}
                               hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                               height={footerHeight}
+                              isEventViewer={true}
                               isLive={isLive}
                               isLoading={loading}
                               itemsCount={events.length}

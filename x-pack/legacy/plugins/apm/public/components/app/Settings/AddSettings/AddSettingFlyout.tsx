@@ -22,6 +22,7 @@ import React, { useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { Config } from '../SettingsList';
@@ -79,9 +80,7 @@ export function AddSettingsFlyout({
     { preservePreviousData: false }
   );
 
-  const isSampleRateValid = transactionSampleRateRt
-    .decode(sampleRate)
-    .isRight();
+  const isSampleRateValid = isRight(transactionSampleRateRt.decode(sampleRate));
 
   const isSelectedEnvironmentValid = environments.some(
     env =>
