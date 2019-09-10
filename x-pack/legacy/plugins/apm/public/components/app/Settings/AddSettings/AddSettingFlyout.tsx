@@ -25,10 +25,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
-import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../services/rest/callApmApi';
+import { Config } from '..';
 
 interface Props {
   onClose: () => void;
