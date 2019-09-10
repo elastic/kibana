@@ -55,10 +55,10 @@ export function compatibilityShimFactory(server, logger) {
         throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
       }
       if (!savedObjectId && !relativeUrls) {
-        throw new Error(`either relativeUrls or savedObjectId must be provided`);
+        throw new Error(`Either relativeUrls or savedObjectId must be provided`);
       }
 
-      if (typeof savedObjectId !== 'string') {
+      if (savedObjectId && typeof savedObjectId !== 'string') {
         throw new Error('Invalid savedObjectId (deprecated). String is expected.');
       }
 
