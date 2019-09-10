@@ -103,6 +103,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
+    loading: PropTypes.bool.isRequired,
     modelPlotEnabled: PropTypes.bool.isRequired,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
@@ -202,6 +203,10 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidUpdate() {
+    if (this.props.loading) {
+      return;
+    }
+
     if (this.props.renderFocusChartOnly === false) {
       this.renderChart();
       this.drawContextChartSelection();
@@ -1062,6 +1067,15 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
       const selectionMin = selectedBounds[0].getTime();
       const selectionMax = selectedBounds[1].getTime();
+
+      // Avoid triggering an update if bounds haven't changed
+      if (
+        that.selectedBounds !== undefined &&
+        that.selectedBounds.min.valueOf() === selectionMin &&
+        that.selectedBounds.max.valueOf() === selectionMax
+      ) {
+        return;
+      }
 
       // Set the color of the swimlane cells according to whether they are inside the selection.
       contextGroup.selectAll('.swimlane-cell')
