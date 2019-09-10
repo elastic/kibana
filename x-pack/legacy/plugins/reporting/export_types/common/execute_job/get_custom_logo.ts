@@ -5,14 +5,15 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
+import { ConditionalHeaders, KbnServer } from '../../../types';
+import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
   job,
   conditionalHeaders,
   server,
 }: {
-  job: JobDocPayload;
+  job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
   server: KbnServer;
 }) => {

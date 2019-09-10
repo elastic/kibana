@@ -28,7 +28,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
     if (isEmpty(val)) {
       return '""';
     }
-    return val.split(' ').length > 1 ? `"${escapeKuery(val)}"` : escapeKuery(val);
+    return `"${escapeKuery(val)}"`;
   }
 
   return val;
@@ -52,7 +52,7 @@ const escapeWhitespace = (val: string) =>
     .replace(/\n/g, '\\n');
 
 // See the SpecialCharacter rule in kuery.peg
-const escapeSpecialCharacters = (val: string) => val.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
 
 // See the Keyword rule in kuery.peg
 const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
