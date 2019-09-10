@@ -60,7 +60,8 @@ interface SuperDatePickerStateRedux {
   start: number;
   end: number;
   isLoading: boolean;
-  queries: inputsModel.GlobalQuery[];
+  queries: inputsModel.GlobalGraphqlQuery[];
+  kqlQuery: inputsModel.GlobalKqlQuery;
 }
 
 interface UpdateReduxTime extends OnTimeChangeProps {
@@ -150,7 +151,7 @@ export const SuperDatePickerComponent = class extends Component<
       id: this.props.id,
       isInvalid: false,
       isQuickSelection: this.state.isQuickSelection,
-      kql: this.props.queries.find(q => q.id === 'kql') as inputsModel.GlobalKqlQuery,
+      kql: this.props.kqlQuery,
       start,
       timelineId: this.props.timelineId,
     });
@@ -201,7 +202,7 @@ export const SuperDatePickerComponent = class extends Component<
         id: this.props.id,
         isInvalid,
         isQuickSelection,
-        kql: this.props.queries.find(q => q.id === 'kql') as inputsModel.GlobalKqlQuery,
+        kql: this.props.kqlQuery,
         start,
         timelineId: this.props.timelineId,
       });
@@ -308,7 +309,8 @@ export const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      queries: getQueriesSelector(inputsRange).filter(q => q.id !== 'kql'),
+      kqlQuery: getQueriesSelector(inputsRange).find(q => q.id === 'kql'),
     };
   };
 };

@@ -59,19 +59,11 @@ interface HostsFilterDispatchProps {
   }>;
 }
 
-interface HostsFilterState {
-  isInitialization: boolean;
-}
-
 export type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
 
-class HostsFilterComponent extends React.PureComponent<HostsFilterProps, HostsFilterState> {
+class HostsFilterComponent extends React.PureComponent<HostsFilterProps> {
   private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
   private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
-
-  public readonly state = {
-    isInitialization: true,
-  };
 
   constructor(props: HostsFilterProps) {
     super(props);
@@ -87,8 +79,7 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps, HostsFi
     const { indexPattern, hostsFilterQueryDraft, kueryFilterQuery, setQuery, type } = this.props;
     if (
       setQuery &&
-      (this.state.isInitialization ||
-        !isEqual(prevProps.hostsFilterQueryDraft, hostsFilterQueryDraft) ||
+      (!isEqual(prevProps.hostsFilterQueryDraft, hostsFilterQueryDraft) ||
         !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
         prevProps.type !== type)
     ) {
@@ -104,9 +95,6 @@ class HostsFilterComponent extends React.PureComponent<HostsFilterProps, HostsFi
           type,
         }),
       });
-      if (this.state.isInitialization) {
-        this.setState({ isInitialization: false });
-      }
     }
   }
 

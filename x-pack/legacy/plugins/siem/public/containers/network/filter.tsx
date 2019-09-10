@@ -61,17 +61,9 @@ interface NetworkFilterDispatchProps {
 
 export type NetworkFilterProps = OwnProps & NetworkFilterReduxProps & NetworkFilterDispatchProps;
 
-interface NetworkFilterState {
-  isInitialization: boolean;
-}
-
-class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps, NetworkFilterState> {
+class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps> {
   private memoizedApplyFilterQueryFromKueryExpression: (expression: string) => void;
   private memoizedSetFilterQueryDraftFromKueryExpression: (expression: string) => void;
-
-  public readonly state = {
-    isInitialization: true,
-  };
 
   constructor(props: NetworkFilterProps) {
     super(props);
@@ -88,8 +80,7 @@ class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps, Net
 
     if (
       setQuery &&
-      (this.state.isInitialization ||
-        !isEqual(prevProps.networkFilterQueryDraft, networkFilterQueryDraft) ||
+      (!isEqual(prevProps.networkFilterQueryDraft, networkFilterQueryDraft) ||
         !isEqual(prevProps.kueryFilterQuery, kueryFilterQuery) ||
         prevProps.type !== type)
     ) {
@@ -105,10 +96,6 @@ class NetworkFilterComponent extends React.PureComponent<NetworkFilterProps, Net
           type,
         }),
       });
-
-      if (this.state.isInitialization) {
-        this.setState({ isInitialization: false });
-      }
     }
   }
 

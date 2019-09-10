@@ -65,11 +65,11 @@ export interface GlobalGenericQuery {
 }
 
 export interface GlobalGraphqlQuery extends GlobalGenericQuery {
-  id: string | 'kql';
-  refetch: null | Refetch | RefetchWithParams | RefetchKql;
+  id: string;
+  refetch: null | Refetch | RefetchWithParams;
 }
 export interface GlobalKqlQuery extends GlobalGenericQuery {
-  id: string | 'kql';
+  id: 'kql';
   refetch: RefetchKql;
 }
 
