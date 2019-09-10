@@ -65,27 +65,32 @@ export function createTileMapTypeDefinition(dependencies) {
     editorConfig: {
       collections: {
         colorSchemas,
-        legendPositions: [{
-          value: 'bottomleft',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
-            defaultMessage: 'Bottom left',
-          }),
-        }, {
-          value: 'bottomright',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
-            defaultMessage: 'Bottom right',
-          }),
-        }, {
-          value: 'topleft',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
-            defaultMessage: 'Top left',
-          }),
-        }, {
-          value: 'topright',
-          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
-            defaultMessage: 'Top right',
-          }),
-        }],
+        legendPositions: [
+          {
+            value: 'bottomleft',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
+              defaultMessage: 'Bottom left',
+            }),
+          },
+          {
+            value: 'bottomright',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
+              defaultMessage: 'Bottom right',
+            }),
+          },
+          {
+            value: 'topleft',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
+              defaultMessage: 'Top left',
+            }),
+          },
+          {
+            value: 'topright',
+            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
+              defaultMessage: 'Top right',
+            }),
+          },
+        ],
         mapTypes: [
           {
             value: MapTypes.ScaledCircleMarkers,
@@ -114,7 +119,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: (props) => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: props => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -125,9 +130,7 @@ export function createTileMapTypeDefinition(dependencies) {
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' },
-          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',

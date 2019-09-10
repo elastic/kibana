@@ -18,6 +18,7 @@ export const withLogPosition = connect(
   (state: State) => ({
     firstVisiblePosition: logPositionSelectors.selectFirstVisiblePosition(state),
     isAutoReloading: logPositionSelectors.selectIsAutoReloading(state),
+    isScrollLocked: logPositionSelectors.selectAutoReloadScrollLock(state),
     lastVisiblePosition: logPositionSelectors.selectFirstVisiblePosition(state),
     targetPosition: logPositionSelectors.selectTargetPosition(state),
     urlState: selectPositionUrlState(state),
@@ -31,6 +32,8 @@ export const withLogPosition = connect(
     reportVisiblePositions: logPositionActions.reportVisiblePositions,
     startLiveStreaming: logPositionActions.startAutoReload,
     stopLiveStreaming: logPositionActions.stopAutoReload,
+    scrollLockLiveStreaming: logPositionActions.lockAutoReloadScroll,
+    scrollUnlockLiveStreaming: logPositionActions.unlockAutoReloadScroll,
   })
 );
 
@@ -65,7 +68,7 @@ export const WithLogPositionUrlState = () => (
             jumpToTargetPosition(newUrlState.position);
           }
           if (newUrlState && newUrlState.streamLive) {
-            startLiveStreaming(5000);
+            startLiveStreaming();
           } else if (
             newUrlState &&
             typeof newUrlState.streamLive !== 'undefined' &&
@@ -81,7 +84,7 @@ export const WithLogPositionUrlState = () => (
             jumpToTargetPositionTime(Date.now());
           }
           if (initialUrlState && initialUrlState.streamLive) {
-            startLiveStreaming(5000);
+            startLiveStreaming();
           }
         }}
       />

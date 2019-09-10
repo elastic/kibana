@@ -17,55 +17,41 @@
  * under the License.
  */
 
-import { FiltersService, FiltersSetup } from './filters';
-import { TypesService, TypesSetup } from './types';
-
-class VisualizationsPlugin {
-  private readonly filters: FiltersService;
-  private readonly types: TypesService;
-
-  constructor() {
-    this.filters = new FiltersService();
-    this.types = new TypesService();
-  }
-
-  public setup() {
-    return {
-      filters: this.filters.setup(),
-      types: this.types.setup(),
-    };
-  }
-
-  public stop() {
-    this.filters.stop();
-    this.types.stop();
-  }
-}
+/**
+ * Static legacy code which hasn't been moved to this plugin yet, but
+ * should be eventually.
+ *
+ * @public
+ */
+// @ts-ignore Used only by tsvb, vega, input control vis
+export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+// @ts-ignore
+export { visFactory } from 'ui/vis/vis_factory';
+// @ts-ignore
+export { DefaultEditorSize } from 'ui/vis/editor_size';
 
 /**
- * We export visualizations here so that users importing from 'plugins/visualizations'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
+ * Legacy types which haven't been moved to this plugin yet, but
+ * should be eventually.
+ *
+ * @public
  */
-export const visualizations = new VisualizationsPlugin().setup();
+import * as types from 'ui/vis/vis';
+export type Vis = types.Vis;
+export type VisParams = types.VisParams;
+export type VisProvider = types.VisProvider;
+export type VisState = types.VisState;
+export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
+export { VisTypesRegistry } from 'ui/registry/vis_types';
+export { Status } from 'ui/vis/update_status';
 
-/** @public */
-export interface VisualizationsSetup {
-  filters: FiltersSetup;
-  types: TypesSetup;
-}
+/**
+ * Static np-ready code, re-exported here so consumers can import from
+ * `src/legacy/core_plugins/visualizations/public`
+ *
+ * @public
+ */
+export * from './np_ready';
 
-/** @public types */
-export {
-  Vis,
-  visFactory,
-  DefaultEditorSize,
-  VisParams,
-  VisProvider,
-  VisState,
-  // VisualizationController,
-  // VisType,
-  VisTypeAlias,
-  VisTypesRegistry,
-  Status,
-} from './types';
+// for backwards compatibility with 7.3
+export { setup as visualizations } from './legacy';

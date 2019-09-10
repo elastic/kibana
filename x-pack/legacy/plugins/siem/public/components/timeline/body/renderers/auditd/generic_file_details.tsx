@@ -128,10 +128,11 @@ interface GenericDetailsProps {
   contextId: string;
   text: string;
   fileIcon: IconType;
+  timelineId: string;
 }
 
 export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
-  ({ data, contextId, text, fileIcon = 'document' }) => {
+  ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -171,7 +172,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
             result={result}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} />
+          <NetflowRenderer data={data} timelineId={timelineId} />
         </Details>
       );
     } else {
