@@ -80,7 +80,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
     setMultipleValidity('yExtents', isValid);
 
     return () => setMultipleValidity('yExtents', true);
-  }, [isValid, setMultipleValidity]);
+  }, [isValid]);
 
   return (
     <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth compressed>
