@@ -6,6 +6,14 @@
   <div class="gphGraph__menus" ng-show="menus.showSettings">
     <graph-settings ng-show="menus.showSettings"></graph-settings>
   </div>
+
+  <graph-search-bar
+    current-index-pattern="selectedIndex"
+    on-index-pattern-selected="uiSelectIndex"
+    on-query-submit="submit"
+    saved-objects="pluginDependencies.savedObjects"
+    ui-settings="pluginDependencies.uiSettings"
+  ></graph-search-bar>
     
   <div class="gphGraph__bar">
     <div class="gphGraph__flexGroup">

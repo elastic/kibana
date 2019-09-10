@@ -41,6 +41,7 @@ import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
+import { GraphSearchBar } from './components/graph_search_bar';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -58,6 +59,7 @@ import {
 } from './angular/services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { save } from  './services/save';
+import { openIndexPatternModal } from './services/source';
 
 import settingsTemplate from './angular/templates/settings.html';
 
@@ -88,6 +90,16 @@ app.directive('focusOn', function () {
 
 app.directive('graphListing', function (reactDirective) {
   return reactDirective(GraphListing);
+});
+
+app.directive('graphSearchBar', function (reactDirective) {
+  return reactDirective(GraphSearchBar, [
+    ['currentIndexPattern', { watchDepth: 'reference' }],
+    ['onIndexPatternSelected', { watchDepth: 'reference' }],
+    ['onQuerySubmit', { watchDepth: 'reference' }],
+    ['savedObjects', { watchDepth: 'reference' }],
+    ['uiSettings', { watchDepth: 'reference' }]
+  ]);
 });
 
 if (uiRoutes.enable) {
@@ -238,6 +250,8 @@ app.controller('graphuiPlugin', function (
   $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
   $scope.searchTerm = '';
 
+  $scope.pluginDependencies = npStart.core;
+
   //So scope properties can be used consistently with ng-model
   $scope.grr = $scope;
 
@@ -374,11 +388,9 @@ app.controller('graphuiPlugin', function (
     }), confirmModalOptions);
   }
 
-  $scope.uiSelectIndex = function () {
+  $scope.uiSelectIndex = function (proposedIndex) {
     canWipeWorkspace(function () {
-      $scope.indexSelected($scope.proposedIndex);
-    }, function () {
-      $scope.proposedIndex = $scope.selectedIndex;
+      $scope.indexSelected(proposedIndex);
     });
   };
 
@@ -491,13 +503,13 @@ app.controller('graphuiPlugin', function (
       .catch(handleHttpError);
   };
 
-  $scope.submit = function () {
+  $scope.submit = function (searchTerm) {
     $scope.hideAllConfigPanels();
     initWorkspaceIfRequired();
     const numHops = 2;
-    if ($scope.searchTerm.startsWith('{')) {
+    if (searchTerm.startsWith('{')) {
       try {
-        const query = JSON.parse($scope.searchTerm);
+        const query = JSON.parse(searchTerm);
         if (query.vertices) {
           // Is a graph explore request
           $scope.workspace.callElasticsearch(query);
@@ -511,7 +523,7 @@ app.controller('graphuiPlugin', function (
       }
       return;
     }
-    $scope.workspace.simpleSearch($scope.searchTerm, $scope.liveResponseFields, numHops);
+    $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
   };
 
   $scope.clearWorkspace = function () {
@@ -1082,6 +1094,9 @@ app.controller('graphuiPlugin', function (
   }else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
+      openIndexPatternModal(npStart.core, indexPattern => {
+        $scope.indexSelected(indexPattern);
+      });
     });
   }
 
