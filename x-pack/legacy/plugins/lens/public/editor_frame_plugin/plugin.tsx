@@ -9,7 +9,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
-import { start as embeddableStart } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   setup as dataSetup,
   start as dataStart,
@@ -28,12 +29,11 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  chrome: Chrome;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
-  embeddables: typeof embeddableStart;
+  embeddables: ReturnType<EmbeddablePlugin['start']>;
   chrome: Chrome;
 }
 
@@ -117,15 +117,14 @@ const editorFrame = new EditorFramePlugin();
 
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
-    data: dataStart,
-    chrome,
+    data: dataSetup,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(null, {
     data: dataStart,
     chrome,
-    embeddables: embeddableStart,
+    embeddables: embeddablePlugin,
   });
 
 export const editorFrameStop = () => editorFrame.stop();

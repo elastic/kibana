@@ -5,8 +5,10 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { logWrapper } from './log_wrapper';
 
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
@@ -19,7 +21,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'timePicker',
   ]);
 
-  return {
+  return logWrapper('lensPage', log, {
     /**
      * Clicks the index pattern filters toggle.
      */
@@ -133,5 +135,5 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     getTitle() {
       return testSubjects.getAttribute('lns_ChartTitle', 'value');
     },
-  };
+  });
 }

@@ -105,10 +105,6 @@ export function createMockSetupDependencies() {
       expressions: {
         registerFunction: jest.fn(),
         registerRenderer: jest.fn(),
-        ExpressionRenderer: jest.fn(() => null),
-      },
-      indexPatterns: {
-        indexPatterns: {},
       },
     },
     chrome: {
