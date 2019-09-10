@@ -5,9 +5,6 @@
  */
 
 import { InternalCoreSetup } from 'src/core/server';
+import { KibanaCore } from './lib/adapters/framework';
 
-export type CoreSetupWithPlugins = InternalCoreSetup & {
-  elasticsearch: any;
-  xpackMain: any;
-  usageCollector: 
-}
+export type CoreSetupWithPlugins = InternalCoreSetup & KibanaCore;

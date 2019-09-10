@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, InternalCoreSetup } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { initServerWithKibana } from './kibana.index';
+import { CoreSetupWithPlugins } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin();
 }
 
 export class Plugin {
-  public setup(core: InternalCoreSetup) {
+  public setup(core: CoreSetupWithPlugins) {
     initServerWithKibana(core);
   }
 }
