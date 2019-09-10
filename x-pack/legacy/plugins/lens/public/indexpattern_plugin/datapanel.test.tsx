@@ -582,4 +582,99 @@ describe('IndexPattern Data Panel', () => {
       expect(emptyFieldsTestProps.onToggleEmptyFields).toHaveBeenCalled();
     });
   });
+
+  describe('showing field information in a popover', () => {
+    let fieldInfoProps: typeof defaultProps;
+
+    beforeEach(() => {
+      (npStartMock.core.http.post as jest.Mock).mockClear();
+
+      fieldInfoProps = {
+        ...defaultProps,
+        indexPatterns: {
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            timeFieldName: 'timestamp',
+            hasExistence: true,
+            fields: [
+              {
+                name: 'timestamp',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+                exists: true,
+              },
+              {
+                name: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                exists: true,
+              },
+              {
+                name: 'memory',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                exists: true,
+              },
+              {
+                name: 'unsupported',
+                type: 'geo',
+                aggregatable: true,
+                searchable: true,
+                exists: true,
+              },
+              {
+                name: 'source',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+                exists: true,
+              },
+            ],
+          },
+        },
+      };
+    });
+
+    it('opens a popover with number stats', async () => {
+      (npStartMock.core.http.post as jest.Mock).mockResolvedValue({
+        timestamp: {
+          exists: true,
+          cardinality: 500,
+          count: 500,
+        },
+      });
+      const wrapper = mount(<InnerIndexPatternDataPanel {...fieldInfoProps} />);
+
+      await waitForPromises();
+
+      wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+
+      expect(npStartMock.core.http.post as jest.Mock).toHaveBeenCalledWith(
+        `/api/lens/index_stats/my-fake-index-pattern/field`,
+        {
+          body: JSON.stringify({
+            query: {
+              bool: { filter: [] },
+            },
+            earliest: 'now-7d',
+            latest: 'now',
+            timeFieldName: 'timestamp',
+            field: {
+              name: 'bytes',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              exists: true,
+            },
+          }),
+        }
+      );
+
+      expect(wrapper.find('[data-test-subj="lnsFieldListPanel-histogram"]')).toBeTruthy();
+    });
+  });
 });
