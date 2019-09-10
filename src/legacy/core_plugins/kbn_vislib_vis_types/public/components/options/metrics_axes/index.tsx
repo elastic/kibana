@@ -196,13 +196,18 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       setValue('valueAxes', newValueAxes);
 
-      const chartIndex = stateParams.seriesParams.findIndex(
-        ({ valueAxis }) => axis.id === valueAxis
-      );
+      let isSeriesUpdated = false;
+      const series = stateParams.seriesParams.map((ser, index) => {
+        if (axis.id === ser.valueAxis) {
+          isSeriesUpdated = true;
+          return { ...ser, valueAxis: newValueAxes[0].id };
+        }
+        return { ...ser };
+      });
 
-      if (chartIndex !== -1) {
-        // if a seriesParam has valueAxis equals to removed one, then we reset it to the first valueAxis
-        setParamByIndex('seriesParams', chartIndex, 'valueAxis', newValueAxes[0].id);
+      if (isSeriesUpdated) {
+        // if seriesParams have valueAxis equals to removed one, then we reset it to the first valueAxis
+        setValue('seriesParams', series);
       }
     },
     [stateParams.seriesParams, stateParams.valueAxes, setParamByIndex, setValue]
