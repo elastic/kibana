@@ -31,7 +31,7 @@ exports[`render file item 1`] = `
       className="codeSearch-suggestion--inner"
     >
       <div
-        className="codeSearch__suggestion-text-container"
+        className="codeSearch__suggestionTextContainer"
       >
         <div
           className="codeSearch__suggestion-text"
@@ -87,7 +87,7 @@ exports[`render repository item 1`] = `
       className="codeSearch-suggestion--inner"
     >
       <div
-        className="codeSearch__suggestion-text-container"
+        className="codeSearch__suggestionTextContainer"
       >
         <div
           className="codeSearch__suggestion-text"
@@ -171,7 +171,7 @@ exports[`render symbol item 1`] = `
         </EuiToken>
       </div>
       <div
-        className="codeSearch__suggestion-text-container"
+        className="codeSearch__suggestionTextContainer"
       >
         <div
           className="codeSearch__suggestion-text"

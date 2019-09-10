@@ -273,7 +273,7 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                     </div>
                     <div
-                      className="codeSearch__suggestion-text-container"
+                      className="codeSearch__suggestionTextContainer"
                     >
                       <div
                         className="codeSearch__suggestion-text"
@@ -407,7 +407,7 @@ exports[`render full suggestions component 1`] = `
                     className="codeSearch-suggestion--inner"
                   >
                     <div
-                      className="codeSearch__suggestion-text-container"
+                      className="codeSearch__suggestionTextContainer"
                     >
                       <div
                         className="codeSearch__suggestion-text"
@@ -536,7 +536,7 @@ exports[`render full suggestions component 1`] = `
                     className="codeSearch-suggestion--inner"
                   >
                     <div
-                      className="codeSearch__suggestion-text-container"
+                      className="codeSearch__suggestionTextContainer"
                     >
                       <div
                         className="codeSearch__suggestion-text"
@@ -582,7 +582,7 @@ exports[`render full suggestions component 1`] = `
                     className="codeSearch-suggestion--inner"
                   >
                     <div
-                      className="codeSearch__suggestion-text-container"
+                      className="codeSearch__suggestionTextContainer"
                     >
                       <div
                         className="codeSearch__suggestion-text"
