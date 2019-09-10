@@ -195,7 +195,9 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
           })}
         >
           <div>
-            <div style={{ float: 'left' }}>{this.props.space.imageFilename}</div>
+            <div style={{ float: 'left', overflowWrap: 'break-word', width: '80%' }}>
+              {this.props.space.imageFilename}
+            </div>
             <div style={{ float: 'right' }}>
               <EuiButtonIcon
                 iconType="trash"
