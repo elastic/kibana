@@ -79,9 +79,10 @@ export function ActionBar({
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === 'successors';
   const [newDocCount, setNewDocCount] = useState(docCount);
-  const onSubmit = (ev: any) => {
+  const isValid = (value: number) => value >= MIN_CONTEXT_SIZE && value <= MAX_CONTEXT_SIZE;
+  const onSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
-    if (newDocCount !== docCount) {
+    if (newDocCount !== docCount && isValid(newDocCount)) {
       onChangeCount(newDocCount);
     }
   };
@@ -100,8 +101,10 @@ export function ActionBar({
             isLoading={isLoading}
             onClick={() => {
               const value = newDocCount + defaultStepSize;
-              setNewDocCount(value);
-              onChangeCount(value);
+              if (isValid(value)) {
+                setNewDocCount(value);
+                onChangeCount(value);
+              }
             }}
             flush="right"
           >
@@ -129,7 +132,7 @@ export function ActionBar({
                 setNewDocCount(ev.target.valueAsNumber);
               }}
               onBlur={() => {
-                if (newDocCount !== docCount) {
+                if (newDocCount !== docCount && isValid(newDocCount)) {
                   onChangeCount(newDocCount);
                 }
               }}
