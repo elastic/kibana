@@ -17,7 +17,7 @@ jest.mock('./framework');
 function generateJWTToken(): string {
   return sign(
     {
-      config: {
+      policy: {
         id: 'policyId',
         sharedId: 'sharedId',
       },
@@ -43,7 +43,7 @@ describe('Token Lib', () => {
         type: TokenType.ENROLMENT_TOKEN,
         active: true,
         tokenHash,
-        config: { id: 'policyId', sharedId: 'sharedId' },
+        policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -62,7 +62,7 @@ describe('Token Lib', () => {
         type: TokenType.ENROLMENT_TOKEN,
         active: false,
         tokenHash,
-        config: { id: 'policyId', sharedId: 'sharedId' },
+        policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 

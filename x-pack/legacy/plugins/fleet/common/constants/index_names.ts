@@ -6,8 +6,6 @@
 
 export const INDEX_NAMES = {
   FLEET: '.fleet',
-  AGENTS: '.fleet-agent',
-  TOKENS: '.fleet-tokens',
 };
 
 export const POLICY_NAMES = {};

@@ -61,7 +61,7 @@ describe('Token Adapter', () => {
         active: true,
         type: TokenType.ACCESS_TOKEN,
         tokenHash: 'qwerty',
-        config: { id: 'policyId', sharedId: 'sharedId' },
+        policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const soToken = (await soAdapter.get<Token>('tokens', token.id)) as SavedObject;
       expect(token).toBeDefined();

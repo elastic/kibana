@@ -36,11 +36,11 @@ export function fleet(kibana: any) {
       savedObjectSchemas: {
         agents: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.AGENTS,
+          indexPattern: INDEX_NAMES.FLEET,
         },
         tokens: {
           isNamespaceAgnostic: true,
-          indexPattern: INDEX_NAMES.TOKENS,
+          indexPattern: INDEX_NAMES.FLEET,
         },
       },
       mappings,

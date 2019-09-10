@@ -33,7 +33,7 @@ export class AgentLib {
     if (!verifyResponse.valid) {
       throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
-    const policy = verifyResponse.token.config;
+    const policy = verifyResponse.token.policy;
 
     const existingAgent = sharedId ? await this.agentAdater.getBySharedId(sharedId) : null;
 

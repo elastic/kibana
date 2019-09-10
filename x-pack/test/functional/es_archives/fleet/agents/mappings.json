@@ -100,7 +100,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".fleet-token",
+    "index": ".fleet-tokens",
     "mappings": {
       "dynamic": "strict",
       "properties": {
