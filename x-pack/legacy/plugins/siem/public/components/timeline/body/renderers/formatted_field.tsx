@@ -14,10 +14,8 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../helpers';
 import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
-import { TruncatableText } from '../../../truncatable_text';
 
 import {
   DATE_FIELD_TYPE,
@@ -86,13 +84,7 @@ export const FormattedFieldValue = pure<{
           </EuiFlexGroup>
         }
       >
-        <TruncatableText
-          data-test-subj="truncatable-message"
-          size="s"
-          width={width != null ? width : `${DEFAULT_COLUMN_MIN_WIDTH}px`}
-        >
-          {value}
-        </TruncatableText>
+        <span data-test-subj="truncatable-message">{value}</span>
       </EuiToolTip>
     );
   } else {
