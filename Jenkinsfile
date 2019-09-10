@@ -143,8 +143,12 @@ def legacyJobRunner(name) {
             try {
               runbld '.ci/run.sh'
             } finally {
-              uploadAllGcsArtifacts(name)
-              publishJunit()
+              catchError {
+                uploadAllGcsArtifacts(name)
+              }
+              catchError {
+                publishJunit()
+              }
             }
           }
         }
