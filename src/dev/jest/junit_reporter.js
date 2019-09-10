@@ -105,8 +105,11 @@ export default class JestJUnitReporter {
 
     const reportPath = resolve(
       rootDirectory,
-      `target/junit/TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
+      'target/junit',
+      process.env.JOB || '.',
+      `TEST-${reportName}.xml`
     );
+
     const reportXML = root.end({
       pretty: true,
       indent: '  ',
