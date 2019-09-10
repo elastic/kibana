@@ -53,7 +53,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param isMouseClick if 'true', click will be done with mouse
      * @param element element that wraps up option
      */
-    private async clickOption(isMouseClick: boolean, element: WebElementWrapper) {
+     private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
       return isMouseClick ? await element.clickMouseButton() : await element.click();
     }
 
@@ -106,7 +106,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxSelector data-test-subj selector
      * @param value option text
      */
-    public async setCustom(comboBoxSelector: string, value: string) {
+    public async setCustom(comboBoxSelector: string, value: string): Promise<void> {
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
       await this.setFilterValue(comboBoxElement, value);
@@ -120,7 +120,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxSelector data-test-subj selector
      * @param filterValue text
      */
-    public async filterOptionsList(comboBoxSelector: string, filterValue: string) {
+    public async filterOptionsList(comboBoxSelector: string, filterValue: string): Promise<void> {
       log.debug(
         `comboBox.filterOptionsList, comboBoxSelector: ${comboBoxSelector}, filter: ${filterValue}`
       );
