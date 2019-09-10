@@ -12,6 +12,9 @@ import uuid from 'uuid';
 
 import { SavedObjectsFindOptions } from 'src/core/server';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { Pick3 } from '../../../common/utility_types';
 import {
   PageInfoNote,
@@ -215,16 +218,18 @@ const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>
-  NoteSavedObjectRuntimeType.decode(savedObject)
-    .map(savedNote => ({
+  pipe(
+    NoteSavedObjectRuntimeType.decode(savedObject),
+    map(savedNote => ({
       noteId: savedNote.id,
       version: savedNote.version,
       timelineVersion,
       ...savedNote.attributes,
-    }))
-    .getOrElseL(errors => {
+    })),
+    fold(errors => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {

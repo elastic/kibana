@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { SavedObject, SavedObjectsService } from 'src/core/server';
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../../plugins/features/server';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
