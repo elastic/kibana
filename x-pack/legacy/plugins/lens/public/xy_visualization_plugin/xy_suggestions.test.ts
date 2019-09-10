@@ -64,6 +64,10 @@ describe('xy_suggestions', () => {
     }));
   }
 
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('ignores invalid combinations', () => {
     const unknownCol = () => {
       const str = strCol('foo');
@@ -113,17 +117,17 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "seriesType": "area_stacked",
-          "splitAccessor": "aaa",
-          "x": "date",
-          "y": Array [
-            "bytes",
-          ],
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "seriesType": "area_stacked",
+                "splitAccessor": "aaa",
+                "x": "date",
+                "y": Array [
+                  "bytes",
+                ],
+              },
+            ]
+        `);
   });
 
   test('does not suggest multiple splits', () => {
@@ -157,18 +161,18 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "seriesType": "area_stacked",
-          "splitAccessor": "product",
-          "x": "date",
-          "y": Array [
-            "price",
-            "quantity",
-          ],
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "seriesType": "area_stacked",
+                "splitAccessor": "product",
+                "x": "date",
+                "y": Array [
+                  "price",
+                  "quantity",
+                ],
+              },
+            ]
+        `);
   });
 
   test('uses datasource provided title if available', () => {
@@ -253,7 +257,7 @@ describe('xy_suggestions', () => {
       state: currentState,
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(1);
     expect(suggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'area',
@@ -289,12 +293,92 @@ describe('xy_suggestions', () => {
       state: currentState,
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(1);
     expect(suggestion.state).toEqual({
       ...currentState,
       isHorizontal: true,
     });
     expect(suggestion.title).toEqual('Flip');
+  });
+
+  test('suggests a stacked chart for unchanged table and unstacked chart', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [_, suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'bar_stacked',
+        },
+      ],
+    });
+    expect(suggestion.title).toEqual('Stacked');
+  });
+
+  test('keeps column to dimension mappings on extended tables', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product'), strCol('category')],
+        layerId: 'first',
+        changeType: 'extended',
+      },
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'product',
+          splitAccessor: 'category',
+        },
+      ],
+    });
   });
 
   test('handles two numeric values', () => {
@@ -309,17 +393,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "seriesType": "bar_stacked",
-          "splitAccessor": "ddd",
-          "x": "quantity",
-          "y": Array [
-            "price",
-          ],
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "seriesType": "bar_stacked",
+                "splitAccessor": "ddd",
+                "x": "quantity",
+                "y": Array [
+                  "price",
+                ],
+              },
+            ]
+        `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -348,9 +432,9 @@ describe('xy_suggestions', () => {
         Object {
           "seriesType": "bar_stacked",
           "splitAccessor": "eee",
-          "x": "num votes",
+          "x": "mybool",
           "y": Array [
-            "mybool",
+            "num votes",
           ],
         },
       ]
