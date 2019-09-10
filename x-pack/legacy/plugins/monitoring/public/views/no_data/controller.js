@@ -67,6 +67,7 @@ export class NoDataController {
       new NodeSettingsChecker($http)
     ];
     const enabler = new Enabler($http, updateModel);
+    const changePath = path => kbnUrl.changePath(path);
 
     $scope.$$postDigest(() => {
       startChecks(checkers, updateModel); // Start the checkers that use APIs for finding the reason for no data
@@ -77,7 +78,7 @@ export class NoDataController {
       props => {
         render(
           <I18nContext>
-            <NoData {...props} enabler={enabler} />
+            <NoData {...props} enabler={enabler} changePath={changePath} />
           </I18nContext>,
           document.getElementById(REACT_NODE_ID_NO_DATA)
         );

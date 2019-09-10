@@ -116,26 +116,19 @@ export const disableElasticsearchInternalCollection = async () => {
 };
 
 export const toggleSetupMode = inSetupMode => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      checkAngularState();
-    } catch (err) {
-      return reject(err);
-    }
+  checkAngularState();
 
-    const globalState = angularState.injector.get('globalState');
-    setupModeState.enabled = inSetupMode;
-    globalState.inSetupMode = inSetupMode;
-    globalState.save();
-    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
-    notifySetupModeDataChange();
+  const globalState = angularState.injector.get('globalState');
+  setupModeState.enabled = inSetupMode;
+  globalState.inSetupMode = inSetupMode;
+  globalState.save();
+  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  notifySetupModeDataChange();
 
-    if (inSetupMode) {
-      await updateSetupModeData();
-    }
-
-    resolve();
-  });
+  if (inSetupMode) {
+    // Intentionally do not await this so we don't block UI operations
+    updateSetupModeData();
+  }
 };
 
 const setSetupModeMenuItem = () => {

@@ -29,7 +29,7 @@ import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
@@ -69,6 +69,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
               status={status}
               instance={instance}
               productName={ELASTICSEARCH_SYSTEM_ID}
+              clusterUuid={clusterUuid}
             />
           </div>
         );
@@ -243,7 +244,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
   const { sorting, pagination, onTableChange, clusterUuid, setupMode } = props;
-  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode);
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
@@ -302,7 +303,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                   <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
                     {i18n.translate(
                       'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                        defaultMessage: 'Disable and finish migration'
+                        defaultMessage: 'Disable internal collection'
                       }
                     )}
                   </EuiButton>

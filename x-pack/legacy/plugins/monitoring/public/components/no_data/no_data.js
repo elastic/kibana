@@ -144,5 +144,8 @@ export function NoData(props) {
 }
 
 NoData.propTypes = {
-  changePath: PropTypes.func.isRequired,
+  changePath: PropTypes.func,
+  isLoading: PropTypes.bool.isRequired,
+  reason: PropTypes.object,
+  checkMessage: PropTypes.string
 };

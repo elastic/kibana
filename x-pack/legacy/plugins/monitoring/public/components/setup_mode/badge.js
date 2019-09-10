@@ -6,102 +6,98 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiLink,
   EuiTextColor,
-  EuiIcon
+  EuiIcon,
+  EuiBadge
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
 const clickToMonitorWithMetricbeat = i18n.translate('xpack.monitoring.setupMode.clickToMonitorWithMetricbeat', {
-  defaultMessage: 'Click to monitor with Metricbeat'
+  defaultMessage: 'Monitor with Metricbeat'
 });
 
-export function SetupModeBadge({ setupMode, productName, status, instance }) {
-  let useLink = false;
+const clickToDisableInternalCollection = i18n.translate('xpack.monitoring.setupMode.clickToDisableInternalCollection', {
+  defaultMessage: 'Disable internal collection'
+});
+
+export function SetupModeBadge({ setupMode, productName, status, instance, clusterUuid }) {
+  let customAction = null;
+  let customText = null;
+
+  const setupModeData = setupMode.data || {};
+  const setupModeMeta = setupMode.meta || {};
 
   // Migrating from partially to fully for Elasticsearch involves changing a cluster
-  // setting which impacts all nodes in the cluster, which we have a separate callout
-  // for. Since it does not make sense to do this on a per node basis, show nothing here
-  const explicitlyAvoidLink = status.isPartiallyMigrated && productName === ELASTICSEARCH_SYSTEM_ID;
-  if (!explicitlyAvoidLink && (status.isInternalCollector || status.isPartiallyMigrated || status.isNetNewUser)) {
-    useLink = true;
+  // setting which impacts all nodes in the cluster so the action text needs to reflect that
+  const allPartiallyMigrated = setupModeData.totalUniquePartiallyMigratedCount === setupModeData.totalUniqueInstanceCount;
+
+  if (status.isPartiallyMigrated && productName === ELASTICSEARCH_SYSTEM_ID) {
+    if (allPartiallyMigrated) {
+      customText = clickToDisableInternalCollection;
+      if (setupModeMeta.liveClusterUuid === clusterUuid) {
+        customAction = setupMode.shortcutToFinishMigration;
+      }
+    }
+    else {
+      return (
+        <Fragment>
+          <EuiIcon type="flag"/>
+          &nbsp;
+          <EuiTextColor color="warning" size="xs">
+            {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
+              defaultMessage: 'Monitor all nodes with Metricbeat'
+            })}
+          </EuiTextColor>
+        </Fragment>
+      );
+    }
   }
+
+  const badgeProps = {};
+  if (status.isInternalCollector || status.isPartiallyMigrated || status.isNetNewUser) {
+    badgeProps.onClick = customAction ? customAction : () => setupMode.openFlyout(instance);
+  }
+
 
   let statusText = null;
   if (status.isInternalCollector) {
     statusText = (
-      <Fragment>
-        <EuiIcon type="flag" color="danger"/>
-        &nbsp;
-        <EuiTextColor color="danger" size="xs">
-          {clickToMonitorWithMetricbeat}
-        </EuiTextColor>
-      </Fragment>
+      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+        {customText || clickToMonitorWithMetricbeat}
+      </EuiBadge>
     );
   }
   else if (status.isPartiallyMigrated) {
-    const text = explicitlyAvoidLink
-      ? i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
-        defaultMessage: 'Monitor all nodes with Metricbeat'
-      })
-      : i18n.translate('xpack.monitoring.setupMode.clickToDisableInternalCollection', {
-        defaultMessage: 'Click to disable internal collection'
-      });
-
     statusText = (
-      <Fragment>
-        <EuiIcon type="flag" color="warning"/>
-        &nbsp;
-        <EuiTextColor color="warning" size="xs">
-          {text}
-        </EuiTextColor>
-      </Fragment>
+      <EuiBadge color="warning" iconType="flag" {...badgeProps}>
+        {customText || clickToDisableInternalCollection}
+      </EuiBadge>
     );
   }
   else if (status.isFullyMigrated) {
     statusText = (
-      <Fragment>
-        <EuiIcon type="flag" color="primary"/>
-        &nbsp;
-        <EuiTextColor color="secondary" size="xs">
-          {i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
-            defaultMessage: 'Monitored with Metricbeat'
-          })}
-        </EuiTextColor>
-      </Fragment>
+      <EuiBadge color="primary" iconType="flag" {...badgeProps}>
+        {customText || i18n.translate('xpack.monitoring.setupMode.usingMetricbeatCollection', {
+          defaultMessage: 'Monitored with Metricbeat'
+        })}
+      </EuiBadge>
     );
   }
   else if (status.isNetNewUser) {
     statusText = (
-      <Fragment>
-        <EuiIcon type="flag" color="danger"/>
-        &nbsp;
-        <EuiTextColor color="danger" size="xs">
-          {clickToMonitorWithMetricbeat}
-        </EuiTextColor>
-      </Fragment>
+      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+        {customText || clickToMonitorWithMetricbeat}
+      </EuiBadge>
     );
   }
   else {
     statusText = (
-      <Fragment>
-        <EuiIcon type="flag" color="danger"/>
-        &nbsp;
-        <EuiTextColor color="danger" size="xs">
-          {i18n.translate('xpack.monitoring.setupMode.unknown', {
-            defaultMessage: 'N/A'
-          })}
-        </EuiTextColor>
-      </Fragment>
-    );
-  }
-
-  if (useLink) {
-    return (
-      <EuiLink onClick={() => setupMode.openFlyout(instance)}>
-        {statusText}
-      </EuiLink>
+      <EuiBadge color="danger" iconType="flag" {...badgeProps}>
+        {customText || i18n.translate('xpack.monitoring.setupMode.unknown', {
+          defaultMessage: 'N/A'
+        })}
+      </EuiBadge>
     );
   }
 
