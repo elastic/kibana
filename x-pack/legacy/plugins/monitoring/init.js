@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get  } from 'lodash';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
@@ -111,7 +112,8 @@ export const init = (monitoringPlugin, server) => {
       maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
       minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
       kbnIndex: config.get('kibana.index'),
-      showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
+      showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration') &&
+        !(get(server.plugins, 'cloud.config.isCloudEnabled', false)),
       showCgroupMetricsElasticsearch: config.get('xpack.monitoring.ui.container.elasticsearch.enabled'),
       showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
     };
