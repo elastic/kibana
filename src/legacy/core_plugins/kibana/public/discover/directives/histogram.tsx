@@ -94,7 +94,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
 
     const partialDataText = i18n.translate('kbn.discover.histogram.partialData.bucketTooltipText', {
       defaultMessage:
-        'Part of this bucket may contain partial data. The selected time range does not fully cover it.',
+        'The selected time range does not include this entire bucket, it may contain partial data.',
     });
 
     if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
