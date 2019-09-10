@@ -193,6 +193,20 @@ export const ComponentStrings = {
         defaultMessage: 'Control settings',
       }),
   },
+  WorkpadHeaderCustomInterval: {
+    getFormLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabelText', {
+        defaultMessage: 'Set a custom interval',
+      }),
+    getFormHelpText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formHelpText', {
+        defaultMessage: 'Use shorthand notation, like 30s, 10m, or 1h',
+      }),
+    getButtonText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.buttonText', {
+        defaultMessage: 'Set',
+      }),
+  },
   WorkpadHeaderKioskControls: {
     getTitleText: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitleText', {

@@ -17,6 +17,9 @@ import {
 import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
 import { getTimeInterval } from '../../../lib/time_interval';
 
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderCustomInterval: strings } = ComponentStrings;
+
 interface Props {
   gutterSize: FlexGroupGutterSize;
   buttonSize: ButtonSize;
@@ -44,8 +47,8 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
       <EuiFlexGroup gutterSize={gutterSize}>
         <EuiFlexItem>
           <EuiFormRow
-            label="Set a custom interval"
-            helpText="Use shorthand notation, like 30s, 10m, or 1h"
+            label={strings.getFormLabelText()}
+            helpText={strings.getFormHelpText()}
             compressed
           >
             <EuiFieldText isInvalid={isInvalid} value={customInterval} onChange={handleChange} />
@@ -60,7 +63,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
               type="submit"
               style={{ minWidth: 'auto' }}
             >
-              Set
+              {strings.getButtonText()}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
