@@ -76,9 +76,10 @@ export function useTrackPageview(
 interface TrackEventProps {
   app: ObservabilityApp;
   name: string;
+  metricType?: METRIC_TYPE;
 }
 
-export function trackEvent({ app, name }: TrackEventProps) {
+export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {
   const trackUiMetric = getTrackerForApp(app);
-  trackUiMetric(METRIC_TYPE.CLICK, `event__${name}`);
+  trackUiMetric(metricType, `event__${name}`);
 }
