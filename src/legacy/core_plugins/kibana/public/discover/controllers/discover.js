@@ -329,7 +329,9 @@ function discoverController(
       run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
         showShareContextMenu({
+          actionType: 'Export',
           anchorElement,
+          allowPermalink: true,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
           getUnhashableStates,

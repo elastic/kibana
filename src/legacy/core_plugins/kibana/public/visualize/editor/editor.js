@@ -220,7 +220,9 @@ function VisEditor(
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
+        actionType: 'Share',
         anchorElement,
+        allowPermalink: true,
         allowEmbed: true,
         allowShortUrl: capabilities.get().visualize.createShortUrl,
         getUnhashableStates,

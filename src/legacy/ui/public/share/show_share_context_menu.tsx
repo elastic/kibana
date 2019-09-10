@@ -50,16 +50,16 @@ interface ShowProps {
 
 export function showShareContextMenu({
   actionType,
-  anchorElement,
   allowEmbed,
   allowPermalink,
   allowShortUrl,
+  anchorElement,
   getUnhashableStates,
+  isDirty,
   objectId,
   objectType,
   shareContextMenuExtensions,
   sharingData,
-  isDirty,
 }: ShowProps) {
   if (isOpen) {
     onClose();
@@ -86,11 +86,11 @@ export function showShareContextMenu({
           allowPermalink={allowPermalink}
           allowShortUrl={allowShortUrl}
           getUnhashableStates={getUnhashableStates}
+          isDirty={isDirty}
           objectId={objectId}
           objectType={objectType}
           shareContextMenuExtensions={shareContextMenuExtensions}
           sharingData={sharingData}
-          isDirty={isDirty}
           onClose={onClose}
         />
       </EuiWrappingPopover>
