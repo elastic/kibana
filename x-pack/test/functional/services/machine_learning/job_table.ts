@@ -16,7 +16,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('row').toArray()) {
+      for (const tr of $.findTestSubjects('~row').toArray()) {
         const $tr = $(tr);
 
         const $description = $tr.findTestSubject('description').find('.euiTableCellContent');
@@ -82,10 +82,10 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         await testSubjects.click(this.detailsSelector(jobId, 'tab-counts'));
 
         const countsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts counts')
+          this.detailsSelector(jobId, 'details-counts > counts')
         );
         const modelSizeStatsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts modelSizeStats')
+          this.detailsSelector(jobId, 'details-counts > modelSizeStats')
         );
 
         // parse a table by reading each row
@@ -118,13 +118,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public rowSelector(jobId: string, subSelector?: string) {
-      const row = `~mlJobListTable > row-${jobId}`;
-      return !subSelector ? row : `${row} ${subSelector}`;
+      const row = `~mlJobListTable > ~row-${jobId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
     public detailsSelector(jobId: string, subSelector?: string) {
-      const row = `~mlJobListTable > details-${jobId}`;
-      return !subSelector ? row : `${row} ${subSelector}`;
+      const row = `~mlJobListTable > ~details-${jobId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
     public async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
