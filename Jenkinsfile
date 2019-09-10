@@ -8,15 +8,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
       ansiColor('xterm') {
-        node('flyweight') {
-          // TODO remove this after testing
-          emailext(
-            to: 'brian.seeders@elastic.co',
-            subject: "Test",
-            body: '${SCRIPT,template="groovy-html.template"}',
-            mimeType: 'text/html',
-          )
-        }
         catchError {
           parallel([
             'kibana-intake-agent': legacyJobRunner('kibana-intake'),
@@ -52,17 +43,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
-        }
-        node('flyweight') {
-          sendMail()
-
-          // TODO remove this after testing
-          emailext(
-            to: 'brian.seeders@elastic.co',
-            subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
-            body: '${SCRIPT,template="groovy-html.template"}',
-            mimeType: 'text/html',
-          )
         }
       }
     }
