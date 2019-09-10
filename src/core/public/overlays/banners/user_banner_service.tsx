@@ -69,7 +69,7 @@ export class UserBannerService {
               <EuiCallOut
                 title={
                   <FormattedMessage
-                    id="common.ui.notify.banner.attentionTitle"
+                    id="core.ui.overlays.banner.attentionTitle"
                     defaultMessage="Attention"
                   />
                 }
@@ -79,7 +79,7 @@ export class UserBannerService {
 
                 <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
                   <FormattedMessage
-                    id="common.ui.notify.banner.closeButtonLabel"
+                    id="core.ui.overlays.banner.closeButtonLabel"
                     defaultMessage="Close"
                   />
                 </EuiButton>
