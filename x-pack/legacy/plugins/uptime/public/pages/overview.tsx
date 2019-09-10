@@ -23,7 +23,6 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { CONTEXT_DEFAULTS } from '../../common/constants';
 
 interface OverviewPageProps {
   basePath: string;
