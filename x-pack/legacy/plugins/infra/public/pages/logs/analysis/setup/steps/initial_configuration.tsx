@@ -5,10 +5,9 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnalysisSetupTimerangeForm } from '../analysis_setup_timerange_form';
-import { StepText } from './step_text';
 
 interface InitialConfigurationProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -39,18 +38,23 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
       ) : (
         <>
           <EuiSpacer size="m" />
-          <StepText>
+          <EuiText size="s">
             <FormattedMessage
               id="xpack.infra.analysisSetup.timeRangeByDefault"
               defaultMessage="By default, Machine Learning will analyze all past and future log messages in your logs indices."
             />{' '}
-            <EuiButtonEmpty onClick={() => setShowTimeRangeForm(true)}>
+            <EuiLink
+              onClick={e => {
+                e.preventDefault();
+                setShowTimeRangeForm(true);
+              }}
+            >
               <FormattedMessage
                 id="xpack.infra.analysisSetup.configureTimeRange"
                 defaultMessage="Configure time range?"
               />
-            </EuiButtonEmpty>
-          </StepText>
+            </EuiLink>
+          </EuiText>
         </>
       )}
     </>

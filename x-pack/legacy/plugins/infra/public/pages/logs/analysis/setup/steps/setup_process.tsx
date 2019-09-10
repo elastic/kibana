@@ -5,10 +5,16 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiButton,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
-import { StepText } from './step_text';
 import { SetupStatus } from '../../../../../containers/logs/log_analysis';
 
 interface Props {
@@ -27,7 +33,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
   setupStatus,
 }: Props) => {
   return (
-    <StepText>
+    <EuiText size="s">
       {setupStatus === 'pending' || setupStatus === 'retrying' ? (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -75,6 +81,6 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
       ) : (
         <CreateMLJobsButton onClick={setup} />
       )}
-    </StepText>
+    </EuiText>
   );
 };
