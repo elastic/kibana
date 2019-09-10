@@ -69,9 +69,11 @@ export class TooltipControl extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.mbMap.off('mouseout', this._onMouseout);
-    this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
-    this.props.mbMap.off('click', this._lockTooltip);
+    if (this._areMapHandlersRegistered) {
+      this.props.mbMap.off('mouseout', this._onMouseout);
+      this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
+      this.props.mbMap.off('click', this._lockTooltip);
+    }
     this._hideTooltip();
   }
 
