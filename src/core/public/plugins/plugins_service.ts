@@ -26,7 +26,7 @@ import {
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
-import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { InternalCoreSetup, InternalCoreStart } from '..';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;

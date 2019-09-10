@@ -1,17 +1,16 @@
 
 // Stats bar styles
-.stat {
-  margin-right: $euiSizeS;
-
-  .stat-value {
-    font-weight: bold
-  }
-}
-
-.mlStatsBar {
+.jobs-stats-bar {
   // SASSTODO: proper calcs
   height: 42px;
   padding: 14px;
   background-color: $euiColorLightestShade;
-}
 
+  .stat {
+    margin-right: $euiSizeS;
+
+    .stat-value {
+      font-weight: bold
+    }
+  }
+}

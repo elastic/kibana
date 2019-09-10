@@ -50,7 +50,6 @@ export const getNetworkTopNFlowColumns = (
       const ipAttr = `${flowTarget}.ip`;
       const ip: string | null = get(ipAttr, node);
       const geoAttr = `${flowTarget}.location.geo.country_iso_code[0]`;
-      const geoAttrName = `${flowTarget}.geo.country_iso_code`;
       const geo: string | null = get(geoAttr, node);
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ip}`);
 
@@ -80,30 +79,10 @@ export const getNetworkTopNFlowColumns = (
             />
 
             {geo && (
-              <DraggableWrapper
-                key={`${id}-${geo}`}
-                dataProvider={{
-                  and: [],
-                  enabled: true,
-                  id: `${id}-${geo}`,
-                  name: geo,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
-                }}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <>
-                      {' '}
-                      <CountryFlag countryCode={geo} /> {geo}
-                    </>
-                  )
-                }
-              />
+              <>
+                {' '}
+                <CountryFlag countryCode={geo} /> {geo}
+              </>
             )}
           </>
         );

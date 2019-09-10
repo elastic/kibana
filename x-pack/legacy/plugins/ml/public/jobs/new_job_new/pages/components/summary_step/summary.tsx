@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { PreviousButton } from '../wizard_nav';
+import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
@@ -97,30 +97,22 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <EuiSpacer size="m" />
           <JobDetails />
 
+          {progress === 0 && <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)} />}
           <EuiHorizontalRule />
           <EuiFlexGroup>
             {progress < 100 && (
-              <Fragment>
-                <EuiFlexItem grow={false}>
-                  <PreviousButton
-                    previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)}
-                    previousActive={creatingJob === false && isValid === true}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={start}
+                  isDisabled={creatingJob === true || isValid === false}
+                  data-test-subj="mlJobWizardButtonCreateJob"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
+                    defaultMessage="Create job"
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={start}
-                    isDisabled={creatingJob === true || isValid === false}
-                    data-test-subj="mlJobWizardButtonCreateJob"
-                    fill
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
-                      defaultMessage="Create job"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </Fragment>
+                </EuiButton>
+              </EuiFlexItem>
             )}
             {creatingJob === false && (
               <Fragment>

@@ -27,7 +27,7 @@ import { IconType } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { InternalApplicationStart } from '../application';
+import { ApplicationStart } from '../application';
 import { HttpStart } from '../http';
 
 import { ChromeNavLinks, NavLinksService } from './nav_links';
@@ -74,7 +74,7 @@ interface ConstructorParams {
 }
 
 interface StartDeps {
-  application: InternalApplicationStart;
+  application: ApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
@@ -84,11 +84,14 @@ interface StartDeps {
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new ReplaySubject(1);
+  private readonly browserSupportsCsp: boolean;
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor({ browserSupportsCsp }: ConstructorParams) {
+    this.browserSupportsCsp = browserSupportsCsp;
+  }
 
   public async start({
     application,
@@ -112,7 +115,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
 
-    if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
+    if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
         i18n.translate('core.chrome.legacyBrowserWarning', {
           defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
@@ -125,12 +128,11 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
 
-      getHeaderComponent: () => (
+      getComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
-            application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
             basePath={http.basePath}
@@ -144,7 +146,6 @@ export class ChromeService {
               takeUntil(this.stop$)
             )}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
-            legacyMode={injectedMetadata.getLegacyMode()}
             navLinks$={navLinks.getNavLinks$()}
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
@@ -373,5 +374,5 @@ export interface InternalChromeStart extends ChromeStart {
    * Used only by MountingService to render the header UI
    * @internal
    */
-  getHeaderComponent(): JSX.Element;
+  getComponent(): JSX.Element;
 }

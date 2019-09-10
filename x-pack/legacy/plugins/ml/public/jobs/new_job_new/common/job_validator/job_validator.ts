@@ -6,7 +6,7 @@
 
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
-import { JobCreatorType } from '../job_creator';
+import { JobCreator } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
@@ -34,7 +34,7 @@ export interface BasicValidations {
 }
 
 export class JobValidator {
-  private _jobCreator: JobCreatorType;
+  private _jobCreator: JobCreator;
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
   private _validateTimeout: NodeJS.Timeout;
@@ -47,7 +47,7 @@ export class JobValidator {
     duplicateDetectors: { valid: true },
   };
 
-  constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
+  constructor(jobCreator: JobCreator, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
     this._validationSummary = {

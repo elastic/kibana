@@ -6,7 +6,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../job_creator';
+import {
+  SingleMetricJobCreator,
+  MultiMetricJobCreator,
+  isMultiMetricJobCreator,
+  PopulationJobCreator,
+  isPopulationJobCreator,
+} from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
@@ -51,10 +57,12 @@ const LAST_UPDATE_DELAY_MS = 500;
 
 export type ResultsSubscriber = (results: Results) => void;
 
+type AnyJobCreator = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
+
 export class ResultsLoader {
   private _results$: BehaviorSubject<Results>;
   private _resultsSearchRunning = false;
-  private _jobCreator: JobCreatorType;
+  private _jobCreator: AnyJobCreator;
   private _chartInterval: MlTimeBuckets;
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
@@ -69,7 +77,7 @@ export class ResultsLoader {
   private _detectorSplitFieldFilters: SplitFieldWithValue | null = null;
   private _splitFieldFiltersLoaded: boolean = false;
 
-  constructor(jobCreator: JobCreatorType, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
+  constructor(jobCreator: AnyJobCreator, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
     this._jobCreator = jobCreator;
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);

@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
+  const browser = getService('browser');
   const retry = getService('retry');
 
   describe('full screen mode', () => {
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('exits when the text button is clicked on', async () => {
       const logoButton = await PageObjects.maps.getExitFullScreenLogoButton();
-      await logoButton.moveMouseTo();
+      await browser.moveMouseTo(logoButton);
       await PageObjects.maps.clickExitFullScreenTextButton();
 
       await retry.try(async () => {

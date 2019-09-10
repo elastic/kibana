@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import semver from 'semver';
 import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
-import uuid from 'uuid';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
@@ -124,17 +123,16 @@ function migratePre61PanelToLatest(
 
   const { columns, sort, row, col, size_x: sizeX, size_y: sizeY, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
   return {
     ...rest,
     version,
-    panelIndex,
+    panelIndex: panel.panelIndex.toString(),
     gridData: {
       x: (col - 1) * PANEL_WIDTH_SCALE_FACTOR,
       y: (row - 1) * heightScaleFactor,
       w: sizeX ? sizeX * PANEL_WIDTH_SCALE_FACTOR : DEFAULT_PANEL_WIDTH,
       h: sizeY ? sizeY * heightScaleFactor : DEFAULT_PANEL_HEIGHT,
-      i: panelIndex,
+      i: panel.panelIndex.toString(),
     },
     embeddableConfig,
   };
@@ -177,11 +175,10 @@ function migrate610PanelToLatest(
     : PANEL_HEIGHT_SCALE_FACTOR;
   const { columns, sort, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
   return {
     ...rest,
     version,
-    panelIndex,
+    panelIndex: panel.panelIndex.toString(),
     gridData: {
       w: panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR,
       h: panel.gridData.h * heightScaleFactor,
@@ -215,11 +212,10 @@ function migrate620PanelToLatest(
     : PANEL_HEIGHT_SCALE_FACTOR;
   const { columns, sort, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
   return {
     ...rest,
     version,
-    panelIndex,
+    panelIndex: panel.panelIndex.toString(),
     gridData: {
       w: panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR,
       h: panel.gridData.h * heightScaleFactor,
@@ -246,11 +242,10 @@ function migrate630PanelToLatest(
   }
 
   const { columns, sort, ...rest } = panel;
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
   return {
     ...rest,
     version,
-    panelIndex,
+    panelIndex: panel.panelIndex.toString(),
     embeddableConfig,
   };
 }
@@ -261,11 +256,10 @@ function migrate640To720PanelsToLatest(
   panel: RawSavedDashboardPanel630,
   version: string
 ): RawSavedDashboardPanel730ToLatest {
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
   return {
     ...panel,
     version,
-    panelIndex,
+    panelIndex: panel.panelIndex.toString(),
   };
 }
 

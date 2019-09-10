@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
+import { pure } from 'recompose';
 
 import { OverviewComponent } from './overview';
 
-export const Overview = memo(() => <OverviewComponent />);
+export const Overview = pure(() => <OverviewComponent />);
 
 Overview.displayName = 'Overview';

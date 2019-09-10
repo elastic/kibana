@@ -27,9 +27,8 @@ import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
-import { MapTypes } from './map_types';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -65,53 +64,48 @@ export function createTileMapTypeDefinition(dependencies) {
     editorConfig: {
       collections: {
         colorSchemas,
-        legendPositions: [
-          {
-            value: 'bottomleft',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
-              defaultMessage: 'Bottom left',
-            }),
-          },
-          {
-            value: 'bottomright',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
-              defaultMessage: 'Bottom right',
-            }),
-          },
-          {
-            value: 'topleft',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
-              defaultMessage: 'Top left',
-            }),
-          },
-          {
-            value: 'topright',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
-              defaultMessage: 'Top right',
-            }),
-          },
-        ],
+        legendPositions: [{
+          value: 'bottomleft',
+          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
+            defaultMessage: 'Bottom left',
+          }),
+        }, {
+          value: 'bottomright',
+          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
+            defaultMessage: 'Bottom right',
+          }),
+        }, {
+          value: 'topleft',
+          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
+            defaultMessage: 'Top left',
+          }),
+        }, {
+          value: 'topright',
+          text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
+            defaultMessage: 'Top right',
+          }),
+        }],
         mapTypes: [
           {
-            value: MapTypes.ScaledCircleMarkers,
+            value: 'Scaled Circle Markers',
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.scaledCircleMarkersText', {
               defaultMessage: 'Scaled circle markers',
             }),
           },
           {
-            value: MapTypes.ShadedCircleMarkers,
+            value: 'Shaded Circle Markers',
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedCircleMarkersText', {
               defaultMessage: 'Shaded circle markers',
             }),
           },
           {
-            value: MapTypes.ShadedGeohashGrid,
+            value: 'Shaded Geohash Grid',
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedGeohashGridText', {
               defaultMessage: 'Shaded geohash grid',
             }),
           },
           {
-            value: MapTypes.Heatmap,
+            value: 'Heatmap',
             text: i18n.translate('tileMap.vis.editorConfig.mapTypes.heatmapText', {
               defaultMessage: 'Heatmap',
             }),
@@ -119,7 +113,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: props => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -130,7 +124,9 @@ export function createTileMapTypeDefinition(dependencies) {
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
-          defaults: [{ schema: 'metric', type: 'count' }],
+          defaults: [
+            { schema: 'metric', type: 'count' },
+          ],
         },
         {
           group: 'buckets',

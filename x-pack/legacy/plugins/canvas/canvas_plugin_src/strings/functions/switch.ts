@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { switchFn } from '../../functions/common/switch';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT } from '../../../i18n';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   help: i18n.translate('xpack.canvas.functions.switchHelpText', {

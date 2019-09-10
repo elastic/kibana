@@ -18,19 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../../actions';
+import { Action, ActionContext } from '../../../../actions';
 import { ViewMode } from '../../../../types';
-import { IEmbeddable } from '../../../../embeddables';
 
 const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
 
 type GetUserData = (context: ActionContext) => Promise<{ title: string | undefined }>;
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class CustomizePanelTitleAction extends Action<ActionContext> {
+export class CustomizePanelTitleAction extends Action {
   public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
 
   constructor(private readonly getDataFromUser: GetUserData) {

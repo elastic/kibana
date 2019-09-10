@@ -11,7 +11,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('page navigation', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

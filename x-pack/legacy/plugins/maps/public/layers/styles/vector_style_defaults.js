@@ -17,19 +17,10 @@ const DEFAULT_ICON = 'airfield';
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
 
-export const vectorStyles = {
-  SYMBOL: 'symbol',
-  FILL_COLOR: 'fillColor',
-  LINE_COLOR: 'lineColor',
-  LINE_WIDTH: 'lineWidth',
-  ICON_SIZE: 'iconSize',
-  ICON_ORIENTATION: 'iconOrientation'
-};
-
 export function getDefaultProperties(mapColors = []) {
   return {
     ...getDefaultStaticProperties(mapColors),
-    [vectorStyles.SYMBOL]: {
+    symbol: {
       options: {
         symbolizeAs: SYMBOLIZE_AS_CIRCLE,
         symbolId: DEFAULT_ICON,
@@ -48,31 +39,31 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 
   return {
-    [vectorStyles.FILL_COLOR]: {
+    fillColor: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: nextFillColor,
       }
     },
-    [vectorStyles.LINE_COLOR]: {
+    lineColor: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: nextLineColor
       }
     },
-    [vectorStyles.LINE_WIDTH]: {
+    lineWidth: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         size: 1
       }
     },
-    [vectorStyles.ICON_SIZE]: {
+    iconSize: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         size: DEFAULT_ICON_SIZE
       }
     },
-    [vectorStyles.ICON_ORIENTATION]: {
+    iconOrientation: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         orientation: 0
@@ -83,21 +74,21 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 export function getDefaultDynamicProperties() {
   return {
-    [vectorStyles.FILL_COLOR]: {
+    fillColor: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
       }
     },
-    [vectorStyles.LINE_COLOR]: {
+    lineColor: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
       }
     },
-    [vectorStyles.LINE_WIDTH]: {
+    lineWidth: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
@@ -105,7 +96,7 @@ export function getDefaultDynamicProperties() {
         field: undefined,
       }
     },
-    [vectorStyles.ICON_SIZE]: {
+    iconSize: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
@@ -113,7 +104,7 @@ export function getDefaultDynamicProperties() {
         field: undefined,
       }
     },
-    [vectorStyles.ICON_ORIENTATION]: {
+    iconOrientation: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         field: undefined,

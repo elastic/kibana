@@ -119,7 +119,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
     })
   ) => {
     return (
-      <p className="eui-textBreakAll">
+      <p>
         <FormattedMessage
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
           defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."

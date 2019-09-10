@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import { get, isEqual, difference, isEmpty } from 'lodash/fp';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
@@ -16,12 +16,8 @@ import {
   RelativeTimeRange,
   UrlInputsModel,
 } from '../../store/inputs/model';
-import { useApolloClient } from '../../utils/apollo_context';
-import { queryTimelineById } from '../open_timeline/helpers';
-import { HostsType } from '../../store/hosts/model';
-import { NetworkType } from '../../store/network/model';
 
-import { CONSTANTS, UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
 import {
   replaceQueryStringInLocation,
   getQueryStringFromLocation,
@@ -31,7 +27,6 @@ import {
   isKqlForRoute,
   getCurrentLocation,
   getUrlType,
-  getTitle,
 } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import {
@@ -41,7 +36,12 @@ import {
   KeyUrlState,
   KqlQuery,
   ALL_URL_STATE_KEYS,
+  UrlStateType,
 } from './types';
+import { useApolloClient } from '../../utils/apollo_context';
+import { queryTimelineById } from '../open_timeline/helpers';
+import { HostsType } from '../../store/hosts/model';
+import { NetworkType } from '../../store/network/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef(value);
@@ -54,52 +54,37 @@ function usePrevious(value: PreviousLocationUrlState) {
 export const useUrlStateHooks = ({
   addGlobalLinkTo,
   addTimelineLinkTo,
-  detailName,
   dispatch,
+  location,
   indexPattern,
+  isInitializing,
   history,
-  navTabs,
-  pageName,
-  pathName,
   removeGlobalLinkTo,
   removeTimelineLinkTo,
-  search,
   setAbsoluteTimerange,
   setHostsKql,
   setNetworkKql,
   setRelativeTimerange,
-  tabName,
   updateTimeline,
   updateTimelineIsLoading,
   urlState,
 }: UrlStateContainerPropTypes) => {
-  const [isInitializing, setIsInitializing] = useState(true);
   const apolloClient = useApolloClient();
-  const prevProps = usePrevious({ pathName, urlState });
+  const prevProps = usePrevious({ location, urlState });
 
   const replaceStateInLocation = (
     urlStateToReplace: UrlInputsModel | KqlQuery | string,
     urlStateKey: string,
-    latestLocation: Location = {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    }
+    latestLocation: Location = location
   ) => {
     const newLocation = replaceQueryStringInLocation(
-      {
-        hash: '',
-        pathname: pathName,
-        search,
-        state: '',
-      },
+      location,
       replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(
         getQueryStringFromLocation(latestLocation)
       )
     );
 
-    if (history && !isEqual(newLocation.search, latestLocation.search)) {
+    if (!isEqual(newLocation.search, latestLocation.search)) {
       history.replace(newLocation);
     }
     return newLocation;
@@ -116,7 +101,7 @@ export const useUrlStateHooks = ({
         const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
         if (
           urlKey === CONSTANTS.kqlQuery &&
-          !isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation) &&
+          !isKqlForRoute(location.pathname, kqlQueryStateData.queryLocation) &&
           urlState[urlKey].queryLocation === kqlQueryStateData.queryLocation
         ) {
           myLocation = replaceStateInLocation(
@@ -216,7 +201,7 @@ export const useUrlStateHooks = ({
     }
     if (urlKey === CONSTANTS.kqlQuery && indexPattern != null) {
       const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-      if (isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation)) {
+      if (isKqlForRoute(location.pathname, kqlQueryStateData.queryLocation)) {
         const filterQuery = {
           kuery: kqlQueryStateData.filterQuery,
           serializedQuery: convertKueryToElasticSearchQuery(
@@ -224,7 +209,7 @@ export const useUrlStateHooks = ({
             indexPattern
           ),
         };
-        const page = getCurrentLocation(pageName, detailName);
+        const page = getCurrentLocation(location.pathname);
         if ([CONSTANTS.hostsPage, CONSTANTS.hostsDetails].includes(page)) {
           dispatch(
             setHostsKql({
@@ -258,30 +243,38 @@ export const useUrlStateHooks = ({
   };
 
   useEffect(() => {
-    const type: UrlStateType = getUrlType(pageName);
-    const location: Location = {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    };
-
-    if (isInitializing && pageName != null && pageName !== '') {
-      handleInitialize(location, type);
-      setIsInitializing(false);
+    const type: UrlStateType = getUrlType(location.pathname);
+    if (isInitializing) {
+      handleInitialize(initializeLocation(location), type);
     } else if (!isEqual(urlState, prevProps.urlState)) {
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
       });
-    } else if (pathName !== prevProps.pathName) {
+    } else if (location.pathname !== prevProps.location.pathname) {
       handleInitialize(location, type);
     }
   });
 
-  useEffect(() => {
-    document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
-  }, [pageName]);
-
   return null;
+};
+
+/*
+ * Why are we doing that, it is because angular-ui router is encoding the `+` back to `2%B` after
+ * that react router is getting the data with the `+` and convert to `2%B`
+ * so we need to get back the value from the window location at initialization to avoid
+ * to bring back the `+` in the kql
+ */
+export const initializeLocation = (location: Location): Location => {
+  if (location.pathname === '/') {
+    location.pathname = window.location.hash.substring(1);
+  }
+  const substringIndex =
+    window.location.href.indexOf(`#${location.pathname}`) >= 0
+      ? window.location.href.indexOf(`#${location.pathname}`) + location.pathname.length + 1
+      : -1;
+  if (substringIndex >= 0 && location.pathname !== '/') {
+    location.search = window.location.href.substring(substringIndex);
+  }
+  return location;
 };

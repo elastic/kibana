@@ -11,7 +11,6 @@ import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
-import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   createRoute,
@@ -111,10 +110,7 @@ export function init(server: Server) {
     isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 
-  registerBuiltInActionTypes(
-    actionTypeRegistry,
-    getActionsConfigurationUtilities(config.get('xpack.actions') as ActionsKibanaConfig)
-  );
+  registerBuiltInActionTypes(actionTypeRegistry);
 
   // Routes
   createRoute(server);

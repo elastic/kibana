@@ -16,7 +16,7 @@ import {
   BOOLEAN_TRUE,
   BOOLEAN_FALSE,
   TYPE_NULL,
-} from '../../../i18n';
+} from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {

@@ -18,19 +18,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { Action } from '../../../../actions';
+import { Action, ActionContext } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { NotificationsStart } from '../../../../../../../../../../../core/public';
 import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
-import { IContainer } from '../../../../containers';
 
 export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
 
-interface ActionContext {
-  embeddable: IContainer;
-}
-
-export class AddPanelAction extends Action<ActionContext> {
+export class AddPanelAction extends Action {
   public readonly type = ADD_PANEL_ACTION_ID;
 
   constructor(

@@ -65,7 +65,7 @@ export interface DataFrameAnalyticsConfig {
     results_field: string;
   };
   source: {
-    index: IndexName | IndexName[];
+    index: IndexName;
   };
   analysis: AnalysisConfig;
   analyzed_fields: {

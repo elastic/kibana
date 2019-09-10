@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { sort } from '../../functions/common/sort';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { DATATABLE } from '../../../i18n';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   help: i18n.translate('xpack.canvas.functions.sortHelpText', {

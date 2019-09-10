@@ -33,7 +33,7 @@ export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) =>
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.stopTransformSuccessMessage', {
-            defaultMessage: 'Request to stop data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Data frame transform {transformId} stopped successfully.',
             values: { transformId },
           })
         );

@@ -5,16 +5,15 @@
  */
 
 import { mount } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { MemoryRouter } from 'react-router-dom';
 
 import { Overview } from './index';
 
 import '../../mock/ui_settings';
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import { MockedProvider } from 'react-apollo/test-utils';
+import { cloneDeep } from 'lodash/fp';
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
@@ -46,9 +45,7 @@ describe('Overview', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
+            <Overview />
           </MockedProvider>
         </TestProviders>
       );
@@ -63,9 +60,7 @@ describe('Overview', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
+            <Overview />
           </MockedProvider>
         </TestProviders>
       );

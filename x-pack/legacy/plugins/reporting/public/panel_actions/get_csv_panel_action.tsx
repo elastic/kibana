@@ -15,6 +15,7 @@ import { EuiIcon } from '@elastic/eui';
 
 import {
   Action,
+  ActionContext,
   ViewMode,
   IncompatibleActionError,
   IEmbeddable,
@@ -36,12 +37,7 @@ function isSavedSearchEmbeddable(
 ): embeddable is ISearchEmbeddable {
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
-
-interface ActionContext {
-  embeddable: ISearchEmbeddable;
-}
-
-class GetCsvReportPanelAction extends Action<ActionContext> {
+class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
   private isDownloading: boolean;
   public readonly type = CSV_REPORTING_ACTION;
 
@@ -86,7 +82,7 @@ class GetCsvReportPanelAction extends Action<ActionContext> {
     return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
-  public execute = async (context: ActionContext) => {
+  public execute = async (context: ActionContext<ISearchEmbeddable>) => {
     const { embeddable } = context;
 
     if (!isSavedSearchEmbeddable(embeddable)) {

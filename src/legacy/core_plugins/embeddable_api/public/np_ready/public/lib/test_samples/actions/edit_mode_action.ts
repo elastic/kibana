@@ -18,15 +18,11 @@
  */
 
 import { ViewMode } from '../../types';
-import { Action } from '../../actions';
-import { IEmbeddable } from '../../embeddables';
+import { Action, ActionContext } from '../../actions';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-export class EditModeAction extends Action<ActionContext> {
+export class EditModeAction extends Action {
   public readonly type = EDIT_MODE_ACTION;
 
   constructor() {
@@ -41,7 +37,7 @@ export class EditModeAction extends Action<ActionContext> {
     return context.embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
-  async execute() {
+  execute() {
     return;
   }
 }

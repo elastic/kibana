@@ -71,9 +71,6 @@ import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } fr
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
-
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
-
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -117,8 +114,6 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link ApplicationSetup} */
-  application: ApplicationSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
@@ -142,7 +137,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: ApplicationStart;
+  application: Pick<ApplicationStart, 'capabilities'>;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -161,33 +156,15 @@ export interface CoreStart {
   uiSettings: UiSettingsClientContract;
 }
 
-/**
- * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreSetup}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreSetup extends CoreSetup {
-  /** @deprecated */
+/** @internal */
+export interface InternalCoreSetup extends CoreSetup {
+  application: ApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 
-/**
- * Start interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreStart}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreStart extends CoreStart {
-  /** @deprecated */
+/** @internal */
+export interface InternalCoreStart extends CoreStart {
+  application: ApplicationStart;
   injectedMetadata: InjectedMetadataStart;
 }
 

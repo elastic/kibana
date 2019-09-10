@@ -56,11 +56,12 @@ import {
 import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { save } from  './services/save';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 
+import saveTemplate from './angular/templates/save_workspace.html';
 import settingsTemplate from './angular/templates/settings.html';
 
+import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
@@ -204,21 +205,6 @@ app.controller('graphuiPlugin', function (
       .then(() => {
         toastNotifications.addDanger(formatAngularHttpError(error));
       });
-  }
-
-  function updateBreadcrumbs() {
-    setBreadcrumbs({
-      chrome,
-      savedWorkspace: $route.current.locals.savedWorkspace,
-      navigateTo: () => {
-        // TODO this should be wrapped into canWipeWorkspace,
-        // but the check is too simple right now. Change this
-        // once actual state-diffing is in place.
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath(getHomePath());
-        });
-      }
-    });
   }
 
   $scope.title = 'Graph';
@@ -669,6 +655,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.resetWorkspace = function () {
     $scope.clearWorkspace();
+    $scope.userHasConfirmedSaveWorkspaceData = false;
     $scope.selectedIndex = null;
     $scope.proposedIndex = null;
     $scope.detail = null;
@@ -875,7 +862,7 @@ app.controller('graphuiPlugin', function (
         defaultMessage: 'Save',
       }),
       description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
-        defaultMessage: 'Save workspace',
+        defaultMessage: 'Save Workspace',
       }),
       tooltip: () => {
         if ($scope.allSavingDisabled) {
@@ -892,11 +879,10 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        save({
-          savePolicy: $scope.graphSavePolicy,
-          hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
-          workspace: $scope.savedWorkspace,
-          saveWorkspace: $scope.saveWorkspace
+        $scope.$evalAsync(() => {
+          const curState = $scope.menus.showSave;
+          $scope.closeMenus();
+          $scope.menus.showSave = !curState;
         });
       },
       testId: 'graphSaveButton',
@@ -920,9 +906,21 @@ app.controller('graphuiPlugin', function (
     },
   });
 
-  updateBreadcrumbs();
+  setBreadcrumbs({
+    chrome,
+    savedWorkspace: $route.current.locals.savedWorkspace,
+    navigateTo: () => {
+      // TODO this should be wrapped into canWipeWorkspace,
+      // but the check is too simple right now. Change this
+      // once actual state-diffing is in place.
+      $scope.$evalAsync(() => {
+        kbnUrl.changePath('/home/');
+      });
+    }
+  });
 
   $scope.menus = {
+    showSave: false,
     showSettings: false,
   };
 
@@ -1084,7 +1082,7 @@ app.controller('graphuiPlugin', function (
     });
   }
 
-  $scope.saveWorkspace = function (saveOptions, userHasConfirmedSaveWorkspaceData) {
+  $scope.saveWorkspace = function () {
     if ($scope.allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
@@ -1095,7 +1093,7 @@ app.controller('graphuiPlugin', function (
     }
     initWorkspaceIfRequired();
     const canSaveData = $scope.graphSavePolicy === 'configAndData' ||
-      ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
+      ($scope.graphSavePolicy === 'configAndDataWithConsent' && $scope.userHasConfirmedSaveWorkspaceData);
 
 
     let blacklist = [];
@@ -1171,8 +1169,12 @@ app.controller('graphuiPlugin', function (
     });
     $scope.savedWorkspace.numVertices = vertices.length;
     $scope.savedWorkspace.numLinks = links.length;
+    $scope.savedWorkspace.description = $scope.description;
 
-    return $scope.savedWorkspace.save(saveOptions).then(function (id) {
+
+    $scope.savedWorkspace.save().then(function (id) {
+      $scope.closeMenus();
+      $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
           defaultMessage: 'Saved "{workspaceTitle}"',
@@ -1190,11 +1192,9 @@ app.controller('graphuiPlugin', function (
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if ($scope.savedWorkspace.id !== $route.current.params.id) {
-          kbnUrl.change(getEditPath($scope.savedWorkspace));
-        }
+        if ($scope.savedWorkspace.id === $route.current.params.id) return;
+        kbnUrl.change(getEditPath($scope.savedWorkspace));
       }
-      return { id };
     }, fatalError);
 
   };

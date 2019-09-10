@@ -10,17 +10,17 @@ import { RouteComponentProps } from 'react-router-dom';
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type NetworkComponentProps = RouteComponentProps<{
-  detailName: string;
+  ip: string;
   search: string;
 }>;
 
 export const RedirectToNetworkPage = ({
   match: {
-    params: { detailName },
+    params: { ip },
   },
   location: { search },
 }: NetworkComponentProps) => (
-  <RedirectWrapper to={detailName ? `/network/ip/${detailName}${search}` : `/network${search}`} />
+  <RedirectWrapper to={ip ? `/network/ip/${ip}${search}` : `/network/${search}`} />
 );
 
 export const getNetworkUrl = () => '#/link-to/network';

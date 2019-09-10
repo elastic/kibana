@@ -21,7 +21,6 @@ import { createStore, hostsModel, State } from '../../../../store';
 
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { HostsTableType } from '../../../../store/hosts/model';
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -101,7 +100,7 @@ describe('Hosts Table', () => {
         );
       });
       test('Initial value of the store', () => {
-        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
+        expect(store.getState().hosts.page.queries.hosts).toEqual({
           activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
@@ -129,7 +128,7 @@ describe('Hosts Table', () => {
 
         wrapper.update();
 
-        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
+        expect(store.getState().hosts.page.queries.hosts).toEqual({
           activePage: 0,
           direction: 'asc',
           sortField: 'hostName',

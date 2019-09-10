@@ -18,9 +18,9 @@
  */
 
 import { EmbeddableApiPure } from './types';
-import { Action, buildContextMenuForActions, openContextMenu } from '../lib';
+import { Action, ActionContext, buildContextMenuForActions, openContextMenu } from '../lib';
 
-const executeSingleAction = async <A extends {} = {}>(action: Action<A>, actionContext: A) => {
+const executeSingleAction = async (action: Action, actionContext: ActionContext) => {
   const href = action.getHref(actionContext);
 
   // TODO: Do we need a `getHref()` special case?

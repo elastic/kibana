@@ -89,8 +89,9 @@ test('Is not compatible when container is in view mode', async () => {
 
 test('Is not compatible when embeddable is not a container', async () => {
   expect(
-    // @ts-ignore
-    await action.isCompatible({ embeddable })
+    await action.isCompatible({
+      embeddable,
+    })
   ).toBe(false);
 });
 

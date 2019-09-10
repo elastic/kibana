@@ -7,9 +7,7 @@ exports[`renders without crashing 1`] = `
     fullWidth={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <p
-        className="eui-textBreakAll"
-      >
+      <p>
         <FormattedMessage
           defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"

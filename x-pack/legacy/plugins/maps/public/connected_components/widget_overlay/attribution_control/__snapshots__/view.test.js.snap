@@ -9,6 +9,8 @@ exports[`AttributionControl is rendered 1`] = `
   >
     <small>
       <strong>
+        attribution with no link
+        , 
         <EuiLink
           color="text"
           href="https://coolmaps.com"
@@ -17,8 +19,6 @@ exports[`AttributionControl is rendered 1`] = `
         >
           attribution with link
         </EuiLink>
-        , 
-        attribution with no link
       </strong>
     </small>
   </EuiText>

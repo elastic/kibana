@@ -19,4 +19,4 @@
 
 export { Registry } from './lib/registry';
 
-export { fromExpression, toExpression, Ast } from './lib/ast';
+export { fromExpression, Ast } from './lib/ast';

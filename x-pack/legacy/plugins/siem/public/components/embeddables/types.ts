@@ -5,7 +5,7 @@
  */
 
 import { Filter as ESFilterType } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange } from 'ui/timefilter';
 import { EmbeddableInput } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {

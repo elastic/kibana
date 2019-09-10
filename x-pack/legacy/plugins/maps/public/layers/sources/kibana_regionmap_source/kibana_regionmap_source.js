@@ -15,10 +15,10 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
   static title = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
-    defaultMessage: 'Configured GeoJSON'
+    defaultMessage: 'Custom vector shapes'
   });
   static description = i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
-    defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml'
+    defaultMessage: 'Vector shapes from static files configured in kibana.yml'
   })
   ;
   static icon = 'logoKibana';

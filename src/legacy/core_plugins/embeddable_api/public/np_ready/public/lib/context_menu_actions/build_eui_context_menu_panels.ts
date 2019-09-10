@@ -20,21 +20,21 @@
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Action } from '../actions';
+import { Action, ActionContext } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
-export async function buildContextMenuForActions<A>({
+export async function buildContextMenuForActions({
   actions,
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
-  actionContext: A;
+  actions: Action[];
+  actionContext: ActionContext;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
-  const menuItems = await buildEuiContextMenuPanelItems<A>({
+  const menuItems = await buildEuiContextMenuPanelItems({
     actions,
     actionContext,
     closeMenu,
@@ -52,13 +52,13 @@ export async function buildContextMenuForActions<A>({
 /**
  * Transform an array of Actions into the shape needed to build an EUIContextMenu
  */
-async function buildEuiContextMenuPanelItems<A>({
+async function buildEuiContextMenuPanelItems({
   actions,
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
-  actionContext: A;
+  actions: Action[];
+  actionContext: ActionContext;
   closeMenu: () => void;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = [];
@@ -88,13 +88,13 @@ async function buildEuiContextMenuPanelItems<A>({
  * @param {Embeddable} embeddable
  * @return {EuiContextMenuPanelItemDescriptor}
  */
-function convertPanelActionToContextMenuItem<A>({
+function convertPanelActionToContextMenuItem({
   action,
   actionContext,
   closeMenu,
 }: {
-  action: Action<A>;
-  actionContext: A;
+  action: Action;
+  actionContext: ActionContext;
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {

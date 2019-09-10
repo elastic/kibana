@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
+import { RouteComponentProps } from 'react-router';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Dispatch } from 'redux';
 
+import { Dispatch } from 'redux';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
-import { RouteSpyState } from '../../utils/route/types';
-import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { NavTab } from '../navigation/types';
 
-import { CONSTANTS, UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
+import { DispatchUpdateTimeline } from '../open_timeline/types';
+
+export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.kqlQuery,
@@ -51,8 +53,8 @@ export interface UrlState {
 }
 export type KeyUrlState = keyof UrlState;
 
-export interface UrlStateProps {
-  navTabs: Record<string, NavTab>;
+export interface UrlStateProps<TCache = object> {
+  isInitializing: boolean;
   indexPattern?: StaticIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
@@ -98,12 +100,12 @@ export interface UrlStateDispatchToPropsType {
   }>;
 }
 
-export type UrlStateContainerPropTypes = RouteSpyState &
+export type UrlStateContainerPropTypes = RouteComponentProps &
   UrlStateStateToPropsType &
   UrlStateDispatchToPropsType &
   UrlStateProps;
 
 export interface PreviousLocationUrlState {
-  pathName: string | undefined;
+  location: Location;
   urlState: UrlState;
 }

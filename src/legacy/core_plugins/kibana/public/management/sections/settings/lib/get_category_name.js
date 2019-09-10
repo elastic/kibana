@@ -45,9 +45,6 @@ const names = {
   search: i18n.translate('kbn.management.settings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
-  siem: i18n.translate('kbn.management.settings.categoryNames.siemLabel', {
-    defaultMessage: 'SIEM',
-  }),
 };
 
 export function getCategoryName(category) {

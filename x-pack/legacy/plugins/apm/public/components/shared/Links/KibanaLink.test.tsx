@@ -9,7 +9,7 @@ import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { KibanaLink } from './KibanaLink';
 import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
+import { InternalCoreStart } from 'src/core/public';
 
 describe('KibanaLink', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('KibanaLink', () => {
           prepend: (path: string) => `/basepath${path}`
         }
       }
-    } as unknown) as LegacyCoreStart;
+    } as unknown) as InternalCoreStart;
 
     jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });

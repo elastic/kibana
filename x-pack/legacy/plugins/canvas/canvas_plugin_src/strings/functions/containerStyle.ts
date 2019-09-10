@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { containerStyle } from '../../functions/common/containerStyle';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CSS } from '../../../i18n';
+import { CSS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
   help: i18n.translate('xpack.canvas.functions.containerStyleHelpText', {

@@ -17,43 +17,108 @@
  * under the License.
  */
 
-import { createBrowserHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
-import React from 'react';
-
+import { Observable, BehaviorSubject } from 'rxjs';
+import { CapabilitiesService, Capabilities } from './capabilities';
 import { InjectedMetadataStart } from '../injected_metadata';
-import { CapabilitiesService } from './capabilities';
-import { AppRouter } from './ui';
-import { HttpStart } from '../http';
-import { ContextSetup, IContextContainer } from '../context';
-import {
-  AppMountContext,
-  App,
-  LegacyApp,
-  AppMounter,
-  AppUnmount,
-  AppMountParameters,
-  InternalApplicationSetup,
-  InternalApplicationStart,
-} from './types';
+import { RecursiveReadonly } from '../../utils';
 
-interface SetupDeps {
-  context: ContextSetup;
+interface BaseApp {
+  id: string;
+
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  order: number;
+
+  /**
+   * The title of the application.
+   */
+  title: string;
+
+  /**
+   * An observable for a tooltip shown when hovering over app link.
+   */
+  tooltip$?: Observable<string>;
+
+  /**
+   * A EUI iconType that will be used for the app's icon. This icon
+   * takes precendence over the `icon` property.
+   */
+  euiIconType?: string;
+
+  /**
+   * A URL to an image file used as an icon. Used as a fallback
+   * if `euiIconType` is not provided.
+   */
+  icon?: string;
+
+  /**
+   * Custom capabilities defined by the app.
+   */
+  capabilities?: Partial<Capabilities>;
+}
+
+/** @public */
+export interface App extends BaseApp {
+  /**
+   * A mount function called when the user navigates to this app's `rootRoute`.
+   * @param targetDomElement An HTMLElement to mount the application onto.
+   * @returns An unmounting function that will be called to unmount the application.
+   */
+  mount(targetDomElement: HTMLElement): () => void;
+}
+
+/** @internal */
+export interface LegacyApp extends BaseApp {
+  appUrl: string;
+  subUrlBase?: string;
+  linkToLastSubUrl?: boolean;
+}
+
+/** @internal */
+export type MixedApp = Partial<App> & Partial<LegacyApp> & BaseApp;
+
+/** @public */
+export interface ApplicationSetup {
+  /**
+   * Register an mountable application to the system. Apps will be mounted based on their `rootRoute`.
+   * @param app
+   */
+  registerApp(app: App): void;
+
+  /**
+   * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
+   * @param app
+   * @internal
+   */
+  registerLegacyApp(app: LegacyApp): void;
+}
+
+/**
+ * @public
+ */
+export interface ApplicationStart {
+  /**
+   * Gets the read-only capabilities.
+   */
+  capabilities: RecursiveReadonly<Capabilities>;
+
+  /**
+   * Apps available based on the current capabilities. Should be used
+   * to show navigation links and make routing decisions.
+   */
+  availableApps: readonly App[];
+
+  /**
+   * Apps available based on the current capabilities. Should be used
+   * to show navigation links and make routing decisions.
+   * @internal
+   */
+  availableLegacyApps: readonly LegacyApp[];
 }
 
 interface StartDeps {
-  http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
-  /**
-   * Only necessary for redirecting to legacy apps
-   * @deprecated
-   */
-  redirectTo?: (path: string) => void;
-}
-
-interface AppBox {
-  app: App;
-  mount: AppMounter;
 }
 
 /**
@@ -61,122 +126,31 @@ interface AppBox {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps$ = new BehaviorSubject<ReadonlyMap<string, AppBox>>(new Map());
-  private readonly legacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(new Map());
+  private readonly apps$ = new BehaviorSubject<App[]>([]);
+  private readonly legacyApps$ = new BehaviorSubject<LegacyApp[]>([]);
   private readonly capabilities = new CapabilitiesService();
-  private mountContext?: IContextContainer<
-    AppMountContext,
-    AppUnmount | Promise<AppUnmount>,
-    [AppMountParameters]
-  >;
 
-  public setup({ context }: SetupDeps): InternalApplicationSetup {
-    this.mountContext = context.createContextContainer();
-
+  public setup(): ApplicationSetup {
     return {
-      register: (plugin: symbol, app: App) => {
-        if (this.apps$.value.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        }
-        if (this.apps$.isStopped) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        }
-
-        const appBox: AppBox = {
-          app,
-          mount: this.mountContext!.createHandler(plugin, app.mount),
-        };
-        this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
+      registerApp: (app: App) => {
+        this.apps$.next([...this.apps$.value, app]);
       },
       registerLegacyApp: (app: LegacyApp) => {
-        if (this.legacyApps$.value.has(app.id)) {
-          throw new Error(`A legacy application is already registered with the id "${app.id}"`);
-        }
-        if (this.legacyApps$.isStopped) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        }
-
-        this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
+        this.legacyApps$.next([...this.legacyApps$.value, app]);
       },
-      registerMountContext: this.mountContext.registerContext,
     };
   }
 
-  public async start({
-    http,
-    injectedMetadata,
-    redirectTo = (path: string) => (window.location.href = path),
-  }: StartDeps): Promise<InternalApplicationStart> {
-    if (!this.mountContext) {
-      throw new Error(`ApplicationService#setup() must be invoked before start.`);
-    }
-
-    // Disable registration of new applications
+  public async start({ injectedMetadata }: StartDeps): Promise<ApplicationStart> {
     this.apps$.complete();
     this.legacyApps$.complete();
 
-    const legacyMode = injectedMetadata.getLegacyMode();
-    const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
-    const { availableApps, availableLegacyApps, capabilities } = await this.capabilities.start({
-      apps: new Map([...this.apps$.value].map(([id, { app }]) => [id, app])),
+    return this.capabilities.start({
+      apps: this.apps$.value,
       legacyApps: this.legacyApps$.value,
       injectedMetadata,
     });
-
-    // Only setup history if we're not in legacy mode
-    const history = legacyMode ? null : createBrowserHistory({ basename: http.basePath.get() });
-
-    return {
-      availableApps,
-      availableLegacyApps,
-      capabilities,
-      registerMountContext: this.mountContext.registerContext,
-      currentAppId$,
-
-      getUrlForApp: (appId, options: { path?: string } = {}) => {
-        return http.basePath.prepend(appPath(appId, options));
-      },
-
-      navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        if (legacyMode) {
-          // If we're in legacy mode, do a full page refresh to load the NP app.
-          redirectTo(http.basePath.prepend(appPath(appId, { path })));
-        } else {
-          // basePath not needed here because `history` is configured with basename
-          history!.push(appPath(appId, { path }), state);
-        }
-      },
-
-      getComponent: () => {
-        if (legacyMode) {
-          return null;
-        }
-
-        // Filter only available apps and map to just the mount function.
-        const appMounters = new Map<string, AppMounter>(
-          [...this.apps$.value]
-            .filter(([id]) => availableApps.has(id))
-            .map(([id, { mount }]) => [id, mount])
-        );
-
-        return (
-          <AppRouter
-            apps={appMounters}
-            legacyApps={availableLegacyApps}
-            basePath={http.basePath}
-            currentAppId$={currentAppId$}
-            history={history!}
-            redirectTo={redirectTo}
-          />
-        );
-      },
-    };
   }
 
   public stop() {}
 }
-
-const appPath = (appId: string, { path }: { path?: string } = {}): string =>
-  path
-    ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
-    : `/app/${appId}`;

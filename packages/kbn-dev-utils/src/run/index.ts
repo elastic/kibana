@@ -18,5 +18,4 @@
  */
 
 export { run } from './run';
-export { Flags } from './flags';
 export { createFailError, createFlagError, combineErrors, isFailError } from './fail';

@@ -18,18 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from './action';
+import { Action, ActionContext } from './action';
 import { GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
-import { IEmbeddable } from '../embeddables';
 
 export const EDIT_PANEL_ACTION_ID = 'editPanel';
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class EditPanelAction extends Action<ActionContext> {
+export class EditPanelAction extends Action {
   public readonly type = EDIT_PANEL_ACTION_ID;
   constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {
     super(EDIT_PANEL_ACTION_ID);
@@ -61,8 +56,8 @@ export class EditPanelAction extends Action<ActionContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute() {
-    return;
+  public execute() {
+    return undefined;
   }
 
   public getHref({ embeddable }: ActionContext): string {

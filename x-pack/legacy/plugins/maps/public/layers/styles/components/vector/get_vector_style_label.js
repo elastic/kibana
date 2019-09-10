@@ -6,23 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vectorStyles } from '../../vector_style_defaults';
-
 export function getVectorStyleLabel(styleName) {
   switch (styleName) {
-    case vectorStyles.FILL_COLOR:
+    case 'fillColor':
       return i18n.translate('xpack.maps.styles.vector.fillColorLabel', {
         defaultMessage: 'Fill color'
       });
-    case vectorStyles.LINE_COLOR:
+    case 'lineColor':
       return i18n.translate('xpack.maps.styles.vector.borderColorLabel', {
         defaultMessage: 'Border color'
       });
-    case vectorStyles.LINE_WIDTH:
+    case 'lineWidth':
       return i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
         defaultMessage: 'Border width'
       });
-    case vectorStyles.ICON_SIZE:
+    case 'iconSize':
       return i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
         defaultMessage: 'Symbol size'
       });

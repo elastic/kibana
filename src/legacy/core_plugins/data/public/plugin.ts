@@ -18,16 +18,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions';
+import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
-import {
-  Start as InspectorStart,
-  Setup as InspectorSetup,
-} from '../../../../plugins/inspector/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -36,11 +32,7 @@ import {
  */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
-  inspector: InspectorSetup;
-}
-
-export interface DataPluginStartDependencies {
-  inspector: InspectorStart;
+  interpreter: any;
 }
 
 /**
@@ -56,10 +48,6 @@ export interface DataSetup {
   search: SearchSetup;
 }
 
-export interface DataStart {
-  expressions: ExpressionsStart;
-}
-
 /**
  * Data Plugin - public
  *
@@ -71,7 +59,7 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupDependencies> {
+export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDependencies> {
   // Exposed services, sorted alphabetically
   private readonly expressions: ExpressionsService = new ExpressionsService();
   private readonly filter: FilterService = new FilterService();
@@ -79,7 +67,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
+  public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
@@ -88,7 +76,9 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
       savedObjectsClient,
     });
     return {
-      expressions: this.expressions.setup(),
+      expressions: this.expressions.setup({
+        interpreter,
+      }),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
@@ -99,11 +89,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupD
     };
   }
 
-  public start(core: CoreStart, plugins: DataPluginStartDependencies) {
-    return {
-      expressions: this.expressions.start({ inspector: plugins.inspector }),
-    };
-  }
+  public start(core: CoreStart) {}
 
   public stop() {
     this.expressions.stop();

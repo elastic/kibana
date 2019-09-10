@@ -85,7 +85,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     query: { match: { extension: { query: 'foo' } } },
   };
 
-  await applyFilterAction.execute({ embeddable, filters: [filter] });
+  applyFilterAction.execute({ embeddable, triggerContext: { filters: [filter] } });
   expect(root.getInput().filters.length).toBe(1);
   expect(node1.getInput().filters.length).toBe(1);
   expect(embeddable.getInput().filters.length).toBe(1);
@@ -124,7 +124,6 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
     throw new Error();
   }
 
-  // @ts-ignore
   expect(await applyFilterAction.isCompatible({ embeddable })).toBe(false);
 });
 
@@ -161,7 +160,6 @@ test('trying to execute on incompatible context throws an error ', async () => {
   }
 
   async function check() {
-    // @ts-ignore
     await applyFilterAction.execute({ embeddable });
   }
   await expect(check()).rejects.toThrow(Error);

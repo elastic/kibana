@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import {
   Setup as InspectorSetup,
@@ -34,12 +34,12 @@ export interface PluginsStart {
 }
 
 export const npSetup = {
-  core: (null as unknown) as LegacyCoreSetup,
+  core: (null as unknown) as InternalCoreSetup,
   plugins: {} as PluginsSetup,
 };
 
 export const npStart = {
-  core: (null as unknown) as LegacyCoreStart,
+  core: (null as unknown) as InternalCoreStart,
   plugins: {} as PluginsStart,
 };
 
@@ -48,18 +48,18 @@ export const npStart = {
  * @internal
  */
 export function __reset__() {
-  npSetup.core = (null as unknown) as LegacyCoreSetup;
+  npSetup.core = (null as unknown) as InternalCoreSetup;
   npSetup.plugins = {} as any;
-  npStart.core = (null as unknown) as LegacyCoreStart;
+  npStart.core = (null as unknown) as InternalCoreStart;
   npStart.plugins = {} as any;
 }
 
-export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
+export function __setup__(coreSetup: InternalCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
 }
 
-export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
+export function __start__(coreStart: InternalCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 }

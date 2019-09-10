@@ -75,7 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.changePanelPreview();
 
         await visualBuilder.cloneSeries();
-        const legend = await visualBuilder.getLegendItems();
+        const legend = await visualBuilder.getLegentItems();
         const series = await visualBuilder.getSeries();
         expect(legend.length).to.be(2);
         expect(series.length).to.be(2);
@@ -108,7 +108,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
-      it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/40458
+      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
@@ -126,8 +127,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCountMin).to.be('3 hours');
       });
 
-      // --reversed class is not implemented in @elastic\chart
-      describe.skip('Dark mode', () => {
+      describe('Dark mode', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({
             'theme:darkMode': true,

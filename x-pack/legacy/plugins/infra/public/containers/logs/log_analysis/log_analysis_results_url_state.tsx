@@ -4,25 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { useEffect } from 'react';
 import * as rt from 'io-ts';
 import { useUrlState } from '../../../utils/use_url_state';
+import { timeRangeRT } from '../../../../common/http_api/shared/time_range';
 
-const autoRefreshRT = rt.union([
-  rt.type({
-    interval: rt.number,
-    isPaused: rt.boolean,
-  }),
-  rt.undefined,
-]);
-
-export const stringTimeRangeRT = rt.type({
-  startTime: rt.string,
-  endTime: rt.string,
-});
-export type StringTimeRange = rt.TypeOf<typeof stringTimeRangeRT>;
-
-const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
+const autoRefreshRT = rt.union([rt.boolean, rt.undefined]);
+const urlTimeRangeRT = rt.union([timeRangeRT, rt.undefined]);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
@@ -30,8 +19,11 @@ const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
 export const useLogAnalysisResultsUrlState = () => {
   const [timeRange, setTimeRange] = useUrlState({
     defaultState: {
-      startTime: 'now-2w',
-      endTime: 'now',
+      startTime: moment
+        .utc()
+        .subtract(2, 'weeks')
+        .valueOf(),
+      endTime: moment.utc().valueOf(),
     },
     decodeUrlState: (value: unknown) => urlTimeRangeRT.decode(value).getOrElse(undefined),
     encodeUrlState: urlTimeRangeRT.encode,
@@ -42,24 +34,21 @@ export const useLogAnalysisResultsUrlState = () => {
     setTimeRange(timeRange);
   }, []);
 
-  const [autoRefresh, setAutoRefresh] = useUrlState({
-    defaultState: {
-      isPaused: false,
-      interval: 30000,
-    },
+  const [autoRefreshEnabled, setAutoRefresh] = useUrlState({
+    defaultState: false,
     decodeUrlState: (value: unknown) => autoRefreshRT.decode(value).getOrElse(undefined),
     encodeUrlState: autoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
   });
 
   useEffect(() => {
-    setAutoRefresh(autoRefresh);
+    setAutoRefresh(autoRefreshEnabled);
   }, []);
 
   return {
     timeRange,
     setTimeRange,
-    autoRefresh,
+    autoRefreshEnabled,
     setAutoRefresh,
   };
 };

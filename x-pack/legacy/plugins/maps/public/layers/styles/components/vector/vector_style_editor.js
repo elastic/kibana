@@ -14,8 +14,7 @@ import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
-  getDefaultStaticProperties,
-  vectorStyles
+  getDefaultStaticProperties
 } from '../../vector_style_defaults';
 import {
   DEFAULT_FILL_COLORS,
@@ -98,7 +97,7 @@ export class VectorStyleEditor extends Component {
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty={vectorStyles.FILL_COLOR}
+        styleProperty="fillColor"
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
@@ -112,7 +111,7 @@ export class VectorStyleEditor extends Component {
   _renderLineColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty={vectorStyles.LINE_COLOR}
+        styleProperty="lineColor"
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
@@ -126,7 +125,7 @@ export class VectorStyleEditor extends Component {
   _renderLineWidth() {
     return (
       <VectorStyleSizeEditor
-        styleProperty={vectorStyles.LINE_WIDTH}
+        styleProperty="lineWidth"
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineWidth}
         ordinalFields={this.state.ordinalFields}
@@ -139,7 +138,7 @@ export class VectorStyleEditor extends Component {
   _renderSymbolSize() {
     return (
       <VectorStyleSizeEditor
-        styleProperty={vectorStyles.ICON_SIZE}
+        styleProperty="iconSize"
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.iconSize}
         ordinalFields={this.state.ordinalFields}
@@ -155,7 +154,7 @@ export class VectorStyleEditor extends Component {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
-            styleProperty={vectorStyles.ICON_ORIENTATION}
+            styleProperty="iconOrientation"
             handlePropertyChange={this.props.handlePropertyChange}
             styleDescriptor={this.props.styleProperties.iconOrientation}
             ordinalFields={this.state.ordinalFields}

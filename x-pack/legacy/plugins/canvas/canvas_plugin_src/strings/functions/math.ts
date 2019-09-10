@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { math } from '../../functions/common/math';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { DATATABLE, CONTEXT, TINYMATH, TINYMATH_URL } from '../../../i18n';
+import { DATATABLE, CONTEXT, TINYMATH, TINYMATH_URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {

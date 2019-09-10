@@ -13,7 +13,6 @@ import {
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
   MachineLearningJobSourceSelectionProvider,
-  MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
   MachineLearningJobWizardCommonProvider,
   MachineLearningNavigationProvider,
@@ -28,7 +27,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
-  const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
@@ -42,7 +40,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     jobManagement,
     jobSourceSelection,
-    jobTable,
     jobTypeSelection,
     jobWizardCommon,
     navigation,

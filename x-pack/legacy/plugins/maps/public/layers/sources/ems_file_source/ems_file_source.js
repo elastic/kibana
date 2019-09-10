@@ -19,10 +19,10 @@ export class EMSFileSource extends AbstractVectorSource {
 
   static type = EMS_FILE;
   static title =  i18n.translate('xpack.maps.source.emsFileTitle', {
-    defaultMessage: 'EMS Boundaries'
+    defaultMessage: 'Vector shapes'
   });
   static description = i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service'
+    defaultMessage: 'Vector shapes of administrative boundaries from Elastic Maps Service'
   });
   static icon = 'emsApp';
 

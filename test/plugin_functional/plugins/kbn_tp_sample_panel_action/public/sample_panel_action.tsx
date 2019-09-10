@@ -22,16 +22,12 @@ import { npStart } from 'ui/new_platform';
 
 import {
   Action,
+  ActionContext,
   CONTEXT_MENU_TRIGGER,
-  IEmbeddable,
 } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-
-class SamplePanelAction extends Action<ActionContext> {
+class SamplePanelAction extends Action {
   public readonly type = 'samplePanelAction';
 
   constructor() {
@@ -42,7 +38,7 @@ class SamplePanelAction extends Action<ActionContext> {
     return 'Sample Panel Action';
   }
 
-  public execute = async ({ embeddable }: ActionContext) => {
+  public execute = ({ embeddable }: ActionContext) => {
     if (!embeddable) {
       return;
     }

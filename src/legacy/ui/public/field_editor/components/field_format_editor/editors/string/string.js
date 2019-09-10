@@ -44,8 +44,7 @@ export class StringFormatEditor extends DefaultFormatEditor {
       'STAY CALM!',
       'com.organizations.project.ClassName',
       'hostname.net',
-      'SGVsbG8gd29ybGQ=',
-      '%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98'
+      'SGVsbG8gd29ybGQ='
     ];
   }
 

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { Action } from './actions';
+import { Action, ActionContext } from './actions';
+import { IEmbeddable } from './embeddables';
+import { IContainer } from './containers';
 import { EmbeddableFactory } from './embeddables/embeddable_factory';
 import { Adapters } from '../../../../../../../plugins/inspector/public';
 
@@ -53,10 +55,18 @@ export interface SavedObjectMetaData<T> {
   showSavedObject?(savedObject: any): any;
 }
 
-export type ExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
-export type GetActionsCompatibleWithTrigger = <C>(
+export interface TriggerContext {
+  embeddable: IEmbeddable;
+  container?: IContainer;
+}
+
+export type ExecuteTriggerActions = (
   triggerId: string,
-  context: C
+  actionContext: ActionContext
+) => Promise<void>;
+export type GetActionsCompatibleWithTrigger = (
+  triggerId: string,
+  context: TriggerContext
 ) => Promise<Action[]>;
 export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;
 export type GetEmbeddableFactories = () => IterableIterator<EmbeddableFactory>;

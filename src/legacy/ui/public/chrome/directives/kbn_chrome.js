@@ -77,21 +77,15 @@ export function kbnChromeProvider(chrome, internals) {
           // Non-scope based code (e.g., React)
 
           // Banners
-          const bannerListContainer = document.getElementById('globalBannerList');
-          // Banners not supported in New Platform yet
-          // https://github.com/elastic/kibana/issues/41986
-          if (bannerListContainer) {
-            ReactDOM.render(
-              <I18nContext>
-                <GlobalBannerList
-                  banners={banners.list}
-                  subscribe={banners.onChange}
-                />
-              </I18nContext>,
-              bannerListContainer
-            );
-          }
-
+          ReactDOM.render(
+            <I18nContext>
+              <GlobalBannerList
+                banners={banners.list}
+                subscribe={banners.onChange}
+              />
+            </I18nContext>,
+            document.getElementById('globalBannerList')
+          );
 
           return chrome;
         }

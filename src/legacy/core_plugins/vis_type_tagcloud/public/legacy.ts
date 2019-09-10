@@ -20,12 +20,12 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { setup as setupVisualizations } from '../../visualizations/public/np_ready/public/legacy';
+import { visualizations } from '../../visualizations/public';
 import { TagCloudPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
 const plugins: Readonly<TagCloudPluginSetupDependencies> = {
-  visualizations: setupVisualizations,
+  visualizations,
   data: npSetup.plugins.data,
 };
 

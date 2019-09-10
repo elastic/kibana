@@ -20,13 +20,13 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { setup as setupVisualizations } from '../../visualizations/public/np_ready/public/legacy';
+import { visualizations } from '../../visualizations/public';
 import { MetricVisPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
 const plugins: Readonly<MetricVisPluginSetupDependencies> = {
-  visualizations: setupVisualizations,
+  visualizations,
   data: npSetup.plugins.data,
 
   // Temporary solution

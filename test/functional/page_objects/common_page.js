@@ -151,22 +151,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}) {
       const self = this;
-
-      let appUrl;
-      if (config.has(['apps', appName])) {
-        // Legacy applications
-        const appConfig = config.get(['apps', appName]);
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-          pathname: `${basePath}${appConfig.pathname}`,
-          hash: hash || appConfig.hash,
-        });
-      } else {
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-          pathname: `${basePath}/app/${appName}`,
-          hash
-        });
-      }
-
+      const appConfig = config.get(['apps', appName]);
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        pathname: `${basePath}${appConfig.pathname}`,
+        hash: hash || appConfig.hash,
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
@@ -370,7 +359,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           throw new Error('Toast is not visible yet');
         }
       });
-      await toast.moveMouseTo();
+      await browser.moveMouseTo(toast);
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
       log.debug(title);
       await find.clickByCssSelector('.euiToast__closeButton');
@@ -381,7 +370,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
         try {
-          await toastElement.moveMouseTo();
+          await browser.moveMouseTo(toastElement);
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {

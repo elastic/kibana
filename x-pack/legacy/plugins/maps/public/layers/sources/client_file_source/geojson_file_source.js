@@ -24,10 +24,10 @@ export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
   static title = i18n.translate('xpack.maps.source.geojsonFileTitle', {
-    defaultMessage: 'Uploaded GeoJSON'
+    defaultMessage: 'Upload GeoJSON vector file'
   });
   static description = i18n.translate('xpack.maps.source.geojsonFileDescription', {
-    defaultMessage: 'Upload and index GeoJSON data in Elasticsearch'
+    defaultMessage: 'Upload a GeoJSON file and index in Elasticsearch'
   });
   static icon = 'importAction';
   static isIndexingSource = true;

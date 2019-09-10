@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin, DataSetup } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -28,9 +28,7 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export type DataStart = DataStart;
-
-export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
+export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,

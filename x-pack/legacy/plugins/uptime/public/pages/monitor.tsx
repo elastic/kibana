@@ -25,7 +25,6 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
-import { getTitle } from '../lib/helper/get_title';
 
 interface MonitorPageProps {
   logMonitorPageLoad: () => void;
@@ -66,7 +65,6 @@ export const MonitorPage = ({
     }).then((result: any) => {
       const { name, url, id } = result.data.monitorPageTitle;
       const heading: string = name || url || id;
-      document.title = getTitle(name);
       setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
       if (setHeadingText) {
         setHeadingText(heading);

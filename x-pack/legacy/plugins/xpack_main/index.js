@@ -85,9 +85,7 @@ export const xpackMain = (kibana) => {
 
       setupXPackMain(server);
       const { types: savedObjectTypes } = server.savedObjects;
-      const config = server.config();
-      const isTimelionUiEnabled = config.get('timelion.enabled') && config.get('timelion.ui.enabled');
-      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes, isTimelionUiEnabled);
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes, server.config().get('timelion.ui.enabled'));
 
       // register routes
       xpackInfoRoute(server);

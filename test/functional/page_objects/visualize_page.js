@@ -1187,7 +1187,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await cell.moveMouseTo();
+        await browser.moveMouseTo(cell);
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });

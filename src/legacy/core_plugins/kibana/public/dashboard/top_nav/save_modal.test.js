@@ -18,20 +18,20 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DashboardSaveModal } from './save_modal';
+import {
+  DashboardSaveModal,
+} from './save_modal';
 
 test('renders DashboardSaveModal', () => {
-  const component = shallowWithI18nProvider(
-    <DashboardSaveModal
-      onSave={() => {}}
-      onClose={() => {}}
-      title="dash title"
-      description="dash description"
-      timeRestore={true}
-      showCopyOnSave={true}
-    />
-  );
+  const component = shallowWithIntl(<DashboardSaveModal.WrappedComponent
+    onSave={() => {}}
+    onClose={() => {}}
+    title="dash title"
+    description="dash description"
+    timeRestore={true}
+    showCopyOnSave={true}
+  />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });

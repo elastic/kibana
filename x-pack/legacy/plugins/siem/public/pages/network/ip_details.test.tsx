@@ -70,8 +70,7 @@ const getMockProps = (ip: string) => ({
     state: '',
     hash: '',
   },
-  detailName: ip,
-  match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
+  match: { params: { ip, search: '' }, isExact: true, path: '', url: '' },
   setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
     id: InputsModelId;
     from: number;

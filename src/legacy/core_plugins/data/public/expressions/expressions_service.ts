@@ -17,51 +17,107 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-// @ts-ignore
+import { Ast } from '@kbn/interpreter/common';
 
-import { setInspector, setInterpreter } from './services';
-import { execute } from './lib/execute';
-import { loader } from './lib/loader';
-import { render } from './lib/render';
+// TODO:
+// this type import and the types below them should be switched to the types of
+// the interpreter plugin itself once they are ready
+import { Registry } from '@kbn/interpreter/common';
+import { Adapters } from 'src/plugins/inspector/public';
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/public';
 import { createRenderer } from './expression_renderer';
+import { createRunFn } from './expression_runner';
+import { Query } from '../query';
 
-import { Start as IInspector } from '../../../../../plugins/inspector/public';
-
-export interface ExpressionsServiceStartDependencies {
-  inspector: IInspector;
+export interface InitialContextObject {
+  timeRange?: TimeRange;
+  filters?: Filter[];
+  query?: Query;
 }
+
+export type getInitialContextFunction = () => InitialContextObject;
+
+export interface Handlers {
+  getInitialContext: getInitialContextFunction;
+  inspectorAdapters?: Adapters;
+  abortSignal?: AbortSignal;
+}
+
+type Context = object;
+export interface Result {
+  type: string;
+  as?: string;
+  value?: unknown;
+  error?: unknown;
+}
+
+interface RenderHandlers {
+  done: () => void;
+  onDestroy: (fn: () => void) => void;
+}
+
+export interface RenderFunction {
+  name: string;
+  displayName: string;
+  help: string;
+  validate: () => void;
+  reuseDomNode: boolean;
+  render: (domNode: Element, data: unknown, handlers: RenderHandlers) => void;
+}
+
+export type RenderFunctionsRegistry = Registry<unknown, RenderFunction>;
+
+export interface Interpreter {
+  interpretAst(ast: Ast, context: Context, handlers: Handlers): Promise<Result>;
+}
+
+type InterpreterGetter = () => Promise<{ interpreter: Interpreter }>;
+
+export interface ExpressionsServiceDependencies {
+  interpreter: {
+    renderersRegistry: RenderFunctionsRegistry;
+    getInterpreter: InterpreterGetter;
+  };
+}
+
 /**
  * Expressions Service
  * @internal
  */
 export class ExpressionsService {
-  public setup() {
-    // eslint-disable-next-line
-    const { getInterpreter } = require('../../../interpreter/public/interpreter');
-    getInterpreter()
-      .then(setInterpreter)
-      .catch((e: Error) => {
-        throw new Error('interpreter is not initialized');
-      });
+  public setup({
+    interpreter: { renderersRegistry, getInterpreter },
+  }: ExpressionsServiceDependencies) {
+    const run = createRunFn(
+      renderersRegistry,
+      getInterpreter().then(({ interpreter }) => interpreter)
+    );
 
     return {
-      registerType: npSetup.plugins.data.expressions.registerType,
-      registerFunction: npSetup.plugins.data.expressions.registerFunction,
-      registerRenderer: npSetup.plugins.data.expressions.registerRenderer,
-    };
-  }
-
-  public start({ inspector }: ExpressionsServiceStartDependencies) {
-    const ExpressionRenderer = createRenderer(loader);
-    setInspector(inspector);
-
-    return {
-      execute,
-      render,
-      loader,
-
-      ExpressionRenderer,
+      /**
+       * **experimential** This API is experimential and might be removed in the future
+       * without notice
+       *
+       * Executes the given expression string or ast and renders the result into the
+       * given DOM element.
+       *
+       *
+       * @param expressionOrAst
+       * @param element
+       */
+      run,
+      /**
+       * **experimential** This API is experimential and might be removed in the future
+       * without notice
+       *
+       * Component which executes and renders the given expression in a div element.
+       * The expression is re-executed on updating the props.
+       *
+       * This is a React bridge of the `run` method
+       * @param props
+       */
+      ExpressionRenderer: createRenderer(run),
     };
   }
 
@@ -72,4 +128,3 @@ export class ExpressionsService {
 
 /** @public */
 export type ExpressionsSetup = ReturnType<ExpressionsService['setup']>;
-export type ExpressionsStart = ReturnType<ExpressionsService['start']>;

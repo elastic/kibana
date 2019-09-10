@@ -22,13 +22,9 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { InternalChromeStart } from '../chrome';
-import { InternalApplicationStart } from '../application';
-import { InjectedMetadataStart } from '../injected_metadata';
 
 interface StartDeps {
-  application: InternalApplicationStart;
   chrome: InternalChromeStart;
-  injectedMetadata: InjectedMetadataStart;
   targetDomElement: HTMLDivElement;
 }
 
@@ -43,40 +39,28 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, injectedMetadata, targetDomElement }: StartDeps): RenderingStart {
-    const chromeUi = chrome.getHeaderComponent();
-    const appUi = application.getComponent();
-
-    const legacyMode = injectedMetadata.getLegacyMode();
-    const legacyRef = legacyMode ? React.createRef<HTMLDivElement>() : null;
+  start({ chrome, targetDomElement }: StartDeps) {
+    const chromeUi = chrome.getComponent();
+    const legacyRef = React.createRef<HTMLDivElement>();
 
     ReactDOM.render(
       <I18nProvider>
         <div className="content" data-test-subj="kibanaChrome">
           {chromeUi}
 
-          {!legacyMode && (
-            <div className="app-wrapper">
-              <div className="app-wrapper-panel">
-                <div className="application">{appUi}</div>
-              </div>
-            </div>
-          )}
-
-          {legacyMode && <div ref={legacyRef} />}
+          <div ref={legacyRef} />
         </div>
       </I18nProvider>,
       targetDomElement
     );
 
     return {
-      // When in legacy mode, return legacy div, otherwise undefined.
-      legacyTargetDomElement: legacyRef ? legacyRef.current! : undefined,
+      legacyTargetDomElement: legacyRef.current!,
     };
   }
 }
 
 /** @internal */
 export interface RenderingStart {
-  legacyTargetDomElement?: HTMLDivElement;
+  legacyTargetDomElement: HTMLDivElement;
 }

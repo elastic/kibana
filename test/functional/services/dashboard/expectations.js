@@ -62,6 +62,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
+    async tsvbTimeSeriesLegendCount(expectedCount) {
+      log.debug(`DashboardExpect.tsvbTimeSeriesLegendCount(${expectedCount})`);
+      await retry.try(async () => {
+        const tsvbLegendItems = await testSubjects.findAll('tsvbLegendItem', findTimeout);
+        expect(tsvbLegendItems.length).to.be(expectedCount);
+      });
+    }
+
     async fieldSuggestions(expectedFields) {
       log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
       const fields = await filterBar.getFilterEditorFields();

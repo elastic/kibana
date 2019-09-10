@@ -67,14 +67,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkTimeSeriesChartIsPresent() {
-      const isPresent = await find.existsByCssSelector('.tvbVisTimeSeries');
-      if (!isPresent) {
-        throw new Error(`TimeSeries chart is not loaded`);
-      }
+      await testSubjects.existOrFail('timeseriesChart');
     }
 
     public async checkTimeSeriesLegendIsPresent() {
-      const isPresent = await find.existsByCssSelector('.echLegend');
+      const isPresent = await find.existsByCssSelector('.tvbLegend');
       if (!isPresent) {
         throw new Error(`TimeSeries legend is not loaded`);
       }
@@ -242,7 +239,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
       const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
-      await comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
+      await comboBox.setElement(formatterEl, formatter);
     }
 
     /**
@@ -263,11 +260,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }) {
       if (from) {
         const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        await comboBox.setElement(fromCombobox, from);
       }
       if (to) {
         const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
-        await comboBox.setElement(toCombobox, to, { clickWithMouse: true });
+        await comboBox.setElement(toCombobox, to);
       }
       if (decimalPlaces) {
         const decimalPlacesInput = await find.byCssSelector('[id$="decimal"]');
@@ -294,11 +291,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await el.type(value);
     }
 
-    public async getRhythmChartLegendValue(nth = 0) {
+    public async getRhythmChartLegendValue() {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -452,7 +447,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickColorPicker(): Promise<void> {
       const picker = await find.byCssSelector('.tvbColorPicker button');
-      await picker.clickMouseButton();
+      await browser.clickMouseButton(picker);
     }
 
     public async setBackgroundColor(colorHex: string): Promise<void> {
@@ -507,8 +502,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
-    public async getLegendItems(): Promise<WebElementWrapper[]> {
-      return await find.allByCssSelector('.echLegendItem');
+    public async getLegentItems(): Promise<WebElementWrapper[]> {
+      return await testSubjects.findAll('tsvbLegendItem');
     }
 
     public async getSeries(): Promise<WebElementWrapper[]> {

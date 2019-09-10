@@ -19,7 +19,7 @@
 
 import { testPlugin, TestPluginReturn } from './test_plugin';
 import { of } from './helpers';
-import { Action, openContextMenu, IEmbeddable } from '../lib';
+import { ActionContext, Action, openContextMenu } from '../lib';
 import {
   ContactCardEmbeddable,
   CONTACT_USER_TRIGGER,
@@ -31,11 +31,11 @@ jest.mock('../lib/context_menu_actions');
 const executeFn = jest.fn();
 const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
-class TestAction<A> extends Action<A> {
+class TestAction extends Action {
   public readonly type = 'testAction';
-  public checkCompatibility: (context: A) => boolean;
+  public checkCompatibility: (context: ActionContext) => boolean;
 
-  constructor(id: string, checkCompatibility: (context: A) => boolean) {
+  constructor(id: string, checkCompatibility: (context: ActionContext) => boolean) {
     super(id);
     this.checkCompatibility = checkCompatibility;
   }
@@ -44,11 +44,11 @@ class TestAction<A> extends Action<A> {
     return 'test';
   }
 
-  async isCompatible(context: A) {
+  async isCompatible(context: ActionContext) {
     return this.checkCompatibility(context);
   }
 
-  async execute(context: unknown) {
+  execute(context: ActionContext) {
     executeFn(context);
   }
 }
@@ -124,10 +124,7 @@ test('does not execute an incompatible action', async () => {
     title: 'My trigger',
     actionIds: ['test1'],
   };
-  const action = new TestAction<{ embeddable: IEmbeddable }>(
-    'test1',
-    ({ embeddable }) => embeddable.id === 'executeme'
-  );
+  const action = new TestAction('test1', ({ embeddable }) => embeddable.id === 'executeme');
   const embeddable = new ContactCardEmbeddable(
     {
       id: 'executeme',
@@ -190,7 +187,7 @@ test('passes whole action context to isCompatible()', async () => {
     title: 'My trigger',
     actionIds: ['test'],
   };
-  const action = new TestAction<{ triggerContext: any }>('test', ({ triggerContext }) => {
+  const action = new TestAction('test', ({ triggerContext }) => {
     expect(triggerContext).toEqual({
       foo: 'bar',
     });

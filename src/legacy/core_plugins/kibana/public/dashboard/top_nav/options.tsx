@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
+import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
@@ -27,6 +27,7 @@ interface Props {
   onUseMarginsChange: (useMargins: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -34,7 +35,7 @@ interface State {
   hidePanelTitles: boolean;
 }
 
-export class OptionsMenu extends Component<Props, State> {
+class OptionsMenuUi extends Component<Props, State> {
   state = {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
@@ -61,12 +62,10 @@ export class OptionsMenu extends Component<Props, State> {
       <EuiForm data-test-subj="dashboardOptionsMenu">
         <EuiFormRow>
           <EuiSwitch
-            label={i18n.translate(
-              'kbn.dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel',
-              {
-                defaultMessage: 'Use margins between panels',
-              }
-            )}
+            label={this.props.intl.formatMessage({
+              id: 'kbn.dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel',
+              defaultMessage: 'Use margins between panels',
+            })}
             checked={this.state.useMargins}
             onChange={this.handleUseMarginsChange}
             data-test-subj="dashboardMarginsCheckbox"
@@ -75,7 +74,8 @@ export class OptionsMenu extends Component<Props, State> {
 
         <EuiFormRow>
           <EuiSwitch
-            label={i18n.translate('kbn.dashboard.topNav.options.hideAllPanelTitlesSwitchLabel', {
+            label={this.props.intl.formatMessage({
+              id: 'kbn.dashboard.topNav.options.hideAllPanelTitlesSwitchLabel',
               defaultMessage: 'Show panel titles',
             })}
             checked={!this.state.hidePanelTitles}
@@ -87,3 +87,5 @@ export class OptionsMenu extends Component<Props, State> {
     );
   }
 }
+
+export const OptionsMenu = injectI18n(OptionsMenuUi);

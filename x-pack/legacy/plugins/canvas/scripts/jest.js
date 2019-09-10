@@ -12,43 +12,19 @@ const { runXPackScript } = require('./_helpers');
 // we're making this script allow
 run(
   ({ log, flags }) => {
-    const { all, storybook, update, coverage } = flags;
+    const { all, storybook, update } = flags;
     let { path } = flags;
     let options = [];
-    process.argv.splice(2, process.argv.length - 2);
 
-    if (path) {
-      log.info(`Limiting tests to ${path}...`);
-      path = 'legacy/plugins/canvas/' + path;
-    } else {
-      path = 'legacy/plugins/canvas';
-    }
-
-    if (coverage) {
-      log.info(`Collecting test coverage and writing to canvas/coverage...`);
-      options = [
-        '--coverage',
-        '--collectCoverageFrom', // Ignore TS definition files
-        `!${path}/**/*.d.ts`,
-        '--collectCoverageFrom', // Ignore build directories
-        `!${path}/**/build/**`,
-        '--collectCoverageFrom', // Ignore coverage on test files
-        `!${path}/**/__tests__/**/*`,
-        '--collectCoverageFrom', // Include JS files
-        `${path}/**/*.js`,
-        '--collectCoverageFrom', // Include TS/X files
-        `${path}/**/*.ts*`,
-        '--coverageDirectory', // Output to canvas/coverage
-        'legacy/plugins/canvas/coverage',
-      ];
-    } else {
+    if (!path) {
       // Mitigation for https://github.com/facebook/jest/issues/7267
       if (all || storybook || update) {
-        options = options.concat(['--no-cache', '--no-watchman']);
+        options = ['--no-cache', '--no-watchman'];
       }
 
       if (all) {
         log.info('Running all available tests. This will take a while...');
+        path = 'legacy/plugins/canvas';
       } else if (storybook || update) {
         path = 'legacy/plugins/canvas/.storybook';
 
@@ -60,9 +36,13 @@ run(
         }
       } else {
         log.info('Running tests. This does not include Storybook Snapshots...');
+        path = 'legacy/plugins/canvas';
       }
+    } else {
+      log.info(`Running tests found at ${path}...`);
     }
 
+    process.argv.splice(2, process.argv.length - 2);
     runXPackScript('jest', [path].concat(options));
   },
   {
@@ -70,14 +50,13 @@ run(
       Jest test runner for Canvas. By default, will not include Storybook Snapshots.
     `,
     flags: {
-      boolean: ['all', 'storybook', 'update', 'coverage'],
+      boolean: ['all', 'storybook', 'update'],
       string: ['path'],
       help: `
         --all              Runs all tests and snapshots.  Slower.
         --storybook        Runs Storybook Snapshot tests only.
         --update           Updates Storybook Snapshot tests.
         --path <string>    Runs any tests at a given path. 
-        --coverage         Collect coverage statistics.
       `,
     },
   }

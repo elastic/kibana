@@ -27,7 +27,7 @@ export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
-        defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+        defaultMessage: 'Data frame analytics {analyticsId} delete request acknowledged.',
         values: { analyticsId: d.config.id },
       })
     );

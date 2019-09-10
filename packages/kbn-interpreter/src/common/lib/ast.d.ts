@@ -20,4 +20,3 @@
 export type Ast = unknown;
 
 export declare function fromExpression(expression: string): Ast;
-export declare function toExpression(astObj: Ast, type?: string): string;

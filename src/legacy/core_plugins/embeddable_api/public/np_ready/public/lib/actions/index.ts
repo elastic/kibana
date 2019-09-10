@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { Action } from './action';
+export { Action, ActionContext } from './action';
 export * from './apply_filter_action';
 export * from './edit_panel_action';

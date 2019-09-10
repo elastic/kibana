@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { Action, IncompatibleActionError } from '../..';
+import { Action, ActionContext, IncompatibleActionError } from '../..';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
@@ -26,10 +26,6 @@ import { CoreStart } from '../../../../../../../../../core/public';
 
 export const SEND_MESSAGE_ACTION = 'SEND_MESSAGE_ACTION';
 
-interface ActionContext {
-  embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
-  message: string;
-}
 export class SendMessageAction extends Action {
   public readonly type = SEND_MESSAGE_ACTION;
 
@@ -41,18 +37,28 @@ export class SendMessageAction extends Action {
     return 'Send message';
   }
 
-  async isCompatible(context: ActionContext) {
+  async isCompatible(
+    context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>
+  ) {
     return hasFullNameOutput(context.embeddable);
   }
 
-  async sendMessage(context: ActionContext, message: string) {
+  async sendMessage(
+    context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>,
+    message: string
+  ) {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
     const content = message ? `${greeting}. ${message}` : greeting;
     this.overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
   }
 
-  async execute(context: ActionContext) {
+  async execute(
+    context: ActionContext<
+      Embeddable<EmbeddableInput, FullNameEmbeddableOutput>,
+      { message?: string }
+    >
+  ) {
     if (!(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }

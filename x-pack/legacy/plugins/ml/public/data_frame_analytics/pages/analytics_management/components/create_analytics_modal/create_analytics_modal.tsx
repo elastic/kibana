@@ -43,7 +43,7 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
-              defaultMessage: 'Create analytics job',
+              defaultMessage: 'Create outlier detection job',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>

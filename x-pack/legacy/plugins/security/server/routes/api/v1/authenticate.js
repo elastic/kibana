@@ -12,12 +12,6 @@ import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
 export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
-  function prepareCustomResourceResponse(response, contentType) {
-    return response
-      .header('cache-control', 'private, no-cache, no-store')
-      .header('content-security-policy', createCSPRuleString(server.config().get('csp.rules')))
-      .type(contentType);
-  }
 
   server.route({
     method: 'POST',
@@ -99,36 +93,22 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     path: '/api/security/v1/oidc/implicit',
     config: { auth: false },
     async handler(request, h) {
-      return prepareCustomResourceResponse(
-        h.response(`
-          <!DOCTYPE html>
-          <title>Kibana OpenID Connect Login</title>
-          <script src="${server.config().get('server.basePath')}/api/security/v1/oidc/implicit.js"></script>
-        `),
-        'text/html'
-      );
-    }
-  });
+      const legacyConfig = server.config();
+      const basePath = legacyConfig.get('server.basePath');
 
-  /**
-   * The route that accompanies `/api/security/v1/oidc/implicit` and renders a JavaScript snippet
-   * that extracts fragment part from the URL and send it to the `/api/security/v1/oidc` route.
-   * We need this separate endpoint because of default CSP policy that forbids inline scripts.
-   */
-  server.route({
-    method: 'GET',
-    path: '/api/security/v1/oidc/implicit.js',
-    config: { auth: false },
-    async handler(request, h) {
-      return prepareCustomResourceResponse(
-        h.response(`
+      const cspRulesHeader = createCSPRuleString(legacyConfig.get('csp.rules'));
+      return h.response(`
+        <!DOCTYPE html>
+        <title>Kibana OpenID Connect Login</title>
+        <script>
           window.location.replace(
-            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
-              encodeURIComponent(window.location.href)
+            '${basePath}/api/security/v1/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
-        `),
-        'text/javascript'
-      );
+        </script>
+      `)
+        .header('cache-control', 'private, no-cache, no-store')
+        .header('content-security-policy', cspRulesHeader)
+        .type('text/html');
     }
   });
 

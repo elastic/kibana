@@ -22,11 +22,11 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 
 import { TablePluginSetupDependencies } from './plugin';
-import { setup as setupVisualizations } from '../../visualizations/public/np_ready/public/legacy';
+import { visualizations } from '../../visualizations/public';
 import { LegacyDependenciesPlugin } from './shim';
 
 const plugins: Readonly<TablePluginSetupDependencies> = {
-  visualizations: setupVisualizations,
+  visualizations,
   data: npSetup.plugins.data,
 
   // Temporary solution

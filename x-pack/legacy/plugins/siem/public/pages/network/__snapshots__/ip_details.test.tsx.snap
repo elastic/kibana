@@ -2,7 +2,6 @@
 
 exports[`Ip Details it matches the snapshot 1`] = `
 <Component
-  detailName="123.456.78.90"
   filterQuery="coolQueryhuh?"
   flowTarget="source"
   history={
@@ -37,7 +36,7 @@ exports[`Ip Details it matches the snapshot 1`] = `
     Object {
       "isExact": true,
       "params": Object {
-        "detailName": "123.456.78.90",
+        "ip": "123.456.78.90",
         "search": "",
       },
       "path": "",

@@ -84,18 +84,17 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-export function getActionType(): ActionType {
-  return {
-    id: '.pagerduty',
-    name: 'pagerduty',
-    validate: {
-      config: ConfigSchema,
-      secrets: SecretsSchema,
-      params: ParamsSchema,
-    },
-    executor,
-  };
-}
+
+export const actionType: ActionType = {
+  id: '.pagerduty',
+  name: 'pagerduty',
+  validate: {
+    config: ConfigSchema,
+    secrets: SecretsSchema,
+    params: ParamsSchema,
+  },
+  executor,
+};
 
 // action executor
 

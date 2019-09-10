@@ -130,7 +130,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   }
 
   const saveQueryForm = (
-    <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
+    <EuiForm isInvalid={hasErrors} error={formErrors}>
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>

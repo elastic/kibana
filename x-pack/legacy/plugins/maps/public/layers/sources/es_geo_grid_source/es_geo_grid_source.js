@@ -16,7 +16,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector_style';
-import { vectorStyles } from '../../styles/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -262,7 +261,7 @@ export class ESGeoGridSource extends AbstractESSource {
       ...options
     });
     descriptor.style = VectorStyle.createDescriptor({
-      [vectorStyles.FILL_COLOR]: {
+      fillColor: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -273,7 +272,7 @@ export class ESGeoGridSource extends AbstractESSource {
           color: 'Blues'
         }
       },
-      [vectorStyles.ICON_SIZE]: {
+      iconSize: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {

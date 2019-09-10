@@ -24,7 +24,7 @@ import {
   UiSettingsClientContract,
 } from '../../../../core/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -70,7 +70,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
     data.expressions.registerFunction(createRegionMapFn);
 
-    visualizations.types.registerVisualization(() =>
+    visualizations.types.VisTypesRegistryProvider.register(() =>
       createRegionMapTypeDefinition(visualizationDependencies)
     );
   }

@@ -72,7 +72,7 @@ beforeEach(() => {
     },
   ];
   mockSetupDeps = {
-    application: applicationServiceMock.createInternalSetupContract(),
+    application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
@@ -81,11 +81,10 @@ beforeEach(() => {
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   mockSetupContext = {
-    ...omit(mockSetupDeps, 'injectedMetadata'),
-    application: expect.any(Object),
+    ...omit(mockSetupDeps, 'application', 'injectedMetadata'),
   };
   mockStartDeps = {
-    application: applicationServiceMock.createInternalStartContract(),
+    application: applicationServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
@@ -98,7 +97,9 @@ beforeEach(() => {
   };
   mockStartContext = {
     ...omit(mockStartDeps, 'injectedMetadata'),
-    application: expect.any(Object),
+    application: {
+      capabilities: mockStartDeps.application.capabilities,
+    },
     chrome: omit(mockStartDeps.chrome, 'getComponent'),
   };
 

@@ -52,7 +52,7 @@ export const isBackgroundDark = (backgroundColor, currentTheme) => {
   const themeIsDark = isThemeDark(currentTheme);
 
   // If a background color doesn't exist or it inherits, pass back if it's a darktheme
-  if (!backgroundColor || backgroundColor === 'inherit') {
+  if (backgroundColor === undefined || backgroundColor === 'inherit') {
     return themeIsDark;
   }
 

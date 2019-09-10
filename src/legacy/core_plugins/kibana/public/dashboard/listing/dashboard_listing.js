@@ -19,10 +19,14 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 
 import { TableListView } from './../../table_list_view';
 
@@ -33,7 +37,8 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-export class DashboardListing extends React.Component {
+class DashboardListingUi extends React.Component {
+
   constructor(props) {
     super(props);
   }
@@ -49,15 +54,21 @@ export class DashboardListing extends React.Component {
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}
         noItemsFragment={this.getNoItemsMessage()}
-        entityName={i18n.translate('kbn.dashboard.listing.table.entityName', {
-          defaultMessage: 'dashboard',
-        })}
-        entityNamePlural={i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
-          defaultMessage: 'dashboards',
-        })}
-        tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
-          defaultMessage: 'Dashboards',
-        })}
+        entityName={
+          i18n.translate('kbn.dashboard.listing.table.entityName', {
+            defaultMessage: 'dashboard'
+          })
+        }
+        entityNamePlural={
+          i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
+            defaultMessage: 'dashboards'
+          })
+        }
+        tableListTitle={
+          i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards'
+          })
+        }
       />
     );
   }
@@ -135,6 +146,7 @@ export class DashboardListing extends React.Component {
         />
       </div>
     );
+
   }
 
   getTableColumns() {
@@ -142,7 +154,7 @@ export class DashboardListing extends React.Component {
       {
         field: 'title',
         name: i18n.translate('kbn.dashboard.listing.table.titleColumnName', {
-          defaultMessage: 'Title',
+          defaultMessage: 'Title'
         }),
         sortable: true,
         render: (field, record) => (
@@ -152,22 +164,22 @@ export class DashboardListing extends React.Component {
           >
             {field}
           </EuiLink>
-        ),
+        )
       },
       {
         field: 'description',
         name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
-          defaultMessage: 'Description',
+          defaultMessage: 'Description'
         }),
         dataType: 'string',
         sortable: true,
-      },
+      }
     ];
     return tableColumns;
   }
 }
 
-DashboardListing.propTypes = {
+DashboardListingUi.propTypes = {
   createItem: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
@@ -178,6 +190,8 @@ DashboardListing.propTypes = {
   initialFilter: PropTypes.string,
 };
 
-DashboardListing.defaultProps = {
+DashboardListingUi.defaultProps = {
   initialFilter: EMPTY_FILTER,
 };
+
+export const DashboardListing = injectI18n(DashboardListingUi);

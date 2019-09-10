@@ -15,6 +15,5 @@ export interface ApplicationSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [register(app)](./kibana-plugin-public.applicationsetup.register.md) | Register an mountable application to the system. |
-|  [registerMountContext(contextName, provider)](./kibana-plugin-public.applicationsetup.registermountcontext.md) | Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. |
+|  [registerApp(app)](./kibana-plugin-public.applicationsetup.registerapp.md) | Register an mountable application to the system. Apps will be mounted based on their <code>rootRoute</code>. |
 

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { replace } from '../../functions/common/replace';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { JS } from '../../../i18n';
+import { JS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
   help: i18n.translate('xpack.canvas.functions.replaceImageHelpText', {

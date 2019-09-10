@@ -22,7 +22,7 @@ interface GlobalQuery extends SetQuery {
   inputId: InputsModelId;
 }
 
-export interface GlobalTimeArgs {
+interface GlobalTimeArgs {
   from: number;
   to: number;
   setQuery: ({ id, inspect, loading, refetch }: SetQuery) => void;
@@ -55,7 +55,7 @@ export const GlobalTimeComponent = React.memo(
       return () => {
         deleteAllQuery({ id: 'global' });
       };
-    }, []);
+    });
 
     return (
       <>

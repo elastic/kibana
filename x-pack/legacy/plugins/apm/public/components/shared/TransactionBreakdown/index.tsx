@@ -17,6 +17,7 @@ import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown'
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 const NoTransactionsTitle = styled.span`
   font-weight: bold;
@@ -32,6 +33,8 @@ const TransactionBreakdown: React.FC<{
     status,
     receivedDataDuringLifetime
   } = useTransactionBreakdown();
+
+  const loading = status === FETCH_STATUS.LOADING || status === undefined;
 
   const { kpis, timeseries } = data;
 
@@ -58,7 +61,7 @@ const TransactionBreakdown: React.FC<{
             <TransactionBreakdownKpiList kpis={kpis} />
           </EuiFlexItem>
         ) : (
-          status === 'success' && (
+          !loading && (
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="center">

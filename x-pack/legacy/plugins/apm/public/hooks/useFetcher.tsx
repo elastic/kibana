@@ -15,59 +15,37 @@ import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetc
 export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
-  FAILURE = 'failure',
-  PENDING = 'pending'
+  FAILURE = 'failure'
 }
 
-interface Result<Data> {
-  data: Data;
-  status: FETCH_STATUS;
-  error?: Error;
-}
+type Fetcher = (...args: any[]) => any;
+type GetReturn<TFetcher extends Fetcher> = Exclude<
+  ReturnType<TFetcher>,
+  undefined
+> extends Promise<infer TReturn>
+  ? TReturn
+  : ReturnType<TFetcher>;
 
-export function useFetcher<TState>(
-  fn: () => Promise<TState> | TState | undefined,
+export function useFetcher<TFetcher extends Fetcher>(
+  fn: TFetcher,
   fnDeps: any[],
-  options?: {
-    preservePreviousData?: boolean;
-  }
-): Result<TState> & { refresh: () => void };
-
-// To avoid infinite rescursion when infering the type of `TState` `initialState` must be given if `prevResult` is consumed
-export function useFetcher<TState>(
-  fn: (prevResult: Result<TState>) => Promise<TState> | TState | undefined,
-  fnDeps: any[],
-  options: {
-    preservePreviousData?: boolean;
-    initialState: TState;
-  }
-): Result<TState> & { refresh: () => void };
-
-export function useFetcher(
-  fn: Function,
-  fnDeps: any[],
-  options: {
-    preservePreviousData?: boolean;
-    initialState?: unknown;
-  } = {}
+  options: { preservePreviousResponse?: boolean } = {}
 ) {
-  const { preservePreviousData = true } = options;
+  const { preservePreviousResponse = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<Result<unknown>>({
-    data: options.initialState,
-    status: FETCH_STATUS.PENDING
-  });
+  const [result, setResult] = useState<{
+    data?: GetReturn<TFetcher>;
+    status?: FETCH_STATUS;
+    error?: Error;
+  }>({});
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     let didCancel = false;
 
     async function doFetch() {
-      const promise = fn(result);
-      // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
-      // This can happen if the data fetching is conditional (based on certain inputs).
-      // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
+      const promise = fn();
       if (!promise) {
         return;
       }
@@ -75,7 +53,7 @@ export function useFetcher(
       dispatchStatus({ id, isLoading: true });
 
       setResult(prevResult => ({
-        data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
+        data: preservePreviousResponse ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined
       }));
@@ -135,7 +113,7 @@ export function useFetcher(
   }, [
     counter,
     id,
-    preservePreviousData,
+    preservePreviousResponse,
     dispatchStatus,
     ...fnDeps
     /* eslint-enable react-hooks/exhaustive-deps */

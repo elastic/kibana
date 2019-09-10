@@ -31,7 +31,7 @@ export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) 
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
-            defaultMessage: 'Request to delete data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Data frame transform {transformId} deleted successfully.',
             values: { transformId },
           })
         );

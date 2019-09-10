@@ -167,13 +167,11 @@ class JobsListUI extends Component {
               { itemId: item.id }
               )}
             data-row-id={item.id}
-            data-test-subj="detailsToggle"
           />
         ),
         width: '3%'
       }, {
         field: 'id',
-        'data-test-subj': 'id',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.idLabel',
           defaultMessage: 'ID'
@@ -195,7 +193,6 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         field: 'description',
-        'data-test-subj': 'description',
         render: (description, item) => (
           <JobDescription job={item} />
         ),
@@ -203,7 +200,6 @@ class JobsListUI extends Component {
         width: '20%'
       }, {
         field: 'processed_record_count',
-        'data-test-subj': 'recordCount',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.processedRecordsLabel',
           defaultMessage: 'Processed records'
@@ -215,7 +211,6 @@ class JobsListUI extends Component {
         width: '10%'
       }, {
         field: 'memory_status',
-        'data-test-subj': 'memoryStatus',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.memoryStatusLabel',
           defaultMessage: 'Memory status'
@@ -225,7 +220,6 @@ class JobsListUI extends Component {
         width: '5%'
       }, {
         field: 'jobState',
-        'data-test-subj': 'jobState',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.jobStateLabel',
           defaultMessage: 'Job state'
@@ -235,7 +229,6 @@ class JobsListUI extends Component {
         width: '8%'
       }, {
         field: 'datafeedState',
-        'data-test-subj': 'datafeedState',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.datafeedStateLabel',
           defaultMessage: 'Datafeed state'
@@ -278,7 +271,6 @@ class JobsListUI extends Component {
         }),
         truncateText: false,
         field: 'latestTimestampSortValue',
-        'data-test-subj': 'latestTimestamp',
         sortable: true,
         render: (time, item) => (
           <span className="euiTableCellContent__text">
@@ -331,7 +323,7 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
-        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+        data-test-subj="mlJobListTable"
         loading={loading === true}
         noItemsMessage={loading ?
           intl.formatMessage({
@@ -354,9 +346,6 @@ class JobsListUI extends Component {
         isExpandable={true}
         sorting={sorting}
         hasActions={true}
-        rowProps={item => ({
-          'data-test-subj': `row row-${item.id}`
-        })}
       />
     );
   }

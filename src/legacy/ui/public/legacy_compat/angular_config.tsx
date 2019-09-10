@@ -33,7 +33,7 @@ import * as Rx from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, LegacyCoreStart } from 'kibana/public';
+import { InternalCoreStart } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
 import { capabilities } from 'ui/capabilities';
@@ -77,7 +77,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .run($setupUrlOverflowHandling(newPlatform));
 };
 
-const getEsUrl = (newPlatform: CoreStart) => {
+const getEsUrl = (newPlatform: InternalCoreStart) => {
   const a = document.createElement('a');
   a.href = newPlatform.http.basePath.prepend('/elasticsearch');
   const protocolPort = /https/.test(a.protocol) ? 443 : 80;
@@ -90,7 +90,7 @@ const getEsUrl = (newPlatform: CoreStart) => {
   };
 };
 
-const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
+const setupCompileProvider = (newPlatform: InternalCoreStart) => (
   $compileProvider: ICompileProvider
 ) => {
   if (!newPlatform.injectedMetadata.getLegacyMetadata().devMode) {
@@ -98,7 +98,7 @@ const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreStart) => (
+const setupLocationProvider = (newPlatform: InternalCoreStart) => (
   $locationProvider: ILocationProvider
 ) => {
   $locationProvider.html5Mode({
@@ -110,7 +110,7 @@ const setupLocationProvider = (newPlatform: CoreStart) => (
   $locationProvider.hashPrefix('');
 };
 
-export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
+export const $setupXsrfRequestInterceptor = (newPlatform: InternalCoreStart) => {
   const version = newPlatform.injectedMetadata.getLegacyMetadata().version;
 
   // Configure jQuery prefilter
@@ -145,7 +145,7 @@ export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
  * @param  {HttpService} $http
  * @return {undefined}
  */
-const capture$httpLoadingCount = (newPlatform: CoreStart) => (
+const capture$httpLoadingCount = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $http: IHttpService
 ) => {
@@ -166,7 +166,7 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
  */
-const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
+const $setupBreadcrumbsAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -213,7 +213,7 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the badge if we switch to a Kibana app that does not use the badge correctly
  */
-const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
+const $setupBadgeAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -253,7 +253,7 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
-const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
+const $setupHelpExtensionAutoClear = (newPlatform: InternalCoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -285,7 +285,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   });
 };
 
-const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
+const $setupUrlOverflowHandling = (newPlatform: InternalCoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
   Private: any,

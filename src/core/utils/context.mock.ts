@@ -24,9 +24,7 @@ export type ContextContainerMock = jest.Mocked<IContextContainer<any, any, any>>
 const createContextMock = () => {
   const contextMock: ContextContainerMock = {
     registerContext: jest.fn(),
-    createHandler: jest.fn((id, handler) => (...args: any[]) =>
-      Promise.resolve(handler({}, ...args))
-    ),
+    createHandler: jest.fn(),
   };
   contextMock.createHandler.mockImplementation((pluginId, handler) => (...args) =>
     handler({}, ...args)

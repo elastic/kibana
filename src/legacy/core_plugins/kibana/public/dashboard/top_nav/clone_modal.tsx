@@ -18,8 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -44,6 +43,7 @@ interface Props {
   ) => Promise<void>;
   onClose: () => void;
   title: string;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -53,7 +53,7 @@ interface State {
   isLoading: boolean;
 }
 
-export class DashboardCloneModal extends React.Component<Props, State> {
+class DashboardCloneModalUi extends React.Component<Props, State> {
   private isMounted = false;
 
   constructor(props: Props) {
@@ -117,12 +117,15 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         <EuiSpacer />
         <EuiCallOut
           size="s"
-          title={i18n.translate('kbn.dashboard.topNav.cloneModal.dashboardExistsTitle', {
-            defaultMessage: 'A dashboard with the title {newDashboardName} already exists.',
-            values: {
-              newDashboardName: `'${this.state.newDashboardName}'`,
+          title={this.props.intl.formatMessage(
+            {
+              id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
+              defaultMessage: 'A dashboard with the title {newDashboardName} already exists.',
             },
-          })}
+            {
+              newDashboardName: `'${this.state.newDashboardName}'`,
+            }
+          )}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
@@ -212,3 +215,5 @@ export class DashboardCloneModal extends React.Component<Props, State> {
     );
   }
 }
+
+export const DashboardCloneModal = injectI18n(DashboardCloneModalUi);

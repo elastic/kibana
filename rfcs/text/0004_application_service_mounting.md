@@ -18,14 +18,14 @@ import ReactDOM from 'react-dom';
 
 import { MyApp } from './componnets';
 
-export function renderApp(context, { element }) {
+export function renderApp(context, targetDomElement) {
   ReactDOM.render(
     <MyApp mountContext={context} deps={pluginStart} />,
-    element
+    targetDomElement
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(targetDomElement);
   };
 }
 ```
@@ -38,9 +38,9 @@ class MyPlugin {
     application.register({
       id: 'my-app',
       title: 'My Application',
-      async mount(context, params) {
+      async mount(context, targetDomElement) {
         const { renderApp } = await import('./applcation');
-        return renderApp(context, params);
+        return renderApp(context, targetDomElement);
       }
     });
   }
@@ -63,7 +63,9 @@ lock-in.
 
 ```ts
 /** A context type that implements the Handler Context pattern from RFC-0003 */
-export interface AppMountContext {
+export interface MountContext {
+  /** This is the base path for setting up your router. */
+  basename: string;
   /** These services serve as an example, but are subject to change. */
   core: {
     http: {
@@ -91,13 +93,6 @@ export interface AppMountContext {
   [contextName: string]: unknown;
 }
 
-export interface AppMountParams {
-  /** The base path the application is mounted on. Used to configure routers. */
-  appBasePath: string;
-  /** The element the application should render into */
-  element: HTMLElement;
-}
-
 export type Unmount = () => Promise<void> | void;
 
 export interface AppSpec {
@@ -114,11 +109,11 @@ export interface AppSpec {
 
   /**
    * A mount function called when the user navigates to this app's route.
-   * @param context the `AppMountContext` generated for this app
-   * @param params the `AppMountParams`
+   * @param context the `MountContext generated for this app
+   * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
    */
-  mount(context: MountContext, params: AppMountParams): Unmount | Promise<Unmount>;
+  mount(context: MountContext, targetDomElement: HTMLElement): Unmount | Promise<Unmount>;
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
@@ -163,21 +158,19 @@ When an app is registered via `register`, it must provide a `mount` function
 that will be invoked whenever the window's location has changed from another app
 to this app.
 
-This function is called with a `AppMountContext` and an
-`AppMountParams` which contains a `HTMLElement` for the application to
-render itself to. The mount function must also return a function that can be
-called by the ApplicationService to unmount the application at the given DOM
-Element. The mount function may return a Promise of an unmount function in order
-to import UI code dynamically.
+This function is called with a `MountContext` and an `HTMLElement` for the
+application to render itself to. The mount function must also return a function
+that can be called by the ApplicationService to unmount the application at the
+given DOM node. The mount function may return a Promise of an unmount function
+in order to import UI code dynamically.
 
 The ApplicationService's `register` method will only be available during the
 *setup* lifecycle event. This allows the system to know when all applications
 have been registered.
 
-The `mount` function will also get access to the `AppMountContext` that
-has many of the same core services available during the `start` lifecycle.
-Plugins can also register additional context attributes via the
-`registerMountContext` function.
+The `mount` function will also get access to the `MountContext` that has many of
+the same core services available during the `start` lifecycle. Plugins can also
+register additional context attributes via the `registerMountContext` function.
 
 ## Routing
 
@@ -197,7 +190,7 @@ An example:
   "overview" page: mykibana.com/app/my-app/overview
 
 When setting up a router, your application should only handle the part of the
-URL following the `params.appBasePath` provided when you application is mounted.
+URL following the `context.basename` provided when you application is mounted.
 
 ### Legacy Applications
 
@@ -218,7 +211,7 @@ a full-featured router and code-splitting. Note that using React or any other
 3rd party tools featured here is not required to build a Kibana Application.
 
 ```tsx
-// my_plugin/public/application.tsx
+// my_plugin/public/application.ts
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -246,16 +239,16 @@ const MyApp = ({ basename }) => (
   </BrowserRouter>,
 );
 
-export function renderApp(context, params) {
+export function renderApp(context, targetDomElement) {
   ReactDOM.render(
-    // `params.appBasePath` would be `/app/my-app` in this example.
-    // This exact string is not guaranteed to be stable, always reference the
-    // provided value at `params.appBasePath`.
-    <MyApp basename={params.appBasePath} />,
-    params.element
+    // `context.basename` would be `/app/my-app` in this example.
+    // This exact string is not guaranteed to be stable, always reference
+    // `context.basename`.
+    <MyApp basename={context.basename} />,
+    targetDomElem
   );
 
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => ReactDOM.unmountComponentAtNode(targetDomElem);
 }
 ```
 
@@ -266,9 +259,9 @@ export class MyPlugin {
   setup({ application }) {
     application.register({
       id: 'my-app',
-      async mount(context, params) {
+      async mount(context, targetDomElem) {
         const { renderApp } = await import('./applcation');
-        return renderApp(context, params);
+        return renderApp(context, targetDomElement);
       }
     });
   }

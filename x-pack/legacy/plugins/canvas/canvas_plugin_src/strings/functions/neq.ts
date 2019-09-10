@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { neq } from '../../functions/common/neq';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT } from '../../../i18n';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof neq>> = {
   help: i18n.translate('xpack.canvas.functions.neqHelpText', {

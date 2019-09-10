@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import util from 'util';
 import { ClusterMetadata } from './cluster_meta';
 import { EsClient } from '../../lib/esqueue';
 import { RepositoryObjectClient } from '../../search';
@@ -80,11 +79,7 @@ export class ClusterService {
 
   private async callClusterStateListeners(event: ClusterStateEvent) {
     for (const applier of this.clusterStateListeners) {
-      try {
-        await applier.onClusterStateChanged(event);
-      } catch (e) {
-        this.logger.error(`Failed to apply cluster state ${util.inspect(event)}`);
-      }
+      await applier.onClusterStateChanged(event);
     }
   }
 

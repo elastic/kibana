@@ -38,9 +38,9 @@ export async function installBrowser(
   }
 
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
-  const binaryChecksum = await md5(binaryPath).catch(() => '');
+  const rawChecksum = await md5(binaryPath).catch(() => '');
 
-  if (binaryChecksum !== pkg.binaryChecksum) {
+  if (rawChecksum !== pkg.rawChecksum) {
     const archive = path.join(browser.paths.archivesPath, pkg.archiveFilename);
     logger.debug(`Extracting [${archive}] to [${binaryPath}]`);
     await extract(archive, installsPath);

@@ -20,18 +20,14 @@
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
-import { Action } from './action';
+import { Action, ActionContext } from './action';
 import { IncompatibleActionError } from '../errors';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
 type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
-interface ActionContext {
-  embeddable: IEmbeddable;
-  filters: Filter[];
-}
 
-export class ApplyFilterAction extends Action<ActionContext> {
+export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }> {
   public readonly type = APPLY_FILTER_ACTION;
 
   constructor() {
@@ -44,27 +40,30 @@ export class ApplyFilterAction extends Action<ActionContext> {
     });
   }
 
-  public async isCompatible(context: ActionContext) {
-    if (context.embeddable === undefined) {
-      return false;
-    }
+  public async isCompatible(context: ActionContext<IEmbeddable, { filters: Filter[] }>) {
     const root = context.embeddable.getRoot() as RootEmbeddable;
-    return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
+    return Boolean(
+      root.getInput().filters !== undefined &&
+        context.triggerContext &&
+        context.triggerContext.filters !== undefined
+    );
   }
 
-  public async execute({ embeddable, filters }: ActionContext) {
-    if (!filters || !embeddable) {
-      throw new Error('Applying a filter requires a filter and embeddable as context');
+  public execute({
+    embeddable,
+    triggerContext,
+  }: ActionContext<IEmbeddable, { filters: Filter[] }>) {
+    if (!triggerContext) {
+      throw new Error('Applying a filter requires a filter as context');
     }
+    const root = embeddable.getRoot() as RootEmbeddable;
 
-    if (!(await this.isCompatible({ embeddable, filters }))) {
+    if (!this.isCompatible({ triggerContext, embeddable })) {
       throw new IncompatibleActionError();
     }
 
-    const root = embeddable.getRoot() as RootEmbeddable;
-
     root.updateInput({
-      filters,
+      filters: triggerContext.filters,
     });
   }
 }

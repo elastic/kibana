@@ -17,54 +17,63 @@
  * under the License.
  */
 
-jest.mock(
-  'ui/notify',
+jest.mock('ui/notify',
   () => ({
     toastNotifications: {
       addWarning: () => {},
-    },
-  }),
-  { virtual: true }
-);
+    }
+  }), { virtual: true });
 
-jest.mock(
-  'lodash',
+jest.mock('lodash',
   () => ({
     ...require.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
-    debounce: func => {
+    debounce: function (func) {
       function debounced(...args) {
         return func.apply(this, args);
       }
       return debounced;
-    },
-  }),
-  { virtual: true }
-);
+    }
+  }), { virtual: true });
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DashboardListing } from './dashboard_listing';
+import {
+  DashboardListing,
+} from './dashboard_listing';
 
-const find = num => {
+const find = (num) => {
   const hits = [];
   for (let i = 0; i < num; i++) {
     hits.push({
       id: `dashboard${i}`,
       title: `dashboard${i} title`,
-      description: `dashboard${i} desc`,
+      description: `dashboard${i} desc`
     });
   }
   return Promise.resolve({
     total: num,
-    hits: hits,
+    hits: hits
   });
 };
 
 test('renders empty page in before initial fetch to avoid flickering', () => {
-  const component = shallow(
-    <DashboardListing
+  const component = shallowWithIntl(<DashboardListing.WrappedComponent
+    findItems={find.bind(null, 2)}
+    deleteItems={() => {}}
+    createItem={() => {}}
+    editItem={() => {}}
+    getViewUrl={() => {}}
+    listingLimit={1000}
+    hideWriteControls={false}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+describe('after fetch', () => {
+  test('initialFilter', async () => {
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       findItems={find.bind(null, 2)}
       deleteItems={() => {}}
       createItem={() => {}}
@@ -72,25 +81,8 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
       getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
-    />
-  );
-  expect(component).toMatchSnapshot();
-});
-
-describe('after fetch', () => {
-  test('initialFilter', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        getViewUrl={() => {}}
-        listingLimit={1000}
-        hideWriteControls={false}
-        initialFilter="my dashboard"
-      />
-    );
+      initialFilter="my dashboard"
+    />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -101,17 +93,15 @@ describe('after fetch', () => {
   });
 
   test('renders table rows', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        getViewUrl={() => {}}
-        listingLimit={1000}
-        hideWriteControls={false}
-      />
-    );
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
+      listingLimit={1000}
+      hideWriteControls={false}
+    />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -122,17 +112,15 @@ describe('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 0)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        getViewUrl={() => {}}
-        listingLimit={1}
-        hideWriteControls={false}
-      />
-    );
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
+      listingLimit={1}
+      hideWriteControls={false}
+    />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -143,17 +131,15 @@ describe('after fetch', () => {
   });
 
   test('hideWriteControls', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 0)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        getViewUrl={() => {}}
-        listingLimit={1}
-        hideWriteControls={true}
-      />
-    );
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
+      listingLimit={1}
+      hideWriteControls={true}
+    />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -164,17 +150,15 @@ describe('after fetch', () => {
   });
 
   test('renders warning when listingLimit is exceeded', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        getViewUrl={() => {}}
-        listingLimit={1}
-        hideWriteControls={false}
-      />
-    );
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
+      listingLimit={1}
+      hideWriteControls={false}
+    />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));

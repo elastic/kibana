@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
       });
 
       it('metric value shows no data', async () => {
@@ -133,6 +134,11 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
       });
 
+      it('tsvb time series shows no data message', async () => {
+        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
+      });
+
       it('metric value shows no data', async () => {
         await dashboardExpect.metricValuesExist(['-']);
       });
@@ -187,6 +193,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('goal and guages', async () => {
         await dashboardExpect.goalAndGuageLabelsExist(['39.958%', '7,544']);
+      });
+
+      it('tsvb time series', async () => {
+        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(false);
+        await dashboardExpect.tsvbTimeSeriesLegendCount(10);
       });
 
       it('metric value', async () => {

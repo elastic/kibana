@@ -56,8 +56,6 @@ export class AttributionControl  extends React.Component {
         }
       }
     }
-    // Reflect top-to-bottom layer order as left-to-right in attribs
-    uniqueAttributions.reverse();
     if (!_.isEqual(this.state.uniqueAttributions, uniqueAttributions)) {
       this.setState({ uniqueAttributions });
     }

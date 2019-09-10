@@ -12,7 +12,6 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { ActionCreator } from 'typescript-fsa';
-import { RouteComponentProps } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -36,7 +35,6 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { InputsModelId } from '../../store/inputs/constants';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { NetworkFilter } from '../../containers/network';
-import { SpyRoute } from '../../utils/route/spy_routes';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -51,7 +49,7 @@ interface NetworkComponentReduxProps {
   }>;
 }
 
-type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponentProps<{}>>;
+type NetworkComponentProps = NetworkComponentReduxProps;
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
@@ -75,8 +73,8 @@ export const getFlexDirection = () => {
 };
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
-    <>
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => {
+    return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -285,9 +283,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           )
         }
       </WithSource>
-      <SpyRoute />
-    </>
-  )
+    );
+  }
 );
 
 NetworkComponent.displayName = 'NetworkComponent';

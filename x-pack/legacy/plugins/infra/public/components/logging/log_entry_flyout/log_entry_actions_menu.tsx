@@ -35,7 +35,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
-          defaultMessage="View status in Uptime"
+          defaultMessage="View monitor status"
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem

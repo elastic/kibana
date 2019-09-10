@@ -6,20 +6,23 @@
 
 import chrome, { Breadcrumb } from 'ui/chrome';
 
-import { getOr } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
+import { getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
+import * as i18n from '../translations';
+import { getHostsUrl } from '../../link_to/redirect_to_hosts';
+import { HostsTableType } from '../../../store/hosts/model';
 import { SiemPageName } from '../../../pages/home/home_navigations';
-import { RouteSpyState } from '../../../utils/route/types';
-import { getOverviewUrl } from '../../link_to';
 
-import { TabNavigationProps } from '../tab_navigation/types';
-import { getSearch } from '../helpers';
-import { SearchNavTab } from '../types';
+export interface NavigationParams {
+  pageName?: SiemPageName;
+  hostName?: string;
+  tabName?: HostsTableType;
+}
 
-export const setBreadcrumbs = (object: RouteSpyState & TabNavigationProps) => {
-  const breadcrumbs = getBreadcrumbsForRoute(object);
+export const setBreadcrumbs = (pathname: string, params?: NavigationParams) => {
+  const breadcrumbs = getBreadcrumbsForRoute(pathname, params);
   if (breadcrumbs) {
     chrome.breadcrumbs.set(breadcrumbs);
   }
@@ -32,49 +35,48 @@ export const siemRootBreadcrumb: Breadcrumb[] = [
   },
 ];
 
-export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps
-): Breadcrumb[] | null => {
-  if (object != null && object.navTabs && object.pageName === SiemPageName.hosts) {
-    const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, object.pageName, object.navTabs)];
-    if (object.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, object.tabName, object.navTabs)];
-    }
-    return [
-      ...siemRootBreadcrumb,
-      ...getHostDetailsBreadcrumbs(
-        object,
-        urlStateKeys.reduce((acc: string[], item: SearchNavTab) => {
-          acc = [...acc, getSearch(item, object)];
-          return acc;
-        }, [])
-      ),
-    ];
-  }
-  if (object != null && object.navTabs && object.pageName === SiemPageName.network) {
-    const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
-    const urlStateKeys = [getOr(tempNav, object.pageName, object.navTabs)];
-    return [
-      ...siemRootBreadcrumb,
-      ...getIPDetailsBreadcrumbs(
-        object.detailName,
-        urlStateKeys.reduce((acc: string[], item) => {
-          acc = [...acc, getSearch(item, object)];
-          return acc;
-        }, [])
-      ),
-    ];
-  }
-  if (object != null && object.navTabs && object.pageName && object.navTabs[object.pageName]) {
-    return [
-      ...siemRootBreadcrumb,
-      {
-        text: object.navTabs[object.pageName].name,
-        href: '',
-      },
-    ];
-  }
+export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
+  overview: siemRootBreadcrumb,
+  hosts: [
+    ...siemRootBreadcrumb,
+    {
+      text: i18n.HOSTS,
+      href: getHostsUrl(),
+    },
+  ],
+  network: [
+    ...siemRootBreadcrumb,
+    {
+      text: i18n.NETWORK,
+      href: getNetworkUrl(),
+    },
+  ],
+  timelines: [
+    ...siemRootBreadcrumb,
+    {
+      text: i18n.TIMELINES,
+      href: getTimelinesUrl(),
+    },
+  ],
+};
 
+export const getBreadcrumbsForRoute = (
+  pathname: string,
+  params?: NavigationParams
+): Breadcrumb[] | null => {
+  const removeSlash = pathname.replace(/\/$/, '');
+  const trailingPath = removeSlash.match(/([^\/]+$)/);
+
+  if (trailingPath !== null) {
+    if (params != null && params.pageName === SiemPageName.hosts) {
+      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(params)];
+    }
+    if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {
+      return rootBreadcrumbs[trailingPath[0]];
+    }
+    if (pathname.match(/network\/ip\/.*?/)) {
+      return [...siemRootBreadcrumb, ...getIPDetailsBreadcrumbs(trailingPath[0])];
+    }
+  }
   return null;
 };

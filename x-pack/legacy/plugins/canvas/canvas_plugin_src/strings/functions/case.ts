@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { caseFn } from '../../functions/common/case';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { CONTEXT } from '../../../i18n';
+import { CONTEXT } from '../constants';
 
 const IF_ARG = '`if`';
 const WHEN_ARG = '`when`';

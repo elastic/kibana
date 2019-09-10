@@ -25,7 +25,7 @@ import {
 } from '../../../../core/public';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
@@ -61,7 +61,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
     data.expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
-    visualizations.types.registerVisualization(() =>
+    visualizations.types.VisTypesRegistryProvider.register(() =>
       createVegaTypeDefinition(visualizationDependencies)
     );
   }

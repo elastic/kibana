@@ -61,7 +61,9 @@ export function AddSettingsFlyout({
         pathname: '/api/apm/settings/agent-configuration/services'
       }),
     [],
-    { preservePreviousData: false }
+    {
+      preservePreviousResponse: false
+    }
   );
   const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
@@ -76,7 +78,7 @@ export function AddSettingsFlyout({
       }
     },
     [serviceName],
-    { preservePreviousData: false }
+    { preservePreviousResponse: false }
   );
 
   const isSampleRateValid = transactionSampleRateRt

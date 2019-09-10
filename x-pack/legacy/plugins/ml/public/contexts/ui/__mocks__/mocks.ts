@@ -11,7 +11,7 @@ export const uiChromeMock = {
       get: (key: string) => {
         switch (key) {
           case 'dateFormat':
-            return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            return {};
           case 'theme:darkMode':
             return false;
           case 'timepicker:timeDefaults':
@@ -26,45 +26,12 @@ export const uiChromeMock = {
   },
 };
 
-interface RefreshInterval {
-  value: number;
-  pause: boolean;
-}
-
-const time = {
-  from: 'Thu Aug 29 2019 02:04:19 GMT+0200',
-  to: 'Sun Sep 29 2019 01:45:36 GMT+0200',
-};
-
 export const uiTimefilterMock = {
-  enableAutoRefreshSelector() {
-    this.isAutoRefreshSelectorEnabled = true;
-  },
-  enableTimeRangeSelector() {
-    this.isTimeRangeSelectorEnabled = true;
-  },
-  getEnabledUpdated$() {
-    return { subscribe: jest.fn() };
-  },
-  getRefreshInterval() {
-    return this.refreshInterval;
-  },
-  getRefreshIntervalUpdate$() {
-    return { subscribe: jest.fn() };
-  },
-  getTime: () => time,
-  getTimeUpdate$() {
-    return { subscribe: jest.fn() };
-  },
-  isAutoRefreshSelectorEnabled: false,
-  isTimeRangeSelectorEnabled: false,
-  refreshInterval: { value: 0, pause: true },
+  getRefreshInterval: () => '30s',
+  getTime: () => ({ from: 0, to: 0 }),
   on: (event: string, reload: () => void) => {},
-  setRefreshInterval(refreshInterval: RefreshInterval) {
-    this.refreshInterval = refreshInterval;
-  },
 };
 
 export const uiTimeHistoryMock = {
-  get: () => [time],
+  get: () => [{ from: 0, to: 0 }],
 };

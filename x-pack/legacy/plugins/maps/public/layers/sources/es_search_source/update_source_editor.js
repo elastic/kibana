@@ -15,7 +15,7 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
+import { getTermsFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
 
 export class UpdateSourceEditor extends Component {
@@ -74,7 +74,11 @@ export class UpdateSourceEditor extends Component {
 
     this.setState({
       dateFields,
-      tooltipFields: getSourceFields(indexPattern.fields),
+      tooltipFields: indexPattern.fields.filter(field => {
+        // Do not show multi fields as tooltip field options
+        // since they do not have values in _source and exist for indexing only
+        return field.subType !== 'multi';
+      }),
       termFields: getTermsFields(indexPattern.fields),
     });
 

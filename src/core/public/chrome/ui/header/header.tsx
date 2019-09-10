@@ -65,7 +65,6 @@ import {
 } from '../..';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -116,22 +115,11 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getUrlForApp']) {
-  if (navLink.legacy) {
-    return {
-      ...navLink,
-      href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
-    };
-  }
-
+function extendNavLink(navLink: ChromeNavLink) {
   return {
     ...navLink,
-    href: urlForApp(navLink.id),
+    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
   };
-}
-
-function isModifiedEvent(event: MouseEvent) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -161,7 +149,6 @@ export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
 
 interface Props {
   kibanaVersion: string;
-  application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
   badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
@@ -172,7 +159,6 @@ interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
-  legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   intl: InjectedIntl;
@@ -183,7 +169,6 @@ interface Props {
 
 interface State {
   appTitle: string;
-  currentAppId?: string;
   isVisible: boolean;
   navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
@@ -218,11 +203,7 @@ class HeaderUI extends Component<Props, State> {
       this.props.navLinks$,
       this.props.recentlyAccessed$,
       // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
-      Rx.combineLatest(
-        this.props.navControlsLeft$,
-        this.props.navControlsRight$,
-        this.props.application.currentAppId$
-      )
+      Rx.combineLatest(this.props.navControlsLeft$, this.props.navControlsRight$)
     ).subscribe({
       next: ([
         appTitle,
@@ -230,21 +211,18 @@ class HeaderUI extends Component<Props, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId],
+        [navControlsLeft, navControlsRight],
       ]) => {
         this.setState({
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(navLink =>
-            extendNavLink(navLink, this.props.application.getUrlForApp)
-          ),
+          navLinks: navLinks.map(navLink => extendNavLink(navLink)),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
           ),
           navControlsLeft,
           navControlsRight,
-          currentAppId,
         });
       },
     });
@@ -285,7 +263,6 @@ class HeaderUI extends Component<Props, State> {
 
   public render() {
     const {
-      application,
       badge$,
       basePath,
       breadcrumbs$,
@@ -295,11 +272,9 @@ class HeaderUI extends Component<Props, State> {
       kibanaDocLink,
       kibanaVersion,
       onIsLockedUpdate,
-      legacyMode,
     } = this.props;
     const {
       appTitle,
-      currentAppId,
       isVisible,
       navControlsLeft,
       navControlsRight,
@@ -316,26 +291,9 @@ class HeaderUI extends Component<Props, State> {
       .map(navLink => ({
         key: navLink.id,
         label: navLink.title,
-
-        // Use href and onClick to support "open in new tab" and SPA navigation in the same link
         href: navLink.href,
-        onClick: (event: MouseEvent) => {
-          if (
-            !legacyMode && // ignore when in legacy mode
-            !navLink.legacy && // ignore links to legacy apps
-            !event.defaultPrevented && // onClick prevented default
-            event.button === 0 && // ignore everything but left clicks
-            !isModifiedEvent(event) // ignore clicks with modifier keys
-          ) {
-            event.preventDefault();
-            application.navigateToApp(navLink.id);
-          }
-        },
-
-        // Legacy apps use `active` property, NP apps should match the current app
-        isActive: navLink.active || currentAppId === navLink.id,
         isDisabled: navLink.disabled,
-
+        isActive: navLink.active,
         iconType: navLink.euiIconType,
         icon:
           !navLink.euiIconType && navLink.icon ? (

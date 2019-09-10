@@ -19,19 +19,22 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
-import { useKibanaContext } from '../../../../contexts/kibana';
 
 import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
-import { JobCreatorType } from '../../common/job_creator';
+import {
+  SingleMetricJobCreator,
+  MultiMetricJobCreator,
+  PopulationJobCreator,
+} from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 
 interface Props {
-  jobCreator: JobCreatorType;
+  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
   chartInterval: MlTimeBuckets;
@@ -49,7 +52,6 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   skipTimeRangeStep = false,
 }) => {
-  const kibanaContext = useKibanaContext();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
@@ -175,24 +177,6 @@ export const Wizard: FC<Props> = ({
     },
   ];
 
-  function getSummaryStepTitle() {
-    if (kibanaContext.currentSavedSearch.id !== undefined) {
-      return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
-        defaultMessage: 'New job from saved search {title}',
-        values: { title: kibanaContext.currentSavedSearch.title },
-      });
-    } else if (kibanaContext.currentIndexPattern.id !== undefined) {
-      return i18n.translate(
-        'xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleIndexPattern',
-        {
-          defaultMessage: 'New job from index pattern {title}',
-          values: { title: kibanaContext.currentIndexPattern.title },
-        }
-      );
-    }
-    return '';
-  }
-
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>
       <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
@@ -259,7 +243,12 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.SUMMARY && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitleSummary">{getSummaryStepTitle()}</Title>
+          <Title data-test-subj="mlJobWizardStepTitleSummary">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitle"
+              defaultMessage="Summary"
+            />
+          </Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
             setCurrentStep={setCurrentStep}

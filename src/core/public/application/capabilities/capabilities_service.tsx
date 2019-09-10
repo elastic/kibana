@@ -18,12 +18,12 @@
  */
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { LegacyApp, App } from '../types';
+import { LegacyApp, App } from '../application_service';
 import { InjectedMetadataStart } from '../../injected_metadata';
 
 interface StartDeps {
-  apps: ReadonlyMap<string, App>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
+  apps: readonly App[];
+  legacyApps: readonly LegacyApp[];
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -53,8 +53,8 @@ export interface Capabilities {
 /** @internal */
 export interface CapabilitiesStart {
   capabilities: RecursiveReadonly<Capabilities>;
-  availableApps: ReadonlyMap<string, App>;
-  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
+  availableApps: readonly App[];
+  availableLegacyApps: readonly LegacyApp[];
 }
 
 /**
@@ -68,23 +68,10 @@ export class CapabilitiesService {
     injectedMetadata,
   }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = new Map(
-      [...apps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
-
-    const availableLegacyApps = new Map(
-      [...legacyApps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
 
     return {
-      availableApps,
-      availableLegacyApps,
+      availableApps: apps.filter(app => capabilities.navLinks[app.id]),
+      availableLegacyApps: legacyApps.filter(app => capabilities.navLinks[app.id]),
       capabilities,
     };
   }

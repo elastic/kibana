@@ -20,29 +20,23 @@
 import './core.css';
 
 import { CoreId } from '../server';
-import { CoreSetup, CoreStart } from '.';
+import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
-import {
-  InjectedMetadataParams,
-  InjectedMetadataService,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
+import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject, pick } from '../utils/';
+import { mapToObject } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects/saved_objects_service';
 import { ContextService } from './context';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -55,18 +49,6 @@ interface Params {
 /** @internal */
 export interface CoreContext {
   coreId: CoreId;
-}
-
-/** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
-  application: InternalApplicationSetup;
-  injectedMetadata: InjectedMetadataSetup;
-}
-
-/** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
-  application: InternalApplicationStart;
-  injectedMetadata: InjectedMetadataStart;
 }
 
 /**
@@ -95,7 +77,6 @@ export class CoreSystem {
   private readonly context: ContextService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -125,14 +106,14 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
+    this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
-    this.application = new ApplicationService();
 
-    this.coreContext = { coreId: Symbol('core') };
-    this.context = new ContextService(this.coreContext);
-    this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    const core: CoreContext = { coreId: Symbol('core') };
+    this.context = new ContextService(core);
+    this.plugins = new PluginsService(core, injectedMetadata.uiPlugins);
 
     this.legacyPlatform = new LegacyPlatformService({
       requireLegacyFiles,
@@ -152,10 +133,10 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const application = this.application.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({ pluginDependencies });
-      const application = this.application.setup({ context });
 
       const core: InternalCoreSetup = {
         application,
@@ -169,11 +150,7 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       const plugins = await this.plugins.setup(core);
-
-      await this.legacyPlatform.setup({
-        core,
-        plugins: mapToObject(plugins.contracts),
-      });
+      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -194,7 +171,7 @@ export class CoreSystem {
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
-      const application = await this.application.start({ http, injectedMetadata });
+      const application = await this.application.start({ injectedMetadata });
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -223,17 +200,6 @@ export class CoreSystem {
       });
       const uiSettings = await this.uiSettings.start();
 
-      application.registerMountContext(this.coreContext.coreId, 'core', () => ({
-        application: pick(application, ['capabilities', 'navigateToApp']),
-        chrome,
-        docLinks,
-        http,
-        i18n,
-        notifications,
-        overlays,
-        uiSettings,
-      }));
-
       const core: InternalCoreStart = {
         application,
         chrome,
@@ -249,12 +215,9 @@ export class CoreSystem {
 
       const plugins = await this.plugins.start(core);
       const rendering = this.rendering.start({
-        application,
         chrome,
-        injectedMetadata,
         targetDomElement: coreUiTargetDomElement,
       });
-
       await this.legacyPlatform.start({
         core,
         plugins: mapToObject(plugins.contracts),

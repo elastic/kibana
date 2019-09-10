@@ -155,26 +155,49 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
-     * offset to browser page top left corner.
+     * Moves the remote environment’s mouse cursor to the specified element or relative
+     * position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
-     * @param {x: number, y: number} point on browser page
+     * @param {WebElementWrapper} element Optional
+     * @param {number} xOffset Optional
+     * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async moveMouseTo(point: { x: number; y: number }): Promise<void> {
+    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
+    public async moveMouseTo(
+      element: WebElementWrapper,
+      xOffset?: number,
+      yOffset?: number
+    ): Promise<void> {
       if (this.isW3CEnabled) {
+        // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
+        // https://github.com/mozilla/geckodriver/issues/776
         await this.getActions()
           .move({ x: 0, y: 0 })
           .perform();
-        await this.getActions()
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
-          .perform();
+        if (element instanceof WebElementWrapper) {
+          await this.getActions()
+            .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
+            .perform();
+        } else {
+          await this.getActions()
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
+        }
       } else {
-        await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
-          .perform();
+        if (element instanceof WebElementWrapper) {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: element._webElement })
+            .perform();
+        } else {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
+        }
       }
     }
 
@@ -190,47 +213,70 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       from: { offset: { x: any; y: any }; location: any },
       to: { offset: { x: any; y: any }; location: any }
     ) {
-      if (this.isW3CEnabled) {
-        // The offset should be specified in pixels relative to the center of the element's bounding box
-        const getW3CPoint = (data: any) => {
-          if (!data.offset) {
-            data.offset = {};
-          }
-          return data.location instanceof WebElementWrapper
-            ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
-            : { x: data.location.x, y: data.location.y, origin: 'pointer' };
-        };
+      // tslint:disable-next-line:variable-name
+      let _from;
+      // tslint:disable-next-line:variable-name
+      let _to;
+      // tslint:disable-next-line:variable-name
+      const _fromOffset = from.offset
+        ? { x: from.offset.x || 0, y: from.offset.y || 0 }
+        : { x: 0, y: 0 };
+      // tslint:disable-next-line:variable-name
+      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
+      // tslint:disable-next-line:variable-name
+      const _convertPointW3C = async (point: any, offset: { x: any; y: any }) => {
+        if (point.location instanceof WebElementWrapper) {
+          const position = await point.location.getPosition();
+          return {
+            x: Math.round(position.x + offset.x),
+            y: Math.round(position.y + offset.y),
+          };
+        } else {
+          return {
+            x: Math.round(point.location.x + offset.x),
+            y: Math.round(point.location.y + offset.y),
+          };
+        }
+      };
+      // tslint:disable-next-line:variable-name
+      const _convertPoint = (point: any) => {
+        return point.location instanceof WebElementWrapper
+          ? point.location._webElement
+          : point.location;
+      };
 
-        const startPoint = getW3CPoint(from);
-        const endPoint = getW3CPoint(to);
-        await this.getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+      if (this.isW3CEnabled) {
+        // tslint:disable-next-line:variable-name
+        _from = await _convertPointW3C(from, _fromOffset);
+        // tslint:disable-next-line:variable-name
+        _to = await _convertPointW3C(to, _toOffset);
+        // tslint:disable-next-line:variable-name
+        const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
+
         return await this.getActions()
-          .move(startPoint)
+          .move({ x: _from.x, y: _from.y, origin: 'pointer' })
           .press()
-          .move(endPoint)
+          .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
           .release()
           .perform();
       } else {
-        // The offset should be specified in pixels relative to the top-left corner of the element's bounding box
-        const getOffset: any = (offset: { x: number; y: number }) =>
-          offset ? { x: offset.x || 0, y: offset.y || 0 } : { x: 0, y: 0 };
-
-        if (from.location instanceof WebElementWrapper === false) {
-          throw new Error('Dragging point should be WebElementWrapper instance');
-        } else if (typeof to.location.x === 'number') {
+        // until Chromedriver is not supporting W3C Webdriver Actions API
+        // tslint:disable-next-line:variable-name
+        _from = _convertPoint(from);
+        // tslint:disable-next-line:variable-name
+        _to = _convertPoint(to);
+        if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
           return await this.getActions()
-            .move({ origin: from.location._webElement })
+            .move({ origin: _from })
             .press()
-            .move({ x: to.location.x, y: to.location.y, origin: 'pointer' })
+            .move({ x: _to.x, y: _to.y, origin: 'pointer' })
             .release()
             .perform();
         } else {
           return await new LegacyActionSequence(driver)
-            .mouseMove(from.location._webElement, getOffset(from.offset))
+            .mouseMove(_from, _fromOffset)
             .mouseDown()
-            .mouseMove(to.location._webElement, getOffset(to.offset))
+            .mouseMove(_to, _toOffset)
             .mouseUp()
             .perform();
         }
@@ -274,29 +320,34 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
-     * offset to browser page top left corner.
-     * Then adds an action for left-click (down/up) with the mouse.
+     * Inserts an action for moving the mouse x and y pixels relative to the specified origin.
+     * The origin may be defined as the mouse's current position, the viewport, or the center
+     * of a specific WebElement. Then adds an action for left-click (down/up) with the mouse.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
      *
-     * @param {x: number, y: number} point on browser page
+     * @param {WebElementWrapper} element Optional
+     * @param {number} xOffset Optional
+     * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async clickMouseButton(point: { x: number; y: number }): Promise<void> {
-      if (this.isW3CEnabled) {
+    public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async clickMouseButton(element: WebElementWrapper): Promise<void>;
+    public async clickMouseButton(...args: unknown[]): Promise<void> {
+      const arg0 = args[0];
+      if (arg0 instanceof WebElementWrapper) {
         await this.getActions()
-          .move({ x: 0, y: 0 })
+          .pause(this.getActions().mouse)
+          .move({ origin: arg0._webElement })
+          .click()
           .perform();
+      } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await this.getActions()
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .pause(this.getActions().mouse)
+          .move({ origin: { x: args[1], y: args[2] } })
           .click()
           .perform();
       } else {
-        await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
-          .click()
-          .perform();
+        throw new Error('Element or coordinates should be provided');
       }
     }
 
@@ -327,10 +378,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(): Promise<void> {
-      await this.getActions()
-        .doubleClick()
-        .perform();
+    public async doubleClick(element?: WebElementWrapper): Promise<void> {
+      if (element instanceof WebElementWrapper) {
+        await this.getActions()
+          .doubleClick(element._webElement)
+          .perform();
+      } else {
+        await this.getActions()
+          .doubleClick()
+          .perform();
+      }
     }
 
     /**

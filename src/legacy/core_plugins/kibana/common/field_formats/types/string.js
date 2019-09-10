@@ -26,8 +26,7 @@ const TRANSFORM_OPTIONS = [
   { kind: 'upper', text: 'Upper Case' },
   { kind: 'title', text: 'Title Case' },
   { kind: 'short', text: 'Short Dots' },
-  { kind: 'base64', text: 'Base64 Decode' },
-  { kind: 'urlparam', text: 'URL Param Decode' }
+  { kind: 'base64', text: 'Base64 Decode' }
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
@@ -58,7 +57,6 @@ export function createStringFormat(FieldFormat) {
         case 'title': return this._toTitleCase(val);
         case 'short': return shortenDottedString(val);
         case 'base64': return this._base64Decode(val);
-        case 'urlparam': return decodeURIComponent(val);
         default: return asPrettyString(val);
       }
     }

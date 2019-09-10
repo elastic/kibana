@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectFinder,
@@ -13,9 +14,6 @@ import {
 } from 'ui/saved_objects/components/saved_object_finder';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { ComponentStrings } from '../../../i18n';
-
-const { AddEmbeddableFlyout: strings } = ComponentStrings;
 
 export interface Props {
   onClose: () => void;
@@ -68,7 +66,9 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
             onChoose={this.onAddPanel}
             savedObjectMetaData={availableSavedObjects}
             showFilter={true}
-            noItemsMessage={strings.getNoItemsText()}
+            noItemsMessage={i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
+              defaultMessage: 'No matching objects found.',
+            })}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

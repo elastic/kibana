@@ -26,11 +26,3 @@ export const CapabilitiesServiceConstructor = jest
 jest.doMock('./capabilities', () => ({
   CapabilitiesService: CapabilitiesServiceConstructor,
 }));
-
-export const MockHistory = {
-  push: jest.fn(),
-};
-export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
-jest.doMock('history', () => ({
-  createBrowserHistory: createBrowserHistoryMock,
-}));

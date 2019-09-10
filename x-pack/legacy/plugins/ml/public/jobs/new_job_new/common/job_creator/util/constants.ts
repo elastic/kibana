@@ -8,7 +8,6 @@ export enum JOB_TYPE {
   SINGLE_METRIC = 'single_metric',
   MULTI_METRIC = 'multi_metric',
   POPULATION = 'population',
-  ADVANCED = 'advanced',
 }
 
 export enum CREATED_BY_LABEL {

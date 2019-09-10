@@ -37,7 +37,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await userModelSpan.moveMouseTo();
+          await browser.moveMouseTo(userModelSpan);
           // Expect the go to definition button show up eventually.
           expect(await exists('codeGoToDefinitionButton')).to.be(true);
 
@@ -180,7 +180,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await userModelSpan.moveMouseTo();
+          await browser.moveMouseTo(userModelSpan);
           // Expect the go to definition button show up eventually.
           expect(await exists('codeFindReferenceButton')).to.be(true);
 
@@ -231,7 +231,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const asyncSpan = spans[1];
           expect(await asyncSpan.getVisibleText()).to.equal('async');
-          await asyncSpan.moveMouseTo();
+          await browser.moveMouseTo(asyncSpan);
           // Expect the go to definition button show up eventually.
           expect(await exists('codeGoToDefinitionButton')).to.be(true);
 

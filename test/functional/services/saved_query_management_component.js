@@ -27,12 +27,14 @@ export function SavedQueryManagementComponentProvider({ getService }) {
   class SavedQueryManagementComponent {
 
     async saveNewQuery(name, description, includeFilters, includeTimeFilter) {
-      await this.openSaveCurrentQueryModal();
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-save-button');
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
     async saveNewQueryWithNameError(name) {
-      await this.openSaveCurrentQueryModal();
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-save-button');
       if (name) {
         await testSubjects.setValue('saveQueryFormTitle', name);
       }
@@ -133,15 +135,6 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       if (!isOpenAlready) return;
 
       await testSubjects.click('saved-query-management-popover-button');
-    }
-
-    async openSaveCurrentQueryModal() {
-      await this.openSavedQueryManagementComponent();
-
-      await retry.try(async () => {
-        await testSubjects.click('saved-query-management-save-button');
-        await testSubjects.existOrFail('saveQueryForm');
-      });
     }
 
     async saveNewQueryMissingOrFail() {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Action } from '../../actions';
+import { Action, ActionContext } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 import { IncompatibleActionError } from '../../errors';
 
@@ -36,12 +36,7 @@ export function hasFullNameOutput(
   );
 }
 
-interface ActionContext {
-  embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
-  message?: string;
-}
-
-export class SayHelloAction extends Action<ActionContext> {
+export class SayHelloAction extends Action {
   public readonly type = SAY_HELLO_ACTION;
   private sayHello: (name: string) => void;
 
@@ -58,7 +53,9 @@ export class SayHelloAction extends Action<ActionContext> {
 
   // Can use typescript generics to get compiler time warnings for immediate feedback if
   // the context is not compatible.
-  async isCompatible(context: ActionContext) {
+  async isCompatible(
+    context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>
+  ) {
     // Option 1: only compatible with Greeting Embeddables.
     // return context.embeddable.type === CONTACT_CARD_EMBEDDABLE;
 
@@ -66,15 +63,20 @@ export class SayHelloAction extends Action<ActionContext> {
     return hasFullNameOutput(context.embeddable);
   }
 
-  async execute(context: ActionContext) {
+  async execute(
+    context: ActionContext<
+      Embeddable<EmbeddableInput, FullNameEmbeddableOutput>,
+      { message?: string }
+    >
+  ) {
     if (!(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }
 
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
-    if (context.message) {
-      this.sayHello(`${greeting}.  ${context.message}`);
+    if (context.triggerContext && context.triggerContext.message) {
+      this.sayHello(`${greeting}.  ${context.triggerContext.message}`);
     } else {
       this.sayHello(greeting);
     }

@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard']);
 
   describe('dashboard grid', function () {
+    this.tags(['skipFirefox']);
 
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();

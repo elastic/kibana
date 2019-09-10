@@ -20,10 +20,10 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_XYZ';
   static title = i18n.translate('xpack.maps.source.ems_xyzTitle', {
-    defaultMessage: 'Tile Map Service'
+    defaultMessage: 'Tile Map Service from URL'
   });
   static description = i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Tile map service configured in interface'
+    defaultMessage: 'Map tiles from a URL that includes the XYZ coordinates'
   });
   static icon = 'grid';
 

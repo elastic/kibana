@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { WizardNav, PreviousButton, NextButton } from './wizard_nav';
+export { WizardNav } from './wizard_nav';

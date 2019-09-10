@@ -15,7 +15,7 @@ import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
+import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -32,7 +32,7 @@ beforeAll(() => {
         prepend: (path: string) => `/basepath${path}`
       }
     }
-  } as unknown) as LegacyCoreStart;
+  } as unknown) as InternalCoreStart;
 
   jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 });

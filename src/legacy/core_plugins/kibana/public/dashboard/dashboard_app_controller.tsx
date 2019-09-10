@@ -33,7 +33,8 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
+// @ts-ignore
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
@@ -603,7 +604,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<SaveResult> {
+    function save(saveOptions: SaveOptions): Promise<{ id?: string } | { error: Error }> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -694,7 +695,7 @@ export class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: SaveResult) => {
+        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);

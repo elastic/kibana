@@ -21,11 +21,11 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { InternalApplicationStart } from '../../application';
+import { ApplicationStart } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
-  application: InternalApplicationStart;
+  application: ApplicationStart;
   http: HttpStart;
 }
 
@@ -99,22 +99,10 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks = [...application.availableApps].map(
-      ([appId, app]) =>
+    const legacyAppLinks = application.availableLegacyApps.map(
+      app =>
         [
-          appId,
-          new NavLinkWrapper({
-            ...app,
-            legacy: false,
-            baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-          }),
-        ] as [string, NavLinkWrapper]
-    );
-
-    const legacyAppLinks = [...application.availableLegacyApps].map(
-      ([appId, app]) =>
-        [
-          appId,
+          app.id,
           new NavLinkWrapper({
             ...app,
             legacy: true,
@@ -124,7 +112,7 @@ export class NavLinksService {
     );
 
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map([...legacyAppLinks, ...appLinks])
+      new Map(legacyAppLinks)
     );
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 

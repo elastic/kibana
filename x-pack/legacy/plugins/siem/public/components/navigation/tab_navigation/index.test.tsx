@@ -8,26 +8,32 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { TabNavigation } from './';
-import { TabNavigationProps } from './types';
+import { TabNavigationProps } from '../type';
 import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
 import { HostsTableType } from '../../../store/hosts/model';
 import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';
 import { CONSTANTS } from '../../url_state/constants';
-import { RouteSpyState } from '../../../utils/route/types';
 
 describe('Tab Navigation', () => {
   const pageName = SiemPageName.hosts;
   const hostName = 'siem-window';
   const tabName = HostsTableType.authentications;
   const pathName = `/${pageName}/${hostName}/${tabName}`;
-
-  describe('Page Navigation', () => {
-    const mockProps: TabNavigationProps & RouteSpyState = {
+  const mockMatch = {
+    params: {
       pageName,
-      pathName,
-      detailName: undefined,
-      search: '',
+      hostName,
       tabName,
+    },
+  };
+  describe('Page Navigation', () => {
+    const mockProps: TabNavigationProps = {
+      location: {
+        pathname: pathName,
+        search: '',
+        state: '',
+        hash: '',
+      },
       navTabs,
       [CONSTANTS.timerange]: {
         global: {
@@ -71,6 +77,7 @@ describe('Tab Navigation', () => {
     test('it mounts with correct tab highlighted', () => {
       const wrapper = shallow(<TabNavigation {...mockProps} />);
       const hostsTab = wrapper.find('[data-test-subj="navigation-hosts"]');
+
       expect(hostsTab.prop('isSelected')).toBeTruthy();
     });
     test('it changes active tab when nav changes by props', () => {
@@ -78,9 +85,12 @@ describe('Tab Navigation', () => {
       const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
       expect(networkTab().prop('isSelected')).toBeFalsy();
       wrapper.setProps({
-        pageName: 'network',
-        pathName: '/network',
-        tabName: undefined,
+        location: {
+          pathname: '/network',
+          search: '',
+          state: '',
+          hash: '',
+        },
       });
       wrapper.update();
       expect(networkTab().prop('isSelected')).toBeTruthy();
@@ -95,13 +105,15 @@ describe('Tab Navigation', () => {
   });
 
   describe('Table Navigation', () => {
-    const mockProps: TabNavigationProps & RouteSpyState = {
-      pageName: 'hosts',
-      pathName: '/hosts',
-      detailName: undefined,
-      search: '',
-      tabName: HostsTableType.authentications,
+    const mockProps: TabNavigationProps = {
+      location: {
+        pathname: pathName,
+        search: '',
+        state: '',
+        hash: '',
+      },
       navTabs: navTabsHostDetails(hostName),
+      match: mockMatch,
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: {
@@ -150,15 +162,18 @@ describe('Tab Navigation', () => {
       expect(tableNavigationTab.prop('isSelected')).toBeTruthy();
     });
     test('it changes active tab when nav changes by props', () => {
+      const newMatch = {
+        params: {
+          pageName: SiemPageName.hosts,
+          hostName,
+          tabName: HostsTableType.events,
+        },
+      };
       const wrapper = shallow(<TabNavigation {...mockProps} />);
       const tableNavigationTab = () =>
         wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`);
       expect(tableNavigationTab().prop('isSelected')).toBeFalsy();
-      wrapper.setProps({
-        pageName: SiemPageName.hosts,
-        pathName: `/${SiemPageName.hosts}`,
-        tabName: HostsTableType.events,
-      });
+      wrapper.setProps({ location: `/${SiemPageName.hosts}`, match: newMatch });
       wrapper.update();
       expect(tableNavigationTab().prop('isSelected')).toBeTruthy();
     });

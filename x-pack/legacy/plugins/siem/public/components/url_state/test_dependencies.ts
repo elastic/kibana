@@ -10,8 +10,6 @@ import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
 import { CONSTANTS } from './constants';
 import { InputsModelId } from '../../store/inputs/constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
-import { HostsTableType } from '../../store/hosts/model';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -46,12 +44,13 @@ export const mockHistory = {
 };
 
 export const defaultProps: UrlStateContainerPropTypes = {
-  pageName: SiemPageName.network,
-  detailName: undefined,
-  tabName: HostsTableType.authentications,
-  search: '',
-  pathName: '/network',
-  navTabs,
+  match: {
+    isExact: true,
+    params: '',
+    path: '',
+    url: '',
+  },
+  isInitializing: true,
   indexPattern: {
     fields: [
       {
@@ -128,14 +127,13 @@ export const defaultProps: UrlStateContainerPropTypes = {
     ...mockHistory,
     location: defaultLocation,
   },
+  location: defaultLocation,
 };
 
 export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
-  kqlQueryValue: KqlQuery | null,
-  pageName: string,
-  detailName: string | undefined
+  kqlQueryValue: KqlQuery | null
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
@@ -146,27 +144,16 @@ export const getMockProps = (
     ...mockHistory,
     location,
   },
-  detailName,
-  pageName,
-  pathName: location.pathname,
-  search: location.search,
+  location,
 });
 
 interface GetMockPropsObj {
   examplePath: string;
   namespaceLower: string;
   page: LocationTypes;
-  pageName: string;
-  detailName: string | undefined;
 }
 
-export const getMockPropsObj = ({
-  page,
-  examplePath,
-  namespaceLower,
-  pageName,
-  detailName,
-}: GetMockPropsObj) => ({
+export const getMockPropsObj = ({ page, examplePath, namespaceLower }: GetMockPropsObj) => ({
   noSearch: {
     undefinedQuery: getMockProps(
       {
@@ -176,9 +163,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      null,
-      pageName,
-      detailName
+      null
     ),
     definedQuery: getMockProps(
       {
@@ -188,9 +173,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
-      pageName,
-      detailName
+      getFilterQuery(page)
     ),
   },
   relativeTimeSearch: {
@@ -202,9 +185,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      null,
-      pageName,
-      detailName
+      null
     ),
     definedQuery: getMockProps(
       {
@@ -214,9 +195,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
-      pageName,
-      detailName
+      getFilterQuery(page)
     ),
   },
   absoluteTimeSearch: {
@@ -229,9 +208,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      null,
-      pageName,
-      detailName
+      null
     ),
     definedQuery: getMockProps(
       {
@@ -242,9 +219,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
-      pageName,
-      detailName
+      getFilterQuery(page)
     ),
   },
   oppositeQueryLocationSearch: {
@@ -258,9 +233,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      null,
-      pageName,
-      detailName
+      null
     ),
   },
 });
@@ -272,54 +245,40 @@ export const testCases = [
     /* page */ CONSTANTS.networkPage,
     /* namespaceLower */ 'network',
     /* namespaceUpper */ 'Network',
-    /* pathName */ '/network',
+    /* examplePath */ '/network',
     /* type */ networkModel.NetworkType.page,
-    /* pageName */ SiemPageName.network,
-    /* detailName */ undefined,
   ],
   [
     /* page */ CONSTANTS.hostsPage,
     /* namespaceLower */ 'hosts',
     /* namespaceUpper */ 'Hosts',
-    /* pathName */ '/hosts',
+    /* examplePath */ '/hosts',
     /* type */ hostsModel.HostsType.page,
-    /* pageName */ SiemPageName.hosts,
-    /* detailName */ undefined,
   ],
   [
     /* page */ CONSTANTS.hostsDetails,
     /* namespaceLower */ 'hosts',
     /* namespaceUpper */ 'Hosts',
-    /* pathName */ '/hosts/siem-es',
+    /* examplePath */ '/hosts/siem-es',
     /* type */ hostsModel.HostsType.details,
-    /* pageName */ SiemPageName.hosts,
-    /* detailName */ 'host-test',
   ],
   [
     /* page */ CONSTANTS.networkDetails,
     /* namespaceLower */ 'network',
     /* namespaceUpper */ 'Network',
-    /* pathName */ '/network/ip/100.90.80',
+    /* examplePath */ '/network/ip/100.90.80',
     /* type */ networkModel.NetworkType.details,
-    /* pageName */ SiemPageName.network,
-    /* detailName */ '100.90.80',
   ],
   [
     /* page */ CONSTANTS.overviewPage,
     /* namespaceLower */ 'overview',
     /* namespaceUpper */ 'Overview',
-    /* pathName */ '/overview',
-    /* type */ null,
-    /* pageName */ SiemPageName.overview,
-    /* detailName */ undefined,
+    /* examplePath */ '/overview',
   ],
   [
     /* page */ CONSTANTS.timelinePage,
     /* namespaceLower */ 'timeline',
     /* namespaceUpper */ 'Timeline',
-    /* pathName */ '/timeline',
-    /* type */ null,
-    /* pageName */ SiemPageName.timelines,
-    /* detailName */ undefined,
+    /* examplePath */ '/timeline',
   ],
 ];
