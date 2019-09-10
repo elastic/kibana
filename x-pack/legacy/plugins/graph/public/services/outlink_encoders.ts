@@ -17,7 +17,7 @@ export interface OutlinkEncoder {
   type: 'kql' | 'lucene' | 'plain' | 'esq';
 }
 
-export const getOutlinkEncoders = (): OutlinkEncoder[] => [
+export const outlinkEncoders: OutlinkEncoder[] = [
   {
     id: 'esq-rison-loose',
     title: i18n.translate('xpack.graph.outlinkEncoders.esqRisonLooseTitle', {

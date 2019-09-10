@@ -5,6 +5,7 @@
  */
 
 import { FontawesomeIcon } from '../services/style_choices';
+import { WorkspaceField, AdvancedSettings } from './app_state';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface JsonArray extends Array<JsonValue> {}
@@ -83,3 +84,26 @@ export interface Workspace {
    */
   mergeGraph(newData: GraphData): void;
 }
+
+export type ExploreRequest = any;
+export type SearchRequest = any;
+export type ExploreResults = any;
+export type SearchResults = any;
+
+export type WorkspaceOptions = Partial<{
+  indexName: string;
+  vertex_fields: WorkspaceField[];
+  nodeLabeller: (newNodes: WorkspaceNode[]) => void;
+  changeHandler: () => void;
+  graphExploreProxy: (
+    indexPattern: string,
+    request: ExploreRequest,
+    callback: (data: ExploreResults) => void
+  ) => void;
+  searchProxy: (
+    indexPattern: string,
+    request: SearchRequest,
+    callback: (data: SearchResults) => void
+  ) => void;
+  exploreControls: AdvancedSettings;
+}>;

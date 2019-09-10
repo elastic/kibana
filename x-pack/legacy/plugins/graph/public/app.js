@@ -54,7 +54,7 @@ import {
   urlTemplateIconChoicesByClass
 } from './services/style_choices';
 import {
-  getOutlinkEncoders,
+  outlinkEncoders,
 } from './services/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
@@ -230,7 +230,7 @@ app.controller('graphuiPlugin', function (
   $scope.colors = colorChoices;
   $scope.iconChoicesByClass = iconChoicesByClass;
 
-  $scope.outlinkEncoders = getOutlinkEncoders(i18n);
+  $scope.outlinkEncoders = outlinkEncoders;
 
   $scope.fields = [];
   $scope.canEditDrillDownUrls = chrome.getInjected('canEditDrillDownUrls');
