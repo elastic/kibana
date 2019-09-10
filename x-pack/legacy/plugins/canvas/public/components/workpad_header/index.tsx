@@ -18,14 +18,14 @@ import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_h
 interface StateProps {
   isWriteable: boolean;
   canUserWrite: boolean;
-  selectedPage: number;
+  selectedPage: string;
 }
 
 interface DispatchProps {
   setWriteable: (isWorkpadWriteable: boolean) => void;
 }
 
-const mapStateToProps = (state: State) => ({
+const mapStateToProps = (state: State): StateProps => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
   selectedPage: getSelectedPage(state),

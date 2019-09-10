@@ -43,7 +43,7 @@ export interface Props {
   isWriteable: boolean;
   toggleWriteable: () => void;
   canUserWrite: boolean;
-  selectedPage: number;
+  selectedPage: string;
 }
 
 interface State {
