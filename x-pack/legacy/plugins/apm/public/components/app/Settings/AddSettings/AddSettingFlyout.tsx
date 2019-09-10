@@ -28,6 +28,7 @@ import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../services/rest/callApmApi';
+import { trackEvent } from '../../../../../../infra/public/hooks/use_track_metric';
 import { Config } from '..';
 
 interface Props {
@@ -270,6 +271,8 @@ async function saveConfig({
   environment: string | undefined;
   configurationId?: string;
 }) {
+  trackEvent({ app: 'apm', name: 'save_agent_configuration' });
+
   try {
     if (isNaN(sampleRate) || !serviceName) {
       throw new Error('Missing arguments');

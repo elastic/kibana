@@ -27,6 +27,7 @@ interface Props {
   yMax?: string | number;
   height?: number;
   stacked?: boolean;
+  onHover?: () => void;
 }
 
 const TransactionLineChart: React.FC<Props> = (props: Props) => {
@@ -37,10 +38,20 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
     yMax = 'max',
     height,
     truncateLegends,
-    stacked = false
+    stacked = false,
+    onHover
   } = props;
 
   const syncedChartsProps = useChartsSync();
+
+  // create callback for syncedChartsProps.onHover and props.onHover
+  const syncedChartsOnHover = syncedChartsProps.onHover;
+  syncedChartsProps.onHover = (...args) => {
+    if (onHover) {
+      onHover();
+    }
+    return syncedChartsOnHover(...args);
+  };
 
   return (
     <CustomPlot
