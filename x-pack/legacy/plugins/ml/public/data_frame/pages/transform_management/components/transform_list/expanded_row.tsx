@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
-import { DataFrameTransformListRow } from './common';
+import { DataFrameTransformListRow } from '../../../../common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
