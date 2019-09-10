@@ -104,6 +104,7 @@ export default function PointSeriesVisType(Private) {
           },
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
+          lineWidth: 2,
           showCircles: true
         }],
         addTooltip: true,

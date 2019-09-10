@@ -196,14 +196,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       setValue('valueAxes', newValueAxes);
 
-      let chartIndex;
-      stateParams.seriesParams.forEach(({ valueAxis }, index) => {
-        if (axis.id === valueAxis) {
-          chartIndex = index;
-        }
-      });
+      const chartIndex = stateParams.seriesParams.findIndex(
+        ({ valueAxis }) => axis.id === valueAxis
+      );
 
-      if (chartIndex !== undefined) {
+      if (chartIndex !== -1) {
         // if a seriesParam has valueAxis equals to removed one, then we reset it to the first valueAxis
         setParamByIndex('seriesParams', chartIndex, 'valueAxis', newValueAxes[0].id);
       }

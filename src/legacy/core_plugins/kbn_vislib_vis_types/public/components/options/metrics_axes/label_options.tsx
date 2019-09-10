@@ -98,9 +98,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
           <SelectOption
             disabled={!axis.labels.show}
             label={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel',
+              'kbnVislibVisTypes.controls.pointSeries.categoryAxis.alignLabel',
               {
-                defaultMessage: 'Rotate',
+                defaultMessage: 'Align',
               }
             )}
             options={rotateOptions}

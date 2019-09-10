@@ -76,7 +76,7 @@ export interface SeriesParam {
   data: { label: string; id: string };
   drawLinesBetweenPoints: boolean;
   interpolate: InterpolationModes;
-  lineWidth: number | '';
+  lineWidth?: number;
   mode: ChartModes;
   show: boolean;
   showCircles: boolean;

@@ -2501,7 +2501,6 @@
     "kbnVislibVisTypes.controls.pointSeries.series.metricsTitle": "指标",
     "kbnVislibVisTypes.controls.pointSeries.series.modeLabel": "模式",
     "kbnVislibVisTypes.controls.pointSeries.series.newAxisLabel": "新建轴…...",
-    "kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel": "显示为圆圈",
     "kbnVislibVisTypes.controls.pointSeries.series.showLineLabel": "显示为线条",
     "kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel": "值轴",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel": "最大值",

@@ -2501,7 +2501,6 @@
     "kbnVislibVisTypes.controls.pointSeries.series.metricsTitle": "メトリック",
     "kbnVislibVisTypes.controls.pointSeries.series.modeLabel": "モード",
     "kbnVislibVisTypes.controls.pointSeries.series.newAxisLabel": "新規軸…",
-    "kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel": "円を表示",
     "kbnVislibVisTypes.controls.pointSeries.series.showLineLabel": "線を表示",
     "kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel": "値軸",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel": "最高",
