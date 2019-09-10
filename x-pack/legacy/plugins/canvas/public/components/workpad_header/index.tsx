@@ -5,22 +5,41 @@
  */
 
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+// @ts-ignore untyped local
 import { canUserWrite } from '../../state/selectors/app';
+// @ts-ignore untyped local
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
+// @ts-ignore untyped local
 import { setWriteable } from '../../state/actions/workpad';
-import { WorkpadHeader as Component } from './workpad_header';
+import { State } from '../../../types';
+import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header';
 
-const mapStateToProps = state => ({
+interface StateProps {
+  isWriteable: boolean;
+  canUserWrite: boolean;
+  selectedPage: string;
+}
+
+interface DispatchProps {
+  setWriteable: (isWorkpadWriteable: boolean) => void;
+}
+
+const mapStateToProps = (state: State): StateProps => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
   selectedPage: getSelectedPage(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setWriteable: isWriteable => dispatch(setWriteable(isWriteable)),
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+const mergeProps = (
+  stateProps: StateProps,
+  dispatchProps: DispatchProps,
+  ownProps: ComponentProps
+): ComponentProps => ({
   ...stateProps,
   ...dispatchProps,
   ...ownProps,
