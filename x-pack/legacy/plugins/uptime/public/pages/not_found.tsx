@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NotFoundPage = () => (
   <EuiFlexGroup justifyContent="center">
@@ -25,18 +25,22 @@ export const NotFoundPage = () => (
           iconColor="subdued"
           title={
             <EuiTitle size="m">
-              {
-                <h3>
-                  {i18n.translate('xpack.uptime.emptyStateError.404', {
-                    defaultMessage: 'Page Not found',
-                  })}
-                </h3>
-              }
+              <h3>
+                <FormattedMessage
+                  defaultMessage="Page not found"
+                  id="xpack.uptime.emptyStateError.notFoundPage"
+                />
+              </h3>
             </EuiTitle>
           }
           body={
             <Link to="/">
-              <EuiButton href="/">Back to home</EuiButton>
+              <EuiButton href="/">
+                <FormattedMessage
+                  defaultMessage="Back to home"
+                  id="xpack.uptime.notFountPage.homeLinkText"
+                />
+              </EuiButton>
             </Link>
           }
         />

@@ -6,4 +6,4 @@
 
 export { MonitorPage } from './monitor';
 export { OverviewPage } from './overview';
-export { NotFoundPage } from './404';
+export { NotFoundPage } from './not_found';

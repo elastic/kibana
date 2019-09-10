@@ -14,7 +14,7 @@ interface EmptyStateErrorProps {
 }
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
-  const unAuthorized = errors.find(
+  const unauthorized = errors.find(
     (error: GraphQLError) => error.message && error.message.includes('unauthorized')
   );
 
@@ -27,11 +27,11 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             iconColor="subdued"
             title={
               <EuiTitle size="m">
-                {unAuthorized ? (
+                {unauthorized ? (
                   <h3>
-                    {i18n.translate('xpack.uptime.emptyStateError.noPermission', {
+                    {i18n.translate('xpack.uptime.emptyStateError.notAuthorized', {
                       defaultMessage:
-                        "You don't have permission, please contact system administraion.",
+                        'You are not authorized to view Uptime data, please contact your system administrator.',
                     })}
                   </h3>
                 ) : (
@@ -45,7 +45,7 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             }
             body={
               <Fragment>
-                {!unAuthorized &&
+                {!unauthorized &&
                   errors.map((error: GraphQLError) => <p key={error.message}>{error.message}</p>)}
               </Fragment>
             }
