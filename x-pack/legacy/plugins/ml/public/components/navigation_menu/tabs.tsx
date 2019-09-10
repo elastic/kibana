@@ -8,70 +8,70 @@ import React, { FC, useState } from 'react';
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-
-interface Tab {
-  id: string;
-  name: any;
-  disabled: boolean;
-}
+import { Tab } from './main_tabs';
+import { TabId } from './navigation_menu';
 
 interface Props {
   disableLinks: boolean;
-  tabId: string;
+  mainTabId: TabId;
+  tabId: TabId;
 }
 
-function getTabs(disableLinks: boolean): Tab[] {
-  return [
-    {
-      id: 'jobs',
-      name: i18n.translate('xpack.ml.navMenu.jobManagementTabLinkText', {
-        defaultMessage: 'Job Management',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'explorer',
-      name: i18n.translate('xpack.ml.navMenu.anomalyExplorerTabLinkText', {
-        defaultMessage: 'Anomaly Explorer',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'timeseriesexplorer',
-      name: i18n.translate('xpack.ml.navMenu.singleMetricViewerTabLinkText', {
-        defaultMessage: 'Single Metric Viewer',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'data_frames',
-      name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
-        defaultMessage: 'Transforms',
-      }),
-      disabled: false,
-    },
-    {
-      id: 'data_frame_analytics',
-      name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-        defaultMessage: 'Analytics',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'datavisualizer',
-      name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-        defaultMessage: 'Data Visualizer',
-      }),
-      disabled: false,
-    },
-    {
-      id: 'settings',
-      name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-        defaultMessage: 'Settings',
-      }),
-      disabled: disableLinks,
-    },
-  ];
+function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
+  const TAB_MAP = {
+    overview: [],
+    datavisualizer: [],
+    anomaly_detection: [
+      {
+        id: 'jobs',
+        name: i18n.translate('xpack.ml.navMenu.jobManagementTabLinkText', {
+          defaultMessage: 'Job Management',
+        }),
+        disabled: disableLinks,
+      },
+      {
+        id: 'explorer',
+        name: i18n.translate('xpack.ml.navMenu.anomalyExplorerTabLinkText', {
+          defaultMessage: 'Anomaly Explorer',
+        }),
+        disabled: disableLinks,
+      },
+      {
+        id: 'timeseriesexplorer',
+        name: i18n.translate('xpack.ml.navMenu.singleMetricViewerTabLinkText', {
+          defaultMessage: 'Single Metric Viewer',
+        }),
+        disabled: disableLinks,
+      },
+      {
+        id: 'settings',
+        name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
+          defaultMessage: 'Settings',
+        }),
+        disabled: disableLinks,
+      },
+    ],
+    main_data_frame_analytics: [
+      {
+        id: 'data_frames',
+        name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
+          defaultMessage: 'Transforms',
+        }),
+        disabled: false,
+      },
+      {
+        id: 'data_frame_analytics',
+        name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
+          defaultMessage: 'Analytics',
+        }),
+        disabled: disableLinks,
+      },
+    ],
+  };
+
+  type TAB_MAP_ID = keyof typeof TAB_MAP;
+
+  return TAB_MAP[tabId as TAB_MAP_ID];
 }
 
 enum TAB_TEST_SUBJECT {
@@ -86,16 +86,16 @@ enum TAB_TEST_SUBJECT {
 
 type TAB_TEST_SUBJECTS = keyof typeof TAB_TEST_SUBJECT;
 
-export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
+export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: string) {
     setSelectedTabId(id);
   }
 
-  const tabs = getTabs(disableLinks);
+  const tabs = getTabs(mainTabId, disableLinks);
 
   return (
-    <EuiTabs>
+    <EuiTabs size="s">
       {tabs.map((tab: Tab) => {
         const id = tab.id;
         return (
