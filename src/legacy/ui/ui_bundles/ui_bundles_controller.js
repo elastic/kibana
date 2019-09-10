@@ -51,28 +51,20 @@ function getWebpackAliases(pluginSpecs) {
 }
 
 // Recursively clone appExtensions, sorting array and normalizing absolute paths
-function stableCloneAppExtensions(input) {
-  if (Array.isArray(input)) {
-    return input
-      .map(i => stableCloneAppExtensions(i))
-      .sort((a, b) => typeof a === 'string' && typeof b === 'string' ? a.localeCompare(b) : 0);
-  }
-
-  if (input && typeof input === 'object') {
-    return Object.fromEntries(
-      Object.entries(input)
-        .map(([key, value]) => [key, stableCloneAppExtensions(value)])
-    );
-  }
-
-  if (typeof input === 'string') {
-    if (isAbsolute(input)) {
-      input = `absolute:${relative(REPO_ROOT, input)}`;
-    }
-    return input.replace(/\\/g, '/');
-  }
-
-  return input;
+function stableCloneAppExtensions(appExtensions) {
+  return Object.fromEntries(
+    Object.entries(appExtensions).map(([extensionType, moduleIds]) => [
+      extensionType,
+      moduleIds
+        .map(moduleId => {
+          if (isAbsolute(moduleId)) {
+            moduleId = `absolute:${relative(REPO_ROOT, moduleId)}`;
+          }
+          return moduleId.replace(/\\/g, '/');
+        })
+        .sort((a, b) => a.localeCompare(b))
+    ])
+  );
 }
 
 export class UiBundlesController {
