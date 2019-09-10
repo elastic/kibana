@@ -81,7 +81,12 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
         }
       }}
     />
-    <Redirect from="/ml-network/" to="/ml-network" />
+    <Route
+      path="/ml-network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-network/" to={`/ml-network${search}`} />
+      )}
+    />
   </Switch>
 ));
 

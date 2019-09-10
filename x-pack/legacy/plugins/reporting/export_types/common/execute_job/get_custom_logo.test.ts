@@ -6,6 +6,7 @@
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { getConditionalHeaders, getCustomLogo } from './index';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
 let mockServer: any;
 beforeEach(() => {
@@ -19,29 +20,13 @@ test(`gets logo from uiSettings`, async () => {
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
+    job: {} as JobDocPayloadPDF,
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
 
   const { logo } = await getCustomLogo({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
+    job: {} as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });

@@ -11,6 +11,7 @@ export interface TimeKey {
   time: number;
   tiebreaker: number;
   gid?: string;
+  fromAutoReload?: boolean;
 }
 
 export interface UniqueTimeKey extends TimeKey {
