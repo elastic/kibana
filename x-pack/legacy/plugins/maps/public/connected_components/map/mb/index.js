@@ -15,14 +15,12 @@ import {
   clearGoto,
   setTooltipState,
   setMapInitError,
-  updateDrawState
 } from '../../../actions/map_actions';
 import {
   getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
-  getDrawState,
   isDrawingFilter,
   getScrollZoom
 } from '../../../selectors/map_selectors';
@@ -35,7 +33,6 @@ function mapStateToProps(state = {}) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
-    drawState: getDrawState(state),
     isDrawingFilter: isDrawingFilter(state),
     scrollZoom: getScrollZoom(state)
   };
@@ -69,9 +66,6 @@ function mapDispatchToProps(dispatch) {
     setMapInitError(errorMessage) {
       dispatch(setMapInitError(errorMessage));
     },
-    disableDrawState() {
-      dispatch(updateDrawState(null));
-    }
   };
 }
 

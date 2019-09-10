@@ -68,10 +68,14 @@ export class GeometryFilterForm extends Component {
       geoFieldName
     } = splitIndexGeoFieldName(this.state.geoFieldTag);
 
-    return this.props.geoFields.find(option => {
+    console.log(this.props.geoFields);
+
+    const geoField = this.props.geoFields.find(option => {
       return option.indexPatternTitle === indexPatternTitle
         && option.geoFieldName === geoFieldName;
     });
+    console.log(geoField);
+    return geoField;
   }
 
   _onGeoFieldChange = selectedValue => {
