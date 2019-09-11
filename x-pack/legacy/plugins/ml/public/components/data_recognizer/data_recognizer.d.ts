@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Workspace, WorkspaceOptions } from '../types';
+import { FC } from 'react';
 
-declare function createWorkspace(options: WorkspaceOptions): Workspace;
+import { IndexPattern } from 'ui/index_patterns';
+
+declare const DataRecognizer: FC<{
+  indexPattern: IndexPattern;
+  results: any;
+  className: string;
+}>;

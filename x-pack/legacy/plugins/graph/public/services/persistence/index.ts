@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Workspace, WorkspaceOptions } from '../types';
-
-declare function createWorkspace(options: WorkspaceOptions): Workspace;
+export * from './serialize';
+export * from './deserialize';

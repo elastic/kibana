@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -15,12 +15,22 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { DataRecognizer } from '../../../../components/data_recognizer';
 
 interface Props {
   indexPattern: IndexPattern;
 }
 
 export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
+  const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+
+  const recognizerResults = {
+    count: 0,
+    onChange() {
+      setRecognizerResultsCount(recognizerResults.count);
+    },
+  };
+
   const basePath = useUiChromeContext().getBasePath();
 
   function openAdvancedJobWizard() {
@@ -29,6 +39,9 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
     window.open(`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
   }
 
+  // Note we use display:none for the DataRecognizer section as it needs to be
+  // passed the recognizerResults object, and then run the recognizer check which
+  // controls whether the recognizer section is ultimately displayed.
   return (
     <EuiPanel data-test-subj="mlDataVisualizerActionsPanel">
       <EuiTitle>
@@ -40,6 +53,23 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <div style={recognizerResultsCount === 0 ? { display: 'none' } : {}}>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
+              defaultMessage="Select known configurations for recognized data:"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <DataRecognizer
+          indexPattern={indexPattern}
+          results={recognizerResults}
+          className="euiFlexGroup euiFlexGrid--gutterLarge euiFlexGroup--responsive euiFlexGroup--wrap"
+        ></DataRecognizer>
+        <EuiSpacer size="l" />
+      </div>
       <EuiText>
         <p>
           <FormattedMessage
