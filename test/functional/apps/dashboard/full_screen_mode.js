@@ -73,8 +73,7 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const isChromeVisible = await PageObjects.common.isChromeVisible();
-        expect(isChromeVisible).to.be(false);
-        expect(false).to.be(true);
+        expect(isChromeVisible).to.be(true);
       });
     });
   });

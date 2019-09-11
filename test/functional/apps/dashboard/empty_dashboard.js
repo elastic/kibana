@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should display add button', async () => {
       const addButtonExists = await testSubjects.exists('emptyDashboardAddPanelButton');
-      expect(addButtonExists).to.be(false);
-      expect(false).to.be(true);
+      expect(addButtonExists).to.be(true);
     });
 
     it('should open add panel when add button is clicked', async () => {
@@ -45,5 +44,7 @@ export default function ({ getService, getPageObjects }) {
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });
+
   });
 }
+
