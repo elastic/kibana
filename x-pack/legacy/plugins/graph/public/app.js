@@ -862,6 +862,7 @@ app.controller('graphuiPlugin', function (
       canWipeWorkspace(function () {
         kbnUrl.change('/workspace/', {});
       });  },
+    testId: 'graphNewButton',
   });
 
   // if saving is disabled using uiCapabilities, we don't want to render the save

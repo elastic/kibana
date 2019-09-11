@@ -60,12 +60,9 @@ exports[`Filter Lists Header renders header 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             iconType="refresh"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
