@@ -7,8 +7,9 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { AggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, BucketAggregation } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
+import { FieldStatsResponse } from '../../common';
 
 const SHARD_SIZE = 5000;
 
@@ -102,7 +103,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
   field: { name: string; type: string; esTypes?: string[] }
-) {
+): Promise<FieldStatsResponse<number>> {
   const searchBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -137,8 +138,11 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      top_values: terms,
-      histogram: { buckets: [], doc_count: minMaxResult.aggregations!.sample.doc_count },
+      topValues: bucketsToResponse<typeof searchBody['sample']['aggs']['top_values'], number>(
+        terms
+      ),
+      histogram: { buckets: [] },
+      // count: minMaxResult.aggregations!.sample.doc_count,
     };
   }
 
@@ -161,15 +165,17 @@ export async function getNumberHistogram(
   >;
 
   return {
-    histogram: histogramResult.aggregations!.sample,
-    top_values: terms,
+    histogram: bucketsToResponse<typeof histogramBody['sample']['aggs']['histo'], number>(
+      histogramResult.aggregations!.sample.histo
+    ),
+    topValues: bucketsToResponse<typeof searchBody['sample']['aggs']['top_values'], number>(terms),
   };
 }
 
 export async function getStringSamples(
   aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string }
-) {
+): Promise<FieldStatsResponse<string>> {
   const topValuesBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -185,7 +191,11 @@ export async function getStringSamples(
     { body: { aggs: typeof topValuesBody } }
   >;
 
-  return topValuesResult.aggregations!.sample;
+  return {
+    topValues: bucketsToResponse<typeof topValuesBody['sample']['aggs']['top_values'], string>(
+      topValuesResult.aggregations!.sample.top_values
+    ),
+  };
 }
 
 // This one is not sampled so that it returns the full date range
@@ -193,7 +203,7 @@ export async function getDateHistogram(
   aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string },
   range: { earliest: string; latest: string }
-) {
+): Promise<FieldStatsResponse<string>> {
   const earliest = DateMath.parse(range.earliest);
   const latest = DateMath.parse(range.latest);
   if (!earliest) {
@@ -217,6 +227,17 @@ export async function getDateHistogram(
   >;
 
   return {
-    histogram: results.aggregations,
+    histogram: bucketsToResponse<typeof histogramBody['histo'], string>(
+      results.aggregations!.histo
+    ),
+  };
+}
+
+function bucketsToResponse<K, KeyType>(agg: BucketAggregation<K, KeyType>) {
+  return {
+    buckets: agg.buckets.map(bucket => ({
+      count: bucket.doc_count,
+      key: bucket.key,
+    })),
   };
 }

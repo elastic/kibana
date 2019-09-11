@@ -38,6 +38,7 @@ import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
+import { BucketedAggregation, FieldStatsResponse } from '../../common';
 
 export interface FieldItemProps {
   field: IndexPatternField;
@@ -48,33 +49,11 @@ export interface FieldItemProps {
   dateRange: DatasourceDataPanelProps['dateRange'];
 }
 
-export interface BucketedAggregation {
-  buckets: Array<{
-    key: number;
-    doc_count: number;
-  }>;
-  sum_other_doc_count?: number;
-  doc_count_error_upper_bound?: number;
-}
-
-export interface NumberStatsResult {
-  histogram: {
-    doc_count: number;
-    histo: BucketedAggregation;
-  };
-  top_values: BucketedAggregation;
-}
-
-export interface TopValuesResult {
-  doc_count: number;
-  top_values: BucketedAggregation;
-}
-
 interface State {
   isLoading: boolean;
-  doc_count?: number;
-  histogram?: BucketedAggregation;
-  topValues?: BucketedAggregation;
+  count?: number;
+  histogram?: BucketedAggregation<number | string>;
+  topValues?: BucketedAggregation<number | string>;
 }
 
 function wrapOnDot(str?: string) {
@@ -127,6 +106,13 @@ export function FieldItem({
   }
 
   function fetchData() {
+    if (
+      state.isLoading ||
+      (field.type !== 'number' && field.type !== 'string' && field.type !== 'date')
+    ) {
+      return;
+    }
+
     setState(s => ({ ...s, isLoading: true }));
 
     npStart.core.http
@@ -139,35 +125,14 @@ export function FieldItem({
           field,
         }),
       })
-      .then((results: NumberStatsResult | TopValuesResult) => {
-        if (field.type === 'string') {
-          setState(s => ({
-            ...s,
-            isLoading: false,
-            doc_count: (results as TopValuesResult).doc_count,
-            topValues: (results as TopValuesResult).top_values,
-          }));
-        } else if (field.type === 'number') {
-          setState(s => ({
-            ...s,
-            isLoading: false,
-            doc_count: (results as NumberStatsResult).histogram.doc_count,
-            histogram: (results as NumberStatsResult).histogram.histo,
-            topValues: (results as NumberStatsResult).top_values,
-          }));
-        } else if (field.type === 'date') {
-          setState(s => ({
-            ...s,
-            isLoading: false,
-            doc_count: (results as NumberStatsResult).histogram.doc_count,
-            histogram: (results as NumberStatsResult).histogram.histo,
-          }));
-        } else {
-          setState(s => ({
-            ...s,
-            isLoading: false,
-          }));
-        }
+      .then((results: FieldStatsResponse<string | number>) => {
+        setState(s => ({
+          ...s,
+          isLoading: false,
+          count: results.count,
+          histogram: results.histogram,
+          topValues: results.topValues,
+        }));
       })
       .catch(() => {
         setState(s => ({ ...s, isLoading: false }));
@@ -187,8 +152,8 @@ export function FieldItem({
   const seriesColors = new Map([[colors, expectedColor]]);
 
   const totalValuesCount =
-    state.topValues && state.topValues.buckets.reduce((prev, bucket) => bucket.doc_count + prev, 0);
-  const otherCount = state.doc_count && totalValuesCount ? state.doc_count - totalValuesCount : 0;
+    state.topValues && state.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
+  const otherCount = state.count && totalValuesCount ? state.count - totalValuesCount : 0;
 
   const euiButtonColor =
     field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
@@ -198,9 +163,8 @@ export function FieldItem({
   return (
     <EuiPopover
       id="lnsFieldListPanel__field"
-      // Wait until @elastic/eui is at least version 13.7.0 to use display="block"
       display="block"
-      // container={document.querySelector('.application')}
+      container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
           value={{ field, indexPatternId: indexPattern.id } as DraggedField}
@@ -296,7 +260,7 @@ export function FieldItem({
               data={state.histogram.buckets}
               id={specId}
               xAccessor={'key'}
-              yAccessors={['doc_count']}
+              yAccessors={['count']}
               xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
               yScaleType={ScaleType.Linear}
               customSeriesColors={seriesColors}
@@ -306,7 +270,7 @@ export function FieldItem({
 
         {state.topValues &&
           (!state.histogram || !showingHistogram) &&
-          (state.doc_count && (
+          (state.count && (
             <div data-test-subj="lnsFieldListPanel-topValues">
               {state.topValues.buckets.map(topValue => (
                 <React.Fragment key={topValue.key}>
@@ -318,7 +282,7 @@ export function FieldItem({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="eui-textTruncate">
                       <EuiText size="s" textAlign="left" color={euiTextColor}>
-                        {((topValue.doc_count / state.doc_count!) * 100).toFixed(1)}%
+                        {((topValue.count / state.count!) * 100).toFixed(1)}%
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -326,7 +290,7 @@ export function FieldItem({
                   <div>
                     <EuiFlexItem grow={1}>
                       <EuiProgress
-                        value={topValue.doc_count / state.doc_count!}
+                        value={topValue.count / state.count!}
                         max={1}
                         size="s"
                         color={euiButtonColor}
@@ -350,14 +314,14 @@ export function FieldItem({
 
                     <EuiFlexItem grow={false} className="eui-textTruncate">
                       <EuiText size="s" color="subdued">
-                        {((otherCount / state.doc_count) * 100).toFixed(1)}%
+                        {((otherCount / state.count) * 100).toFixed(1)}%
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
 
                   <div>
                     <EuiProgress
-                      value={otherCount / state.doc_count}
+                      value={otherCount / state.count}
                       max={1}
                       size="s"
                       color="subdued"
@@ -370,14 +334,14 @@ export function FieldItem({
             </div>
           ))}
 
-        {state.doc_count && (
+        {state.count && (
           <div>
             <EuiSpacer size="m" />
 
             <EuiText size="s">
               {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
                 defaultMessage: '{docCount} documents',
-                values: { docCount: state.doc_count },
+                values: { docCount: state.count },
               })}
             </EuiText>
           </div>

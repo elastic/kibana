@@ -9,5 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function lensApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Lens', () => {
     loadTestFile(require.resolve('./index_stats'));
+    loadTestFile(require.resolve('./field_stats'));
   });
 }
