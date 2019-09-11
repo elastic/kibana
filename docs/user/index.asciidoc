@@ -34,7 +34,7 @@ include::{kib-repo-dir}/siem/index.asciidoc[]
 
 include::{kib-repo-dir}/graph/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools.asciidoc[]
+include::dev-tools.asciidoc[]
 
 include::{kib-repo-dir}/monitoring/index.asciidoc[]
 
