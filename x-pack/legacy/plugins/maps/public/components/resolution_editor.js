@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { GRID_RESOLUTION } from '../../grid_resolution';
+import { GRID_RESOLUTION } from '../layers/grid_resolution';
 import {
   EuiSuperSelect,
   EuiFormRow,

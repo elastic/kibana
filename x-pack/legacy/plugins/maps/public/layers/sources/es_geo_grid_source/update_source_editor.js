@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import { RENDER_AS } from './render_as';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
-import { ResolutionEditor } from './resolution_editor';
+import { ResolutionEditor } from '../../../components/resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 

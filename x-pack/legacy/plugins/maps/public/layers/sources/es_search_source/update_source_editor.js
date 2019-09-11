@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -17,6 +18,7 @@ import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
+import { ResolutionEditor } from '../../../components/resolution_editor';
 
 export class UpdateSourceEditor extends Component {
 
@@ -29,6 +31,7 @@ export class UpdateSourceEditor extends Component {
     topHitsSplitField: PropTypes.string,
     topHitsTimeField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
+    topHitsResolution: PropTypes.string,
   }
 
   state = {
@@ -72,10 +75,15 @@ export class UpdateSourceEditor extends Component {
       return field.type === 'date';
     });
 
+    const geoPointFields = indexPattern.fields.filter(field => {
+      return field.type === 'geo_point';
+    });
+
     this.setState({
       dateFields,
+      geoPointFields,
       tooltipFields: getSourceFields(indexPattern.fields),
-      termFields: getTermsFields(indexPattern.fields),
+      termFields: getTermsFields(indexPattern.fields).concat(geoPointFields),
     });
 
     if (!this.props.topHitsTimeField) {
@@ -112,6 +120,10 @@ export class UpdateSourceEditor extends Component {
 
   onTopHitsSizeChange = size => {
     this.props.onChange({ propName: 'topHitsSize', value: size });
+  };
+
+  onTopHitsResolutionChange = resolution => {
+    this.props.onChange({ propName: 'topHitsResolution', value: resolution });
   };
 
   renderTopHitsForm() {
@@ -162,6 +174,21 @@ export class UpdateSourceEditor extends Component {
       );
     }
 
+    let geoGridResolutionSelect;
+    const isTopHitsSplitFieldGeoPoint = _.reduce(
+      this.state.geoPointFields,
+      (accum, v) => {
+        return accum || (v.name === this.props.topHitsSplitField);
+      },
+      false
+    );
+
+    if (this.props.topHitsSplitField && isTopHitsSplitFieldGeoPoint) {
+      geoGridResolutionSelect = (
+        <ResolutionEditor resolution={this.props.topHitsResolution} onChange={this.onTopHitsResolutionChange}/>
+      );
+    }
+
     return (
       <Fragment>
         <EuiFormRow
@@ -178,6 +205,8 @@ export class UpdateSourceEditor extends Component {
             fields={this.state.termFields}
           />
         </EuiFormRow>
+
+        {geoGridResolutionSelect}
 
         {timeFieldSelect}
 

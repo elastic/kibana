@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { GRID_RESOLUTION } from '../../grid_resolution';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { SearchSource } from '../../../kibana_services';
@@ -22,8 +23,9 @@ import { getSourceFields } from '../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
-export class ESSearchSource extends AbstractESSource {
+const MAX_GEOTILE_LEVEL = 29;
 
+export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
   static title = i18n.translate('xpack.maps.source.esSearchTitle', {
     defaultMessage: 'Documents'
@@ -60,6 +62,7 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSplitField: descriptor.topHitsSplitField,
       topHitsTimeField: descriptor.topHitsTimeField,
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
+      topHitsResolution: _.get(descriptor, 'topHitsResolution', GRID_RESOLUTION.COARSE),
     }, inspectorAdapters);
   }
 
@@ -74,6 +77,7 @@ export class ESSearchSource extends AbstractESSource {
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsTimeField={this._descriptor.topHitsTimeField}
         topHitsSize={this._descriptor.topHitsSize}
+        topHitsResolution={this._descriptor.topHitsResolution}
       />
     );
   }
@@ -95,6 +99,36 @@ export class ESSearchSource extends AbstractESSource {
 
   getFieldNames() {
     return [this._descriptor.geoField];
+  }
+
+  isGeoGridPrecisionAware() {
+    return true;
+  }
+
+  getGeoGridPrecision(zoom) {
+    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
+  }
+
+  _getGeoGridPrecisionResolutionDelta() {
+    if (this._descriptor.topHitsResolution === GRID_RESOLUTION.COARSE) {
+      return 2;
+    }
+
+    if (this._descriptor.topHitsResolution === GRID_RESOLUTION.FINE) {
+      return 3;
+    }
+
+    if (this._descriptor.topHitsResolution === GRID_RESOLUTION.MOST_FINE) {
+      return 4;
+    }
+
+    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+      defaultMessage: `Grid resolution param not recognized: {topHitsResolution}`,
+      values: {
+        topHitsResolution: this._descriptor.topHitsResolution
+      }
+    }));
   }
 
   async getImmutableProperties() {
@@ -158,32 +192,63 @@ export class ESSearchSource extends AbstractESSource {
     });
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    searchSource.setField('aggs', {
-      entitySplit: {
-        terms: {
-          field: topHitsSplitField,
-          size: ES_SIZE_LIMIT
-        },
-        aggs: {
-          entityHits: {
-            top_hits: {
-              sort: [
-                {
-                  [topHitsTimeField]: {
-                    order: 'desc'
+
+    if (indexPattern.fields.byName[topHitsSplitField].type !== 'geo_point') {
+      searchSource.setField('aggs', {
+        entitySplit: {
+          terms: {
+            field: topHitsSplitField,
+            size: ES_SIZE_LIMIT
+          },
+          aggs: {
+            entityHits: {
+              top_hits: {
+                sort: [
+                  {
+                    [topHitsTimeField]: {
+                      order: 'desc'
+                    }
                   }
-                }
-              ],
-              _source: {
-                includes: searchFilters.fieldNames
-              },
-              size: topHitsSize,
-              script_fields: scriptFields,
+                ],
+                _source: {
+                  includes: searchFilters.fieldNames
+                },
+                size: topHitsSize,
+                script_fields: scriptFields,
+              }
             }
           }
         }
-      }
-    });
+      });
+    } else {
+      searchSource.setField('aggs', {
+        entitySplit: {
+          geotile_grid: {
+            field: topHitsSplitField,
+            precision: searchFilters.geogridPrecision,
+            size: ES_SIZE_LIMIT
+          },
+          aggs: {
+            entityHits: {
+              top_hits: {
+                sort: [
+                  {
+                    [topHitsTimeField]: {
+                      order: 'desc'
+                    }
+                  }
+                ],
+                _source: {
+                  includes: searchFilters.fieldNames
+                },
+                size: topHitsSize,
+                script_fields: scriptFields,
+              }
+            }
+          }
+        }
+      });
+    }
 
     const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
 
@@ -410,6 +475,7 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSplitField: this._descriptor.topHitsSplitField,
       topHitsTimeField: this._descriptor.topHitsTimeField,
       topHitsSize: this._descriptor.topHitsSize,
+      topHitsResolution: this._descriptor.topHitsResolution,
     };
   }
 }
