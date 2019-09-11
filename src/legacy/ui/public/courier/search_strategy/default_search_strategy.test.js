@@ -18,7 +18,6 @@
  */
 
 import { defaultSearchStrategy } from './default_search_strategy';
-import { Promise } from 'bluebird';
 
 const { search } = defaultSearchStrategy;
 
@@ -44,7 +43,6 @@ describe('defaultSearchStrategy', function () {
           msearch: msearchMock,
           search: searchMock,
         },
-        Promise,
         serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
       };
     });

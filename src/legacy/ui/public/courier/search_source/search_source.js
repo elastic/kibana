@@ -110,7 +110,7 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.title === 'string');
 }
 
-export function SearchSourceProvider(Promise, Private, config) {
+export function SearchSourceProvider(Private, config) {
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -334,9 +334,7 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
       }
 
-      return Promise
-        .map(handlers, fn => fn(this, request, options))
-        .then(_.noop);
+      return Promise.all(handlers.map(fn => fn(this, request, options)));
     }
 
     async getSearchRequestBody() {
@@ -368,7 +366,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     _mergeProp(data, val, key) {
       if (typeof val === 'function') {
         const source = this;
-        return Promise.cast(val(this))
+        return Promise.resolve(val(this))
           .then(function (newVal) {
             return source._mergeProp(data, newVal, key);
           });
@@ -450,14 +448,14 @@ export function SearchSourceProvider(Promise, Private, config) {
         // pass each key:value pair to source._mergeProp. if _mergeProp
         // returns a promise, then wait for it to complete and call _mergeProp again
         return Promise.all(_.map(current._fields, function ittr(value, key) {
-          if (Promise.is(value)) {
+          if (value instanceof Promise) {
             return value.then(function (value) {
               return ittr(value, key);
             });
           }
 
           const prom = root._mergeProp(flatData, value, key);
-          return Promise.is(prom) ? prom : null;
+          return prom instanceof Promise ? prom : null;
         }))
           .then(function () {
             // move to this sources parent

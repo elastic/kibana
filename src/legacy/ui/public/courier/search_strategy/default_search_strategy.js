@@ -62,7 +62,7 @@ function msearch({ searchRequests, es, config, sessionId, esShardTimeout }) {
   };
 }
 
-function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout }) {
+function search({ searchRequests, es, config, sessionId, esShardTimeout }) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, sessionId, esShardTimeout);
   const promises = searchRequests.map(({ index, body }) => {

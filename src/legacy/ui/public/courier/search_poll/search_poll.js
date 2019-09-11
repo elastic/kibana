@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 
-import '../../promises';
 import { timefilter } from 'ui/timefilter';
 
 export class SearchPoll {

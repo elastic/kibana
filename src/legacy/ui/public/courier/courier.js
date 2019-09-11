@@ -25,7 +25,6 @@ import '../es';
 import '../directives/listen';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
-import '../promises';
 
 import { FetchSoonProvider } from './fetch';
 import { SearchPoll } from './search_poll';
