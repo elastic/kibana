@@ -103,7 +103,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
-    loading: PropTypes.bool.isRequired,
+    skipRefresh: PropTypes.bool.isRequired,
     modelPlotEnabled: PropTypes.bool.isRequired,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
@@ -203,7 +203,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidUpdate() {
-    if (this.props.loading) {
+    if (this.props.skipRefresh) {
       return;
     }
 
@@ -1046,7 +1046,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
 
         topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
-        topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
+        // Use Math.max(0, ...) to make sure we don't end up
+        // with a negative width which would cause an SVG error.
+        topBorder.attr('width', Math.max(0, contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2));
       }
 
       this.setBrushVisibility(show);
@@ -1061,8 +1063,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const that = this;
     function brushed() {
+      if (that.props.skipRefresh) {
+        return;
+      }
+
       const isEmpty = brush.empty();
-      showBrush(!isEmpty);
 
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
       const selectionMin = selectedBounds[0].getTime();
@@ -1076,6 +1081,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       ) {
         return;
       }
+
+      showBrush(!isEmpty);
 
       // Set the color of the swimlane cells according to whether they are inside the selection.
       contextGroup.selectAll('.swimlane-cell')

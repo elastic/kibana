@@ -479,7 +479,13 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   refresh = (fullRefresh = true) => {
-    if (this.state.loading && fullRefresh === false) {
+    // Skip the refresh if:
+    // a) The global state's `skipRefresh` was set to true by the job selector to avoid race conditions
+    //    when loading the Single Metric Viewer after a job/group and time range update.
+    // b) A 'soft' refresh without a full page reload is already happening.
+    if (this.props.globalState.ml.skipRefresh || (
+      this.state.loading && fullRefresh === false
+    )) {
       return;
     }
 
@@ -821,7 +827,7 @@ export class TimeSeriesExplorer extends React.Component {
       const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
       this.contextChartSelectedInitCallDone = false;
-      this.setState({ showForecastCheckbox: false });
+      this.setState({ fullRefresh: false, loading: true, showForecastCheckbox: false });
 
       const timeSeriesJobIds = jobs.map(j => j.id);
 
@@ -907,7 +913,7 @@ export class TimeSeriesExplorer extends React.Component {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(this.refresh));
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(() => this.refresh(false)));
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -974,7 +980,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
-      loading,
+      skipRefresh: loading || this.props.globalState.ml.skipRefresh,
       svgWidth,
       zoomFrom,
       zoomTo,

@@ -15,7 +15,7 @@ import { JobSelectorTable } from './job_selector_table/';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';
-import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
+import { getGroupsFromJobs, normalizeTimes, setGlobalState, setGlobalStateSkipRefresh } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
@@ -139,12 +139,21 @@ export function JobSelector({
     handleResize();
   }, [handleResize, jobs]);
 
-  function closeFlyout() {
+  // On opening and closing the flyout, optionally update a global `skipRefresh` flag.
+  // This allows us to circumvent race conditions which could happen by triggering both
+  // timefilter and job selector related events in Single Metric Viewer.
+  function closeFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(false);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, false);
+    }
   }
 
-  function showFlyout() {
+  function showFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(true);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, true);
+    }
   }
 
   function handleJobSelectionClick() {
@@ -173,7 +182,9 @@ export function JobSelector({
   }
 
   function applySelection() {
-    closeFlyout();
+    // Don't update skipRefresh yet to avoid firing multiple events via
+    // applyTimeRangeFromSelection() and setGlobalState().
+    closeFlyout(false);
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection = [];
     const groupSelection = [];
@@ -193,8 +204,14 @@ export function JobSelector({
 
     setSelectedIds(newSelection);
     setNewSelection([]);
+    // When calling `applyTimeRangeFromSelection()` here
+    // Single Metric Viewer will still skip and
+    // update triggered by timefilter.
     applyTimeRangeFromSelection(allNewSelectionUnique);
-    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
+    // Set `skipRefresh` again to `false` here so after
+    // both the time range and jobs have been updated
+    // Single Metric Viewer should again update itself.
+    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection, skipRefresh: false });
   }
 
   function applyTimeRangeFromSelection(selection) {
