@@ -20,6 +20,10 @@ export const waitForRenderComplete = async (
     .evaluate({
       fn: (selector, visLoadDelay) => {
         // wait for visualizations to finish loading
+        console.log(
+          '*****************************************************************************************',
+          document
+        );
         const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
         const visCount = visualizations.length;
         const renderedTasks = [];
@@ -60,6 +64,11 @@ export const waitForRenderComplete = async (
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
     })
     .then(() => {
-      logger.debug('rendering is complete');
+      logger.error('********************************************** rendering is complete');
+      logger.error('********************************************** rendering is complete');
+      logger.error('********************************************** rendering is complete');
+      logger.error('********************************************** rendering is complete');
+      logger.error('********************************************** rendering is complete');
+      logger.error('********************************************** rendering is complete');
     });
 };

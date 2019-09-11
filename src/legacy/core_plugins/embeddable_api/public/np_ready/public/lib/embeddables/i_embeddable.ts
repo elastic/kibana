@@ -36,6 +36,7 @@ export interface EmbeddableOutput {
   title?: string;
   editable?: boolean;
   savedObjectId?: string;
+  renderComplete?: boolean;
 }
 
 export interface IEmbeddable<
@@ -126,7 +127,7 @@ export interface IEmbeddable<
    * Renders the embeddable at the given node.
    * @param domNode
    */
-  render(domNode: HTMLElement | Element): void;
+  render(domNode: HTMLElement | Element, renderComplete: () => void): void;
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

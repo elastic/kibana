@@ -223,10 +223,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dataAttrs,
     };
 
+    // HORSE
+    console.log('this', this.onRenderComplete);
     this.handler = this.loader.embedVisualizationWithSavedObject(
       domNode,
       this.savedVisualization,
-      handlerParams
+      handlerParams,
+      // () => this.updateOutput({ renderComplete: true })
+      () => this.onRenderComplete()
     );
   }
 

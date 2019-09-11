@@ -129,10 +129,11 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement | Element): void {
+  public render(domNode: HTMLElement | Element, renderComplete: () => void): void {
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');
     }
+    renderComplete();
     return;
   }
 
@@ -166,6 +167,11 @@ export abstract class Embeddable<
       this.output = newOutput;
       this.output$.next(this.output);
     }
+  }
+
+  protected onRenderComplete(): void {
+    console.log('RENDERING COMPLETE');
+    this.updateOutput({ renderComplete: true } as Partial<TEmbeddableOutput>);
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
