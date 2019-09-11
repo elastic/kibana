@@ -51,26 +51,28 @@ export function compatibilityShimFactory(server, logger) {
       headers,
       request
     ) {
-      if (savedObjectId && relativeUrls) {
-        throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
-      }
-      if (!savedObjectId && !relativeUrls) {
-        throw new Error(`Either relativeUrls or savedObjectId must be provided`);
-      }
 
-      if (savedObjectId && typeof savedObjectId !== 'string') {
-        throw new Error('Invalid savedObjectId (deprecated). String is expected.');
-      }
-
-      if (!Array.isArray(relativeUrls)) {
-        throw new Error('Invalid relativeUrls. String[] is expected.');
-      }
-
-      relativeUrls.forEach(url => {
-        if (typeof url !== 'string') {
-          throw new Error('Invalid Relative URL in relativeUrls. String is expected.');
+      // input validation and deprecation logging
+      if (savedObjectId) {
+        if (typeof savedObjectId !== 'string') {
+          throw new Error('Invalid savedObjectId (deprecated). String is expected.');
         }
-      });
+        if (relativeUrls) {
+          throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
+        }
+      } else {
+        if (!relativeUrls) {
+          throw new Error(`Either relativeUrls or savedObjectId must be provided`);
+        }
+        if (!Array.isArray(relativeUrls)) {
+          throw new Error('Invalid relativeUrls. String[] is expected.');
+        }
+        relativeUrls.forEach(url => {
+          if (typeof url !== 'string') {
+            throw new Error('Invalid Relative URL in relativeUrls. String is expected.');
+          }
+        });
+      }
 
       let kibanaRelativeUrls;
       if (relativeUrls) {
