@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -173,6 +174,39 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+    }
+
+    public async assertJobRowFields(jobId: string, expectedRow: object) {
+      const rows = await this.parseJobTable();
+      const jobRow = rows.filter(row => row.id === jobId)[0];
+      expect(jobRow).to.eql(expectedRow);
+    }
+
+    public async assertJobRowDetailsCounts(
+      jobId: string,
+      expectedCounts: object,
+      expectedModelSizeStats: object
+    ) {
+      const countDetails = await this.parseJobCounts(jobId);
+      const counts = countDetails.counts;
+
+      // last_data_time holds a runtime timestamp and is hard to predict
+      // the property is only validated to be present and then removed
+      // so it doesn't make the counts object validation fail
+      expect(counts).to.have.property('last_data_time');
+      delete counts.last_data_time;
+
+      expect(counts).to.eql(expectedCounts);
+
+      const modelSizeStats = countDetails.modelSizeStats;
+
+      // log_time holds a runtime timestamp and is hard to predict
+      // the property is only validated to be present and then removed
+      // so it doesn't make the modelSizeStats object validation fail
+      expect(modelSizeStats).to.have.property('log_time');
+      delete modelSizeStats.log_time;
+
+      expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
   })();
 }

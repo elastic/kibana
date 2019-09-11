@@ -18,8 +18,6 @@ exports[`StepTimeField should enable the action button if the user decides to no
 
 exports[`StepTimeField should render "Custom index pattern ID already exists" when error is "Conflict" 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -87,11 +85,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
 `;
 
 exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiFlexGroup
     alignItems="center"
   >
@@ -117,8 +111,6 @@ exports[`StepTimeField should render a loading state when creating the index pat
 
 exports[`StepTimeField should render a selected timeField 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -175,8 +167,6 @@ exports[`StepTimeField should render a selected timeField 1`] = `
 
 exports[`StepTimeField should render advanced options 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -222,8 +212,6 @@ exports[`StepTimeField should render advanced options 1`] = `
 
 exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -269,8 +257,6 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
 
 exports[`StepTimeField should render any error message 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -335,8 +321,6 @@ exports[`StepTimeField should render any error message 1`] = `
 
 exports[`StepTimeField should render normally 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -382,8 +366,6 @@ exports[`StepTimeField should render normally 1`] = `
 
 exports[`StepTimeField should render timeFields 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header

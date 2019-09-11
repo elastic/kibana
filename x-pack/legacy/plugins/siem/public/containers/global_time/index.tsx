@@ -16,7 +16,7 @@ interface SetQuery {
   id: string;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch;
+  refetch: inputsModel.Refetch | inputsModel.RefetchKql;
 }
 interface GlobalQuery extends SetQuery {
   inputId: InputsModelId;

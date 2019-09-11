@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DisabledLoginForm renders as expected 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiText
     color="danger"
     style={

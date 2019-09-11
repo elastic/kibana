@@ -12,5 +12,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pages'));
     loadTestFile(require.resolve('./create_single_metric_job'));
+    loadTestFile(require.resolve('./create_multi_metric_job'));
   });
 }
