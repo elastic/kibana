@@ -165,7 +165,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
    * @param {Element} domNode
    * @param {ContainerState} containerState
    */
-  public render(domNode: HTMLElement) {
+  public _render(domNode: HTMLElement, renderComplete: () => void) {
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
@@ -174,6 +174,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     rootNode.append(this.searchInstance);
 
     this.pushContainerStateParamsToScope(this.searchScope);
+    renderComplete(); // this is a guess, need to verify
   }
 
   public destroy() {

@@ -78,11 +78,12 @@ export class ContactCardEmbeddable extends Embeddable<
     });
   }
 
-  public render(node: HTMLElement) {
+  public _render(node: HTMLElement, renderComplete: () => void) {
     this.node = node;
     ReactDom.render(
       <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />,
-      node
+      node,
+      renderComplete
     );
   }
 

@@ -33,10 +33,10 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   }
 
   public reload() {}
-  public render(domNode: HTMLElement) {
+  public _render(domNode: HTMLElement, renderComplete: () => void) {
     if (this.title) {
       this.domNode = domNode;
-      ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode);
+      ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode, renderComplete);
     }
   }
 

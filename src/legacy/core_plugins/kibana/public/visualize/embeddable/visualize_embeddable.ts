@@ -197,7 +197,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    * @param {ContainerState} containerState
    */
-  public render(domNode: HTMLElement) {
+  public _render(domNode: HTMLElement, renderComplete: () => void) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
     this.query = this.input.query;
     this.filters = this.input.filters;
@@ -223,14 +223,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dataAttrs,
     };
 
-    // HORSE
-    console.log('this', this.onRenderComplete);
     this.handler = this.loader.embedVisualizationWithSavedObject(
       domNode,
       this.savedVisualization,
       handlerParams,
-      // () => this.updateOutput({ renderComplete: true })
-      () => this.onRenderComplete()
+      renderComplete
     );
   }
 

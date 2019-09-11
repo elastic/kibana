@@ -44,7 +44,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
 
   public reload() {}
 
-  public render(dom: HTMLElement) {
+  public _render(dom: HTMLElement, renderComplete: () => void) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
     ReactDOM.render(
@@ -56,7 +56,8 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
           {title}
         </EuiText>
       </div>,
-      dom
+      dom,
+      renderComplete
     );
   }
 

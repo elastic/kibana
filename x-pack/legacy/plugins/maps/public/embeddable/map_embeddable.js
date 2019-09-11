@@ -95,7 +95,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {HTMLElement} domNode
    * @param {ContainerState} containerState
    */
-  render(domNode) {
+  _render(domNode, renderComplete) {
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 
@@ -125,7 +125,8 @@ export class MapEmbeddable extends Embeddable {
           <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
         </I18nContext>
       </Provider>,
-      domNode
+      domNode,
+      renderComplete // this probably needs to be improved
     );
 
     this._unsubscribeFromStore = this._store.subscribe(() => {

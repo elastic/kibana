@@ -25,6 +25,6 @@ export class EmptyEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   constructor(initialInput: EmbeddableInput) {
     super(initialInput, {});
   }
-  public render() {}
+  public _render() {}
   public reload() {}
 }

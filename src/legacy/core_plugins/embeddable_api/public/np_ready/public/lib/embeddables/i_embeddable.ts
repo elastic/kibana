@@ -124,10 +124,17 @@ export interface IEmbeddable<
   getRoot(): IEmbeddable | IContainer;
 
   /**
-   * Renders the embeddable at the given node.
+   * Public method to render embeddable at the given node. Treat as final.
+   * Calls _render and executes common render functionality
    * @param domNode
    */
-  render(domNode: HTMLElement | Element, renderComplete: () => void): void;
+  render(domNode: HTMLElement | Element): void;
+
+  /**
+   * Overridden method that defines rendering and calls renderComplete
+   * @param domNode
+   */
+  _render(domNode: HTMLElement | Element, renderComplete: () => void): void;
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

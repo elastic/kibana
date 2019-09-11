@@ -129,10 +129,17 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement | Element, renderComplete: () => void): void {
+  // treat as final
+  public render(domNode: HTMLElement | Element): void {
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');
     }
+    this._render(domNode, () => this.onRenderComplete());
+    return;
+  }
+
+  // overridden by extending classes
+  public _render(domNode: HTMLElement | Element, renderComplete: () => void): void {
     renderComplete();
     return;
   }
@@ -169,7 +176,7 @@ export abstract class Embeddable<
     }
   }
 
-  protected onRenderComplete(): void {
+  private onRenderComplete(): void {
     console.log('RENDERING COMPLETE');
     this.updateOutput({ renderComplete: true } as Partial<TEmbeddableOutput>);
   }

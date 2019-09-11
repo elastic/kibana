@@ -42,9 +42,9 @@ export class HelloWorldEmbeddable extends Embeddable {
    * vanilla js.
    * @param node
    */
-  public render(node: HTMLElement) {
+  public _render(node: HTMLElement, renderComplete: () => void) {
     node.innerHTML = '<div data-test-subj="helloWorldEmbeddable">HELLO WORLD!Z</div>';
-    this.updateOutput({ rendered: true });
+    renderComplete();
   }
 
   /**
