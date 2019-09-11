@@ -2,11 +2,7 @@
 
 exports[`MonitorList component renders a no items message when no data is provided 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <EuiTitle
       size="xs"
     >
@@ -89,11 +85,7 @@ exports[`MonitorList component renders a no items message when no data is provid
 
 exports[`MonitorList component renders the monitor list 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <EuiTitle
       size="xs"
     >

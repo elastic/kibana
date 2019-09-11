@@ -65,8 +65,6 @@ Array [
       </EuiOverlayMask>
       <EuiFocusTrap
         clickOutsideDisables={true}
-        disabled={false}
-        returnFocus={true}
       >
         <EuiOutsideClickDetector
           isDisabled={false}
@@ -264,10 +262,8 @@ Array [
                       className="euiFlyout__closeButton"
                       color="text"
                       data-test-subj="euiFlyoutCloseButton"
-                      iconSize="m"
                       iconType="cross"
                       onClick={[Function]}
-                      type="button"
                     >
                       <button
                         aria-label="Closes this dialog"
@@ -373,10 +369,8 @@ Array [
       className="euiFlyout__closeButton"
       color="text"
       data-test-subj="euiFlyoutCloseButton"
-      iconSize="m"
       iconType="cross"
       onClick={[Function]}
-      type="button"
     >
       <button
         aria-label="Closes this dialog"
@@ -480,8 +474,6 @@ Array [
       </EuiOverlayMask>
       <EuiFocusTrap
         clickOutsideDisables={true}
-        disabled={false}
-        returnFocus={true}
       >
         <EuiOutsideClickDetector
           isDisabled={false}
@@ -675,10 +667,8 @@ Array [
                       className="euiFlyout__closeButton"
                       color="text"
                       data-test-subj="euiFlyoutCloseButton"
-                      iconSize="m"
                       iconType="cross"
                       onClick={[Function]}
-                      type="button"
                     >
                       <button
                         aria-label="Closes this dialog"
@@ -782,10 +772,8 @@ Array [
       className="euiFlyout__closeButton"
       color="text"
       data-test-subj="euiFlyoutCloseButton"
-      iconSize="m"
       iconType="cross"
       onClick={[Function]}
-      type="button"
     >
       <button
         aria-label="Closes this dialog"

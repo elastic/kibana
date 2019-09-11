@@ -73,8 +73,6 @@ exports[`renders ControlsTab 1`] = `
   />
   <EuiPanel
     grow={false}
-    hasShadow={false}
-    paddingSize="m"
   >
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -121,14 +119,10 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiButton
             aria-label="Add control"
-            color="primary"
             data-test-subj="inputControlEditorAddBtn"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add"
