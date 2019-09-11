@@ -8,7 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('APM', function() {
-    this.tags('ciGroup6');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./feature_controls'));
   });
 }

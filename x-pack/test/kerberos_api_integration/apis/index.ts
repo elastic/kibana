@@ -9,7 +9,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('apis Kerberos', function() {
-    this.tags('ciGroup6');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./security'));
   });
 }
