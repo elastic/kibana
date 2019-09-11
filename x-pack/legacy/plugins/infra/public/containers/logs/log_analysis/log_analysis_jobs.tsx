@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useReducer } from 'react';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
@@ -43,6 +43,82 @@ const getInitialJobStatuses = (): AllJobStatuses => {
   };
 };
 
+const initialState = {
+  jobStatus: getInitialJobStatuses(),
+  setupStatus: 'unknown',
+};
+
+function statusReducer(state: any, action: any) {
+  switch (action.type) {
+    case 'startedSetup':
+      return {
+        ...state,
+        setupStatus: 'pending',
+      };
+    case 'finishedSetup':
+      const { jobs, datafeeds }: SetupMlModuleResponsePayload = action;
+      const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
+      const hasSuccessfullyStartedDatafeeds = datafeeds.every(
+        datafeed => datafeed.success && datafeed.started
+      );
+      const hasAnyErrors =
+        jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
+      const logEntryRateJobStatus = hasAnyErrors
+        ? 'failed'
+        : hasSuccessfullyCreatedJobs
+        ? hasSuccessfullyStartedDatafeeds
+          ? 'started'
+          : 'created'
+        : 'created';
+      return {
+        jobStatus: {
+          ...state.jobStatus,
+          logEntryRate: logEntryRateJobStatus,
+        },
+        setupStatus: logEntryRateJobStatus === 'failed' ? 'failed' : 'succeeded',
+      };
+    case 'failedSetup':
+      return {
+        jobStatus: {
+          ...state.jobStatus,
+          logEntryRate: 'failed',
+        },
+        setupStatus: 'failed',
+      };
+    case 'retryingSetup':
+      return {
+        ...state,
+        setupStatus: 'retrying',
+      };
+    case 'fetchedJobStatuses':
+      const { payload, spaceId, sourceId } = action;
+      const logEntryRate = payload.find(
+        (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
+      );
+      const logEntryRateJobStatusResponse = logEntryRate ? logEntryRate.jobState : 'missing';
+
+      return {
+        jobStatus: {
+          ...state.jobStatus,
+          logEntryRate: logEntryRateJobStatusResponse,
+        },
+        setupStatus:
+          logEntryRateJobStatusResponse === 'missing'
+            ? 'required'
+            : ['opened', 'opening', 'created', 'started'].includes(logEntryRateJobStatusResponse)
+            ? 'skipped'
+            : 'required',
+      };
+    case 'viewedResults':
+      return {
+        ...state,
+        setupStatus: 'hiddenAfterSuccess',
+      };
+    default:
+      return state;
+  }
+}
+
 export const useLogAnalysisJobs = ({
   indexPattern,
   sourceId,
@@ -55,13 +131,13 @@ export const useLogAnalysisJobs = ({
   timeField: string;
 }) => {
   const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
-  const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
-  const [setupStatus, setSetupStatus] = useState<SetupStatus>('unknown');
+  const [statusState, dispatch] = useReducer(statusReducer, initialState);
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
+        dispatch({ type: 'startedSetup' });
         return await callSetupMlModuleAPI(
           start,
           end,
@@ -73,34 +149,13 @@ export const useLogAnalysisJobs = ({
         );
       },
       onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
-        const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
-        const hasSuccessfullyStartedDatafeeds = datafeeds.every(
-          datafeed => datafeed.success && datafeed.started
-        );
-        const hasAnyErrors =
-          jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
-        const logEntryRateJobStatus = hasAnyErrors
-          ? 'failed'
-          : hasSuccessfullyCreatedJobs
-          ? hasSuccessfullyStartedDatafeeds
-            ? 'started'
-            : 'created'
-          : 'created';
-        setSetupStatus(logEntryRateJobStatus === 'failed' ? 'failed' : 'succeeded');
-        setJobStatus(currentJobStatus => ({
-          ...currentJobStatus,
-          logEntryRate: logEntryRateJobStatus,
-        }));
+        dispatch({ type: 'finishedSetup', datafeeds, jobs });
       },
       onReject: () => {
-        setSetupStatus('failed');
-        setJobStatus(currentJobStatus => ({
-          ...currentJobStatus,
-          logEntryRate: 'failed',
-        }));
+        dispatch({ type: 'failedSetup' });
       },
     },
-    [indexPattern, spaceId, sourceId, timeField, bucketSpan, setJobStatus, setSetupStatus]
+    [indexPattern, spaceId, sourceId, timeField, bucketSpan]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
@@ -111,20 +166,7 @@ export const useLogAnalysisJobs = ({
       },
       onResolve: response => {
         if (response) {
-          const logEntryRate = response.find(
-            (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
-          );
-          const logEntryRateJobStatus = logEntryRate ? logEntryRate.jobState : 'missing';
-          setSetupStatus(
-            logEntryRateJobStatus === 'missing'
-              ? 'required'
-              : ['opened', 'opening', 'created', 'started'].includes(logEntryRateJobStatus)
-              ? 'skipped'
-              : 'required'
-          );
-          setJobStatus({
-            logEntryRate: logEntryRateJobStatus,
-          });
+          dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
         }
       },
       onReject: error => {
@@ -143,38 +185,37 @@ export const useLogAnalysisJobs = ({
   ]);
 
   const viewResults = useCallback(() => {
-    setSetupStatus('hiddenAfterSuccess');
-  }, [setSetupStatus]);
+    dispatch({ type: 'viewedResults' });
+  }, []);
 
   const setup = useCallback(
     (start, end) => {
-      setSetupStatus('pending');
       setupMlModule(start, end);
     },
-    [setSetupStatus, setupMlModule]
+    [setupMlModule]
   );
 
   const retry = useCallback(
     (start, end) => {
-      setSetupStatus('retrying');
+      dispatch({ type: 'retryingSetup' });
       cleanupMLResources()
         .then(() => {
           setupMlModule(start, end);
         })
         .catch(() => {
-          setSetupStatus('failed');
+          dispatch({ type: 'failedSetup' });
         });
     },
-    [setSetupStatus, cleanupMLResources, setupMlModule]
+    [cleanupMLResources, setupMlModule]
   );
 
   return {
     setupMlModuleRequest,
-    jobStatus,
+    jobStatus: statusState.jobStatus,
     isLoadingSetupStatus,
     setup,
     retry,
-    setupStatus,
+    setupStatus: statusState.setupStatus,
     viewResults,
   };
 };
