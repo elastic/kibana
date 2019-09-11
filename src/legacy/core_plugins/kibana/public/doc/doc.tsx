@@ -17,46 +17,49 @@
  * under the License.
  */
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
-import { DocViewer } from '../../doc_viewer/doc_viewer';
-import { searchDocById } from '../search_doc_by_id';
+import { DocViewer } from '../doc_viewer/doc_viewer';
+import { searchDocById } from './search_doc_by_id';
 
 export function Doc({
-  es,
   id,
   index,
   indexPattern,
+  es,
 }: {
   id: string;
   index: string;
   indexPattern: IndexPattern;
   es: any;
 }) {
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('loading');
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+
   async function requestData() {
     const result = await searchDocById(id, index, es, indexPattern);
     setHit(result.hit ? result.hit : null);
     setStatus(result.status);
   }
+
   useEffect(() => {
     requestData();
   }, []);
+
   return (
     <EuiPageContent>
       {status === 'notFound' && (
         <EuiCallOut
+          color="danger"
+          iconType="alert"
           title={
             <FormattedMessage
               id="kbn.doc.failedToLocateDocumentDescription"
               defaultMessage="Failed to locate document"
             />
           }
-          color="danger"
-          iconType="alert"
         >
           <FormattedMessage
             id="kbn.doc.couldNotFindDocumentsDescription"
@@ -83,7 +86,7 @@ export function Doc({
         </EuiCallOut>
       )}
 
-      {status === '' && (
+      {status === 'loading' && (
         <EuiCallOut>
           <EuiLoadingSpinner size="m" />{' '}
           <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />

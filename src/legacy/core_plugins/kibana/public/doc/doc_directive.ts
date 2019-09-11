@@ -22,5 +22,14 @@ import { uiModules } from 'ui/modules';
 import { Doc } from './doc';
 
 uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(Doc));
+  return reactDirective(
+    wrapInI18nContext(Doc),
+    [
+      ['id', { watchDepth: 'value' }],
+      ['index', { watchDepth: 'value' }],
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['es', { watchDepth: 'reference' }],
+    ],
+    { restrict: 'E' }
+  );
 });

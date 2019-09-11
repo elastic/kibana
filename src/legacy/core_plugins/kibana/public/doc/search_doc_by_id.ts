@@ -17,14 +17,15 @@
  * under the License.
  */
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
+import { IndexPattern } from '../../../data/public/index_patterns';
 
 export async function searchDocById(
   id: string,
   index: string,
   es: any,
-  indexPattern: any
+  indexPattern: IndexPattern
 ): Promise<{
-  status: string;
+  status: 'notFound' | 'found' | 'error';
   hit?: ElasticSearchHit;
 }> {
   const computedFields = indexPattern.getComputedFields();

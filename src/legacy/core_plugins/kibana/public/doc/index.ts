@@ -16,5 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import uiRoutes from 'ui/routes';
+// @ts-ignore
+import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
+// @ts-ignore
+import html from './index.html';
+import '../doc_directive';
+import { IndexPatterns } from '../../../data/public/index_patterns';
 
-import './controllers/doc';
+uiRoutes
+  // the old, pre 8.0 route, no longer used, keep it to stay compatible
+  // somebody might have bookmarked his favorite log messages
+  .when('/doc/:indexPattern/:index/:type', {
+    redirectTo: '/doc/:indexPattern/:index',
+  })
+  // the new route, es 7 deprecated types, es 8 removed them
+  .when('/doc/:indexPattern/:index', {
+    controller: ($scope: any, $route: any, es: any) => {
+      $scope.es = es;
+      $scope.id = $route.current.params.id;
+      $scope.index = $route.current.params.index;
+      $scope.indexPattern = $route.current.locals.indexPattern;
+    },
+    template: html,
+    resolve: {
+      indexPattern: (indexPatterns: IndexPatterns, savedSearches: any, $route: any) => {
+        return indexPatterns.get($route.current.params.indexPattern);
+      },
+    },
+    k7Breadcrumbs: ($route: any) => [
+      ...getRootBreadcrumbs(),
+      {
+        text: `${$route.current.params.index}#${$route.current.params.id}`,
+      },
+    ],
+  });
