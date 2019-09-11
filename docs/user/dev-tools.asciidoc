@@ -14,8 +14,8 @@ with your data in Kibana.
 
 --
 
-include::dev-tools/console/console.asciidoc[]
+include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
 
-include::dev-tools/searchprofiler/index.asciidoc[]
+include::{kib-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
 
-include::dev-tools/grokdebugger/index.asciidoc[]
+include::{kib-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
