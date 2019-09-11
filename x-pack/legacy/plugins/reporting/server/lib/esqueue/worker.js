@@ -88,7 +88,7 @@ export class Worker extends events.EventEmitter {
     this.checkSize = opts.size || 10;
 
     this.debug = getLogger(opts, this.id, 'debug');
-    this.warn = getLogger(opts, this.id, 'warn');
+    this.warn = getLogger(opts, this.id, 'warning');
     this.error = getLogger(opts, this.id, 'error');
     this.info = getLogger(opts, this.id, 'info');
 
