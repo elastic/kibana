@@ -2,41 +2,21 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="hollow"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiFlexGroup
       justifyContent="spaceBetween"
     >

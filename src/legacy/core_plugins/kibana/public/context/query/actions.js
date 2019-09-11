@@ -32,8 +32,6 @@ export function QueryActionsProvider(Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchSurroundingDocs } = Private(fetchContextProvider);
   const {
-    increasePredecessorCount,
-    increaseSuccessorCount,
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,
@@ -60,7 +58,7 @@ export function QueryActionsProvider(Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
+    const { queryParameters: { indexPatternId, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
       return Promise.reject(setFailedStatus(state)('anchor', {
@@ -71,7 +69,7 @@ export function QueryActionsProvider(Private, Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
     ))
       .then(
         (anchorDocument) => {
@@ -173,16 +171,6 @@ export function QueryActionsProvider(Private, Promise) {
     return fetchSurroundingRows('successors', state);
   };
 
-  const fetchMorePredecessorRows = (state) => () => {
-    increasePredecessorCount(state)();
-    return fetchSurroundingRows('predecessors', state);
-  };
-
-  const fetchMoreSuccessorRows = (state) => () => {
-    increaseSuccessorCount(state)();
-    return fetchSurroundingRows('successors', state);
-  };
-
   const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) => (
     state.rows.all = [
       ...(predecessorRows || []),
@@ -199,8 +187,6 @@ export function QueryActionsProvider(Private, Promise) {
     fetchContextRowsWithNewQueryParameters,
     fetchGivenPredecessorRows,
     fetchGivenSuccessorRows,
-    fetchMorePredecessorRows,
-    fetchMoreSuccessorRows,
     setAllRows,
   };
 }

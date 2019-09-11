@@ -30,11 +30,13 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { visualizations } from 'plugins/visualizations';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+app.directive('visualizeListingTable', reactDirective =>
+  reactDirective(wrapInI18nContext(VisualizeListingTable))
+);
 app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
@@ -44,7 +46,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
-  this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
+  this.visTypeAliases = visualizationsSetup.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -81,15 +83,16 @@ export function VisualizeListingController($injector, createNewVis) {
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
 
-  this.fetchItems = (filter) => {
+  this.fetchItems = filter => {
     const isLabsEnabled = config.get('visualize:enableLabs');
-    return visualizationService.findListItems(filter, config.get('savedObjects:listingLimit'))
+    return visualizationService
+      .findListItems(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
 
         return {
           total: result.total,
-          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+          hits: result.hits.filter(result => isLabsEnabled || result.type.stage !== 'experimental'),
         };
       });
   };
@@ -98,23 +101,27 @@ export function VisualizeListingController($injector, createNewVis) {
     return Promise.all(
       selectedItems.map(item => {
         return savedObjectClient.delete(item.savedObjectType, item.id);
-      }),
-    ).then(() => {
-      chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
-    }).catch(error => {
-      toastNotifications.addError(error, {
-        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
-          defaultMessage: 'Error deleting visualization',
-        }),
+      })
+    )
+      .then(() => {
+        chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+      })
+      .catch(error => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+            defaultMessage: 'Error deleting visualization',
+          }),
+        });
       });
-    });
   };
 
-  chrome.breadcrumbs.set([{
-    text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
-      defaultMessage: 'Visualize',
-    })
-  }]);
+  chrome.breadcrumbs.set([
+    {
+      text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
+        defaultMessage: 'Visualize',
+      }),
+    },
+  ]);
 
   this.listingLimit = config.get('savedObjects:listingLimit');
 

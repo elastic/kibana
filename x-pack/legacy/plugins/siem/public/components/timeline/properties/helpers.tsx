@@ -158,8 +158,8 @@ const getNewNoteId = (): string => uuid.v4();
 
 const NotesButtonIcon = styled(EuiButtonIcon)`
   svg {
-    height: 24px;
-    width: 24px;
+    height: 19px;
+    width: 19px;
   }
 `;
 
@@ -168,7 +168,7 @@ const NotesIcon = pure<{ count: number }>(({ count }) => (
     aria-label={i18n.NOTES}
     color={count > 0 ? 'primary' : 'subdued'}
     data-test-subj="timeline-notes-icon"
-    size="l"
+    size="m"
     iconType="editorComment"
   />
 ));

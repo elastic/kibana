@@ -34,14 +34,14 @@ export function ContextPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
 
   class ContextPage {
-    async navigateTo(indexPattern, anchorType, anchorId, overrideInitialState = {}) {
+    async navigateTo(indexPattern, anchorId, overrideInitialState = {}) {
       const initialState = rison.encode({
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         ...config.get('apps.context'),
-        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
+        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
       });
 
       log.debug(`browser.get(${appUrl})`);
@@ -54,19 +54,19 @@ export function ContextPageProvider({ getService, getPageObjects }) {
     }
 
     async getPredecessorCountPicker() {
-      return await testSubjects.find('predecessorCountPicker');
+      return await testSubjects.find('predecessorsCountPicker');
     }
 
     async getSuccessorCountPicker() {
-      return await testSubjects.find('successorCountPicker');
+      return await testSubjects.find('successorsCountPicker');
     }
 
     async getPredecessorLoadMoreButton() {
-      return await testSubjects.find('predecessorLoadMoreButton');
+      return await testSubjects.find('predecessorsLoadMoreButton');
     }
 
     async getSuccessorLoadMoreButton() {
-      return await testSubjects.find('successorLoadMoreButton');
+      return await testSubjects.find('successorsLoadMoreButton');
     }
 
     async clickPredecessorLoadMoreButton() {
