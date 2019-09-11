@@ -19,7 +19,7 @@
 
 import { IconType } from '@elastic/eui';
 import { Status } from '../update_status';
-import { RequestHandler, ResponseHandler, Vis } from '..';
+import { Vis } from '..';
 
 export declare class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);
@@ -34,8 +34,8 @@ export interface VisType {
   description?: string;
   visualization: typeof VisualizationController;
   isAccessible?: boolean;
-  requestHandler: string | RequestHandler;
-  responseHandler: string | ResponseHandler;
+  requestHandler: string;
+  responseHandler: string;
   icon?: IconType;
   image?: string;
   stage: 'experimental' | 'production';

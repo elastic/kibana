@@ -28,7 +28,7 @@ import {
 } from '../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
-import { GetEmbeddableFactory } from '../../../types';
+import { GetEmbeddableFactory, ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -45,7 +45,7 @@ beforeEach(async () => {
     query: { match: {} },
   };
   container = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [derivedFilter] },
+    { id: 'hello', panels: {}, filters: [derivedFilter], viewMode: ViewMode.EDIT },
     getFactory
   );
 
@@ -55,6 +55,7 @@ beforeEach(async () => {
     FilterableEmbeddable
   >(FILTERABLE_EMBEDDABLE, {
     id: '123',
+    viewMode: ViewMode.EDIT,
   });
 
   if (isErrorEmbeddable(filterableEmbeddable)) {
@@ -68,7 +69,7 @@ test('Removes the embeddable', async () => {
   const removePanelAction = new RemovePanelAction();
   expect(container.getChild(embeddable.id)).toBeDefined();
 
-  removePanelAction.execute({ embeddable });
+  await removePanelAction.execute({ embeddable });
 
   expect(container.getChild(embeddable.id)).toBeUndefined();
 });

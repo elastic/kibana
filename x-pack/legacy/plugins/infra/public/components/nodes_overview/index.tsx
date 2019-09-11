@@ -181,7 +181,7 @@ export const NodesOverview = injectI18n(
 
     private handleViewChange = (view: string) => this.props.onViewChange(view);
 
-    // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
+    // TODO: Change this to a real implementation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {
       const { metric } = this.props.options;
       const metricFormatter = get(

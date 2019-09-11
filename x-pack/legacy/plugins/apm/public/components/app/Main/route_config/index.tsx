@@ -13,7 +13,7 @@ import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
-import { SettingsList } from '../../Settings/SettingsList';
+import { Settings } from '../../Settings';
 import { toQuery } from '../../../shared/Links/url_helpers';
 
 interface RouteParams {
@@ -60,7 +60,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings',
-    component: SettingsList,
+    component: Settings,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings'
     }),

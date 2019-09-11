@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import { visualizations } from '../../../visualizations/public';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 import { createMetricVisTypeDefinition } from '../metric_vis_type';
 
 describe('metric_vis - createMetricVisTypeDefinition', () => {
@@ -32,48 +32,52 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject((Private) => {
-    setup = () => {
-      const Vis = Private(VisProvider);
-      const metricVisType = createMetricVisTypeDefinition();
+  beforeEach(
+    ngMock.inject(Private => {
+      setup = () => {
+        const Vis = Private(VisProvider);
+        const metricVisType = createMetricVisTypeDefinition();
 
-      visualizations.types.VisTypesRegistryProvider.register(() =>
-        metricVisType
-      );
+        visualizationsSetup.types.registerVisualization(() => metricVisType);
 
-      const indexPattern = Private(LogstashIndexPatternStubProvider);
+        const indexPattern = Private(LogstashIndexPatternStubProvider);
 
-      indexPattern.stubSetFieldFormat('ip', 'url', {
-        urlTemplate: 'http://ip.info?address={{value}}',
-        labelTemplate: 'ip[{{value}}]'
-      });
+        indexPattern.stubSetFieldFormat('ip', 'url', {
+          urlTemplate: 'http://ip.info?address={{value}}',
+          labelTemplate: 'ip[{{value}}]',
+        });
 
-      vis = new Vis(indexPattern, {
-        type: 'metric',
-        aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
-      });
+        vis = new Vis(indexPattern, {
+          type: 'metric',
+          aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+        });
 
-      vis.params.dimensions = {
-        metrics: [{
-          accessor: 0, format: {
-            id: 'url', params: {
-              urlTemplate: 'http://ip.info?address={{value}}',
-              labelTemplate: 'ip[{{value}}]'
-            }
-          }
-        }]
+        vis.params.dimensions = {
+          metrics: [
+            {
+              accessor: 0,
+              format: {
+                id: 'url',
+                params: {
+                  urlTemplate: 'http://ip.info?address={{value}}',
+                  labelTemplate: 'ip[{{value}}]',
+                },
+              },
+            },
+          ],
+        };
+
+        const el = document.createElement('div');
+        const Controller = metricVisType.visualization;
+        const controller = new Controller(el, vis);
+        const render = esResponse => {
+          controller.render(esResponse, vis.params);
+        };
+
+        return { el, render };
       };
-
-      const el = document.createElement('div');
-      const Controller = metricVisType.visualization;
-      const controller = new Controller(el, vis);
-      const render = (esResponse) => {
-        controller.render(esResponse, vis.params);
-      };
-
-      return { el, render };
-    };
-  }));
+    })
+  );
 
   it('renders html value from field formatter', () => {
     const { el, render } = setup();
@@ -81,12 +85,14 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     const ip = '235.195.237.208';
     render({
       columns: [{ id: 'col-0', name: 'ip' }],
-      rows: [{ 'col-0': ip }]
+      rows: [{ 'col-0': ip }],
     });
 
     const $link = $(el)
       .find('a[href]')
-      .filter(function () { return this.href.includes('ip.info'); });
+      .filter(function () {
+        return this.href.includes('ip.info');
+      });
 
     expect($link).to.have.length(1);
     expect($link.text()).to.be(`ip[${ip}]`);
