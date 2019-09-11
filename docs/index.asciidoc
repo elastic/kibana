@@ -82,6 +82,6 @@ include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
 
-include::development/index.asciidoc[]
+include::developer/index.asciidoc[]
 
 include::redirects.asciidoc[]
