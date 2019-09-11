@@ -11,7 +11,7 @@ import { TokenAdapter } from './adapters/tokens/adapter_types';
 import { FrameworkLib } from './framework';
 
 interface JWTToken {
-  config: { id: string; sharedId: string };
+  policy: { id: string; sharedId: string };
   type: TokenType;
 }
 
@@ -37,7 +37,7 @@ export class TokenLib {
         valid: true,
         type: decodedToken.type,
         token: {
-          config: decodedToken.config,
+          policy: decodedToken.policy,
         },
       };
     } catch (error) {
@@ -71,14 +71,14 @@ export class TokenLib {
    * @param expire
    */
   public async generateEnrolmentToken(
-    config: { id: string; sharedId: string },
+    policy: { id: string; sharedId: string },
     expire: string = '24h'
   ): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
     const token = signToken(
       {
         type: TokenType.ENROLMENT_TOKEN,
-        config,
+        policy,
       },
       encryptionKey,
       {
@@ -91,7 +91,7 @@ export class TokenLib {
       active: true,
       type: TokenType.ENROLMENT_TOKEN,
       tokenHash,
-      config,
+      policy,
     });
 
     return token;

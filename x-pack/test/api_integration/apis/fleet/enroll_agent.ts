@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
         .set(
           'kbn-fleet-enrollment-token',
           // Token without expiration for test purpose
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjowLCJjb25maWciOnsiaWQiOiJjb25maWcxIiwic2hhcmVkSWQiOiJjb25maWcxIn0sImlhdCI6MTU2NzA4MTIwMX0.9gZFt00k0lJfkCMsaYnQ8Mt40ftAVAorYSr7Zq6yFuo'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xNRU5UX1RPS0VOIiwicG9saWN5Ijp7ImlkIjoicG9saWN5OjEiLCJzaGFyZWRJZCI6InBvbGljeToxIn0sImlhdCI6MTU2ODEzNzY4NX0.Be4coPFUq3NTk5-0dI3CmlgujMdnA9JJSoHsmhq1ldY'
         )
         .send({
           type: 'PERMANENT',
@@ -43,8 +43,8 @@ export default function({ getService }: FtrProviderContext) {
         'active',
         'access_token',
         'type',
-        'config_id',
-        'config_shared_id'
+        'policy_id',
+        'policy_shared_id'
       );
     });
   });
