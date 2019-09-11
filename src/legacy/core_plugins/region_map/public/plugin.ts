@@ -24,7 +24,7 @@ import {
   UiSettingsClientContract,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 

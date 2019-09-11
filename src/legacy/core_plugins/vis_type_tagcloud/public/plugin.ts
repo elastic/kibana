@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudTypeDefinition } from './tag_cloud_type';
