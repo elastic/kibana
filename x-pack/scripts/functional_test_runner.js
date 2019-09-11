@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', function () {
-    this.tags('ciGroup6');
-    loadTestFile(require.resolve('./oidc_auth'));
-  });
-}
+require('@kbn/plugin-helpers').babelRegister();
+require('@kbn/test').runFtrCli();
