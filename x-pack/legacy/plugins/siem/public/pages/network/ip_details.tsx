@@ -77,6 +77,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                 data-test-subj="ip-details-headline"
                 subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                 title={ip}
+                draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
               >
                 <FlowTargetSelectConnected />
               </HeaderPage>
