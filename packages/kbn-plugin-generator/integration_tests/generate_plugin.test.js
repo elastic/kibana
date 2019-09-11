@@ -65,13 +65,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     // Link to the error that happens when the blank line is not there:
     // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
     const intlFile = `${generatedPath}/.i18nrc.json`;
-
-    const stats = await statP(intlFile);
-    expect(stats.isFile()).toBe(true);
-
-    const re = new RegExp(/^\s{1}$/, 'gm');
-    const contents = readFileSync(intlFile, 'utf8');
-    expect(re.test(contents)).toBe(true);
+    expect(readFileSync(intlFile, 'utf8').endsWith('\n\n')).toBe(true);
   });
 
   describe(`then running`, () => {
