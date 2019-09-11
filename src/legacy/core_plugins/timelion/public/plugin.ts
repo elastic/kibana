@@ -24,7 +24,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { VisualizationsSetup } from '../../visualizations/public/np_ready';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
