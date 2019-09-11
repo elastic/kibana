@@ -22,6 +22,7 @@ import { GraphSourcePicker } from './graph_source_picker';
 
 interface GraphSearchBarProps {
   isLoading: boolean;
+  initialQuery?: string;
   currentIndexPattern?: IndexPatternSavedObject;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
@@ -34,10 +35,11 @@ export function GraphSearchBar({
   onQuerySubmit,
   isLoading,
   onIndexPatternSelected,
+  initialQuery,
   ...sourcePickerProps
 }: GraphSearchBarProps) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery || '');
   return (
     <form
       className="gphSearchBar"

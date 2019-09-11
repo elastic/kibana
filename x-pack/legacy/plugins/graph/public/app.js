@@ -1094,8 +1094,8 @@ app.controller('graphuiPlugin', function (
 
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
-        $scope.searchTerm = $route.current.params.query;
-        $scope.submit();
+        $scope.initialQuery = $route.current.params.query;
+        $scope.submit($route.current.params.query);
       }
 
     });
