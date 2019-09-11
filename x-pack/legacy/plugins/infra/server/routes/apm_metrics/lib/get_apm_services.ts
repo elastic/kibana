@@ -7,6 +7,9 @@
 import moment from 'moment';
 import Boom from 'boom';
 import { Legacy } from 'kibana';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '../../../../common/runtime_types';
 import { APMServiceResponseRT, InfraApmMetricsService } from '../../../../common/http_api';
 import { InfraNodeType } from '../../../../common/http_api/common';
@@ -39,8 +42,12 @@ export const getApmServices = async (
   if (res.statusCode !== 200) {
     throw res;
   }
-  const result = APMServiceResponseRT.decode(res.result).getOrElseL(
-    throwErrors(message => Boom.badImplementation(`Request to APM Failed: ${message}`))
+  const result = pipe(
+    APMServiceResponseRT.decode(res.result),
+    fold(
+      throwErrors(message => Boom.badImplementation(`Request to APM Failed: ${message}`)),
+      identity
+    )
   );
   return result.items.map(item => ({
     id: item.serviceName,

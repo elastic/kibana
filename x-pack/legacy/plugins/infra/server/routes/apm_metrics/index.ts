@@ -5,8 +5,11 @@
  */
 
 import Boom from 'boom';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '../../../common/runtime_types';
+import { InfraBackendLibs } from '../../lib/infra_types';
 import {
   InfraApmMetricsRequestRT,
   InfraApmMetricsRequestWrapped,
@@ -24,9 +27,11 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
     path: '/api/infra/apm_metrics',
     handler: async req => {
       try {
-        const { timeRange, nodeId, nodeType, sourceId } = InfraApmMetricsRequestRT.decode(
-          req.payload
-        ).getOrElseL(throwErrors(Boom.badRequest));
+        const { timeRange, nodeId, nodeType, sourceId } = pipe(
+          InfraApmMetricsRequestRT.decode(req.payload),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
         const { configuration } = await sources.getSourceConfiguration(req, sourceId);
         const services = await getApmServices(
           framework,
@@ -41,10 +46,13 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
             getApmServiceData(framework, req, configuration, service, nodeId, nodeType, timeRange)
           )
         );
-        return InfraApmMetricsRT.decode({
-          id: 'apmMetrics',
-          services: servicesWithData,
-        }).getOrElseL(throwErrors(Boom.badImplementation));
+        return pipe(
+          InfraApmMetricsRT.decode({
+            id: 'apmMetrics',
+            services: servicesWithData,
+          }),
+          fold(throwErrors(Boom.badImplementation), identity)
+        );
       } catch (error) {
         throw Boom.boomify(error);
       }

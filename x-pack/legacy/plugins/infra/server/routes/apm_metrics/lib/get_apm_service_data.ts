@@ -7,6 +7,9 @@
 import moment from 'moment';
 import { Legacy } from 'kibana';
 import Boom from 'boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '../../../../common/runtime_types';
 import { InfraNodeType } from '../../../../common/http_api/common';
 import {
@@ -75,8 +78,12 @@ const getDataForTransactionType = async (
   if (res.statusCode !== 200) {
     throw res;
   }
-  const result = APMChartResponseRT.decode(res.result).getOrElseL(
-    throwErrors(message => Boom.badImplementation(`Request to APM Failed: ${message}`))
+  const result = pipe(
+    APMChartResponseRT.decode(res.result),
+    fold(
+      throwErrors(message => Boom.badImplementation(`Request to APM Failed: ${message}`)),
+      identity
+    )
   );
   if (!hasTransactionData(result)) {
     return [] as InfraApmMetricsDataSet[];
