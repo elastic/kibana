@@ -7,7 +7,7 @@
 import * as Joi from 'joi';
 import { resolve } from 'path';
 // import { i18n } from '@kbn/i18n';
-import { PLUGIN } from './common/constants';
+import { PLUGIN, INDEX_NAMES } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
 import { mappings } from './server/mappings';
@@ -33,6 +33,16 @@ export function fleet(kibana: any) {
       //   euiIconType: 'apmApp',
       //   order: 8000,
       // },
+      savedObjectSchemas: {
+        agents: {
+          isNamespaceAgnostic: true,
+          indexPattern: INDEX_NAMES.FLEET,
+        },
+        tokens: {
+          isNamespaceAgnostic: true,
+          indexPattern: INDEX_NAMES.FLEET,
+        },
+      },
       mappings,
     },
     config: () => config,

@@ -162,11 +162,11 @@ export class AgentAdapter implements AgentAdapterType {
     };
   }
 
-  public async findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null> {
+  public async findEphemeralByPolicySharedId(policySharedId: string): Promise<Agent | null> {
     const res = await this.soAdapter.find<SavedObjectAgentAttributes>({
       type: 'agents',
-      search: configSharedId,
-      searchFields: ['config_shared_id'],
+      search: policySharedId,
+      searchFields: ['policy_shared_id'],
     });
     const agents = res.saved_objects
       .map(this._savedObjectToAgent)

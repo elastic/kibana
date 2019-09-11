@@ -21,21 +21,21 @@ export class TokenAdapter implements TokenAdapterType {
     type,
     tokenHash,
     active,
-    config,
+    policy,
     expire_at,
   }: {
     type: TokenType;
     tokenHash: string;
     active: boolean;
     expire_at?: string;
-    config: { id: string; sharedId: string };
+    policy: { id: string; sharedId: string };
   }): Promise<Token> {
     const so = await this.soAdapter.create(SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       type,
       tokenHash,
-      config_id: config.id,
-      config_shared_id: config.sharedId,
+      policy_id: policy.id,
+      policy_shared_id: policy.sharedId,
       expire_at,
       active,
     });

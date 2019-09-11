@@ -24,6 +24,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
       expect(apiResponse).to.have.keys('success', 'page', 'total', 'list');
       expect(apiResponse.success).to.eql(true);
+      expect(apiResponse.total).to.eql(4);
     });
   });
 }

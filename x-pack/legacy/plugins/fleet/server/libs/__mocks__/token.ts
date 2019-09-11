@@ -15,7 +15,7 @@ export class TokenLib {
         return {
           valid: true,
           type: TokenType.ENROLMENT_TOKEN,
-          token: { config: { id: 'configId', sharedId: 'configSharedId' } },
+          token: { policy: { id: 'policyId', sharedId: 'configSharedId' } },
         };
       }
       default: {
