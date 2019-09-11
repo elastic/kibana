@@ -1,9 +1,15 @@
 [[managing-saved-objects]]
 == Saved objects
 
-Saved objects store your visualizations, dashboards, maps, Canvas workpads, and more.
-You can view, edit, delete, import, and export saved objects in 
-*Management > Kibana > Saved Objects*.  
+A saved object stores your data for use at a later time. A saved object
+can be a visualization, dashboard, map, Canvas workpad, and more.
+
+With  *Management > Kibana > Saved Objects*, you can:
+
+* <<managing-saved-objects-view, View&#44; edit&#44; and delete saved objects>>
+* <<managing-saved-objects-export-objects, Import and export saved objects>>
+* <<managing-saved-objects-object-definition, Edit the object definition>>
+
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
@@ -18,7 +24,7 @@ image::images/management-saved-objects.png[Saved Objects]
 impact of deleting it, click the actions icon image:images/actions_icon.png[Actions icon] 
 and select *Relationships*.
 
-* To delete one or more objects, select their checkboxes and click *Delete*.
+* To delete one or more objects, select their checkboxes, and then click *Delete*.
 
 [float]
 [[managing-saved-objects-export-objects]]
@@ -47,8 +53,8 @@ You have two options for exporting saved objects.
 * Select the checkboxes of objects that you want to export, and then click *Export*.
 * Click *Export x objects*, and select which object types to export.
 
-This action exports a NDJSON with all your saved objects.  By default, 
-the export includes related objects. Exported dashboards include their associated index patterns.
+This action creates an NDJSON with all your saved objects.  By default, 
+the NDJSON includes related objects. Exported dashboards include their associated index patterns.
 
 
 [float]
