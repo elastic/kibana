@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { Feature } from '../xpack_main/server/lib/feature_registry';
+import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
 import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
