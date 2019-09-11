@@ -1,0 +1,7 @@
+.lnsDragDrop-isDropTarget {
+  background-color: transparentize($euiColorSecondary, .9);
+}
+
+.lnsDragDrop-isActiveDropTarget {
+  background-color: transparentize($euiColorSecondary, .75);
+}
