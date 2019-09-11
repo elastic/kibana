@@ -24,14 +24,14 @@ import {
   FieldDataColumnType,
 } from '../../../../../../common/types/eui/in_memory_table';
 
-import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
-  DATA_FRAME_TRANSFORM_STATE,
-  DataFrameTransformListColumn,
+  DataFrameTransformId,
   DataFrameTransformListRow,
   DataFrameTransformStats,
-} from './common';
+  DATA_FRAME_TRANSFORM_LIST_COLUMN,
+  DATA_FRAME_TRANSFORM_STATE,
+} from '../../../../common';
 import { getActions } from './actions';
 
 enum STATE_COLOR {
@@ -120,25 +120,25 @@ export const getColumns = (
       ),
     },
     {
-      field: DataFrameTransformListColumn.id,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID,
       name: 'ID',
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.description,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.DESCRIPTION,
       name: i18n.translate('xpack.ml.dataframe.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.configSourceIndex,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.CONFIG_SOURCE_INDEX,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameTransformListColumn.configDestIndex,
+      field: DATA_FRAME_TRANSFORM_LIST_COLUMN.CONFIG_DEST_INDEX,
       name: i18n.translate('xpack.ml.dataframe.destinationIndex', {
         defaultMessage: 'Destination index',
       }),
@@ -167,7 +167,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: getTransformProgress || 0,
+      sortable: (item: DataFrameTransformListRow) => getTransformProgress(item) || 0,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
         const progress = getTransformProgress(item);
