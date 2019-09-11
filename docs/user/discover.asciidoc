@@ -14,14 +14,14 @@ documents over time is displayed in a histogram at the top of the page.
 image::images/Discover-Start.png[Discover]
 --
 
-include::discover/set-time-filter.asciidoc[]
+include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 
-include::discover/search.asciidoc[]
+include::{kib-repo-dir}/discover/search.asciidoc[]
 
-include::discover/field-filter.asciidoc[]
+include::{kib-repo-dir}/discover/field-filter.asciidoc[]
 
-include::discover/document-data.asciidoc[]
+include::{kib-repo-dir}/discover/document-data.asciidoc[]
 
-include::discover/context.asciidoc[]
+include::{kib-repo-dir}/discover/context.asciidoc[]
 
-include::discover/viewing-field-stats.asciidoc[]
+include::{kib-repo-dir}/discover/viewing-field-stats.asciidoc[]
