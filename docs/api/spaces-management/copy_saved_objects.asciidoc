@@ -1,13 +1,13 @@
 [role="xpack"]
 [[spaces-api-copy-saved-objects]]
-=== Copy Saved Objects to Space
+=== Copy saved objects to space API
 ++++
-<titleabbrev>Copy Saved Objects to Space</titleabbrev>
+<titleabbrev>Copy saved objects to space</titleabbrev>
 ++++
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 Copies saved objects from one space to other spaces.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 ////
 Use the appropriate heading levels for your book.

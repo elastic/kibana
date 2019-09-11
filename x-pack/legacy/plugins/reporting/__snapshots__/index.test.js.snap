@@ -16,6 +16,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 1,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -78,6 +79,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 3,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -139,6 +141,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 1,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -201,6 +204,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 3,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {

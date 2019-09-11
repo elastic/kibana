@@ -337,6 +337,16 @@ export function queryDsl(api) {
         },
       ],
     },
+    distance_feature: {
+      __template: {
+        field: '',
+        origin: '',
+        pivot: '',
+      },
+      field: '{field}',
+      origin: '',
+      pivot: '',
+    },
     exists: {
       field: '',
     },

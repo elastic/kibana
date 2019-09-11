@@ -6,7 +6,7 @@
 
 import { flatten, isObject, mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../../plugins/features/server';
 import { Actions } from './actions';
 import { CheckPrivilegesAtResourceResponse } from './check_privileges';
 import { CheckPrivilegesDynamically } from './check_privileges_dynamically';

@@ -26,6 +26,7 @@ describe('SystemGenericFileDetails', () => {
             text="[generic-text-123]"
             browserFields={browserFields}
             data={mockTimelineData[29].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -40,6 +41,7 @@ describe('SystemGenericFileDetails', () => {
             text="[generic-text-123]"
             browserFields={mockBrowserFields}
             data={mockTimelineData[29].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );

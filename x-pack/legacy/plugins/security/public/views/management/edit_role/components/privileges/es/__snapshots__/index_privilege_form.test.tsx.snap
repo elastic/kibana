@@ -134,10 +134,8 @@ exports[`it renders without crashing 1`] = `
         <EuiButtonIcon
           aria-label="Delete index privilege"
           color="danger"
-          iconSize="m"
           iconType="trash"
           onClick={[MockFunction]}
-          type="button"
         />
       </EuiFormRow>
     </EuiFlexItem>

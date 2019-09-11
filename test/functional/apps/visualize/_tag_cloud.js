@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await inspector.open();
-      await await inspector.setTablePageSize('50');
+      await await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedTableData);
     });
 
