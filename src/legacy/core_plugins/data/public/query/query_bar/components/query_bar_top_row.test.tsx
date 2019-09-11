@@ -89,7 +89,7 @@ const mockIndexPattern = {
 } as IndexPattern;
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarTopRowInputUI)';
+  const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarInputUI)';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
   beforeEach(() => {
     jest.clearAllMocks();
