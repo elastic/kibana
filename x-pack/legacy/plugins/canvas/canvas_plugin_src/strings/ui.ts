@@ -63,11 +63,11 @@ export const ArgumentStrings = {
   },
   Palette: {
     getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.arguments.filterGroup.displayName', {
+      i18n.translate('xpack.canvas.uis.arguments.palette.displayName', {
         defaultMessage: 'Color palette',
       }),
     getHelp: () =>
-      i18n.translate('xpack.canvas.uis.arguments.filterGroup.help', {
+      i18n.translate('xpack.canvas.uis.arguments.palette.help', {
         defaultMessage: 'Choose a color palette',
       }),
   },
