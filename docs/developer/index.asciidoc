@@ -23,3 +23,5 @@ include::security/index.asciidoc[]
 
 include::pr-review.asciidoc[]
 
+include::testing/interpreting-ci-failures.asciidoc[]
+
