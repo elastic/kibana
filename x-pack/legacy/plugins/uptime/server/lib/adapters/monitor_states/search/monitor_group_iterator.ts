@@ -111,7 +111,7 @@ export class MonitorGroupIterator {
 
   async peek(): Promise<MonitorGroups | null> {
     await this.bufferNext(CHUNK_SIZE, false);
-    return this.buffer[this.bufferPos + 1];
+    return this.buffer[this.bufferPos + 1] || null;
   }
 
   async bufferNext(size: number = CHUNK_SIZE, trim: boolean = true): Promise<void> {

@@ -22,12 +22,18 @@ export default function({ getService }: FtrProviderContext) {
         },
       };
 
+      console.log("EXEC QUERY", getMonitorStatesQuery);
+
       const {
         body: { data },
       } = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatesQuery });
+
+      console.log("GOT DATA", data);
+
+      await new Promise(res => setTimeout(res, 500000));
 
       expectFixtureEql(data, 'monitor_states');
     });
