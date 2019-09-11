@@ -123,7 +123,7 @@ export class SetupModeRenderer extends React.Component {
       <Fragment>
         <EuiSpacer size="l"/>
         <EuiBottomBar>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>

@@ -77,8 +77,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.oneInternal', {
-          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat.
-          Click to get the status of each {identifier}.`,
+          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. Click to get the status of each {identifier}.`,
           values: {
             identifier: getIdentifier(productName)
           }

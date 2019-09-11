@@ -41,8 +41,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
-                defaultMessage: `Based on your indices, we think you might have a {product} {identifier}. Click 'Set up monitoring'
-                below to start monitoring this {identifier}.`,
+                defaultMessage: `Based on your indices, we think you might have a {product} {identifier}. Click 'Set up monitoring' below to start monitoring this {identifier}.`, // eslint-disable-line max-len
                 values: {
                   product: formatProductName(productName),
                   identifier: getIdentifier(productName)
@@ -111,8 +110,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
-              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}.
-              Disable internal collection to finish the migration.`,
+              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}. Disable internal collection to finish the migration.`, // eslint-disable-line max-len
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
