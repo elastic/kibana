@@ -165,7 +165,8 @@ export default function({ getService }: FtrProviderContext) {
       expect(rows.filter(row => row.id === jobId)).to.have.length(1);
     });
 
-    it('displays details for the created job in the job list', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/45450
+    it.skip('displays details for the created job in the job list', async () => {
       const expectedRow = {
         id: jobId,
         description: jobDescription,
