@@ -33,8 +33,8 @@ import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
 import { SectionError } from '../../../../components';
 
-const getChartTheme = () => {
-  return npStart.plugins.eui_chart_utils.getChartsTheme({
+const customTheme = () => {
+  return {
     lineSeriesStyle: {
       line: {
         strokeWidth: 3,
@@ -43,7 +43,7 @@ const getChartTheme = () => {
         visible: false,
       },
     },
-  });
+  };
 };
 
 const getTimezone = () => {
@@ -212,7 +212,7 @@ export const WatchVisualization = () => {
         {watchVisualizationDataKeys.length ? (
           <Chart size={[800, 300]} renderer="canvas">
             <Settings
-              theme={getChartTheme()}
+              theme={[customTheme(), npStart.plugins.eui_chart_utils.getChartsTheme()]}
               xDomain={domain}
               showLegend={!!watch.termField}
               legendPosition={Position.Bottom}
