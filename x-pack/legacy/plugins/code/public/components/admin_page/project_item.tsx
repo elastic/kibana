@@ -30,6 +30,7 @@ import { RepoStatus } from '../../actions/status';
 
 const stateColor = {
   [RepoState.CLONING]: 'secondary',
+  [RepoState.UPDATING]: 'secondary',
   [RepoState.DELETING]: 'accent',
   [RepoState.INDEXING]: 'primary',
 };
@@ -124,6 +125,12 @@ class CodeProjectItem extends React.PureComponent<
       footer = (
         <div className="codeFooter">
           <FormattedMessage id="xpack.code.repoItem.cloningText" defaultMessage="CLONING..." />
+        </div>
+      );
+    } else if (status.state === RepoState.UPDATING) {
+      footer = (
+        <div className="codeFooter">
+          <FormattedMessage id="xpack.code.repoItem.updatingText" defaultMessage="UPDATING..." />
         </div>
       );
     } else if (status.state === RepoState.DELETE_ERROR) {
