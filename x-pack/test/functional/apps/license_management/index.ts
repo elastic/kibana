@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('License app', function() {
-    this.tags('ciGroup7');
+    this.tags('ciGroup2');
     loadTestFile(require.resolve('./home_page'));
   });
 };

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import {
   PluginInitializerContext,
