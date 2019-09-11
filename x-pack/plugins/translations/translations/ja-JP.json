@@ -533,8 +533,6 @@
     "common.ui.url.replacementFailedErrorMessage": "置換に失敗、未解決の表現式: {expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "保存されたオブジェクトがありません",
     "common.ui.vis.aggConfig.percentageOfLabel": "{label} のパーセンテージ",
-    "common.ui.vis.courier.inspector.dataRequest.description": "このリクエストが Elasticsearch にクエリし、ビジュアライゼーション用のデータを取得します。",
-    "common.ui.vis.courier.inspector.dataRequest.title": "データ",
     "common.ui.vis.defaultEditor.aggSelect.aggregationLabel": "集約",
     "common.ui.vis.defaultEditor.aggSelect.helpLinkLabel": "{aggTitle} のヘルプ",
     "common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder": "集約を選択してください",

@@ -533,8 +533,6 @@
     "common.ui.url.replacementFailedErrorMessage": "替换失败，未解析的表达式：{expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "已保存对象缺失",
     "common.ui.vis.aggConfig.percentageOfLabel": "{label} 的百分比",
-    "common.ui.vis.courier.inspector.dataRequest.description": "此请求将查询 Elasticsearch 以获取可视化的数据。",
-    "common.ui.vis.courier.inspector.dataRequest.title": "数据",
     "common.ui.vis.defaultEditor.aggSelect.aggregationLabel": "聚合",
     "common.ui.vis.defaultEditor.aggSelect.helpLinkLabel": "{aggTitle} 帮助",
     "common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription": "索引模式“{indexPatternTitle}”不包含任何聚合。",
