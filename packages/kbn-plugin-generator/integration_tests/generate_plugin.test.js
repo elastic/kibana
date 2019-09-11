@@ -21,7 +21,7 @@
 import { spawn } from 'child_process';
 import { resolve } from 'path';
 import util from 'util';
-import { stat } from 'fs';
+import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
 import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
@@ -59,6 +59,19 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   it(`should succeed on creating a plugin in a directory named 'plugins/${snakeCased}`, async () => {
     const stats = await statP(generatedPath);
     expect(stats.isDirectory()).toBe(true);
+  });
+
+  it(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
+    // Link to the error that happens when the blank line is not there:
+    // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
+    const intlFile = `${generatedPath}/.i18nrc.json`;
+
+    const stats = await statP(intlFile);
+    expect(stats.isFile()).toBe(true);
+
+    const re = new RegExp(/^\s{1}$/, 'gm');
+    const contents = readFileSync(intlFile, 'utf8');
+    expect(re.test(contents)).toBe(true);
   });
 
   describe(`then running`, () => {
