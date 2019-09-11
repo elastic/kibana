@@ -19,18 +19,15 @@
 
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { PartialTheme } from '@elastic/charts';
 
 export class EuiChartUtils {
   public setup(core: CoreSetup) {}
   public start(core: CoreStart) {
     return {
-      getChartsTheme(optionalPartial?: PartialTheme) {
-        const euiTheme = core.uiSettings.get('theme:darkMode')
+      getChartsTheme() {
+        return core.uiSettings.get('theme:darkMode')
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme;
-
-        return optionalPartial ? [optionalPartial, euiTheme] : euiTheme;
       },
     };
   }

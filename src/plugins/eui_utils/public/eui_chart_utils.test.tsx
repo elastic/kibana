@@ -33,18 +33,6 @@ describe('EuiChartUtils', () => {
       );
     });
 
-    it('returns the correct theme combined with a custom one', () => {
-      const combinedTheme = getStart().getChartsTheme({
-        lineSeriesStyle: {
-          point: {
-            radius: 30,
-          },
-        },
-      });
-      expect(combinedTheme.lineSeriesStyle.point.fill).toEqual('rgba(255, 255, 255, 1)');
-      expect(combinedTheme.lineSeriesStyle.point.radius).toEqual(30);
-    });
-
     describe('in dark mode', () => {
       it(`returns the dark theme`, () => {
         const darkStart = () => {
