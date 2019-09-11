@@ -128,8 +128,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getCurrentUrl(): Promise<string> {
       // strip _t=Date query param when url is read
-      // const current = await driver.getCurrentUrl(); // doesn't get everything on IE
-      const current = await driver.executeScript<string>('return window.document.location.href');
+      let current;
+      if (this.isInternetExplorer) {
+        current = await driver.executeScript<string>('return window.document.location.href');
+      } else {
+        current = await driver.getCurrentUrl();
+      }
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete (parsed.query as any)._t;
         return void 0;

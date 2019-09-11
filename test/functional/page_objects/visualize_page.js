@@ -63,6 +63,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');
       await this.clickNewVisualization();
+      // have to move the mouse to get the help flyout to appear on IE11
+      // see https://github.com/elastic/kibana/issues/45333
+      const logo = await testSubjects.find('logo');
+      await logo.moveMouseTo();
       await this.waitForVisualizationSelectPage();
     }
 
@@ -917,7 +921,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
-      const svg = await find.byCssSelector('div.chart > svg');
+      const svg = await find.byCssSelector('div.chart');
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`).toArray().map(chart => {
         const barHeight = $(chart).attr('height');

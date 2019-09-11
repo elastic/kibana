@@ -109,17 +109,17 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
       case 'internet explorer':
         // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
         // console.log(`${process.env['PATH']}`);
-        process.env['PATH']='node_modules\\iedriver\\lib\\iedriver\\;' + process.env['PATH'];
-        console.log(`${process.env['PATH']}`);
+        process.env.PATH = 'node_modules\\iedriver\\lib\\iedriver\\;' + process.env.PATH;
 
         const ieCapabilities = Capabilities.ie();
-        ieCapabilities.set('se:ieOptions', { 'ie.ensureCleanSession': true,
-        'ignoreProtectedModeSettings': true,
-        'ignoreZoomSetting': true,
-        'nativeEvents': false,
-        'requireWindowFocus': true,
-        'logLevel': 'TRACE'
-       });
+        ieCapabilities.set('se:ieOptions', {
+          'ie.ensureCleanSession': true,
+          ignoreProtectedModeSettings: true,
+          ignoreZoomSetting: false, // requires us to have 100% zoom level
+          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
+          requireWindowFocus: true,
+          logLevel: 'TRACE',
+        });
 
         return new Builder()
           .forBrowser(browserType)
