@@ -216,11 +216,21 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
             </>
           )}
         />
-        <Redirect
-          from={`${url}/:detailName`}
-          to={`${url}/:detailName/${HostsTableType.authentications}`}
+        <Route
+          path={`${url}/:detailName`}
+          render={({ location: { search = '' } }) => (
+            <Redirect
+              from={`${url}/:detailName`}
+              to={`${url}/:detailName/${HostsTableType.authentications}${search}`}
+            />
+          )}
         />
-        <Redirect from="/hosts/" to={`/hosts/${HostsTableType.hosts}`} />
+        <Route
+          path="/hosts/"
+          render={({ location: { search = '' } }) => (
+            <Redirect from={`/hosts/"`} to={`/hosts/${HostsTableType.hosts}${search}`} />
+          )}
+        />
       </Switch>
     )}
   </GlobalTime>
