@@ -17,24 +17,8 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import contextLoadingButtonTemplate from './loading_button.html';
+import { createInitialQueryParametersState } from './state';
 
-
-const module = uiModules.get('apps/context', [
-  'kibana',
-  'ngRoute',
-]);
-
-module.directive('contextLoadingButton', function ContextLoadingButton() {
-  return {
-    replace: true,
-    restrict: 'E',
-    scope: {
-      isDisabled: '=',
-      icon: '=',
-    },
-    template: contextLoadingButtonTemplate,
-    transclude: true,
-  };
-});
+export const MAX_CONTEXT_SIZE = 10000; // Elasticsearch's default maximum size limit
+export const MIN_CONTEXT_SIZE = 0;
+export const QUERY_PARAMETER_KEYS = Object.keys(createInitialQueryParametersState());
