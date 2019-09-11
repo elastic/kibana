@@ -118,7 +118,7 @@ describe('XYConfigPanel', () => {
       .first()
       .prop('options') as EuiButtonGroupProps['options'];
 
-    expect(options.map(({ id }) => id)).toEqual([
+    expect(options!.map(({ id }) => id)).toEqual([
       'bar',
       'bar_stacked',
       'line',
@@ -126,7 +126,7 @@ describe('XYConfigPanel', () => {
       'area_stacked',
     ]);
 
-    expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
+    expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
   });
 
   test('the x dimension panel accepts only bucketed operations', () => {
