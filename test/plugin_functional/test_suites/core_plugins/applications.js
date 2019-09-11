@@ -32,11 +32,12 @@ export default function ({ getService, getPageObjects }) {
   const loadingScreenShown = () =>
     testSubjects.existOrFail('kbnLoadingMessage');
 
-  const getKibanaUrl = pathname => url.format({
+  const getKibanaUrl = (pathname, search) => url.format({
     protocol: 'http:',
     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
     port: process.env.TEST_KIBANA_PORT || '5620',
-    pathname
+    pathname,
+    search,
   });
 
   describe('ui applications', function describeIndexTests() {
@@ -73,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('fooNavBarPageB');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('barAppPageB');
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/bar/page-b?query=here'));
+      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/bar/page-b', 'query=here'));
     });
 
     it('preserves query parameters across apps', async () => {
