@@ -10,9 +10,10 @@ import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/public';
 import { IndexPatternSavedObject } from '../types/app_state';
+import { IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 
 export interface GraphSourcePickerProps {
-  currentIndexPattern?: IndexPatternSavedObject;
+  currentIndexPattern?: IndexPattern;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];

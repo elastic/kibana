@@ -16,6 +16,8 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+// Used for kuery autocomplete
+import 'uiExports/autocompleteProviders';
 // TODO: remove ui imports completely (move to plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
@@ -404,13 +406,12 @@ app.controller('graphuiPlugin', function (
     $scope.basicModeSelectedSingleField = null;
     $scope.selectedField = null;
     $scope.selectedFieldConfig = null;
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
 
     const promise = $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id);
     promise
       .then(handleSuccess)
       .then(function (indexPattern) {
+        $scope.selectedIndex = indexPattern;
         const patternFields = indexPattern.getNonScriptedFields();
         const blockedFieldNames = ['_id', '_index', '_score', '_source', '_type'];
         patternFields.forEach(function (field, index) {
@@ -457,7 +458,7 @@ app.controller('graphuiPlugin', function (
         if (postInitHandler) {
           postInitHandler();
         }
-
+        $scope.$digest();
       }, handleError);
 
   };
@@ -725,7 +726,7 @@ app.controller('graphuiPlugin', function (
       return;
     }
     const options = {
-      indexName: $scope.selectedIndex.attributes.title,
+      indexName: $scope.selectedIndex.title,
       vertex_fields: $scope.selectedFields,
       // Here we have the opportunity to look up labels for nodes...
       nodeLabeller: function () {
@@ -1094,8 +1095,7 @@ app.controller('graphuiPlugin', function (
 
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
-        $scope.searchTerm = $route.current.params.query;
-        $scope.submit();
+        $scope.submit($route.current.params.query);
       }
 
     });
@@ -1177,7 +1177,7 @@ app.controller('graphuiPlugin', function (
     });
 
     $scope.savedWorkspace.wsState = JSON.stringify({
-      'indexPattern': $scope.selectedIndex.attributes.title,
+      'indexPattern': $scope.selectedIndex.title,
       'selectedFields': $scope.selectedFields.map(function (field) {
         return {
           'name': field.name,
