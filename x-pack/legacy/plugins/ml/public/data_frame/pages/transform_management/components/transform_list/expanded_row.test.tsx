@@ -8,10 +8,10 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
 
-import { DataFrameTransformListRow } from './common';
+import { DataFrameTransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
-import dataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
+import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
 describe('Data Frame: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
