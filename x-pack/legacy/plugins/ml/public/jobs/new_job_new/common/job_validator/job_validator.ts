@@ -37,7 +37,7 @@ export class JobValidator {
   private _jobCreator: JobCreatorType;
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
-  private _validateTimeout: NodeJS.Timeout | null = null;
+  private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },

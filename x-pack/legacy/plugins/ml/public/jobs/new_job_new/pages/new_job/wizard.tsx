@@ -86,7 +86,6 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    // IIFE to run the validation. the useEffect callback can't be async
     jobValidator.validate(() => {
       setJobValidatorUpdate(jobValidatorUpdated);
     });
