@@ -6,7 +6,12 @@
 
 import { Filter as ESFilterType } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { inputsModel } from '../../store/inputs';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: ESFilterType[];
@@ -21,7 +26,16 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
+export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput>;
+
 export interface IndexPatternMapping {
   title: string;
   id: string;
 }
+
+export type SetQuery = (params: {
+  id: string;
+  inspect: inputsModel.InspectQuery | null;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
+}) => void;
