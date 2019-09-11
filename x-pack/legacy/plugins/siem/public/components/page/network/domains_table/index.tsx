@@ -42,6 +42,7 @@ interface OwnProps {
 }
 
 interface DomainsTableReduxProps {
+  activePage: number;
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
   limit: number;
@@ -84,6 +85,7 @@ export const DomainsTableId = 'domains-table';
 class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       domainsSortField,
       fakeTotalCount,
@@ -104,6 +106,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getDomainsColumns(
           indexPattern,
           ip,

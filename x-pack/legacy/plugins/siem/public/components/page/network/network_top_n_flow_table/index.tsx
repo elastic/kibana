@@ -39,6 +39,7 @@ interface OwnProps {
 }
 
 interface NetworkTopNFlowTableReduxProps {
+  activePage: number;
   limit: number;
   topNFlowSort: NetworkTopNFlowSortField;
 }
@@ -80,6 +81,7 @@ export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       flowTargeted,
@@ -115,6 +117,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getNetworkTopNFlowColumns(
           indexPattern,
           flowTargeted,

@@ -145,7 +145,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             startDate,
             totalCount: getOr(-1, 'source.Hosts.totalCount', data),
           });

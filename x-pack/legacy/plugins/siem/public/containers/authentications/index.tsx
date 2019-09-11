@@ -67,24 +67,25 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetAuthenticationsQuery.Variables = {
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+      pagination: generateTablePaginationOptions(activePage, limit),
+      filterQuery: createFilter(filterQuery),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
+    };
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          pagination: generateTablePaginationOptions(activePage, limit),
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          inspect: isInspected,
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
@@ -116,7 +117,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.Authentications.totalCount', data),
           });
         }}

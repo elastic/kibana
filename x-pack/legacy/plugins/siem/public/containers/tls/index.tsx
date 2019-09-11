@@ -74,27 +74,28 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       startDate,
       tlsSortField,
     } = this.props;
+    const variables: GetTlsQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowTarget,
+      inspect: isInspected,
+      ip,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: tlsSortField,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate ? startDate : 0,
+        to: endDate ? endDate : Date.now(),
+      },
+    };
     return (
       <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
         query={tlsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: tlsSortField,
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : 0,
-            to: endDate ? endDate : Date.now(),
-          },
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const tls = getOr([], 'source.Tls.edges', data);
@@ -125,7 +126,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Tls.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             tls,
             totalCount: getOr(-1, 'source.Tls.totalCount', data),
           });

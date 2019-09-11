@@ -32,8 +32,9 @@ interface OwnProps {
 }
 
 interface UsersTableReduxProps {
-  usersSortField: UsersSortField;
+  activePage: number;
   limit: number;
+  usersSortField: UsersSortField;
 }
 
 interface UsersTableDispatchProps {
@@ -69,6 +70,7 @@ export const usersTableId = 'users-table';
 class UsersTableComponent extends React.PureComponent<UsersTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       flowTarget,
@@ -86,6 +88,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getUsersColumns(flowTarget, usersTableId)}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}

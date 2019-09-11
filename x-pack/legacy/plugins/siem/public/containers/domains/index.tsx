@@ -77,6 +77,22 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetDomainsQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowDirection,
+      flowTarget,
+      inspect: isInspected,
+      ip,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: domainsSortField,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetDomainsQuery.Query, GetDomainsQuery.Variables>
         query={domainsQuery}
@@ -130,7 +146,7 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Domains.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.Domains.totalCount', data),
           });
         }}

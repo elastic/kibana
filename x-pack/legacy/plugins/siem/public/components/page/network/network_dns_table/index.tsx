@@ -32,6 +32,7 @@ interface OwnProps {
 }
 
 interface NetworkDnsTableReduxProps {
+  activePage: number;
   limit: number;
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
@@ -72,6 +73,7 @@ const rowItems: ItemsPerRow[] = [
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       dnsSortField,
       fakeTotalCount,
@@ -88,6 +90,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getNetworkDnsColumns(type)}
         headerCount={totalCount}
         headerSupplement={

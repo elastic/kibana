@@ -38,6 +38,7 @@ describe('Paginated Table Component', () => {
       const wrapper = shallow(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -64,6 +65,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={-1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -92,6 +94,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -118,6 +121,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -154,6 +158,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -184,6 +189,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -211,6 +217,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={sortedHosts}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -239,6 +246,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -268,6 +276,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -293,6 +302,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -320,6 +330,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -349,6 +360,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -387,6 +399,7 @@ describe('Paginated Table Component', () => {
     test('should call updateActivePage with 0 when an update prop changes', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ourProps: BasicTableProps<any> = {
+        activePage: 0,
         columns: getHostsColumns(),
         headerCount: 1,
         headerSupplement: <p>{'My test supplement.'}</p>,
@@ -431,6 +444,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={getHostsColumns()}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}
@@ -467,6 +481,7 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <PaginatedTable
+            activePage={0}
             columns={sortedHosts}
             headerCount={1}
             headerSupplement={<p>{'My test supplement.'}</p>}

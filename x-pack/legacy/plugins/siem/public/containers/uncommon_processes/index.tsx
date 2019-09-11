@@ -67,24 +67,25 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetUncommonProcessesQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      inspect: isInspected,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
         query={uncommonProcessesQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          inspect: isInspected,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
@@ -115,7 +116,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
             uncommonProcesses,
           });

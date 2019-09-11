@@ -72,26 +72,27 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       startDate,
       topNFlowSort,
     } = this.props;
+    const variables: GetNetworkTopNFlowQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowTarget,
+      inspect: isInspected,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: topNFlowSort,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
         query={networkTopNFlowQuery}
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: topNFlowSort,
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
@@ -123,7 +124,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}

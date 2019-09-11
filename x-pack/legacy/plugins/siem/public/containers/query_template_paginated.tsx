@@ -8,7 +8,10 @@ import { ApolloQueryResult } from 'apollo-client';
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
+import memoizeOne from 'memoize-one';
 import { ESQuery } from '../../common/typed_json';
+import { inputsModel } from '../store/model';
+import { generateTablePaginationOptions } from '../components/paginated_table/helpers';
 
 export interface QueryTemplatePaginatedProps {
   id?: string;
@@ -37,9 +40,16 @@ export class QueryTemplatePaginated<
 
   private fetchMoreOptions!: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>;
 
+  public memoizedRefetchQuery: (
+    variables: TVariables,
+    limit: number,
+    refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>
+  ) => inputsModel.Refetch;
+
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(props: T) {
     super(props);
+    this.memoizedRefetchQuery = memoizeOne(this.refetchQuery);
   }
 
   public setFetchMore = (
@@ -56,5 +66,13 @@ export class QueryTemplatePaginated<
 
   public wrappedLoadMore = (newActivePage: number) => {
     return this.fetchMore(this.fetchMoreOptions(newActivePage));
+  };
+
+  public refetchQuery = (
+    variables: TVariables,
+    limit: number,
+    refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>
+  ): inputsModel.Refetch => () => {
+    refetch({ ...variables, pagination: generateTablePaginationOptions(0, limit) });
   };
 }

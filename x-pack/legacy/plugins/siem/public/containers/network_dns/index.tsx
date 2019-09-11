@@ -71,26 +71,28 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetNetworkDnsQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      inspect: isInspected,
+      isPtrIncluded,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: dnsSortField,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
+
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
         query={networkDnsQuery}
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          inspect: isInspected,
-          isPtrIncluded,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: dnsSortField,
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const networkDns = getOr([], `source.NetworkDns.edges`, data);
@@ -122,7 +124,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
           });
         }}

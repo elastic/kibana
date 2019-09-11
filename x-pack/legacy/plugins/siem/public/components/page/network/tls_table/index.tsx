@@ -29,8 +29,9 @@ interface OwnProps {
 }
 
 interface TlsTableReduxProps {
-  tlsSortField: TlsSortField;
+  activePage: number;
   limit: number;
+  tlsSortField: TlsSortField;
 }
 
 interface TlsTableDispatchProps {
@@ -66,6 +67,7 @@ export const tlsTableId = 'tls-table';
 class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       id,
@@ -81,6 +83,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getTlsColumns(tlsTableId)}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}

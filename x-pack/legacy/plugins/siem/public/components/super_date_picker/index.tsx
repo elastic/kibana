@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { inputsModel, State } from '../../store';
-import { inputsActions, timelineActions } from '../../store/actions';
+import { inputsActions, timelineActions, hostsActions, networkActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
@@ -275,15 +275,18 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
     );
   }
 
+  let kqlHaveBeenUpdated = false;
+
   if (kql) {
-    return {
-      kqlHaveBeenUpdated: kql.refetch(dispatch),
-    };
+    kqlHaveBeenUpdated = kql.refetch(dispatch);
   }
 
-  return {
-    kqlHaveBeenUpdated: false,
-  };
+  if (!kqlHaveBeenUpdated) {
+    dispatch(hostsActions.setHostTablesActivePageToZero());
+    dispatch(networkActions.setNetworkTablesActivePageToZero());
+  }
+
+  return { kqlHaveBeenUpdated };
 };
 
 export const makeMapStateToProps = () => {

@@ -75,27 +75,28 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       startDate,
       usersSortField,
     } = this.props;
+    const variables: GetUsersQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowTarget,
+      inspect: isInspected,
+      ip,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: usersSortField,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
         query={usersQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: usersSortField,
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const users = getOr([], `source.Users.edges`, data);
@@ -126,7 +127,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
             loading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Users.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.Users.totalCount', data),
             users,
           });

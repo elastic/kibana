@@ -47,6 +47,7 @@ interface OwnProps {
 }
 
 interface HostsTableReduxProps {
+  activePage: number;
   limit: number;
   sortField: HostsFields;
   direction: Direction;
@@ -108,6 +109,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
 
   public render() {
     const {
+      activePage,
       data,
       direction,
       fakeTotalCount,
@@ -125,6 +127,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={this.memoizedColumns(type, indexPattern)}
         dataTestSubj="all-hosts"
         headerCount={totalCount}

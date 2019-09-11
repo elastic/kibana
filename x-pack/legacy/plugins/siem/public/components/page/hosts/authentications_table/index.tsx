@@ -40,6 +40,7 @@ interface OwnProps {
 }
 
 interface AuthenticationTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -85,6 +86,7 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
@@ -98,6 +100,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     updateTableLimit,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getAuthenticationColumnsCurated(type)}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}

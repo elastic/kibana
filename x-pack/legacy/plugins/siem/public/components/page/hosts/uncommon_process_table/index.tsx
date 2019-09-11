@@ -32,6 +32,7 @@ interface OwnProps {
 }
 
 interface UncommonProcessTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -82,6 +83,7 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
@@ -95,6 +97,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     type,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getUncommonColumnsCurated(type)}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
