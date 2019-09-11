@@ -59,9 +59,11 @@ utils.reformatData = function (data, indent) {
 };
 
 utils.collapseLiteralStrings = function (data) {
-  return data.replace(/"""(?:\s*\r?\n)?((?:.|\r?\n)*?)(?:\r?\n\s*)?"""/g, function (match, literal) {
-    return JSON.stringify(literal);
-  });
+  const splitData = data.split(`"""`);
+  for (let idx = 1; idx < splitData.length - 1; idx += 2) {
+    splitData[idx] = JSON.stringify(splitData[idx]);
+  }
+  return splitData.join('');
 };
 
 utils.expandLiteralStrings = function (data) {
@@ -69,8 +71,7 @@ utils.expandLiteralStrings = function (data) {
     // expand things with two slashes or more
     if (string.split(/\\./).length > 2) {
       string = JSON.parse(string).replace('^\s*\n', '').replace('\n\s*^', '');
-      const append = string.includes('\n') ? '\n' : ''; // only go multi line if the string has multiline
-      return '"""' + append + string + append + '"""';
+      return '"""' + string  + '"""';
     } else {
       return string;
     }
