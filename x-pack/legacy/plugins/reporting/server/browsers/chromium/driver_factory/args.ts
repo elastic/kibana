@@ -13,16 +13,9 @@ export interface IArgOptions {
     server: string;
     bypass?: string[];
   };
-  verboseLogging?: boolean;
 }
 
-export const args = ({
-  userDataDir,
-  viewport,
-  disableSandbox,
-  proxyConfig,
-  verboseLogging,
-}: IArgOptions) => {
+export const args = ({ userDataDir, viewport, disableSandbox, proxyConfig }: IArgOptions) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -61,10 +54,9 @@ export const args = ({
     flags.push('--no-sandbox');
   }
 
-  if (verboseLogging) {
-    flags.push('--enable-logging');
-    flags.push('--v=1');
-  }
+  // log to chrome_debug.log
+  flags.push('--enable-logging');
+  flags.push('--v=1');
 
   if (process.platform === 'linux') {
     flags.push('--disable-setuid-sandbox');

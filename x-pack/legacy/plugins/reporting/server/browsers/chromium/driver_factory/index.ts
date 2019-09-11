@@ -59,7 +59,6 @@ export class HeadlessChromiumDriverFactory {
     const chromiumArgs = args({
       userDataDir,
       viewport,
-      verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
       proxyConfig: this.browserConfig.proxy,
     });
