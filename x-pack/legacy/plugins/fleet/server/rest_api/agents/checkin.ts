@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import Boom from 'boom';
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
@@ -81,12 +82,12 @@ async function validateAndDecodePayload(
   const { events: rawEvents } = request.payload;
   const events: AgentEvent[] = rawEvents.map((event, idx) => {
     const result = RuntimeAgentEvent.decode(event);
-    if (result.isLeft()) {
+    if (isLeft(result)) {
       throw Boom.badRequest(
         `Malformed request, event ${idx} is invalid, (${PathReporter.report(result)})`
       );
     }
-    return result.value;
+    return result.right;
   });
 
   return { events };

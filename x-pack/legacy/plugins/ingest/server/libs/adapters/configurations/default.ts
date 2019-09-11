@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
+
 import { SODatabaseAdapter } from '../so_database/default';
 import { RuntimeConfigurationFile, NewConfigurationFile } from './adapter_types';
 
@@ -37,7 +39,7 @@ export class ConfigAdapter {
     if (!config.attributes) {
       throw new Error(`No configuration found with ID of ${id}`);
     }
-    if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
+    if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
       return config.attributes as ConfigurationFile;
     } else {
       throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
@@ -54,7 +56,7 @@ export class ConfigAdapter {
     });
     const uniqConfigurationFile = configs.saved_objects
       .map<ConfigurationFile>(config => {
-        if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
+        if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
           return config.attributes;
         } else {
           throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
@@ -99,7 +101,7 @@ export class ConfigAdapter {
     }
 
     return configs.map<ConfigurationFile>(config => {
-      if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
+      if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
         return config.attributes;
       } else {
         throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
@@ -151,7 +153,7 @@ export class ConfigAdapter {
     if (!config.attributes) {
       throw new Error(`No backup configuration found with ID of ${id}`);
     }
-    if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
+    if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
       return config.attributes as BackupConfigurationFile;
     } else {
       throw new Error(`Invalid BackupConfigurationFile data. == ${config.attributes}`);

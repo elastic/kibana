@@ -53,7 +53,7 @@ const ExistingDocument = t.interface({
   id: t.string,
   shared_id: t.string,
   version: t.number,
-  status: t.union(['active', 'locked', 'inactive'].map(s => t.literal(s))),
+  status: t.union([t.literal('active'), t.literal('locked'), t.literal('inactive')]),
   updated_at: t.string,
   created_by: t.union([t.undefined, t.string]),
   updated_on: t.string,

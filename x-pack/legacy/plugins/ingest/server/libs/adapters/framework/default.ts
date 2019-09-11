@@ -5,6 +5,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import { get } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
 import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
@@ -91,7 +92,7 @@ export class BackendFrameworkAdapter {
       return null;
     }
     const assertKibanaUser = RuntimeKibanaUser.decode(user);
-    if (assertKibanaUser.isLeft()) {
+    if (isLeft(assertKibanaUser)) {
       throw new Error(
         `Error parsing user info in ${this.PLUGIN_ID},   ${
           PathReporter.report(assertKibanaUser)[0]
@@ -139,7 +140,7 @@ export class BackendFrameworkAdapter {
     }
 
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-    if (assertData.isLeft()) {
+    if (isLeft(assertData)) {
       throw new Error(
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
