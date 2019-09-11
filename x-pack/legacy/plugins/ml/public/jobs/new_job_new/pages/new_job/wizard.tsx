@@ -86,11 +86,9 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    // IIFE to run the validation. the useEffect callback can't be async
-    (async () => {
-      await jobValidator.validate();
+    jobValidator.validate(() => {
       setJobValidatorUpdate(jobValidatorUpdated);
-    })();
+    });
 
     // if the job config has changed, reset the highestStep
     // compare a stringified config to ensure the configs have actually changed
