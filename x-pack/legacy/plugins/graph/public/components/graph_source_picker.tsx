@@ -12,6 +12,7 @@ import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/pu
 import { IndexPatternSavedObject } from '../types/app_state';
 
 export interface GraphSourcePickerProps {
+  currentIndexPattern?: IndexPatternSavedObject;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
@@ -19,13 +20,18 @@ export interface GraphSourcePickerProps {
 
 const fixedPageSize = 8;
 
-export function GraphSourcePicker(props: GraphSourcePickerProps) {
+export function GraphSourcePicker({
+  savedObjects,
+  uiSettings,
+  currentIndexPattern,
+  onIndexPatternSelected,
+}: GraphSourcePickerProps) {
   return (
     <SavedObjectFinder
-      savedObjects={props.savedObjects}
-      uiSettings={props.uiSettings}
+      savedObjects={savedObjects}
+      uiSettings={uiSettings}
       onChoose={(_id, _type, _name, indexPattern) => {
-        props.onIndexPatternSelected(indexPattern as IndexPatternSavedObject);
+        onIndexPatternSelected(indexPattern as IndexPatternSavedObject);
       }}
       showFilter={false}
       noItemsMessage={i18n.translate('xpack.graph.sourceModal.notFoundLabel', {
@@ -38,7 +44,9 @@ export function GraphSourcePicker(props: GraphSourcePickerProps) {
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.indexPattern', {
             defaultMessage: 'Index pattern',
           }),
-          showSavedObject: indexPattern => !indexPattern.attributes.type,
+          showSavedObject: indexPattern =>
+            !indexPattern.attributes.type &&
+            (!currentIndexPattern || currentIndexPattern.id !== indexPattern.id),
         },
       ]}
       fixedPageSize={fixedPageSize}

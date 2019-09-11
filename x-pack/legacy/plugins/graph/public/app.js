@@ -95,6 +95,7 @@ app.directive('graphListing', function (reactDirective) {
 app.directive('graphSearchBar', function (reactDirective) {
   return reactDirective(GraphSearchBar, [
     ['currentIndexPattern', { watchDepth: 'reference' }],
+    ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
@@ -251,6 +252,8 @@ app.controller('graphuiPlugin', function (
   $scope.searchTerm = '';
 
   $scope.pluginDependencies = npStart.core;
+
+  $scope.loading = false;
 
   //So scope properties can be used consistently with ng-model
   $scope.grr = $scope;
@@ -475,6 +478,7 @@ app.controller('graphuiPlugin', function (
       index: indexName,
       query: query
     };
+    $scope.loading = true;
     return $http.post('../api/graph/graphExplore', request)
       .then(function (resp) {
         if (resp.data.resp.timed_out) {
@@ -486,7 +490,10 @@ app.controller('graphuiPlugin', function (
         }
         responseHandler(resp.data.resp);
       })
-      .catch(handleHttpError);
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
   }
 
 
@@ -496,11 +503,15 @@ app.controller('graphuiPlugin', function (
       index: indexName,
       body: query
     };
+    $scope.loading = true;
     $http.post('../api/graph/searchProxy', request)
       .then(function (resp) {
         responseHandler(resp.data.resp);
       })
-      .catch(handleHttpError);
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
   };
 
   $scope.submit = function (searchTerm) {
@@ -769,9 +780,6 @@ app.controller('graphuiPlugin', function (
     }
   }
 
-  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.attributes.type);
-
-
   $scope.setDetail = function (data) {
     $scope.detail = data;
   };
@@ -830,7 +838,7 @@ app.controller('graphuiPlugin', function (
   const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
 
-  if ($scope.indices.length === 0) {
+  if ($route.current.locals.indexPatterns.length === 0) {
     toastNotifications.addWarning({
       title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
         defaultMessage: 'No data source',
@@ -970,7 +978,7 @@ app.controller('graphuiPlugin', function (
 
     //Lookup the saved index pattern title
     let savedObjectIndexPattern = null;
-    $scope.indices.forEach(function (savedObject) {
+    $route.current.locals.indexPatterns.forEach(function (savedObject) {
       // wsObj.indexPattern is the title string of an indexPattern which
       // we attempt here to look up in the list of currently saved objects
       // that contain index pattern definitions

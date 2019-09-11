@@ -20,6 +20,7 @@ import { IndexPatternSavedObject } from '../types/app_state';
 import { GraphSourcePicker } from './graph_source_picker';
 
 interface GraphSearchBarProps {
+  isLoading: boolean;
   currentIndexPattern?: IndexPatternSavedObject;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
@@ -30,32 +31,47 @@ interface GraphSearchBarProps {
 export function GraphSearchBar({
   currentIndexPattern,
   onQuerySubmit,
+  isLoading,
+  onIndexPatternSelected,
   ...sourcePickerProps
 }: GraphSearchBarProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   return (
     <form
+      className="gphSearchBar"
       onSubmit={e => {
         e.preventDefault();
-        onQuerySubmit(query);
-        setQuery('');
+        if (!isLoading) {
+          onQuerySubmit(query);
+        }
       }}
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
+            isLoading={isLoading}
+            icon="search"
+            placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
+              defaultMessage: 'Search your data and add to your graph',
+            })}
             prepend={
               <EuiPopover
                 id="graphSourcePicker"
                 anchorPosition="downLeft"
                 ownFocus
                 button={
-                  <EuiButtonEmpty onClick={() => setOpen(true)}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    className="gphSearchBar__datasourceButton"
+                    onClick={() => setOpen(true)}
+                  >
                     {currentIndexPattern
                       ? currentIndexPattern.attributes.title
-                      : i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                      : // This branch will be shown if the user exits the
+                        // initial picker modal
+                        i18n.translate('xpack.graph.bar.pickSourceLabel', {
                           defaultMessage: 'Click here to pick a data source',
                         })}
                   </EuiButtonEmpty>
@@ -63,7 +79,14 @@ export function GraphSearchBar({
                 isOpen={open}
                 closePopover={() => setOpen(false)}
               >
-                <GraphSourcePicker {...sourcePickerProps} />
+                <GraphSourcePicker
+                  onIndexPatternSelected={pattern => {
+                    onIndexPatternSelected(pattern);
+                    setOpen(false);
+                  }}
+                  currentIndexPattern={currentIndexPattern}
+                  {...sourcePickerProps}
+                />
               </EuiPopover>
             }
             value={query}
@@ -71,8 +94,8 @@ export function GraphSearchBar({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill type="submit">
-            Explore
+          <EuiButton fill type="submit" disabled={isLoading}>
+            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
