@@ -20,7 +20,7 @@ interface ManageTimelineContextProps {
   width: number;
 }
 
-// To DO we need to refactor this as more complex context/reducer with useReducer
+// todo we need to refactor this as more complex context/reducer with useReducer
 // to avoid so many Context, at least the separation of code is there now
 export const ManageTimelineContext = memo<ManageTimelineContextProps>(
   ({ children, loading, width }) => {
