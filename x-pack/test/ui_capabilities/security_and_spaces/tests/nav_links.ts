@@ -72,7 +72,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
+              GetUICapabilitiesFailureReason.RedirectedToSpaceSelector
             );
             break;
           default:
