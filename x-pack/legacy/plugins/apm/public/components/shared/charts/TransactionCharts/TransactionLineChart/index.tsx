@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Coordinate,
   RectCoordinate
@@ -44,19 +44,22 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
 
   const syncedChartsProps = useChartsSync();
 
-  // create callback for syncedChartsProps.onHover and props.onHover
-  const syncedChartsOnHover = syncedChartsProps.onHover;
-  syncedChartsProps.onHover = (...args) => {
-    if (onHover) {
-      onHover();
-    }
-    return syncedChartsOnHover(...args);
-  };
+  // combine callback for syncedChartsProps.onHover and props.onHover
+  const combinedOnHover = useCallback(
+    (hoverX: number) => {
+      if (onHover) {
+        onHover();
+      }
+      return syncedChartsProps.onHover(hoverX);
+    },
+    [syncedChartsProps, onHover]
+  );
 
   return (
     <CustomPlot
       series={series}
       {...syncedChartsProps}
+      onHover={combinedOnHover}
       tickFormatY={tickFormatY}
       formatTooltipValue={formatTooltipValue}
       yMax={yMax}
