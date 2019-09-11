@@ -17,7 +17,7 @@ export default function ({ getService }) {
         query: filterBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {

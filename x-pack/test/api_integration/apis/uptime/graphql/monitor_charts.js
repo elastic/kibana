@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { monitorChartsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import monitorCharts from './fixtures/monitor_charts';
-import monitorChartsEmptySet from './fixtures/monitor_charts_empty_set';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorCharts query', () => {
@@ -19,8 +17,8 @@ export default function ({ getService }) {
         query: monitorChartsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0X131221E73F825974',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          monitorId: '0002-up',
         },
       };
       const {
@@ -29,7 +27,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
-      expect(data).to.eql(monitorCharts);
+
+      expectFixtureEql(data, 'monitor_charts');
     });
 
     it('will fetch empty sets for a date range with no data', async () => {
@@ -39,7 +38,7 @@ export default function ({ getService }) {
         variables: {
           dateRangeStart: '2002-01-28T17:40:08.078Z',
           dateRangeEnd: '2002-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0X131221E73F825974',
+          monitorId: '0002-up',
         },
       };
       const {
@@ -48,7 +47,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
-      expect(data).to.eql(monitorChartsEmptySet);
+
+      expectFixtureEql(data, 'monitor_charts');
     });
   });
 }

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
-import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
 import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import monitorStatus from './fixtures/monitor_status';
-import monitorStatusById from './fixtures/monitor_status_by_id';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorStatusBar query', () => {
@@ -21,7 +18,7 @@ export default function ({ getService }) {
         query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -32,9 +29,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
-        monitorStatus
-      );
+
+      expectFixtureEql(responseData, 'monitor_status_by_id', res => res.forEach(i => delete i.millisFromNow));
     });
 
     it('returns the status for only the given monitor', async () => {
@@ -43,8 +39,8 @@ export default function ({ getService }) {
         query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-tcp-0X81440A68E839814C',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          monitorId: '0002-up',
         },
       };
       const {
@@ -55,9 +51,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
-        monitorStatusById
-      );
+
+      expectFixtureEql(responseData, 'monitor_status_by_id', res => res.forEach(i => delete i.millisFromNow));
     });
   });
 }

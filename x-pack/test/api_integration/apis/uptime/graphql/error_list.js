@@ -17,7 +17,7 @@ export default function ({ getService }) {
         query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -26,6 +26,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
+
+
       expectFixtureEql(data, 'error_list');
     });
 
@@ -35,7 +37,7 @@ export default function ({ getService }) {
         query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters: `{"bool":{"must":[{"match":{"monitor.id":{"query":"auto-http-0X3675F89EF0612091","operator":"and"}}}]}}`,
         },
       };
@@ -54,7 +56,7 @@ export default function ({ getService }) {
         query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters: `{"bool":{"must":[{"match":{"url.port":{"query":"9200","operator":"and"}}}]}}`,
         },
       };
@@ -73,7 +75,7 @@ export default function ({ getService }) {
         query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters:
             `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}},` +
             `{"match":{"monitor.type":{"query":"http","operator":"and"}}}]}}`,

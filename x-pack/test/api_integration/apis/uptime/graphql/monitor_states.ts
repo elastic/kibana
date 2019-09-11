@@ -18,11 +18,9 @@ export default function({ getService }: FtrProviderContext) {
         query: monitorStatesQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
-
-      console.log("EXEC QUERY", getMonitorStatesQuery);
 
       const {
         body: { data },
@@ -30,10 +28,6 @@ export default function({ getService }: FtrProviderContext) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatesQuery });
-
-      console.log("GOT DATA", data);
-
-      await new Promise(res => setTimeout(res, 500000));
 
       expectFixtureEql(data, 'monitor_states');
     });
@@ -44,9 +38,9 @@ export default function({ getService }: FtrProviderContext) {
         query: monitorStatesQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters:
-            '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"match":{"monitor.id":{"query":"auto-http-0XDD2D4E60FD4A61C3","operator":"and"}}}]}}',
+            '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"match":{"monitor.id":{"query":"0030-up","operator":"and"}}}]}}',
         },
       };
 
