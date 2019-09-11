@@ -27,18 +27,32 @@ export const buildEventsOverTimeQuery = ({
     },
   ];
 
+  const getHistogramAggregation = () => {
+    const interval = calculateTimeseriesInterval(from, to, 1);
+    const histogramTimestampField = '@timestamp';
+    if (interval != null)
+      return {
+        date_histogram: {
+          field: histogramTimestampField,
+          fixed_interval: `${interval}s`,
+        },
+      };
+    else
+      return {
+        auto_date_histogram: {
+          field: histogramTimestampField,
+          buckets: 36,
+        },
+      };
+  };
+
   const dslQuery = {
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
     body: {
       aggregations: {
-        events: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: calculateTimeseriesInterval(from, to, 1) + 's',
-          },
-        },
+        events: getHistogramAggregation(),
       },
       query: {
         bool: {
