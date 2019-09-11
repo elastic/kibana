@@ -343,7 +343,7 @@ describe('onPostAuthInterceptor', () => {
     expect(response.body).toMatchInlineSnapshot(`
       Object {
         "error": "Internal Server Error",
-        "message": "An internal server error occurred.",
+        "message": "unknown error retrieving all spaces",
         "statusCode": 500,
       }
     `);
