@@ -55,8 +55,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const page = await fetchPage(queryContext);
 
-    console.log("PAGE RESULT IS", page);
-
     return {
       summaries: page.items,
       nextPagePagination: jsonifyPagination(page.nextPagePagination),

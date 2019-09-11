@@ -89,7 +89,6 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   }
 
   // We have to create these objects before checking if we can navigate backward
-  console.log("ATTEMPT TO GET NEXT PAGINATION", await iterator.peek(), await iterator.paginationAfterCurrent())
   const paginationAfter = await iterator.paginationAfterCurrent();
 
   const ssAligned = searchSortAligned(queryContext.pagination);
