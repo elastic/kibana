@@ -32,7 +32,7 @@ export function AdvancedSettingsForm({
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
     return function({ target: { valueAsNumber } }: { target: { valueAsNumber: number } }) {
-      updateSetting(key, Number.isNaN(valueAsNumber) ? 0 : valueAsNumber);
+      updateSetting(key, Number.isNaN(valueAsNumber) ? 1 : valueAsNumber);
     };
   }
 
@@ -51,7 +51,6 @@ export function AdvancedSettingsForm({
         <EuiFieldNumber
           fullWidth
           min={1}
-          max={500000}
           step={1}
           value={advancedSettings.sampleSize}
           onChange={getNumberUpdater('sampleSize')}
@@ -92,7 +91,6 @@ export function AdvancedSettingsForm({
         <EuiFieldNumber
           fullWidth
           min={1}
-          max={500000}
           step={1}
           value={advancedSettings.minDocCount}
           onChange={getNumberUpdater('minDocCount')}
@@ -174,7 +172,6 @@ export function AdvancedSettingsForm({
           <EuiFieldNumber
             fullWidth
             min={1}
-            max={500000}
             step={1}
             value={advancedSettings.maxValuesPerDoc}
             onChange={getNumberUpdater('maxValuesPerDoc')}
@@ -194,7 +191,6 @@ export function AdvancedSettingsForm({
         <EuiFieldNumber
           fullWidth
           min={1}
-          max={500000}
           step={1}
           value={advancedSettings.timeoutMillis}
           onChange={getNumberUpdater('timeoutMillis')}

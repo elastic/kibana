@@ -49,6 +49,10 @@ function isUpdateForm(props: UrlTemplateFormProps): props is UpdateFormProps {
   return 'initialTemplate' in props;
 }
 
+function isEqual(a: UrlTemplate, b: UrlTemplate) {
+  return (Object.keys(a) as Array<keyof UrlTemplate>).every(key => a[key] === b[key]);
+}
+
 export function UrlTemplateForm(props: UrlTemplateFormProps) {
   const { onSubmit } = props;
   const getInitialTemplate = () =>
@@ -110,6 +114,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
   );
   const formIncomplete = !Boolean(currentTemplate.description && currentTemplate.url);
 
+  const formUntouched = isEqual(currentTemplate, getInitialTemplate());
+
   return (
     <EuiAccordion
       id={props.id}
@@ -118,7 +124,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         isUpdateForm(props)
           ? props.initialTemplate.description
           : i18n.translate('xpack.graph.templates.addLabel', {
-              defaultMessage: 'New template',
+              defaultMessage: 'New drill-down',
             })
       }
       extraAction={
@@ -273,7 +279,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           </div>
         </EuiFormRow>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={null}>
+          <EuiFlexItem grow={false}>
             {
               <EuiButtonEmpty
                 color="danger"
@@ -289,23 +295,21 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             }
           </EuiFlexItem>
           <EuiFlexItem></EuiFlexItem>
-          <EuiFlexItem grow={null}>
-            {
-              <EuiButtonEmpty onClick={reset}>
-                {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
-                  defaultMessage: 'Reset',
-                })}
-              </EuiButtonEmpty>
-            }
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={reset} disabled={formUntouched}>
+              {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
+                defaultMessage: 'Reset',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={null}>
+          <EuiFlexItem grow={false}>
             <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
               {isUpdateForm(props)
                 ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
-                    defaultMessage: 'Update template',
+                    defaultMessage: 'Update drill-down',
                   })
                 : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
-                    defaultMessage: 'Add template',
+                    defaultMessage: 'Add drill-down',
                   })}
             </EuiButton>
           </EuiFlexItem>
