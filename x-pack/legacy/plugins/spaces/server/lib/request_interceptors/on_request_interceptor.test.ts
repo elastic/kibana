@@ -64,14 +64,14 @@ describe('onRequestInterceptor', () => {
       const router = http.createRouter('/');
 
       router.get(
-        { path: '/foo', validate: false },
+        { path: '/np_foo', validate: false },
         (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
           return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
         }
       );
 
       router.get(
-        { path: '/some/path/s/foo/bar', validate: false },
+        { path: '/some/path/s/np_foo/bar', validate: false },
         (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
           return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
         }
@@ -79,7 +79,7 @@ describe('onRequestInterceptor', () => {
 
       router.get(
         {
-          path: '/i/love/spaces',
+          path: '/i/love/np_spaces',
           validate: {
             query: schema.object({
               queryParam: schema.string({
@@ -101,26 +101,39 @@ describe('onRequestInterceptor', () => {
     }
   }
 
+  interface SetupOpts {
+    basePath: string;
+    routes: 'legacy' | 'new-platform';
+  }
+  async function setup(opts: SetupOpts = { basePath: '/', routes: 'legacy' }) {
+    const { http } = await root.setup();
+
+    const config = ({
+      get: jest.fn().mockReturnValue(opts.basePath),
+    } as unknown) as KibanaConfig;
+
+    initSpacesOnRequestInterceptor({
+      getLegacyAPI: () =>
+        ({
+          legacyConfig: (config as unknown) as KibanaConfig,
+        } as LegacyAPI),
+      http: (http as unknown) as CoreSetup['http'],
+    });
+
+    initKbnServer(http, 'new-platform');
+
+    await root.start();
+
+    initKbnServer(http, 'legacy');
+
+    return {
+      http,
+    };
+  }
+
   describe('requests proxied to the legacy platform', () => {
     it('handles paths without a space identifier', async () => {
-      const { http } = await root.setup();
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      initKbnServer(http, 'legacy');
+      await setup();
 
       const path = '/foo';
 
@@ -131,24 +144,7 @@ describe('onRequestInterceptor', () => {
     }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
-      const { http } = await root.setup();
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      initKbnServer(http, 'legacy');
+      await setup();
 
       const path = '/s/foo-space/foo';
 
@@ -162,24 +158,7 @@ describe('onRequestInterceptor', () => {
     }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
-      const { http } = await root.setup();
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      initKbnServer(http, 'legacy');
+      await setup();
 
       const path = '/some/path/s/foo/bar';
 
@@ -190,24 +169,7 @@ describe('onRequestInterceptor', () => {
     }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
-      const { http } = await root.setup();
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      initKbnServer(http, 'legacy');
+      await setup();
 
       const path = '/s/foo/i/love/spaces?queryParam=queryValue';
 
@@ -223,26 +185,9 @@ describe('onRequestInterceptor', () => {
 
   describe('requests handled completely in the new platform', () => {
     it('handles paths without a space identifier', async () => {
-      const { http } = await root.setup();
+      await setup({ basePath: '/', routes: 'new-platform' });
 
-      initKbnServer(http, 'new-platform');
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      const path = '/foo';
+      const path = '/np_foo';
 
       await kbnTestServer.request.get(root, path).expect(200, {
         path,
@@ -251,85 +196,34 @@ describe('onRequestInterceptor', () => {
     }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
-      const { http } = await root.setup();
+      await setup({ basePath: '/', routes: 'new-platform' });
 
-      initKbnServer(http, 'new-platform');
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      const path = '/s/foo-space/foo';
+      const path = '/s/foo-space/np_foo';
 
       await kbnTestServer.request.get(root, path).expect(200, {
-        path: '/foo',
+        path: '/np_foo',
         basePath: '/s/foo-space',
       });
     }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
-      const { http } = await root.setup();
+      await setup({ basePath: '/', routes: 'new-platform' });
 
-      initKbnServer(http, 'new-platform');
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      const path = '/some/path/s/foo/bar';
+      const path = '/some/path/s/np_foo/bar';
 
       await kbnTestServer.request.get(root, path).expect(200, {
-        path: '/some/path/s/foo/bar',
+        path: '/some/path/s/np_foo/bar',
         basePath: '', // no base path set for route within the default space
       });
     }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
-      const { http } = await root.setup();
+      await setup({ basePath: '/', routes: 'new-platform' });
 
-      initKbnServer(http, 'new-platform');
-
-      const basePath = '/';
-      const config = ({
-        get: jest.fn().mockReturnValue(basePath),
-      } as unknown) as KibanaConfig;
-
-      initSpacesOnRequestInterceptor({
-        getLegacyAPI: () =>
-          ({
-            legacyConfig: (config as unknown) as KibanaConfig,
-          } as LegacyAPI),
-        http: (http as unknown) as CoreSetup['http'],
-      });
-
-      await root.start();
-
-      const path = '/s/foo/i/love/spaces?queryParam=queryValue';
+      const path = '/s/foo/i/love/np_spaces?queryParam=queryValue';
 
       await kbnTestServer.request.get(root, path).expect(200, {
-        path: '/i/love/spaces',
+        path: '/i/love/np_spaces',
         basePath: '/s/foo',
         query: {
           queryParam: 'queryValue',
