@@ -87,15 +87,10 @@ export interface JobParams {
 }
 
 export interface JobDocPayload {
-  basePath?: string;
-  forceNow?: string;
   headers?: Record<string, string>;
   jobParams: JobParams;
-  relativeUrl?: string;
-  timeRange?: any;
   title: string;
   type: string | null;
-  urls?: string[];
 }
 
 export interface JobDocOutput {

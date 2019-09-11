@@ -34,7 +34,6 @@ import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
 import { PipelineDataLoader } from '../pipeline_data_loader';
-import { VisualizeDataLoader } from '../visualize_data_loader';
 import { PersistedState } from '../../../persisted_state';
 import { DataAdapter, RequestAdapter } from '../../../inspector/adapters';
 
@@ -73,12 +72,12 @@ describe('visualize loader', () => {
   }
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
-  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, interpreterConfig, Private) => {
+  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, Private) => {
     $rootScope = _$rootScope_;
     searchSource = Private(FixturesStubbedSearchSourceProvider);
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    DataLoader = interpreterConfig.enableInVisualize ? PipelineDataLoader : VisualizeDataLoader;
+    DataLoader = PipelineDataLoader;
     // Create a new Vis object
     const Vis = Private(VisProvider);
     vis = new Vis(indexPattern, {
