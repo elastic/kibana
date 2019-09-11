@@ -20,7 +20,7 @@ describe('getSechduledActionOptions()', () => {
   });
 });
 
-describe('dequeue()', () => {
+describe('unscheduleActions()', () => {
   test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
