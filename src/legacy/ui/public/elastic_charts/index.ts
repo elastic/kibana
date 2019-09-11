@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export { FiltersService, FiltersSetup } from './filters_service';
+import chrome from 'ui/chrome';
+import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+
+export function getChartTheme(): Theme {
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  return isDarkMode ? DARK_THEME : LIGHT_THEME;
+}

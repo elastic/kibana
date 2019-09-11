@@ -17,21 +17,4 @@
  * under the License.
  */
 
-export function EmbeddingProvider({ getService, getPageObjects }) {
-  const browser = getService('browser');
-  const log = getService('log');
-  const PageObjects = getPageObjects(['header']);
-
-  class Embedding {
-
-    async openInEmbeddedMode() {
-      const currentUrl = await browser.getCurrentUrl();
-      log.debug(`Opening in embedded mode: ${currentUrl}`);
-      await browser.get(`${currentUrl}&embed=true`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-  }
-
-  return new Embedding();
-}
+export * from './types_service';

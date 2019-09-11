@@ -17,35 +17,24 @@
  * under the License.
  */
 
-import VislibProvider from 'ui/vislib';
-import { uiModules } from 'ui/modules';
-uiModules
-  .get('apps/discover')
-  .directive('discoverTimechart', function (Private) {
-    const vislib = Private(VislibProvider);
+import { FtrProviderContext } from '../ftr_provider_context';
 
-    return {
-      restrict: 'E',
-      scope: {
-        data: '='
-      },
-      link: function ($scope, elem) {
+export function EmbeddingProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
+  const log = getService('log');
+  const PageObjects = getPageObjects(['header']);
 
-        const init = function () {
-        // This elem should already have a height/width
-          const myChart = new vislib.Chart(elem[0], {
-            addLegend: false
-          });
+  class Embedding {
+    /**
+     * Opens current page in embeded mode
+     */
+    public async openInEmbeddedMode(): Promise<void> {
+      const currentUrl = await browser.getCurrentUrl();
+      log.debug(`Opening in embedded mode: ${currentUrl}`);
+      await browser.get(`${currentUrl}&embed=true`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+  }
 
-          $scope.$watch('data', function (data) {
-            if (data != null) {
-              myChart.render(data);
-            }
-          });
-        };
-
-        // Start the directive
-        init();
-      }
-    };
-  });
+  return new Embedding();
+}
