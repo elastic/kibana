@@ -41,4 +41,3 @@ include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
 
 include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
 
-
