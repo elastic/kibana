@@ -39,6 +39,9 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
     window.open(`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
   }
 
+  // Note we use display:none for the DataRecognizer section as it needs to be
+  // passed the recognizerResults object, and then run the recognizer check which
+  // controls whether the recognizer section is ultimately displayed.
   return (
     <EuiPanel data-test-subj="mlDataVisualizerActionsPanel">
       <EuiTitle>

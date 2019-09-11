@@ -5,6 +5,5 @@
  */
 
 import './data_recognizer_directive';
-import './data_recognizer';
 
 export { DataRecognizer } from './data_recognizer';
