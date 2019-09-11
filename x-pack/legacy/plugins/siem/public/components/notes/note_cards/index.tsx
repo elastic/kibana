@@ -8,12 +8,11 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { Note } from '../../../lib/note';
 import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
-import { TimelineWidthContext } from '../../timeline/timeline_context';
+import { useTimelineWidthContext } from '../../timeline/timeline_context';
 
 const AddNoteContainer = styled.div``;
 
@@ -30,7 +29,7 @@ interface NoteCardsCompProps {
 }
 
 const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => {
-  const width = useContext(TimelineWidthContext);
+  const width = useTimelineWidthContext();
 
   // Passing the styles directly to the component because the width is
   // being calculated and is recommended by Styled Components for performance

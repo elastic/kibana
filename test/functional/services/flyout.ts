@@ -17,42 +17,47 @@
  * under the License.
  */
 
-export function FlyoutProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function FlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
 
   class Flyout {
-    async close(testSubj) {
-      log.debug('Closing flyout', testSubj);
-      const flyoutElement = await testSubjects.find(testSubj);
+    public async close(dataTestSubj: string): Promise<void> {
+      log.debug('Closing flyout', dataTestSubj);
+      const flyoutElement = await testSubjects.find(dataTestSubj);
       const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
       await closeBtn.click();
-      await retry.waitFor('flyout closed', async () => !await testSubjects.exists(testSubj));
+      await retry.waitFor('flyout closed', async () => !(await testSubjects.exists(dataTestSubj)));
     }
 
-    async ensureClosed(testSubj) {
-      if (await testSubjects.exists(testSubj)) {
-        await this.close(testSubj);
+    public async ensureClosed(dataTestSubj: string): Promise<void> {
+      if (await testSubjects.exists(dataTestSubj)) {
+        await this.close(dataTestSubj);
       }
     }
 
-    async ensureAllClosed() {
+    public async ensureAllClosed(): Promise<void> {
       const flyoutElements = await find.allByCssSelector('.euiFlyout');
 
       if (!flyoutElements.length) {
         return;
       }
 
-      await Promise.all(flyoutElements.map(async (flyoutElement) => {
-        const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
-        await closeBtn.click();
-      }));
+      await Promise.all(
+        flyoutElements.map(async flyoutElement => {
+          const closeBtn = await flyoutElement.findByCssSelector('[aria-label*="Close"]');
+          await closeBtn.click();
+        })
+      );
 
-      await retry.waitFor('all flyouts to be closed', async () => (
-        (await find.allByCssSelector('.euiFlyout')).length === 0
-      ));
+      await retry.waitFor(
+        'all flyouts to be closed',
+        async () => (await find.allByCssSelector('.euiFlyout')).length === 0
+      );
     }
   }
 
