@@ -78,6 +78,7 @@
   },
   "resolutions": {
     "**/@types/node": "10.12.27",
+    "**/@types/react": "16.8.3",
     "**/@types/hapi": "^17.0.18",
     "**/typescript": "3.5.3",
     "**/cypress/lodash": "4.17.13",
