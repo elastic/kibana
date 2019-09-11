@@ -27,19 +27,17 @@ and select *Relationships*.
 Using the import and export commands, you can move objects between different 
 {kib} instances. This action is useful when you 
 have multiple environments for development and production. 
-
 Import and export also work well when you have a large number 
 of objects to update and want to batch the process.  
-You can export the objects to JSON, make the JSON modification, and re-import 
-the objects.
+
 
 [float]
 ==== Import
 
 You can import multiple objects in a single operation. Click *Import* and 
-navigate to the JSON file that 
+navigate to the NDJSON file that 
 represents the objects to import.  By default, 
-objects already in {kib} are overwritten.
+saved objects already in {kib} are overwritten.
 
 [float]
 ==== Export
@@ -49,13 +47,8 @@ You have two options for exporting saved objects.
 * Select the checkboxes of objects that you want to export, and then click *Export*.
 * Click *Export x objects*, and select which object types to export.
 
-This action exports a JSON with all your saved objects.  By default, 
-the export includes related objects. 
-
-WARNING: Exported dashboards do not include their associated index patterns.
-You must recreate the index patterns manually before importing 
-a saved dashboard to a 
-{kib} instance running on another {es} cluster.
+This action exports a NDJSON with all your saved objects.  By default, 
+the export includes related objects. Exported dashboards include their associated index patterns.
 
 
 [float]
@@ -72,7 +65,7 @@ If you access an object whose index has been deleted, you can:
 
 * Recreate the index so you can continue using the object.
 * Delete the object and recreate it using a different index.
-* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing
+* Change the index name in the object's `reference` array to point to an existing
 index pattern. This is useful if the index you were working with has been renamed.
 
 WARNING: Validation is not performed for object properties. Submitting an invalid 
