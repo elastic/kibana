@@ -49,17 +49,17 @@ on Elastic Cloud, you can access Kibana with a single click.
 
 --
 
-include::getting-started/add-sample-data.asciidoc[]
+include::{kib-repo-dir}/getting-started/add-sample-data.asciidoc[]
 
-include::getting-started/tutorial-sample-data.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-sample-data.asciidoc[]
 
-include::getting-started/tutorial-full-experience.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-full-experience.asciidoc[]
 
-include::getting-started/tutorial-define-index.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-define-index.asciidoc[]
 
-include::getting-started/tutorial-discovering.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-discovering.asciidoc[]
 
-include::getting-started/tutorial-visualizing.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-visualizing.asciidoc[]
 
-include::getting-started/tutorial-dashboard.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-dashboard.asciidoc[]
 
