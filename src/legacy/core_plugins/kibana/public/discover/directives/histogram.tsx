@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { npStart } from 'ui/new_platform';
 
 import {
   AnnotationDomainTypes,
@@ -44,7 +45,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { getChartTheme } from 'ui/elastic_charts';
 import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -213,13 +213,14 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
           onBrushEnd={this.onBrushEnd}
           onElementClick={this.onElementClick(xInterval)}
           tooltip={tooltipProps}
-          theme={getChartTheme()}
+          theme={npStart.plugins.eui_chart_utils.getChartsTheme()}
         />
         <Axis
           id={getAxisId('discover-histogram-left-axis')}
           position={Position.Left}
           ticks={5}
           title={chartData.yAxisLabel}
+          showGridLines
         />
         <Axis
           id={getAxisId('discover-histogram-bottom-axis')}
