@@ -6,7 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiTitle,
+  EuiPanel,
+  EuiIconTip,
+  EuiToolTip,
+  EuiKeyboardAccessible,
+} from '@elastic/eui';
 import { toExpression, Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
@@ -55,45 +62,54 @@ const SuggestionPreview = ({
     setExpressionError(false);
   }, [previewExpression]);
 
+  const clickHandler = () => {
+    switchToSuggestion(frame, dispatch, suggestion);
+  };
+
   return (
     <EuiToolTip content={suggestion.title}>
       <EuiPanel
         className="lnsSuggestionPanel__button"
         paddingSize="none"
         data-test-subj="lnsSuggestion"
-        onClick={() => {
-          switchToSuggestion(frame, dispatch, suggestion);
-        }}
       >
-        {expressionError ? (
-          <div className="lnsSidebar__suggestionIcon">
-            <EuiIconTip
-              size="xxl"
-              color="danger"
-              type="cross"
-              aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-                defaultMessage: 'Preview rendering failed',
-              })}
-              content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
-                defaultMessage: 'Preview rendering failed',
-              })}
-            />
+        <EuiKeyboardAccessible>
+          <div
+            onClick={clickHandler}
+            onKeyPress={clickHandler}
+            data-test-subj="lnsSuggestion-target"
+          >
+            {expressionError ? (
+              <div className="lnsSidebar__suggestionIcon">
+                <EuiIconTip
+                  size="xxl"
+                  color="danger"
+                  type="cross"
+                  aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                    defaultMessage: 'Preview rendering failed',
+                  })}
+                  content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
+                    defaultMessage: 'Preview rendering failed',
+                  })}
+                />
+              </div>
+            ) : previewExpression ? (
+              <ExpressionRendererComponent
+                className="lnsSuggestionChartWrapper"
+                expression={previewExpression}
+                onRenderFailure={(e: unknown) => {
+                  // eslint-disable-next-line no-console
+                  console.error(`Failed to render preview: `, e);
+                  setExpressionError(true);
+                }}
+              />
+            ) : (
+              <div className="lnsSidebar__suggestionIcon">
+                <EuiIcon size="xxl" type={suggestion.previewIcon} />
+              </div>
+            )}
           </div>
-        ) : previewExpression ? (
-          <ExpressionRendererComponent
-            className="lnsSuggestionChartWrapper"
-            expression={previewExpression}
-            onRenderFailure={(e: unknown) => {
-              // eslint-disable-next-line no-console
-              console.error(`Failed to render preview: `, e);
-              setExpressionError(true);
-            }}
-          />
-        ) : (
-          <div className="lnsSidebar__suggestionIcon">
-            <EuiIcon size="xxl" type={suggestion.previewIcon} />
-          </div>
-        )}
+        </EuiKeyboardAccessible>
       </EuiPanel>
     </EuiToolTip>
   );

@@ -98,7 +98,7 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     wrapper
-      .find('[data-test-subj="lnsSuggestion"]')
+      .find('[data-test-subj="lnsSuggestion-target"]')
       .first()
       .simulate('click');
 
@@ -116,7 +116,7 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} activeVisualizationId="vis2" />);
 
     wrapper
-      .find('[data-test-subj="lnsSuggestion"]')
+      .find('[data-test-subj="lnsSuggestion-target"]')
       .first()
       .simulate('click');
 
