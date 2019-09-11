@@ -10,10 +10,7 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
     size="s"
   />
   <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add new condition"
@@ -30,10 +27,7 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
     size="s"
   />
   <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add new condition"
@@ -59,10 +53,7 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
     size="s"
   />
   <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add new condition"
@@ -97,10 +88,7 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     size="s"
   />
   <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add new condition"

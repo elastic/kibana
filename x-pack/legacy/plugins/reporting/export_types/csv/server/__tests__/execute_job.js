@@ -474,7 +474,8 @@ describe('CSV Execute Job', function () {
     });
   });
 
-  describe('cancellation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/43069
+  describe.skip('cancellation', function () {
     const scrollId = getRandomScrollId();
 
     beforeEach(function () {
