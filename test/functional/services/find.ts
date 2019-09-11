@@ -364,7 +364,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async clickByButtonText(
       buttonText: string,
-      element = driver,
+      element: WebDriver | WebElement | WebElementWrapper = driver,
       timeout: number = defaultFindTimeout
     ): Promise<void> {
       log.debug(`Find.clickByButtonText('${buttonText}') with timeout=${timeout}`);

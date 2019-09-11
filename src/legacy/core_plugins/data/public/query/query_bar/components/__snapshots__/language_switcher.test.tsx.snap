@@ -5,11 +5,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
-      color="primary"
-      iconSide="left"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Lucene"
@@ -108,11 +105,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
-      color="primary"
-      iconSide="left"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="KQL"

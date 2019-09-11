@@ -81,18 +81,22 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
-              <FiltersGlobal>
-                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-              </FiltersGlobal>
-
-              <HeaderPage
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-                title={i18n.PAGE_TITLE}
-              />
-
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <FiltersGlobal>
+                      <NetworkKql
+                        indexPattern={indexPattern}
+                        setQuery={setQuery}
+                        type={networkModel.NetworkType.page}
+                      />
+                    </FiltersGlobal>
+
+                    <HeaderPage
+                      subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                      title={i18n.PAGE_TITLE}
+                    />
+
                     <NetworkFilter indexPattern={indexPattern} type={networkModel.NetworkType.page}>
                       {({ applyFilterQueryFromKueryExpression }) => (
                         <EmbeddedMap
@@ -279,7 +283,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           ) : (
             <>
               <HeaderPage title={i18n.PAGE_TITLE} />
-
               <NetworkEmptyPage />
             </>
           )
