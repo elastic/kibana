@@ -164,7 +164,7 @@ test('executeAction is called per alert instance that is scheduled', async () =>
   `);
 });
 
-test('persists alertInstances passed in from state, only if they are schduled for execution', async () => {
+test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
   getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
     ({ services: executorServices }: AlertExecutorOptions) => {
       executorServices.alertInstanceFactory('1').scheduleActions('default');
