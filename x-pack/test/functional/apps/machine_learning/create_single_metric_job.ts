@@ -145,10 +145,9 @@ export default function({ getService }: FtrProviderContext) {
       expect(rows.filter(row => row.id === jobId)).to.have.length(1);
     });
 
-    it('displays details for the created job in the job list', async () => {
-      const rows = await ml.jobTable.parseJobTable();
-      const job = rows.filter(row => row.id === jobId)[0];
-      expect(job).to.eql({
+    // FLAKY: https://github.com/elastic/kibana/issues/45447
+    it.skip('displays details for the created job in the job list', async () => {
+      const expectedRow = {
         id: jobId,
         description: jobDescription,
         jobGroups,
@@ -157,18 +156,10 @@ export default function({ getService }: FtrProviderContext) {
         jobState: 'closed',
         datafeedState: 'stopped',
         latestTimestamp: '2016-02-11 23:56:59',
-      });
+      };
+      await ml.jobTable.assertJobRowFields(jobId, expectedRow);
 
-      const countDetails = await ml.jobTable.parseJobCounts(jobId);
-      const counts = countDetails.counts;
-
-      // last_data_time holds a runtime timestamp and is hard to predict
-      // the property is only validated to be present and then removed
-      // so it doesn't make the counts object validation fail
-      expect(counts).to.have.property('last_data_time');
-      delete counts.last_data_time;
-
-      expect(counts).to.eql({
+      const expectedCounts = {
         job_id: jobId,
         processed_record_count: '2,399',
         processed_field_count: '4,798',
@@ -184,17 +175,8 @@ export default function({ getService }: FtrProviderContext) {
         latest_record_timestamp: '2016-02-11 23:56:59',
         input_record_count: '2,399',
         latest_bucket_timestamp: '2016-02-11 23:30:00',
-      });
-
-      const modelSizeStats = countDetails.modelSizeStats;
-
-      // log_time holds a runtime timestamp and is hard to predict
-      // the property is only validated to be present and then removed
-      // so it doesn't make the modelSizeStats object validation fail
-      expect(modelSizeStats).to.have.property('log_time');
-      delete modelSizeStats.log_time;
-
-      expect(modelSizeStats).to.eql({
+      };
+      const expectedModelSizeStats = {
         job_id: jobId,
         result_type: 'model_size_stats',
         model_bytes: '47.6 KB',
@@ -206,7 +188,8 @@ export default function({ getService }: FtrProviderContext) {
         bucket_allocation_failures_count: '0',
         memory_status: 'ok',
         timestamp: '2016-02-11 23:00:00',
-      });
+      };
+      await ml.jobTable.assertJobRowDetailsCounts(jobId, expectedCounts, expectedModelSizeStats);
     });
   });
 }

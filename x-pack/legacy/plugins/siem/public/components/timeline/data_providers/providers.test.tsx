@@ -17,6 +17,7 @@ import { getDraggableId, Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 
 describe('Providers', () => {
+  const mockTimelineContext: boolean = true;
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -95,7 +96,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -158,7 +159,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -240,7 +241,7 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -318,7 +319,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -427,7 +428,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -508,7 +509,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -594,7 +595,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={true}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}

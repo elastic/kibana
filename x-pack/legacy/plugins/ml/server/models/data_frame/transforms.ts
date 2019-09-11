@@ -5,8 +5,8 @@
  */
 
 import { callWithRequestType } from '../../../common/types/kibana';
+import { DATA_FRAME_TRANSFORM_STATE } from '../../../public/data_frame/common';
 import {
-  DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
