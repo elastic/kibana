@@ -18,8 +18,6 @@
  */
 import { escape, isFunction } from 'lodash';
 import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../types';
-
-// @ts-ignore
 import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
 // @ts-ignore
 import { getHighlightHtml } from '../../../core_plugins/kibana/common/highlight/highlight_html';
