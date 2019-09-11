@@ -42,14 +42,10 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={false}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -62,12 +58,9 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={false}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -80,12 +73,9 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -140,14 +130,10 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -160,12 +146,9 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -178,12 +161,9 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={false}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -238,14 +218,10 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -258,12 +234,9 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -276,12 +249,9 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -342,14 +312,10 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -362,12 +328,9 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -380,12 +343,9 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
