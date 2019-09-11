@@ -17,11 +17,19 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
-    loadTestFile(require.resolve('./legacy_plugins.js'));
+import expect from '@kbn/expect';
+
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
+
+  describe('legacy plugins', function describeIndexTests() {
+    it('have access to New Platform HTTP service', async () => {
+      const url = `${PageObjects.common.getHostPort()}/api/np-http-in-legacy`;
+      await browser.get(url);
+
+      const pageSource = await browser.execute('return window.document.body.textContent;');
+      expect(pageSource).to.equal('Pong in legacy via new platform: true');
+    });
   });
 }
