@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export * from './angular';
-export * from './constants';
-export * from './components';
-
-export const getAppDescription = () =>
-  i18n.translate('xpack.canvas.appDescription', {
-    defaultMessage: 'Showcase your data in a pixel-perfect way.',
-  });
+export const ComponentStrings = {
+  AddEmbeddableFlyout: {
+    getNoItemsText: () =>
+      i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
+        defaultMessage: 'No matching objects found.',
+      }),
+  },
+};
