@@ -49,10 +49,7 @@ export class NoDataController extends MonitoringViewBaseController {
 
       if (catchReason) {
         this.reason = catchReason;
-      } else if (!this.isCollectionEnabledUpdating
-        && !this.isCollectionEnabledUpdated
-        && !this.isCollectionIntervalUpdating
-        && !this.isCollectionIntervalUpdated) {
+      } else if (!this.isCollectionEnabledUpdating && !this.isCollectionIntervalUpdating) {
         /**
          * `no-use-before-define` is fine here, since getData is an async function.
          * Needs to be done this way, since there is no `this` before super is executed
