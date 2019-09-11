@@ -53,10 +53,10 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
   const startTimeValue = useMemo(() => {
-    return startTime ? moment(startTime) : null;
+    return startTime ? moment(startTime) : undefined;
   }, [startTime]);
   const endTimeValue = useMemo(() => {
-    return endTime ? moment(endTime) : null;
+    return endTime ? moment(endTime) : undefined;
   }, [endTime]);
   return (
     <EuiForm>
@@ -113,7 +113,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
                 onChange={date => setEndTime(selectedDateToParam(date))}
                 placeholder={endTimeDefaultDescription}
                 openToDate={now}
-                minDate={moment(startTime)}
+                minDate={startTimeValue}
                 minTime={
                   selectedEndTimeIsToday
                     ? now
