@@ -20,12 +20,12 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { setup as setupVisualizations } from '../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../visualizations/public/legacy';
 import { MarkdownPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
 const plugins: Readonly<MarkdownPluginSetupDependencies> = {
-  visualizations: setupVisualizations,
+  visualizations: visualizationsSetup,
   data: npSetup.plugins.data,
 };
 
