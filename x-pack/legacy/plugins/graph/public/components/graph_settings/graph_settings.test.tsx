@@ -25,6 +25,11 @@ describe('graph_settings', () => {
     updateAdvancedSettings: jest.fn(),
     blacklistedNodes: [
       {
+        x: 0,
+        y: 0,
+        scaledSize: 10,
+        parent: null,
+        color: 'black',
         data: {
           field: 'A',
           term: '1',
@@ -37,6 +42,11 @@ describe('graph_settings', () => {
         },
       },
       {
+        x: 0,
+        y: 0,
+        scaledSize: 10,
+        parent: null,
+        color: 'black',
         data: {
           field: 'A',
           term: '1',
@@ -72,6 +82,7 @@ describe('graph_settings', () => {
     saveUrlTemplate: jest.fn(),
     allFields: [
       {
+        selected: false,
         color: 'black',
         name: 'B',
         icon: {
@@ -81,6 +92,7 @@ describe('graph_settings', () => {
         },
       },
       {
+        selected: false,
         color: 'red',
         name: 'C',
         icon: {

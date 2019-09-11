@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlacklistForm } from './blacklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { WorkspaceNode, AdvancedSettings, UrlTemplate, Field } from '../../types';
+import { WorkspaceNode, AdvancedSettings, UrlTemplate, WorkspaceField } from '../../types';
 
 const tabs = [
   {
@@ -40,7 +40,7 @@ export interface GraphSettingsProps {
   urlTemplates: UrlTemplate[];
   removeUrlTemplate: (urlTemplate: UrlTemplate) => void;
   saveUrlTemplate: (index: number, urlTemplate: UrlTemplate) => void;
-  allFields: Field[];
+  allFields: WorkspaceField[];
 }
 
 interface AsObservable<P> {

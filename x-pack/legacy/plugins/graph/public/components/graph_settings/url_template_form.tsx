@@ -20,15 +20,13 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { UrlTemplate } from '../../types';
 import { LegacyIcon } from './legacy_icon';
-import { getOutlinkEncoders } from '../../services/outlink_encoders';
+import { outlinkEncoders } from '../../services/outlink_encoders';
 import { urlTemplateIconChoices } from '../../services/style_choices';
 import {
   isUrlTemplateValid,
   isKibanaUrl,
   replaceKibanaUrlParam,
 } from '../../services/url_template';
-
-const encoders = getOutlinkEncoders();
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
@@ -59,7 +57,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
     isUpdateForm(props)
       ? props.initialTemplate
       : {
-          encoder: encoders[0],
+          encoder: outlinkEncoders[0],
           icon: null,
           description: '',
           url: '',
@@ -104,7 +102,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
       encoder:
         currentTemplate.encoder.type === 'kql'
           ? currentTemplate.encoder
-          : encoders.find(enc => enc.type === 'kql')!,
+          : outlinkEncoders.find(enc => enc.type === 'kql')!,
     });
     setAutoformatUrl(false);
   }
@@ -242,7 +240,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             fullWidth
             singleSelection={{ asPlainText: true }}
             isClearable={false}
-            options={encoders.map(encoder => ({ label: encoder.title, value: encoder }))}
+            options={outlinkEncoders.map(encoder => ({ label: encoder.title, value: encoder }))}
             selectedOptions={[
               {
                 label: currentTemplate.encoder.title,
