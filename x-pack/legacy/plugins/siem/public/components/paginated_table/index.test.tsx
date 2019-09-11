@@ -32,6 +32,7 @@ describe('Paginated Table Component', () => {
     updateLimitPagination = jest.fn();
     updateActivePage = jest.fn();
   });
+
   describe('rendering', () => {
     test('it renders the default load more table', () => {
       const wrapper = shallow(
@@ -396,9 +397,6 @@ describe('Paginated Table Component', () => {
     });
 
     test('should update the page when the activePage is changed from redux', () => {
-      // const setState = jest.fn();
-      // const useStateSpy = jest.spyOn(React, 'useState');
-      // useStateSpy.mockImplementation(init => [init, setState]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ourProps: BasicTableProps<any> = {
         activePage: 3,
@@ -432,6 +430,7 @@ describe('Paginated Table Component', () => {
           </ThemeProvider>
         );
       };
+
       const wrapper = mount(<ComponentWithContext {...ourProps} />);
       expect(
         wrapper
