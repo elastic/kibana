@@ -32,11 +32,11 @@ export default function ({ getService, getPageObjects }) {
   const loadingScreenShown = () =>
     testSubjects.existOrFail('kbnLoadingMessage');
 
-  const getKibanaUrl = path => url.format({
+  const getKibanaUrl = pathname => url.format({
     protocol: 'http:',
     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
     port: process.env.TEST_KIBANA_PORT || '5620',
-    path
+    pathname
   });
 
   describe('ui applications', function describeIndexTests() {
