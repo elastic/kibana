@@ -17,7 +17,7 @@ export function getFileDataVisualizerBreadcrumbs() {
     DATA_VISUALIZER_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
-        defaultMessage: 'File based'
+        defaultMessage: 'File'
       }),
       href: ''
     }

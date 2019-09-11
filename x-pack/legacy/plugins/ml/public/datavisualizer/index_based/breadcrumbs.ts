@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   ML_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
@@ -13,5 +14,14 @@ import {
 export function getDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
-  return [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
+  return [
+    ML_BREADCRUMB,
+    DATA_VISUALIZER_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
+        defaultMessage: 'Index',
+      }),
+      href: '',
+    },
+  ];
 }
