@@ -9,12 +9,33 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ML_BREADCRUMB } from '../breadcrumbs';
 
-export function getDataFrameAnalyticsBreadcrumbs() {
+const DATA_FRAME_ANALYTICS_BREADCRUMB = {
+  text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameLabel', {
+    defaultMessage: 'Data Frame Analytics',
+  }),
+  href: '#/data_frame_analytics?',
+};
+
+export function getDataFrameAnalyticsManagementBreadcrumbs() {
   return [
     ML_BREADCRUMB,
+    DATA_FRAME_ANALYTICS_BREADCRUMB,
     {
-      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameLabel', {
-        defaultMessage: 'Analytics',
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsManagementBreadcrumbs.dataFrameLabel', {
+        defaultMessage: 'Job Management',
+      }),
+      href: '',
+    },
+  ];
+}
+
+export function getDataFrameAnalyticsExplorationBreadcrumbs() {
+  return [
+    ML_BREADCRUMB,
+    DATA_FRAME_ANALYTICS_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsExplorationBreadcrumbs.dataFrameLabel', {
+        defaultMessage: 'Exploration',
       }),
       href: '',
     },

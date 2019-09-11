@@ -15,13 +15,13 @@ import {
   loadIndexPatterns,
   // @ts-ignore
 } from '../../../util/index_utils';
-import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
+import { getDataFrameAnalyticsExplorationBreadcrumbs } from '../../breadcrumbs';
 
 const template = `<ml-data-frame-analytics-exploration />`;
 
 uiRoutes.when('/data_frame_analytics/exploration?', {
   template,
-  k7Breadcrumbs: getDataFrameAnalyticsBreadcrumbs,
+  k7Breadcrumbs: getDataFrameAnalyticsExplorationBreadcrumbs,
   resolve: {
     CheckLicense: checkFullLicense,
     privileges: checkGetJobsPrivilege,

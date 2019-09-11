@@ -6,7 +6,6 @@
 
 import {
   ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   // @ts-ignore
 } from '../../breadcrumbs';
@@ -14,5 +13,5 @@ import {
 export function getDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
-  return [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
+  return [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
 }

@@ -13,7 +13,14 @@ export function getJobManagementBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
   return [
-    ML_BREADCRUMB
+    ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
+        defaultMessage: 'Job Management'
+      }),
+      href: ''
+    }
   ];
 }
 
@@ -91,7 +98,6 @@ export function getCreateRecognizerJobBreadcrumbs($routeParams) {
 export function getDataVisualizerIndexOrSearchBreadcrumbs() {
   return [
     ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB,
     DATA_VISUALIZER_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {

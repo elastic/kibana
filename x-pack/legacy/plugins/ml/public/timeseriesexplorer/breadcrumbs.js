@@ -6,6 +6,7 @@
 
 
 import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../breadcrumbs';
+import { i18n } from '@kbn/i18n';
 
 
 export function getSingleMetricViewerBreadcrumbs() {
@@ -13,7 +14,14 @@ export function getSingleMetricViewerBreadcrumbs() {
   // use root ML breadcrumb.
   return [
     ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB
+    ANOMALY_DETECTION_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
+        defaultMessage: 'Single Metric Viewer'
+      }),
+      href: ''
+    }
+
   ];
 }
 
