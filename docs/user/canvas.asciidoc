@@ -29,16 +29,16 @@ Canvas, see the <<canvas-common-functions>> and
 
 --
 
-include::canvas/canvas-getting-started.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-getting-started.asciidoc[]
 
-include::canvas/canvas-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-workpad.asciidoc[]
 
-include::canvas/canvas-function-reference.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-function-reference.asciidoc[]
 
-include::canvas/canvas-common-functions.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-common-functions.asciidoc[]
 
-include::canvas/canvas-server-functions.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-server-functions.asciidoc[]
 
-include::canvas/canvas-client-functions.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-client-functions.asciidoc[]
 
-include::canvas/canvas-tinymath-functions.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]
