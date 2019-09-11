@@ -285,19 +285,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await indexLink.click();
     }
 
-    async createIndexPattern(indexPatternName, standardIndexPattern = true, timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, isStandardIndexPattern = true, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickOptionalAddNewButton();
+        await this.clickOptionalAddNewButton(isStandardIndexPattern);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        if (standardIndexPattern) {
-          await this.clickIndexPatternType('Standard');
-        } else {
-          await this.clickIndexPatternType('Rollup');
-        }
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
         });
@@ -324,9 +319,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
-    async clickOptionalAddNewButton() {
+    async clickOptionalAddNewButton(isStandardIndexPattern) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
+        if (await testSubjects.isDisplayed('createRollupIndexPatternButton')) {
+          if (isStandardIndexPattern) {
+            await this.clickIndexPatternType('Standard');
+          } else {
+            await this.clickIndexPatternType('Rollup');
+          }
+        }
       }
     }
 
