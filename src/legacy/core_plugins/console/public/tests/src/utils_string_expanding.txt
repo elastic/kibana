@@ -2,7 +2,7 @@
 Scripts in requests
 -------------------------------------
 {
-  "f": { "script" : { "source": "test\ntest\\2" } },
+  "f": { "script" : { "source": "\ntest\ntest\\2\n" } },
   "g": { "script" : "second + \"\\\";" },
   "f": "short with \\",
   "h": 1,
