@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function QueryBarProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function QueryBarProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
@@ -25,12 +27,11 @@ export function QueryBarProvider({ getService, getPageObjects }) {
   const find = getService('find');
 
   class QueryBar {
-
-    async getQueryString() {
+    async getQueryString(): Promise<string> {
       return await testSubjects.getAttribute('queryInput', 'value');
     }
 
-    async setQuery(query) {
+    public async setQuery(query: string): Promise<void> {
       log.debug(`QueryBar.setQuery(${query})`);
       // Extra caution used because of flaky test here: https://github.com/elastic/kibana/issues/16978 doesn't seem
       // to be actually setting the query in the query input based off
@@ -44,22 +45,23 @@ export function QueryBarProvider({ getService, getPageObjects }) {
         await input.type(query);
         const currentQuery = await this.getQueryString();
         if (currentQuery !== query) {
-          throw new Error(`Failed to set query input to ${query}, instead query is ${currentQuery}`);
+          throw new Error(
+            `Failed to set query input to ${query}, instead query is ${currentQuery}`
+          );
         }
       });
     }
 
-    async submitQuery() {
+    public async submitQuery(): Promise<void> {
       log.debug('QueryBar.submitQuery');
       await testSubjects.click('queryInput');
       await PageObjects.common.pressEnterKey();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickQuerySubmitButton() {
+    public async clickQuerySubmitButton(): Promise<void> {
       await testSubjects.click('querySubmitButton');
     }
-
   }
 
   return new QueryBar();
