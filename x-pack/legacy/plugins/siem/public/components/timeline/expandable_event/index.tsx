@@ -7,14 +7,13 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { BrowserFields } from '../../../containers/source';
 import { ColumnHeader } from '../body/column_headers/column_header';
 import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { OnUpdateColumns } from '../events';
-import { TimelineWidthContext } from '../timeline_context';
+import { useTimelineWidthContext } from '../timeline_context';
 
 const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
   ${({ hideExpandButton }) =>
@@ -52,7 +51,7 @@ export const ExpandableEvent = React.memo<Props>(
     toggleColumn,
     onUpdateColumns,
   }) => {
-    const width = useContext(TimelineWidthContext);
+    const width = useTimelineWidthContext();
     // Passing the styles directly to the component of LazyAccordion because the width is
     // being calculated and is recommended by Styled Components for performance
     // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291

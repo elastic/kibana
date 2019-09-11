@@ -64,6 +64,18 @@ export const getKqlFilterQueryDraftSelector = () =>
     timeline => (timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null)
   );
 
+export const getKqlFilterKuerySelector = () =>
+  createSelector(
+    selectTimeline,
+    timeline =>
+      timeline &&
+      timeline.kqlQuery &&
+      timeline.kqlQuery.filterQuery &&
+      timeline.kqlQuery.filterQuery.kuery
+        ? timeline.kqlQuery.filterQuery.kuery
+        : null
+  );
+
 export const isFilterQueryDraftValidSelector = () =>
   createSelector(
     selectTimeline,

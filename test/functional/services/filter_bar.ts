@@ -17,48 +17,70 @@
  * under the License.
  */
 
-export function FilterBarProvider({ getService, getPageObjects }) {
-  const testSubjects = getService('testSubjects');
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function FilterBarProvider({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
   class FilterBar {
-    hasFilter(key, value, enabled = true) {
+    /**
+     * Checks if specified filter exists
+     *
+     * @param key field name
+     * @param value filter value
+     * @param enabled filter status
+     */
+    public async hasFilter(key: string, value: string, enabled: boolean = true): Promise<boolean> {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
-      return testSubjects.exists(
+      return await testSubjects.exists(
         `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`,
         {
-          allowHidden: true
+          allowHidden: true,
         }
       );
     }
 
-    async removeFilter(key) {
+    /**
+     * Removes specified filter
+     *
+     * @param key field name
+     */
+    public async removeFilter(key: string): Promise<void> {
       await testSubjects.click(`filter & filter-key-${key}`);
       await testSubjects.click(`deleteFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async removeAllFilters() {
+    /**
+     * Removes all filters
+     */
+    public async removeAllFilters(): Promise<void> {
       await testSubjects.click('showFilterActions');
       await testSubjects.click('removeAllFilters');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitUntilUrlIncludes('filters:!()');
     }
 
-    async toggleFilterEnabled(key) {
+    /**
+     * Changes filter active status
+     *
+     * @param key field name
+     */
+    public async toggleFilterEnabled(key: string): Promise<void> {
       await testSubjects.click(`filter & filter-key-${key}`);
       await testSubjects.click(`disableFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async toggleFilterPinned(key) {
+    public async toggleFilterPinned(key: string): Promise<void> {
       await testSubjects.click(`filter & filter-key-${key}`);
       await testSubjects.click(`pinFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async getFilterCount() {
+    public async getFilterCount(): Promise<number> {
       const filters = await testSubjects.findAll('filter');
       return filters.length;
     }
@@ -81,12 +103,14 @@ export function FilterBarProvider({ getService, getPageObjects }) {
      * // Add a filter containing multiple values
      * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
      */
-    async addFilter(field, operator, ...values) {
+    public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
       await testSubjects.click('addFilter');
       await comboBox.set('filterFieldSuggestionList', field);
       await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      const paramsComboBoxes = await params.findAllByCssSelector('[data-test-subj~="filterParamsComboBox"]');
+      const paramsComboBoxes = await params.findAllByCssSelector(
+        '[data-test-subj~="filterParamsComboBox"]'
+      );
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
@@ -98,8 +122,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
           for (let j = 0; j < fieldValues.length; j++) {
             await comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
           }
-        }
-        else if (paramFields && paramFields.length > 0) {
+        } else if (paramFields && paramFields.length > 0) {
           for (let j = 0; j < fieldValues.length; j++) {
             await paramFields[i].type(fieldValues[j]);
           }
@@ -109,36 +132,60 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickEditFilter(key, value) {
+    /**
+     * Activates filter editing
+     * @param key field name
+     * @param value field value
+     */
+    public async clickEditFilter(key: string, value: string): Promise<void> {
       await testSubjects.click(`filter & filter-key-${key} & filter-value-${value}`);
       await testSubjects.click(`editFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async getFilterEditorSelectedPhrases() {
+    /**
+     * Returns available phrases in the filter
+     */
+    public async getFilterEditorSelectedPhrases(): Promise<string[]> {
       return await comboBox.getComboBoxSelectedOptions('filterParamsComboBox');
     }
 
-    async getFilterEditorFields() {
+    /**
+     * Returns available fields in the filter
+     */
+    public async getFilterEditorFields(): Promise<string[]> {
       const optionsString = await comboBox.getOptionsList('filterFieldSuggestionList');
       return optionsString.split('\n');
     }
 
-    async ensureFieldEditorModalIsClosed() {
+    /**
+     * Closes field editor modal window
+     */
+    public async ensureFieldEditorModalIsClosed(): Promise<void> {
       const cancelSaveFilterModalButtonExists = await testSubjects.exists('cancelSaveFilter');
       if (cancelSaveFilterModalButtonExists) {
         await testSubjects.click('cancelSaveFilter');
       }
     }
 
-    async getIndexPatterns() {
+    /**
+     * Returns comma-separated list of index patterns
+     */
+    public async getIndexPatterns(): Promise<string> {
       await testSubjects.click('addFilter');
       const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
       await this.ensureFieldEditorModalIsClosed();
-      return indexPatterns.trim().split('\n').join(',');
+      return indexPatterns
+        .trim()
+        .split('\n')
+        .join(',');
     }
 
-    async selectIndexPattern(indexPatternTitle) {
+    /**
+     * Adds new index pattern filter
+     * @param indexPatternTitle
+     */
+    public async selectIndexPattern(indexPatternTitle: string): Promise<void> {
       await testSubjects.click('addFilter');
       await comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
     }

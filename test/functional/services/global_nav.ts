@@ -18,39 +18,42 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function GlobalNavProvider({ getService }) {
+export function GlobalNavProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
-  return new class GlobalNav {
-    async moveMouseToLogo() {
+  class GlobalNav {
+    public async moveMouseToLogo(): Promise<void> {
       await testSubjects.moveMouseTo('headerGlobalNav logo');
     }
 
-    async clickLogo() {
+    public async clickLogo(): Promise<void> {
       return await testSubjects.click('headerGlobalNav logo');
     }
 
-    async exists() {
+    public async exists(): Promise<boolean> {
       return await testSubjects.exists('headerGlobalNav');
     }
 
-    async getFirstBreadcrumb() {
+    public async getFirstBreadcrumb(): Promise<string> {
       return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
     }
 
-    async getLastBreadcrumb() {
+    public async getLastBreadcrumb(): Promise<string> {
       return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
     }
 
-    async badgeExistsOrFail(expectedLabel) {
+    public async badgeExistsOrFail(expectedLabel: string): Promise<void> {
       await testSubjects.existOrFail('headerBadge');
       const actualLabel = await testSubjects.getAttribute('headerBadge', 'data-test-badge-label');
       expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
     }
 
-    async badgeMissingOrFail() {
+    public async badgeMissingOrFail(): Promise<void> {
       await testSubjects.missingOrFail('headerBadge');
     }
-  };
+  }
+
+  return new GlobalNav();
 }
