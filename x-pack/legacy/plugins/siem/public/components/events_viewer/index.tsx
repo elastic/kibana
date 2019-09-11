@@ -84,7 +84,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders });
+        createTimeline({ id, columns });
       }
     }, []);
 
