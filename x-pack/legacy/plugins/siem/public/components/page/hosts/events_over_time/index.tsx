@@ -28,6 +28,23 @@ export const getBarchartConfigs = (from: number, to: number) => ({
   settings: {
     legendPosition: Position.Bottom,
     showLegend: true,
+    theme: {
+      scales: {
+        barsPadding: 0.05,
+      },
+      chartMargins: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+      chartPaddings: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    },
   },
 });
 
@@ -78,7 +95,7 @@ export const EventsOverTimeHistogram = ({
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >
-      <FlexGroup direction="column">
+      <FlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <HeaderPanel
             id={id}

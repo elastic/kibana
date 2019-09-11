@@ -23,7 +23,6 @@ import {
   ChartHolder,
   getSeriesStyle,
   WrappedByAutoSizer,
-  getTheme,
   ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
@@ -70,7 +69,7 @@ export const AreaChartBaseComponent = React.memo<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings {...settings} theme={getTheme()} />
+        <Settings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);

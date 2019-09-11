@@ -48,15 +48,6 @@ export const ChartHolder = () => (
   </FlexGroup>
 );
 
-export const chartDefaultSettings = {
-  rotation: chartDefaultRotation,
-  rendering: chartDefaultRendering,
-  animatedData: false,
-  showLegend: false,
-  showLegendDisplayValue: false,
-  debug: false,
-};
-
 export interface ChartData {
   x: number | string | null;
   y: number | string | null;
@@ -144,6 +135,16 @@ export const getTheme = () => {
   const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
+};
+
+export const chartDefaultSettings = {
+  rotation: chartDefaultRotation,
+  rendering: chartDefaultRendering,
+  animatedData: false,
+  showLegend: false,
+  showLegendDisplayValue: false,
+  debug: false,
+  theme: getTheme(),
 };
 
 const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);

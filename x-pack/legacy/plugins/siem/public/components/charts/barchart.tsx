@@ -23,7 +23,6 @@ import {
   ChartHolder,
   SeriesType,
   getSeriesStyle,
-  getTheme,
   ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
@@ -49,7 +48,7 @@ export const BarChartBaseComponent = React.memo<{
   };
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} theme={getTheme()} />
+      <Settings {...settings} />
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
