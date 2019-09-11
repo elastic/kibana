@@ -47,15 +47,15 @@ export const DOCKER_ALLOWED_LIST = [
 
 export const getAllowedListForPrefix = (prefix: string) => {
   const firstPart = first(prefix.split(/\./));
-  const DEFAULT_ALLOWED_LIST = prefix ? [...ECS_ALLOWED_LIST, prefix] : ECS_ALLOWED_LIST;
+  const defaultAllowedList = prefix ? [...ECS_ALLOWED_LIST, prefix] : ECS_ALLOWED_LIST;
   switch (firstPart) {
     case 'docker':
-      return [...DEFAULT_ALLOWED_LIST, ...DOCKER_ALLOWED_LIST];
+      return [...defaultAllowedList, ...DOCKER_ALLOWED_LIST];
     case 'prometheus':
-      return [...DEFAULT_ALLOWED_LIST, ...PROMETHEUS_ALLOWED_LIST];
+      return [...defaultAllowedList, ...PROMETHEUS_ALLOWED_LIST];
     case 'kubernetes':
-      return [...DEFAULT_ALLOWED_LIST, ...K8S_ALLOWED_LIST];
+      return [...defaultAllowedList, ...K8S_ALLOWED_LIST];
     default:
-      return DEFAULT_ALLOWED_LIST;
+      return defaultAllowedList;
   }
 };
