@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CustomExtentsOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <SwitchOption
+    label="Scale to data bounds"
+    paramName="defaultYExtents"
+    setValue={[Function]}
+    value={true}
+  />
+  <NumberInputOption
+    isInvalid={false}
+    label="Bounds margin"
+    min={0}
+    paramName="boundsMargin"
+    setValue={[Function]}
+    step={0.1}
+  />
+  <SwitchOption
+    dataTestSubj="yAxisSetYExtents"
+    label="Set axis extents"
+    paramName="setYExtents"
+    setValue={[Function]}
+    value={true}
+  />
+  <YExtents
+    scale={
+      Object {
+        "boundsMargin": undefined,
+        "defaultYExtents": true,
+        "max": undefined,
+        "min": undefined,
+        "setYExtents": true,
+      }
+    }
+    setMultipleValidity={[MockFunction]}
+    setScale={[MockFunction]}
+  />
+</Fragment>
+`;

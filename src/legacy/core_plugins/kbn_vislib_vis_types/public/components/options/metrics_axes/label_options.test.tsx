@@ -57,6 +57,14 @@ describe('LabelOptions component', () => {
     expect(comp).toMatchSnapshot();
   });
 
+  it('should show other fields when axis.labels.show is true', () => {
+    const comp = shallow(<LabelOptions {...defaultProps} />);
+
+    expect(comp.find({ paramName: 'filter' }).prop('disabled')).toBeFalsy();
+    expect(comp.find({ paramName: 'rotate' }).prop('disabled')).toBeFalsy();
+    expect(comp.find(TruncateLabelsOption).prop('disabled')).toBeFalsy();
+  });
+
   it('should disable other fields when axis.labels.show is false', () => {
     defaultProps.axis.labels.show = false;
     const comp = shallow(<LabelOptions {...defaultProps} />);
@@ -73,6 +81,28 @@ describe('LabelOptions component', () => {
     });
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, rotate: 5 } }];
-    expect(defaultProps.setValue).toBeCalledWith('categoryAxes', newAxes);
+    expect(setValue).toBeCalledWith('categoryAxes', newAxes);
+  });
+
+  it('should set filter value', () => {
+    const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
+    expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeFalsy();
+    act(() => {
+      comp.find({ paramName: 'filter' }).prop('setValue')('filter', true);
+    });
+
+    const newAxes = [{ ...axis, labels: { ...axis.labels, filter: true } }];
+    expect(setValue).toBeCalledWith('categoryAxes', newAxes);
+  });
+
+  it('should set value for valueAxes', () => {
+    defaultProps.axesName = 'valueAxes';
+    const comp = shallow(<LabelOptions {...defaultProps} />);
+    act(() => {
+      comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
+    });
+
+    const newAxes = [{ ...axis, labels: { ...axis.labels, truncate: 10 } }];
+    expect(setValue).toBeCalledWith('valueAxes', newAxes);
   });
 });

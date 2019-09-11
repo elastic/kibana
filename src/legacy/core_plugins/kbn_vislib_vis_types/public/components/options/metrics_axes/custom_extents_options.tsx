@@ -25,7 +25,7 @@ import { NumberInputOption, SwitchOption } from '../../common';
 import { YExtents } from './y_extents';
 import { SetScale } from './value_axis_options';
 
-interface CustomExtentsOptionsProps {
+export interface CustomExtentsOptionsProps {
   axis: ValueAxis;
   setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
