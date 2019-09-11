@@ -3,10 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Server } from 'hapi';
-
-import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kibana_configuration_adapter';
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
 import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
@@ -20,12 +16,13 @@ import { InfraLogAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
+import { InfraConfig } from '../../new_platform_config.schema';
+import { InternalCoreSetup } from '../../../../../../../src/core/server';
 
-export function compose(server: Server): InfraBackendLibs {
-  const configuration = new InfraKibanaConfigurationAdapter(server);
-  const framework = new InfraKibanaBackendFrameworkAdapter(server);
+export function compose(core: InternalCoreSetup, config: InfraConfig) {
+  const framework = new InfraKibanaBackendFrameworkAdapter(core);
   const sources = new InfraSources({
-    configuration,
+    config,
     savedObjects: framework.getSavedObjectsService(),
   });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
@@ -46,7 +43,7 @@ export function compose(server: Server): InfraBackendLibs {
   };
 
   const libs: InfraBackendLibs = {
-    configuration,
+    configuration: config, // NP_TODO: Do we ever use this anywhere?
     framework,
     logAnalysis,
     snapshot,

@@ -5,20 +5,8 @@
  */
 import { InternalCoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { initServerWithKibana } from './kibana.index';
-
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean(),
-    query: schema.object({
-      partitionSize: schema.maybe(schema.number()),
-      partitionFactor: schema.maybe(schema.number()),
-    }),
-  }),
-};
-
-export type InfraConfig = TypeOf<typeof config.schema>;
+import { InfraConfig } from './new_platform_config.schema';
 
 const DEFAULT_CONFIG: InfraConfig = {
   enabled: true,
@@ -47,6 +35,6 @@ export class InfraServerPlugin {
   }
 
   setup(core: InternalCoreSetup) {
-    initServerWithKibana(core);
+    initServerWithKibana(core, this.config);
   }
 }

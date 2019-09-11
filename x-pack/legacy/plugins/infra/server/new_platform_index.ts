@@ -5,7 +5,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { InfraServerPlugin, config, InfraConfig } from './new_platform_plugin';
+import { InfraServerPlugin } from './new_platform_plugin';
+import { config, InfraConfig } from './new_platform_config.schema';
 
 // NP_TODO: kibana NP needs "config" to be exported from here, I think?
 export { config, InfraConfig };
