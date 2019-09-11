@@ -21,7 +21,7 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  hasSecheduledActions() {
+  hasScheduledActions() {
     return this.scheduledExecutionOptions !== undefined;
   }
 
@@ -43,8 +43,8 @@ export class AlertInstance {
   }
 
   scheduleActions(actionGroup: string, context: Context = {}) {
-    if (this.hasSecheduledActions()) {
-      throw new Error('Alert instance has already been enqueued to be fired, cannot enqueue twice');
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
     this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;

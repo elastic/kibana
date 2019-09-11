@@ -6,10 +6,10 @@
 
 import { AlertInstance } from './alert_instance';
 
-describe('hasSecheduledActions()', () => {
+describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.hasSecheduledActions()).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 });
 
@@ -21,12 +21,12 @@ describe('getSechduledActionOptions()', () => {
 });
 
 describe('dequeue()', () => {
-  test('makes hasSecheduledActions() return false', () => {
+  test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
-    expect(alertInstance.hasSecheduledActions()).toEqual(true);
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
     alertInstance.unscheduleActions();
-    expect(alertInstance.hasSecheduledActions()).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
   test('makes getSechduledActionOptions() return undefined', () => {
@@ -59,10 +59,10 @@ describe('getMeta()', () => {
 });
 
 describe('enqueue()', () => {
-  test('makes hasSecheduledActions() return true', () => {
+  test('makes hasScheduledActions() return true', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.hasSecheduledActions()).toEqual(true);
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
   });
 
   test('makes getSechduledActionOptions() return given options', () => {
@@ -75,13 +75,13 @@ describe('enqueue()', () => {
     });
   });
 
-  test('cannot enqueue for firing twice', () => {
+  test('cannot schdule for execution twice', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default', { field: true });
     expect(() =>
       alertInstance.scheduleActions('default', { field: false })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert instance has already been enqueued to be fired, cannot enqueue twice"`
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
     );
   });
 });
