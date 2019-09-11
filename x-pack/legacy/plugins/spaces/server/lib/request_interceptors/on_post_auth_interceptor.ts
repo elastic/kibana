@@ -61,7 +61,11 @@ export function initSpacesOnPostAuthRequestInterceptor({
           });
         }
       } catch (error) {
-        return wrapError(error);
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          statusCode: wrappedError.statusCode,
+        });
       }
     }
 
