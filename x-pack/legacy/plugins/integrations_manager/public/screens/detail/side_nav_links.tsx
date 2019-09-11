@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { IntegrationInfo } from '../../../common/types';
 import { entries } from '../../../common/type_utils';
@@ -28,7 +28,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
   return (
     <Fragment>
       {entries(PanelDisplayNames).map(([panel, display]) => {
-        const Link = styled(EuiButtonEmpty).attrs<typeof EuiButtonEmpty>({
+        const Link = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
           href: toDetailView({ name, version, panel }),
         })`
           font-weight: ${p =>
