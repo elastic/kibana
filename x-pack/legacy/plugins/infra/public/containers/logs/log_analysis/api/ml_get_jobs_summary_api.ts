@@ -34,28 +34,33 @@ export const fetchJobStatusRequestPayloadRT = rt.type({
 
 export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusRequestPayloadRT>;
 
-// TODO: Get this to align with the payload - something is tripping it up somewhere
-// export const fetchJobStatusResponsePayloadRT = rt.array(rt.type({
-//   datafeedId: rt.string,
-//   datafeedIndices: rt.array(rt.string),
-//   datafeedState: rt.string,
-//   description: rt.string,
-//   earliestTimestampMs: rt.number,
-//   groups: rt.array(rt.string),
-//   hasDatafeed: rt.boolean,
-//   id: rt.string,
-//   isSingleMetricViewerJob: rt.boolean,
-//   jobState: rt.string,
-//   latestResultsTimestampMs: rt.number,
-//   latestTimestampMs: rt.number,
-//   memory_status: rt.string,
-//   nodeName: rt.union([rt.string, rt.undefined]),
-//   processed_record_count: rt.number,
-//   fullJob: rt.any,
-//   auditMessage: rt.any,
-//   deleting: rt.union([rt.boolean, rt.undefined]),
-// }));
+const datafeedStateRT = rt.keyof({
+  started: null,
+  stopped: null,
+});
 
-export const fetchJobStatusResponsePayloadRT = rt.any;
+const jobStateRT = rt.keyof({
+  closed: null,
+  closing: null,
+  failed: null,
+  opened: null,
+  opening: null,
+});
+
+export const jobSummaryRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    jobState: jobStateRT,
+  }),
+  rt.partial({
+    datafeedIndices: rt.array(rt.string),
+    datafeedState: datafeedStateRT,
+    fullJob: rt.partial({
+      finished_time: rt.number,
+    }),
+  }),
+]);
+
+export const fetchJobStatusResponsePayloadRT = rt.array(jobSummaryRT);
 
 export type FetchJobStatusResponsePayload = rt.TypeOf<typeof fetchJobStatusResponsePayloadRT>;
