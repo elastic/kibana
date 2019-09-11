@@ -69,22 +69,26 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
           const ip = decodeIpv6(detailName);
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
-              <FiltersGlobal>
-                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-              </FiltersGlobal>
-
-              <HeaderPage
-                data-test-subj="ip-details-headline"
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-                title={ip}
-                draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-              >
-                <FlowTargetSelectConnected />
-              </HeaderPage>
-
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <FiltersGlobal>
+                      <NetworkKql
+                        indexPattern={indexPattern}
+                        setQuery={setQuery}
+                        type={networkModel.NetworkType.details}
+                      />
+                    </FiltersGlobal>
+
+                    <HeaderPage
+                      data-test-subj="ip-details-headline"
+                      subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                      title={ip}
+                      draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                    >
+                      <FlowTargetSelectConnected />
+                    </HeaderPage>
+
                     <IpOverviewQuery
                       skip={isInitializing}
                       sourceId="default"
