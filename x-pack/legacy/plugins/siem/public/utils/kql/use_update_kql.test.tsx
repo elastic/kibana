@@ -38,7 +38,7 @@ describe('#useUpdateKql', () => {
     applyTimelineKqlMock.mockClear();
   });
 
-  test('We should apply host kql', () => {
+  test('We should apply host kql on host page', () => {
     useUpdateKql({
       indexPattern: mockIndexPattern,
       kueryFilterQuery: { expression: '', kind: 'kuery' },
@@ -61,7 +61,30 @@ describe('#useUpdateKql', () => {
     expect(applyTimelineKqlMock).not.toHaveBeenCalled();
   });
 
-  test('We should apply network kql', () => {
+  test('We should apply host kql on host details page', () => {
+    useUpdateKql({
+      indexPattern: mockIndexPattern,
+      kueryFilterQuery: { expression: '', kind: 'kuery' },
+      kueryFilterQueryDraft: { expression: 'host.name: "myLove"', kind: 'kuery' },
+      storeType: 'hostsType',
+      type: HostsType.details,
+    })(mockDispatch);
+    expect(applyHostsKqlMock).toHaveBeenCalledWith({
+      filterQuery: {
+        kuery: {
+          expression: 'host.name: "myLove"',
+          kind: 'kuery',
+        },
+        serializedQuery:
+          '{"bool":{"should":[{"match_phrase":{"host.name":"myLove"}}],"minimum_should_match":1}}',
+      },
+      hostsType: 'details',
+    });
+    expect(applyNetworkKqlMock).not.toHaveBeenCalled();
+    expect(applyTimelineKqlMock).not.toHaveBeenCalled();
+  });
+
+  test('We should apply network kql on network page', () => {
     useUpdateKql({
       indexPattern: mockIndexPattern,
       kueryFilterQuery: { expression: '', kind: 'kuery' },
@@ -79,6 +102,29 @@ describe('#useUpdateKql', () => {
           '{"bool":{"should":[{"match_phrase":{"host.name":"myLove"}}],"minimum_should_match":1}}',
       },
       networkType: 'page',
+    });
+    expect(applyHostsKqlMock).not.toHaveBeenCalled();
+    expect(applyTimelineKqlMock).not.toHaveBeenCalled();
+  });
+
+  test('We should apply network kql on network details page', () => {
+    useUpdateKql({
+      indexPattern: mockIndexPattern,
+      kueryFilterQuery: { expression: '', kind: 'kuery' },
+      kueryFilterQueryDraft: { expression: 'host.name: "myLove"', kind: 'kuery' },
+      storeType: 'networkType',
+      type: NetworkType.details,
+    })(mockDispatch);
+    expect(applyNetworkKqlMock).toHaveBeenCalledWith({
+      filterQuery: {
+        kuery: {
+          expression: 'host.name: "myLove"',
+          kind: 'kuery',
+        },
+        serializedQuery:
+          '{"bool":{"should":[{"match_phrase":{"host.name":"myLove"}}],"minimum_should_match":1}}',
+      },
+      networkType: 'details',
     });
     expect(applyHostsKqlMock).not.toHaveBeenCalled();
     expect(applyTimelineKqlMock).not.toHaveBeenCalled();

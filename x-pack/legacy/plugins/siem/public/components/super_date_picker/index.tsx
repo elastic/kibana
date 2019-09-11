@@ -30,6 +30,7 @@ import {
   toStrSelector,
   isLoadingSelector,
   queriesSelector,
+  kqlQuerySelector,
 } from './selectors';
 import { InputsRange, Policy } from '../../store/inputs/model';
 
@@ -188,11 +189,8 @@ export const SuperDatePickerComponent = class extends Component<
     }
   };
 
-  private refetchQuery = (queries: inputsModel.GlobalQuery[]) => {
-    queries
-      .filter(q => q.id !== 'kql' && q.refetch != null)
-      .map(q => q.refetch as inputsModel.Refetch)
-      .forEach(refetch => refetch());
+  private refetchQuery = (queries: inputsModel.GlobalGraphqlQuery[]) => {
+    queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
 
   private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {
@@ -298,6 +296,7 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   const getIsLoadingSelector = isLoadingSelector();
   const getQueriesSelector = queriesSelector();
+  const getKqlQuerySelector = kqlQuerySelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
     return {
@@ -309,8 +308,8 @@ export const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(inputsRange).filter(q => q.id !== 'kql'),
-      kqlQuery: getQueriesSelector(inputsRange).find(q => q.id === 'kql'),
+      queries: getQueriesSelector(inputsRange),
+      kqlQuery: getKqlQuerySelector(inputsRange),
     };
   };
 };

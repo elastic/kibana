@@ -64,5 +64,11 @@ export const isLoadingSelector = () =>
 export const queriesSelector = () =>
   createSelector(
     getQuery,
-    query => query
+    query => query.filter(q => q.id !== 'kql')
+  );
+
+export const kqlQuerySelector = () =>
+  createSelector(
+    getQuery,
+    query => query.find(q => q.id === 'kql')
   );
