@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
 import { highlightTags } from './highlight_tags';
 import { htmlTags } from './html_tags';
 

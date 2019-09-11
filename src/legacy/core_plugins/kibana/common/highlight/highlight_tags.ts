@@ -22,5 +22,5 @@
 // inside a field value.
 export const highlightTags = {
   pre: '@kibana-highlighted-field@',
-  post: '@/kibana-highlighted-field@'
+  post: '@/kibana-highlighted-field@',
 };
