@@ -38,7 +38,7 @@ include::dev-tools.asciidoc[]
 
 include::{kib-repo-dir}/monitoring/index.asciidoc[]
 
-include::management.asciidoc[]
+include::{kib-repo-dir}/management.asciidoc[]
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
@@ -53,3 +53,4 @@ include::{kib-repo-dir}/reporting/index.asciidoc[]
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
+
