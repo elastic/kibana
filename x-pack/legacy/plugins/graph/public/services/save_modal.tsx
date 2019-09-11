@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-import { GraphWorkspaceSavedObject } from '../types/persistence';
+import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
-import { GraphSavePolicy } from '../types/config';
 
 export function save({
   savePolicy,

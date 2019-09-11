@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Chrome } from 'ui/chrome';
-import { GraphWorkspaceSavedObject } from '../types/persistence';
+import { GraphWorkspaceSavedObject } from '../types';
 
 export function getHomePath() {
   return '/home';

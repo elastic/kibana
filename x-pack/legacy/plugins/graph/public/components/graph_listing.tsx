@@ -11,7 +11,7 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 // @ts-ignore
 import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
-import { GraphWorkspaceSavedObject } from '../types/persistence';
+import { GraphWorkspaceSavedObject } from '../types';
 
 export interface GraphListingProps {
   createItem: () => void;
