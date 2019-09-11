@@ -8,11 +8,11 @@ to you """
 ==========
 String only 2
 -------------------------------------
-""" 
+"""
 starting with new lines and ending as well
- """
+"""
 -------------------------------------
-"starting with new lines and ending as well"
+"\nstarting with new lines and ending as well\n"
 ==========
 Strings in requests
 -------------------------------------
@@ -27,7 +27,7 @@ test2
 }
 -------------------------------------
 {
-  "f": { "somefield" : "test\ntest2" },
+  "f": { "somefield" : "\ntest\ntest2\n" },
   "g": { "script" : "second + \"\\\";" },
   "h": 1,
   "script": "a + 2"
