@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import './data_recognizer_directive';
-import './data_recognizer';
+
+export { DataRecognizer } from './data_recognizer';
