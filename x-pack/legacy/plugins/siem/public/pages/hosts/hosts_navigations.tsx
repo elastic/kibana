@@ -28,6 +28,7 @@ import { NavTab } from '../../components/navigation/types';
 import { EventsOverTimeQuery } from '../../containers/events/events_over_time';
 import { EventsOverTimeHistogram } from '../../components/page/hosts/events_over_time';
 import { getFilterQuery } from './details/utils';
+import { UpdateDateRange } from '../../components/charts/common';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
@@ -164,7 +165,7 @@ export type HostsComponentsQueryProps = OwnProps & {
     loading: boolean;
     refetch: Refetch;
   }) => void;
-  narrowDateRange?: NarrowDateRange;
+  narrowDateRange?: UpdateDateRange;
   filterQueryExpression?: string;
   hostName?: string;
 };
@@ -349,6 +350,7 @@ export const EventsTabBody = ({
   filterQueryExpression,
   hostName,
   indexPattern,
+  narrowDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
   const filterQuery = filterQueryExpression
@@ -373,6 +375,7 @@ export const EventsTabBody = ({
             loading={loading}
             startDate={startDate}
             endDate={endDate}
+            narrowDateRange={narrowDateRange}
           />
         )}
       </EventsOverTimeQuery>

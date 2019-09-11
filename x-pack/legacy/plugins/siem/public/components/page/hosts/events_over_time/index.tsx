@@ -14,9 +14,9 @@ import { BarChart } from '../../../charts/barchart';
 import { EventsOverTimeData } from '../../../../graphql/types';
 import * as i18n from './translation';
 import { HeaderPanel } from '../../../header_panel';
-import { ChartSeriesData } from '../../../charts/common';
+import { ChartSeriesData, UpdateDateRange } from '../../../charts/common';
 
-export const getBarchartConfigs = (from: number, to: number) => ({
+export const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRange) => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
@@ -27,6 +27,7 @@ export const getBarchartConfigs = (from: number, to: number) => ({
   },
   settings: {
     legendPosition: Position.Bottom,
+    onBrushEnd,
     showLegend: true,
     theme: {
       scales: {
@@ -66,20 +67,22 @@ export const EventsOverTimeHistogram = ({
   id,
   loading,
   data,
-  startDate,
   endDate,
+  narrowDateRange,
+  startDate,
 }: {
   id: string;
   data: EventsOverTimeData;
   loading: boolean;
   startDate: number;
   endDate: number;
+  narrowDateRange: UpdateDateRange;
 }) => {
   const eventsOverTime = getOr([], 'eventsOverTime', data);
   const totalCount = getOr(0, 'totalCount', data);
   const bucketStartDate = getOr(startDate, 'x', head(eventsOverTime));
   const bucketEndDate = getOr(endDate, 'x', last(eventsOverTime));
-  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!);
+  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, narrowDateRange);
   const [showInspect, setShowInspect] = useState(false);
 
   const barChartData: ChartSeriesData[] = [
