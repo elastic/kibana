@@ -5,22 +5,21 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useEffect, useCallback, useReducer } from 'react';
-import { bucketSpan, getJobId } from '../../../../common/log_analysis';
+import { useEffect, useMemo, useReducer, useCallback } from 'react';
+import { bucketSpan, getDatafeedId, getJobId, JobType } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callJobsSummaryAPI, FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
-import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 
 // combines and abstracts job and datafeed status
 type JobStatus =
   | 'unknown'
   | 'missing'
-  | 'inconsistent'
-  | 'created'
+  | 'initializing'
+  | 'stopped'
   | 'started'
-  | 'opening'
-  | 'opened'
+  | 'finished'
   | 'failed';
 
 export type SetupStatus =
@@ -33,89 +32,99 @@ export type SetupStatus =
   | 'hiddenAfterSuccess' // hide the setup screen and we show the results for the first time
   | 'skipped'; // setup hidden because the module is in a correct state already
 
-interface AllJobStatuses {
-  [key: string]: JobStatus;
+interface StatusReducerState {
+  jobStatus: Record<JobType, JobStatus>;
+  setupStatus: SetupStatus;
 }
 
-const getInitialJobStatuses = (): AllJobStatuses => {
-  return {
-    logEntryRate: 'unknown',
-  };
-};
-
-const initialState = {
-  jobStatus: getInitialJobStatuses(),
+const initialState: StatusReducerState = {
+  jobStatus: {
+    'log-entry-rate': 'unknown',
+  },
   setupStatus: 'unknown',
 };
 
-function statusReducer(state: any, action: any) {
+function statusReducer(state: StatusReducerState, action: any): StatusReducerState {
   switch (action.type) {
-    case 'startedSetup':
+    case 'startedSetup': {
       return {
-        ...state,
+        jobStatus: {
+          'log-entry-rate': 'initializing',
+        },
         setupStatus: 'pending',
       };
-    case 'finishedSetup':
-      const { jobs, datafeeds }: SetupMlModuleResponsePayload = action;
-      const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
-      const hasSuccessfullyStartedDatafeeds = datafeeds.every(
-        datafeed => datafeed.success && datafeed.started
-      );
-      const hasAnyErrors =
-        jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
-      const logEntryRateJobStatus = hasAnyErrors
-        ? 'failed'
-        : hasSuccessfullyCreatedJobs
-        ? hasSuccessfullyStartedDatafeeds
-          ? 'started'
-          : 'created'
-        : 'created';
-      return {
-        jobStatus: {
-          ...state.jobStatus,
-          logEntryRate: logEntryRateJobStatus,
-        },
-        setupStatus: logEntryRateJobStatus === 'failed' ? 'failed' : 'succeeded',
+    }
+    case 'finishedSetup': {
+      const { jobs, datafeeds, spaceId, sourceId } = action;
+      const nextJobStatus = {
+        ...state.jobStatus,
+        'log-entry-rate':
+          hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, 'log-entry-rate'))(jobs) &&
+          hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, 'log-entry-rate'))(
+            datafeeds
+          )
+            ? ('started' as JobStatus)
+            : ('failed' as JobStatus),
       };
-    case 'failedSetup':
+      const nextSetupStatus = Object.values(nextJobStatus).every(jobState =>
+        ['started'].includes(jobState)
+      )
+        ? 'succeeded'
+        : 'failed';
+      return {
+        jobStatus: nextJobStatus,
+        setupStatus: nextSetupStatus,
+      };
+    }
+    case 'failedSetup': {
       return {
         jobStatus: {
           ...state.jobStatus,
-          logEntryRate: 'failed',
+          'log-entry-rate': 'failed',
         },
         setupStatus: 'failed',
       };
-    case 'retryingSetup':
+    }
+    case 'retryingSetup': {
       return {
         ...state,
         setupStatus: 'retrying',
       };
-    case 'fetchedJobStatuses':
+    }
+    case 'fetchedJobStatuses': {
       const { payload, spaceId, sourceId } = action;
-      const logEntryRate = payload.find(
-        (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
-      );
-      const logEntryRateJobStatusResponse = logEntryRate ? logEntryRate.jobState : 'missing';
-
+      const nextJobStatus = {
+        ...state.jobStatus,
+        'log-entry-rate': getJobStatus(getJobId(spaceId, sourceId, 'log-entry-rate'))(payload),
+      };
+      const nextSetupStatus = Object.values(nextJobStatus).every(jobState =>
+        ['started', 'finished'].includes(jobState)
+      )
+        ? 'skipped'
+        : 'required';
       return {
+        jobStatus: nextJobStatus,
+        setupStatus: nextSetupStatus,
+      };
+    }
+    case 'failedFetchingJobStatuses': {
+      return {
+        ...state,
         jobStatus: {
           ...state.jobStatus,
-          logEntryRate: logEntryRateJobStatusResponse,
+          'log-entry-rate': 'unknown',
         },
-        setupStatus:
-          logEntryRateJobStatusResponse === 'missing'
-            ? 'required'
-            : ['opened', 'opening', 'created', 'started'].includes(logEntryRateJobStatusResponse)
-            ? 'skipped'
-            : 'required',
       };
-    case 'viewedResults':
+    }
+    case 'viewedResults': {
       return {
         ...state,
         setupStatus: 'hiddenAfterSuccess',
       };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 }
 
@@ -149,7 +158,7 @@ export const useLogAnalysisJobs = ({
         );
       },
       onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
-        dispatch({ type: 'finishedSetup', datafeeds, jobs });
+        dispatch({ type: 'finishedSetup', datafeeds, jobs, spaceId, sourceId });
       },
       onReject: () => {
         dispatch({ type: 'failedSetup' });
@@ -162,15 +171,13 @@ export const useLogAnalysisJobs = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return callJobsSummaryAPI(spaceId, sourceId);
+        return await callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
-        if (response) {
-          dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
-        }
+        dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
       },
-      onReject: error => {
-        // TODO: Handle errors
+      onReject: err => {
+        dispatch({ type: 'failedFetchingJobStatuses' });
       },
     },
     [indexPattern, spaceId, sourceId]
@@ -221,3 +228,52 @@ export const useLogAnalysisJobs = ({
 };
 
 export const LogAnalysisJobs = createContainer(useLogAnalysisJobs);
+
+const hasSuccessfullyCreatedJob = (jobId: string) => (
+  jobSetupResponses: SetupMlModuleResponsePayload['jobs']
+) =>
+  jobSetupResponses.filter(
+    jobSetupResponse =>
+      jobSetupResponse.id === jobId && jobSetupResponse.success && !jobSetupResponse.error
+  ).length > 0;
+
+const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
+  datafeedSetupResponses: SetupMlModuleResponsePayload['datafeeds']
+) =>
+  datafeedSetupResponses.filter(
+    datafeedSetupResponse =>
+      datafeedSetupResponse.id === datafeedId &&
+      datafeedSetupResponse.success &&
+      datafeedSetupResponse.started &&
+      !datafeedSetupResponse.error
+  ).length > 0;
+
+const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePayload): JobStatus =>
+  jobSummaries
+    .filter(jobSummary => jobSummary.id === jobId)
+    .map(
+      (jobSummary): JobStatus => {
+        if (jobSummary.jobState === 'failed') {
+          return 'failed';
+        } else if (
+          jobSummary.jobState === 'closed' &&
+          jobSummary.datafeedState === 'stopped' &&
+          jobSummary.fullJob &&
+          jobSummary.fullJob.finished_time != null
+        ) {
+          return 'finished';
+        } else if (
+          jobSummary.jobState === 'closed' ||
+          jobSummary.jobState === 'closing' ||
+          jobSummary.datafeedState === 'stopped'
+        ) {
+          return 'stopped';
+        } else if (jobSummary.jobState === 'opening') {
+          return 'initializing';
+        } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
+          return 'started';
+        }
+
+        return 'unknown';
+      }
+    )[0] || 'missing';
