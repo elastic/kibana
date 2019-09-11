@@ -20,6 +20,7 @@ include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
 
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
+<<<<<<< HEAD
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
@@ -73,6 +74,9 @@ include::reporting/index.asciidoc[]
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
+=======
+include::user/index.asciidoc[]
+>>>>>>> 80c05bf928... [DOCS] Adds user folder (#45411)
 
 include::limitations.asciidoc[]
 

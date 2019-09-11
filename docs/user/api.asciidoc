@@ -37,10 +37,10 @@ NOTE: You cannot access these APIs via the Console in Kibana.
 * <<upgrade-assistant-api>>
 --
 
-include::api/spaces-management.asciidoc[]
-include::api/role-management.asciidoc[]
-include::api/saved-objects.asciidoc[]
-include::api/dashboard-import.asciidoc[]
-include::api/logstash-configuration-management.asciidoc[]
-include::api/url-shortening.asciidoc[]
-include::api/upgrade-assistant.asciidoc[]
+include::{kib-repo-dir}/api/spaces-management.asciidoc[]
+include::{kib-repo-dir}/api/role-management.asciidoc[]
+include::{kib-repo-dir}/api/saved-objects.asciidoc[]
+include::{kib-repo-dir}/api/dashboard-import.asciidoc[]
+include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
+include::{kib-repo-dir}/api/url-shortening.asciidoc[]
+include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]
