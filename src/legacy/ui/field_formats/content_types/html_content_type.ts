@@ -21,7 +21,7 @@ import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../typ
 
 // @ts-ignore
 import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
-import { getHighlightHtml } from '../../../core_plugins/kibana/common/highlight/highlight_html';
+import { getHighlightHtml } from '../../../../plugins/data/common/highlight/highlight_html';
 
 const CONTEXT_TYPE = 'html';
 
