@@ -10,11 +10,9 @@ exports[`Data Frame: Transform List Actions <StopAction /> Minimal initializatio
     aria-label="Stop"
     color="text"
     disabled={true}
-    iconSide="left"
     iconType="stop"
     onClick={[Function]}
     size="xs"
-    type="button"
   >
     Stop
   </EuiButtonEmpty>

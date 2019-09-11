@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const { version } = require('../../package.json');
-const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
+const KIBANA_INSTALL_DIR = process.env.KIBANA_INSTALL_DIR || `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
