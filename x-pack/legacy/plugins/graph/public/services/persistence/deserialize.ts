@@ -7,17 +7,17 @@
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
   AppState,
-  PersistedNode,
+  SerializedNode,
   UrlTemplate,
-  PersistedUrlTemplate,
+  SerializedUrlTemplate,
   WorkspaceField,
-  PersistedGraphWorkspace,
-  PersistedWorkspaceState,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
   IndexPatternSavedObject,
   AdvancedSettings,
   GraphData,
   Workspace,
-  PersistedField,
+  SerializedField,
 } from '../../types';
 import { outlinkEncoders } from '../outlink_encoders';
 import {
@@ -39,7 +39,7 @@ function deserializeUrlTemplate({
   encoderID,
   iconClass,
   ...serializableProps
-}: PersistedUrlTemplate) {
+}: SerializedUrlTemplate) {
   const encoder = outlinkEncoders.find(outlinkEncoder => outlinkEncoder.id === encoderID);
   if (!encoder) {
     return;
@@ -61,12 +61,12 @@ function deserializeUrlTemplate({
 
 // returns the id of the index pattern, lookup is done in app.js
 export function lookupIndexPattern(
-  savedWorkspace: PersistedGraphWorkspace,
+  savedWorkspace: GraphWorkspaceSavedObject,
   indexPatterns: IndexPatternSavedObject[]
 ) {
-  const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
   const indexPattern = indexPatterns.find(
-    pattern => pattern.attributes.title === persistedWorkspaceState.indexPattern
+    pattern => pattern.attributes.title === serializedWorkspaceState.indexPattern
   );
 
   if (indexPattern) {
@@ -102,7 +102,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
 
 function getFieldsWithWorkspaceSettings(
   indexPattern: IndexPattern,
-  selectedFields: PersistedField[]
+  selectedFields: SerializedField[]
 ) {
   const allFields = mapFields(indexPattern);
 
@@ -123,28 +123,28 @@ function getFieldsWithWorkspaceSettings(
 }
 
 function getBlacklistedNodes(
-  persistedWorkspaceState: PersistedWorkspaceState,
+  serializedWorkspaceState: SerializedWorkspaceState,
   allFields: WorkspaceField[]
 ) {
-  return persistedWorkspaceState.blacklist.map(persistedNode => {
-    const currentField = allFields.find(field => field.name === persistedNode.field)!;
+  return serializedWorkspaceState.blacklist.map(serializedNode => {
+    const currentField = allFields.find(field => field.name === serializedNode.field)!;
     return {
       x: 0,
       y: 0,
-      label: persistedNode.label,
-      color: persistedNode.color,
+      label: serializedNode.label,
+      color: serializedNode.color,
       icon: currentField.icon,
       parent: null,
       scaledSize: 0,
       data: {
-        field: persistedNode.field,
-        term: persistedNode.term,
+        field: serializedNode.field,
+        term: serializedNode.term,
       },
     };
   });
 }
 
-function resolveGroups(nodes: PersistedNode[], workspaceInstance: Workspace) {
+function resolveGroups(nodes: SerializedNode[], workspaceInstance: Workspace) {
   nodes.forEach(({ field, term, x, y, parent }) => {
     const nodeId = makeNodeId(field, term);
     const workspaceNode = workspaceInstance.nodesMap[nodeId];
@@ -159,7 +159,7 @@ function resolveGroups(nodes: PersistedNode[], workspaceInstance: Workspace) {
 }
 
 function getNodesAndEdges(
-  persistedWorkspaceState: PersistedWorkspaceState,
+  persistedWorkspaceState: SerializedWorkspaceState,
   allFields: WorkspaceField[]
 ): GraphData {
   return {
@@ -184,14 +184,14 @@ export function makeNodeId(field: string, term: string) {
 }
 
 export function savedWorkspaceToAppState(
-  savedWorkspace: PersistedGraphWorkspace,
+  savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: IndexPattern,
   workspaceInstance: Workspace
 ): Pick<
   AppState,
   'urlTemplates' | 'advancedSettings' | 'workspace' | 'allFields' | 'selectedFields'
 > {
-  const persistedWorkspaceState: PersistedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+  const persistedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
   // ================== url templates =============================
   const urlTemplates = persistedWorkspaceState.urlTemplates

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { PersistedGraphWorkspace } from '../types/persistence';
+import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
+import { GraphWorkspaceSavedObject } from '../types/persistence';
 import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
 import { GraphSavePolicy } from '../types/config';
 
@@ -18,7 +18,7 @@ export function save({
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
-  workspace: PersistedGraphWorkspace;
+  workspace: GraphWorkspaceSavedObject;
   saveWorkspace: (
     saveOptions: {
       confirmOverwrite: boolean;
@@ -26,7 +26,7 @@ export function save({
       onTitleDuplicate: () => void;
     },
     dataConsent: boolean
-  ) => Promise<{ id?: string } | { error: string }>;
+  ) => Promise<SaveResult>;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;

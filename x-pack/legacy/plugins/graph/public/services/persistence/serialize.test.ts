@@ -6,7 +6,7 @@
 
 import { appStateToSavedWorkspace } from './serialize';
 import {
-  PersistedGraphWorkspace,
+  GraphWorkspaceSavedObject,
   IndexPatternSavedObject,
   Workspace,
   WorkspaceEdge,
@@ -143,7 +143,7 @@ describe('serialize', () => {
   });
 
   it('should serialize given workspace', () => {
-    const savedWorkspace = ({} as unknown) as PersistedGraphWorkspace;
+    const savedWorkspace = ({} as unknown) as GraphWorkspaceSavedObject;
 
     appStateToSavedWorkspace(savedWorkspace, appState, true);
 
@@ -267,7 +267,7 @@ describe('serialize', () => {
   });
 
   it('should not save data if set to false', () => {
-    const savedWorkspace = ({} as unknown) as PersistedGraphWorkspace;
+    const savedWorkspace = ({} as unknown) as GraphWorkspaceSavedObject;
 
     appStateToSavedWorkspace(savedWorkspace, appState, false);
 

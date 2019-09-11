@@ -6,21 +6,21 @@
 
 import {
   AppState,
-  PersistedNode,
+  SerializedNode,
   WorkspaceNode,
   WorkspaceEdge,
-  PersistedEdge,
+  SerializedEdge,
   UrlTemplate,
-  PersistedUrlTemplate,
+  SerializedUrlTemplate,
   WorkspaceField,
-  PersistedGraphWorkspace,
-  PersistedWorkspaceState,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
 } from '../../types';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,
   allNodes: WorkspaceNode[] = []
-): PersistedNode {
+): SerializedNode {
   return {
     x,
     y,
@@ -36,7 +36,7 @@ function serializeNode(
 function serializeEdge(
   { source, target, weight, width, inferred, label }: WorkspaceEdge,
   allNodes: WorkspaceNode[] = []
-): PersistedEdge {
+): SerializedEdge {
   return {
     weight,
     width,
@@ -48,7 +48,7 @@ function serializeEdge(
 }
 
 function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: UrlTemplate) {
-  const serializedTemplate: PersistedUrlTemplate = {
+  const serializedTemplate: SerializedUrlTemplate = {
     url,
     description,
     isDefault,
@@ -79,23 +79,23 @@ function serializeField({
 }
 
 export function appStateToSavedWorkspace(
-  currentSavedWorkspace: PersistedGraphWorkspace,
+  currentSavedWorkspace: GraphWorkspaceSavedObject,
   { workspace, urlTemplates, advancedSettings, selectedIndex, selectedFields }: AppState,
   canSaveData: boolean
 ) {
-  const blacklist: PersistedNode[] = canSaveData
+  const blacklist: SerializedNode[] = canSaveData
     ? workspace.blacklistedNodes.map(node => serializeNode(node))
     : [];
-  const vertices: PersistedNode[] = canSaveData
+  const vertices: SerializedNode[] = canSaveData
     ? workspace.nodes.map(node => serializeNode(node, workspace.nodes))
     : [];
-  const links: PersistedEdge[] = canSaveData
+  const links: SerializedEdge[] = canSaveData
     ? workspace.edges.map(edge => serializeEdge(edge, workspace.nodes))
     : [];
 
   const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
 
-  const persistedWorkspaceState: PersistedWorkspaceState = {
+  const persistedWorkspaceState: SerializedWorkspaceState = {
     indexPattern: selectedIndex.attributes.title,
     selectedFields: selectedFields.map(serializeField),
     blacklist,

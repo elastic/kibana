@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PersistedGraphWorkspace } from '../../types';
+import { GraphWorkspaceSavedObject } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../outlink_encoders';
 
 describe('deserialize', () => {
-  let savedWorkspace: PersistedGraphWorkspace;
+  let savedWorkspace: GraphWorkspaceSavedObject;
 
   beforeEach(() => {
     savedWorkspace = {
@@ -109,7 +109,7 @@ describe('deserialize', () => {
           minDocCount: 3,
         },
       }),
-    } as PersistedGraphWorkspace;
+    } as GraphWorkspaceSavedObject;
   });
 
   function callSavedWorkspaceToAppState() {

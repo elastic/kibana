@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Chrome } from 'ui/chrome';
-import { PersistedGraphWorkspace } from '../types/persistence';
+import { GraphWorkspaceSavedObject } from '../types/persistence';
 
 export function getHomePath() {
   return '/home';
@@ -16,11 +16,11 @@ export function getNewPath() {
   return '/workspace';
 }
 
-export function getEditPath({ id }: PersistedGraphWorkspace) {
+export function getEditPath({ id }: GraphWorkspaceSavedObject) {
   return `/workspace/${id}`;
 }
 
-export function getEditUrl(chrome: Chrome, workspace: PersistedGraphWorkspace) {
+export function getEditUrl(chrome: Chrome, workspace: GraphWorkspaceSavedObject) {
   return chrome.addBasePath(`#${getEditPath(workspace)}`);
 }
 
@@ -30,7 +30,7 @@ export type SetBreadcrumbOptions =
     }
   | {
       chrome: Chrome;
-      savedWorkspace?: PersistedGraphWorkspace;
+      savedWorkspace?: GraphWorkspaceSavedObject;
       navigateTo: (path: string) => void;
     };
 
