@@ -36,10 +36,15 @@ export interface FrameworkAdapter {
   }): void;
 }
 
+const licenseLiterals = LICENSES.map(s => t.literal(s));
+if (licenseLiterals.length < 2) {
+  throw new Error('expected LICENSES array to include at least 2 items');
+}
+
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
-    type: t.union(LICENSES.map(s => t.literal(s))),
+    type: t.union([licenseLiterals[0], licenseLiterals[1], ...licenseLiterals.slice(2)]),
     expired: t.boolean,
     expiry_date_in_millis: t.number,
   }),

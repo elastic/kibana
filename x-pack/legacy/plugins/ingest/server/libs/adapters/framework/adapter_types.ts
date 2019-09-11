@@ -16,7 +16,7 @@ import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
 import {
   Feature,
   FeatureWithAllOrReadPrivileges,
-} from '../../../../../xpack_main/server/lib/feature_registry/feature_registry';
+} from '../../../../../../../plugins/features/server';
 import { SecurityPlugin } from '../../../../../security';
 
 export const internalAuthData = Symbol('internalAuthData');
@@ -67,9 +67,14 @@ export const RuntimeFrameworkInfo = t.interface(
       version: t.string,
     }),
     license: t.type({
-      type: t.union(
-        ['oss', 'trial', 'standard', 'basic', 'gold', 'platinum'].map(s => t.literal(s))
-      ),
+      type: t.union([
+        t.literal('oss'),
+        t.literal('trial'),
+        t.literal('standard'),
+        t.literal('basic'),
+        t.literal('gold'),
+        t.literal('platinum'),
+      ]),
       expired: t.boolean,
       expiry_date_in_millis: t.number,
     }),
