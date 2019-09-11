@@ -127,6 +127,18 @@ class ScopeResolver extends SharedComponent {
 }
 function getTemplate(description) {
   if (description.__template) {
+    if (description.__raw && _.isString(description.__template)) {
+      return {
+        // This is a special secret attribute that gets passed through to indicate that
+        // the raw value should be passed through to the console without JSON.stringifying it
+        // first.
+        //
+        // Primary use case is to allow __templates to contain extended JSON special values like
+        // triple quotes.
+        __raw: true,
+        value: description.__template,
+      };
+    }
     return description.__template;
   } else if (description.__one_of) {
     return getTemplate(description.__one_of[0]);
