@@ -46,22 +46,22 @@ encourage users to run the same versions of Kibana and Elasticsearch down to
 the patch version.
 --
 
-include::setup/install.asciidoc[]
+include::{kib-repo-dir}/setup/install.asciidoc[]
 
-include::setup/start-stop.asciidoc[]
+include::{kib-repo-dir}/setup/start-stop.asciidoc[]
 
-include::setup/settings.asciidoc[]
+include::{kib-repo-dir}/setup/settings.asciidoc[]
 
-include::setup/secure-settings.asciidoc[]
+include::{kib-repo-dir}/setup/secure-settings.asciidoc[]
 
-include::setup/docker.asciidoc[]
+include::{kib-repo-dir}/setup/docker.asciidoc[]
 
-include::setup/access.asciidoc[]
+include::{kib-repo-dir}/setup/access.asciidoc[]
 
-include::setup/connect-to-elasticsearch.asciidoc[]
+include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
 
-include::setup/tribe.asciidoc[]
+include::{kib-repo-dir}/setup/tribe.asciidoc[]
 
-include::setup/production.asciidoc[]
+include::{kib-repo-dir}/setup/production.asciidoc[]
 
-include::setup/upgrade.asciidoc[]
+include::{kib-repo-dir}/setup/upgrade.asciidoc[]

@@ -1,0 +1,58 @@
+[[getting-started]]
+= Getting Started
+
+[partintro]
+--
+
+Ready to get some hands-on experience with {kib}? There are two ways to start:
+
+* <<tutorial-sample-data, Explore {kib} using the Flights dashboard>>
++
+Load the Flights sample data and dashboard with one click and start 
+interacting with {kib} visualizations in seconds.
+
+* <<tutorial-build-dashboard, Build your own dashboard>> 
++
+Manually load a data set and build your own visualizations and dashboard.
+
+Before you begin, make sure you've <<install, installed Kibana>> and established
+a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].
+You might also be interested in the
+https://www.elastic.co/webinars/getting-started-kibana[Getting Started with Kibana]
+video tutorial.
+
+If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
+on Elastic Cloud, you can access Kibana with a single click.
+--
+
+include::{kib-repo-dir}/getting-started/add-sample-data.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-data.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-filter.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-query.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-discover.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-edit.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-inspect.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-sample-remove.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-full-experience.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-load-dataset.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-define-index.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-discovering.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-visualizing.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-dashboard.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/tutorial-inspect.asciidoc[]
+
+include::{kib-repo-dir}/getting-started/wrapping-up.asciidoc[]

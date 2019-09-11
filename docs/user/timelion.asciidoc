@@ -24,6 +24,6 @@ You might also be interested in these tutorial videos:
 * https://www.elastic.co/videos/using-kibana-and-timelion-to-analyze-earthquake-data[Using Kibana and Timelion to Analyze Earthquake Data]
 --
 
-include::timelion/timelion-getting-started.asciidoc[]
+include::{kib-repo-dir}/timelion/timelion-getting-started.asciidoc[]
 
-include::timelion/timelion-inline-help.asciidoc[]
+include::{kib-repo-dir}/timelion/timelion-inline-help.asciidoc[]
