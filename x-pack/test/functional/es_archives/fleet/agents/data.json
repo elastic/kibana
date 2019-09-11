@@ -2,8 +2,9 @@
   "type": "doc",
   "value": {
     "id": "agents:agent1",
-    "index": ".kibana",
+    "index": ".fleet",
     "source": {
+      "type": "agents",
       "agents": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiQUNDRVNTX1RPS0VOIiwiYWdlbnRJZCI6ImIzNWQ2ZDIwLWQwYTAtMTFlOS1iNTkwLThiMGEzYWY4NzUwZCIsImNvbmZpZyI6eyJpZCI6ImNvbmZpZzEiLCJzaGFyZWRJZCI6ImNvbmZpZzEifSwiaWF0IjoxNTY3NzcyNDIzfQ.UQJjI9Ki6JL3iX6zMGhd-LFZynq8a6-Fti1qcq9poFQ",
         "active": true,
@@ -23,8 +24,7 @@
           "created_at": "2019-09-04T15:01:07+0000",
           "sent_at": "2019-09-04T15:03:07+0000"
         }]
-      },
-      "type": "agents"
+      }
     }
   }
 }
@@ -33,8 +33,9 @@
   "type": "doc",
   "value": {
     "id": "agents:agent2",
-    "index": ".kibana",
+    "index": ".fleet",
     "source": {
+      "type": "agents",
       "agents": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
@@ -44,8 +45,7 @@
         "user_provided_metadata": "{}",
         "events": [],
         "actions": []
-      },
-      "type": "agents"
+      }
     }
   }
 }
@@ -54,8 +54,9 @@
   "type": "doc",
   "value": {
     "id": "agents:agent3",
-    "index": ".kibana",
+    "index": ".fleet",
     "source": {
+      "type": "agents",
       "agents": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
@@ -65,8 +66,7 @@
         "user_provided_metadata": "{}",
         "events": [],
         "actions": []
-      },
-      "type": "agents"
+      }
     }
   }
 }
@@ -75,8 +75,9 @@
   "type": "doc",
   "value": {
     "id": "agents:agent4",
-    "index": ".kibana",
+    "index": ".fleet",
     "source": {
+      "type": "agents",
       "agents": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
@@ -86,8 +87,7 @@
         "user_provided_metadata": "{}",
         "events": [],
         "actions": []
-      },
-      "type": "agents"
+      }
     }
   }
 }
@@ -96,16 +96,16 @@
   "type": "doc",
   "value": {
     "id": "tokens:token1",
-    "index": ".kibana",
+    "index": ".fleet",
     "source": {
+      "type": "tokens",
       "tokens": {
         "type": "ENROLMENT_TOKEN",
-        "tokenHash": "7129fcd665a3e9f9976d6d67d993178ab9267c4739e2f38c3459806a95252b5ebd245c9c2d7ebbe9f2077be24f7556076bb9c34d3269568e0434253dcde9b8ad",
-        "config_id": "config1",
-        "config_shared_id": "config1",
+        "tokenHash": "7015c04a6e0bb7a3a7f55165772d5abf0a8ae4b393721f2a11d5c15dcdcafc837d5fe1daea833eca303eb72e424d27418a63af5bc0d46bfa63620e9e0fcfdf94",
+        "policy_id": "policy:1",
+        "policy_shared_id": "policy:1",
         "active": true
-      },
-      "type": "tokens"
+      }
     }
   }
 }

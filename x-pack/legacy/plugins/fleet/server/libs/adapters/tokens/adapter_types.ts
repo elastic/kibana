@@ -5,11 +5,11 @@
  */
 
 export interface EnrollmentTokenData {
-  config: { id: string; sharedId: string };
+  policy: { id: string; sharedId: string };
 }
 
 export interface AccessTokenData {
-  config: { id: string; sharedId: string };
+  policy: { id: string; sharedId: string };
 }
 
 export type TokenVerificationResponse =
@@ -35,8 +35,8 @@ export interface Token {
   created_at: string;
   expire_at?: string;
   active: boolean;
-  config_id: string;
-  config_shared_id: string;
+  policy_id: string;
+  policy_shared_id: string;
   [k: string]: any; // allow to use it as saved object attributes type
 }
 
@@ -45,7 +45,7 @@ export interface TokenAdapter {
     type: TokenType;
     tokenHash: string;
     active: boolean;
-    config: { id: string; sharedId: string };
+    policy: { id: string; sharedId: string };
     expire_at?: string;
   }): Promise<Token>;
 

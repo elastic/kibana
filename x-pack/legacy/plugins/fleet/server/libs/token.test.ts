@@ -17,8 +17,8 @@ jest.mock('./framework');
 function generateJWTToken(): string {
   return sign(
     {
-      config: {
-        id: 'configId',
+      policy: {
+        id: 'policyId',
         sharedId: 'sharedId',
       },
       type: TokenType.ENROLMENT_TOKEN,
@@ -43,7 +43,7 @@ describe('Token Lib', () => {
         type: TokenType.ENROLMENT_TOKEN,
         active: true,
         tokenHash,
-        config: { id: 'configId', sharedId: 'sharedId' },
+        policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -62,7 +62,7 @@ describe('Token Lib', () => {
         type: TokenType.ENROLMENT_TOKEN,
         active: false,
         tokenHash,
-        config: { id: 'configId', sharedId: 'sharedId' },
+        policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -106,8 +106,8 @@ describe('Token Lib', () => {
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const token = await tokens.generateEnrolmentToken({
-        id: 'config_id',
-        sharedId: 'config_shared_id',
+        id: 'policy_id',
+        sharedId: 'policy_shared_id',
       });
 
       expect(token).toBeDefined();
@@ -118,8 +118,8 @@ describe('Token Lib', () => {
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
       const token = await tokens.generateEnrolmentToken({
-        id: 'config_id',
-        sharedId: 'config_shared_id',
+        id: 'policy_id',
+        sharedId: 'policy_shared_id',
       });
 
       const tokenHash = hashJWTToken(token);
@@ -127,8 +127,8 @@ describe('Token Lib', () => {
 
       expect(persistedToken).toMatchObject({
         tokenHash,
-        config_id: 'config_id',
-        config_shared_id: 'config_shared_id',
+        policy_id: 'policy_id',
+        policy_shared_id: 'policy_shared_id',
       });
     });
   });

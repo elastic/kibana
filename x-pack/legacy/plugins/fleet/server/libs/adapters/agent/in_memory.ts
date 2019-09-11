@@ -67,9 +67,9 @@ export class InMemoryAgentAdapter implements AgentAdapter {
     return { agents, total };
   }
 
-  public async findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null> {
+  public async findEphemeralByPolicySharedId(policySharedId: string): Promise<Agent | null> {
     const agent = Object.values(this.agents).find(
-      a => a.type === 'EPHEMERAL' && a.config_shared_id === configSharedId
+      a => a.type === 'EPHEMERAL' && a.policy_shared_id === policySharedId
     );
 
     return agent || null;

@@ -27,8 +27,8 @@ export class AgentsLib {
   };
 
   /** Get an array of agents that have a given tag id assigned to it */
-  public getOnConfig = async (configId: string): Promise<Agent[]> => {
-    const agents = await this.adapter.getOnConfig(configId);
+  public getOnPolicy = async (policyId: string): Promise<Agent[]> => {
+    const agents = await this.adapter.getOnPolicy(policyId);
     return agents;
   };
 

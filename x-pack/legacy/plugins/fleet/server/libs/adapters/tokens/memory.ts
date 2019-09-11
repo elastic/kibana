@@ -17,13 +17,13 @@ export class MemoryTokenAdapter implements TokenAdapterType {
     type,
     tokenHash,
     active,
-    config,
+    policy,
     expire_at,
   }: {
     type: TokenType;
     tokenHash: string;
     active: boolean;
-    config: { id: string; sharedId: string };
+    policy: { id: string; sharedId: string };
     expire_at?: string;
   }): Promise<Token> {
     const id = `tokens-${this.tokenId++}`;
@@ -34,8 +34,8 @@ export class MemoryTokenAdapter implements TokenAdapterType {
       type,
       tokenHash,
       expire_at,
-      config_id: config.id,
-      config_shared_id: config.sharedId,
+      policy_id: policy.id,
+      policy_shared_id: policy.sharedId,
     };
 
     return this.tokens[id];

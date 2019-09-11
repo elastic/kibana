@@ -32,7 +32,7 @@ export class AgentAdapter {
   public async getAll(ESQuery?: string) {
     return this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
   }
-  public async getOnConfig(tagId: string): Promise<Agent[]> {
+  public async getOnPolicy(tagId: string): Promise<Agent[]> {
     return this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
   }
 

@@ -33,7 +33,7 @@ export class AgentLib {
     if (!verifyResponse.valid) {
       throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
-    const config = verifyResponse.token.config;
+    const policy = verifyResponse.token.policy;
 
     const existingAgent = sharedId ? await this.agentAdater.getBySharedId(sharedId) : null;
 
@@ -45,14 +45,14 @@ export class AgentLib {
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
-        ? (await this._createParentForEphemeral(config.id, config.sharedId)).id
+        ? (await this._createParentForEphemeral(policy.id, policy.sharedId)).id
         : undefined;
 
     const agentData: NewAgent = {
       shared_id: sharedId,
       active: true,
-      config_id: config.id,
-      config_shared_id: config.sharedId,
+      policy_id: policy.id,
+      policy_shared_id: policy.sharedId,
       type,
       enrolled_at: enrolledAt,
       parent_id: parentId,
@@ -72,7 +72,7 @@ export class AgentLib {
       agent = await this.agentAdater.create(agentData);
     }
 
-    const accessToken = await this.tokens.generateAccessToken(agent.id, config);
+    const accessToken = await this.tokens.generateAccessToken(agent.id, policy);
     await this.agentAdater.update(agent.id, {
       access_token: accessToken,
     });
@@ -157,10 +157,10 @@ export class AgentLib {
   }
 
   private async _createParentForEphemeral(
-    configId: string,
-    configSharedId: string
+    policyId: string,
+    policySharedId: string
   ): Promise<Agent> {
-    const ephemeralParentId = `agents:ephemeral:${configSharedId}`;
+    const ephemeralParentId = `agents:ephemeral:${policySharedId}`;
     const parentAgent = await this.agentAdater.getById('ephemeralParentId');
 
     if (parentAgent) {
@@ -170,8 +170,8 @@ export class AgentLib {
     return await this.agentAdater.create(
       {
         type: 'EPHEMERAL',
-        config_id: configId,
-        config_shared_id: configSharedId,
+        policy_id: policyId,
+        policy_shared_id: policySharedId,
         active: true,
       },
       {

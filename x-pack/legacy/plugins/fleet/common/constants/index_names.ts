@@ -6,10 +6,6 @@
 
 export const INDEX_NAMES = {
   FLEET: '.fleet',
-  EVENTS: '.fleet-agent-events-*',
-  EVENTS_ALIAS: '.fleet-agent-events',
 };
 
-export const POLICY_NAMES = {
-  EVENTS: '.fleet-agent-events-retention',
-};
+export const POLICY_NAMES = {};

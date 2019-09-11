@@ -31,16 +31,19 @@ export const mappings = {
       local_metadata: {
         type: 'text',
       },
-      config_shared_id: {
+      policy_shared_id: {
         type: 'keyword',
       },
-      config_id: {
+      policy_id: {
         type: 'keyword',
       },
       last_updated: {
         type: 'date',
       },
       last_checkin: {
+        type: 'date',
+      },
+      updated_at: {
         type: 'date',
       },
       actions: {
@@ -77,13 +80,16 @@ export const mappings = {
       tokenHash: {
         type: 'keyword',
       },
-      config_id: {
+      policy_id: {
         type: 'keyword',
       },
-      config_shared_id: {
+      policy_shared_id: {
         type: 'keyword',
       },
       created_at: {
+        type: 'date',
+      },
+      updated_at: {
         type: 'date',
       },
       expire_at: {
