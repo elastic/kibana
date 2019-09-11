@@ -168,7 +168,12 @@ export function InnerWorkspacePanel({
   }
 
   return (
-    <DragDrop draggable={false} droppable={Boolean(suggestionForDraggedField)} onDrop={onDrop}>
+    <DragDrop
+      data-test-subj="lnsWorkspace"
+      draggable={false}
+      droppable={Boolean(suggestionForDraggedField)}
+      onDrop={onDrop}
+    >
       {renderVisualization()}
     </DragDrop>
   );

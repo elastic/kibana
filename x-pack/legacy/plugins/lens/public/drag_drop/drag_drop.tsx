@@ -56,7 +56,7 @@ interface Props {
   /**
    * The optional test subject associated with this DOM element.
    */
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -128,7 +128,7 @@ export function DragDrop(props: Props) {
 
   return (
     <div
-      data-test-subj={props.dataTestSubj || 'lnsDragDrop'}
+      data-test-subj={props['data-test-subj'] || 'lnsDragDrop'}
       className={classes}
       onDragOver={dragOver}
       onDragLeave={dragLeave}

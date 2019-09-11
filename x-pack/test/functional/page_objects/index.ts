@@ -44,7 +44,7 @@ import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
-import { LensPageProvider } from './lens';
+import { LensPageProvider } from './lens_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones

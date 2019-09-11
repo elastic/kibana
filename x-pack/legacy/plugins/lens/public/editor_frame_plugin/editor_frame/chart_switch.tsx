@@ -241,12 +241,13 @@ export function ChartSwitch(props: Props) {
     </div>
   );
 }
+
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
   newVisualization: Visualization<unknown, unknown>
 ): Suggestion | undefined {
-  return getSuggestions({
+  const suggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates: props.datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
@@ -256,5 +257,14 @@ function getTopSuggestion(
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return suggestion.changeType !== 'extended';
-  })[0];
+  });
+
+  // We prefer unchanged or reduced suggestions when switching
+  // charts since that allows you to switch from A to B and back
+  // to A with the greatest chance of preserving your original state.
+  return (
+    suggestions.find(s => s.changeType === 'unchanged') ||
+    suggestions.find(s => s.changeType === 'reduced') ||
+    suggestions[0]
+  );
 }
