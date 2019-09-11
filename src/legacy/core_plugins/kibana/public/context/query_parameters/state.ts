@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
-
-const noneRequestHandlerProvider = function () {
+export function createInitialQueryParametersState(
+  defaultStepSize: number = 5,
+  tieBreakerField: string = '_doc'
+) {
   return {
-    name: 'none',
-    handler: function () {
-      return new Promise((resolve) => {
-        resolve();
-      });
-    }
+    anchorType: null,
+    anchorId: null,
+    columns: [],
+    defaultStepSize,
+    filters: [],
+    indexPatternId: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+    tieBreakerField,
   };
-};
-
-VisRequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
-
-export { noneRequestHandlerProvider };
+}

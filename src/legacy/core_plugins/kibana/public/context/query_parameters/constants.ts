@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export type ResponseHandler = <Response, Data>(response: Response, dimensions?: any) => Data;
+import { createInitialQueryParametersState } from './state';
 
-export interface ResponseHandlerDescription {
-  name: string;
-  handler: ResponseHandler;
-}
+export const MAX_CONTEXT_SIZE = 10000; // Elasticsearch's default maximum size limit
+export const MIN_CONTEXT_SIZE = 0;
+export const QUERY_PARAMETER_KEYS = Object.keys(createInitialQueryParametersState());
