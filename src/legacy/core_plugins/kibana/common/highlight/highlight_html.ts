@@ -20,7 +20,6 @@
 import _ from 'lodash';
 // @ts-ignore
 import { highlightTags } from './highlight_tags';
-// @ts-ignore
 import { htmlTags } from './html_tags';
 
 export function getHighlightHtml(fieldValue: any, highlights: any) {
