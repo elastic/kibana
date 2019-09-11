@@ -85,7 +85,6 @@ export class VisualizeLoader {
     params: VisualizeLoaderParams,
     onComplete: () => void
   ) {
-    console.log('VisualizeLoader embedVisualizationWithSavedObject - start / end');
     return this.renderVis(el, savedObj, params, onComplete);
   }
 
@@ -106,7 +105,6 @@ export class VisualizeLoader {
     onComplete: () => void
   ) {
     const { vis, description, searchSource } = savedObj;
-    console.log('VisualizeLoader renderVis - start');
 
     vis.description = description;
     vis.searchSource = searchSource;
@@ -146,7 +144,6 @@ export class VisualizeLoader {
       pipelineDataLoader: this.pipelineDataLoader,
     };
 
-    console.log('VisualizeLoader renderVis - end before return');
     return new EmbeddedVisualizeHandler(element, savedObj, handlerParams, onComplete);
   }
 }
