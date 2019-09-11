@@ -153,8 +153,18 @@ export const HomePage = pure(() => (
                     />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
-                    <Route path="/ml-hosts" component={MlHostConditionalContainer} />
-                    <Route path="/ml-network" component={MlNetworkConditionalContainer} />
+                    <Route
+                      path="/ml-hosts"
+                      render={({ match, location }) => (
+                        <MlHostConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route
+                      path="/ml-network"
+                      render={({ match, location }) => (
+                        <MlNetworkConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
                     <Route component={NotFoundPage} />
                   </Switch>
                 </EuiPageBody>
