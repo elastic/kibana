@@ -140,10 +140,8 @@ function stashCombinedJob(
   } else {
     mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    if (skipTimeRangeStep === true) {
-      // skip over the time picker step of the wizard
-      mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
-    }
+    // skip over the time picker step of the wizard
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
 
     if (includeTimeRange === true) {
       // auto select the start and end dates of the time picker
