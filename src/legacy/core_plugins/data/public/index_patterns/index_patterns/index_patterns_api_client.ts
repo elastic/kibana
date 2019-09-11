@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpServiceBase } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../errors';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
@@ -30,6 +30,8 @@ export interface GetFieldsOptions {
   metaFields?: string;
 }
 
+export type IIndexPatternsApiClient = PublicMethodsOf<IndexPatternsApiClient>;
+
 export class IndexPatternsApiClient {
   private http: HttpServiceBase;
 
@@ -37,12 +39,12 @@ export class IndexPatternsApiClient {
     this.http = http;
   }
 
-  _request(url: string, query: any) {
+  private _request(url: string, query: any) {
     return this.http
       .fetch(url, {
         query,
       })
-      .catch(resp => {
+      .catch((resp: any) => {
         if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
           throw new IndexPatternMissingIndices(resp.body.message);
         }
@@ -70,7 +72,7 @@ export class IndexPatternsApiClient {
       pattern,
       look_back: lookBack,
       meta_fields: metaFields,
-    }).then(resp => resp.fields);
+    }).then((resp: any) => resp.fields);
   }
 
   getFieldsForWildcard(options: GetFieldsOptions = {}) {
@@ -94,6 +96,6 @@ export class IndexPatternsApiClient {
       };
     }
 
-    return this._request(url, query).then(resp => resp.fields);
+    return this._request(url, query).then((resp: any) => resp.fields);
   }
 }

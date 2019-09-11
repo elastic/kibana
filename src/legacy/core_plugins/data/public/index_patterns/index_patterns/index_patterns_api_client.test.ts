@@ -20,14 +20,6 @@
 import { http } from './index_patterns_api_client.test.mock';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
-const requestData = {
-  credentials: 'same-origin',
-  headers: { 'Content-Type': 'application/json' },
-  method: 'GET',
-  prependBasePath: true,
-  query: {},
-};
-
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.Mock;
   let indexPatternsApiClient: IndexPatternsApiClient;
