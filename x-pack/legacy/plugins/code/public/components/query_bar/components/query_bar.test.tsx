@@ -51,10 +51,6 @@ test('render correctly with input query string changed', done => {
     return;
   };
 
-  const emptyAsyncFn = (query: string): Promise<any> => {
-    return Promise.resolve();
-  };
-
   const fileSuggestionsSpy = sinon.fake.returns(
     Promise.resolve(props[AutocompleteSuggestionType.FILE])
   );
@@ -65,19 +61,9 @@ test('render correctly with input query string changed', done => {
     Promise.resolve(props[AutocompleteSuggestionType.REPOSITORY])
   );
 
-  const mockFileSuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockFileSuggestionsProvider.getSuggestions = fileSuggestionsSpy;
-  const mockSymbolSuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockSymbolSuggestionsProvider.getSuggestions = symbolSuggestionsSpy;
-  const mockRepositorySuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockRepositorySuggestionsProvider.getSuggestions = repoSuggestionsSpy;
-
+  const mockFileSuggestionsProvider = { getSuggestions: fileSuggestionsSpy };
+  const mockSymbolSuggestionsProvider = { getSuggestions: symbolSuggestionsSpy };
+  const mockRepositorySuggestionsProvider = { getSuggestions: repoSuggestionsSpy };
   const submitSpy = sinon.spy();
 
   const queryBarComp = mount(
