@@ -39,8 +39,8 @@ export const ControlSettings = ({
   };
 
   const popoverButton = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiToolTip position="bottom" content={strings.getTooltipText()}>
-      <EuiButtonIcon iconType="gear" aria-label={strings.getTooltipText()} onClick={handleClick} />
+    <EuiToolTip position="bottom" content={strings.getTooltip()}>
+      <EuiButtonIcon iconType="gear" aria-label={strings.getTooltip()} onClick={handleClick} />
     </EuiToolTip>
   );
 

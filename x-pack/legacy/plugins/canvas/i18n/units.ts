@@ -44,7 +44,7 @@ export const UnitStrings = {
             defaultMessage: 'Every {hours} {hours, plural, one {hour} other {hours}}',
             values: { hours: length },
           });
-        case 'hours':
+        case 'days':
           return i18n.translate('xpack.canvas.workpadHeader.cycleIntervalDaysText', {
             defaultMessage: 'Every {days} {days, plural, one {day} other {days}}',
             values: { days: length },

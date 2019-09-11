@@ -47,8 +47,8 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
       <EuiFlexGroup gutterSize={gutterSize}>
         <EuiFlexItem>
           <EuiFormRow
-            label={strings.getFormLabelText()}
-            helpText={strings.getFormHelpText()}
+            label={strings.getFormLabel()}
+            helpText={strings.getFormDescription()}
             compressed
           >
             <EuiFieldText isInvalid={isInvalid} value={customInterval} onChange={handleChange} />
@@ -63,7 +63,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
               type="submit"
               style={{ minWidth: 'auto' }}
             >
-              {strings.getButtonText()}
+              {strings.getButtonLabel()}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>

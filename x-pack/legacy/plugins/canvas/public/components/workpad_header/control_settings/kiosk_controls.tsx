@@ -65,7 +65,7 @@ export const KioskControls = ({
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiDescriptionList textStyle="reverse">
-          <EuiDescriptionListTitle>{strings.getTitleText()}</EuiDescriptionListTitle>
+          <EuiDescriptionListTitle>{strings.getTitle()}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <span>{timeStrings.getCycleTimeText(interval.length, interval.format)}</span>
           </EuiDescriptionListDescription>
@@ -75,13 +75,13 @@ export const KioskControls = ({
         <div>
           <EuiSwitch
             checked={autoplayEnabled}
-            label={strings.getCycleSwitchLabelText()}
+            label={strings.getCycleToggleSwitch()}
             onChange={ev => onSetEnabled(ev.target.checked)}
           />
           <EuiSpacer size="m" />
         </div>
 
-        <EuiFormLabel>{strings.getCycleFormLabelText()}</EuiFormLabel>
+        <EuiFormLabel>{strings.getCycleFormLabel()}</EuiFormLabel>
         <EuiSpacer size="s" />
 
         <EuiText size="s">

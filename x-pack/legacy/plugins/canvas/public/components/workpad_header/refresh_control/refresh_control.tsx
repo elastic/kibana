@@ -22,7 +22,7 @@ export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
     position="bottom"
     content={
       <span>
-        {strings.getTooltipText()}
+        {strings.getRefreshTooltip()}
         <ToolTipShortcut namespace="EDITOR" action="REFRESH" />
       </span>
     }
@@ -30,7 +30,7 @@ export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
     <EuiButtonIcon
       disabled={inFlight}
       iconType="refresh"
-      aria-label={strings.getButtonLabelText()}
+      aria-label={strings.getRefreshAriaLabel()}
       onClick={doRefresh}
     />
   </EuiToolTip>

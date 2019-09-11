@@ -63,7 +63,7 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
-              <EuiDescriptionListTitle>{strings.getRefreshListTitleText()}</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>{strings.getRefreshListTitle()}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 {refreshInterval > 0 ? (
                   <Fragment>
@@ -79,11 +79,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {refreshInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content={strings.getDisableTooltipText()}>
+                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableInterval}
-                      aria-label={strings.getDisableTooltipText()}
+                      aria-label={strings.getDisableTooltip()}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

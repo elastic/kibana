@@ -19,19 +19,19 @@ export const ComponentStrings = {
       }),
   },
   Asset: {
-    getCopyAssetTooltipText: () =>
+    getCopyAssetTooltip: () =>
       i18n.translate('xpack.canvas.asset.copyAssetTooltip', {
         defaultMessage: 'Copy id to clipboard',
       }),
-    getCreateImageTooltipText: () =>
+    getCreateImageTooltip: () =>
       i18n.translate('xpack.canvas.asset.createImageTooltip', {
         defaultMessage: 'Create image element',
       }),
-    getDeleteAssetTooltipText: () =>
+    getDeleteAssetTooltip: () =>
       i18n.translate('xpack.canvas.asset.deleteAssetTooltip', {
         defaultMessage: 'Delete',
       }),
-    getDownloadAssetTooltipText: () =>
+    getDownloadAssetTooltip: () =>
       i18n.translate('xpack.canvas.asset.downloadAssetTooltip', {
         defaultMessage: 'Download',
       }),
@@ -41,11 +41,11 @@ export const ComponentStrings = {
       }),
   },
   AssetManager: {
-    getBtnText: () =>
+    getButtonLabel: () =>
       i18n.translate('xpack.canvas.assetManager.manageButtonLabel', {
         defaultMessage: 'Manage assets',
       }),
-    getConfirmModalBtnText: () =>
+    getConfirmModalButtonLabel: () =>
       i18n.translate('xpack.canvas.assetManager.confirmModalButtonLabel', {
         defaultMessage: 'Remove',
       }),
@@ -53,18 +53,18 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.assetManager.confirmModalDetail', {
         defaultMessage: 'Are you sure you want to remove this asset?',
       }),
-    getConfirmModalTitleText: () =>
+    getConfirmModalTitle: () =>
       i18n.translate('xpack.canvas.assetManager.confirmModalTitle', {
         defaultMessage: 'Remove Asset',
       }),
   },
   AssetModal: {
-    getDescriptionText: () =>
+    getDescription: () =>
       i18n.translate('xpack.canvas.assetModal.modalDescription', {
         defaultMessage:
           'Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.',
       }),
-    getEmptyAssetsMessageText: () =>
+    getEmptyAssetsDescription: () =>
       i18n.translate('xpack.canvas.assetModal.emptyAssetsDescription', {
         defaultMessage: 'Import your assets to get started',
       }),
@@ -76,11 +76,11 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.assetModal.loadingText', {
         defaultMessage: 'Uploading images',
       }),
-    getModalCloseBtnText: () =>
+    getModalCloseButtonLabel: () =>
       i18n.translate('xpack.canvas.assetModal.modalCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
-    getModalTitleText: () =>
+    getModalTitle: () =>
       i18n.translate('xpack.canvas.assetModal.modalTitle', {
         defaultMessage: 'Manage workpad assets',
       }),
@@ -129,41 +129,41 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeader: {
-    getAddElementBtnText: () =>
+    getAddElementButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.addElementButtonLabel', {
         defaultMessage: 'Add element',
       }),
-    getAddElementModalCloseBtnText: () =>
+    getAddElementModalCloseButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
-    getEmbedObjectBtnText: () =>
+    getEmbedObjectButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonLabel', {
         defaultMessage: 'Embed object',
       }),
-    getFullScreenTooltipText: () =>
+    getFullScreenTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltip', {
         defaultMessage: 'Enter fullscreen mode',
       }),
-    getFullScreenButtonLabelText: () =>
+    getFullScreenButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
         defaultMessage: 'View fullscreen',
       }),
-    getHideEditControlText: () =>
+    getHideEditControlTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeader.hideEditControlTooltip', {
         defaultMessage: 'Hide editing controls',
       }),
-    getNoWritePermText: () =>
+    getNoWritePermissionTooltipText: () =>
       i18n.translate('xpack.canvas.workpadHeader.noWritePermissionTooltip', {
         defaultMessage: "You don't have permission to edit this workpad",
       }),
-    getShowEditControlText: () =>
+    getShowEditControlTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeader.showEditControlTooltip', {
         defaultMessage: 'Show editing controls',
       }),
   },
   WorkpadHeaderAutoRefreshControls: {
-    getRefreshListTitleText: () =>
+    getRefreshListTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitle', {
         defaultMessage: 'Refresh elements',
       }),
@@ -174,7 +174,7 @@ export const ComponentStrings = {
           defaultMessage: 'Manually',
         }
       ),
-    getDisableTooltipText: () =>
+    getDisableTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltip', {
         defaultMessage: 'Disable auto-refresh',
       }),
@@ -184,17 +184,17 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderControlSettings: {
-    getTooltipText: () =>
+    getTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeaderControlSettings.settingsTooltip', {
         defaultMessage: 'Control settings',
       }),
   },
   WorkpadHeaderCustomInterval: {
-    getFormLabelText: () =>
+    getFormLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
         defaultMessage: 'Set a custom interval',
       }),
-    getFormHelpText: () =>
+    getFormDescription: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formDescription', {
         defaultMessage:
           'Use shorthand notation, like {secondsExample}, {minutesExample}, or {hoursExample}',
@@ -204,31 +204,31 @@ export const ComponentStrings = {
           hoursExample: '1h',
         },
       }),
-    getButtonText: () =>
+    getButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
         defaultMessage: 'Set',
       }),
   },
   WorkpadHeaderKioskControls: {
-    getTitleText: () =>
+    getTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
       }),
-    getCycleSwitchLabelText: () =>
+    getCycleToggleSwitch: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleToggleSwitch', {
         defaultMessage: 'Cycle slides automatically',
       }),
-    getCycleFormLabelText: () =>
+    getCycleFormLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
         defaultMessage: 'Change cycling interval',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {
-    getTooltipText: () =>
+    getRefreshTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshTooltip', {
         defaultMessage: 'Refresh data',
       }),
-    getButtonLabelText: () =>
+    getRefreshAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshAriaLabel', {
         defaultMessage: 'Refresh Elements',
       }),
