@@ -19,7 +19,9 @@
   width: 100%;
   display: flex;
   flex: 0 0 auto;
-  //position: relative;
+
+  // NB: Required on IE11 to render ace editor correctly after first input.
+  position: relative;
 }
 
 .conApp__output {
@@ -29,6 +31,7 @@
 
 .conApp__editorContent,
 .conApp__outputContent {
+  height: 100%;
   flex: 1 1 1px;
 }
 

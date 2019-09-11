@@ -17,43 +17,35 @@
  * under the License.
  */
 import React, { useEffect, useRef } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import { keyCodes, EuiText } from '@elastic/eui';
 
-const Overlay = ({
-  onMount,
-  onKeyDown,
-}: {
-  onMount: (ref: HTMLDivElement) => void;
-  onKeyDown: (ev: React.KeyboardEvent) => void;
-}) => (
+const OverlayText = () => (
   // The point of this element is for accessibility purposes, so ignore eslint error
   // in this case
   //
   // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-  <div ref={onMount} onKeyDown={onKeyDown}>
+  <>
     <EuiText size="s">Press Enter to start editing.</EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
-  </div>
+  </>
 );
 
 export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
-  const mountNode = useRef<HTMLDivElement | null>(null);
+  const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
 
-  function onDismissOverlay(ev: React.KeyboardEvent) {
-    if (ev.keyCode === keyCodes.ENTER) {
-      ev.preventDefault();
-      unmountComponentAtNode(mountNode.current!);
+  function onDismissOverlay(event: KeyboardEvent) {
+    if (event.keyCode === keyCodes.ENTER) {
+      event.preventDefault();
       aceTextAreaElement!.focus();
     }
   }
 
   function enableOverlay() {
-    render(
-      <Overlay onKeyDown={onDismissOverlay} onMount={ref => ref && ref.focus()} />,
-      mountNode.current!
-    );
+    if (overlayMountNode.current) {
+      overlayMountNode.current.focus();
+    }
   }
 
   const isAutoCompleteVisible = () => {
@@ -69,29 +61,37 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
     autoCompleteVisibleRef.current = isAutoCompleteVisible();
   };
 
-  const aceKeydownListener = (ev: KeyboardEvent) => {
-    if (ev.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
-      ev.preventDefault();
-      ev.stopPropagation();
+  const aceKeydownListener = (event: KeyboardEvent) => {
+    if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
       enableOverlay();
     }
   };
 
   useEffect(() => {
     if (aceTextAreaElement) {
-      const container = document.createElement('div');
-      container.className = 'kbnUiAceKeyboardHint';
-      container.setAttribute('role', 'application');
-      container.tabIndex = 0;
-      container.addEventListener('focus', () => {
-        enableOverlay();
-      });
-      aceTextAreaElement.parentElement!.insertBefore(container, aceTextAreaElement);
+      // We don't control HTML elements inside of ace so we imperatively create an element
+      // that acts as a container and insert it just before ace's textarea element
+      // so that the overlay lives at the correct spot in the DOM hierarchy.
+      overlayMountNode.current = document.createElement('div');
+      overlayMountNode.current.className = 'kbnUiAceKeyboardHint';
+      overlayMountNode.current.setAttribute('role', 'application');
+      overlayMountNode.current.tabIndex = 0;
+      overlayMountNode.current.addEventListener('focus', enableOverlay);
+      overlayMountNode.current.addEventListener('keydown', onDismissOverlay);
 
-      mountNode.current = container;
+      ReactDOM.render(<OverlayText />, overlayMountNode.current);
+
+      aceTextAreaElement.parentElement!.insertBefore(overlayMountNode.current, aceTextAreaElement);
       aceTextAreaElement.setAttribute('tabindex', '-1');
 
-      // This listener fires on capture phase so that we get a look at the world before ace changes it.
+      // Order of events:
+      // 1. Document capture event fires first and we check whether an autocomplete menu is open on keydown
+      //    (not ideal because this is scoped to the entire document).
+      // 2. Ace changes it's state (like hiding or showing autocomplete menu)
+      // 3. We check what button was pressed and whether autocomplete was visible then determine
+      //    whether it should act like a dismiss or if we should display an overlay.
       document.addEventListener('keydown', documentKeyDownListener, { capture: true });
       aceTextAreaElement.addEventListener('keydown', aceKeydownListener);
     }
@@ -99,7 +99,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       if (aceTextAreaElement) {
         document.removeEventListener('keydown', documentKeyDownListener);
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
-        document.removeChild(mountNode.current!);
+        document.removeChild(overlayMountNode.current!);
       }
     };
   }, [aceTextAreaElement]);
