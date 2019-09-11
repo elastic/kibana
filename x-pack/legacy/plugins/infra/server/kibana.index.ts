@@ -13,13 +13,17 @@ import { UsageCollector } from './usage/usage_collector';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { InternalCoreSetup } from '../../../../../src/core/server';
+import { InfraConfig } from './new_platform_config.schema';
 
 export interface KbnServer extends Server {
   usage: any;
 }
 
-export const initServerWithKibana = (core: InternalCoreSetup) => {
-  const libs = compose(kbnServer);
+export const initServerWithKibana = (core: InternalCoreSetup, config: InfraConfig) => {
+  const libs = compose(
+    core,
+    config
+  );
   initInfraServer(libs);
 
   // NP_TODO how do we replace this?

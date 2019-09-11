@@ -82,7 +82,10 @@ export function infra(kibana: any) {
 
       const getConfig$ = <T>() =>
         new Observable<T>(observer => {
-          observer.next(server.config().get('xpack.infra'));
+          server
+            .config()
+            .get('xpack.infra')
+            .then((value: T) => observer.next(value));
         });
 
       const initContext = {

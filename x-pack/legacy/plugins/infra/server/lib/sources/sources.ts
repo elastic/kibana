@@ -12,7 +12,6 @@ import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { Pick3 } from '../../../common/utility_types';
-import { InfraConfigurationAdapter } from '../adapters/configuration';
 import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
@@ -25,9 +24,10 @@ import {
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
 } from './types';
+import { InfraConfig } from '../../new_platform_config.schema';
 
 interface Libs {
-  configuration: InfraConfigurationAdapter;
+  config: InfraConfig;
   savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
     Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
 }
@@ -187,7 +187,6 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticConfiguration = await this.libs.configuration.get();
     const staticSourceConfiguration = pipe(
       runtimeTypes
         .type({
@@ -195,7 +194,7 @@ export class InfraSources {
             default: StaticSourceConfigurationRuntimeType,
           }),
         })
-        .decode(staticConfiguration),
+        .decode(this.libs.config),
       map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
       fold(constant({}), identity)
     );
