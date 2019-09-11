@@ -17,7 +17,7 @@ const fieldStartsWith = (field: DisplayableFieldType) => (name: string) =>
 
 export const isDisplayable = (field: DisplayableFieldType, additionalPrefixes: string[] = []) => {
   // We need to start with at least one prefix, even if it's empty
-  const prefixes = (additionalPrefixes.length && additionalPrefixes) || [''];
+  const prefixes = additionalPrefixes && additionalPrefixes.length ? additionalPrefixes : [''];
   // Create a set of allowed list based on the prefixes
   const allowedList = prefixes.reduce(
     (acc, prefix) => {
