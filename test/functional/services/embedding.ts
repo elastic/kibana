@@ -17,20 +17,23 @@
  * under the License.
  */
 
-export function EmbeddingProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function EmbeddingProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const PageObjects = getPageObjects(['header']);
 
   class Embedding {
-
-    async openInEmbeddedMode() {
+    /**
+     * Opens current page in embeded mode
+     */
+    public async openInEmbeddedMode(): Promise<void> {
       const currentUrl = await browser.getCurrentUrl();
       log.debug(`Opening in embedded mode: ${currentUrl}`);
       await browser.get(`${currentUrl}&embed=true`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-
   }
 
   return new Embedding();
