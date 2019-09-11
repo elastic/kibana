@@ -210,7 +210,7 @@ export const WatchVisualization = () => {
       <div data-test-subj="watchVisualizationChart">
         <EuiSpacer size="l" />
         {watchVisualizationDataKeys.length ? (
-          <Chart size={[800, 300]} renderer="canvas">
+          <Chart size={['100%', 300]} renderer="canvas">
             <Settings
               theme={[customTheme(), npStart.plugins.eui_chart_utils.getChartsTheme()]}
               xDomain={domain}

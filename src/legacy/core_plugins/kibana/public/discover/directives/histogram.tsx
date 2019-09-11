@@ -220,7 +220,6 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
           position={Position.Left}
           ticks={5}
           title={chartData.yAxisLabel}
-          showGridLines
         />
         <Axis
           id={getAxisId('discover-histogram-bottom-axis')}
