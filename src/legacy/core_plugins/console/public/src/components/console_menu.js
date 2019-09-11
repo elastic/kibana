@@ -24,6 +24,7 @@ import React, {
 } from 'react';
 
 import {
+  EuiGlobalToastList,
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
@@ -39,6 +40,7 @@ export class ConsoleMenu extends Component {
     this.state = {
       curlCode: '',
       isPopoverOpen: false,
+      toasts: [],
     };
   }
 
@@ -60,6 +62,8 @@ export class ConsoleMenu extends Component {
     textField.select();
     document.execCommand('copy');
     textField.remove();
+
+    this.addToast();
   }
 
   onButtonClick = () => {
@@ -79,6 +83,34 @@ export class ConsoleMenu extends Component {
     this.props.getDocumentation();
     this.props.openDocumentation();
   }
+
+  getCopyToast = () => {
+    const toasts = [
+      {
+        title: 'Text copied to clipboard as cURL',
+        color: 'success',
+      },
+    ];
+
+    return {
+      id: 1,
+      ...toasts[0],
+    };
+  };
+
+  addToast = () => {
+    const toast = this.getCopyToast();
+
+    this.setState({
+      toasts: this.state.toasts.concat(toast),
+    });
+  };
+
+  removeToast = () => {
+    this.setState({
+      toasts: [],
+    });
+  };
 
   render() {
     const button = (
@@ -131,19 +163,28 @@ export class ConsoleMenu extends Component {
     ];
 
     return (
-      <span onMouseEnter={this.mouseEnter}>
-        <EuiPopover
-          id="contextMenu"
-          button={button}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            items={items}
+      <span>
+        <span onMouseEnter={this.mouseEnter}>
+          <EuiPopover
+            id="contextMenu"
+            button={button}
+            isOpen={this.state.isPopoverOpen}
+            closePopover={this.closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel
+              items={items}
+            />
+          </EuiPopover>
+        </span>
+        <span>
+          <EuiGlobalToastList
+            toasts={this.state.toasts}
+            dismissToast={this.removeToast}
+            toastLifeTimeMs={6000}
           />
-        </EuiPopover>
+        </span>
       </span>
     );
   }
