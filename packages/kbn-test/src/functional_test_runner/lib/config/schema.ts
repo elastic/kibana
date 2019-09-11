@@ -134,7 +134,7 @@ export const schema = Joi.object()
     browser: Joi.object()
       .keys({
         type: Joi.string()
-          .valid('chrome', 'firefox', 'internet explorer')
+          .valid('chrome', 'firefox', 'ie')
           .default('chrome'),
 
         logPollingMs: Joi.number().default(100),

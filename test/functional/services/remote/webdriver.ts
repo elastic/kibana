@@ -106,7 +106,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
 
-      case 'internet explorer':
+      case 'ie':
         // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
         // console.log(`${process.env['PATH']}`);
         process.env.PATH = 'node_modules\\iedriver\\lib\\iedriver\\;' + process.env.PATH;
