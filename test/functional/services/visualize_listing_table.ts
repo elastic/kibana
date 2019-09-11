@@ -17,14 +17,16 @@
  * under the License.
  */
 
-export function VisualizeListingTableProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function VisualizeListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
+  const { header } = getPageObjects(['header']);
 
   class VisualizeListingTable {
-    async getAllVisualizationNamesOnCurrentPage() {
+    public async getAllVisualizationNamesOnCurrentPage(): Promise<string[]> {
       const visualizationNames = [];
       const links = await find.allByCssSelector('.kuiLink');
       for (let i = 0; i < links.length; i++) {
@@ -34,16 +36,18 @@ export function VisualizeListingTableProvider({ getService, getPageObjects }) {
       return visualizationNames;
     }
 
-    async getAllVisualizationNames() {
+    public async getAllVisualizationNames(): Promise<string[]> {
       log.debug('VisualizeListingTable.getAllVisualizationNames');
       let morePages = true;
-      let visualizationNames = [];
+      let visualizationNames: string[] = [];
       while (morePages) {
-        visualizationNames = visualizationNames.concat(await this.getAllVisualizationNamesOnCurrentPage());
-        morePages = !(await testSubjects.getAttribute('pagerNextButton', 'disabled') === 'true');
+        visualizationNames = visualizationNames.concat(
+          await this.getAllVisualizationNamesOnCurrentPage()
+        );
+        morePages = !((await testSubjects.getAttribute('pagerNextButton', 'disabled')) === 'true');
         if (morePages) {
           await testSubjects.click('pagerNextButton');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
         }
       }
       return visualizationNames;
