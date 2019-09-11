@@ -115,7 +115,7 @@ export const CronYearly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
-            label={i18n.translate('esUi.cronEditor.cronYearly.hourSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronYearly.hourSelectLabel', {
               defaultMessage: 'Hour'
             })}
             onChange={e => onChange({ hour: e.target.value })}
@@ -138,7 +138,7 @@ export const CronYearly = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
-            label={i18n.translate('esUi.cronEditor.cronYearly.minuteSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronYearly.minuteSelectLabel', {
               defaultMessage: 'Minute'
             })}
             onChange={e => onChange({ minute: e.target.value })}

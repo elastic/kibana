@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,
   EuiSwitch,
@@ -350,9 +351,6 @@ export class IndexTable extends Component {
               aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectIndexAriaLabel', {
                 defaultMessage: 'Select this row'
               })}
-              title={i18n.translate('xpack.idxMgmt.indexTable.selectIndexTitle', {
-                defaultMessage: 'Select this row'
-              })}
             />
           </EuiTableRowCellCheckbox>
           {this.buildRowCells(index)}
@@ -528,18 +526,19 @@ export class IndexTable extends Component {
         {indices.length > 0 ? (
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <EuiTable className="indTable">
-              <caption
-                role="status"
-                aria-relevant="text"
-                aria-live="polite"
-                className="euiScreenReaderOnly"
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.captionText"
-                  defaultMessage="Below is a table of {count} items."
-                  values={{ count: indices.length }}
-                />
-              </caption>
+              <EuiScreenReaderOnly>
+                <caption
+                  role="status"
+                  aria-relevant="text"
+                  aria-live="polite"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexTable.captionText"
+                    defaultMessage="Below is a table of {count} items."
+                    values={{ count: indices.length }}
+                  />
+                </caption>
+              </EuiScreenReaderOnly>
               <EuiTableHeader>
                 <EuiTableHeaderCellCheckbox>
                   <EuiCheckbox

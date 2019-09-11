@@ -32,6 +32,7 @@ import {
   EuiText,
   EuiPageBody,
   EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -308,7 +309,7 @@ export class PolicyTable extends Component {
             scope="row"
             data-test-subj={`policyTableCell-${fieldName}`}
           >
-            <div className={`euiTableCellContent policyTable__content----${fieldName}`}>
+            <div className={`euiTableCellContent policyTable__content--${fieldName}`}>
               {this.buildRowCell(fieldName, value)}
             </div>
           </th>
@@ -406,18 +407,19 @@ export class PolicyTable extends Component {
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
           <EuiTable className="policyTable__horizontalScroll">
-            <caption
-              role="status"
-              aria-relevant="text"
-              aria-live="polite"
-              className="euiScreenReaderOnly"
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.captionText"
-                defaultMessage="Below is a table of {count} items."
-                values={{ count: totalNumberOfPolicies }}
-              />
-            </caption>
+            <EuiScreenReaderOnly>
+              <caption
+                role="status"
+                aria-relevant="text"
+                aria-live="polite"
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyTable.captionText"
+                  defaultMessage="Below is a table of {count} items."
+                  values={{ count: totalNumberOfPolicies }}
+                />
+              </caption>
+            </EuiScreenReaderOnly>
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>

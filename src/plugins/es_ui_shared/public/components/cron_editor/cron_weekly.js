@@ -84,7 +84,7 @@ export const CronWeekly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
-            label={i18n.translate('esUi.cronEditor.cronWeekly.hourSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronWeekly.hourSelectLabel', {
               defaultMessage: 'Hour'
             })}
             onChange={e => onChange({ hour: e.target.value })}
@@ -108,7 +108,7 @@ export const CronWeekly = ({
             options={minuteOptions}
             value={minute}
             onChange={e => onChange({ minute: e.target.value })}
-            label={i18n.translate('esUi.cronEditor.cronWeekly.minuteSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronWeekly.minuteSelectLabel', {
               defaultMessage: 'Minute'
             })}
             fullWidth
