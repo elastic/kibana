@@ -258,4 +258,4 @@ const getConfigCollections = () => ({
   thresholdLineStyles,
 });
 
-export { getConfigCollections, rotateOptions };
+export { getConfigCollections, rotateOptions, axisModes, scaleTypes, positions };
