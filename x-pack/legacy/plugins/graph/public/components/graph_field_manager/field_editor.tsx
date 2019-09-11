@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPopover,
-  EuiButtonEmpty,
-  EuiSelectable,
-  EuiButton,
-  EuiText,
-  EuiSpacer,
   EuiFormRow,
   EuiBadge,
   EuiComboBox,
   EuiColorPicker,
+  EuiFieldNumber,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { GraphFieldManagerProps } from '.';
 import { WorkspaceField } from '../../types';
+import { iconChoices } from '../../services/style_choices';
+import { LegacyIcon } from '../graph_settings/legacy_icon';
 
 export type FieldPickerProps = GraphFieldManagerProps & { field: WorkspaceField };
 
-export function FieldEditor({ field, updateFieldProperties, allFields }: FieldPickerProps) {
+export function FieldEditor({ field, updateFieldProperties, selectField, deselectField, allFields }: FieldPickerProps) {
   const [open, setOpen] = useState(false);
+
+  const { color, hopSize, icon, name: fieldName } = field;
 
   return (
     <EuiPopover
@@ -36,17 +35,34 @@ export function FieldEditor({ field, updateFieldProperties, allFields }: FieldPi
       closePopover={() => setOpen(false)}
     >
       <EuiFormRow label="Field">
-        <EuiComboBox selectedOptions={[{ label: 'category.keyword' }]} />
+        <EuiComboBox
+          onChange={choices => {
+            // value is always defined because it's an unclearable single selection
+            const newFieldName = choices[0].value!;
+
+            deselectField(fieldName);
+            selectField(newFieldName);
+            updateFieldProperties(newFieldName, { color, hopSize, icon });
+          }}
+          singleSelection={{ asPlainText: true }}
+          isClearable={false}
+          options={toOptions(allFields, field)}
+          selectedOptions={[{ value: field.name, label: field.name }]}
+        />
       </EuiFormRow>
 
       <EuiFormRow label="Color">
-        <EuiColorPicker color="#ffffff" onChange={() => {}} />
+        <EuiColorPicker color={color} onChange={newColor => {
+            updateFieldProperties(fieldName, { color: newColor, hopSize, icon });
+        }} />
       </EuiFormRow>
 
       <EuiFormRow label="Icon">
         <div>
-          {iconChoices.map(icon => (
-            <LegacyIcon key={icon.class} asListIcon icon={icon} onClick={() => {}} />
+          {iconChoices.map(currentIcon => (
+            <LegacyIcon key={currentIcon.class} selected={currentIcon === icon} icon={currentIcon} onClick={() => {
+                updateFieldProperties(fieldName, { color, hopSize, icon: currentIcon });
+            }} />
           ))}
         </div>
       </EuiFormRow>
@@ -58,10 +74,14 @@ export function FieldEditor({ field, updateFieldProperties, allFields }: FieldPi
   );
 }
 
-function toOptions(fields: WorkspaceField[]): Array<{ label: string; checked?: 'on' | 'off' }> {
-  return fields.map(field => ({
-    label: field.name,
-    checked: 'off',
-    // TODO icon for data type
-  }));
+function toOptions(
+  fields: WorkspaceField[],
+  currentField: WorkspaceField
+): Array<{ label: string; value: string }> {
+  return fields
+    .filter(field => !field.selected || field === currentField)
+    .map(field => ({
+      label: field.name,
+      value: field.name,
+    }));
 }

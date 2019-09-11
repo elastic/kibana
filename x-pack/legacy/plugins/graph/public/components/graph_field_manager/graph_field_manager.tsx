@@ -12,9 +12,9 @@ import { FieldPicker } from './field_picker';
 
 export interface GraphFieldManagerProps {
   allFields: WorkspaceField[];
-  updateFieldProperties: (field: WorkspaceField, fieldProperties: Pick<WorkspaceField, 'hopSize' | 'color' | 'icon'>) => void;
-  selectField: (field: WorkspaceField) => void;
-  deselectField: (field: WorkspaceField) => void;
+  updateFieldProperties: (fieldName: string, fieldProperties: Pick<WorkspaceField, 'hopSize' | 'color' | 'icon'>) => void;
+  selectField: (fieldName: string) => void;
+  deselectField: (fieldName: string) => void;
 }
 
 export function GraphFieldManager(props: GraphFieldManagerProps) {
