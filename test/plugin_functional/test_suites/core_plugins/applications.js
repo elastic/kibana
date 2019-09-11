@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import url from 'url';
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
@@ -32,11 +32,12 @@ export default function ({ getService, getPageObjects }) {
   const loadingScreenShown = () =>
     testSubjects.existOrFail('kbnLoadingMessage');
 
-  const getKibanaUrl = path => {
-    const host = process.env.TEST_KIBANA_HOST || 'localhost';
-    const port = process.env.TEST_KIBANA_PORT || '5620';
-    return `http://${host}:${port}${path}`;
-  };
+  const getKibanaUrl = path => url.format({
+    protocol: 'http:',
+    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
+    port: process.env.TEST_KIBANA_PORT || '5620',
+    path
+  });
 
   describe('ui applications', function describeIndexTests() {
     before(async () => {

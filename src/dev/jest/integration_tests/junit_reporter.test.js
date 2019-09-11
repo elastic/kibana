@@ -78,14 +78,16 @@ it(
                 $: {
                   classname: 'Jest Tests.·',
                   name: 'fails',
-                  time: expect.anything(),
+                  time: expect.anything()
                 },
-                failure: [expect.stringMatching(/Error: failure\s+at /m)],
-              },
-            ],
-          },
-        ],
-      },
+                failure: [
+                  expect.stringMatching(/Error: failure\s+at /m)
+                ]
+              }
+            ]
+          }
+        ]
+      }
     });
   },
   3 * MINUTE
