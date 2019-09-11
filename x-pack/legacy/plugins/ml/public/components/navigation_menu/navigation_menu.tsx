@@ -15,8 +15,9 @@ import { MainTabs } from './main_tabs';
 import { Tabs } from './tabs';
 
 export type TabId = string;
+type TabSupport = Record<TabId, string | null>;
 
-const tabSupport = {
+const tabSupport: TabSupport = {
   // overview: null,
   jobs: 'anomaly_detection',
   settings: 'anomaly_detection',
@@ -29,18 +30,16 @@ const tabSupport = {
   explorer: 'anomaly_detection',
 };
 
-type tabSupportId = keyof typeof tabSupport;
-
 interface Props {
   tabId: TabId;
 }
 
 export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
-  const showTabs = Object.keys(tabSupport).includes(tabId);
-  const mainTabId = tabSupport[tabId as tabSupportId] || tabId;
+  const showTabs = typeof tabSupport[tabId] !== 'undefined';
+  const mainTabId = tabSupport[tabId] || tabId;
   // show horizontal rule if there are no subtabs
-  const showHorizontalRule = tabSupport[tabId as tabSupportId] === null;
+  const showHorizontalRule = tabSupport[tabId] === null;
 
   return (
     <Fragment>

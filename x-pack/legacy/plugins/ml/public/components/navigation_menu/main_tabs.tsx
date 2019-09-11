@@ -65,15 +65,13 @@ interface TabData {
   pathId?: string;
 }
 
-const TAB_DATA: { [key: string]: TabData } = {
+const TAB_DATA: Record<TabId, TabData> = {
   // overview: { testSubject: 'mlTabOverview', pathId: 'overview' },
   anomaly_detection: { testSubject: 'mlTabAnomalyDetection', pathId: 'jobs' },
   data_frames: { testSubject: 'mlTabDataFrames' },
   data_frame_analytics: { testSubject: 'mlTabDataFrameAnalytics' },
   datavisualizer: { testSubject: 'mlTabDataVisualizer' },
 };
-
-type TAB_DATA_PROPERTY = keyof typeof TAB_DATA;
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const [selectedTabId, setSelectedTabId] = useState(tabId);
@@ -87,8 +85,8 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
     <EuiTabs display="condensed">
       {tabs.map((tab: Tab) => {
         const id = tab.id;
-        const testSubject = TAB_DATA[id as TAB_DATA_PROPERTY].testSubject;
-        const defaultPathId = TAB_DATA[id as TAB_DATA_PROPERTY].pathId || id;
+        const testSubject = TAB_DATA[id].testSubject;
+        const defaultPathId = TAB_DATA[id].pathId || id;
         return (
           <EuiLink
             data-test-subj={testSubject}

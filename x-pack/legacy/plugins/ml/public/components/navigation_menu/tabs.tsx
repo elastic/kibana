@@ -18,7 +18,7 @@ interface Props {
 }
 
 function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
-  const TAB_MAP = {
+  const TAB_MAP: Record<TabId, Tab[]> = {
     // overview: [],
     datavisualizer: [],
     data_frames: [],
@@ -55,9 +55,7 @@ function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
     ],
   };
 
-  type TAB_MAP_ID = keyof typeof TAB_MAP;
-
-  return TAB_MAP[tabId as TAB_MAP_ID];
+  return TAB_MAP[tabId];
 }
 
 enum TAB_TEST_SUBJECT {
