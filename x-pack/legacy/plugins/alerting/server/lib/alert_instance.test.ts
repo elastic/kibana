@@ -58,7 +58,7 @@ describe('getMeta()', () => {
   });
 });
 
-describe('enqueue()', () => {
+describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
