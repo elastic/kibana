@@ -8,7 +8,7 @@ These include refreshing, flushing, clearing the cache, force merging segments,
 freezing indices, and more. Practicing good index management helps ensure 
 that your data is stored in the most cost-effective way possible.
 
-*Index Management* also enables you to create index templates. This reduces 
+*Index Management* also helps you create index templates. A template reduces 
 the amount of bookkeeping when working with indices. Instead of manually 
 setting up your indices, you can create them automatically from a template, 
 ensuring that your settings, mappings, and aliases are consistently defined.
@@ -73,7 +73,7 @@ production because it has a performance impact.
 clearing the cache. Once the sync is complete, the internal transaction log is reset.
 
 * *Freeze index*. Makes the index read-only and reduces its memory footprint 
-by moving shards to disk. {ref}/frozen-indices.html[Frozen indices] remain 
+by moving shards to disk. Frozen indices remain 
 searchable, but queries take longer.
 
 * *Delete index*. Permanently removes the index and all of its documents.
@@ -82,6 +82,7 @@ searchable, but queries take longer.
 index.
 
 [float]
+[[manage-index-templates]]
 === Manage index templates
 
 An index template defines {ref}/index-modules.html#index-modules-settings[settings],
@@ -93,14 +94,97 @@ The *Index Templates* view lists your templates and enables you to examine, edit
 delete them. Changes you make to an index template 
 do not affect existing indices.
 
+[role="screenshot"]
+image::images/management-index-templates.png[Index templates]
+
 If you don't have any templates, you can create one using the *Create template* wizard.  
 Index templates are applied during index creation, 
 so you must create the 
 template before you create the indices.
 
+[float]
+==== Example: Create an index template
+
+In this example, you’ll create an index template for randomly generated log files.
+
+Open the *Create template* wizard, and enter `logs_template` in the *Name* 
+field.  Set *Index pattern* to `logstash*` so the template matches any index
+with that index pattern. The merge order and version are both optional, 
+and you'll leave them blank in this example.
+ 
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
+The second step in the *Create template* allows you to define index settings.  
+These settings are optional, and this example skips this step. 
 
+The logs data set requires a 
+mapping to label the latitude and longitude pairs as geographic locations 
+by applying the geo_point type. In the third step of the wizard, define 
+this mapping as follows:
 
+[source,js]
+----------------------------------
+{
+  "properties": {
+    "geo": {
+      "properties": {
+        "coordinates": {
+          "type": "geo_point"
+        }  
+      }    
+    }
+  }
+}
+----------------------------------
 
+In the fourth step, define an alias named `logstash`.
+ 
+[source,js]
+----------------------------------
+{
+  "logstash": {}
+}
+----------------------------------
+ 
+A summary of the template is in step 5. If everything looks right, click *Create template*. 
+
+At this point, you’re ready to use the {es} index API to load the logs data.
+In the {kib} *Console*, index two documents:
+
+[source,js]
+----------------------------------
+POST /logstash-2019.05.18/_doc
+{
+  "@timestamp": "2019-05-18T15:57:27.541Z",
+  "ip": "225.44.217.191",
+  "extension": "jpg",
+  "response": "200",
+  "geo": {
+    "coordinates": {
+      "lat": 38.53146222,
+      "lon": -121.7864906
+    }
+  },
+  "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/charles-fullerton.jpg"
+}
+
+POST /logstash-2019.05.20/_doc
+{
+  "@timestamp": "2019-05-20T03:44:20.844Z",
+  "ip": "198.247.165.49",
+  "extension": "php",
+  "response": "200",
+  "geo": {
+    "coordinates": {
+      "lat": 37.13189556,
+      "lon": -76.4929875
+    }
+  },
+  "memory": 241720,
+  "url": "https://theacademyofperformingartsandscience.org/people/type:astronauts/name:laurel-b-clark/profile"
+}
+----------------------------------
+
+The mappings and alias are configured automatically based on the template. To verify, you 
+can view one of the newly created indices using the {ref}/indices-get-index.html#indices-get-index[index API].
