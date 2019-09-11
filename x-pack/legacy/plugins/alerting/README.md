@@ -28,7 +28,7 @@ A Kibana alert detects a condition and fires one or more actions when that condi
 
 ## Limitations
 
-An SSL connection to Elasticsearch is required to use alerting when security is enabled.
+When security is enabled, an SSL connection to Elasticsearch is required in order to use alerting.
 
 When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
 
