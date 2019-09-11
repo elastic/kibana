@@ -58,8 +58,8 @@ export type AgentType = t.TypeOf<typeof RuntimeAgentType>;
 const newAgentProperties = {
   type: RuntimeAgentType,
   active: t.boolean,
-  config_shared_id: t.string,
-  config_id: t.string,
+  policy_shared_id: t.string,
+  policy_id: t.string,
 };
 
 const newAgentOptionalProperties = t.partial({
@@ -142,7 +142,7 @@ export interface AgentAdapter {
     perPage?: number
   ): Promise<{ agents: Agent[]; total: number }>;
 
-  findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null>;
+  findEphemeralByPolicySharedId(policySharedId: string): Promise<Agent | null>;
 
   getByEphemeralAccessToken(token: any): Promise<Agent | null>;
 }
