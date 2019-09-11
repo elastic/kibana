@@ -19,7 +19,7 @@ export default function alertingApiIntegrationTests({
   const esArchiver = getService('esArchiver');
 
   describe('alerting api integration security and spaces enabled', function() {
-    this.tags('ciGroup8');
+    this.tags('ciGroup3');
 
     before(async () => {
       for (const space of Spaces) {

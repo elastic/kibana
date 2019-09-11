@@ -162,11 +162,13 @@
 
               </header>
 
-              <div id="discoverHistogram"
-                ng-show="vis && rows.length !== 0"
+              <discover-histogram
                 style="display: flex; height: 200px"
-              >
-              </div>
+                ng-show="vis && rows.length !== 0"
+                chart-data="histogramData"
+                timefilter-update-handler="timefilterUpdateHandler"
+                watch-depth="reference"
+              ></discover-histogram>
             </section>
 
             <section
