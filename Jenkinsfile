@@ -232,7 +232,7 @@ def sendInfraMail() {
 
 def sendKibanaMail() {
   catchError {
-    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS') {
+    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
       emailext(
         // to: 'build-kibana@elastic.co',
         to: 'brian.seeders@elastic.co', // TODO switch this out after testing
