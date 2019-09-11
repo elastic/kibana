@@ -5,17 +5,18 @@
  */
 
 import { get } from 'lodash';
+import { State } from '../../../types';
 
 const assetRoot = 'assets';
 
-export function getAssets(state) {
+export function getAssets(state: State): State['assets'] {
   return get(state, assetRoot, {});
 }
 
-export function getAssetIds(state) {
+export function getAssetIds(state: State): Array<keyof State['assets']> {
   return Object.keys(getAssets(state));
 }
 
-export function getAssetById(state, id) {
-  return get(state, [assetRoot, id]);
+export function getAssetById(state: State, id: string) {
+  return state[assetRoot][id];
 }
