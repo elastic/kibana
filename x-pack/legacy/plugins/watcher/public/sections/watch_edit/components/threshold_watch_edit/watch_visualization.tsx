@@ -8,12 +8,10 @@ import React, { Fragment, useContext, useEffect } from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
-  DARK_THEME,
   getAnnotationId,
   getAxisId,
   getSpecId,
   Chart,
-  LIGHT_THEME,
   LineAnnotation,
   LineSeries,
   Position,
@@ -28,6 +26,7 @@ import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
+import { npStart } from 'ui/new_platform';
 import { getWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
@@ -35,23 +34,16 @@ import { comparators } from '../../../../models/watch/comparators';
 import { SectionError } from '../../../../components';
 
 const getChartTheme = () => {
-  const isDarkTheme = chrome.getUiSettingsClient().get('theme:darkMode');
-  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
-
-  return {
-    ...baseTheme,
+  return npStart.plugins.eui_chart_utils.getChartsTheme({
     lineSeriesStyle: {
-      ...baseTheme.lineSeriesStyle,
       line: {
-        ...baseTheme.lineSeriesStyle.line,
         strokeWidth: 3,
       },
       point: {
-        ...baseTheme.lineSeriesStyle.point,
         visible: false,
       },
     },
-  };
+  });
 };
 
 const getTimezone = () => {
