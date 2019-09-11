@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiPopover,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
@@ -62,19 +63,25 @@ export function GraphSearchBar({
                 anchorPosition="downLeft"
                 ownFocus
                 button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    className="gphSearchBar__datasourceButton"
-                    onClick={() => setOpen(true)}
+                  <EuiToolTip
+                    content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+                      defaultMessage: 'Click here to pick another data source',
+                    })}
                   >
-                    {currentIndexPattern
-                      ? currentIndexPattern.attributes.title
-                      : // This branch will be shown if the user exits the
-                        // initial picker modal
-                        i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                          defaultMessage: 'Click here to pick a data source',
-                        })}
-                  </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="xs"
+                      className="gphSearchBar__datasourceButton"
+                      onClick={() => setOpen(true)}
+                    >
+                      {currentIndexPattern
+                        ? currentIndexPattern.attributes.title
+                        : // This branch will be shown if the user exits the
+                          // initial picker modal
+                          i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                            defaultMessage: 'Click here to pick a data source',
+                          })}
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
                 }
                 isOpen={open}
                 closePopover={() => setOpen(false)}
