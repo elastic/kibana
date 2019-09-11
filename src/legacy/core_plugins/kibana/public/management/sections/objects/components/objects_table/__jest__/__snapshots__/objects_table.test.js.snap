@@ -165,10 +165,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButtonEmpty
-              color="primary"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Cancel"
@@ -181,12 +178,8 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export all"
