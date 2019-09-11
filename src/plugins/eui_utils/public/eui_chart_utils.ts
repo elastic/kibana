@@ -19,7 +19,7 @@
 
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { mergeWithDefaultTheme, PartialTheme } from '@elastic/charts';
+import { PartialTheme } from '@elastic/charts';
 
 export class EuiChartUtils {
   public setup(core: CoreSetup) {}
@@ -30,7 +30,7 @@ export class EuiChartUtils {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme;
 
-        return optionalPartial ? mergeWithDefaultTheme(optionalPartial, euiTheme) : euiTheme;
+        return optionalPartial ? [optionalPartial, euiTheme] : euiTheme;
       },
     };
   }
