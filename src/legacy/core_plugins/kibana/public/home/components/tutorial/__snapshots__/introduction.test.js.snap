@@ -27,7 +27,7 @@ exports[`props exportedFieldsUrl 1`] = `
       <EuiSpacer />
       <EuiButton
         href="exported_fields_url"
-        rel="noopener"
+        rel="noopener noreferrer"
         target="_blank"
       >
         <FormattedMessage
