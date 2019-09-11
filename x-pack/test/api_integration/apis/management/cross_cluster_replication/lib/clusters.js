@@ -16,6 +16,9 @@ const CLUSTER_NAME = `test-${getRandomString()}`;
 export const initClusterHelpers = (supertest) => {
   let clusters = [];
 
+  // TODO how could this get pulled out of the ES config instead?
+  const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0] : '9300';
+
   const addCluster = (name = CLUSTER_NAME) => {
     clusters.push(name);
     return (
@@ -25,7 +28,7 @@ export const initClusterHelpers = (supertest) => {
         .send({
           "name": name,
           "seeds": [
-            "localhost:9300"
+            `localhost:${esTransportPort}`
           ],
           "skipUnavailable": true,
         })

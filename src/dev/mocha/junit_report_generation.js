@@ -142,7 +142,12 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
+    const reportPath = resolve(
+      rootDirectory,
+      'target/junit',
+      process.env.JOB || '.',
+      `TEST-${reportName}.xml`
+    );
     const reportXML = builder.end({
       pretty: true,
       indent: '  ',

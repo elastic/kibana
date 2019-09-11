@@ -5,10 +5,13 @@
  */
 
 import expect from 'expect.js';
-import { API_BASE_PATH, NODE_SEED } from './constants';
+import { API_BASE_PATH } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+
+  const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0] : '9300';
+  const NODE_SEED = `localhost:${esTransportPort}`;
 
   describe('Remote Clusters', function () {
     this.tags(['skipCloud']);
