@@ -29,7 +29,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
-  describe('visual builder', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/45315
+  describe.skip('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
