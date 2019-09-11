@@ -4,4 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-class PolicyAdapter {}
+import { IngestPlugin, PolicyAdapter as PolicyAdapterType } from './adapter_type';
+
+export class PolicyAdapter implements PolicyAdapterType {
+  constructor(private readonly plugin: IngestPlugin) {}
+
+  /**
+   * Return a full policy
+   *
+   * @param id
+   */
+  async getFullPolicy(id: string) {
+    return await this.plugin.getFull(id);
+  }
+}

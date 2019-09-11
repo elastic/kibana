@@ -6,8 +6,10 @@
 
 import { AgentLib } from './agent';
 import { TokenLib } from './token';
+import { PolicyLib } from './policy';
 
 export interface FleetServerLib {
   agents: AgentLib;
   tokens: TokenLib;
+  policies: PolicyLib;
 }

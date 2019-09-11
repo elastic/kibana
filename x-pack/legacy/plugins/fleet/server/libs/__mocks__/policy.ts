@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Policy {
-  id: string;
-}
+import { Policy } from '../adapters/policy/adapter_type';
 
-export interface IngestPlugin {
-  getFull(id: string): Promise<Policy>;
-}
-
-export interface PolicyAdapter {
-  getFullPolicy(id: string): Promise<Policy>;
+/**
+ * Mocked policy lib for test purpropse
+ */
+export class PolicyLib {
+  public async getFullPolicy(policyId: string): Promise<Policy> {
+    return { id: policyId };
+  }
 }

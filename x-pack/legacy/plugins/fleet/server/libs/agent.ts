@@ -15,9 +15,15 @@ import {
   AgentAction,
 } from './adapters/agent/adapter_type';
 import { TokenLib } from './token';
+import { PolicyLib } from './policy';
+import { Policy } from './adapters/policy/adapter_type';
 
 export class AgentLib {
-  constructor(private readonly agentAdater: AgentAdapter, private readonly tokens: TokenLib) {}
+  constructor(
+    private readonly agentAdater: AgentAdapter,
+    private readonly tokens: TokenLib,
+    private readonly policy: PolicyLib
+  ) {}
 
   /**
    * Enroll a new token into elastic fleet
@@ -108,7 +114,7 @@ export class AgentLib {
     agentId: string,
     events: AgentEvent[],
     localMetadata?: any
-  ): Promise<{ actions: AgentAction[] }> {
+  ): Promise<{ actions: AgentAction[]; policy: Policy }> {
     const agent = await this.agentAdater.getById(agentId);
 
     if (!agent || !agent.active) {
@@ -132,9 +138,10 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
+    const policy = await this.policy.getFullPolicy(agent.policy_id);
     await this.agentAdater.update(agent.id, updateData);
 
-    return { actions };
+    return { actions, policy };
   }
 
   /**
