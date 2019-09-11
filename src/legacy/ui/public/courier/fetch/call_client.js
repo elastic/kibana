@@ -25,7 +25,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 
-export function callClient(searchRequests, requestsOptions = [], { es, config, sessionId, esShardTimeout }) {
+export function callClient(searchRequests, requestsOptions = [], { es, config, esShardTimeout }) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map(requestOptionEntries);
@@ -43,7 +43,7 @@ export function callClient(searchRequests, requestsOptions = [], { es, config, s
   Object.keys(searchStrategyMap).forEach(searchStrategyId => {
     const searchStrategy = getSearchStrategyById(searchStrategyId);
     const requests = searchStrategyMap[searchStrategyId];
-    const { searching, abort } = searchStrategy.search({ searchRequests: requests, es, config, sessionId, esShardTimeout });
+    const { searching, abort } = searchStrategy.search({ searchRequests: requests, es, config, esShardTimeout });
     requests.forEach((request, i) => {
       const response = searching.then(results => handleResponse(request, results[i]));
       const { abortSignal } = requestOptionsMap.get(request) || {};

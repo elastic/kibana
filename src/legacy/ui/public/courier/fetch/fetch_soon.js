@@ -24,7 +24,7 @@ import { callClient } from './call_client';
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
  */
-export function FetchSoonProvider(es, config, sessionId, esShardTimeout) {
+export function FetchSoonProvider(es, config, esShardTimeout) {
   /**
    * Delays executing a function for a given amount of time, and returns a promise that resolves
    * with the result.
@@ -57,7 +57,7 @@ export function FetchSoonProvider(es, config, sessionId, esShardTimeout) {
     requestsToFetch = [...requestsToFetch, request];
     requestOptions = [...requestOptions, options];
     const responses = await (fetchInProgress = fetchInProgress || delay(() => {
-      const response = callClient(requestsToFetch, requestOptions, { es, config, sessionId, esShardTimeout });
+      const response = callClient(requestsToFetch, requestOptions, { es, config, esShardTimeout });
       requestsToFetch = [];
       requestOptions = [];
       fetchInProgress = null;

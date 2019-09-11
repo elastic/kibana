@@ -37,13 +37,13 @@ export const defaultSearchStrategy = {
   },
 };
 
-function msearch({ searchRequests, es, config, sessionId, esShardTimeout }) {
+function msearch({ searchRequests, es, config, esShardTimeout }) {
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
       index: index.title || index,
       search_type: searchType,
       ignore_unavailable: true,
-      preference: getPreference(config, sessionId)
+      preference: getPreference(config)
     };
     const inlineBody = {
       ...body,
@@ -62,9 +62,9 @@ function msearch({ searchRequests, es, config, sessionId, esShardTimeout }) {
   };
 }
 
-function search({ searchRequests, es, config, sessionId, esShardTimeout }) {
+function search({ searchRequests, es, config, esShardTimeout }) {
   const abortController = new AbortController();
-  const searchParams = getSearchParams(config, sessionId, esShardTimeout);
+  const searchParams = getSearchParams(config, esShardTimeout);
   const promises = searchRequests.map(({ index, body }) => {
     const searching = es.search({ index: index.title || index, body, ...searchParams })
       .catch(({ response }) => JSON.parse(response));
