@@ -92,36 +92,6 @@ export const ComponentStrings = {
         },
       }),
   },
-  WorkpadHeader: {
-    getAddElementBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementButtonText', {
-        defaultMessage: 'Add element',
-      }),
-    getAddElementModalCloseBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonText', {
-        defaultMessage: 'Close',
-      }),
-    getEmbedObjectBtnText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonText', {
-        defaultMessage: 'Embed object',
-      }),
-    getFullScreenTooltipText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltipText', {
-        defaultMessage: 'Enter fullscreen mode',
-      }),
-    getHideEditControlText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.hideEditControlText', {
-        defaultMessage: 'Hide editing controls',
-      }),
-    getNoWritePermText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.noWritePermissionText', {
-        defaultMessage: "You don't have permission to edit this workpad",
-      }),
-    getShowEditControlText: () =>
-      i18n.translate('xpack.canvas.workpadHeader.showEditControlText', {
-        defaultMessage: 'Show editing controls',
-      }),
-  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
@@ -150,10 +120,42 @@ export const ComponentStrings = {
     getShortcutSeparator: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.shortcutListSeparator', {
         defaultMessage: 'or',
+        description:
+          'Separates which keyboard shortcuts can be used for a single action. Example: "{shortcut1} or {shortcut2} or {shortcut3}"',
       }),
     getFlyoutCloseButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
         defaultMessage: 'Closes keyboard shortcuts reference',
+      }),
+  },
+  WorkpadHeader: {
+    getAddElementBtnText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.addElementButtonText', {
+        defaultMessage: 'Add element',
+      }),
+    getAddElementModalCloseBtnText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonText', {
+        defaultMessage: 'Close',
+      }),
+    getEmbedObjectBtnText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonText', {
+        defaultMessage: 'Embed object',
+      }),
+    getFullScreenTooltipText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltipText', {
+        defaultMessage: 'Enter fullscreen mode',
+      }),
+    getHideEditControlText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.hideEditControlText', {
+        defaultMessage: 'Hide editing controls',
+      }),
+    getNoWritePermText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.noWritePermissionText', {
+        defaultMessage: "You don't have permission to edit this workpad",
+      }),
+    getShowEditControlText: () =>
+      i18n.translate('xpack.canvas.workpadHeader.showEditControlText', {
+        defaultMessage: 'Show editing controls',
       }),
   },
 };
