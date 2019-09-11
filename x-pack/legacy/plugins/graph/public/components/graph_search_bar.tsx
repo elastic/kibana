@@ -32,6 +32,7 @@ const localStorage = new Storage(window.localStorage);
 interface GraphSearchBarProps {
   isLoading: boolean;
   currentIndexPattern?: IndexPattern;
+  initialQuery?: string;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
   savedObjects: CoreStart['savedObjects'];
@@ -61,9 +62,10 @@ export function GraphSearchBar({
   onIndexPatternSelected,
   uiSettings,
   savedObjects,
+  initialQuery,
 }: GraphSearchBarProps) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState<Query>({ language: 'kuery', query: '' });
+  const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
   return (
     <I18nProvider>
       <form

@@ -1095,9 +1095,11 @@ app.controller('graphuiPlugin', function (
 
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
+        $scope.initialQuery = $route.current.params.query;
         $scope.submit($route.current.params.query);
       }
 
+      $scope.$digest();
     });
   }else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
