@@ -37,6 +37,26 @@ interface StatusReducerState {
   setupStatus: SetupStatus;
 }
 
+type StatusReducerActions =
+  | { type: 'startedSetup' }
+  | {
+      type: 'finishedSetup';
+      sourceId: string;
+      spaceId: string;
+      jobs: SetupMlModuleResponsePayload['jobs'];
+      datafeeds: SetupMlModuleResponsePayload['datafeeds'];
+    }
+  | { type: 'failedSetup' }
+  | { type: 'retryingSetup' }
+  | {
+      type: 'fetchedJobStatuses';
+      spaceId: string;
+      sourceId: string;
+      payload: FetchJobStatusResponsePayload;
+    }
+  | { type: 'failedFetchingJobStatuses' }
+  | { type: 'viewedResults' };
+
 const initialState: StatusReducerState = {
   jobStatus: {
     'log-entry-rate': 'unknown',
@@ -44,7 +64,10 @@ const initialState: StatusReducerState = {
   setupStatus: 'unknown',
 };
 
-function statusReducer(state: StatusReducerState, action: any): StatusReducerState {
+function statusReducer(
+  state: StatusReducerState,
+  action: StatusReducerActions
+): StatusReducerState {
   switch (action.type) {
     case 'startedSetup': {
       return {
