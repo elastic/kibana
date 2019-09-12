@@ -31,6 +31,18 @@ describe('kuery AST API', function () {
     indexPattern = indexPatternResponse;
   });
 
+  describe('fromKueryExpressionWithCursor', () => {
+    it('should ', () => {
+      const actual = ast.fromKueryExpression(
+        'level1:{ l@kuery-cursor@ }',
+        { cursorSymbol: '@kuery-cursor@', parseCursor: true }
+      );
+
+      console.log(actual);
+    });
+
+  });
+
   describe('fromKueryExpression', function () {
 
     it('should return a match all "is" function for whitespace', function () {

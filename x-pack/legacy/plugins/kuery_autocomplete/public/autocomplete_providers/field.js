@@ -29,15 +29,22 @@ export function getSuggestionsProvider({ indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => {
     return indexPattern.fields.filter(isFilterable);
   }));
-  return function getFieldSuggestions({ start, end, prefix, suffix }) {
-    const search = `${prefix}${suffix}`.toLowerCase();
+  return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
+    const search = `${nestedPath ? `${nestedPath}.` : ''}${prefix}${suffix}`.trim().toLowerCase();
     const fieldNames = allFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {
-      const text = `${escapeKuery(fieldName)} `;
+      const field = allFields.find(patternField => patternField.name === fieldName);
+      const remainingPath = field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0);
+      const text = field.subType && field.subType.nested && remainingPath.length > 0
+        ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(fieldName.slice(field.subType.nested.path.length + 1))} }`
+        : `${escapeKuery(fieldName.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
       const description = getDescription(fieldName);
-      return { type, text, description, start, end };
+      const cursorIndex = field.subType && field.subType.nested
+        ? text.length - 2
+        : text.length;
+      return { type, text, description, start, end, cursorIndex };
     });
     return suggestions;
   };

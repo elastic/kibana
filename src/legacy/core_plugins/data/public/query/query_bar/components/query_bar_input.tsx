@@ -305,11 +305,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     text,
     start,
     end,
+    cursorIndex,
   }: {
     type: AutocompleteSuggestionType;
     text: string;
     start: number;
     end: number;
+    cursorIndex?: number;
   }) => {
     if (!this.inputRef) {
       return;
@@ -325,6 +327,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.onQueryStringChange(newQueryString);
+
+    if (cursorIndex) {
+      this.setState({
+        selectionStart: start + cursorIndex,
+        selectionEnd: start + cursorIndex,
+      });
+    }
 
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });

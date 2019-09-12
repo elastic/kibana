@@ -79,6 +79,13 @@ module.exports = (function() {
         peg$c12 = "}",
         peg$c13 = { type: "literal", value: "}", description: "\"}\"" },
         peg$c14 = function(field, query, trailing) {
+              if (query.type === 'cursor') {
+                return {
+                  ...query,
+                  nestedPath: query.nestedPath ? `${field.value}.${query.nestedPath}` : field.value,
+                }
+              };
+
               if (trailing.type === 'cursor') {
                 return {
                   ...trailing,

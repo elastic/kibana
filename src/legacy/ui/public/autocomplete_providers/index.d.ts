@@ -49,6 +49,7 @@ export interface AutocompleteSuggestion {
   start: number;
   text: string;
   type: AutocompleteSuggestionType;
+  cursorIndex?: number;
 }
 
 export function addAutocompleteProvider(language: string, provider: AutocompleteProvider): void;

@@ -63,6 +63,13 @@ SubQuery
 
 NestedQuery
   = field:Field':{' Space* query:OrQuery trailing:OptionalSpace '}' {
+      if (query.type === 'cursor') {
+        return {
+          ...query,
+          nestedPath: query.nestedPath ? `${field.value}.${query.nestedPath}` : field.value,
+        }
+      };
+
       if (trailing.type === 'cursor') {
         return {
           ...trailing,
