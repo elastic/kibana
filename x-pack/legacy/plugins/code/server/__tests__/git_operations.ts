@@ -97,13 +97,10 @@ describe('git_operations', () => {
     const iterator = await g.iterateRepo(repoUri, 'HEAD');
     for await (const value of iterator) {
       if (count === 0) {
-        assert.strictEqual('1', value.name);
         assert.strictEqual('1', value.path);
       } else if (count === 1) {
-        assert.strictEqual('2', value.name);
         assert.strictEqual('src/2', value.path);
       } else if (count === 2) {
-        assert.strictEqual('3', value.name);
         assert.strictEqual('src/3', value.path);
       } else {
         assert.fail('this repo should contains exactly 3 files');

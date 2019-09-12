@@ -15,6 +15,7 @@ import {
   Repository,
   Revwalk,
 } from '@elastic/nodegit';
+import { LsTreeSummary, simplegit } from '@elastic/simple-git/dist/';
 import Boom from 'boom';
 import LruCache from 'lru-cache';
 import * as Path from 'path';
@@ -202,66 +203,18 @@ export class GitOperations {
     }
   }
 
-  private static async isTextFile(gitdir: string, entry: TreeEntry) {
-    if (entry.type === 'blob') {
-      const type = GitOperations.mode2type(entry.mode);
-      if (type === FileTreeItemType.File) {
-        return await GitPrime.isTextFile({ gitdir, oid: entry.oid });
-      }
-    }
-    return false;
-  }
-
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
-    let count = 0;
-    const commit = await this.getCommitOr404(uri, revision);
     const gitdir = this.repoDir(uri);
-    const commitObject = await GitPrime.readObject({ gitdir, oid: commit.id });
-    const treeId = (commitObject.object as CommitDescription).tree;
-
-    async function walk(oid: string) {
-      const tree = await GitOperations.readTree(gitdir, oid);
-      for (const entry of tree.entries) {
-        if (entry.type === 'tree') {
-          await walk(entry.oid);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
-          count++;
-        }
-      }
-    }
-
-    await walk(treeId);
-    return count;
+    const git = simplegit(gitdir, false);
+    const ls = new LsTreeSummary(git, revision, '.', { recursive: true });
+    return (await ls.allFiles()).length;
   }
 
-  public async iterateRepo(
-    uri: RepositoryUri,
-    revision: string
-  ): Promise<AsyncIterableIterator<FileTree>> {
-    const commit = await this.getCommitOr404(uri, revision);
+  public iterateRepo(uri: RepositoryUri, revision: string) {
     const gitdir = this.repoDir(uri);
-    const commitObject = await GitPrime.readObject({ gitdir, oid: commit.id });
-    const treeId = (commitObject.object as CommitDescription).tree;
-    async function* walk(oid: string, prefix: string = ''): AsyncIterableIterator<FileTree> {
-      const tree = await GitOperations.readTree(gitdir, oid);
-      for (const entry of tree.entries) {
-        const path = prefix ? `${prefix}/${entry.path}` : entry.path;
-        if (entry.type === 'tree') {
-          yield* walk(entry.oid, path);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
-          const type = GitOperations.mode2type(entry.mode);
-          yield {
-            name: entry.path,
-            type,
-            path,
-            repoUri: uri,
-            sha1: entry.oid,
-          } as FileTree;
-        }
-      }
-    }
-
-    return walk(treeId);
+    const git = simplegit(gitdir, false);
+    const ls = new LsTreeSummary(git, revision, '.', { showSize: true, recursive: true });
+    return ls.iterator();
   }
 
   private static async readTree(gitdir: string, oid: string): Promise<Tree> {
