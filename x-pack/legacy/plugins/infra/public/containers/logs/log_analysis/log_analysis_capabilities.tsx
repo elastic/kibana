@@ -8,6 +8,9 @@ import createContainer from 'constate-latest';
 import { useMemo, useState, useEffect } from 'react';
 import { kfetch } from 'ui/kfetch';
 
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
@@ -29,9 +32,10 @@ export const useLogAnalysisCapabilities = () => {
           pathname: '/api/ml/ml_capabilities',
         });
 
-        return getMlCapabilitiesResponsePayloadRT
-          .decode(rawResponse)
-          .getOrElseL(throwErrors(createPlainError));
+        return pipe(
+          getMlCapabilitiesResponsePayloadRT.decode(rawResponse),
+          fold(throwErrors(createPlainError), identity)
+        );
       },
       onResolve: response => {
         setMlCapabilities(response);
