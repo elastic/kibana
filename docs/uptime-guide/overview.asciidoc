@@ -37,7 +37,7 @@ The {kibana-ref}/xpack-uptime.html[Elasticsearch Uptime app] in Kibana provides 
 // ++ In diagram, should be Uptime app, not Uptime UI, possibly even Elastic Uptime? Also applies to Infra/logging/APM.
 // ++ Need more whitespace around components.
 
-image::images/uptime-multi-deployment.png[Uptime simple deployment]
+image::images/uptime-simple-deployment.png[Uptime simple deployment]
 
 In this simple deployment, a single instance of Heartbeat is deployed at a single monitoring location to monitor a single service.
 The Heartbeat instance sends the monitoring data to Elasticsearch.
