@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS } from './constants';
+import { CANVAS, JSON as json, KIBANA as kibana, PDF as pdf, URL as url } from './constants';
 
 export const ComponentStrings = {
   AddEmbeddableFlyout: {
@@ -141,13 +141,13 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonLabel', {
         defaultMessage: 'Embed object',
       }),
-    getFullScreenTooltip: () =>
-      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltip', {
-        defaultMessage: 'Enter fullscreen mode',
-      }),
     getFullScreenButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
         defaultMessage: 'View fullscreen',
+      }),
+    getFullScreenTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltip', {
+        defaultMessage: 'Enter fullscreen mode',
       }),
     getHideEditControlTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeader.hideEditControlTooltip', {
@@ -163,9 +163,13 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderAutoRefreshControls: {
-    getRefreshListTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitle', {
-        defaultMessage: 'Refresh elements',
+    getDisableTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltip', {
+        defaultMessage: 'Disable auto-refresh',
+      }),
+    getIntervalFormLabelText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.intervalFormLabel', {
+        defaultMessage: 'Change auto-refresh interval',
       }),
     getRefreshListDurationManualText: () =>
       i18n.translate(
@@ -174,13 +178,9 @@ export const ComponentStrings = {
           defaultMessage: 'Manually',
         }
       ),
-    getDisableTooltip: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.disableTooltip', {
-        defaultMessage: 'Disable auto-refresh',
-      }),
-    getIntervalFormLabelText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.intervalFormLabel', {
-        defaultMessage: 'Change auto-refresh interval',
+    getRefreshListTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderAutoRefreshControls.refreshListTitle', {
+        defaultMessage: 'Refresh elements',
       }),
   },
   WorkpadHeaderControlSettings: {
@@ -190,9 +190,9 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderCustomInterval: {
-    getFormLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
-        defaultMessage: 'Set a custom interval',
+    getButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
+        defaultMessage: 'Set',
       }),
     getFormDescription: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formDescription', {
@@ -204,33 +204,137 @@ export const ComponentStrings = {
           hoursExample: '1h',
         },
       }),
-    getButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
-        defaultMessage: 'Set',
+    getFormLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
+        defaultMessage: 'Set a custom interval',
       }),
   },
   WorkpadHeaderKioskControls: {
-    getTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
-        defaultMessage: 'Cycle fullscreen pages',
+    getCycleFormLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
+        defaultMessage: 'Change cycling interval',
       }),
     getCycleToggleSwitch: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleToggleSwitch', {
         defaultMessage: 'Cycle slides automatically',
       }),
-    getCycleFormLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
-        defaultMessage: 'Change cycling interval',
+    getTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
+        defaultMessage: 'Cycle fullscreen pages',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {
+    getRefreshAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshAriaLabel', {
+        defaultMessage: 'Refresh Elements',
+      }),
     getRefreshTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshTooltip', {
         defaultMessage: 'Refresh data',
       }),
-    getRefreshAriaLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshAriaLabel', {
-        defaultMessage: 'Refresh Elements',
+  },
+  WorkpadHeaderWorkpadExport: {
+    getCopyPDFMessage: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyPDFMessage', {
+        defaultMessage: 'The {pdf} generation {url} was copied to your clipboard.',
+        values: {
+          pdf,
+          url,
+        },
+      }),
+    getCopyReportingConfigMessage: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyReportingConfigMessage', {
+        defaultMessage: 'Copied reporting configuration to clipboard',
+      }),
+    getExportPDFErrorTitle: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFErrorMessage', {
+        defaultMessage: "Failed to create {pdf} for '{workpadName}'",
+        values: {
+          pdf,
+          workpadName,
+        },
+      }),
+    getExportPDFMessage: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFMessage', {
+        defaultMessage: 'Exporting {pdf}. You can track the progress in Management.',
+        values: {
+          pdf,
+        },
+      }),
+    getExportPDFTitle: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFTitle', {
+        defaultMessage: "{pdf} export of workpad '{workpadName}'",
+        values: {
+          pdf,
+          workpadName,
+        },
+      }),
+    getPDFPanelCopyAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyAriaLabel', {
+        defaultMessage:
+          'Alternatively, you can generate a {pdf} from a script or with Watcher by using this {url}. Press Enter to copy the {url} to clipboard.',
+        values: {
+          pdf,
+          url,
+        },
+      }),
+    getPDFPanelCopyButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyButtonLabel', {
+        defaultMessage: 'Copy {post} {url}',
+        values: {
+          post: 'POST',
+          url,
+        },
+      }),
+    getPDFPanelCopyDescription: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyDescription', {
+        defaultMessage:
+          'Alternatively, copy this {post} {url} to call generation from outside {kibana} or from Watcher.',
+        values: {
+          post: 'POST',
+          kibana,
+          url,
+        },
+      }),
+    getPDFPanelGenerateDescription: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateDescription', {
+        defaultMessage:
+          '{pdf}s can take a minute or two to generate based on the size of your workpad.',
+        values: {
+          pdf,
+        },
+      }),
+    getPDFPanelGenerateButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateButtonLabel', {
+        defaultMessage: 'Generate {pdf}',
+        values: {
+          pdf,
+        },
+      }),
+    getShareDownloadJSONTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadJSONTitle', {
+        defaultMessage: 'Download as {json}',
+        values: {
+          json,
+        },
+      }),
+    getShareDownloadPDFTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadPDFTitle', {
+        defaultMessage: '{pdf} reports',
+        values: {
+          pdf,
+        },
+      }),
+    getShareWorkpadMessage: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWorkpadMessage', {
+        defaultMessage: 'Share this workpad',
+      }),
+    getUnknownExportErrorMessage: (type: string) =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unknownExportErrorMessage', {
+        defaultMessage: 'Unknown export type: {type}',
+        values: {
+          type,
+        },
       }),
   },
 };
