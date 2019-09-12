@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { UrlTemplate } from '../../types';
-import { LegacyIcon } from './legacy_icon';
+import { LegacyIcon } from '../legacy_icon';
 import { outlinkEncoders } from '../../services/outlink_encoders';
 import { urlTemplateIconChoices } from '../../services/style_choices';
 import {

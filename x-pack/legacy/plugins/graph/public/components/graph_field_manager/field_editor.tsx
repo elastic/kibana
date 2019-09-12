@@ -15,20 +15,24 @@ import {
   EuiAccordion,
   EuiSwitch,
   EuiButtonEmpty,
+  isColorDark,
+  hexToRgb,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../services/style_choices';
-import { LegacyIcon } from '../graph_settings/legacy_icon';
+import { LegacyIcon } from '../legacy_icon';
 
+type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 export interface FieldPickerProps {
   field: WorkspaceField;
   allFields: WorkspaceField[];
   updateFieldProperties: (props: {
     fieldName: string;
-    fieldProperties: Partial<
-      Pick<WorkspaceField, 'hopSize' | 'lastValidHopSize' | 'color' | 'icon'>
-    >;
+    fieldProperties: Partial<Pick<WorkspaceField, UpdateableFieldProperties>>;
   }) => void;
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
@@ -47,56 +51,75 @@ export function FieldEditor({
 
   const isDisabled = field.hopSize === 0;
 
+  const darkColor = isColorDark(...hexToRgb(color));
+
+  function updateProp<K extends UpdateableFieldProperties>(name: K, value: WorkspaceField[K]) {
+    updateFieldProperties({
+      fieldName,
+      fieldProperties: {
+        [name]: value,
+      },
+    });
+  }
+
+  function toggleDisabledState() {
+    updateFieldProperties({
+      fieldName,
+      fieldProperties: {
+        hopSize: isDisabled ? lastValidHopSize : 0,
+        lastValidHopSize: isDisabled ? 0 : hopSize,
+      },
+    });
+  }
+
   return (
     <EuiPopover
       id="graphFieldEditor"
       anchorPosition="downLeft"
       ownFocus
+      initialFocus=".gphFieldEditor"
+      panelClassName="gphFieldEditor"
       button={
         <EuiBadge
+          className={classNames('gphFieldEditorBadge', {
+            'gphFieldEditorBadge--disabled': isDisabled,
+          })}
           iconOnClick={() => {}}
           iconOnClickAriaLabel=""
-          onClickAriaLabel=""
-          onClick={() => setOpen(true)}
+          onClickAriaLabel={
+            isDisabled
+              ? i18n.translate('xpack.graph.fieldManager.disabledFieldBadgeDescription', {
+                  defaultMessage: 'Disabled field {field}: Click to configure the field',
+                  values: { field: fieldName },
+                })
+              : i18n.translate('xpack.graph.fieldManager.fieldBadgeDescription', {
+                  defaultMessage: 'Field {field}: Click to configure the field',
+                  values: { field: fieldName },
+                })
+          }
+          onClick={e => {
+            if (e.shiftKey) {
+              toggleDisabledState();
+            } else {
+              setOpen(true);
+            }
+          }}
         >
+          <div className="gphFieldEditorBadge__color" style={{ backgroundColor: color }}>
+            <LegacyIcon
+              className={classNames({
+                'gphFieldEditorBadge__icon--dark': darkColor,
+                'gphFieldEditorBadge__icon--light': !darkColor,
+              })}
+              icon={icon}
+            />
+          </div>
           {field.name}
         </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
     >
-      <EuiFormRow
-        label=""
-        helpText={i18n.translate('xpack.graph.fieldManager.disabledDescription', {
-          defaultMessage: "A disabled field won't show up in new searches",
-        })}
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.graph.fieldManager.disabledLabel', {
-            defaultMessage: 'Disable field temporarily',
-          })}
-          checked={isDisabled}
-          onChange={() => {
-            if (isDisabled) {
-              updateFieldProperties({
-                fieldName,
-                fieldProperties: {
-                  hopSize: lastValidHopSize,
-                  lastValidHopSize: 0,
-                },
-              });
-            } else {
-              updateFieldProperties({
-                fieldName,
-                fieldProperties: {
-                  hopSize: 0,
-                  lastValidHopSize: hopSize,
-                },
-              });
-            }
-          }}
-        />
-      </EuiFormRow>
       <EuiFormRow label="Field">
         <EuiComboBox
           onChange={choices => {
@@ -117,11 +140,26 @@ export function FieldEditor({
         />
       </EuiFormRow>
 
+      <EuiFormRow
+        label=""
+        helpText={i18n.translate('xpack.graph.fieldManager.disabledDescription', {
+          defaultMessage: "A disabled field won't show up in new searches",
+        })}
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.graph.fieldManager.disabledLabel', {
+            defaultMessage: 'Disable field temporarily',
+          })}
+          checked={isDisabled}
+          onChange={toggleDisabledState}
+        />
+      </EuiFormRow>
+
       <EuiFormRow label="Color">
         <EuiColorPicker
           color={color}
           onChange={newColor => {
-            updateFieldProperties({ fieldName, fieldProperties: { color: newColor } });
+            updateProp('color', newColor);
           }}
         />
       </EuiFormRow>
@@ -134,7 +172,7 @@ export function FieldEditor({
               selected={currentIcon === icon}
               icon={currentIcon}
               onClick={() => {
-                updateFieldProperties({ fieldName, fieldProperties: { icon: currentIcon } });
+                updateProp('icon', currentIcon);
               }}
             />
           ))}
@@ -147,6 +185,7 @@ export function FieldEditor({
           defaultMessage: 'Advanced settings',
         })}
       >
+        <EuiSpacer />
         <EuiFormRow label="Max hops">
           <EuiFieldNumber
             step={1}
@@ -154,17 +193,12 @@ export function FieldEditor({
             value={isDisabled ? lastValidHopSize : hopSize}
             onChange={({ target: { valueAsNumber } }) => {
               const updatedHopSize = Number.isNaN(valueAsNumber) ? 1 : valueAsNumber;
-              updateFieldProperties({
-                fieldName,
-                fieldProperties: {
-                  hopSize: isDisabled ? 0 : updatedHopSize,
-                  lastValidHopSize: isDisabled ? updatedHopSize : 0,
-                },
-              });
+              updateProp(isDisabled ? 'lastValidHopSize' : 'hopSize', updatedHopSize);
             }}
           />
         </EuiFormRow>
       </EuiAccordion>
+      <EuiHorizontalRule />
       <EuiButtonEmpty
         color="danger"
         onClick={() => {

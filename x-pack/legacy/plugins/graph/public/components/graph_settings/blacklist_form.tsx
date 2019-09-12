@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { GraphSettingsProps } from './graph_settings';
-import { LegacyIcon } from './legacy_icon';
+import { LegacyIcon } from '../legacy_icon';
 import { useListKeys } from './use_list_keys';
 
 export function BlacklistForm({

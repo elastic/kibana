@@ -282,15 +282,17 @@ app.controller('graphuiPlugin', function (
         }
       });
     }
-
-    $scope.$digest();
   };
+
   const updateScope = () => {
     const newState = store.getState();
     $scope.reduxState = newState;
     $scope.allFields = fieldsSelector(newState);
     $scope.selectedFields = selectedFieldsSelector(newState);
     $scope.liveResponseFields = liveResponseFieldsSelector(newState);
+    if ($scope.workspace) {
+      $scope.workspace.options.vertex_fields = $scope.allFields;
+    }
   };
   store.subscribe(updateScope);
   updateScope();
@@ -415,7 +417,6 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.submit = function () {
-    $scope.hideAllConfigPanels();
     initWorkspaceIfRequired();
     const numHops = 2;
     if ($scope.searchTerm.startsWith('{')) {
@@ -829,7 +830,6 @@ app.controller('graphuiPlugin', function (
       $scope.workspace = workspace;
       $scope.exploreControls = advancedSettings;
       $scope.urlTemplates = urlTemplates;
-      $scope.updateLiveResponseFields();
       $scope.workspace.runLayout();
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {

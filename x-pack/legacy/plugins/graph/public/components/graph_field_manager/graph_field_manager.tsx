@@ -40,9 +40,11 @@ export function GraphFieldManager({ state, dispatch }: GraphFieldManagerProps) {
 
   return (
     <I18nProvider>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
         {selectedFields.map(field => (
-          <FieldEditor allFields={allFields} {...actionCreators} field={field} />
+          <EuiFlexItem key={field.name} grow={false}>
+            <FieldEditor allFields={allFields} {...actionCreators} field={field} />
+          </EuiFlexItem>
         ))}
         <EuiFlexItem grow={false}>
           <FieldPicker allFields={allFields} {...actionCreators} />
