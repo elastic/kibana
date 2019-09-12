@@ -5,7 +5,7 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import { Feature } from '../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../../common/model';
 import { Actions } from '../actions';

@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
+import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
 import {
   checkPermission,
   createPermissionFailureMessage,
