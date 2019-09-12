@@ -16,7 +16,7 @@ export function MachineLearningJobManagementProvider({ getService }: FtrProvider
     },
 
     async assertJobTableExists() {
-      await testSubjects.existOrFail('mlJobListTable');
+      await testSubjects.existOrFail('~mlJobListTable');
     },
 
     async assertCreateNewJobButtonExists() {
@@ -24,7 +24,7 @@ export function MachineLearningJobManagementProvider({ getService }: FtrProvider
     },
 
     async assertJobStatsBarExists() {
-      await testSubjects.existOrFail('mlJobStatsBar');
+      await testSubjects.existOrFail('~mlJobStatsBar');
     },
   };
 }

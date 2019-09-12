@@ -24,7 +24,7 @@ export default function exploreRepositoryFunctionalTests({
   // FLAKY: https://github.com/elastic/kibana/issues/45079
   describe.skip('File Tree', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     before(async () => {
       await repoLoad(

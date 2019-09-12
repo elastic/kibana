@@ -9,11 +9,15 @@ import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { THIRTY_PERCENT_ALPHA_HEX_SUFFIX, TWENTY_PERCENT_ALPHA_HEX_SUFFIX } from './helpers';
+
 interface Props {
+  children?: React.ReactNode;
   droppableId: string;
   height?: string;
   isDropDisabled?: boolean;
   type?: string;
+  render?: ({ isDraggingOver }: { isDraggingOver: boolean }) => React.ReactNode;
 }
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
@@ -30,14 +34,22 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       ? `
     .drop-and-provider-timeline {
       &:hover {
-        background-color: ${props.theme.eui.euiColorEmptyShade};
+        background-color: ${props.theme.eui.euiColorSuccess}${THIRTY_PERCENT_ALPHA_HEX_SUFFIX};
       }
     }
+    .drop-and-provider-timeline:hover {
+        background-color: ${props.theme.eui.euiColorSuccess}${THIRTY_PERCENT_ALPHA_HEX_SUFFIX};
+    }
   > div.timeline-drop-area-empty {
-     background-color: ${props.theme.eui.euiColorLightShade};
+     color: ${props.theme.eui.euiColorSuccess}
+     background-color: ${props.theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX};
+
+     & .euiTextColor--subdued {
+      color: ${props.theme.eui.euiColorSuccess};
+     }
   }
   > div.timeline-drop-area {
-    background-color: ${props.theme.eui.euiColorLightShade};
+    background-color: ${props.theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX};
     .provider-item-filter-container div:first-child{
       // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
       transform: none !important;
@@ -47,6 +59,10 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       + div {
         display: none;
       }
+    }
+
+    & .euiFormHelpText {
+      color: ${props.theme.eui.euiColorSuccess};
     }
   }
   .flyout-overlay {
@@ -74,7 +90,14 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
 ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
 export const DroppableWrapper = pure<Props>(
-  ({ children, droppableId, height = '100%', isDropDisabled = false, type }) => (
+  ({
+    children = null,
+    droppableId,
+    height = '100%',
+    isDropDisabled = false,
+    type,
+    render = null,
+  }) => (
     <Droppable
       isDropDisabled={isDropDisabled}
       droppableId={droppableId}
@@ -88,7 +111,7 @@ export const DroppableWrapper = pure<Props>(
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >
-          {children}
+          {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
           {provided.placeholder}
         </ReactDndDropTarget>
       )}
