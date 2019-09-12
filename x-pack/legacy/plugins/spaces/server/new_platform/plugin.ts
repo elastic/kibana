@@ -77,9 +77,9 @@ export interface SpacesPluginSetup {
 export class Plugin {
   private readonly pluginId = 'spaces';
 
-  private config$: Observable<SpacesConfigType>;
+  private readonly config$: Observable<SpacesConfigType>;
 
-  private log: Logger;
+  private readonly log: Logger;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
