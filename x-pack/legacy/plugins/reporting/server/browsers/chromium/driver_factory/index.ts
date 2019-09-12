@@ -190,7 +190,7 @@ export class HeadlessChromiumDriverFactory {
         if (line.type() === 'error') {
           this.logger.error(line.text(), ['headless-browser-console']);
         } else {
-          this.logger.debug(line.text(), [line.type(), 'headless-browser-console']);
+          this.logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
         }
       })
     );

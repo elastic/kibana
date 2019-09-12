@@ -21,13 +21,27 @@ import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.te
 import _ from 'lodash';
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { Vis } from '../../vis';
 import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
-import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
+import { EmbeddedVisualizeHandler, RequestHandlerParams } from './embedded_visualize_handler';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
 jest.mock('ui/new_platform');
+
+jest.mock('../../../../core_plugins/interpreter/public/registries', () => ({
+  registries: {
+    renderers: {
+      get: (name: string) => {
+        return {
+          render: async () => {
+            return {};
+          },
+        };
+      },
+    },
+  },
+}));
 
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
