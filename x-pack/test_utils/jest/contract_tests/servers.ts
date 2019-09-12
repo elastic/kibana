@@ -119,7 +119,7 @@ export async function createKibanaServer(xpackOption = {}) {
   const { server } = (root as any).server.legacy.kbnServer;
 
   return {
-    shutdown: () => root.shutdown(),
+    shutdown: async () => await root.shutdown(),
     kbnServer: server,
     root,
   };

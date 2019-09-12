@@ -9,8 +9,6 @@ import * as t from 'io-ts';
 export const RuntimeDatasourceInput = t.intersection([
   t.interface(
     {
-      id: t.string,
-      other: t.string, // JSON, gets flattened to top level when returned via REST API
       data_source_id: t.string,
     },
     'DatasourceInput'

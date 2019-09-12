@@ -26,6 +26,7 @@ describe('Policies Lib', () => {
 
   beforeAll(async () => {
     await callWhenOnline(async () => {
+      jest.setTimeout(300000);
       const { createKibanaServer } = await import(
         '../../../../../test_utils/jest/contract_tests/servers'
       );
@@ -52,7 +53,8 @@ describe('Policies Lib', () => {
 
   beforeEach(async () => {
     if (es) {
-      es.deleteByQuery({
+      jest.setTimeout(300000);
+      await es.deleteByQuery({
         index: INDEX_NAMES.INGEST,
         body: {
           conflicts: 'proceed',
@@ -203,19 +205,14 @@ describe('Policies Lib', () => {
     it('Should add data sources and inputs to the policy', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      try {
-        await libs.policy.requestAddDataSource(newPolicy.id, {
-          ref_source: undefined,
-          ref: undefined,
-          output: '43hi34hi5y3i53o4',
-          queue: {},
-          inputs: [{}, {}],
-        });
-      } catch (e) {
-        expect(e).toBe(undefined);
-      }
-
-      const fullPolicy = await libs.policy.get(newPolicy.id);
+      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
+        ref_source: undefined,
+        ref: undefined,
+        output: '43hi34hi5y3i53o4',
+        queue: {},
+        inputs: [{}, {}],
+      });
+      const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
       expect(fullPolicy.name).toBe('test');
       expect(fullPolicy.data_sources.length).toBe(1);
       expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
@@ -227,24 +224,25 @@ describe('Policies Lib', () => {
     it('Should delete data sources', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      try {
-        await libs.policy.requestAddDataSource(newPolicy.id, {
-          ref_source: undefined,
-          ref: undefined,
-          output: '43hi34hi5y3i53o4',
-          queue: {},
-          inputs: [{}, {}],
-        });
-      } catch (e) {
-        expect(e).toBe(undefined);
-      }
-
-      const fullPolicy = await libs.policy.get(newPolicy.id);
+      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
+        ref_source: undefined,
+        ref: undefined,
+        output: '43hi34hi5y3i53o4',
+        queue: {},
+        inputs: [{}, {}],
+      });
+      const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
       expect(fullPolicy.data_sources.length).toBe(1);
       expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
 
-      await libs.policy.requestDeleteDataSource(newPolicy.id, fullPolicy.data_sources[0].uuid);
-      const fullPolicy2 = await libs.policy.get(newPolicy.id);
+      const finalPolicyInfo = await libs.policy.requestDeleteDataSource(
+        updatedPolicyInfo.id,
+        fullPolicy.data_sources[0].uuid
+      );
+      expect(finalPolicyInfo.id).not.toBe(updatedPolicyInfo.id);
+      const fullPolicy2 = await libs.policy.get(finalPolicyInfo.id);
+      expect(fullPolicy2.version).toBe(fullPolicy.version + 1);
+
       expect(fullPolicy2.data_sources.length).toBe(0);
     });
   });
@@ -252,26 +250,22 @@ describe('Policies Lib', () => {
     it('Should return a policy with all inputs, not just refs to the inputs', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      try {
-        await libs.policy.requestAddDataSource(newPolicy.id, {
-          ref_source: undefined,
-          ref: undefined,
-          output: '43hi34hi5y3i53o4',
-          queue: {},
-          inputs: [{ foo: 'bar' }],
-        });
-      } catch (e) {
-        expect(e).toBe(undefined);
-      }
+      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
+        ref_source: undefined,
+        ref: undefined,
+        output: '43hi34hi5y3i53o4',
+        queue: {},
+        inputs: [{ foo: 'bar' }],
+      });
+      const fullPolicy = await libs.policy.getFull(updatedPolicyInfo.id);
 
-      const fullPolicy = await libs.policy.getFull(newPolicy.id);
       expect(fullPolicy.name).toBe('test');
       expect(fullPolicy.data_sources.length).toBe(1);
       expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
       expect(fullPolicy.data_sources[0].inputs.length).toBe(1);
       expect(typeof fullPolicy.data_sources[0].inputs[0]).not.toBe('string');
-      expect(typeof fullPolicy.data_sources[0].inputs[0].other).toBe('string');
-      expect(fullPolicy.data_sources[0].inputs[0].other).toBe('bar');
+      expect((fullPolicy.data_sources[0].inputs[0] as any).other).toBe(undefined);
+      expect(fullPolicy.data_sources[0].inputs[0].foo).toBe('bar');
     });
   });
 

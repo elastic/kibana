@@ -39,6 +39,9 @@ export const mappings = {
           policy: {
             type: 'keyword',
           },
+          inputs: {
+            type: 'keyword',
+          },
         },
       },
       id: {

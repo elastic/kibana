@@ -217,7 +217,7 @@ export class PolicyAdapter {
       newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
     }
 
-    return newInputs.map(input => input.attributes.id);
+    return newInputs.map(input => input.id);
   }
 
   public async deleteInputs(inputIDs: string[]): Promise<{ success: boolean }> {

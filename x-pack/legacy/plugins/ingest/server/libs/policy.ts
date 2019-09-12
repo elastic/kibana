@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge, omit } from 'lodash';
+import { assign, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
 import { PolicyAdapter } from './adapters/policy/default';
 import { BackendFrameworkLib } from './framework';
@@ -34,7 +34,7 @@ export class PolicyLib {
       description: description || '',
       status: 'active',
       monitoring_enabled: true,
-      shared_id: uuidv4(),
+      shared_id: `shared-${uuidv4()}`,
       version: 0,
       agent_version: info.kibana.version,
       data_sources: [],
@@ -49,6 +49,24 @@ export class PolicyLib {
     return await this.adapter.create(newPolicy);
   }
 
+  public async getFullActive(sharedId: string): Promise<PolicyFile> {
+    const activePolicies = await this.adapter.listVersions(sharedId);
+
+    const mostRecentDate = new Date(
+      Math.max.apply(
+        null,
+        activePolicies.map(policy => {
+          return new Date(policy.updated_on).getTime();
+        })
+      )
+    );
+
+    return activePolicies.filter(policy => {
+      const d = new Date(policy.updated_on);
+      return d.getTime() >= mostRecentDate.getTime();
+    })[0];
+  }
+
   public async get(id: string): Promise<PolicyFile> {
     const policy = await this.adapter.get(id);
     return policy;
@@ -56,18 +74,22 @@ export class PolicyLib {
 
   public async getFull(id: string): Promise<FullPolicyFile> {
     const policy = await this.adapter.get(id);
-    for (let i = 0; policy.data_sources; i++) {
+    for (let i = 0; i < policy.data_sources.length; i++) {
       // TODO page through vs one large query as this will break if there are more then 10k inputs
       // a likely case for uptime
       // const fullInputs = await this.adapter.getInputsById(policy.data_sources[i].inputs, 1, 10000);
 
-      // hard coded to mock data for now
-      (policy.data_sources[i] as any).inputs = {
-        id: uuidv4(),
-        meta: {},
-        other: {}, // JSON, gets flattened to top level when returned via REST API
-        policy_id: id,
-      };
+      if (policy.data_sources[i]) {
+        // hard coded to mock data for now
+        (policy.data_sources[i] as any).inputs = [
+          {
+            id: uuidv4(),
+            data_source_id: policy.data_sources[i].uuid,
+            meta: {},
+            foo: 'bar', // JSON from the `other` field, gets flattened to top level when returned via REST API
+          },
+        ];
+      }
     }
 
     return policy as FullPolicyFile;
@@ -162,7 +184,7 @@ export class PolicyLib {
       ...oldPolicy,
       id: newPolicy.id,
       data_sources: newDSs,
-      shared_id: uuidv4(),
+      shared_id: `shared-${uuidv4()}`,
       name,
       description,
     });
@@ -194,13 +216,16 @@ export class PolicyLib {
     });
   }
 
-  public async rollForward(id: string): Promise<{ id: string; version: number }> {
+  public async rollForward(
+    id: string
+  ): Promise<{ id: string; version: number; shared_id: string }> {
     const oldPolicy = await this.adapter.get(id);
 
-    await this._update(oldPolicy, {});
+    const newPolicyInfo = await this._update(oldPolicy, {});
     return {
-      id: 'fsdfsdf',
-      version: 0,
+      id: newPolicyInfo.id,
+      version: newPolicyInfo.version,
+      shared_id: newPolicyInfo.shared_id,
     };
   }
 
@@ -216,26 +241,33 @@ export class PolicyLib {
       );
     }
     const uuid = uuidv4();
+
+    // TODO: these types are really messed up... idk why...
     const editedDS: NewDatasource & {
       inputs: string[];
+      queue?: string;
     } = {
       ...datasource,
+      queue: JSON.stringify(datasource.queue || ''),
       inputs: (await this.adapter.addInputs(
         datasource.inputs.map(input => {
           return {
-            id: uuidv4(),
             other: JSON.stringify(input),
             data_source_id: uuid,
           };
         })
       )) as any[],
-    };
+    } as any;
 
-    await this._update(oldPolicy, {
+    const newPolicyInfo = await this._update(oldPolicy, {
       data_sources: [...oldPolicy.data_sources, { uuid, ...editedDS } as Datasource],
     });
 
-    // TODO return data
+    return {
+      id: newPolicyInfo.id,
+      version: newPolicyInfo.version,
+      shared_id: newPolicyInfo.shared_id,
+    };
   }
 
   /**
@@ -250,17 +282,20 @@ export class PolicyLib {
       );
     }
 
-    if (!oldPolicy.data_sources.find(ds => ds.uuid !== datasourceUUID)) {
+    if (!oldPolicy.data_sources.find(ds => ds.uuid === datasourceUUID)) {
       throw new Error(
         `Policy ${oldPolicy.id} does not contain a datasource with a uuid of ${datasourceUUID}`
       );
     }
 
-    await this._update(oldPolicy, {
+    const newPolicyInfo = await this._update(oldPolicy, {
       data_sources: oldPolicy.data_sources.filter(ds => ds.uuid !== datasourceUUID),
     });
-
-    // TODO return something
+    return {
+      id: newPolicyInfo.id,
+      version: newPolicyInfo.version,
+      shared_id: newPolicyInfo.shared_id,
+    };
   }
 
   public async listDataSources() {
@@ -268,14 +303,17 @@ export class PolicyLib {
   }
 
   private async _update(oldPolicy: PolicyFile, policy: Partial<PolicyFile>) {
-    const newPolicy = await this.adapter.create({
-      ...merge<PolicyFile>({}, omit(oldPolicy, ['id']), policy),
+    const policyData = {
+      ...assign<PolicyFile>({}, omit(oldPolicy, ['id']), policy),
       version: oldPolicy.version + 1,
-    });
+    };
+
+    const newPolicy = await this.adapter.create(policyData);
 
     await this.adapter.update(oldPolicy.id, {
       ...omit(oldPolicy, ['id']),
       status: 'locked',
+      updated_on: new Date().toString(),
     });
     // TODO fire events for fleet that update was made
 
