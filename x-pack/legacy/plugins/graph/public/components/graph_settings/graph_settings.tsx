@@ -15,16 +15,19 @@ import { WorkspaceNode, AdvancedSettings, UrlTemplate, WorkspaceField } from '..
 
 const tabs = [
   {
+    id: 'advancedSettings',
     title: i18n.translate('xpack.graph.settings.advancedSettingsTitle', {
       defaultMessage: 'Advanced settings',
     }),
     component: AdvancedSettingsForm,
   },
   {
+    id: 'blacklist',
     title: i18n.translate('xpack.graph.settings.blacklistTitle', { defaultMessage: 'Blacklist' }),
     component: BlacklistForm,
   },
   {
+    id: 'drillDowns',
     title: i18n.translate('xpack.graph.settings.drillDownsTitle', {
       defaultMessage: 'Drill-downs',
     }),
@@ -41,6 +44,7 @@ export interface GraphSettingsProps {
   removeUrlTemplate: (urlTemplate: UrlTemplate) => void;
   saveUrlTemplate: (index: number, urlTemplate: UrlTemplate) => void;
   allFields: WorkspaceField[];
+  canEditDrillDownUrls: boolean;
 }
 
 interface AsObservable<P> {
@@ -65,17 +69,19 @@ export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) 
           <h2>{i18n.translate('xpack.graph.settings.title', { defaultMessage: 'Settings' })}</h2>
         </EuiTitle>
         <EuiTabs style={{ marginBottom: '-25px' }}>
-          {tabs.map(({ title }, index) => (
-            <EuiTab
-              key={title}
-              isSelected={activeTab === index}
-              onClick={() => {
-                setActiveTab(index);
-              }}
-            >
-              {title}
-            </EuiTab>
-          ))}
+          {tabs
+            .filter(({ id }) => id !== 'drillDowns' || currentProps.canEditDrillDownUrls)
+            .map(({ title }, index) => (
+              <EuiTab
+                key={title}
+                isSelected={activeTab === index}
+                onClick={() => {
+                  setActiveTab(index);
+                }}
+              >
+                {title}
+              </EuiTab>
+            ))}
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
