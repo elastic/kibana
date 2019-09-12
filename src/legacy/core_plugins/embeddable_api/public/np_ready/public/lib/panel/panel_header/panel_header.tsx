@@ -17,12 +17,14 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiBadge } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { Action } from '../../actions';
 import { IEmbeddable } from '../../embeddables';
+import { VisualizeEmbeddable } from '../../../../../../../kibana/public/visualize/embeddable/visualize_embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../kibana/public/visualize/embeddable/constants';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -45,6 +47,12 @@ function renderBadges(badges: Action[], embeddable: IEmbeddable) {
       {badge.getDisplayName({ embeddable })}
     </EuiBadge>
   ));
+}
+
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
 export function PanelHeader({
@@ -75,6 +83,16 @@ export function PanelHeader({
     );
   }
 
+  let viewDescr = '';
+  if (isVisualizeEmbeddable(embeddable)) {
+    const vd = (embeddable as VisualizeEmbeddable).getVisualizationDescription();
+    if (vd) {
+      viewDescr = vd;
+    }
+  } else {
+    viewDescr = '';
+  }
+
   return (
     <div
       className={classes}
@@ -83,16 +101,25 @@ export function PanelHeader({
       <div
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
-        title={title}
-        aria-label={i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-          defaultMessage: 'Dashboard panel: {title}',
-          values: {
-            title,
-          },
-        })}
+        /* title={title} */ /* this is redundant - it shows a tooltip with the view title - and clutters the UI */ aria-label={i18n.translate(
+          'embeddableApi.panel.dashboardPanelAriaLabel',
+          {
+            defaultMessage: 'Dashboard panel: {title}',
+            values: {
+              title,
+            },
+          }
+        )}
       >
         {showTitle ? `${title} ` : ''}
         {renderBadges(badges, embeddable)}
+        {viewDescr !== '' ? (
+          <EuiToolTip content={viewDescr} delay="regular" position="right">
+            <EuiIcon type="iInCircle" />
+          </EuiToolTip>
+        ) : (
+          ''
+        )}
       </div>
 
       <PanelOptionsMenu

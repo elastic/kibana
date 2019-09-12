@@ -13,7 +13,7 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/data/common/expressions/expression_types';
+} from 'src/plugins/expressions/common/expressions/expression_types';
 import { CanvasFunction } from './functions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
