@@ -139,7 +139,6 @@ function defineSAMLRoutes({
             value: {
               step: SAMLLoginStep.SAMLResponseReceived,
               samlResponse: request.body.SAMLResponse,
-              redirectURL: request.body.RelayState,
             },
           });
 

@@ -38,7 +38,13 @@ export const ConfigSchema = schema.object(
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
       oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
-      saml: providerOptionsSchema('saml', schema.maybe(schema.object({ realm: schema.string() }))),
+      saml: providerOptionsSchema(
+        'saml',
+        schema.object({
+          realm: schema.string(),
+          maxURLToStoreSize: schema.byteSize({ defaultValue: '2kb', min: '100b' }),
+        })
+      ),
     }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.

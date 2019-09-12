@@ -147,6 +147,7 @@ kibana_vars=(
     xpack.security.authc.providers
     xpack.security.authc.oidc.realm
     xpack.security.authc.saml.realm
+    xpack.security.authc.saml.maxURLToStoreSize
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
