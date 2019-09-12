@@ -16,13 +16,8 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
-      color="primary"
-      fill={false}
-      iconSide="left"
       isDisabled={true}
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Add"
@@ -50,13 +45,8 @@ exports[`AddFilter should render normally 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
-      color="primary"
-      fill={false}
-      iconSide="left"
       isDisabled={true}
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Add"

@@ -11,13 +11,13 @@ export function PipelineListProvider({ getService }) {
 
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
-  const SUBJ_BTN_ADD = `pipelineList btnAdd`;
-  const SUBJ_BTN_DELETE = `pipelineList btnDeletePipeline`;
-  const getCloneLinkSubjForId = id => `pipelineList lnkPipelineClone-${id}`;
-  const SUBJ_FILTER = `pipelineList filter`;
-  const SUBJ_SELECT_ALL = `pipelineList pipelineTable checkboxSelectAll`;
-  const getSelectCheckbox = id => `pipelineList pipelineTable checkboxSelectRow-${id}`;
-  const SUBJ_BTN_NEXT_PAGE = `pipelineList pagination-button-next`;
+  const SUBJ_BTN_ADD = `pipelineList > btnAdd`;
+  const SUBJ_BTN_DELETE = `pipelineList > btnDeletePipeline`;
+  const getCloneLinkSubjForId = id => `pipelineList > lnkPipelineClone-${id}`;
+  const SUBJ_FILTER = `pipelineList > filter`;
+  const SUBJ_SELECT_ALL = `pipelineList > pipelineTable > checkboxSelectAll`;
+  const getSelectCheckbox = id => `pipelineList > pipelineTable > checkboxSelectRow-${id}`;
+  const SUBJ_BTN_NEXT_PAGE = `pipelineList > pagination-button-next`;
 
   const INNER_SUBJ_ROW = `row`;
   const INNER_SUBJ_CELL_ID = `cellId`;
@@ -25,7 +25,7 @@ export function PipelineListProvider({ getService }) {
   const INNER_SUBJ_CELL_LAST_MODIFIED = `cellLastModified`;
   const INNER_SUBJ_CELL_USERNAME = `cellUsername`;
 
-  const SUBJ_CELL_ID = `${SUBJ_CONTAINER} ${INNER_SUBJ_ROW} ${INNER_SUBJ_CELL_ID}`;
+  const SUBJ_CELL_ID = `${SUBJ_CONTAINER} > ${INNER_SUBJ_ROW} > ${INNER_SUBJ_CELL_ID}`;
 
   return new class PipelineList {
     /**
