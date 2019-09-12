@@ -8,47 +8,40 @@ import styled, { css } from 'styled-components';
 
 import { footerHeight } from './footer';
 
-export const HorizontalScroll = styled.div<{
-  height: number;
-}>`
-  display: block;
+export const HorizontalScroll = styled.div<{ height: number }>`
   height: ${({ height }) => height + 'px'};
+  min-height: 0;
   overflow: hidden;
   overflow-x: auto;
-  min-height: 0px;
 `;
 HorizontalScroll.displayName = 'HorizontalScroll';
 
-export const VerticalScrollContainer = styled.div<{
-  height: number;
-  minWidth: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height - footerHeight - 12}px`};
+export const VerticalScrollContainer = styled.div<{ height: number; minWidth: number }>`
+  height: ${({ height }) => height - footerHeight - 12 + 'px'};
+  min-width: ${({ minWidth }) => minWidth + 'px'};
   overflow: hidden;
   overflow-y: auto;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
 VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
-export const EventsContainer = styled.div<{
-  minWidth: number;
-}>`
-  display: block;
+export const EventsContainer = styled.div<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
-  overflow: hidden;
 `;
 EventsContainer.displayName = 'EventsContainer';
 
-export const TimelineRow = styled.div`
+export const TimelineEvent = styled.div`
   ${props => css`
     border-top: ${props.theme.eui.euiBorderWidthThin} solid ${props.theme.eui.euiColorLightShade};
-    display: flex;
 
     &:hover {
       background-color: ${props.theme.eui.euiTableHoverColor};
     }
   `}
+`;
+TimelineEvent.displayName = 'TimelineEvent';
+
+export const TimelineRow = styled.div`
+  display: flex;
 `;
 TimelineRow.displayName = 'TimelineRow';
 
