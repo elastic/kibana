@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { createKfetch } from 'ui/kfetch/kfetch';
-import { setup } from 'test_utils/http_test_setup';
-
 const mockIndexPattern = {
   id: '1234',
   title: 'logstash-*',
@@ -47,7 +44,6 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 export const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
 const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
-const mockKfetch = jest.fn(() => createKfetch(setup().http));
 
 export const mockFetchIndexPatterns = jest
   .fn()
@@ -55,9 +51,6 @@ export const mockFetchIndexPatterns = jest
 
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
-}));
-jest.mock('ui/kfetch', () => ({
-  kfetch: mockKfetch,
 }));
 
 jest.mock('../lib/fetch_index_patterns', () => ({

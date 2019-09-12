@@ -97,6 +97,7 @@ describe('TopNavMenu', () => {
         name="test"
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
         showSearchBar={true}
       />
     );

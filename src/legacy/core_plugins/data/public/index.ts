@@ -54,7 +54,6 @@ export {
   getRoutes,
   isFilterable,
   IndexPatternSelect,
-  IndexPatternsProvider, // LEGACY
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,

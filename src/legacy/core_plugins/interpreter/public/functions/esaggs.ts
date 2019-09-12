@@ -44,7 +44,7 @@ import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/emb
 import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
-import { IndexPatternsProvider } from '../../../data/public';
+import { setup as data } from '../../../data/public/legacy';
 
 const name = 'esaggs';
 
@@ -249,7 +249,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   async fn(context, args, { inspectorAdapters, abortSignal }) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
-    const indexPatterns = Private(IndexPatternsProvider);
+    const { indexPatterns } = data.indexPatterns;
     const SearchSourceClass = Private(SearchSourceProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 

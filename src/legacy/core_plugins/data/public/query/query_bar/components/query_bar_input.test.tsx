@@ -95,6 +95,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -113,6 +114,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -132,6 +134,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -153,6 +156,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -175,6 +179,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -201,6 +206,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -226,6 +232,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
 
@@ -256,6 +263,7 @@ describe('QueryBarInput', () => {
         intl={null as any}
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        http={startMock.http}
       />
     );
     expect(mockFetchIndexPatterns).toHaveBeenCalledWith(

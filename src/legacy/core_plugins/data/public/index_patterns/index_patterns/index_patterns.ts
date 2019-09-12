@@ -22,6 +22,7 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   UiSettingsClientContract,
+  HttpServiceBase,
 } from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
@@ -31,7 +32,6 @@ import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 const indexPatternCache = createIndexPatternCache();
-const apiClient = new IndexPatternsApiClient();
 
 export class IndexPatterns {
   fieldFormats: fieldFormats;
@@ -39,8 +39,15 @@ export class IndexPatterns {
   private config: UiSettingsClientContract;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
+  private apiClient: IndexPatternsApiClient;
 
-  constructor(config: UiSettingsClientContract, savedObjectsClient: SavedObjectsClientContract) {
+  constructor(
+    config: UiSettingsClientContract,
+    savedObjectsClient: SavedObjectsClientContract,
+    http: HttpServiceBase
+  ) {
+    this.apiClient = new IndexPatternsApiClient(http);
+
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }
@@ -105,7 +112,7 @@ export class IndexPatterns {
     return null;
   };
 
-  get = (id?: string) => {
+  get = (id?: string | null) => {
     if (!id) return this.make();
 
     const cache = indexPatternCache.get(id);
@@ -117,27 +124,8 @@ export class IndexPatterns {
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
-      apiClient,
+      this.apiClient,
       indexPatternCache
     ).init();
   };
 }
-
-// add angular service for backward compatibility
-// @ts-ignore
-// eslint-disable-next-line
-import { uiModules } from 'ui/modules';
-
-const module = uiModules.get('kibana/index_patterns');
-let _service: any;
-module.service('indexPatterns', function(chrome: any) {
-  if (!_service)
-    _service = new IndexPatterns(chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
-  return _service;
-});
-
-export const IndexPatternsProvider = (chrome: any) => {
-  if (!_service)
-    _service = new IndexPatterns(chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
-  return _service;
-};
