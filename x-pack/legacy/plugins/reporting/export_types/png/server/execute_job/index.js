@@ -48,7 +48,7 @@ function executeJobFn(server) {
           hashUrl,
           job.browserTimezone,
           conditionalHeaders,
-          job.layout
+          job.layout // was this mutated in from somewhere? It has not been sanity checked. See x-pack/legacy/plugins/reporting/export_types/png/server/lib/generate_png.ts line 52
         );
       }),
       map(buffer => ({

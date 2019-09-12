@@ -17,7 +17,7 @@ import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
-// @ts-ignore untyped module
+// @ts-ignore
 import { pdf } from './pdf';
 
 interface ScreenshotData {
@@ -29,6 +29,13 @@ interface ScreenshotData {
 interface UrlScreenshot {
   screenshots: ScreenshotData[];
   timeRange: TimeRange;
+}
+
+interface PdfMaker {
+  setTitle: (title: string) => void;
+  addImage: (base64EncodedData: string, options: { title: string; description: string }) => void;
+  generate: () => void;
+  getBuffer: () => Buffer;
 }
 
 const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
@@ -50,6 +57,7 @@ function generatePdfObservableFn(server: KbnServer) {
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const captureConcurrency = 1;
 
+  // NOTE: return type is faulty: "Buffer" could instead be anything
   return function generatePdfObservable(
     logger: LevelLogger,
     title: string,
@@ -58,66 +66,67 @@ function generatePdfObservableFn(server: KbnServer) {
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo: string
-  ) {
+  ): Rx.Observable<Buffer> {
     const layout = createLayout(server, layoutParams) as LayoutInstance;
+    const create$ = browserDriverFactory.create({
+      viewport: layout.getBrowserViewport(),
+      browserTimezone,
+    });
 
-    const screenshots$ = Rx.from(urls).pipe(
-      mergeMap((url: string) => {
-        const create$ = browserDriverFactory.create({
-          viewport: layout.getBrowserViewport(),
-          browserTimezone,
-        });
+    return create$
+      .pipe(
+        mergeMap(({ driver$ }) => {
+          return driver$.pipe(
+            mergeMap((browser: HeadlessBrowser) => {
+              return Rx.from(urls).pipe(
+                mergeMap((url: string) => {
+                  return screenshotsObservable({
+                    browser,
+                    logger,
+                    url,
+                    conditionalHeaders,
+                    layout,
+                    browserTimezone,
+                  });
+                })
+              );
+            }, captureConcurrency)
+          );
+        }),
+        first() // fixme: takeUntil urls.length
+      )
+      .pipe(
+        toArray(),
+        mergeMap(
+          async (urlScreenshots: UrlScreenshot[]): Promise<Buffer> => {
+            const pdfOutput: PdfMaker = pdf.create(layout, logo);
 
-        return create$.pipe(
-          mergeMap(({ driver$ }) => {
-            return driver$.pipe(
-              mergeMap(async (browser: HeadlessBrowser) => {
-                return screenshotsObservable({
-                  browser,
-                  logger,
-                  url,
-                  conditionalHeaders,
-                  layout,
-                  browserTimezone,
+            if (title) {
+              const timeRange = getTimeRange(urlScreenshots);
+              title += timeRange
+                ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
+                    timeRange.to,
+                    browserTimezone
+                  )}`
+                : '';
+              pdfOutput.setTitle(title);
+            }
+
+            urlScreenshots.forEach(({ screenshots }) => {
+              screenshots.forEach(screenshot => {
+                pdfOutput.addImage(screenshot.base64EncodedData, {
+                  title: screenshot.title,
+                  description: screenshot.description,
                 });
-              }, captureConcurrency)
-            );
-          }),
-          first()
-        );
-      })
-    );
-
-    return screenshots$.pipe(
-      toArray(),
-      mergeMap(async (urlScreenshots: UrlScreenshot[]) => {
-        const pdfOutput = pdf.create(layout, logo);
-
-        if (title) {
-          const timeRange = getTimeRange(urlScreenshots);
-          title += timeRange
-            ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
-                timeRange.to,
-                browserTimezone
-              )}`
-            : '';
-          pdfOutput.setTitle(title);
-        }
-
-        urlScreenshots.forEach(({ screenshots }) => {
-          screenshots.forEach(screenshot => {
-            pdfOutput.addImage(screenshot.base64EncodedData, {
-              title: screenshot.title,
-              description: screenshot.description,
+              });
             });
-          });
-        });
 
-        pdfOutput.generate();
-        const buffer = await pdfOutput.getBuffer();
-        return buffer;
-      })
-    );
+            pdfOutput.generate();
+            const buffer = await pdfOutput.getBuffer();
+            return buffer;
+          }
+        )
+      );
   };
 }
 

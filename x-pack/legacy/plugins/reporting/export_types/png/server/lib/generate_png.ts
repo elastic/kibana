@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
@@ -23,7 +24,7 @@ interface UrlScreenshot {
 
 function generatePngObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
-  const captureConcurrency = 1;
+  const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
 
   // prettier-ignore
   const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
@@ -49,20 +50,34 @@ function generatePngObservableFn(server: KbnServer) {
     layoutParams: LayoutParams
   ) {
     if (!layoutParams || !layoutParams.dimensions) {
-      throw new Error(`LayoutParams.Dimensions is undefined.`);
+      throw new Error(`LayoutParams.Dimensions is undefined.`); // why wouldn't this check go into create_job
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
-    const screenshots$ = Rx.of(url).pipe(
-      mergeMap(
-        iUrl =>
-          screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone }),
-        (jUrl: string, screenshot: UrlScreenshot) => screenshot,
-        captureConcurrency
-      )
+
+    const create$ = browserDriverFactory.create({
+      viewport: layout.getBrowserViewport(),
+      browserTimezone,
+    });
+
+    const screenshot$ = create$.pipe(
+      mergeMap(({ driver$ }) => {
+        return driver$.pipe(
+          mergeMap(async (browser: HeadlessBrowser) => {
+            return screenshotsObservable({
+              browser,
+              logger,
+              url,
+              conditionalHeaders,
+              layout,
+              browserTimezone,
+            });
+          })
+        );
+      })
     );
 
-    return screenshots$.pipe(
+    return screenshot$.pipe(
       toArray(),
       mergeMap(urlScreenshots => createPngWithScreenshots({ urlScreenshots }))
     );
