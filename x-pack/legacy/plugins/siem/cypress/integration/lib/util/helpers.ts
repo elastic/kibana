@@ -15,6 +15,7 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
+
   cy.visit(`${Cypress.config().baseUrl}${url}`);
 
   cy.viewport('macbook-15');
