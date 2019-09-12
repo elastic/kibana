@@ -12,11 +12,9 @@ exports[`Should render cancel button when drawing 1`] = `
           aria-label="Tools"
           className="mapToolbarOverlay__button"
           color="text"
-          iconSize="m"
           iconType="wrench"
           onClick={[Function]}
           title="Tools"
-          type="button"
         />
       }
       closePopover={[Function]}
@@ -95,12 +93,9 @@ exports[`Should render cancel button when drawing 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
-      color="primary"
       fill={true}
-      iconSide="left"
       onClick={[Function]}
       size="s"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Cancel"
@@ -120,11 +115,9 @@ exports[`renders 1`] = `
       aria-label="Tools"
       className="mapToolbarOverlay__button"
       color="text"
-      iconSize="m"
       iconType="wrench"
       onClick={[Function]}
       title="Tools"
-      type="button"
     />
   }
   closePopover={[Function]}

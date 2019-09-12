@@ -17,7 +17,7 @@ export default function testWithSecurity({ getService, getPageObjects }: FtrProv
   const dummyPassword = '123321';
   const codeAdmin = 'codeAdmin';
   const codeUser = 'codeUser';
-  const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+  const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
   const manageButtonSelectors = ['indexRepositoryButton', 'deleteRepositoryButton'];
   const log = getService('log');
   const security = getService('security');
