@@ -67,7 +67,7 @@ export interface FormOptions {
 export interface FieldHook {
   readonly path: string;
   readonly label?: string;
-  readonly helpText?: string;
+  readonly helpText?: string | ReactNode;
   readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];

@@ -130,14 +130,14 @@ describe.skip('<IndexManagementHome />', () => {
         const template1 = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-          settings: JSON.stringify({
+          settings: {
             index: {
               number_of_shards: '1',
               lifecycle: {
                 name: 'my_ilm_policy',
               },
             },
-          }),
+          },
         });
         const template2 = fixtures.getTemplate({
           name: `b${getRandomString()}`,
@@ -415,12 +415,12 @@ describe.skip('<IndexManagementHome />', () => {
               const template = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: JSON.stringify({
+                settings: {
                   index: {
                     number_of_shards: '1',
                   },
-                }),
-                mappings: JSON.stringify({
+                },
+                mappings: {
                   _source: {
                     enabled: false,
                   },
@@ -430,10 +430,10 @@ describe.skip('<IndexManagementHome />', () => {
                       format: 'EEE MMM dd HH:mm:ss Z yyyy',
                     },
                   },
-                }),
-                aliases: JSON.stringify({
+                },
+                aliases: {
                   alias1: {},
-                }),
+                },
               });
 
               const { find, actions, exists } = testBed;

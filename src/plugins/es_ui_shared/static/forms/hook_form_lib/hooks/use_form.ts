@@ -25,11 +25,11 @@ import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
-interface UseFormReturn<T> {
+interface UseFormReturn<T extends object> {
   form: FormHook<T>;
 }
 
-export function useForm<T = FormData>(
+export function useForm<T extends object = FormData>(
   formConfig: FormConfig<T> | undefined = {}
 ): UseFormReturn<T> {
   const {

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializeTemplate } from '../../../../common/lib/template_serialization';
+import { Template } from '../../../../common/types';
 import { StepProps } from '../types';
 
 const NoneDescriptionText = () => (
@@ -49,7 +50,7 @@ const getDescriptionText = (data: any) => {
 export const StepReview: React.FunctionComponent<StepProps> = ({ template, updateCurrentStep }) => {
   const { name, indexPatterns, version, order } = template;
 
-  const serializedTemplate = serializeTemplate(template);
+  const serializedTemplate = serializeTemplate(template as Template);
   // Name not included in ES request body
   delete serializedTemplate.name;
   const {
@@ -58,9 +59,9 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
     aliases: serializedAliases,
   } = serializedTemplate;
 
-  const numIndexPatterns = indexPatterns.length;
+  const numIndexPatterns = indexPatterns!.length;
 
-  const hasWildCardIndexPattern = Boolean(indexPatterns.find(pattern => pattern === '*'));
+  const hasWildCardIndexPattern = Boolean(indexPatterns!.find(pattern => pattern === '*'));
 
   const SummaryTab = () => (
     <div data-test-subj="summaryTab">
@@ -80,7 +81,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
               {numIndexPatterns > 1 ? (
                 <EuiText>
                   <ul>
-                    {indexPatterns.map((indexName: string, i: number) => {
+                    {indexPatterns!.map((indexName: string, i: number) => {
                       return (
                         <li key={`${indexName}-${i}`}>
                           <EuiTitle size="xs">
@@ -92,7 +93,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
                   </ul>
                 </EuiText>
               ) : (
-                indexPatterns.toString()
+                indexPatterns!.toString()
               )}
             </EuiDescriptionListDescription>
 
