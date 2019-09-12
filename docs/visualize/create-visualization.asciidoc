@@ -13,6 +13,10 @@ image::visualize/images/read-only-badge.png[Example of Visualize's read only acc
 
 . Choose the {ref}/search-aggregations.html[aggregations].
 
+. To customize the colors of your visualization, click the color dot next to each label.
++
+image::images/color-picker.png[Color picker]
+
 . Change the display *Options*.
 
 . When you are finished, *Save* the visualization.

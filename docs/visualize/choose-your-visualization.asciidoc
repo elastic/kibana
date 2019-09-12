@@ -18,133 +18,9 @@ With area charts, you can:
 
 * Display the magnitude of trends
  
-<Image>
+//<image>
 
-[[visualize-bar-chart]]
-=== Bar chart
-
-Bar charts show numerical comparisons across multiple categories. In bar charts, data is displayed using a number of bars that represent a particular category. Choose a horizontal or vertical bar chart, where the height or length of each bar is proportional to the value that the bar represents.
-
-With bar charts, you can:
-
-* Compare a large number of categories
-
-* Display data that includes categories with negative values
-
-* Easily identify the categories that represent the highest and lowest values
-
-<image>
-
-[[visualize-line-chart]]
-=== Line chart
-
-Line charts show data trends over time.  In line charts, data is displayed as a series of data points that are connected by line segments.
-
-With line charts, you can:
-
-* Display data that changes over time
-
-* Identify patterns of individual variables
-
-* Compare patterns of multiple variables
-
-<image>
-
-[[visualize-pie-chart]]
-=== Pie chart
-
-Pie charts show proportions of your data compared to a total. In pie charts, each slice represents a data category, and the slice size is proportional to the quantity is represents.
-
-With pie charts, you can:
-
-* Show comparisons between multiple categories
-
-* Illustrate the dominance of one category over the others
-
-* Show percentage or proportional data
-
-<image>
-
-[[visualize-data-table]]
-=== Data table
-
-Mellori’s section.
-
-Short description.
-
-With data tables, you can:
-
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
-
-<image>
-
-Ready to create a data table? Refer to the data table example <link to example>.
-
-[[visualize-gauge]]
-=== Gauge
-
-The gauge visualization displays your data along a scale that changes color according to where your data falls on the expected scale.
-
-Use the gauge visualization to:
-
-* Compare values between a small number of variables
-
-* Show how metric values relate to reference threshold values
-
-* Determine how a specified field is performing versus how it is expected to perform
-
-<image>
-
-Ready to create a gauge visualization? Refer to the gauge example <link to example>.
-
-[[visualize-goal]]
-=== Goal
-
-The goal visualization displays how your metric progresses toward a fixed goal. 
-
-With the goal visualization, you can:
-
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
-
-<insert image>
-
-Ready to create a goal visualization? Refer to the goal visualization example <link to example>.
-
-[[visualize-metric]]
-=== Metric
-
-The metric visualization displays a single numeric value for the specified aggregation.
-
-With the metric visualization, you can:
-
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
-
-<insert image>
-
-Ready to create a metric visualization? Refer to the metric visualization example <link to example>.
-
-[[visualize-maps-app]]
-=== Maps
-
-To create and style maps with multiple layers and indices, use the Maps application.  
-
-For more information about the Maps application, refer to <<maps,Maps>>.
-
-NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the Coordinate Map, Heat Map, and Region Map.
-
-<insert image>
+//Ready to create an area chart? Check out the area chart example.
 
 [[visualize-controls]]
 === Controls
@@ -163,7 +39,125 @@ With the Control visualization, you can:
 [role="screenshot"]
 image::images/controls/controls_in_dashboard.png[]
 
-Ready to add a Controls visualization to your dashboard? Refer to the example here.
+//<image>
+
+//Ready to add a Controls visualization to your dashboard? Refer to Controls example.
+
+[[visualize-coordinate-map]]
+=== Coordinate map
+
+Short description.
+
+NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the coordinate map.
+
+//<image>
+
+[[visualize-data-table]]
+=== Data table
+
+Mellori’s section.
+
+Short description.
+
+With data tables, you can:
+
+* Cool thing 1
+
+* Cool thing 2
+
+* Cool thing 3
+
+//<image>
+
+//Ready to create a data table? Check out the data example.
+
+[[visualize-gauge]]
+=== Gauge
+
+The gauge visualization displays your data along a scale that changes color according to where your data falls on the expected scale.
+
+Use the gauge visualization to:
+
+* Compare values between a small number of variables
+
+* Show how metric values relate to reference threshold values
+
+* Determine how a specified field is performing versus how it is expected to perform
+
+//<image>
+
+//Ready to create a gauge visualization? Check out the gauge example.
+
+[[visualize-goal]]
+=== Goal
+
+The goal visualization displays how your metric progresses toward a fixed goal. 
+
+With the goal visualization, you can:
+
+* Cool thing 1
+
+* Cool thing 2
+
+* Cool thing 3
+
+//<image>
+
+//Ready to create a goal visualization? Check out the goal example.
+
+[[visualize-heat-map]]
+=== Heat map
+
+Short description.
+
+NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the heat Map.
+
+//<image>
+
+[[visualize-bar-chart]]
+=== Horizontal and vertical bar charts
+
+Bar charts show numerical comparisons across multiple categories. In bar charts, data is displayed using a number of bars that represent a particular category. Choose a horizontal or vertical bar chart, where the height or length of each bar is proportional to the value that the bar represents.
+
+With bar charts, you can:
+
+* Compare a large number of categories
+
+* Display data that includes categories with negative values
+
+* Easily identify the categories that represent the highest and lowest values
+
+//<image>
+
+//Ready to create a bar chart? Check out the bar chart example.
+
+[[visualize-line-chart]]
+=== Line chart
+
+Line charts show data trends over time.  In line charts, data is displayed as a series of data points that are connected by line segments.
+
+With line charts, you can:
+
+* Display data that changes over time
+
+* Identify patterns of individual variables
+
+* Compare patterns of multiple variables
+
+//<image>
+
+//Ready to create a line chart? Check out the line chart example?
+
+[[visualize-maps-app]]
+=== Maps
+
+To create and style maps with multiple layers and indices, use the Maps application.  
+
+For more information about the Maps application, refer to <<maps,Maps>>.
+
+NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the Coordinate Map, Heat Map, and Region Map.
+
+//<image>
 
 [[visualize-markdown]]
 === Markdown
@@ -179,44 +173,54 @@ The Markdown widget is helpful for:
 
 * Cool thing 3
 
-<insert image>
+//<image>
 
-Ready to add the Markdown widget? Refer to the example here.
+//Ready to add the Markdown widget to your visualization? Check out the Markdown widget example.
 
-[[visualize-tag-cloud]]
-=== Tag cloud
+[[visualize-metric]]
+=== Metric
 
-Tag clouds are graphical representations of how frequently a work appears in a source text.
+Mellori's section. 
 
-With tag cloud, you can:
+The metric visualization displays a single numeric value for an aggregation.
 
-* Easily produce a summary of large documents
+With the metric visualization, you can:
 
-* Create art for a topic
+* Cool thing 1
 
-* Visualize data tables and surveys
+* Cool thing 2
 
-<image>
+* Cool thing 3
 
-Ready to create a tag cloud? Refer to the tag cloud example <insert link to example>.
+//<image>
 
-[[visualize-timelion]]
-=== Timelion
+//Ready to create a metric visualization? Check out the metric example.
 
-Timelion is a time series data visualizer that enables you to combine totally
-independent data sources within a single visualization. It's driven by a simple
-expression language you use to retrieve time series data, perform calculations
-to tease out the answers to complex questions, and visualize the results.
+[[visualize-pie-chart]]
+=== Pie chart
 
-For example, Timelion enables you to easily get the answers to questions like:
+Pie charts show proportions of your data compared to a total. In pie charts, each slice represents a data category, and the slice size is proportional to the quantity is represents.
 
-* <<time-series-intro, What is the real-time percentage of CPU time spent in user space to the results offset by one hour?>>
-* <<mathematical-functions-intro, What does my inbound and outbound network traffic look like?>>
-* <<timelion-conditional-intro, How much memory is my system actually using?>>
+With pie charts, you can:
 
-<image>
+* Show comparisons between multiple categories
 
-Ready to create a Timelion visualization? Refer to the Timelion tutorial <insert link to tutorial>.
+* Illustrate the dominance of one category over the others
+
+* Show percentage or proportional data
+
+//<image>
+
+//Ready to create a pie chart? Check out the pie chart example.
+
+[[visualize-region-map]]
+=== Region map
+
+Short description.
+
+NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the region map.
+
+//<image>
 
 [[visualize-tsvb]]
 === TSVB
@@ -258,6 +262,41 @@ Table:: Display data from multiple time series by defining the field group to sh
 
 [role="screenshot"]
 image:images/tsvb-table.png["Table visualization"]
+
+//Ready to create a TSVB visualization? Check out the TSVB example.
+
+[[visualize-tag-cloud]]
+=== Tag cloud
+
+Tag clouds are graphical representations of how frequently a work appears in a source text.
+
+With tag cloud, you can:
+
+* Easily produce a summary of large documents
+
+* Create art for a topic
+
+* Visualize data tables and surveys
+
+//<image>
+
+//Ready to create a tag cloud? Check out the tag cloud example>.
+
+[[visualize-timelion]]
+=== Timelion
+
+Timelion is a time series data visualizer that enables you to combine totally
+independent data sources within a single visualization. It's driven by a simple expression language you use to retrieve time series data, perform calculations to tease out the answers to complex questions, and visualize the results.
+
+For example, Timelion enables you to easily get the answers to questions like:
+
+* <<time-series-intro, What is the real-time percentage of CPU time spent in user space to the results offset by one hour?>>
+
+* <<mathematical-functions-intro, What does my inbound and outbound network traffic look like?>>
+
+* <<timelion-conditional-intro, How much memory is my system actually using?>>
+
+//<image>
 
 --
 
