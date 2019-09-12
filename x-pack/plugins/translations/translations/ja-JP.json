@@ -4534,7 +4534,6 @@
     "xpack.graph.exploreGraph.timedOutWarningText": "閲覧がタイムアウトしました",
     "xpack.graph.featureRegistry.graphFeatureName": "Graph",
     "xpack.graph.home.breadcrumb": "Graph",
-    "xpack.graph.loadWorkspace.missingIndexPatternErrorMessage": "インデックスパターン {indexPattern} がありません",
     "xpack.graph.missingWorkspaceErrorMessage": "ワークスペースがありません",
     "xpack.graph.noDataSourceNotificationMessageText": "{managementIndexPatternsLink} に移動してインデックスパターンを作成してください",
     "xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText": "管理 > インデックスパターン",
