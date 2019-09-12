@@ -13,7 +13,7 @@ the amount of bookkeeping when working with indices. Instead of manually
 setting up your indices, you can create them automatically from a template, 
 ensuring that your settings, mappings, and aliases are consistently defined.
 
-To get started, go to *Management > {es} > Index Management*. 
+To manage your indices, go to *Management > {es} > Index Management*. 
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
@@ -21,7 +21,7 @@ image::images/management_index_labels.png[Index Management UI]
 If security is enabled,
 you must have the `monitor` cluster privilege and the `view_index_metadata` 
 and `manage` index privileges to view the data.  
-For index templates, you require the `manage_index_templates` cluster privilege.
+For index templates, you must have the `manage_index_templates` cluster privilege.
 See {xpack-ref}/security-privileges.html[Security Privileges] for more
 information.
 
@@ -37,12 +37,12 @@ Badges indicate if an index is {ref}/frozen-indices.html[frozen],
 a {ref}/ccr-put-follow.html[follower index], 
 or a {ref}/rollup-get-rollup-index-caps.html[rollup index]. 
 
-Clicking a badge filters for all indices of that type. 
-You can also narrow the view of your indices using the search bar.
+Clicking a badge narrows the list to only indices of that type. 
+You can also filter your indices using the search bar.
 
 You can drill down into each index to investigate the index 
 {ref}/index-modules.html#index-modules-settings[settings], {ref}/mapping.html[mapping], and statistics.  
-From this view, you can edit the index settings.
+From this view, you can also edit the index settings.
 
 [role="screenshot"]
 image::images/management_index_details.png[Index Management UI]
@@ -50,7 +50,7 @@ image::images/management_index_details.png[Index Management UI]
 [float]
 === Perform index-level operations
 
-Use the *Manage* menu to initiate index-level operations.  This menu 
+Use the *Manage* menu to perform index-level operations.  This menu 
 is available in the index details view, or when you select the checkbox of one or more 
 indices on the overview page. The menu includes the following actions:  
 
