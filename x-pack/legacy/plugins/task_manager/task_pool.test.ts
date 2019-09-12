@@ -21,27 +21,6 @@ describe('TaskPool', () => {
     expect(pool.occupiedWorkers).toEqual(3);
   });
 
-  test('occupiedWorkers ignored the deprecated numWorkers field', async () => {
-    /*
-     * As we've deprecated the field butstill keep it in the type as an incremental step
-     * towards removing it entirely, we wish to make it explicit that this field is ignored.
-     * Oncethe field is removed fro mthe type this test will be removed.
-     */
-    const pool = new TaskPool({
-      maxWorkers: 200,
-      logger: mockLogger(),
-    });
-
-    const result = await pool.run([
-      { ...mockTask(), numWorkers: 1 },
-      { ...mockTask(), numWorkers: 2 },
-      { ...mockTask(), numWorkers: 1 },
-    ]);
-
-    expect(result).toBeTruthy();
-    expect(pool.occupiedWorkers).toEqual(3);
-  });
-
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
       maxWorkers: 10,
@@ -214,7 +193,6 @@ describe('TaskPool', () => {
 
   function mockTask() {
     return {
-      numWorkers: 1,
       isExpired: false,
       cancel: async () => undefined,
       claimOwnership: async () => true,

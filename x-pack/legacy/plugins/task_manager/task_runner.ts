@@ -28,7 +28,6 @@ import {
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
-  numWorkers: number;
   isExpired: boolean;
   cancel: CancelFunction;
   claimOwnership: () => Promise<boolean>;
@@ -82,15 +81,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = opts.logger;
     this.store = opts.store;
     this.beforeRun = opts.beforeRun;
-  }
-
-  /**
-   * Gets how many workers are occupied by this task instance.
-   * Per Joi validation logic, this will return a number >= 1
-   */
-  public get numWorkers() {
-    // as we're gradualy depricating `numWorkers`, we'll keep the prop and assume it returns 1
-    return 1;
   }
 
   /**
