@@ -8,7 +8,7 @@ You can create {stack-ov}/ml-dataframes.html[{dataframe-transforms}] in the
 {kib} Machine Learning application.
 
 [role="screenshot"]
-image::ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
+image::user/ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
 
 Select the index pattern or saved search you want to transform. To pivot your 
 data, you must group the data by at least one field and apply at least one 
@@ -22,7 +22,7 @@ for the target index. At the end of the process, a {dataframe} job is created as
 a result. 
 
 [role="screenshot"]
-image::ml/images/ml-jobid.jpg["Job ID and target index"]
+image::user/ml/images/ml-jobid.jpg["Job ID and target index"]
 
 After you create {dataframe} jobs, you can start, stop, and delete them 
 and explore their progress and statistics from the jobs list.
