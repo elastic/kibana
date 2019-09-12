@@ -27,18 +27,20 @@ export const emptyColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     width,
+    timelineId,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeader;
     width?: string;
+    timelineId: string;
   }) => (
     <DraggableWrapper
-      key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}`}
+      key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
       dataProvider={{
         enabled: true,
         id: escapeDataProviderId(
-          `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}`
+          `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
         ),
         name: `${columnName}: ${parseQueryValue(null)}`,
         queryMatch: {

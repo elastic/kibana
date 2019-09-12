@@ -14,8 +14,6 @@ exports[`ErrorList component renders the error list without errors 1`] = `
     </h5>
   </EuiTitle>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="s"
   >
     <EuiInMemoryTable

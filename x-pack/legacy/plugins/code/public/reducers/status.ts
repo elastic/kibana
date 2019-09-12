@@ -13,6 +13,7 @@ import {
   WorkerReservedProgress,
   IndexWorkerProgress,
   CloneWorkerProgress,
+  RepoState,
 } from '../../model';
 import {
   deleteRepoFinished,
@@ -26,7 +27,6 @@ import {
   updateIndexProgress,
   StatusSuccessPayload,
   RepoStatus,
-  RepoState,
   FetchRepoFileStatus,
 } from '../actions';
 import { StatusReport } from '../../common/repo_file_status';
@@ -71,6 +71,9 @@ const getGitState = (gitStatus: CloneWorkerProgress) => {
   ) {
     return RepoState.CLONE_ERROR;
   } else if (progress < WorkerReservedProgress.COMPLETED) {
+    if (gitStatus.cloneProgress && gitStatus.cloneProgress.isCloned) {
+      return RepoState.UPDATING;
+    }
     return RepoState.CLONING;
   } else if (progress === WorkerReservedProgress.COMPLETED) {
     return RepoState.READY;

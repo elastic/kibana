@@ -5,10 +5,7 @@
  */
 
 import { flatten, uniq } from 'lodash';
-import {
-  Feature,
-  FeatureKibanaPrivileges,
-} from '../../../../../../xpack_main/server/lib/feature_registry/feature_registry';
+import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugins/features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = ['bulk_get', 'get', 'find'];

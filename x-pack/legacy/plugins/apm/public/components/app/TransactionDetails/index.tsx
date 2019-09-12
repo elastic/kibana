@@ -20,7 +20,7 @@ import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionDistribution } from './Distribution';
-import { Transaction } from './Transaction';
+import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
@@ -39,10 +39,9 @@ export function TransactionDetails() {
   } = useTransactionDistribution(urlParams);
 
   const { data: transactionChartsData } = useTransactionCharts();
-
-  const { data: waterfall, exceedsMax } = useWaterfall(urlParams);
-  const transaction = waterfall.getTransactionById(urlParams.transactionId);
-
+  const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
+    urlParams
+  );
   const { transactionName, transactionType, serviceName } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
@@ -92,25 +91,20 @@ export function TransactionDetails() {
           <EuiPanel>
             <TransactionDistribution
               distribution={distributionData}
-              isLoading={
-                distributionStatus === FETCH_STATUS.LOADING ||
-                distributionStatus === undefined
-              }
+              isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
             />
           </EuiPanel>
 
           <EuiSpacer size="s" />
 
-          {transaction && (
-            <Transaction
-              location={location}
-              transaction={transaction}
-              urlParams={urlParams}
-              waterfall={waterfall}
-              exceedsMax={exceedsMax}
-            />
-          )}
+          <WaterfallWithSummmary
+            location={location}
+            urlParams={urlParams}
+            waterfall={waterfall}
+            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+            exceedsMax={exceedsMax}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

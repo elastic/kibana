@@ -16,7 +16,7 @@ export const mockSourceLayer = {
     type: 'ES_SEARCH',
     geoField: 'source.geo.location',
     filterByMapBounds: false,
-    tooltipProperties: ['host.name', 'host.ip'],
+    tooltipProperties: ['host.name', 'source.ip', 'source.domain', 'source.as.organization.name'],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -25,7 +25,7 @@ export const mockSourceLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#3cb44b' } },
+      fillColor: { type: 'STATIC', options: { color: '#3185FC' } },
       lineColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
       lineWidth: { type: 'STATIC', options: { size: 1 } },
       iconSize: { type: 'STATIC', options: { size: 6 } },
@@ -41,7 +41,7 @@ export const mockSourceLayer = {
   visible: true,
   applyGlobalQuery: true,
   type: 'VECTOR',
-  query: { query: 'source.geo.location:* and destination.geo.location:*', language: 'kuery' },
+  query: { query: '', language: 'kuery' },
   joins: [],
 };
 
@@ -51,7 +51,12 @@ export const mockDestinationLayer = {
     type: 'ES_SEARCH',
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
-    tooltipProperties: ['host.name', 'host.ip'],
+    tooltipProperties: [
+      'host.name',
+      'destination.ip',
+      'destination.domain',
+      'destination.as.organization.name',
+    ],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -60,7 +65,7 @@ export const mockDestinationLayer = {
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#e6194b' } },
+      fillColor: { type: 'STATIC', options: { color: '#DB1374' } },
       lineColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
       lineWidth: { type: 'STATIC', options: { size: 1 } },
       iconSize: { type: 'STATIC', options: { size: 6 } },
@@ -76,7 +81,7 @@ export const mockDestinationLayer = {
   visible: true,
   applyGlobalQuery: true,
   type: 'VECTOR',
-  query: { query: 'source.geo.location:* and destination.geo.location:*', language: 'kuery' },
+  query: { query: '', language: 'kuery' },
 };
 
 export const mockLineLayer = {

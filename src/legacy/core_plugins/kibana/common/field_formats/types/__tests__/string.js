@@ -70,4 +70,11 @@ describe('String Format', function () {
     expect(string.convert(value)).to.be(value);
   });
 
+  it('decode a URL Param string', function () {
+    const string = new StringFormat({
+      transform: 'urlparam'
+    });
+    expect(string.convert('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')).to.be('안녕 키바나');
+  });
+
 });
