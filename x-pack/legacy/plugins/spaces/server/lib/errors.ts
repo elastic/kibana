@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { boomify } from 'boom';
+
+import { boomify, isBoom } from 'boom';
 
 export function wrapError(error: any) {
-  if (error.isBoom) {
+  if (isBoom(error)) {
     return error;
   }
 

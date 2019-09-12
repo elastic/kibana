@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
@@ -62,7 +61,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           });
         }
       } catch (error) {
-        const wrappedError: Boom<any> = wrapError(error);
+        const wrappedError = wrapError(error);
         return response.customError({
           body: wrappedError,
           statusCode: wrappedError.output.statusCode,
