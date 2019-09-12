@@ -113,6 +113,7 @@ export interface TaskDefinition {
   /**
    * The numer of workers / slots a running instance of this task occupies.
    * This defaults to 1.
+   * @deprecated: numWorkers is now ignored, and is treated as if all tasks declare a value of 1.
    */
   numWorkers?: number;
 
@@ -123,13 +124,6 @@ export interface TaskDefinition {
   createTaskRunner: TaskRunCreatorFunction;
 }
 
-/**
- * A task definition with all of its properties set to a valid value.
- */
-export interface SanitizedTaskDefinition extends TaskDefinition {
-  numWorkers: number;
-}
-
 export const validateTaskDefinition = Joi.object({
   type: Joi.string().required(),
   title: Joi.string().optional(),
@@ -138,9 +132,7 @@ export const validateTaskDefinition = Joi.object({
   maxAttempts: Joi.number()
     .min(1)
     .optional(),
-  numWorkers: Joi.number()
-    .min(1)
-    .default(1),
+  numWorkers: Joi.number().optional(),
   createTaskRunner: Joi.func().required(),
   getRetry: Joi.func().optional(),
 }).default();

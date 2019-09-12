@@ -19,7 +19,7 @@ import {
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   validateRunResult,
   TaskStatus,
@@ -44,7 +44,7 @@ interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   beforeRun: BeforeRunFunction;
@@ -61,7 +61,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
   private store: Updatable;
   private beforeRun: BeforeRunFunction;
@@ -89,7 +89,8 @@ export class TaskManagerRunner implements TaskRunner {
    * Per Joi validation logic, this will return a number >= 1
    */
   public get numWorkers() {
-    return this.definition.numWorkers;
+    // as we're gradualy depricating `numWorkers`, we'll keep the prop and assume it returns 1
+    return 1;
   }
 
   /**
