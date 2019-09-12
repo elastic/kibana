@@ -28,7 +28,7 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { load as repoLoad, unload as repoUnload } from './repo_archiver';
 
 export default function codeIntelligenceFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
@@ -25,7 +27,7 @@ export default function codeIntelligenceFunctionalTests({
 
   describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
           expect(await exists('codeSourceViewer')).to.be(true);
@@ -37,7 +39,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await browser.moveMouseTo(userModelSpan);
+          await userModelSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await exists('codeGoToDefinitionButton')).to.be(true);
 
@@ -77,58 +79,21 @@ export default function codeIntelligenceFunctionalTests({
       };
 
       before(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Prepare a git repository for the test
-        await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/elastic/TypeScript-Node-Starter'
+        await repoLoad(
+          'github.com/elastic/TypeScript-Node-Starter',
+          'typescript_node_starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
         );
-        // Click the import repository button.
-        await PageObjects.code.clickImportRepositoryButton();
-
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(1);
-          expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'elastic/TypeScript-Node-Starter'
-          );
-
-          // Wait for the index to start.
-          await retry.try(async () => {
-            expect(await exists('repositoryIndexOngoing')).to.be(true);
-          });
-          // Wait for the index to end.
-          await retry.try(async () => {
-            expect(await exists('repositoryIndexDone')).to.be(true);
-          });
-        });
+        await esArchiver.load('code/repositories/typescript_node_starter');
       });
 
       after(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Clean up the imported repository
-        await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.try(async () => {
-          expect(await exists('confirmModalConfirmButton')).to.be(true);
-        });
-
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-
         await PageObjects.security.logout();
+        await esArchiver.unload('code/repositories/typescript_node_starter');
+        await repoUnload(
+          'github.com/elastic/TypeScript-Node-Starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
       });
 
       beforeEach(async () => {
@@ -180,7 +145,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await browser.moveMouseTo(userModelSpan);
+          await userModelSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await exists('codeFindReferenceButton')).to.be(true);
 
@@ -231,7 +196,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const asyncSpan = spans[1];
           expect(await asyncSpan.getVisibleText()).to.equal('async');
-          await browser.moveMouseTo(asyncSpan);
+          await asyncSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await exists('codeGoToDefinitionButton')).to.be(true);
 

@@ -22,7 +22,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { visualizations } from 'plugins/visualizations';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
 
@@ -32,13 +32,18 @@ const app = uiModules.get('app/visualize');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedVisualizations',
-  title: 'visualizations'
+  title: 'visualizations',
 });
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
   const visTypes = Private(VisTypesRegistryProvider);
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
+  const saveVisualizationLoader = new SavedObjectLoader(
+    SavedVis,
+    kbnUrl,
+    chrome,
+    savedObjectClient
+  );
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;
@@ -46,8 +51,11 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
 
     let typeName = source.typeName;
     if (source.visState) {
-      try { typeName = JSON.parse(source.visState).type; }
-      catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
+      try {
+        typeName = JSON.parse(source.visState).type;
+      } catch (e) {
+        /* missing typename handled below */
+      } // eslint-disable-line no-empty
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
@@ -78,7 +86,7 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       size,
       mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
       savedObjectsClient: this.savedObjectsClient,
-      visTypes: visualizations.types.visTypeAliasRegistry.get(),
+      visTypes: visualizationsSetup.types.visTypeAliasRegistry.get(),
     });
   };
 

@@ -9,7 +9,7 @@ import { axisConfig } from '../../functions/common/axisConfig';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
-import { ISO8601 } from '../constants';
+import { ISO8601 } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   help: i18n.translate('xpack.canvas.functions.axisConfigHelpText', {

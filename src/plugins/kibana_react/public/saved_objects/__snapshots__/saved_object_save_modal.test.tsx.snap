@@ -6,7 +6,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
     onSubmit={[Function]}
   >
     <EuiModal
-      className="dshSaveModal"
+      className="kbnSavedObjectSaveModal"
       data-test-subj="savedObjectSaveModal"
       maxWidth={true}
       onClose={[Function]}
@@ -50,15 +50,33 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
               value="Saved Object title"
             />
           </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Description"
+                id="kibana-react.savedObjects.saveModal.descriptionLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiTextArea
+              data-test-subj="viewDescription"
+              fullWidth={false}
+              onChange={[Function]}
+              resize="vertical"
+              value=""
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          color="primary"
           data-test-subj="saveCancelButton"
-          iconSide="left"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -67,20 +85,13 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           />
         </EuiButtonEmpty>
         <EuiButton
-          color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
           fill={true}
-          iconSide="left"
           isDisabled={false}
           isLoading={false}
-          size="m"
           type="submit"
         >
-          <FormattedMessage
-            defaultMessage="Confirm Save"
-            id="kibana-react.savedObjects.saveModal.confirmSaveButtonLabel"
-            values={Object {}}
-          />
+          Save
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

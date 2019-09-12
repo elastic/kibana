@@ -119,13 +119,15 @@ export class MapEmbeddable extends Embeddable {
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
+    this._domNode = domNode;
+
     render(
       <Provider store={this._store}>
         <I18nContext>
           <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
         </I18nContext>
       </Provider>,
-      domNode
+      this._domNode
     );
 
     this._unsubscribeFromStore = this._store.subscribe(() => {
@@ -136,9 +138,7 @@ export class MapEmbeddable extends Embeddable {
   addFilters = filters => {
     start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
-      triggerContext: {
-        filters,
-      },
+      filters,
     });
   }
 

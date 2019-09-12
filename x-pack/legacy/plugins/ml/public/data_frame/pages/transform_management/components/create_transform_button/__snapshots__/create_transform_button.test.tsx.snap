@@ -7,15 +7,12 @@ exports[`Data Frame: Transform List <CreateTransformButton /> Minimal initializa
   position="top"
 >
   <EuiButton
-    color="primary"
     data-test-subj="mlDataFramesButtonCreate"
     disabled={true}
     fill={true}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Create transform"
