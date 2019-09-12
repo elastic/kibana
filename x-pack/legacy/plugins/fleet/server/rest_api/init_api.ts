@@ -5,15 +5,17 @@
  */
 
 import { Server } from 'hapi';
-import { FleetServerLib } from '../libs/types';
 import { createListAgentsRoute } from './agents/list';
 import { createDeleteAgentsRoute } from './agents/delete';
 import { createEnrollAgentsRoute } from './agents/enroll';
 import { createCheckinAgentsRoute } from './agents/checkin';
+import { createGetEnrollmentTokenRoute } from './tokens/get_enrollment';
+import { FleetServerLibRequestFactory } from '../libs/compose/types';
 
-export function initRestApi(server: Server, libs: FleetServerLib) {
+export function initRestApi(server: Server, libs: FleetServerLibRequestFactory) {
   server.route(createListAgentsRoute(libs));
   server.route(createDeleteAgentsRoute(libs));
   server.route(createEnrollAgentsRoute(libs));
   server.route(createCheckinAgentsRoute(libs));
+  server.route(createGetEnrollmentTokenRoute(libs));
 }

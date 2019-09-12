@@ -5,7 +5,6 @@
  */
 
 import {
-  SavedObjectsService,
   SavedObjectsClient as SavedObjectsClientType,
   SavedObjectAttributes,
   SavedObjectsBulkCreateObject,
@@ -19,18 +18,10 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 
 export class SODatabaseAdapter implements SODatabaseAdapterType {
-  private readonly client: SavedObjectsClientType;
-  constructor(savedObjects: SavedObjectsService, elasticsearch: ElasticsearchPlugin) {
-    const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-    const { callWithInternalUser } = elasticsearch.getCluster('admin');
-    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-    this.client = new SavedObjectsClient(internalRepository);
-  }
+  constructor(private readonly client: SavedObjectsClientType) {}
 
   /**
    * Persists a SavedObject

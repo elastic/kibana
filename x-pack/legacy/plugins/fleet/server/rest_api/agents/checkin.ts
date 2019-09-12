@@ -11,9 +11,10 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
-import { FleetServerLib } from '../../libs/types';
 import { TokenType } from '../../libs/adapters/tokens/adapter_types';
 import { RuntimeAgentEvent, AgentEvent } from '../../libs/adapters/agent/adapter_type';
+import { FleetServerLibRequestFactory } from '../../libs/compose/types';
+import { FleetServerLib } from '../../libs/types';
 
 type CheckinRequest = FrameworkRequest<{
   query: { page: string };
@@ -29,7 +30,7 @@ type CheckinRequest = FrameworkRequest<{
   };
 }>;
 
-export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
+export const createCheckinAgentsRoute = (libsFactory: FleetServerLibRequestFactory) => ({
   method: 'POST',
   path: '/api/fleet/agents/{agentId}/checkin',
   config: {
@@ -50,6 +51,7 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     },
   },
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
+    const libs = libsFactory(request);
     await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
     const { actions, policy } = await libs.agents.checkin(

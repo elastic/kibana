@@ -7,13 +7,12 @@
 import * as Joi from 'joi';
 import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeList } from '../../../common/return_types';
-import { FleetServerLib } from '../../libs/types';
+import { FleetServerLibRequestFactory } from '../../libs/compose/types';
 
-export const createListAgentsRoute = (libs: FleetServerLib) => ({
+export const createListAgentsRoute = (libsFactory: FleetServerLibRequestFactory) => ({
   method: 'GET',
   path: '/api/fleet/agents',
   config: {
-    auth: false,
     validate: {
       query: {
         page: Joi.number().default(1),
@@ -23,6 +22,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   handler: async (
     request: FrameworkRequest<{ query: { page: string } }>
   ): Promise<ReturnTypeList<any>> => {
+    const libs = libsFactory(request);
     const page = parseInt(request.query.page, 10);
 
     const { agents, total } = await libs.agents.list();

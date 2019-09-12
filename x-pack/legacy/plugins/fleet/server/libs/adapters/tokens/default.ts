@@ -8,23 +8,33 @@ import moment from 'moment';
 import { SavedObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
+import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
 
 const SAVED_OBJECT_TYPE = 'tokens';
+
+function getFirstOrNull(list: Token[]) {
+  return list.length > 0 ? list[0] : null;
+}
 
 /**
  * Token adapter that persist tokens using saved objects
  */
 export class TokenAdapter implements TokenAdapterType {
-  constructor(private readonly soAdapter: SODatabaseAdapter) {}
+  constructor(
+    private readonly soAdapter: SODatabaseAdapter,
+    private readonly encryptedSavedObject: EncryptedSavedObjects
+  ) {}
 
   public async create({
     type,
+    token,
     tokenHash,
     active,
     policy,
     expire_at,
   }: {
     type: TokenType;
+    token: string;
     tokenHash: string;
     active: boolean;
     expire_at?: string;
@@ -33,6 +43,7 @@ export class TokenAdapter implements TokenAdapterType {
     const so = await this.soAdapter.create(SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       type,
+      token,
       tokenHash,
       policy_id: policy.id,
       policy_shared_id: policy.sharedId,
@@ -54,8 +65,20 @@ export class TokenAdapter implements TokenAdapterType {
     });
 
     const tokens = res.saved_objects.map(this._savedObjectToToken);
+    const token = getFirstOrNull(tokens);
+    return token ? await this._getDecrypted(token.id) : null;
+  }
 
-    return tokens.length > 0 ? tokens[0] : null;
+  public async getByPolicyId(policyId: string): Promise<Token | null> {
+    const res = await this.soAdapter.find({
+      type: SAVED_OBJECT_TYPE,
+      searchFields: ['policy_id'],
+      search: policyId,
+    });
+
+    const tokens = res.saved_objects.map(this._savedObjectToToken);
+    const token = getFirstOrNull(tokens);
+    return token ? await this._getDecrypted(token.id) : null;
   }
 
   public async update(id: string, newData: Partial<Token>): Promise<void> {
@@ -70,12 +93,19 @@ export class TokenAdapter implements TokenAdapterType {
     await this.soAdapter.delete(SAVED_OBJECT_TYPE, id);
   }
 
-  private _savedObjectToToken({ error, attributes }: SavedObject<Token>): Token {
+  private async _getDecrypted(tokenId: string) {
+    return this._savedObjectToToken(
+      await this.encryptedSavedObject.getDecryptedAsInternalUser(SAVED_OBJECT_TYPE, tokenId)
+    );
+  }
+
+  private _savedObjectToToken({ error, attributes, id }: SavedObject<Token>): Token {
     if (error) {
       throw new Error(error.message);
     }
 
     return {
+      id,
       ...attributes,
     };
   }

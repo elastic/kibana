@@ -6,7 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { ResponseToolkit, ResponseObject } from 'hapi';
-import { Request } from 'src/legacy/server/kbn_server';
+import { Request, SavedObjectsClient } from 'src/legacy/server/kbn_server';
 
 export type KibanaLegacyServer = Legacy.Server;
 
@@ -19,6 +19,7 @@ export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Req
   params: KibanaServerRequestGenaric['params'];
   payload: KibanaServerRequestGenaric['payload'];
   headers: KibanaServerRequestGenaric['headers'];
+  getSavedObjectsClient: () => SavedObjectsClient;
 }
 
 export type FrameworkResponseToolkit = ResponseToolkit;

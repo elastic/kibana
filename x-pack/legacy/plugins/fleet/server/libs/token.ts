@@ -6,7 +6,7 @@
 
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import { createHmac } from 'crypto';
-import { TokenVerificationResponse, TokenType } from './adapters/tokens/adapter_types';
+import { TokenVerificationResponse, TokenType, Token } from './adapters/tokens/adapter_types';
 import { TokenAdapter } from './adapters/tokens/adapter_types';
 import { FrameworkLib } from './framework';
 
@@ -91,8 +91,28 @@ export class TokenLib {
       active: true,
       type: TokenType.ENROLMENT_TOKEN,
       tokenHash,
+      token,
       policy,
     });
+
+    return token;
+  }
+
+  public async getEnrollmentTokenForPolicy(
+    policyId: string,
+    regenerate?: boolean
+  ): Promise<Token | null> {
+    let token = await this.adapter.getByPolicyId(policyId);
+
+    if (regenerate && token) {
+      const policy = {
+        id: token.policy_id,
+        sharedId: token.policy_shared_id,
+      };
+      await this.adapter.delete(token.id);
+      await this.generateEnrolmentToken(policy);
+      token = await this.adapter.getByPolicyId(policyId);
+    }
 
     return token;
   }

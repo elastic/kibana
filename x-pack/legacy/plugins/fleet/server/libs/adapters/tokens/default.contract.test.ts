@@ -12,10 +12,14 @@ import { SODatabaseAdapter } from '../saved_objets_database/default';
 import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
 import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
 import { Token, TokenType } from './adapter_types';
+import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
+import { MemorizeEncryptedSavedObjects } from '../encrypted_saved_objects/memorize_adapter';
+import { httpServerMock } from '../../../../../../../../src/core/server/mocks';
 
 describe('Token Adapter', () => {
   let adapter: TokenAdapter;
   let soAdapter: SODatabaseAdapterType;
+  let encryptedSavedObject: EncryptedSavedObjects;
   let servers: any;
 
   async function loadFixtures(tokens: any[]): Promise<SavedObject[]> {
@@ -34,17 +38,30 @@ describe('Token Adapter', () => {
       servers = await createKibanaServer({
         security: { enabled: false },
       });
-      const baseAdapter = new SODatabaseAdapter(
-        servers.kbnServer.savedObjects,
-        servers.kbnServer.plugins.elasticsearch
+
+      const soBaseAdapter = servers.kbnServer.savedObjects.getScopedSavedObjectsClient(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
+          },
+        })
       );
+      const baseAdapter = new SODatabaseAdapter(soBaseAdapter);
       soAdapter = new MemorizeSODatabaseAdapter(baseAdapter);
+
+      const baseEncyrptedSOAdapter = new EncryptedSavedObjects(
+        servers.kbnServer.plugins.encrypted_saved_objects
+      );
+
+      encryptedSavedObject = (new MemorizeEncryptedSavedObjects(
+        baseEncyrptedSOAdapter
+      ) as unknown) as EncryptedSavedObjects;
     });
 
     if (!soAdapter) {
       soAdapter = new MemorizeSODatabaseAdapter();
     }
-    adapter = new TokenAdapter(soAdapter);
+    adapter = new TokenAdapter(soAdapter, encryptedSavedObject);
   });
 
   afterAll(async () => {
@@ -60,12 +77,16 @@ describe('Token Adapter', () => {
       const token = await adapter.create({
         active: true,
         type: TokenType.ACCESS_TOKEN,
+        token: 'notencryptedtoken',
         tokenHash: 'qwerty',
         policy: { id: 'policyId', sharedId: 'sharedId' },
       });
       const soToken = (await soAdapter.get<Token>('tokens', token.id)) as SavedObject;
-      expect(token).toBeDefined();
+      expect(soToken).toBeDefined();
       expect(token.id).toBeDefined();
+
+      expect(soToken.attributes.token !== 'notencryptedtoken').toBe(true);
+
       expect(soToken.attributes).toMatchObject({
         active: true,
         type: TokenType.ACCESS_TOKEN,
@@ -93,8 +114,11 @@ describe('Token Adapter', () => {
     it('allow to update a token', async () => {
       await adapter.update(tokenId, {
         active: false,
+        token: 'notencryptedtoken',
       });
-      const soToken = (await soAdapter.get<Token>('tokens', tokenId)) as SavedObject;
+
+      const soToken = (await soAdapter.get<Token>('tokens', tokenId)) as SavedObject<Token>;
+      expect(soToken.attributes.token !== 'notencryptedtoken').toBe(true);
       expect(soToken.attributes).toMatchObject({
         active: false,
       });
@@ -125,6 +149,44 @@ describe('Token Adapter', () => {
 
     it('return null if the token does not exists', async () => {
       const token = await adapter.getByTokenHash('idonotexists');
+      expect(token).toBeNull();
+    });
+  });
+
+  describe('getByPolicyId', () => {
+    beforeEach(async () => {
+      await loadFixtures([
+        {
+          active: true,
+          type: TokenType.ACCESS_TOKEN,
+          tokenHash: 'qwerty',
+          policy_id: 'policy1',
+        },
+        {
+          active: true,
+          type: TokenType.ACCESS_TOKEN,
+          token: 'notencryptedtoken',
+          tokenHash: 'azerty',
+          policy_id: 'policy12',
+        },
+        {
+          active: true,
+          type: TokenType.ACCESS_TOKEN,
+          tokenHash: 'azerty',
+          policy_id: 'policy123',
+        },
+      ]);
+    });
+
+    it('allow to find a token', async () => {
+      const token = await adapter.getByPolicyId('policy12');
+      expect(token).toBeDefined();
+      expect((token as Token).policy_id).toBe('policy12');
+      expect((token as Token).token).toBe('notencryptedtoken');
+    });
+
+    it('return null if the token does not exists', async () => {
+      const token = await adapter.getByTokenHash('policy1234');
       expect(token).toBeNull();
     });
   });

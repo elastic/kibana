@@ -8,6 +8,6 @@ import { compose } from './libs/compose/kibana';
 import { initRestApi } from './rest_api/init_api';
 
 export const initServerWithKibana = (hapiServer: any) => {
-  const libs = compose(hapiServer);
-  initRestApi(hapiServer, libs);
+  const libsRequestFactory = compose(hapiServer);
+  initRestApi(hapiServer, libsRequestFactory);
 };

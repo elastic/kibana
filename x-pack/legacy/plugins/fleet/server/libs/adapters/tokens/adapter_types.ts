@@ -31,6 +31,7 @@ export enum TokenType {
 export interface Token {
   id: string;
   type: TokenType;
+  token: string;
   tokenHash: string;
   created_at: string;
   expire_at?: string;
@@ -43,6 +44,7 @@ export interface Token {
 export interface TokenAdapter {
   create(data: {
     type: TokenType;
+    token: string;
     tokenHash: string;
     active: boolean;
     policy: { id: string; sharedId: string };
@@ -54,6 +56,12 @@ export interface TokenAdapter {
    * @param token
    */
   getByTokenHash(tokenHash: string): Promise<Token | null>;
+
+  /**
+   * Get a token by token.
+   * @param token
+   */
+  getByPolicyId(policyId: string): Promise<Token | null>;
 
   /**
    * Update a token

@@ -16,11 +16,13 @@ export class MemoryTokenAdapter implements TokenAdapterType {
   public async create({
     type,
     tokenHash,
+    token,
     active,
     policy,
     expire_at,
   }: {
     type: TokenType;
+    token: string;
     tokenHash: string;
     active: boolean;
     policy: { id: string; sharedId: string };
@@ -32,6 +34,7 @@ export class MemoryTokenAdapter implements TokenAdapterType {
       active,
       created_at: moment().toISOString(),
       type,
+      token,
       tokenHash,
       expire_at,
       policy_id: policy.id,
@@ -49,6 +52,10 @@ export class MemoryTokenAdapter implements TokenAdapterType {
     const token = this.tokens[id];
 
     Object.assign(token, newData);
+  }
+
+  public async getByPolicyId(policyId: string) {
+    return Object.values(this.tokens).find(t => t.policy_id === policyId) || null;
   }
 
   public async delete(id: string): Promise<void> {
