@@ -190,9 +190,9 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const countDetails = await this.parseJobCounts(jobId);
       const counts = countDetails.counts;
 
-      // last_data_time holds a runtime timestamp and is hard to predict
-      // the property is only validated to be present and then removed
-      // so it doesn't make the counts object validation fail
+      // fields that have changing values are only validated
+      // to be present and then removed so they don't make
+      // the object validation fail
       expect(counts).to.have.property('last_data_time');
       delete counts.last_data_time;
 
@@ -200,11 +200,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
 
       const modelSizeStats = countDetails.modelSizeStats;
 
-      // log_time holds a runtime timestamp and is hard to predict
-      // the property is only validated to be present and then removed
-      // so it doesn't make the modelSizeStats object validation fail
+      // fields that have changing values are only validated
+      // to be present and then removed so they don't make
+      // the object validation fail
       expect(modelSizeStats).to.have.property('log_time');
       delete modelSizeStats.log_time;
+      expect(modelSizeStats).to.have.property('model_bytes');
+      delete modelSizeStats.model_bytes;
 
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
