@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from './types';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+const expressionsPlugin = plugin();
+
+export const setup = expressionsPlugin.setup(npSetup.core);
+
+export const start = expressionsPlugin.start(npStart.core, {
+  inspector: npStart.plugins.inspector,
+});

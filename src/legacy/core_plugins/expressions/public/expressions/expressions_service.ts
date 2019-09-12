@@ -46,9 +46,9 @@ export class ExpressionsService {
       });
 
     return {
-      registerType: npSetup.plugins.data.expressions.registerType,
-      registerFunction: npSetup.plugins.data.expressions.registerFunction,
-      registerRenderer: npSetup.plugins.data.expressions.registerRenderer,
+      registerType: npSetup.plugins.expressions.registerType,
+      registerFunction: npSetup.plugins.expressions.registerFunction,
+      registerRenderer: npSetup.plugins.expressions.registerRenderer,
     };
   }
 

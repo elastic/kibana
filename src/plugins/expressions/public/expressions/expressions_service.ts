@@ -20,15 +20,30 @@
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './interpreter';
 import { ExpressionType } from '../../common/expressions/types';
 
+export interface ExpressionsSetupContract {
+  registerFunction: (fn: any) => void;
+  registerRenderer: (renderer: any) => void;
+  registerType: (type: () => ExpressionType<any, any>) => void;
+  __LEGACY: {
+    functions: FunctionsRegistry;
+    renderers: RenderFunctionsRegistry;
+    types: TypesRegistry;
+  };
+}
+
+export type ExpressionsStartContract = ExpressionsSetupContract;
+
 export class ExpressionsService {
   private readonly functions = new FunctionsRegistry();
   private readonly renderers = new RenderFunctionsRegistry();
   private readonly types = new TypesRegistry();
 
+  private setupApi!: ExpressionsSetupContract;
+
   public setup() {
     const { functions, renderers, types } = this;
 
-    return {
+    this.setupApi = {
       registerFunction: (fn: any) => {
         this.functions.register(fn);
       },
@@ -38,11 +53,17 @@ export class ExpressionsService {
       registerType: (type: () => ExpressionType<any, any>) => {
         this.types.register(type);
       },
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         functions,
         renderers,
         types,
       },
     };
+
+    return this.setupApi;
+  }
+
+  public start(): ExpressionsStartContract {
+    return this.setupApi as ExpressionsStartContract;
   }
 }
