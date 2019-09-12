@@ -21,7 +21,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 import chrome from '../chrome';
-import { KbnError } from '../errors';
+import { VislibError } from './errors';
 import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
 import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
@@ -98,7 +98,7 @@ export function VislibVisProvider(Private) {
         this.handler[method]();
       } catch (error) {
 
-        if (error instanceof KbnError) {
+        if (error instanceof VislibError) {
           error.displayToScreen(this.handler);
         } else {
           throw error;

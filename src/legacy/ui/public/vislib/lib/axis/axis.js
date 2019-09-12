@@ -25,7 +25,7 @@ import { AxisTitle } from './axis_title';
 import { AxisLabels } from './axis_labels';
 import { AxisScale } from './axis_scale';
 import { AxisConfig } from './axis_config';
-import { VislibError } from '../../../errors';
+import { VislibError } from '../../errors';
 
 export class Axis extends ErrorHandler {
   constructor(visConfig, axisConfigArgs) {

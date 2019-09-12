@@ -21,8 +21,7 @@ import { defaults, pluck, last, get } from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { IndexPattern } from './index_pattern';
 
-// @ts-ignore
-import { DuplicateField } from 'ui/errors';
+import { DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 // @ts-ignore
 import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
 // @ts-ignore

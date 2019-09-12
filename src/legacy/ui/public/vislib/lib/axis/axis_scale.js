@@ -21,8 +21,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import moment from 'moment';
 
-import { InvalidLogScaleValues } from '../../../errors';
+import { InvalidLogScaleValues } from '../../errors';
 import { timeTicks } from './time_ticks';
+
 
 export class AxisScale {
   constructor(axisConfig, visConfig) {

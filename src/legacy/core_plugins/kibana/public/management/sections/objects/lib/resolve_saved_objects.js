@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../../../../../../../plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {

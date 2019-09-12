@@ -19,8 +19,7 @@
 
 /* eslint-disable */
 
-// @ts-ignore
-import { KbnError } from 'ui/errors';
+import { KbnError } from '../../../../../plugins/kibana_utils/public';
 
 /**
  * when a mapping already exists for a field the user is attempting to add

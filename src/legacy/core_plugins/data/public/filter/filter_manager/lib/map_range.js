@@ -18,7 +18,7 @@
  */
 
 import { has, get } from 'lodash';
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 
 
 function isScriptedRange(filter) {

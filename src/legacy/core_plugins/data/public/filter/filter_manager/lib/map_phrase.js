@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 
 function isScriptedPhrase(filter) {
   const value = _.get(filter, ['script', 'script', 'params', 'value']);
