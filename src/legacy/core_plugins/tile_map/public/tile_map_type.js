@@ -27,7 +27,7 @@ import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 
