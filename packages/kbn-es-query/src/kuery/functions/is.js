@@ -24,7 +24,6 @@ import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
-import { nodeTypes } from '../node_types';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -42,12 +41,13 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
+export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
-  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
+  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
-  if (fieldNameArg.value === null) {
+  if (fullFieldNameArg.value === null) {
     if (valueArg.type === 'wildcard') {
       return {
         query_string: {
@@ -65,7 +65,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
     };
   }
 
-  const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
+  const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
   // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
@@ -73,14 +73,14 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toElasticsearchQuery(fieldNameArg),
+      name: ast.toElasticsearchQuery(fullFieldNameArg),
       scripted: false,
     });
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
-    (fieldNameArg.type === 'wildcard' && fieldName === '*')
+    (fullFieldNameArg.type === 'wildcard' && fieldName === '*')
     || (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
@@ -146,11 +146,5 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
       minimum_should_match: 1
     }
   };
-}
-
-export function getTargetFields(node) {
-  const [ fieldNameArg ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  return [fieldName];
 }
 

@@ -62,14 +62,14 @@ SubQuery
   / NestedQuery
 
 NestedQuery
-  = '{' Space* query:OrQuery trailing:OptionalSpace '}' {
+  = field:Field':{' Space* query:OrQuery trailing:OptionalSpace '}' {
       if (trailing.type === 'cursor') {
         return {
           ...trailing,
           suggestionTypes: ['conjunction']
         };
       }
-      return buildFunctionNode('nested', [query]);
+      return buildFunctionNode('nested', [field, query]);
     }
     / Expression
 

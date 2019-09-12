@@ -25,23 +25,15 @@ export function buildNodeParams(children) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config) {
+export function toElasticsearchQuery(node, indexPattern, config, context) {
   const children = node.arguments || [];
 
   return {
     bool: {
       should: children.map((child) => {
-        return ast.toElasticsearchQuery(child, indexPattern, config);
+        return ast.toElasticsearchQuery(child, indexPattern, config, context);
       }),
       minimum_should_match: 1,
     },
   };
-}
-
-export function getTargetFields(node) {
-  const children = node.arguments || [];
-
-  return children.reduce((acc, child) => {
-    return [...acc, ...ast.getTargetFields(child)];
-  }, []);
 }

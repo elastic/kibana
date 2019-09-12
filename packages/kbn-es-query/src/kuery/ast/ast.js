@@ -63,12 +63,12 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
  * IndexPattern isn't required, but if you pass one in, we can be more intelligent
  * about how we craft the queries (e.g. scripted fields)
  */
-export function toElasticsearchQuery(node, indexPattern, config = {}) {
+export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
   }
 
-  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, config);
+  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, config, context);
 }
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
@@ -78,12 +78,4 @@ export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
   } catch (e) {
     return (e.message.startsWith('Lucene'));
   }
-}
-
-export function getTargetFields(node) {
-  if (!node || !node.type || !nodeTypes[node.type]) {
-    throw new Error('Unknown node type');
-  }
-
-  return nodeTypes[node.type].getTargetFields(node);
 }

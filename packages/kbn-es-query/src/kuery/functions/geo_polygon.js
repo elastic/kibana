@@ -33,12 +33,13 @@ export function buildNodeParams(fieldName, points) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
   const [ fieldNameArg, ...points ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = {
-    points: points.map(ast.toElasticsearchQuery)
+    points: points.map((point) => { ast.toElasticsearchQuery(point, indexPattern, config, context); })
   };
 
   if (field && field.scripted) {
@@ -51,10 +52,4 @@ export function toElasticsearchQuery(node, indexPattern) {
       ignore_unmapped: true,
     },
   };
-}
-
-export function getTargetFields(node) {
-  const [ fieldNameArg ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  return [fieldName];
 }

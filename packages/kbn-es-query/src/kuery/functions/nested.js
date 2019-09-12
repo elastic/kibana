@@ -18,62 +18,27 @@
  */
 
 import * as ast from '../ast';
-import { uniq } from 'lodash';
 
-export function buildNodeParams(child) {
+export function buildNodeParams(path, child) {
   return {
-    arguments: [child],
+    arguments: [path, child],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config) {
+export function toElasticsearchQuery(node, indexPattern, config, context = {}) {
   if (!indexPattern) {
     throw new Error('Cannot use nested queries without an index pattern');
   }
 
-  const [child] = node.arguments;
-
-  const targetSubFields = ast.getTargetFields(child);
-  const indexPatternFields = indexPattern.fields.filter(field => targetSubFields.includes(field.name));
-  const parentFields = uniq(indexPatternFields.map(field => field.parent));
-
-  if (parentFields.length > 1) {
-    throw new Error('nested query cannot target more than one path');
-  }
-  if (parentFields.length === 0) {
-    throw new Error('nested query does not contain a nested field');
-  }
-
-  const parentField = indexPattern.fields.find(field => field.name === parentFields[0]);
+  const [path, child] = node.arguments;
+  const stringPath = ast.toElasticsearchQuery(path);
+  const fullPath = context.nested && context.nested.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {
     nested: {
-      path: generatePath(parentField, indexPattern),
-      query: ast.toElasticsearchQuery(child, indexPattern, config),
+      path: fullPath,
+      query: ast.toElasticsearchQuery(child, indexPattern, config, { ...context, nested: { path: fullPath } }),
       score_mode: 'none',
     },
   };
-}
-
-export function getTargetFields(node, indexPattern) {
-  const [child] = node.arguments;
-  const targetSubFields = ast.getTargetFields(child);
-  const indexPatternFields = indexPattern.fields.filter(field => targetSubFields.includes(field.name));
-  const parentFields = uniq(indexPatternFields.map(field => field.parent));
-
-  if (parentFields.length > 1) {
-    throw new Error('nested query cannot target more than one path');
-  }
-
-  return parentFields.length > 0 ? [parentFields[0]] : [];
-}
-
-function generatePath(field, indexPattern) {
-  if (!field.subType || field.subType !== 'nested') {
-    return field.name;
-  }
-
-  const parent = indexPattern.fields.find(indexPatternField => indexPatternField.name === field.parent);
-
-  return `${generatePath(parent)}.${field.name}}`;
 }
