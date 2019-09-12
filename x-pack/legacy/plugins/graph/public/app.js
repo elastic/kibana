@@ -260,6 +260,11 @@ app.controller('graphuiPlugin', function (
 
   $scope.reduxDispatch = (action) => {
     store.dispatch(action);
+
+    // patch updated icons and fields on the nodes in the workspace state
+    // this workaround is necessary because the nodes are still managed by
+    // angular - once they are moved over to redux, this can be handled in
+    // the reducer
     if (action.type === 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES' &&
         action.payload.fieldProperties.color && $scope.workspace) {
       $scope.workspace.nodes.forEach(function (node) {
