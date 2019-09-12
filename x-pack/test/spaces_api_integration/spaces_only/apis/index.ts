@@ -9,7 +9,7 @@ import { TestInvoker } from '../../common/lib/types';
 // eslint-disable-next-line import/no-default-export
 export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
   describe('spaces api without security', function() {
-    this.tags('ciGroup6');
+    this.tags('ciGroup2');
 
     loadTestFile(require.resolve('./copy_to_space'));
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));

@@ -16,3 +16,5 @@ export enum CONSTANTS {
   timelineId = 'timelineId',
   unknown = 'unknown',
 }
+
+export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
