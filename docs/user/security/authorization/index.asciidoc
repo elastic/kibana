@@ -19,7 +19,7 @@ To create a role that grants {kib} privileges, go to **Management -> Security ->
 To assign {kib} privileges to the role, click **Add space privilege** in the Kibana section.
 
 [role="screenshot"]
-image::security/images/add-space-privileges.png[Add space privileges]
+image::user/security/images/add-space-privileges.png[Add space privileges]
 
 Open the **Spaces** selection control to specify whether to grant the role access to all spaces *** Global (all spaces)** or one or more individual spaces. If you select *** Global (all spaces)**, you can’t select individual spaces until you clear your selection.
 
@@ -36,7 +36,7 @@ To apply your changes, click **Create space privilege**. The space privilege sho
 
 
 [role="screenshot"]
-image::security/images/create-space-privilege.png[Create space privilege]
+image::user/security/images/create-space-privilege.png[Create space privilege]
 
 ==== Assigning different privileges to different spaces
 
@@ -50,7 +50,7 @@ Additionally, if you’ve already assigned privileges at *** Global (all spaces)
 To view a summary of the privileges granted, click **View privilege summary**.
 
 [role="screenshot"]
-image::security/images/view-privilege-summary.png[View privilege summary]
+image::user/security/images/view-privilege-summary.png[View privilege summary]
 
 ==== Example 1: Grant all access to Dashboard at an individual space
 
@@ -61,7 +61,7 @@ image::security/images/view-privilege-summary.png[View privilege summary]
 . Click **Create space privilege**.
 
 [role="screenshot"]
-image::security/images/privilege-example-1.png[Privilege example 1]
+image::user/security/images/privilege-example-1.png[Privilege example 1]
 
 ==== Example 2: Grant all access to one space and read access to another
 
@@ -75,7 +75,7 @@ image::security/images/privilege-example-1.png[Privilege example 1]
 . Click **Create space privilege**.
 
 [role="screenshot"]
-image::security/images/privilege-example-2.png[Privilege example 2]
+image::user/security/images/privilege-example-2.png[Privilege example 2]
 
 ==== Example 3: Grant read access to all spaces and write access to an individual space
 
@@ -89,5 +89,5 @@ image::security/images/privilege-example-2.png[Privilege example 2]
 . Click **Create space privilege**.
 
 [role="screenshot"]
-image::security/images/privilege-example-3.png[Privilege example 3]
+image::user/security/images/privilege-example-3.png[Privilege example 3]
 
