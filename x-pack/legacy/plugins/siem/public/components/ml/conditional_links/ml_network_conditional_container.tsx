@@ -80,7 +80,12 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         }
       }}
     />
-    <Redirect from="/ml-network/" to="/ml-network" />
+    <Route
+      path="/ml-network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-network/" to={`/ml-network${search}`} />
+      )}
+    />
   </Switch>
 ));
 
