@@ -92,7 +92,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should schedule task, run alert and fire actions when appropriate', async () => {
+        it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const reference = `create-test-1:${user.username}`;
           const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
@@ -496,13 +496,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts fired 3 times to ensure actions had a chance to fire twice
+              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const firedActionsResult = await searchTestIndexDocs(
+              const executedActionsResult = await searchTestIndexDocs(
                 'action:test.index-record',
                 reference
               );
-              expect(firedActionsResult.hits.total.value).to.eql(1);
+              expect(executedActionsResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -524,7 +524,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 alertTypeParams: {
                   index: esTestIndexName,
                   reference,
-                  groupsToFireInSeries: ['default', 'other'],
+                  groupsToScheduleActionsInSeries: ['default', 'other'],
                 },
                 actions: [
                   {
@@ -562,14 +562,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts fired 3 times to ensure actions had a chance to fire twice
+              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const firedActionsResult = await searchTestIndexDocs(
+              const executedActionsResult = await searchTestIndexDocs(
                 'action:test.index-record',
                 reference
               );
-              expect(firedActionsResult.hits.total.value).to.eql(2);
-              const messages: string[] = firedActionsResult.hits.hits.map(
+              expect(executedActionsResult.hits.total.value).to.eql(2);
+              const messages: string[] = executedActionsResult.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
@@ -594,7 +594,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 alertTypeParams: {
                   index: esTestIndexName,
                   reference,
-                  groupsToFireInSeries: ['default', null, 'default'],
+                  groupsToScheduleActionsInSeries: ['default', null, 'default'],
                 },
                 actions: [
                   {
@@ -623,13 +623,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts executed 4 times to ensure actions had a chance to fire twice
+              // Wait until alerts scheduled actions 4 times to ensure actions had a chance to execute twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 4);
-              const firedActionsResult = await searchTestIndexDocs(
+              const executedActionsResult = await searchTestIndexDocs(
                 'action:test.index-record',
                 reference
               );
-              expect(firedActionsResult.hits.total.value).to.eql(2);
+              expect(executedActionsResult.hits.total.value).to.eql(2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

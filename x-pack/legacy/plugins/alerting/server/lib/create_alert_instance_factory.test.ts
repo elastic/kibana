@@ -30,7 +30,7 @@ test('creates new instances for ones not passed in', () => {
 test('reuses existing instances', () => {
   const alertInstance = new AlertInstance({
     state: { foo: true },
-    meta: { lastFired: { group: 'default', date: new Date() } },
+    meta: { lastScheduleActions: { group: 'default', date: new Date() } },
   });
   const alertInstanceFactory = createAlertInstanceFactory({
     '1': alertInstance,
@@ -39,7 +39,7 @@ test('reuses existing instances', () => {
   expect(result).toMatchInlineSnapshot(`
     Object {
       "meta": Object {
-        "lastFired": Object {
+        "lastScheduleActions": Object {
           "date": 1970-01-01T00:00:00.000Z,
           "group": "default",
         },

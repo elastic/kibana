@@ -8,13 +8,13 @@ import { State, Context } from '../types';
 import { parseDuration } from './parse_duration';
 
 interface Meta {
-  lastFired?: {
+  lastScheduleActions?: {
     group: string;
     date: Date;
   };
 }
 
-interface FireOptions {
+interface ScheduledExecutionOptions {
   actionGroup: string;
   context: Context;
   state: State;
@@ -26,7 +26,7 @@ interface ConstructorOptions {
 }
 
 export class AlertInstance {
-  private fireOptions?: FireOptions;
+  private scheduledExecutionOptions?: ScheduledExecutionOptions;
   private meta: Meta;
   private state: State;
 
@@ -35,19 +35,19 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  shouldFire(throttle?: string) {
-    // Fire function wasn't called
-    if (this.fireOptions === undefined) {
+  hasScheduledActions(throttle?: string) {
+    // scheduleActions function wasn't called
+    if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
-    // Shouldn't fire if still within throttling window
+    // Shouldn't schedule actions if still within throttling window
     // Reset if actionGroup changes
     const throttleMills = throttle ? parseDuration(throttle) : 0;
-    const actionGroup = this.fireOptions.actionGroup;
+    const actionGroup = this.scheduledExecutionOptions.actionGroup;
     if (
-      this.meta.lastFired &&
-      this.meta.lastFired.group === actionGroup &&
-      new Date(this.meta.lastFired.date).getTime() + throttleMills > Date.now()
+      this.meta.lastScheduleActions &&
+      this.meta.lastScheduleActions.group === actionGroup &&
+      new Date(this.meta.lastScheduleActions.date).getTime() + throttleMills > Date.now()
     ) {
       return false;
     }
@@ -55,16 +55,16 @@ export class AlertInstance {
   }
 
   isResolved(throttle?: string) {
-    // At this time we'll consider instances that didn't fire as resolved
-    return !this.shouldFire(throttle);
+    // At this time we'll consider instances that didn't schedule actions as resolved
+    return !this.hasScheduledActions(throttle);
   }
 
-  getFireOptions() {
-    return this.fireOptions;
+  getSechduledActionOptions() {
+    return this.scheduledExecutionOptions;
   }
 
-  resetFire() {
-    this.fireOptions = undefined;
+  unscheduleActions() {
+    this.scheduledExecutionOptions = undefined;
     return this;
   }
 
@@ -72,11 +72,11 @@ export class AlertInstance {
     return this.state;
   }
 
-  fire(actionGroup: string, context: Context = {}) {
-    if (this.shouldFire()) {
-      throw new Error('Alert instance already fired, cannot fire twice');
+  scheduleActions(actionGroup: string, context: Context = {}) {
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.fireOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
@@ -85,8 +85,8 @@ export class AlertInstance {
     return this;
   }
 
-  updateLastFired(group: string) {
-    this.meta.lastFired = { group, date: new Date() };
+  updateLastScheduleActions(group: string) {
+    this.meta.lastScheduleActions = { group, date: new Date() };
   }
 
   /**

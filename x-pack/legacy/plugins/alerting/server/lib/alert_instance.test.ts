@@ -15,81 +15,81 @@ beforeAll(() => {
 beforeEach(() => clock.reset());
 afterAll(() => clock.restore());
 
-describe('shouldFire()', () => {
+describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
   test(`should throttle when group didn't change and throttle period is still active`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     clock.tick(30000);
-    alertInstance.fire('default');
-    expect(alertInstance.shouldFire('1m')).toEqual(false);
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.hasScheduledActions('1m')).toEqual(false);
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     clock.tick(30000);
-    alertInstance.fire('default');
-    expect(alertInstance.shouldFire('15s')).toEqual(true);
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.hasScheduledActions('15s')).toEqual(true);
   });
 
   test(`shouldn't throttle when group changes`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     clock.tick(5000);
-    alertInstance.fire('other-group');
-    expect(alertInstance.shouldFire('1m')).toEqual(true);
+    alertInstance.scheduleActions('other-group');
+    expect(alertInstance.hasScheduledActions('1m')).toEqual(true);
   });
 });
 
-describe('getFireOptions()', () => {
+describe('getSechduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
   });
 });
 
-describe('resetFire()', () => {
-  test('makes shouldFire() return false', () => {
+describe('unscheduleActions()', () => {
+  test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.shouldFire()).toEqual(true);
-    alertInstance.resetFire();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
+    alertInstance.unscheduleActions();
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
-  test('makes getFireOptions() return undefined', () => {
+  test('makes getSechduledActionOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.getSechduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: {},
       state: {},
     });
-    alertInstance.resetFire();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    alertInstance.unscheduleActions();
+    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -101,66 +101,68 @@ describe('getState()', () => {
   });
 });
 
-describe('fire()', () => {
-  test('makes shouldFire() return true', () => {
+describe('scheduleActions()', () => {
+  test('makes hasScheduledActions() return true', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.shouldFire()).toEqual(true);
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
   });
 
-  test('makes shouldFire() return false when throttled', () => {
+  test('makes hasScheduledActions() return false when throttled', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.shouldFire('1m')).toEqual(false);
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.hasScheduledActions('1m')).toEqual(false);
   });
 
-  test('make shouldFire() return true when throttled expired', () => {
+  test('make hasScheduledActions() return true when throttled expired', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     clock.tick(120000);
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.shouldFire('1m')).toEqual(true);
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.hasScheduledActions('1m')).toEqual(true);
   });
 
-  test('makes getFireOptions() return given options', () => {
+  test('makes getSechduledActionOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.getSechduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },
       state: { otherField: true },
     });
   });
 
-  test('cannot fire twice', () => {
+  test('cannot schdule for execution twice', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default', { field: true });
+    alertInstance.scheduleActions('default', { field: true });
     expect(() =>
-      alertInstance.fire('default', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(`"Alert instance already fired, cannot fire twice"`);
+      alertInstance.scheduleActions('default', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
+    );
   });
 });
 
@@ -174,14 +176,14 @@ describe('replaceState()', () => {
   });
 });
 
-describe('updateLastFired()', () => {
-  test('replaces previous lastFired', () => {
+describe('updateLastScheduleActions()', () => {
+  test('replaces previous lastScheduleActions', () => {
     const alertInstance = new AlertInstance({ meta: {} });
-    alertInstance.updateLastFired('default');
+    alertInstance.updateLastScheduleActions('default');
     expect(alertInstance.toJSON()).toEqual({
       state: {},
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
@@ -195,14 +197,14 @@ describe('toJSON', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastFired":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
+      '{"state":{"foo":true},"meta":{"lastScheduleActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
     );
   });
 });
@@ -216,20 +218,20 @@ describe('isResolved', () => {
     expect(alertInstance.isResolved()).toEqual(true);
   });
 
-  test('returns false when fired', () => {
+  test('returns false when scheduling actions', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {},
     });
-    alertInstance.fire('default');
+    alertInstance.scheduleActions('default');
     expect(alertInstance.isResolved()).toEqual(false);
   });
 
-  test(`returns true when some groups are still throttled but didn't fire`, () => {
+  test(`returns true when some groups are still throttled but didn't schedule actions`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },
@@ -238,11 +240,11 @@ describe('isResolved', () => {
     expect(alertInstance.isResolved('1m')).toEqual(true);
   });
 
-  test(`returns true when throttle is expired and didn't fire`, () => {
+  test(`returns true when throttle is expired and didn't schedule actions`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastFired: {
+        lastScheduleActions: {
           date: new Date(),
           group: 'default',
         },

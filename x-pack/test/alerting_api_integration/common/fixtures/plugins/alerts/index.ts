@@ -171,16 +171,16 @@ export default function(kibana: any) {
         async executor({ services, params, state }: AlertExecutorOptions) {
           let group = 'default';
 
-          if (params.groupsToFireInSeries) {
+          if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
-            group = params.groupsToFireInSeries[index];
+            group = params.groupsToScheduleActionsInSeries[index];
           }
 
           if (group) {
             services
               .alertInstanceFactory('1')
               .replaceState({ instanceStateValue: true })
-              .fire(group, {
+              .scheduleActions(group, {
                 instanceContextValue: true,
               });
           }

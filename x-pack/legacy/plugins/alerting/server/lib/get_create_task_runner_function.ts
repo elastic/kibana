@@ -6,7 +6,7 @@
 
 import { ActionsPlugin } from '../../../actions';
 import { ConcreteTaskInstance } from '../../../task_manager';
-import { createFireHandler } from './create_fire_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
@@ -95,7 +95,7 @@ export function getCreateTaskRunnerFunction({
           };
         });
 
-        const fireHandler = createFireHandler({
+        const executionHandler = createExecutionHandler({
           executeAction,
           apiKey,
           actions: actionsWithIds,
@@ -132,11 +132,11 @@ export function getCreateTaskRunnerFunction({
               return;
             }
 
-            if (alertInstance.shouldFire(throttle)) {
-              const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-              alertInstance.updateLastFired(actionGroup);
-              alertInstance.resetFire();
-              return fireHandler(actionGroup, context, state);
+            if (alertInstance.hasScheduledActions(throttle)) {
+              const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
+              alertInstance.updateLastScheduleActions(actionGroup);
+              alertInstance.unscheduleActions();
+              return executionHandler(actionGroup, context, state);
             }
           })
         );

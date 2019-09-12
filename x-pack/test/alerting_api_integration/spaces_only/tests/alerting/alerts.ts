@@ -88,7 +88,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       return createdAction;
     }
 
-    it('should schedule task, run alert and fire actions', async () => {
+    it('should schedule task, run alert and schedule actions', async () => {
       const reference = `create-test-1:${Spaces.space1.id}`;
       const createdAction = await createIndexRecordAction(Spaces.space1.id);
 
