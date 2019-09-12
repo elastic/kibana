@@ -51,7 +51,7 @@ export interface DataExpressionsStart {
 }
 
 export class ExpressionsPlugin
-  implements Plugin<ExpressionsSetup, ExpressionsStart, xpressionsPluginSetupDependencies> {
+  implements Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsPluginSetupDependencies> {
   // Exposed services, sorted alphabetically
   private readonly expressions: ExpressionsService = new ExpressionsService();
 
