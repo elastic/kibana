@@ -54,7 +54,10 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
           fold(throwErrors(Boom.badImplementation), identity)
         );
       } catch (error) {
-        throw Boom.boomify(error);
+        if (error instanceof Error) {
+          throw Boom.boomify(error);
+        }
+        throw Boom.badImplementation('Recieved a non Error object.');
       }
     },
   });
