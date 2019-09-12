@@ -26,6 +26,9 @@ import init from '../app';
 import { getEndpointFromPosition } from '../autocomplete';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
+// progress bar
+import { showProgressBar } from '../helpers/show_progress_bar';
+
 // welcome message
 import { showWelcomePanel } from '../helpers/welcome_show_panel';
 import storage from '../storage';
@@ -76,6 +79,8 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
 
     // expose method for React Consumption
     $scope.getRequestsAsCURL = input.getRequestsAsCURL;
+
+    showProgressBar();
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {
