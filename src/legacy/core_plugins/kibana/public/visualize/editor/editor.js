@@ -187,10 +187,11 @@ function VisEditor(
       }
     },
     run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate, newDescription }) => {
         const currentTitle = savedVis.title;
         savedVis.title = newTitle;
         savedVis.copyOnSave = newCopyOnSave;
+        savedVis.description = newDescription;
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -220,6 +221,7 @@ function VisEditor(
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
           confirmButtonLabel={confirmButtonLabel}
+          description={savedVis.description}
         />);
       showSaveModal(saveModal);
     }
