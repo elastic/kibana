@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('token-based auth', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./login'));
     loadTestFile(require.resolve('./logout'));
     loadTestFile(require.resolve('./header'));
