@@ -80,7 +80,6 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
       </EuiFlexGroup>
 
       <SwitchOption
-        disabled={!chart.drawLinesBetweenPoints}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showDotsLabel', {
           defaultMessage: 'Show dots',
         })}
