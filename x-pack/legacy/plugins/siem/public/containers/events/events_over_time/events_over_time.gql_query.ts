@@ -24,7 +24,6 @@ export const EventsOverTimeGqlQuery = gql`
         eventsOverTime {
           x
           y
-          g
         }
         totalCount
         inspect @include(if: $inspect) {

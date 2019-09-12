@@ -5526,7 +5526,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "EventsOverTimeHistogramData",
+                    "name": "MatrixOverTimeHistogramData",
                     "ofType": null
                   }
                 }
@@ -5555,7 +5555,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EventsOverTimeHistogramData",
+        "name": "MatrixOverTimeHistogramData",
         "description": "",
         "fields": [
           {
@@ -5578,18 +5578,6 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "g",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null

@@ -68,14 +68,14 @@ export const eventsSchema = gql`
     network
   }
 
-  type EventsOverTimeHistogramData {
+  type MatrixOverTimeHistogramData {
     x: Float!
     y: Float!
-    g: String!
   }
+
   type EventsOverTimeData {
     inspect: Inspect
-    eventsOverTime: [EventsOverTimeHistogramData!]!
+    eventsOverTime: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 

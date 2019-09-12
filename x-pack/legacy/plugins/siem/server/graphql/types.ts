@@ -881,17 +881,15 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Inspect | null;
 
-  eventsOverTime: EventsOverTimeHistogramData[];
+  eventsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
 
-export interface EventsOverTimeHistogramData {
+export interface MatrixOverTimeHistogramData {
   x: number;
 
   y: number;
-
-  g: string;
 }
 
 export interface HostsData {
@@ -5248,7 +5246,7 @@ export namespace EventsOverTimeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeData> {
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
 
-    eventsOverTime?: EventsOverTimeResolver<EventsOverTimeHistogramData[], TypeParent, Context>;
+    eventsOverTime?: EventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
   }
@@ -5259,7 +5257,7 @@ export namespace EventsOverTimeDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EventsOverTimeResolver<
-    R = EventsOverTimeHistogramData[],
+    R = MatrixOverTimeHistogramData[],
     Parent = EventsOverTimeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5270,28 +5268,21 @@ export namespace EventsOverTimeDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace EventsOverTimeHistogramDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeHistogramData> {
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
     x?: XResolver<number, TypeParent, Context>;
 
     y?: YResolver<number, TypeParent, Context>;
-
-    g?: GResolver<string, TypeParent, Context>;
   }
 
   export type XResolver<
     R = number,
-    Parent = EventsOverTimeHistogramData,
+    Parent = MatrixOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type YResolver<
     R = number,
-    Parent = EventsOverTimeHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type GResolver<
-    R = string,
-    Parent = EventsOverTimeHistogramData,
+    Parent = MatrixOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

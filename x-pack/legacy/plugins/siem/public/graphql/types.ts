@@ -852,17 +852,15 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Inspect | null;
 
-  eventsOverTime: EventsOverTimeHistogramData[];
+  eventsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
 
-export interface EventsOverTimeHistogramData {
+export interface MatrixOverTimeHistogramData {
   x: number;
 
   y: number;
-
-  g: string;
 }
 
 export interface HostsData {
@@ -2475,13 +2473,11 @@ export namespace GetEventsOverTimeQuery {
   };
 
   export type _EventsOverTime = {
-    __typename?: 'EventsOverTimeHistogramData';
+    __typename?: 'MatrixOverTimeHistogramData';
 
     x: number;
 
     y: number;
-
-    g: string;
   };
 
   export type Inspect = {

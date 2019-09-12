@@ -52,7 +52,7 @@ import {
 } from './types';
 import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-import { EventsOverTimeHistogramData } from '../../../public/graphql/types';
+import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -162,12 +162,11 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 
 export const formatEventsOverTimeData = (
   data: EventsOverTimeHistogram[]
-): EventsOverTimeHistogramData[] => {
+): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
-    ? data.map<EventsOverTimeHistogramData>(({ key, doc_count }) => ({
+    ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
         x: key,
         y: doc_count,
-        g: 'eventsOverTime',
       }))
     : [];
 };
