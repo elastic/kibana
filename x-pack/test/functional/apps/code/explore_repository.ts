@@ -32,7 +32,7 @@ export default function exploreRepositoryFunctionalTests({
   describe.skip('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
       before(async () => {
         // Navigate to the code app.
