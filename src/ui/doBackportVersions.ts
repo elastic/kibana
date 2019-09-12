@@ -17,7 +17,7 @@ import { confirmPrompt } from '../services/prompts';
 import { createPullRequest } from '../services/github/createPullRequest';
 import { getRepoPath } from '../services/env';
 import { getShortSha } from '../services/github/commitFormatters';
-import { log } from '../services/logger';
+import { consoleLog, logger } from '../services/logger';
 import { exec } from '../services/child-process-promisified';
 
 export function doBackportVersions(
@@ -29,7 +29,7 @@ export function doBackportVersions(
     try {
       await doBackportVersion(options, { commits, baseBranch });
     } catch (e) {
-      if (e.name === 'HandledError') {
+      if (e instanceof HandledError) {
         console.error(e.message);
       } else {
         console.error(e);
@@ -53,7 +53,7 @@ export async function doBackportVersion(
   const commitMessages = commits
     .map(commit => ` - ${commit.message}`)
     .join('\n');
-  log(
+  consoleLog(
     `\n${chalk.bold(
       `Backporting the following commits to ${baseBranch}:`
     )}\n${commitMessages}\n`
@@ -119,10 +119,10 @@ async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
   } catch (e) {
     const repoPath = getRepoPath(options);
     spinner.fail(`Cherry-picking failed.\n`);
-    log(
+    consoleLog(
       `Please resolve conflicts in: ${repoPath} and when all conflicts have been resolved and staged run:`
     );
-    log(`\ngit cherry-pick --continue\n`);
+    consoleLog(`\ngit cherry-pick --continue\n`);
     if (options.editor) {
       await exec(`${options.editor} ${repoPath}`);
     }
@@ -191,13 +191,16 @@ async function withSpinner<T>(
   { text }: { text: string },
   fn: (spinner: ora.Ora) => Promise<T>
 ): Promise<T> {
+  logger.info(text);
   const spinner = ora(text).start();
 
   try {
     const res = await fn(spinner);
     spinner.succeed();
+
     return res;
   } catch (e) {
+    logger.info(e.message);
     spinner.fail();
     throw e;
   }

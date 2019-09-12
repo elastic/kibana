@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`run through steps exec should be called with correct args 1`] = `
+exports[`runWithOptions exec should be called with correct args 1`] = `
 Array [
   Array [
     "git remote rm origin",
@@ -59,7 +59,7 @@ Array [
 ]
 `;
 
-exports[`run through steps git clone should be called with correct args 1`] = `
+exports[`runWithOptions git clone should be called with correct args 1`] = `
 Array [
   Array [
     "git clone https://myAccessToken@github.com/elastic/kibana.git --progress",
@@ -72,7 +72,7 @@ Array [
 ]
 `;
 
-exports[`run through steps prompt calls should match snapshot 1`] = `
+exports[`runWithOptions prompt calls should match snapshot 1`] = `
 Array [
   Array [
     Array [

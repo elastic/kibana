@@ -1,14 +1,14 @@
 import axios from 'axios';
 import inquirer from 'inquirer';
-import * as createPullRequest from '../services/github/createPullRequest';
-import * as fetchCommitsByAuthor from '../services/github/fetchCommitsByAuthor';
-import * as fs from '../services/fs-promisified';
-import { BackportOptions } from '../options/options';
-import { commitsWithPullRequestsMock } from '../services/github/mocks/commitsByAuthorMock';
-import { initSteps } from './steps';
-import * as childProcess from '../services/child-process-promisified';
+import * as createPullRequest from './services/github/createPullRequest';
+import * as fetchCommitsByAuthor from './services/github/fetchCommitsByAuthor';
+import * as fs from './services/fs-promisified';
+import { BackportOptions } from './options/options';
+import { commitsWithPullRequestsMock } from './services/github/mocks/commitsByAuthorMock';
+import { runWithOptions } from './runWithOptions';
+import * as childProcess from './services/child-process-promisified';
 
-describe('run through steps', () => {
+describe('runWithOptions', () => {
   let rpcExecMock: jest.SpyInstance;
   let rpcExecOriginalMock: jest.SpyInstance;
   let inquirerPromptMock: jest.SpyInstance;
@@ -48,7 +48,8 @@ describe('run through steps', () => {
       repoOwner: 'elastic',
       resetAuthor: false,
       sha: undefined,
-      username: 'sqren'
+      username: 'sqren',
+      verbose: false
     };
 
     rpcExecMock = (childProcess.exec as any) as jest.SpyInstance;
@@ -101,7 +102,7 @@ describe('run through steps', () => {
         }
       } as any);
 
-    await initSteps(options);
+    await runWithOptions(options);
   });
 
   it('should check whether access token is valid', () => {

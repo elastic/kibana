@@ -49,7 +49,8 @@ describe('getOptionsFromCliArgs', () => {
       resetAuthor: false,
       sha: undefined,
       upstream: 'sqren/backport-demo',
-      username: 'sqren'
+      username: 'sqren',
+      verbose: false
     });
   });
 

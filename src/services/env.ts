@@ -2,6 +2,10 @@ import { homedir } from 'os';
 import path from 'path';
 import { BackportOptions } from '../options/options';
 
+export function getLogfilePath() {
+  return path.join(homedir(), '.backport', 'backport.log');
+}
+
 export function getGlobalConfigPath() {
   return path.join(homedir(), '.backport', 'config.json');
 }

@@ -64,6 +64,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
+    "@types/yargs-parser": "^13.1.0",
     "axios": "^0.19.0",
     "del": "^5.1.0",
     "find-up": "^4.1.0",
@@ -75,36 +76,33 @@
     "make-dir": "^3.0.0",
     "ora": "^3.4.0",
     "strip-json-comments": "^3.0.1",
+    "winston": "^3.2.1",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
     "@types/core-js": "^2.5.2",
-    "@types/find-up": "^4.0.0",
     "@types/inquirer": "^6.5.0",
     "@types/jest": "^24.0.18",
-    "@types/lodash": "^4.14.137",
+    "@types/lodash": "^4.14.138",
     "@types/lodash.flatten": "^4.4.6",
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.isempty": "^4.4.6",
     "@types/lodash.isstring": "^4.0.6",
-    "@types/nock": "^10.0.3",
     "@types/node": "^10.14.16",
-    "@types/strip-json-comments": "^3.0.0",
     "@types/yargs": "^13.0.2",
-    "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
-    "eslint": "^6.2.2",
-    "eslint-config-prettier": "^6.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.2.0",
+    "@typescript-eslint/parser": "^2.2.0",
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.3.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.0",
-    "husky": "^3.0.4",
+    "husky": "^3.0.5",
     "jest": "^24.9.0",
-    "lint-staged": "^9.2.4",
+    "lint-staged": "^9.2.5",
     "lodash": "^4.17.15",
-    "nock": "^10.0.6",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.6.3"
   }
 }

@@ -142,7 +142,7 @@ myPrSuffix`
 
   describe('when cherry-picking fails', () => {
     function didResolveConflict(didResolve: boolean) {
-      const logSpy = jest.spyOn(logger, 'log');
+      const logSpy = jest.spyOn(logger, 'consoleLog');
 
       const execSpy = ((exec as any) as jest.SpyInstance).mockImplementation(
         async (cmd: string) => {

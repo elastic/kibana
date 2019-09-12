@@ -23,7 +23,8 @@ const validOptions: OptionsFromCliArgs = {
   resetAuthor: false,
   sha: undefined,
   upstream: 'elastic/kibana',
-  username: 'sqren'
+  username: 'sqren',
+  verbose: false
 };
 
 describe('validateRequiredOptions', () => {

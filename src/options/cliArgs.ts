@@ -7,11 +7,10 @@ export function getOptionsFromCliArgs(
   argv: string[]
 ) {
   const cliArgs = yargs(argv)
-    // TODO: remove `any` downcast as soon as this PR is merged: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38108
     .parserConfiguration({
       'strip-dashed': true,
       'strip-aliased': true
-    } as any)
+    })
     .usage('$0 [args]')
     .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
     .option('accessToken', {
@@ -121,6 +120,11 @@ export function getOptionsFromCliArgs(
       default: configOptions.username,
       description: 'Github username',
       type: 'string'
+    })
+    .option('verbose', {
+      default: false,
+      description: 'Show additional debug information',
+      type: 'boolean'
     })
     .alias('v', 'version')
     .version()

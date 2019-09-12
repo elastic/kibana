@@ -1,6 +1,6 @@
 import { once } from 'lodash';
 import { getOptions } from '../../options/options';
-import { initSteps } from '../../steps/steps';
+import { runWithOptions } from '../../runWithOptions';
 import { REMOTE_ORIGIN_REPO_PATH, REMOTE_FORK_REPO_PATH } from './envConstants';
 import { createSpies } from './createSpies';
 import {
@@ -24,7 +24,7 @@ describe('when a single commit is backported', () => {
       await deleteAndSetupEnvironment();
 
       const options = await getOptions([]);
-      await initSteps(options);
+      await runWithOptions(options);
     })
   );
 
@@ -88,7 +88,7 @@ describe('when a multiple commits are backported', () => {
       await deleteAndSetupEnvironment();
 
       const options = await getOptions([]);
-      await initSteps(options);
+      await runWithOptions(options);
     })
   );
 
@@ -160,7 +160,7 @@ describe('when disabling fork mode', () => {
       await deleteAndSetupEnvironment();
 
       const options = await getOptions(['--fork=false']);
-      await initSteps(options);
+      await runWithOptions(options);
     })
   );
 

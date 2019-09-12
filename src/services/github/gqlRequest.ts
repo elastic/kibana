@@ -1,6 +1,7 @@
 import axios from 'axios';
 import get from 'lodash.get';
 import { HandledError } from '../HandledError';
+import { logger } from '../logger';
 
 interface GithubResponse<DataResponse> {
   data: DataResponse;
@@ -29,6 +30,8 @@ export async function gqlRequest<DataResponse>({
   accessToken: string;
 }) {
   try {
+    logger.verbose(query);
+    logger.verbose(variables as any);
     const { data } = await axios.post<GithubResponse<DataResponse>>(
       `https://${apiHostname}/graphql`,
       { query, variables },
@@ -40,14 +43,17 @@ export async function gqlRequest<DataResponse>({
       }
     );
 
+    logger.verbose(data);
+
     if (data.errors) {
-      throw new HandledError(
-        data.errors.map(error => error.message).join(', ')
-      );
+      const message = data.errors.map(error => error.message).join(', ');
+      throw new HandledError(message);
     }
 
     return data.data;
   } catch (e) {
+    logger.info(e.message);
+    logger.info(e.response);
     const responseError = get(e, 'response.data.errors') as {
       message: string;
     }[];
