@@ -219,7 +219,11 @@ class DraggableWrapperComponent extends React.Component<Props> {
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
                       ) : (
-                        <span data-test-subj="draggable-content">
+                        <span
+                          data-test-subj="draggable-content"
+                          data-test-field={dataProvider.queryMatch.field}
+                          data-test-value={dataProvider.queryMatch.value}
+                        >
                           {render(dataProvider, provided, snapshot)}
                         </span>
                       )}

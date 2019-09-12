@@ -15,10 +15,12 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
-
   cy.visit(`${Cypress.config().baseUrl}${url}`);
 
   cy.viewport('macbook-15');
 
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
+
+export const waitForTableLoad = () =>
+  cy.get('[data-test-state="paginated-table-false"]', { timeout: DEFAULT_TIMEOUT });

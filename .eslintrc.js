@@ -141,13 +141,13 @@ module.exports = {
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index.ts',
+                  '!src/core/public/selectors.ts',
                   '!src/core/public/mocks.ts',
                   '!src/core/public/*.test.mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index.ts',
+                  '!src/core/server/selectors.ts',
                   '!src/core/server/mocks.ts',
                   '!src/core/server/*.test.mocks.ts',
 
