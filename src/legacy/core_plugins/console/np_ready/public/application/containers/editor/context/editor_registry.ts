@@ -17,39 +17,26 @@
  * under the License.
  */
 
-import { Reducer } from 'react';
+export class EditorRegistry {
+  inputEditor: any;
+  outputEditor: any;
 
-import { instance as registry } from './editor_registry';
-import { ContextValue } from './editor_context';
+  setInputEditor(inputEditor: any) {
+    this.inputEditor = inputEditor;
+  }
 
-export type ActionType =
-  | 'setInputValue'
-  | 'setOutputValue'
-  | 'appendOutputValue'
-  | 'setInputEditor'
-  | 'setOutputEditor';
+  setOutputEditor(outputEditor: any) {
+    this.outputEditor = outputEditor;
+  }
 
-export interface Action {
-  type: ActionType;
-  value?: any;
+  getInputEditor() {
+    return this.inputEditor;
+  }
+
+  getOutputEditor() {
+    return this.outputEditor;
+  }
 }
 
-export const reducer: Reducer<ContextValue, Action> = (state, { type, value }) => {
-  const nextState = { ...state };
-
-  if (type === 'setInputEditor') {
-    registry.setInputEditor(value);
-    if (registry.getOutputEditor()) {
-      nextState.editorsReady = true;
-    }
-  }
-
-  if (type === 'setOutputEditor') {
-    registry.setOutputEditor(value);
-    if (registry.getInputEditor()) {
-      nextState.editorsReady = true;
-    }
-  }
-
-  return nextState;
-};
+// Create a single instance of this and use as private state.
+export const instance = new EditorRegistry();

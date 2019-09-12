@@ -33,10 +33,12 @@ import { registerCommands } from './keyboard_shortcuts';
 // @ts-ignore
 import { initializeInput } from '../../../../../../../public/quarantined/src/input';
 import { useEditorActionContext } from '../../context';
+import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 export interface EditorProps {
   sendCurrentRequest?: () => void;
   docLinkVersion: string;
+  preiviousStateLocation?: 'stored' | string;
 }
 
 const abs: CSSProperties = {
@@ -47,9 +49,24 @@ const abs: CSSProperties = {
   right: '0',
 };
 
+// const sendCurrentRequest = useCallback(() => {
+//   inputEditor.focus();
+//   inputEditor.sendCurrentRequestToES(() => {
+//     setPastRequests(history.getHistory());
+//   }, outputEditor);
+// }, [inputEditor, outputEditor]);
+
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
+
 function Component({ docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
   const {
     services: { history, settings },
+    ResizeChecker,
   } = useAppContext();
 
   const dispatch = useEditorActionContext();
@@ -74,9 +91,51 @@ function Component({ docLinkVersion, sendCurrentRequest = () => {} }: EditorProp
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeInput($editor, $actions, history, settings);
 
-    dispatch({ type: 'inputReady' });
+    const previousContent = history.getSavedEditorState();
+    editorInstanceRef.current.update(
+      previousContent != null ? previousContent : DEFAULT_INPUT_VALUE
+    );
+
+    function setupAutosave() {
+      let timer: number;
+      const saveDelay = 500;
+
+      return editorInstanceRef.current.getSession().on('change', function onChange() {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = window.setTimeout(saveCurrentState, saveDelay);
+      });
+    }
+
+    function saveCurrentState() {
+      try {
+        const content = editorInstanceRef.current.getValue();
+        history.updateCurrentState(content);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Ignoring saving error: ' + e);
+      }
+    }
+
+    dispatch({
+      type: 'setInputEditor',
+      value: editorInstanceRef.current,
+    });
 
     setTextArea(editorRef.current!.querySelector('textarea'));
+
+    const unsubscribeResizer = subscribeResizeChecker(
+      ResizeChecker,
+      editorRef.current!,
+      editorInstanceRef.current
+    );
+    const unsubscribeAutoSave = setupAutosave();
+
+    return () => {
+      unsubscribeResizer();
+      unsubscribeAutoSave();
+    };
   }, []);
 
   useEffect(() => {

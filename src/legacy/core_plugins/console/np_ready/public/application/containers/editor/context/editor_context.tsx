@@ -24,11 +24,9 @@ import { Action, reducer } from './reducer';
 export interface ContextValue {
   editorsReady: boolean;
   input: {
-    ready: boolean;
     value: string;
   };
   output: {
-    ready: boolean;
     value: string;
   };
 }
@@ -41,8 +39,8 @@ export interface EditorContextArgs {
 }
 
 const initialValue: ContextValue = {
-  input: { ready: false, value: '' },
-  output: { ready: false, value: '' },
+  input: { value: '' },
+  output: { value: '' },
   editorsReady: false,
 };
 

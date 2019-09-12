@@ -27,7 +27,8 @@ import mappings from '../../../../../public/quarantined/src/mappings';
 import init from '../../../../../public/quarantined/src/app';
 
 import { EditorOutput, Editor, ConsoleHistory } from '../editor';
-import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
+
+// TODO: find out what this is:   $(document.body).removeClass('fouc');
 
 import {
   AutocompleteOptions,
@@ -52,14 +53,10 @@ export function Main() {
   const {
     services: { storage, settings, history },
     docLinkVersion,
-    ResizeChecker,
   } = useAppContext();
 
   const { editorsReady } = useEditorReadContext();
 
-  const [editorReady, setEditorReady] = useState<boolean>(false);
-  const [inputEditor, setInputEditor] = useState<any>(null);
-  const [outputEditor, setOutputEditor] = useState<any>(null);
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
   );
@@ -84,13 +81,6 @@ export function Main() {
 
   const [pastRequests, setPastRequests] = useState<any[]>(() => history.getHistory());
 
-  const sendCurrentRequest = useCallback(() => {
-    inputEditor.focus();
-    inputEditor.sendCurrentRequestToES(() => {
-      setPastRequests(history.getHistory());
-    }, outputEditor);
-  }, [inputEditor, outputEditor]);
-
   const clearHistory = useCallback(() => {
     history.clearHistory();
     setPastRequests(history.getHistory());
@@ -101,7 +91,7 @@ export function Main() {
   }, []);
 
   const renderConsoleHistory = () => {
-    return editorReady ? (
+    return editorsReady ? (
       <ConsoleHistory
         restoreFromHistory={restoreFromHistory}
         clearHistory={clearHistory}
@@ -164,25 +154,11 @@ export function Main() {
 
   useEffect(() => {
     if (editorsReady) {
-      settings.registerOutput(output.editor);
-      settings.registerInput(input.editor);
-      history.setEditor(input.editor);
+      // settings.registerOutput(output.editor);
+      // settings.registerInput(input.editor);
+      // history.setEditor(input.editor);
 
       init(input.editor, output.editor, history);
-
-      const resizerSubscriptions = [
-        subscribeResizeChecker(ResizeChecker, containerRef.current!, input.editor, output.editor),
-        subscribeResizeChecker(ResizeChecker, input.element, input.editor),
-        subscribeResizeChecker(ResizeChecker, output.element, output.editor),
-      ];
-
-      setInputEditor(input.editor);
-      setOutputEditor(output.editor);
-      setEditorReady(true);
-      return () => {
-        resizerSubscriptions.map(done => done());
-        subscription.unsubscribe();
-      };
     }
   }, [editorsReady]);
 
@@ -210,17 +186,13 @@ export function Main() {
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={firstPanelWidth + '%'}
             >
-              <Editor
-                sendCurrentRequest={sendCurrentRequest}
-                onEditorReady={onInputEditorReady}
-                docLinkVersion={docLinkVersion}
-              />
+              <Editor sendCurrentRequest={() => {}} docLinkVersion={docLinkVersion} />
             </Panel>
             <Panel
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
               initialWidth={secondPanelWidth + '%'}
             >
-              <EditorOutput onReady={onOutputEditorReady} />
+              <EditorOutput />
             </Panel>
           </PanelsContainer>
         </EuiFlexItem>

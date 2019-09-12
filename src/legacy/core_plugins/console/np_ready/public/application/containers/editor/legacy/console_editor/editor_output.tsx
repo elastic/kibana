@@ -22,6 +22,8 @@ import $ from 'jquery';
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
 import { useAppContext } from '../../../../context';
+import { useEditorActionContext } from '../../context';
+import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 export interface EditorOutputProps {
   onReady?: (ref: any) => void;
@@ -31,14 +33,22 @@ function Component({ onReady }: EditorOutputProps) {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const {
     services: { settings },
+    ResizeChecker,
   } = useAppContext();
+
+  const dispatch = useEditorActionContext();
 
   useEffect(() => {
     const editor$ = $(editorRef.current!);
     const outputEditor = initializeOutput(editor$, settings);
-    if (onReady) {
-      onReady({ editor: outputEditor, element: editorRef.current! });
-    }
+    outputEditor.update('');
+    const unsubscribe = subscribeResizeChecker(ResizeChecker, editorRef.current!, outputEditor);
+
+    dispatch({ type: 'setOutputEditor', value: outputEditor });
+
+    return () => {
+      unsubscribe();
+    };
   });
 
   return (
