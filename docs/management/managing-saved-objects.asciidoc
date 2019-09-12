@@ -62,7 +62,7 @@ the NDJSON includes related objects. Exported dashboards include their associate
 [float]
 [role="xpack"]
 [[managing-saved-objects-copy-to-space]]
-=== Copy to other {kib} spaces
+=== [xpack]#Copy to other {kib} spaces#
 
 To copy a saved object to another space, click the actions icon image:images/actions_icon.png[Actions icon]
 and select *Copy to space*. From here, you can select the spaces in which to copy the object.
