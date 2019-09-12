@@ -55,7 +55,7 @@ jest.mock('@elastic/eui', () => ({
   EuiCodeEditor: (props: any) => (
     <input
       data-test-subj="mockCodeEditor"
-      onChange={async (syntheticEvent: any) => {
+      onChange={(syntheticEvent: any) => {
         props.onChange(syntheticEvent.jsonString);
       }}
     />
@@ -79,9 +79,9 @@ describe.skip('<TemplateEdit />', () => {
   });
 
   beforeEach(async () => {
-    testBed = await setup();
-
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+
+    testBed = await setup();
 
     // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
@@ -98,31 +98,32 @@ describe.skip('<TemplateEdit />', () => {
     expect(find('pageTitle').text()).toEqual(`Edit template '${name}'`);
   });
 
+  it('should set the nameField to readOnly', () => {
+    const { find } = testBed;
+
+    const nameInput = find('nameField.input');
+    expect(nameInput.props().disabled).toEqual(true);
+  });
+
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions, find } = testBed;
+      const { actions } = testBed;
 
-      // Step 1 (logistics)
-      const nameInput = find('nameInput');
-      expect(nameInput.props().readOnly).toEqual(true);
+      // @ts-ignore (remove when react 16.9.0 is released)
+      await act(async () => {
+        // Complete step 1 (logistics)
+        await actions.completeStepOne({
+          indexPatterns: UPDATED_INDEX_PATTERN,
+        });
 
-      actions.completeStepOne({
-        indexPatterns: UPDATED_INDEX_PATTERN,
-      });
+        // Step 2 (index settings)
+        await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
-      // Step 2 (index settings)
-      actions.completeStepTwo({
-        settings: JSON.stringify(SETTINGS),
-      });
+        // Step 3 (mappings)
+        await actions.completeStepThree(JSON.stringify(MAPPINGS));
 
-      // Step 3 (mappings)
-      actions.completeStepThree({
-        mappings: JSON.stringify(MAPPINGS),
-      });
-
-      // Step 4 (aliases)
-      actions.completeStepFour({
-        aliases: JSON.stringify(ALIASES),
+        // Step 4 (aliases)
+        await actions.completeStepFour(JSON.stringify(ALIASES));
       });
     });
 
@@ -139,17 +140,17 @@ describe.skip('<TemplateEdit />', () => {
 
       const { version, order } = templateToEdit;
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          name: TEMPLATE_NAME,
-          version,
-          order,
-          indexPatterns: UPDATED_INDEX_PATTERN,
-          settings: JSON.stringify(SETTINGS),
-          mappings: JSON.stringify(MAPPINGS),
-          aliases: JSON.stringify(ALIASES),
-        })
-      );
+      const expected = {
+        name: TEMPLATE_NAME,
+        version,
+        order,
+        indexPatterns: UPDATED_INDEX_PATTERN,
+        settings: SETTINGS,
+        mappings: MAPPINGS,
+        aliases: ALIASES,
+        isManaged: false,
+      };
+      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
     });
   });
 });

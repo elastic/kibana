@@ -5,3 +5,5 @@
  */
 
 export const INVALID_INDEX_PATTERN_CHARS = ['\\', '/', '?', '"', '<', '>', '|'];
+
+export const INVALID_TEMPLATE_NAME_CHARS = ['"', '*', '\\', ',', '?'];

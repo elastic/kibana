@@ -5,12 +5,13 @@
  */
 
 import { Template } from '../../../common/types';
-import { TemplateValidation } from '../../services/template_validation';
 
 export interface StepProps {
-  template: Template;
-  updateTemplate: (updatedTemplate: Partial<Template>) => void;
+  template: Partial<Template>;
+  setDataGetter: (dataGetter: DataGetterFunc) => void;
   updateCurrentStep: (step: number) => void;
-  errors: TemplateValidation['errors'];
+  onStepValidityChange: (isValid: boolean) => void;
   isEditing?: boolean;
 }
+
+export type DataGetterFunc = () => Promise<{ isValid: boolean; data: any }>;

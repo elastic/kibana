@@ -77,9 +77,9 @@ describe.skip('<TemplateClone />', () => {
   });
 
   beforeEach(async () => {
-    testBed = await setup();
-
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
+
+    testBed = await setup();
 
     // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
@@ -97,22 +97,31 @@ describe.skip('<TemplateClone />', () => {
 
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions } = testBed;
+      const { actions, component } = testBed;
 
-      // Complete step 1 (logistics)
-      // Specify index patterns, but do not change name (keep default)
-      actions.completeStepOne({
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
+      // @ts-ignore (remove when react 16.9.0 is released)
+      await act(async () => {
+        // Complete step 1 (logistics)
+        // Specify index patterns, but do not change name (keep default)
+        await actions.completeStepOne({
+          indexPatterns: DEFAULT_INDEX_PATTERNS,
+        });
+
+        // Bypass step 2 (index settings)
+        actions.clickNextButton();
+        await nextTick();
+        component.update();
+
+        // Bypass step 3 (mappings)
+        actions.clickNextButton();
+        await nextTick();
+        component.update();
+
+        // Bypass step 4 (aliases)
+        actions.clickNextButton();
+        await nextTick();
+        component.update();
       });
-
-      // Bypass step 2 (index settings)
-      actions.clickNextButton();
-
-      // Bypass step 3 (mappings)
-      actions.clickNextButton();
-
-      // Bypass step 4 (aliases)
-      actions.clickNextButton();
     });
 
     it('should send the correct payload', async () => {
@@ -126,13 +135,16 @@ describe.skip('<TemplateClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          ...templateToClone,
-          name: `${templateToClone.name}-copy`,
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-        })
-      );
+      const body = JSON.parse(latestRequest.requestBody);
+      const expected = {
+        ...templateToClone,
+        name: `${templateToClone.name}-copy`,
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
+        aliases: {},
+        mappings: {},
+        settings: {},
+      };
+      expect(body).toEqual(expected);
     });
   });
 });

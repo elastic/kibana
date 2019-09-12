@@ -125,7 +125,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             </Fragment>
           )}
           <TemplateForm
-            template={template}
+            defaultValue={template}
             onSave={onSave}
             isSaving={isSaving}
             saveError={saveError}

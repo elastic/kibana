@@ -20,14 +20,19 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { templatesDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
+import { useJsonStep } from './use_json_step';
 
 export const StepAliases: React.FunctionComponent<StepProps> = ({
   template,
-  updateTemplate,
-  errors,
+  setDataGetter,
+  onStepValidityChange,
 }) => {
-  const { aliases } = template;
-  const { aliases: aliasesError } = errors;
+  const { content, setContent, error } = useJsonStep({
+    prop: 'aliases',
+    defaultValue: template.aliases,
+    setDataGetter,
+    onStepValidityChange,
+  });
 
   return (
     <div data-test-subj="stepAliases">
@@ -95,8 +100,8 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
             }}
           />
         }
-        isInvalid={Boolean(aliasesError)}
-        error={aliasesError}
+        isInvalid={Boolean(error)}
+        error={error}
         fullWidth
       >
         <EuiCodeEditor
@@ -119,9 +124,9 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
               defaultMessage: 'Aliases code editor',
             }
           )}
-          value={aliases}
-          onChange={(newAliases: string) => {
-            updateTemplate({ aliases: newAliases });
+          value={content}
+          onChange={(updated: string) => {
+            setContent(updated);
           }}
           data-test-subj="aliasesEditor"
         />
