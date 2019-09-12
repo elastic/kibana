@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { load as repoLoad, unload as repoUnload } from './repo_archiver';
 
 export default function manageRepositoriesFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
@@ -25,50 +27,35 @@ export default function manageRepositoriesFunctionalTests({
   const existsInvisible = async (selector: string) =>
     await testSubjects.exists(selector, { allowHidden: true });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
-  describe.skip('History', function() {
+  describe('History', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
       let driver: any;
       before(async () => {
+        await repoLoad(
+          'github.com/elastic/TypeScript-Node-Starter',
+          'typescript_node_starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
+        await esArchiver.load('code/repositories/typescript_node_starter');
+
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        log.debug('Code test import repository');
-        // Fill in the import repository input box with a valid git repository url.
-        await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/elastic/TypeScript-Node-Starter'
-        );
-        // Click the import repository button.
-        await PageObjects.code.clickImportRepositoryButton();
 
         const webDriver = await getService('__webdriver__').init();
         driver = webDriver.driver;
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Clean up the imported repository
-        await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.try(async () => {
-          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
-        });
-
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-
         await PageObjects.security.logout();
+        await esArchiver.unload('code/repositories/typescript_node_starter');
+        await repoUnload(
+          'github.com/elastic/TypeScript-Node-Starter',
+          config.get('kbnTestServer.installDir') || REPO_ROOT
+        );
       });
 
       it('from admin page to source view page can go back and forward', async () => {

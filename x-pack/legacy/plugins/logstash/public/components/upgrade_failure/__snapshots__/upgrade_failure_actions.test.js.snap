@@ -8,12 +8,8 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
     grow={false}
   >
     <EuiButton
-      color="primary"
       fill={true}
-      iconSide="left"
       onClick={[MockFunction]}
-      size="m"
-      type="button"
     >
       upgrade button text
     </EuiButton>
@@ -23,9 +19,7 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
   >
     <EuiButtonEmpty
       color="primary"
-      iconSide="left"
       onClick={[MockFunction]}
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Go back"

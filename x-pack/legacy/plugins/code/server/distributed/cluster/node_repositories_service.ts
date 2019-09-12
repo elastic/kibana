@@ -9,9 +9,8 @@ import { ClusterService, ClusterStateListener } from './cluster_service';
 import { ClusterStateEvent } from './cluster_state_event';
 import { ClusterMembershipService } from './cluster_membership_service';
 import { CloneWorker } from '../../queue';
-import { Repository, RepositoryUri } from '../../../model';
+import { Repository, RepositoryUri, RepoState } from '../../../model';
 import { Logger } from '../../log';
-import { RepoState } from '../../../public/actions';
 
 export class NodeRepositoriesService implements ClusterStateListener {
   // visible for test

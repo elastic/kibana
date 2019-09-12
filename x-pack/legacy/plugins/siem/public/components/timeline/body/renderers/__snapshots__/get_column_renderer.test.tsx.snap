@@ -8,7 +8,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "id-timeline-column-event_severity-for-event-1-message-3",
+        "id": "plain-column-renderer-data-provider-test-event_severity-1-message-3",
         "kqlQuery": "",
         "name": "event.severity: 3",
         "queryMatch": Object {
@@ -18,7 +18,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
         },
       }
     }
-    key="timeline-draggable-column-event.severity-for-event-1-message--3"
+    key="plain-column-renderer-draggable-wrapper-test-event.severity-1-message-3"
     render={[Function]}
   />
 </span>
