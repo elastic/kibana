@@ -26,7 +26,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    this.tags('ciGroup10');
+    this.tags('ciGroup5');
     loadTestFile(require.resolve('./vector_styling'));
   });
 }

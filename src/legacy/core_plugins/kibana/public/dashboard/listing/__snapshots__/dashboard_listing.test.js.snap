@@ -62,14 +62,10 @@ exports[`after fetch initialFilter 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            color="primary"
             data-test-subj="createDashboardPromptButton"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
@@ -159,14 +155,10 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            color="primary"
             data-test-subj="createDashboardPromptButton"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
@@ -256,14 +248,10 @@ exports[`after fetch renders table rows 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            color="primary"
             data-test-subj="createDashboardPromptButton"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
@@ -353,14 +341,10 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            color="primary"
             data-test-subj="createDashboardPromptButton"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
@@ -450,14 +434,10 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            color="primary"
             data-test-subj="createDashboardPromptButton"
             fill={true}
-            iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
