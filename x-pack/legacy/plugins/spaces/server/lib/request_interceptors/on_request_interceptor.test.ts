@@ -15,7 +15,6 @@ import {
 } from '../../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
-import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
 import { LegacyAPI } from '../../new_platform/plugin';
 
 describe('onRequestInterceptor', () => {
@@ -108,14 +107,12 @@ describe('onRequestInterceptor', () => {
   async function setup(opts: SetupOpts = { basePath: '/', routes: 'legacy' }) {
     const { http } = await root.setup();
 
-    const config = ({
-      get: jest.fn().mockReturnValue(opts.basePath),
-    } as unknown) as KibanaConfig;
-
     initSpacesOnRequestInterceptor({
       getLegacyAPI: () =>
         ({
-          legacyConfig: (config as unknown) as KibanaConfig,
+          legacyConfig: {
+            serverBasePath: opts.basePath,
+          },
         } as LegacyAPI),
       http: (http as unknown) as CoreSetup['http'],
     });

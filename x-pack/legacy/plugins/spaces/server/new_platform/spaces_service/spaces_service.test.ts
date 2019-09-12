@@ -11,7 +11,6 @@ import { KibanaRequest, SavedObjectsService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { LegacyAPI } from '../plugin';
 
 const mockLogger = {
@@ -27,15 +26,8 @@ const mockLogger = {
 const createService = async (serverBasePath: string = '') => {
   const legacyAPI: LegacyAPI = {
     legacyConfig: {
-      get: (key: string) => {
-        switch (key) {
-          case 'server.basePath':
-            return serverBasePath;
-          default:
-            throw new Error(`unexpected legacy config key: ${key}`);
-        }
-      },
-    } as KibanaConfig,
+      serverBasePath,
+    },
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue(null),
     } as unknown) as SavedObjectsService,

@@ -161,18 +161,10 @@ describe('onPostAuthInterceptor', () => {
     };
 
     const legacyAPI: LegacyAPI = {
-      legacyConfig: ({
-        get: jest.fn().mockImplementation(key => {
-          switch (key) {
-            case 'server.defaultRoute':
-              return defaultRoute;
-            case 'server.basePath':
-              return '';
-            default:
-              throw new Error('unexpected legacy config key: ' + key);
-          }
-        }),
-      } as unknown) as LegacyAPI['legacyConfig'],
+      legacyConfig: {
+        serverDefaultRoute: defaultRoute,
+        serverBasePath: '',
+      },
       savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
     } as LegacyAPI;
 

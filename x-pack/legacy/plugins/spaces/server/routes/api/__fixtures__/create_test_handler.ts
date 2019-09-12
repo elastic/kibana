@@ -217,7 +217,10 @@ export function createTestHandler(
     const coreSetupMock = coreMock.createSetup();
 
     const legacyAPI: LegacyAPI = {
-      legacyConfig: server.config(),
+      legacyConfig: {
+        serverBasePath: mockConfig.get('server.basePath'),
+        serverDefaultRoute: mockConfig.get('server.defaultRoute'),
+      },
       savedObjects: server.savedObjects,
     } as LegacyAPI;
 
@@ -245,11 +248,7 @@ export function createTestHandler(
     });
 
     initApiFn({
-      getLegacyAPI: () =>
-        ({
-          savedObjects: server.savedObjects,
-          legacyConfig: mockConfig,
-        } as LegacyAPI),
+      getLegacyAPI: () => legacyAPI,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,

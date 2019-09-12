@@ -14,20 +14,6 @@ import { elasticsearchServiceMock, coreMock } from '../../../../../../src/core/s
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
 import { createOptionalPlugin } from '../../../../server/lib/optional_plugin';
 import { LegacyAPI } from '../new_platform/plugin';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-
-const server = {
-  config: () => {
-    return {
-      get: (key: string) => {
-        if (key === 'server.basePath') {
-          return '/foo';
-        }
-        throw new Error('unexpected key ' + key);
-      },
-    };
-  },
-};
 
 const log = {
   log: jest.fn(),
@@ -40,7 +26,9 @@ const log = {
 };
 
 const legacyAPI: LegacyAPI = {
-  legacyConfig: server.config() as KibanaConfig,
+  legacyConfig: {
+    serverBasePath: '/foo',
+  },
   savedObjects: {} as SavedObjectsService,
 } as LegacyAPI;
 

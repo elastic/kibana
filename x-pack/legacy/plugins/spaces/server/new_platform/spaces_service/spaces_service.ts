@@ -126,6 +126,6 @@ export class SpacesService {
   }
 
   private getServerBasePath() {
-    return this.getLegacyAPI().legacyConfig.get<string>('server.basePath');
+    return this.getLegacyAPI().legacyConfig.serverBasePath;
   }
 }

@@ -27,8 +27,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
-  const serverBasePath: string = getLegacyAPI().legacyConfig.get('server.basePath');
-  const defaultRoute: string = getLegacyAPI().legacyConfig.get('server.defaultRoute');
+  const { serverBasePath, serverDefaultRoute } = getLegacyAPI().legacyConfig;
 
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const path = request.url.pathname!;
@@ -50,7 +49,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           // No need for an interstitial screen where there is only one possible outcome.
           const space = spaces[0];
 
-          const destination = addSpaceIdToPath(serverBasePath, space.id, defaultRoute);
+          const destination = addSpaceIdToPath(serverBasePath, space.id, serverDefaultRoute);
           return response.redirected({ headers: { location: destination } });
         }
 

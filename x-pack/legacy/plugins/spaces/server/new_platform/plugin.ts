@@ -5,14 +5,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { SavedObjectsService, CoreSetup } from 'src/core/server';
-import {
-  Logger,
-  HttpServiceSetup,
-  PluginInitializerContext,
-  ElasticsearchServiceSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { Legacy } from 'kibana';
 import { OptionalPlugin } from '../../../../server/lib/optional_plugin';
@@ -57,7 +51,12 @@ export interface LegacyAPI {
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
-  legacyConfig: KibanaConfig;
+  legacyConfig: {
+    spacesEnabled: boolean;
+    kibanaIndex: string;
+    serverBasePath: string;
+    serverDefaultRoute: string;
+  };
 }
 
 export interface PluginsSetup {
@@ -163,7 +162,7 @@ export class Plugin {
         const activeSpace = await getActiveSpace(
           spacesClient,
           core.http.basePath.get(request),
-          legacyAPI.legacyConfig.get('server.basePath')
+          legacyAPI.legacyConfig.serverBasePath
         );
 
         const features = xpackMainPlugin.getFeatures();

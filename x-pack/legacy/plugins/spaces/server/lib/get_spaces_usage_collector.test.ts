@@ -5,6 +5,7 @@
  */
 
 import { getSpacesUsageCollector, UsageStats } from './get_spaces_usage_collector';
+import { LegacyAPI } from '../new_platform/plugin';
 
 function getServerMock(customization?: any) {
   class MockUsageCollector {
@@ -43,13 +44,6 @@ function getServerMock(customization?: any) {
     log: () => {
       return;
     },
-    config: () => ({
-      get: (key: string) => {
-        if (key === 'xpack.spaces.enabled') {
-          return true;
-        }
-      },
-    }),
     usage: {
       collectorSet: {
         makeUsageCollector: (options: any) => {
@@ -79,17 +73,19 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
+const legacyConfig = {
+  spacesEnabled: true,
+  kibanaIndex: '.kibana',
+} as LegacyAPI['legacyConfig'];
+
 test('sets enabled to false when spaces is turned off', async () => {
-  const mockConfigGet = jest.fn(key => {
-    if (key === 'xpack.spaces.enabled') {
-      return false;
-    } else if (key.indexOf('xpack.spaces') >= 0) {
-      throw new Error('Unknown config key!');
-    }
-  });
-  const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
+  const config = {
+    ...legacyConfig,
+    spacesEnabled: false,
+  };
+  const serverMock = getServerMock();
   const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-    config: serverMock.config(),
+    config,
     usage: serverMock.usage,
     xpackMain: serverMock.plugins.xpack_main,
   });
@@ -106,7 +102,7 @@ describe('with a basic license', () => {
       .fn()
       .mockReturnValue('basic');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithBasicLicenseMock.config(),
+      config: legacyConfig,
       usage: serverWithBasicLicenseMock.usage,
       xpackMain: serverWithBasicLicenseMock.plugins.xpack_main,
     });
@@ -142,7 +138,7 @@ describe('with no license', () => {
     serverWithNoLicenseMock.plugins.xpack_main.info.isAvailable = jest.fn().mockReturnValue(false);
 
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithNoLicenseMock.config(),
+      config: legacyConfig,
       usage: serverWithNoLicenseMock.usage,
       xpackMain: serverWithNoLicenseMock.plugins.xpack_main,
     });
@@ -175,7 +171,7 @@ describe('with platinum license', () => {
       .fn()
       .mockReturnValue('platinum');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: serverWithPlatinumLicenseMock.config(),
+      config: legacyConfig,
       usage: serverWithPlatinumLicenseMock.usage,
       xpackMain: serverWithPlatinumLicenseMock.plugins.xpack_main,
     });
