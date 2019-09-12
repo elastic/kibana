@@ -24,7 +24,7 @@ describe('hasScheduledActions()', () => {
   test(`should throttle when group didn't change and throttle period is still active`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -38,7 +38,7 @@ describe('hasScheduledActions()', () => {
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -52,7 +52,7 @@ describe('hasScheduledActions()', () => {
   test(`shouldn't throttle when group changes`, () => {
     const alertInstance = new AlertInstance({
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -106,7 +106,7 @@ describe('scheduleActions()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -120,7 +120,7 @@ describe('scheduleActions()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -134,7 +134,7 @@ describe('scheduleActions()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -176,14 +176,14 @@ describe('replaceState()', () => {
   });
 });
 
-describe('updateLastScheduleActions()', () => {
-  test('replaces previous lastScheduleActions', () => {
+describe('updateLastScheduledActions()', () => {
+  test('replaces previous lastScheduledActions', () => {
     const alertInstance = new AlertInstance({ meta: {} });
-    alertInstance.updateLastScheduleActions('default');
+    alertInstance.updateLastScheduledActions('default');
     expect(alertInstance.toJSON()).toEqual({
       state: {},
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -197,14 +197,14 @@ describe('toJSON', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
       },
     });
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduleActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
     );
   });
 });
@@ -231,7 +231,7 @@ describe('isResolved', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },
@@ -244,7 +244,7 @@ describe('isResolved', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        lastScheduleActions: {
+        lastScheduledActions: {
           date: new Date(),
           group: 'default',
         },

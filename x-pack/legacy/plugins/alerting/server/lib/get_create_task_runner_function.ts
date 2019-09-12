@@ -134,7 +134,7 @@ export function getCreateTaskRunnerFunction({
 
             if (alertInstance.hasScheduledActions(throttle)) {
               const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
-              alertInstance.updateLastScheduleActions(actionGroup);
+              alertInstance.updateLastScheduledActions(actionGroup);
               alertInstance.unscheduleActions();
               return executionHandler(actionGroup, context, state);
             }

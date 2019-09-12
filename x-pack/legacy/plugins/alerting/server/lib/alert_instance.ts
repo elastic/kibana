@@ -8,7 +8,7 @@ import { State, Context } from '../types';
 import { parseDuration } from './parse_duration';
 
 interface Meta {
-  lastScheduleActions?: {
+  lastScheduledActions?: {
     group: string;
     date: Date;
   };
@@ -45,9 +45,9 @@ export class AlertInstance {
     const throttleMills = throttle ? parseDuration(throttle) : 0;
     const actionGroup = this.scheduledExecutionOptions.actionGroup;
     if (
-      this.meta.lastScheduleActions &&
-      this.meta.lastScheduleActions.group === actionGroup &&
-      new Date(this.meta.lastScheduleActions.date).getTime() + throttleMills > Date.now()
+      this.meta.lastScheduledActions &&
+      this.meta.lastScheduledActions.group === actionGroup &&
+      new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now()
     ) {
       return false;
     }
@@ -85,8 +85,8 @@ export class AlertInstance {
     return this;
   }
 
-  updateLastScheduleActions(group: string) {
-    this.meta.lastScheduleActions = { group, date: new Date() };
+  updateLastScheduledActions(group: string) {
+    this.meta.lastScheduledActions = { group, date: new Date() };
   }
 
   /**
