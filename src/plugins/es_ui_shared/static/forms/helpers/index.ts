@@ -17,21 +17,12 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
+import * as fieldValidatorsImport from './field_validators';
+import * as fieldFormattersImport from './field_formatters';
+import * as serializersImport from './serializers';
+import * as deserializersImport from './de_serializers';
 
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
-
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
-
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+export const fieldValidators = fieldValidatorsImport;
+export const fieldFormatters = fieldFormattersImport;
+export const deserializers = deserializersImport;
+export const serializers = serializersImport;

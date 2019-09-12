@@ -17,21 +17,6 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
-
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
-
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
-
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+export * from './field';
+export * from './form_row';
+export * from './fields';

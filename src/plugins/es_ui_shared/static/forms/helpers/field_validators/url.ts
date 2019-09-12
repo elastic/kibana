@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { isUrl } from '../../../validators/string';
+import { ERROR_CODE } from './types';
 
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
+export const urlField = (message: string) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+  const [{ value }] = args;
 
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
+  const error: ValidationError<ERROR_CODE> = {
+    code: 'ERR_FIELD_FORMAT',
+    formatType: 'URL',
+    message,
+  };
 
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+  if (typeof value !== 'string') {
+    return error;
+  }
+
+  return isUrl(value) ? undefined : error;
+};

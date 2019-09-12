@@ -17,21 +17,31 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
+const protocolAndDomainRE = /^(?:\w+:)?\/\/(\S+)$/;
+const localhostDomainRE = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/;
+const nonLocalhostDomainRE = /^[^\s\.]+\.\S{2,}$/;
 
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
+export const isUrl = (string: string) => {
+  if (typeof string !== 'string') {
+    return false;
+  }
 
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
+  const match = string.match(protocolAndDomainRE);
+  if (!match) {
+    return false;
+  }
 
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+  const everythingAfterProtocol = match[1];
+  if (!everythingAfterProtocol) {
+    return false;
+  }
+
+  if (
+    localhostDomainRE.test(everythingAfterProtocol) ||
+    nonLocalhostDomainRE.test(everythingAfterProtocol)
+  ) {
+    return true;
+  }
+
+  return false;
+};

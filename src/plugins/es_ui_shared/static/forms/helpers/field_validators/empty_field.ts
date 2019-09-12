@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
+import { ValidationFunc } from '../../hook_form_lib';
+import { isEmptyString } from '../../../validators/string';
+import { isEmptyArray } from '../../../validators/array';
+import { ERROR_CODE } from './types';
 
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
+export const emptyField = (message: string) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+  const [{ value, path }] = args;
 
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
+  if (typeof value === 'string') {
+    return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+  }
 
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+  if (Array.isArray(value)) {
+    return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+  }
+};

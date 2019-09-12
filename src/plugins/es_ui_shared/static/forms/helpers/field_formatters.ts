@@ -17,21 +17,12 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
-
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
-
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
-
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+/**
+ * NOTE: The toInt() formatter does _not_ play well if we enter the "e" letter in a "number" input
+ * as it does not trigger an "onChange" event.
+ * I searched if it was a bug and found this thread (https://github.com/facebook/react/pull/7359#event-1017024857)
+ * We will need to investigate this a little further.
+ *
+ * @param value The string value to convert to number
+ */
+export const toInt = (value: string): number => parseFloat(value);

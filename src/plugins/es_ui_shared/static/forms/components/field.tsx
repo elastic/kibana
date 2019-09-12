@@ -17,21 +17,37 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
-
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
+import React from 'react';
+import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
+  field: FieldHook;
+  euiFieldProps?: Record<string, any>;
+  idAria?: string;
   [key: string]: any;
 }
 
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+import {
+  TextField,
+  NumericField,
+  CheckBoxField,
+  ComboBoxField,
+  MultiSelectField,
+  SelectField,
+  ToggleField,
+} from './fields';
+
+const mapTypeToFieldComponent = {
+  [FIELD_TYPES.TEXT]: TextField,
+  [FIELD_TYPES.NUMBER]: NumericField,
+  [FIELD_TYPES.CHECKBOX]: CheckBoxField,
+  [FIELD_TYPES.COMBO_BOX]: ComboBoxField,
+  [FIELD_TYPES.MULTI_SELECT]: MultiSelectField,
+  [FIELD_TYPES.SELECT]: SelectField,
+  [FIELD_TYPES.TOGGLE]: ToggleField,
+};
+
+export const Field = (props: Props) => {
+  const FieldComponent = mapTypeToFieldComponent[props.field.type] || TextField;
+  return <FieldComponent {...props} />;
+};

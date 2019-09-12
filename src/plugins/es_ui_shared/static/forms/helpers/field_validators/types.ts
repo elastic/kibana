@@ -17,21 +17,12 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
-
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
-
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
-
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+export type ERROR_CODE =
+  | 'ERR_FIELD_MISSING'
+  | 'ERR_FIELD_FORMAT'
+  | 'ERR_INVALID_CHARS'
+  | 'ERR_FIRST_CHAR'
+  | 'ERR_MIN_LENGTH'
+  | 'ERR_MAX_LENGTH'
+  | 'ERR_MIN_SELECTION'
+  | 'ERR_MAX_SELECTION';

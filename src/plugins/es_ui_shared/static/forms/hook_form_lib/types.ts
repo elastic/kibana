@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
+import { ReactNode, ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
 import { Subject } from './lib';
 
-export interface FormHook<T = FormData> {
+export interface FormHook<T extends object = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
@@ -39,15 +39,15 @@ export interface FormHook<T = FormData> {
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 
-export interface FormSchema<T = FormData> {
+export interface FormSchema<T extends object = FormData> {
   [key: string]: FormSchemaEntry<T>;
 }
-type FormSchemaEntry<T> =
+type FormSchemaEntry<T extends object> =
   | FieldConfig<T>
   | Array<FieldConfig<T>>
   | { [key: string]: FieldConfig<T> | Array<FieldConfig<T>> | FormSchemaEntry<T> };
 
-export interface FormConfig<T = FormData> {
+export interface FormConfig<T extends object = FormData> {
   onSubmit?: (data: T, isFormValid: boolean) => void;
   schema?: FormSchema<T>;
   defaultValue?: Partial<T>;
@@ -91,10 +91,10 @@ export interface FieldHook {
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
-export interface FieldConfig<T = any> {
+export interface FieldConfig<T extends object = any> {
   readonly path?: string;
   readonly label?: string;
-  readonly helpText?: string;
+  readonly helpText?: string | ReactNode;
   readonly type?: HTMLInputElement['type'];
   readonly defaultValue?: unknown;
   readonly validations?: Array<ValidationConfig<T>>;
@@ -111,20 +111,20 @@ export interface FieldsMap {
 
 export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<void>;
 
-export interface ValidationError {
+export interface ValidationError<T = string> {
   message: string | ((error: ValidationError) => string);
-  code?: string;
+  code?: T;
   validationType?: string;
   [key: string]: any;
 }
 
-export type ValidationFunc<T = any> = (data: {
+export type ValidationFunc<T extends object = any, E = string> = (data: {
   path: string;
   value: unknown;
   form: FormHook<T>;
   formData: T;
   errors: readonly ValidationError[];
-}) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;
+}) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
 export interface FieldValidateResponse {
   isValid: boolean;
@@ -133,7 +133,9 @@ export interface FieldValidateResponse {
 
 export type SerializerFunc<T = unknown> = (value: any) => T;
 
-export type FormData = Record<string, unknown>;
+export interface FormData {
+  [key: string]: any;
+}
 
 type FormatterFunc = (value: any) => unknown;
 
@@ -141,7 +143,7 @@ type FormatterFunc = (value: any) => unknown;
 // string | number | boolean | string[] ...
 type FieldValue = unknown;
 
-export interface ValidationConfig<T = any> {
+export interface ValidationConfig<T extends object = any> {
   validator: ValidationFunc<T>;
   type?: string;
   exitOnFail?: boolean;

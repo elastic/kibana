@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiForm } from '@elastic/eui';
+export const containsChars = (chars: string | string[]) => (value: string) => {
+  const charToArray = Array.isArray(chars) ? (chars as string[]) : ([chars] as string[]);
 
-import { FormProvider } from '../form_context';
-import { FormHook } from '../types';
+  const charsFound = charToArray.reduce(
+    (acc, char) => (value.includes(char) ? [...acc, char] : acc),
+    [] as string[]
+  );
 
-interface Props {
-  form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
-  children: ReactNode | ReactNode[];
-  [key: string]: any;
-}
-
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
-  <FormProvider form={form}>
-    <FormWrapper {...rest} />
-  </FormProvider>
-);
+  return {
+    charsFound,
+    doesContain: charsFound.length > 0,
+  };
+};
