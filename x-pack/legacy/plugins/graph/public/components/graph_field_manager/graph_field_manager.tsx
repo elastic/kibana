@@ -23,9 +23,16 @@ import {
 export interface GraphFieldManagerProps {
   state: GraphState;
   dispatch: GraphDispatch;
+  pickerOpen: boolean;
+  setPickerOpen: (open: boolean) => void;
 }
 
-export function GraphFieldManager({ state, dispatch }: GraphFieldManagerProps) {
+export function GraphFieldManager({
+  state,
+  dispatch,
+  pickerOpen,
+  setPickerOpen,
+}: GraphFieldManagerProps) {
   const allFields = fieldsSelector(state);
   const selectedFields = selectedFieldsSelector(state);
 
@@ -47,7 +54,12 @@ export function GraphFieldManager({ state, dispatch }: GraphFieldManagerProps) {
           </EuiFlexItem>
         ))}
         <EuiFlexItem grow={false}>
-          <FieldPicker allFields={allFields} {...actionCreators} />
+          <FieldPicker
+            open={pickerOpen}
+            setOpen={setPickerOpen}
+            allFields={allFields}
+            {...actionCreators}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </I18nProvider>

@@ -42,7 +42,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
-import { GraphFieldManager } from './components/graph_field_manager';
+import { GraphChrome } from './components/graph_chrome';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -100,10 +100,12 @@ app.directive('graphListing', function (reactDirective) {
   return reactDirective(GraphListing);
 });
 
-app.directive('graphFieldManager', function (reactDirective) {
-  return reactDirective(GraphFieldManager, [
+app.directive('graphChrome', function (reactDirective) {
+  return reactDirective(GraphChrome, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
+    ['onFillWorkspace', { watchDepth: 'reference' }],
+    ['hasNodes', { watchDepth: 'reference' }],
   ]);
 });
 
@@ -411,6 +413,13 @@ app.controller('graphuiPlugin', function (
         responseHandler(resp.data.resp);
       })
       .catch(handleHttpError);
+  };
+
+  $scope.fillWorkspace = () => {
+    // TODO:
+    // * fetch top terms for selected fields
+    // * add them to the workspace
+    // * fill in connections
   };
 
   $scope.submit = function () {

@@ -22,10 +22,12 @@ export interface FieldPickerProps {
   allFields: WorkspaceField[];
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 export function FieldPicker(props: FieldPickerProps) {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = props;
   const [fieldOptions, setFieldOptions] = useState(toOptions(props.allFields));
 
   const unselectedFields = props.allFields.filter(field => !field.selected);
