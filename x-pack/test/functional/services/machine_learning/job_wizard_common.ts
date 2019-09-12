@@ -89,7 +89,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardComboBoxJobGroups comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(jobGroups.length);
       expect(comboBoxSelectedOptions).to.eql(jobGroups);
     },
 
@@ -139,6 +138,60 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(actualModelMemoryLimit).to.eql(expectedValue);
     },
 
+    async assertMultiMetricSplitFieldInputExists() {
+      await testSubjects.existOrFail('mlJobWizardSplitFieldSelection comboBoxInput');
+    },
+
+    async assertMultiMetricSplitFieldSelection(identifier: string) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardSplitFieldSelection comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions.length).to.eql(1);
+      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+    },
+
+    async assertInfluencerInputExists() {
+      await testSubjects.existOrFail('mlJobWizardInfluencerSelection comboBoxInput');
+    },
+
+    async assertInfluencerSelection(influencers: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardInfluencerSelection comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql(influencers);
+    },
+
+    async assertDetectorPreviewExists(
+      aggAndFieldIdentifier: string,
+      detectorPosition: number,
+      chartType: string
+    ) {
+      await testSubjects.existOrFail(`detector&${detectorPosition}`);
+      await testSubjects.existOrFail(`detector&${detectorPosition} detectorTitle`);
+      expect(
+        await testSubjects.getVisibleText(`detector&${detectorPosition} detectorTitle`)
+      ).to.eql(aggAndFieldIdentifier);
+      await testSubjects.existOrFail(`detector&${detectorPosition} mlAnomalyChart&${chartType}`);
+    },
+
+    async assertDetectorSplitExists(splitField: string) {
+      await testSubjects.existOrFail(`dataSplit dataSplitTitle&${splitField}`);
+      await testSubjects.existOrFail(`dataSplit splitCard&front`);
+      await testSubjects.existOrFail(`dataSplit splitCard&back`);
+    },
+
+    async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
+      expect(await testSubjects.getVisibleText(`dataSplit splitCard&front splitCardTitle`)).to.eql(
+        frontCardTitle
+      );
+    },
+
+    async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
+      expect(await testSubjects.findAll(`dataSplit splitCard&back`)).to.have.length(
+        numberOfBackCards
+      );
+    },
+
     async clickNextButton() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
     },
@@ -169,6 +222,14 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async addJobGroup(jobGroup: string) {
       await comboBox.setCustom('mlJobWizardComboBoxJobGroups comboBoxInput', jobGroup);
+    },
+
+    async selectMultiMetricSplitField(identifier: string) {
+      await comboBox.set('mlJobWizardSplitFieldSelection comboBoxInput', identifier);
+    },
+
+    async addInfluencer(influencer: string) {
+      await comboBox.setCustom('mlJobWizardInfluencerSelection comboBoxInput', influencer);
     },
 
     async ensureAdvancedSectionOpen() {
