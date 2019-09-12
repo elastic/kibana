@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { FiltersService, FiltersSetup } from './filters_service';
+export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string) {
+  return aggregatable && esType !== 'text' && !esType.startsWith('_');
+}

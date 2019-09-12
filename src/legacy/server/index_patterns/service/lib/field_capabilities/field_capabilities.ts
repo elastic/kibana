@@ -19,13 +19,15 @@
 
 import { defaults, indexBy, sortBy } from 'lodash';
 
+import { APICaller } from 'src/core/server';
 import { callFieldCapsApi } from '../es_api';
-import { readFieldCapsResponse } from './field_caps_response';
+import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
+import { FieldDescriptor } from '../../index_patterns_service';
 
-export const concatIfUniq = (arr, value) => (
-  arr.includes(value) ? arr : arr.concat(value)
-);
+export function concatIfUniq<T>(arr: T[], value: T) {
+  return arr.includes(value) ? arr : arr.concat(value);
+}
 
 /**
  *  Get the field capabilities for field in `indices`, excluding
@@ -34,24 +36,29 @@ export const concatIfUniq = (arr, value) => (
  *  @param  {Function} callCluster bound function for accessing an es client
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
- *  @return {Promise<Array<FieldInfo>>}
+ *  @return {Promise<Array<FieldDescriptor>>}
  */
-export async function getFieldCapabilities(callCluster, indices = [], metaFields = []) {
-  const esFieldCaps = await callFieldCapsApi(callCluster, indices);
+export async function getFieldCapabilities(
+  callCluster: APICaller,
+  indices: string | string[] = [],
+  metaFields: string[] = []
+) {
+  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
   const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
 
-  const allFieldsUnsorted = Object
-    .keys(fieldsFromFieldCapsByName)
+  const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter(name => !name.startsWith('_'))
     .concat(metaFields)
-    .reduce(concatIfUniq, [])
-    .map(name => defaults({}, fieldsFromFieldCapsByName[name], {
-      name,
-      type: 'string',
-      searchable: false,
-      aggregatable: false,
-      readFromDocValues: false
-    }))
+    .reduce(concatIfUniq, [] as string[])
+    .map<FieldDescriptor>(name =>
+      defaults({}, fieldsFromFieldCapsByName[name], {
+        name,
+        type: 'string',
+        searchable: false,
+        aggregatable: false,
+        readFromDocValues: false,
+      })
+    )
     .map(mergeOverrides);
 
   return sortBy(allFieldsUnsorted, 'name');
