@@ -19,10 +19,12 @@ import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../.
 import { ExpandableEvent } from '../../expandable_event';
 import { TimelineEvent } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEventChild } from './stateful_event_child';
+import { eventIsPinned } from '../helpers';
 
 interface Props {
   actionsColumnWidth: number;
@@ -187,6 +189,7 @@ export class StatefulEvent extends React.Component<Props, State> {
               >
                 {({ detailsData, loading }) => (
                   <TimelineEvent
+                    className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
                     ref={divElement => {
                       if (divElement != null) {
@@ -217,10 +220,12 @@ export class StatefulEvent extends React.Component<Props, State> {
                           onUnPinEvent={onUnPinEvent}
                           pinnedEventIds={pinnedEventIds}
                           showNotes={!!this.state.showNotes[event._id]}
+                          timelineId={timelineId}
                           onToggleShowNotes={this.onToggleShowNotes}
                           updateNote={updateNote}
                         />
                       ),
+                      timelineId,
                     })}
                     <div data-test-subj="event-details">
                       <ExpandableEvent
@@ -279,6 +284,8 @@ export class StatefulEvent extends React.Component<Props, State> {
     onPinEvent: OnPinEvent
   ): ((noteId: string) => void) => (noteId: string) => {
     addNoteToEvent({ eventId, noteId });
-    onPinEvent(eventId); // pin the event, because it has notes
+    if (!eventIsPinned({ eventId, pinnedEventIds: this.props.pinnedEventIds })) {
+      onPinEvent(eventId); // pin the event, because it has notes
+    }
   };
 }

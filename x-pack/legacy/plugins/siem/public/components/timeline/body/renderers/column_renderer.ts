@@ -13,12 +13,14 @@ export interface ColumnRenderer {
     columnName,
     eventId,
     field,
+    timelineId,
     truncate,
     values,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeader;
+    timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
   }) => React.ReactNode;

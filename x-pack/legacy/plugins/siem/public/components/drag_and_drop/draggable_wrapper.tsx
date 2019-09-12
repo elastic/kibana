@@ -18,6 +18,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
 import { getDraggableId, getDroppableId } from './helpers';
 
@@ -42,6 +43,11 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         color ${theme.eui.euiAnimSpeedFast} ease;
     }
 
+    .euiBadge,
+    .euiBadge__text {
+      cursor: grab;
+    }
+
     ${!isDragging &&
       `
       & {
@@ -49,7 +55,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         padding: 0 4px 0 8px;
         position: relative;
         z-index: ${theme.eui.euiZLevel0} !important;
-        
+
         &::before {
           background-image: linear-gradient(
               135deg,
@@ -71,6 +77,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
 
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
         background-color: ${theme.eui.euiColorLightShade};
 
@@ -88,6 +95,8 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
 
       &:hover,
       &:focus,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
+      .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
       tr:hover &:hover,
       tr:hover &:focus {
         background-color: ${theme.eui.euiColorPrimary};
@@ -175,7 +184,7 @@ class DraggableWrapperComponent extends React.Component<Props> {
               <Draggable
                 draggableId={getDraggableId(dataProvider.id)}
                 index={0}
-                key={dataProvider.id}
+                key={getDraggableId(dataProvider.id)}
               >
                 {(provided, snapshot) => {
                   return (

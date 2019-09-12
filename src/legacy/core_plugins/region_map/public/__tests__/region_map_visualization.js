@@ -39,7 +39,7 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { visualizations } from '../../../visualizations/public';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -48,7 +48,6 @@ const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
 
 describe('RegionMapsVisualizationTests', function () {
-
   let domNode;
   let RegionMapsVisualization;
   let Vis;
@@ -61,83 +60,87 @@ describe('RegionMapsVisualizationTests', function () {
   const _makeJsonAjaxCallOld = ChoroplethLayer.prototype._makeJsonAjaxCall;
 
   const dummyTableGroup = {
-    columns: [{
-      'id': 'col-0',
-      'aggConfig': {
-        'id': '2',
-        'enabled': true,
-        'type': 'terms',
-        'schema': 'segment',
-        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
-      }, 'title': 'geo.dest: Descending'
-    }, {
-      'id': 'col-1',
-      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-      'title': 'Count'
-    }],
+    columns: [
+      {
+        id: 'col-0',
+        aggConfig: {
+          id: '2',
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'geo.dest', size: 5, order: 'desc', orderBy: '1' },
+        },
+        title: 'geo.dest: Descending',
+      },
+      {
+        id: 'col-1',
+        aggConfig: { id: '1', enabled: true, type: 'count', schema: 'metric', params: {} },
+        title: 'Count',
+      },
+    ],
     rows: [
       { 'col-0': 'CN', 'col-1': 26 },
       { 'col-0': 'IN', 'col-1': 17 },
       { 'col-0': 'US', 'col-1': 6 },
       { 'col-0': 'DE', 'col-1': 4 },
-      { 'col-0': 'BR', 'col-1': 3 }
-    ]
+      { 'col-0': 'BR', 'col-1': 3 },
+    ],
   };
 
   beforeEach(ngMock.module('kibana'));
 
   let getManifestStub;
-  beforeEach(ngMock.inject((Private, $injector) => {
-    const serviceSettings = $injector.get('serviceSettings');
-    const uiSettings = $injector.get('config');
-    const regionmapsConfig = {
-      includeElasticMapsService: true,
-      layers: []
-    };
+  beforeEach(
+    ngMock.inject((Private, $injector) => {
+      const serviceSettings = $injector.get('serviceSettings');
+      const uiSettings = $injector.get('config');
+      const regionmapsConfig = {
+        includeElasticMapsService: true,
+        layers: [],
+      };
 
-    dependencies = {
-      serviceSettings,
-      $injector,
-      regionmapsConfig,
-      uiSettings
-    };
+      dependencies = {
+        serviceSettings,
+        $injector,
+        regionmapsConfig,
+        uiSettings,
+      };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
-      createRegionMapTypeDefinition(dependencies)
-    );
+      visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
 
-    Vis = Private(visModule.VisProvider);
-    RegionMapsVisualization = createRegionMapVisualization(dependencies);
-    indexPattern = Private(LogstashIndexPatternStubProvider);
+      Vis = Private(visModule.VisProvider);
+      RegionMapsVisualization = createRegionMapVisualization(dependencies);
+      indexPattern = Private(LogstashIndexPatternStubProvider);
 
-    ChoroplethLayer.prototype._makeJsonAjaxCall = async function () {
-      //simulate network call
-      return new Promise((resolve)=> {
-        setTimeout(() => {
-          resolve(worldJson);
-        }, 10);
-      });
-    };
+      ChoroplethLayer.prototype._makeJsonAjaxCall = async function () {
+        //simulate network call
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve(worldJson);
+          }, 10);
+        });
+      };
 
-    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
-      //simulate network calls
-      if (url.startsWith('https://foobar')) {
-        return EMS_CATALOGUE;
-      } else if (url.startsWith('https://tiles.foobar')) {
-        return EMS_TILES;
-      } else if (url.startsWith('https://files.foobar')) {
-        return EMS_FILES;
-      } else if (url.startsWith('https://raster-style.foobar')) {
-        if (url.includes('osm-bright-desaturated')) {
-          return EMS_STYLE_ROAD_MAP_DESATURATED;
-        } else if (url.includes('osm-bright')) {
-          return EMS_STYLE_ROAD_MAP_BRIGHT;
-        } else if (url.includes('dark-matter')) {
-          return EMS_STYLE_DARK_MAP;
+      getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
+        //simulate network calls
+        if (url.startsWith('https://foobar')) {
+          return EMS_CATALOGUE;
+        } else if (url.startsWith('https://tiles.foobar')) {
+          return EMS_TILES;
+        } else if (url.startsWith('https://files.foobar')) {
+          return EMS_FILES;
+        } else if (url.startsWith('https://raster-style.foobar')) {
+          if (url.includes('osm-bright-desaturated')) {
+            return EMS_STYLE_ROAD_MAP_DESATURATED;
+          } else if (url.includes('osm-bright')) {
+            return EMS_STYLE_ROAD_MAP_BRIGHT;
+          } else if (url.includes('dark-matter')) {
+            return EMS_STYLE_DARK_MAP;
+          }
         }
-      }
-    });
-  }));
+      });
+    })
+  );
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
@@ -145,15 +148,13 @@ describe('RegionMapsVisualizationTests', function () {
   });
 
   describe('RegionMapVisualization - basics', function () {
-
     beforeEach(async function () {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
 
-
       vis = new Vis(indexPattern, {
-        type: 'region_map'
+        type: 'region_map',
       });
 
       vis.params.bucket = {
@@ -163,19 +164,25 @@ describe('RegionMapsVisualizationTests', function () {
         accessor: 1,
       };
 
-      vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
+      vis.params.selectedJoinField = { name: 'iso2', description: 'Two letter abbreviation' };
       vis.params.selectedLayer = {
-        'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
-        'name': 'World Countries',
-        'format': 'geojson',
-        'url': 'https://vector-staging.maps.elastic.co/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
-        'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
-          'name': 'iso3',
-          'description': 'Three letter abbreviation'
-        }, { 'name': 'name', 'description': 'Country name' }],
-        'created_at': '2017-07-31T16:00:19.996450',
-        'id': 5715999101812736,
-        'layerId': 'elastic_maps_service.World Countries'
+        attribution:
+          '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
+        name: 'World Countries',
+        format: 'geojson',
+        url:
+          'https://vector-staging.maps.elastic.co/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
+        fields: [
+          { name: 'iso2', description: 'Two letter abbreviation' },
+          {
+            name: 'iso3',
+            description: 'Three letter abbreviation',
+          },
+          { name: 'name', description: 'Country name' },
+        ],
+        created_at: '2017-07-31T16:00:19.996450',
+        id: 5715999101812736,
+        layerId: 'elastic_maps_service.World Countries',
       };
     });
 
@@ -184,7 +191,6 @@ describe('RegionMapsVisualizationTests', function () {
       imageComparator.destroy();
     });
 
-
     it('should instantiate at zoom level 2', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
@@ -192,7 +198,7 @@ describe('RegionMapsVisualizationTests', function () {
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
       const mismatchedPixels = await compareImage(initialPng);
       regionMapsVisualization.destroy();
@@ -206,35 +212,33 @@ describe('RegionMapsVisualizationTests', function () {
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       //this will actually create an empty image
-      vis.params.selectedJoinField = { 'name': 'iso3', 'description': 'Three letter abbreviation' };
-      vis.params.isDisplayWarning = false;//so we don't get notifications
+      vis.params.selectedJoinField = { name: 'iso3', description: 'Three letter abbreviation' };
+      vis.params.isDisplayWarning = false; //so we don't get notifications
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false
+        uiState: false,
       });
 
       const mismatchedPixels = await compareImage(toiso3Png);
       regionMapsVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
-
     });
 
     it('should resize', async function () {
-
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       domNode.style.width = '256px';
@@ -244,7 +248,7 @@ describe('RegionMapsVisualizationTests', function () {
         params: false,
         aggs: false,
         data: false,
-        uiState: false
+        uiState: false,
       });
       const mismatchedPixelsAfterFirstResize = await compareImage(afterresizePng);
 
@@ -255,7 +259,7 @@ describe('RegionMapsVisualizationTests', function () {
         params: false,
         aggs: false,
         data: false,
-        uiState: false
+        uiState: false,
       });
       const mismatchedPixelsAfterSecondResize = await compareImage(initialPng);
 
@@ -265,32 +269,31 @@ describe('RegionMapsVisualizationTests', function () {
     });
 
     it('should redo data', async function () {
-
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
 
-      newTableGroup.rows.pop();//remove one shape
+      newTableGroup.rows.pop(); //remove one shape
 
       await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: false,
         aggs: false,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       const mismatchedPixelsAfterDataChange = await compareImage(afterdatachangePng);
       const anotherTableGroup = _.cloneDeep(newTableGroup);
 
-      anotherTableGroup.rows.pop();//remove one shape
+      anotherTableGroup.rows.pop(); //remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
       await regionMapsVisualization.render(anotherTableGroup, vis.params, {
@@ -298,9 +301,11 @@ describe('RegionMapsVisualizationTests', function () {
         params: false,
         aggs: false,
         data: true,
-        uiState: false
+        uiState: false,
       });
-      const mismatchedPixelsAfterDataChangeAndResize = await compareImage(afterdatachangeandresizePng);
+      const mismatchedPixelsAfterDataChangeAndResize = await compareImage(
+        afterdatachangeandresizePng
+      );
 
       regionMapsVisualization.destroy();
       expect(mismatchedPixelsAfterDataChange).to.be.lessThan(PIXEL_DIFF);
@@ -314,18 +319,18 @@ describe('RegionMapsVisualizationTests', function () {
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
-      newTableGroup.rows.pop();//remove one shape
+      newTableGroup.rows.pop(); //remove one shape
       vis.params.colorSchema = 'Blues';
       await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
         data: true,
-        uiState: false
+        uiState: false,
       });
       const mismatchedPixelsAfterDataAndColorChange = await compareImage(aftercolorchangePng);
 
@@ -342,7 +347,7 @@ describe('RegionMapsVisualizationTests', function () {
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       const mismatchedPixels = await compareImage(changestartupPng);
@@ -350,7 +355,6 @@ describe('RegionMapsVisualizationTests', function () {
 
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
-
   });
 
   async function compareImage(expectedImageSource) {

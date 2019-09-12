@@ -22,11 +22,39 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   onColumnResized: OnColumnResized;
+  timelineId: string;
 }
+
+// const Cell = styled.div<{
+//   width: string;
+//   index: number;
+// }>`
+//   background: ${({ index, theme }) =>
+//     index % 2 === 0 && theme.darkMode
+//       ? theme.eui.euiFormBackgroundColor
+//       : index % 2 === 0 && !theme.darkMode
+//       ? theme.eui.euiColorLightestShade
+//       : 'inherit'};
+//   height: 20px;
+//   overflow: hidden;
+//   user-select: none;
+//   width: ${({ width }) => width};
+// `;
+
+// Cell.displayName = 'Cell';
+
+// const CellContainer = styled(EuiFlexGroup)<{ width: string }>`
+//   display: flex;
+//   height: 100%;
+//   overflow: hidden;
+//   width: ${({ width }) => width};
+// `;
+
+// CellContainer.displayName = 'CellContainer';
 
 export class DataDrivenColumns extends React.PureComponent<Props> {
   public render() {
-    const { columnHeaders, columnRenderers, data, _id } = this.props;
+    const { _id, columnHeaders, columnRenderers, data, timelineId } = this.props;
 
     return (
       <TimelineRowGroupData data-test-subj="data-driven-columns">
@@ -37,7 +65,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
                 columnName: header.id,
                 eventId: _id,
                 field: header,
-                truncate: true,
+                timelineId,
                 values: getMappedNonEcsValue({
                   data,
                   fieldName: header.id,
@@ -64,25 +92,28 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
   }
 
   // private renderCell = (header: ColumnHeader, index: number) => () => {
-  //   const { columnRenderers, data, _id } = this.props;
+  //   const { columnRenderers, data, _id, timelineId } = this.props;
 
   //   return (
-  //     <div
-  //       data-test-subj="column-cell"
-  //       index={index}
-  //       width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}
-  //     >
-  //       {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-  //         columnName: header.id,
-  //         eventId: _id,
-  //         values: getMappedNonEcsValue({
-  //           data,
-  //           fieldName: header.id,
-  //         }),
-  //         field: header,
-  //         width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
-  //       })}
-  //     </div>
+  //     <EuiFlexItem grow={false}>
+  //       <Cell
+  //         data-test-subj="column-cell"
+  //         index={index}
+  //         width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}
+  //       >
+  //         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+  //           columnName: header.id,
+  //           eventId: _id,
+  //           values: getMappedNonEcsValue({
+  //             data,
+  //             fieldName: header.id,
+  //           }),
+  //           field: header,
+  //           width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
+  //           timelineId,
+  //         })}
+  //       </Cell>
+  //     </EuiFlexItem>
   //   );
   // };
 

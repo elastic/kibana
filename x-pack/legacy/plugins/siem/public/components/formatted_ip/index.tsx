@@ -26,7 +26,7 @@ const getUniqueId = ({
   eventId: string;
   fieldName: string;
   address: string | object | null | undefined;
-}) => `id-${contextId}-${fieldName}-${address}-for-event-${eventId}`;
+}) => `formatted-ip-data-provider-${contextId}-${fieldName}-${address}-${eventId}`;
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -69,7 +69,12 @@ const NonDecoratedIp = pure<{
 }>(({ contextId, eventId, fieldName, truncate, value }) => (
   <DraggableWrapper
     dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
-    key={getUniqueId({ contextId, eventId, fieldName, address: value })}
+    key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
+      contextId,
+      eventId,
+      fieldName,
+      address: value,
+    })}`}
     render={(dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
@@ -98,7 +103,12 @@ const AddressLinks = pure<{
     {uniq(addresses).map(address => (
       <DraggableWrapper
         dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-        key={getUniqueId({ contextId, eventId, fieldName, address })}
+        key={`address-links-draggable-wrapper-${getUniqueId({
+          contextId,
+          eventId,
+          fieldName,
+          address,
+        })}`}
         render={(_, __, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>

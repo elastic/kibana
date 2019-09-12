@@ -6,15 +6,17 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function codeApp({ loadTestFile }: FtrProviderContext) {
-  describe('Code', function codeAppTestSuite() {
+  // FLAKY: https://github.com/elastic/kibana/issues/45094
+  describe.skip('Code', function codeAppTestSuite() {
     // Add 'skipCloud' regarding issue: https://github.com/elastic/kibana/issues/39386
     this.tags(['ciGroup2', 'skipCloud']);
+    loadTestFile(require.resolve('./lang_server_coverage'));
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./explore_repository'));
     loadTestFile(require.resolve('./code_intelligence'));
-    loadTestFile(require.resolve('./with_security'));
     loadTestFile(require.resolve('./history'));
     loadTestFile(require.resolve('./file_tree'));
+    loadTestFile(require.resolve('./with_security'));
   });
 }

@@ -11,7 +11,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('page navigation', function() {
-    this.tags('smoke');
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -41,6 +41,12 @@ export default function({ getService }: FtrProviderContext) {
       await ml.singleMetricViewer.assertSingleMetricViewerEmptyListMessageExsist();
     });
 
+    it('loads the settings page', async () => {
+      await ml.navigation.navigateToSettings();
+      await ml.settings.assertSettingsCalendarLinkExists();
+      await ml.settings.assertSettingsFilterlistLinkExists();
+    });
+
     it('loads the data frame page', async () => {
       await ml.navigation.navigateToDataFrames();
       await ml.dataFrames.assertDataFrameEmptyListMessageExists();
@@ -50,12 +56,6 @@ export default function({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToDataVisualizer();
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
-    });
-
-    it('loads the settings page', async () => {
-      await ml.navigation.navigateToSettings();
-      await ml.settings.assertSettingsCalendarLinkExists();
-      await ml.settings.assertSettingsFilterlistLinkExists();
     });
   });
 }

@@ -19,7 +19,7 @@ import {
 import { TruncatableText } from '../../../../truncatable_text';
 import { WithHoverActions } from '../../../../with_hover_actions';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
-import { TimelineContext } from '../../../timeline_context';
+import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { Actions, ACTIONS_WIDTH } from '../actions';
 import { ColumnHeader } from '../column_header';
@@ -63,7 +63,7 @@ interface HeaderCompProps {
 }
 
 const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
-  const isLoading = useContext(TimelineContext);
+  const isLoading = useTimelineContext();
   return (
     <HeaderDiv
       data-test-subj="header"

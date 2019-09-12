@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getCell } from '../../functions/common/getCell';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { DATATABLE } from '../constants';
+import { DATATABLE } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   help: i18n.translate('xpack.canvas.functions.getCellHelpText', {

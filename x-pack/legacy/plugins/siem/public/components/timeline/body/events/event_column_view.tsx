@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
@@ -36,6 +37,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
+  timelineId: string;
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
@@ -63,6 +65,7 @@ export const EventColumnView = React.memo<Props>(
     onUnPinEvent,
     pinnedEventIds,
     showNotes,
+    timelineId,
     toggleShowNotes,
     updateNote,
   }) => (
@@ -105,6 +108,7 @@ export const EventColumnView = React.memo<Props>(
           columnRenderers={columnRenderers}
           data={data}
           onColumnResized={onColumnResized}
+          timelineId={timelineId}
         />
       </TimelineRowGroup>
     </TimelineRow>
@@ -120,7 +124,8 @@ export const EventColumnView = React.memo<Props>(
       prevProps.expanded === nextProps.expanded &&
       prevProps.loading === nextProps.loading &&
       prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-      prevProps.showNotes === nextProps.showNotes
+      prevProps.showNotes === nextProps.showNotes &&
+      prevProps.timelineId === nextProps.timelineId
     );
   }
 );

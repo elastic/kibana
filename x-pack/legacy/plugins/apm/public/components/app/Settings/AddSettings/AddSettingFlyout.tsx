@@ -22,12 +22,13 @@ import React, { useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
-import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../services/rest/callApmApi';
+import { Config } from '..';
 
 interface Props {
   onClose: () => void;
@@ -61,9 +62,7 @@ export function AddSettingsFlyout({
         pathname: '/api/apm/settings/agent-configuration/services'
       }),
     [],
-    {
-      preservePreviousResponse: false
-    }
+    { preservePreviousData: false }
   );
   const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
@@ -78,12 +77,10 @@ export function AddSettingsFlyout({
       }
     },
     [serviceName],
-    { preservePreviousResponse: false }
+    { preservePreviousData: false }
   );
 
-  const isSampleRateValid = transactionSampleRateRt
-    .decode(sampleRate)
-    .isRight();
+  const isSampleRateValid = isRight(transactionSampleRateRt.decode(sampleRate));
 
   const isSelectedEnvironmentValid = environments.some(
     env =>

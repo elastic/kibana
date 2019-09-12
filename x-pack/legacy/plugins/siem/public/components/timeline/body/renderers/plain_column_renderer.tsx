@@ -25,8 +25,6 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
 
-const contextId = 'plain_column_renderer';
-
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
@@ -38,12 +36,14 @@ export const plainColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
+    timelineId,
     truncate,
     values,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeader;
+    timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
   }) =>
@@ -52,7 +52,7 @@ export const plainColumnRenderer: ColumnRenderer = {
           const itemDataProvider: DataProvider = {
             enabled: true,
             id: escapeDataProviderId(
-              `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}-${value}`
+              `plain-column-renderer-data-provider-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`
             ),
             name: `${columnName}: ${parseQueryValue(value)}`,
             queryMatch: {
@@ -68,10 +68,10 @@ export const plainColumnRenderer: ColumnRenderer = {
             // since ip fields may contain multiple IP addresses, return a FormattedIp here to avoid a "draggable of draggables"
             return (
               <FormattedIp
-                contextId={contextId}
+                contextId={`plain-column-renderer-formatted-ip-${timelineId}`}
                 eventId={eventId}
                 fieldName={field.id}
-                key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
+                key={`plain-column-renderer-formatted-ip-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
                 value={!isNumber(value) ? value : String(value)}
                 truncate={truncate}
               />
@@ -82,12 +82,12 @@ export const plainColumnRenderer: ColumnRenderer = {
             if (truncate) {
               return (
                 <FormattedFieldValue
-                  contextId={contextId}
+                  contextId={`plain-column-renderer-truncatable-formatted-field-value-${timelineId}`}
                   eventId={eventId}
                   fieldFormat={field.format || ''}
                   fieldName={columnName}
                   fieldType={field.type || ''}
-                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
+                  key={`plain-column-renderer-truncatable-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
                   truncate={truncate}
                   value={parseValue(value)}
                 />
@@ -95,13 +95,13 @@ export const plainColumnRenderer: ColumnRenderer = {
             } else {
               return (
                 <FormattedFieldValue
-                  contextId={contextId}
+                  contextId={`plain-column-renderer-text-formatted-field-value-${timelineId}`}
                   data-test-subj="draggable-content"
                   eventId={eventId}
                   fieldFormat={field.format || ''}
                   fieldName={columnName}
                   fieldType={field.type || ''}
-                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
+                  key={`plain-column-renderer-text-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
                   truncate={truncate}
                   value={parseValue(value)}
                 />
@@ -113,7 +113,7 @@ export const plainColumnRenderer: ColumnRenderer = {
           return (
             <DraggableWrapper
               dataProvider={itemDataProvider}
-              key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}--${value}`}
+              key={`plain-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>
@@ -121,7 +121,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                   </DragEffects>
                 ) : (
                   <FormattedFieldValue
-                    contextId={contextId}
+                    contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
                     eventId={eventId}
                     fieldFormat={field.format || ''}
                     fieldName={columnName}

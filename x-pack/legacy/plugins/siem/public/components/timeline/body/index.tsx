@@ -28,7 +28,7 @@ import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 
-interface Props {
+export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -55,7 +55,7 @@ interface Props {
 }
 
 /** Renders the timeline body */
-export const Body = React.memo<Props>(
+export const Body = React.memo<BodyProps>(
   ({
     addNoteToEvent,
     browserFields,

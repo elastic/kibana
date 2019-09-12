@@ -21,6 +21,7 @@ import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
+import dedent from 'dedent';
 
 import {
   runElasticsearch,
@@ -33,14 +34,20 @@ import {
 
 import { readConfigFile } from '../functional_test_runner/lib';
 
-const SUCCESS_MESSAGE = `
+const makeSuccessMessage = options => {
+  const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
 
-Elasticsearch and Kibana are ready for functional testing. Start the functional tests
-in another terminal session by running this command from this directory:
+  return (
+    '\n\n' +
+    dedent`
+      Elasticsearch and Kibana are ready for functional testing. Start the functional tests
+      in another terminal session by running this command from this directory:
 
-    node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}
-
-`;
+          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}
+    ` +
+    '\n\n'
+  );
+};
 
 /**
  * Run servers and tests for each config
@@ -118,15 +125,15 @@ export async function startServers(options) {
 
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
-    await silence(5000, { log });
-    log.info(SUCCESS_MESSAGE);
+    await silence(log, 5000);
+    log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
     await es.cleanup();
   });
 }
 
-async function silence(milliseconds, { log }) {
+async function silence(log, milliseconds) {
   await log
     .getWritten$()
     .pipe(

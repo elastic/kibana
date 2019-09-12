@@ -83,15 +83,15 @@ export const getFieldItems = ({
     field: (
       <DroppableWrapper
         droppableId={getDroppableId(
-          `field-browser-field-${categoryId}-${field.name}-${timelineId}`
+          `field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`
         )}
-        key={`${categoryId}-${field.name}-${timelineId}`}
+        key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${categoryId}-field-${field.name}-${timelineId}`,
+            contextId: `field-browser-field-items-field-draggable-${timelineId}-${categoryId}-${field.name}`,
             fieldId: field.name || '',
           })}
           index={0}

@@ -17,5 +17,17 @@
  * under the License.
  */
 
-export { ApplicationService, ApplicationSetup, ApplicationStart } from './application_service';
+export { ApplicationService } from './application_service';
 export { Capabilities } from './capabilities';
+export {
+  App,
+  AppBase,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+  ApplicationSetup,
+  ApplicationStart,
+  // Internal types
+  InternalApplicationStart,
+  LegacyApp,
+} from './types';

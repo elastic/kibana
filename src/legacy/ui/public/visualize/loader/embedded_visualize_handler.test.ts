@@ -18,15 +18,30 @@
  */
 import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
+import _ from 'lodash';
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis, AggConfig } from '../../vis';
+import { Vis } from '../../vis';
 import { VisResponseData } from './types';
-
 import { Inspector } from '../../inspector';
-import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
+import { EmbeddedVisualizeHandler, RequestHandlerParams } from './embedded_visualize_handler';
+import { AggConfigs } from 'ui/vis/agg_configs';
 
 jest.mock('ui/new_platform');
+
+jest.mock('../../../../core_plugins/interpreter/public/registries', () => ({
+  registries: {
+    renderers: {
+      get: (name: string) => {
+        return {
+          render: async () => {
+            return {};
+          },
+        };
+      },
+    },
+  },
+}));
 
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
@@ -48,8 +63,17 @@ describe('EmbeddedVisualizeHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    jest.spyOn(_, 'debounce').mockImplementation(
+      // @ts-ignore
+      (f: Function) => {
+        // @ts-ignore
+        f.cancel = () => {};
+        return f;
+      }
+    );
+
     dataLoaderParams = {
-      aggs: [] as AggConfig[],
+      aggs: ([] as any) as AggConfigs,
       filters: undefined,
       forceFetch: false,
       inspectorAdapters: {},
@@ -152,9 +176,9 @@ describe('EmbeddedVisualizeHandler', () => {
     it('should call dataLoader.render with updated timeRange', () => {
       const params = { timeRange: { foo: 'bar' } };
       handler.update(params);
-      jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalled();
-      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      const callIndex = mockDataLoaderFetch.mock.calls.length - 1;
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[callIndex][0];
       expect(abortSignal).toBeInstanceOf(AbortSignal);
       expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
@@ -162,9 +186,9 @@ describe('EmbeddedVisualizeHandler', () => {
     it('should call dataLoader.render with updated filters', () => {
       const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
-      jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalled();
-      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      const callIndex = mockDataLoaderFetch.mock.calls.length - 1;
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[callIndex][0];
       expect(abortSignal).toBeInstanceOf(AbortSignal);
       expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
@@ -172,9 +196,9 @@ describe('EmbeddedVisualizeHandler', () => {
     it('should call dataLoader.render with updated query', () => {
       const params = { query: { foo: 'bar' } };
       handler.update(params);
-      jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalled();
-      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      const callIndex = mockDataLoaderFetch.mock.calls.length - 1;
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[callIndex][0];
       expect(abortSignal).toBeInstanceOf(AbortSignal);
       expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
