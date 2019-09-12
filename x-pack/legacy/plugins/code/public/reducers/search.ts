@@ -156,7 +156,7 @@ export const search = handleActions<SearchState, SearchPayload>(
           took,
           stats: {
             total,
-            from: from! + 1,
+            from: from as number,
             to: from! + results!.length,
             page: page!,
             totalPage: totalPage!,
