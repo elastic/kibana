@@ -19,11 +19,11 @@
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { Doc } from './doc';
+import { IndexPatternSelect } from './index_pattern_select';
 
-uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective: any) {
+uiModules.get('apps/discover').directive('discoverIndexPattern', function(reactDirective: any) {
   return reactDirective(
-    wrapInI18nContext(Doc),
+    wrapInI18nContext(IndexPatternSelect),
     [
       ['id', { watchDepth: 'value' }],
       ['index', { watchDepth: 'value' }],

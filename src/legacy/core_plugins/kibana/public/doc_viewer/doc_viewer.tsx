@@ -44,6 +44,10 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     };
   });
 
+  if (!tabs.length) {
+    return <div>No Tabs registered</div>;
+  }
+
   return (
     <div className="kbnDocViewer">
       <EuiTabbedContent tabs={tabs} />

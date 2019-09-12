@@ -21,7 +21,7 @@ import uiRoutes from 'ui/routes';
 import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 // @ts-ignore
 import html from './index.html';
-import '../doc_directive';
+import './doc_directive';
 import { IndexPatterns } from '../../../data/public/index_patterns';
 
 uiRoutes
@@ -33,7 +33,7 @@ uiRoutes
   // the new route, es 7 deprecated types, es 8 removed them
   .when('/doc/:indexPattern/:index', {
     controller: ($scope: any, $route: any, es: any) => {
-      $scope.es = es;
+      $scope.esClient = es;
       $scope.id = $route.current.params.id;
       $scope.index = $route.current.params.index;
       $scope.indexPattern = $route.current.locals.indexPattern;

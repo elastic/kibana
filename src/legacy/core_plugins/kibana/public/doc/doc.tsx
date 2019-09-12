@@ -16,43 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
-import { ElasticSearchHit } from 'ui/registry/doc_views_types';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import { IndexPattern } from 'ui/index_patterns';
+import { metadata } from 'ui/metadata';
 import { DocViewer } from '../doc_viewer/doc_viewer';
-import { searchDocById } from './search_doc_by_id';
+import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
 
-export function Doc({
-  id,
-  index,
-  indexPattern,
-  es,
-}: {
+export interface DocProps {
   id: string;
   index: string;
   indexPattern: IndexPattern;
-  es: any;
-}) {
-  const [status, setStatus] = useState('loading');
-  const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+  esClient: any;
+}
 
-  async function requestData() {
-    const result = await searchDocById(id, index, es, indexPattern);
-    setHit(result.hit ? result.hit : null);
-    setStatus(result.status);
-  }
-
-  useEffect(() => {
-    requestData();
-  }, []);
+export function Doc(props: DocProps) {
+  const [reqState, hit] = useEsDocSearch(props);
 
   return (
     <EuiPageContent>
-      {status === 'notFound' && (
+      {reqState === ElasticRequestState.NotFound && (
         <EuiCallOut
           color="danger"
+          data-test-subj={`doc-msg-notFound`}
           iconType="alert"
           title={
             <FormattedMessage
@@ -63,39 +50,50 @@ export function Doc({
         >
           <FormattedMessage
             id="kbn.doc.couldNotFindDocumentsDescription"
-            defaultMessage="Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better"
+            defaultMessage="No documents matching that ID were found."
           />
         </EuiCallOut>
       )}
 
-      {status === 'error' && (
+      {reqState === ElasticRequestState.Error && (
         <EuiCallOut
+          color="danger"
+          data-test-subj={`doc-msg-error`}
+          iconType="alert"
           title={
             <FormattedMessage
               id="kbn.doc.failedToExecuteQueryDescription"
               defaultMessage="Failed to execute query"
             />
           }
-          color="danger"
-          iconType="alert"
         >
           <FormattedMessage
             id="kbn.doc.somethingWentWrongDescription"
-            defaultMessage="Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here."
-          />
+            defaultMessage="{indexName} is missing."
+            values={{ indexName: props.index }}
+          />{' '}
+          <EuiLink
+            href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-exists.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="kbn.doc.somethingWentWrongDescriptionAddon"
+              defaultMessage="Please ensure the index exists."
+            />
+          </EuiLink>
         </EuiCallOut>
       )}
 
-      {status === 'loading' && (
-        <EuiCallOut>
+      {reqState === ElasticRequestState.Loading && (
+        <EuiCallOut data-test-subj={`doc-msg-loading`}>
           <EuiLoadingSpinner size="m" />{' '}
           <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />
         </EuiCallOut>
       )}
 
-      {status === 'found' && hit !== null && (
+      {reqState === ElasticRequestState.Found && hit !== null && (
         <div data-test-subj="doc-hit">
-          <DocViewer hit={hit} indexPattern={indexPattern} />
+          <DocViewer hit={hit} indexPattern={props.indexPattern} />
         </div>
       )}
     </EuiPageContent>
