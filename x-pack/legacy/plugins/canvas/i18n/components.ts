@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS, JSON as json, KIBANA as kibana, PDF as pdf, URL as url } from './constants';
+import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
   AddEmbeddableFlyout: {
@@ -236,10 +236,10 @@ export const ComponentStrings = {
   WorkpadHeaderWorkpadExport: {
     getCopyPDFMessage: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyPDFMessage', {
-        defaultMessage: 'The {pdf} generation {url} was copied to your clipboard.',
+        defaultMessage: 'The {PDF} generation {URL} was copied to your clipboard.',
         values: {
-          pdf,
-          url,
+          PDF,
+          URL,
         },
       }),
     getCopyReportingConfigMessage: () =>
@@ -248,81 +248,81 @@ export const ComponentStrings = {
       }),
     getExportPDFErrorTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFErrorMessage', {
-        defaultMessage: "Failed to create {pdf} for '{workpadName}'",
+        defaultMessage: "Failed to create {PDF} for '{workpadName}'",
         values: {
-          pdf,
+          PDF,
           workpadName,
         },
       }),
     getExportPDFMessage: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFMessage', {
-        defaultMessage: 'Exporting {pdf}. You can track the progress in Management.',
+        defaultMessage: 'Exporting {PDF}. You can track the progress in Management.',
         values: {
-          pdf,
+          PDF,
         },
       }),
     getExportPDFTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFTitle', {
-        defaultMessage: "{pdf} export of workpad '{workpadName}'",
+        defaultMessage: "{PDF} export of workpad '{workpadName}'",
         values: {
-          pdf,
+          PDF,
           workpadName,
         },
       }),
     getPDFPanelCopyAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyAriaLabel', {
         defaultMessage:
-          'Alternatively, you can generate a {pdf} from a script or with Watcher by using this {url}. Press Enter to copy the {url} to clipboard.',
+          'Alternatively, you can generate a {PDF} from a script or with Watcher by using this {URL}. Press Enter to copy the {URL} to clipboard.',
         values: {
-          pdf,
-          url,
+          PDF,
+          URL,
         },
       }),
     getPDFPanelCopyButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyButtonLabel', {
-        defaultMessage: 'Copy {post} {url}',
+        defaultMessage: 'Copy {POST} {URL}',
         values: {
-          post: 'POST',
-          url,
+          POST,
+          URL,
         },
       }),
     getPDFPanelCopyDescription: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyDescription', {
         defaultMessage:
-          'Alternatively, copy this {post} {url} to call generation from outside {kibana} or from Watcher.',
+          'Alternatively, copy this {POST} {URL} to call generation from outside {KIBANA} or from Watcher.',
         values: {
-          post: 'POST',
-          kibana,
-          url,
+          POST,
+          KIBANA,
+          URL,
         },
       }),
     getPDFPanelGenerateDescription: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateDescription', {
         defaultMessage:
-          '{pdf}s can take a minute or two to generate based on the size of your workpad.',
+          '{PDF}s can take a minute or two to generate based on the size of your workpad.',
         values: {
-          pdf,
+          PDF,
         },
       }),
     getPDFPanelGenerateButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateButtonLabel', {
-        defaultMessage: 'Generate {pdf}',
+        defaultMessage: 'Generate {PDF}',
         values: {
-          pdf,
+          PDF,
         },
       }),
     getShareDownloadJSONTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadJSONTitle', {
-        defaultMessage: 'Download as {json}',
+        defaultMessage: 'Download as {JSON}',
         values: {
-          json,
+          JSON,
         },
       }),
     getShareDownloadPDFTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadPDFTitle', {
-        defaultMessage: '{pdf} reports',
+        defaultMessage: '{PDF} reports',
         values: {
-          pdf,
+          PDF,
         },
       }),
     getShareWorkpadMessage: () =>

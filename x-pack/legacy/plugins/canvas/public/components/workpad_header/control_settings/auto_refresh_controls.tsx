@@ -28,10 +28,11 @@ import { CustomInterval } from './custom_interval';
 import { ComponentStrings, UnitStrings } from '../../../../i18n';
 const { WorkpadHeaderAutoRefreshControls: strings } = ComponentStrings;
 const { time: timeStrings } = UnitStrings;
+const { getSecondsText, getMinutesText, getHoursText } = timeStrings;
 
 interface Props {
   refreshInterval: number;
-  setRefresh: (interval: number) => void;
+  setRefresh: (interval: number | undefined) => void;
   disableInterval: () => void;
 }
 
@@ -103,22 +104,22 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
           <EuiFlexGrid gutterSize="s" columns={2}>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration={5000} label={timeStrings.getSecondsText(5)} />
-                <RefreshItem duration={15000} label={timeStrings.getSecondsText(15)} />
-                <RefreshItem duration={30000} label={timeStrings.getSecondsText(30)} />
-                <RefreshItem duration={60000} label={timeStrings.getMinutesText(1)} />
-                <RefreshItem duration={300000} label={timeStrings.getMinutesText(5)} />
-                <RefreshItem duration={900000} label={timeStrings.getMinutesText(15)} />
+                <RefreshItem duration={5000} label={getSecondsText(5)} />
+                <RefreshItem duration={15000} label={getSecondsText(15)} />
+                <RefreshItem duration={30000} label={getSecondsText(30)} />
+                <RefreshItem duration={60000} label={getMinutesText(1)} />
+                <RefreshItem duration={300000} label={getMinutesText(5)} />
+                <RefreshItem duration={900000} label={getMinutesText(15)} />
               </ListGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration={1800000} label={timeStrings.getMinutesText(30)} />
-                <RefreshItem duration={3600000} label={timeStrings.getHoursText(1)} />
-                <RefreshItem duration={7200000} label={timeStrings.getHoursText(2)} />
-                <RefreshItem duration={21600000} label={timeStrings.getHoursText(6)} />
-                <RefreshItem duration={43200000} label={timeStrings.getHoursText(12)} />
-                <RefreshItem duration={86400000} label={timeStrings.getHoursText(24)} />
+                <RefreshItem duration={1800000} label={getMinutesText(30)} />
+                <RefreshItem duration={3600000} label={getHoursText(1)} />
+                <RefreshItem duration={7200000} label={getHoursText(2)} />
+                <RefreshItem duration={21600000} label={getHoursText(6)} />
+                <RefreshItem duration={43200000} label={getHoursText(12)} />
+                <RefreshItem duration={86400000} label={getHoursText(24)} />
               </ListGroup>
             </EuiFlexItem>
           </EuiFlexGrid>

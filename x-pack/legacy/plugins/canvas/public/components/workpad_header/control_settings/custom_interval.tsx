@@ -6,14 +6,8 @@
 
 import React, { useState, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiButton,
-  ButtonSize,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
+import { ButtonSize } from '@elastic/eui/src/components/button/button';
 import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
 import { getTimeInterval } from '../../../lib/time_interval';
 
@@ -23,7 +17,7 @@ const { WorkpadHeaderCustomInterval: strings } = ComponentStrings;
 interface Props {
   gutterSize: FlexGroupGutterSize;
   buttonSize: ButtonSize;
-  onSubmit: (interval: number) => void;
+  onSubmit: (interval: number | undefined) => void;
   defaultValue: any;
 }
 
@@ -39,9 +33,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
       onSubmit={ev => {
         ev.preventDefault();
 
-        if (refreshInterval) {
-          onSubmit(refreshInterval);
-        }
+        onSubmit(refreshInterval);
       }}
     >
       <EuiFlexGroup gutterSize={gutterSize}>

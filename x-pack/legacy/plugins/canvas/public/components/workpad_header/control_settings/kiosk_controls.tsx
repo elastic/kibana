@@ -26,12 +26,13 @@ import { CustomInterval } from './custom_interval';
 import { ComponentStrings, UnitStrings } from '../../../../i18n';
 const { WorkpadHeaderKioskControls: strings } = ComponentStrings;
 const { time: timeStrings } = UnitStrings;
+const { getSecondsText, getMinutesText } = timeStrings;
 
 interface Props {
   autoplayEnabled: boolean;
   autoplayInterval: number;
   onSetEnabled: (enabled: boolean) => void;
-  onSetInterval: (interval: number) => void;
+  onSetInterval: (interval: number | undefined) => void;
 }
 
 interface ListGroupProps {
@@ -88,16 +89,16 @@ export const KioskControls = ({
           <EuiFlexGrid gutterSize="s" columns={2}>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration={5000} label={timeStrings.getSecondsText(5)} />
-                <RefreshItem duration={10000} label={timeStrings.getSecondsText(10)} />
-                <RefreshItem duration={30000} label={timeStrings.getSecondsText(30)} />
+                <RefreshItem duration={5000} label={getSecondsText(5)} />
+                <RefreshItem duration={10000} label={getSecondsText(10)} />
+                <RefreshItem duration={30000} label={getSecondsText(30)} />
               </ListGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration={60000} label={timeStrings.getMinutesText(1)} />
-                <RefreshItem duration={300000} label={timeStrings.getMinutesText(5)} />
-                <RefreshItem duration={900000} label={timeStrings.getMinutesText(15)} />
+                <RefreshItem duration={60000} label={getMinutesText(1)} />
+                <RefreshItem duration={300000} label={getMinutesText(5)} />
+                <RefreshItem duration={900000} label={getMinutesText(15)} />
               </ListGroup>
             </EuiFlexItem>
           </EuiFlexGrid>

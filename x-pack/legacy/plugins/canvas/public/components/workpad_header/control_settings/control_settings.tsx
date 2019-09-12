@@ -17,11 +17,11 @@ const { WorkpadHeaderControlSettings: strings } = ComponentStrings;
 
 interface Props {
   refreshInterval: number;
-  setRefreshInterval: (interval: number) => void;
+  setRefreshInterval: (interval: number | undefined) => void;
   autoplayEnabled: boolean;
   autoplayInterval: number;
   enableAutoplay: (enable: boolean) => void;
-  setAutoplayInterval: (interval: number) => void;
+  setAutoplayInterval: (interval: number | undefined) => void;
 }
 
 export const ControlSettings = ({
@@ -32,7 +32,7 @@ export const ControlSettings = ({
   enableAutoplay,
   setAutoplayInterval,
 }: Props) => {
-  const setRefresh = (val: number) => setRefreshInterval(val);
+  const setRefresh = (val: number | undefined) => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
