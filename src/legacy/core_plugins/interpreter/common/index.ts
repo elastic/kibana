@@ -18,6 +18,9 @@
  */
 
 export {
+  getType,
+  interpreterProvider,
+  serializeProvider,
   Datatable,
   DatatableColumn,
   DatatableRow,
@@ -34,10 +37,6 @@ export {
   PointSeriesColumnName,
   Render,
   Style,
-} from '../../../../plugins/data/common/expressions/expression_types';
+  Type,
+} from '../../../../plugins/expressions/common';
 export const API_ROUTE = '/api/interpreter';
-export * from '../../../../plugins/data/common/expressions/serialize_provider';
-export { Type } from '../../../../plugins/data/common/expressions/interpreter';
-export {
-  interpreterProvider,
-} from '../../../../plugins/data/common/expressions/interpreter_provider';

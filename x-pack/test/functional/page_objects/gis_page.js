@@ -539,7 +539,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openInspectorMapView() {
-      await inspector.openInspectorView('inspectorViewChooserMap');
+      await inspector.openInspectorView('~inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected

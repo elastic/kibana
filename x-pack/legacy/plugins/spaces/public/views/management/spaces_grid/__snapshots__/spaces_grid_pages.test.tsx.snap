@@ -39,12 +39,8 @@ exports[`SpacesGridPage renders as expected 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create a space"
