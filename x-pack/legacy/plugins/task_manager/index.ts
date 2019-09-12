@@ -41,12 +41,6 @@ export function taskManager(kibana: any) {
           )
           .min(1) // disable the task manager rather than trying to specify it with 0 workers
           .default(10),
-        override_num_workers: Joi.object()
-          .pattern(/.*/, Joi.number().greater(0))
-          .description(
-            'Customize the number of workers occupied by specific tasks (e.g. override_num_workers.reporting: 2)'
-          )
-          .default({}),
       }).default();
     },
     init(server: Legacy.Server) {

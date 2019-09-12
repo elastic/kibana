@@ -20,7 +20,6 @@ describe('TaskManager', () => {
     xpack: {
       task_manager: {
         max_workers: 10,
-        override_num_workers: {},
         index: 'foo',
         max_attempts: 9,
         poll_interval: 6000000,
