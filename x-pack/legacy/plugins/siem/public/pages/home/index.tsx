@@ -10,7 +10,6 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import chrome from 'ui/chrome';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
@@ -62,10 +61,8 @@ NavGlobal.displayName = 'NavGlobal';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
-/** Returns true if we are running with the k7 design */
-const isK7Design = () => chrome.getUiSettingsClient().get('k7design');
 /** the global Kibana navigation at the top of every page */
-const globalHeaderHeightPx = isK7Design ? 48 : 0;
+const globalHeaderHeightPx = 48;
 
 const calculateFlyoutHeight = ({
   globalHeaderSize,
@@ -156,8 +153,18 @@ export const HomePage = pure(() => (
                     />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
-                    <Route path="/ml-hosts" component={MlHostConditionalContainer} />
-                    <Route path="/ml-network" component={MlNetworkConditionalContainer} />
+                    <Route
+                      path="/ml-hosts"
+                      render={({ match, location }) => (
+                        <MlHostConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
+                    <Route
+                      path="/ml-network"
+                      render={({ match, location }) => (
+                        <MlNetworkConditionalContainer url={match.url} location={location} />
+                      )}
+                    />
                     <Route component={NotFoundPage} />
                   </Switch>
                 </EuiPageBody>

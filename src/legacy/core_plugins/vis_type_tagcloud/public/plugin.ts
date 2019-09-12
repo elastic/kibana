@@ -18,15 +18,15 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudTypeDefinition } from './tag_cloud_type';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
@@ -38,8 +38,8 @@ export class TagCloudPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { data, visualizations }: TagCloudPluginSetupDependencies) {
-    data.expressions.registerFunction(createTagCloudFn);
+  public setup(core: CoreSetup, { expressions, visualizations }: TagCloudPluginSetupDependencies) {
+    expressions.registerFunction(createTagCloudFn);
     visualizations.types.registerVisualization(createTagCloudTypeDefinition);
   }
 

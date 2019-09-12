@@ -8,13 +8,8 @@ import { badRequest } from 'boom';
 import { Request } from 'hapi';
 import { KbnServer, Logger } from '../../../../types';
 import { SearchPanel, VisPanel, JobParamsPanelCsv } from '../../types';
+import { FakeRequest } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
-
-interface FakeRequest {
-  headers: any;
-  getBasePath: (opts: any) => string;
-  server: KbnServer;
-}
 
 export function createGenerateCsv(logger: Logger) {
   return async function generateCsv(

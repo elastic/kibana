@@ -74,6 +74,7 @@ export const footerHeight = 40; // px
 
 interface FooterProps {
   itemsCount: number;
+  isEventViewer?: boolean;
   isLive: boolean;
   isLoading: boolean;
   itemsPerPage: number;
@@ -99,7 +100,7 @@ interface FooterState {
 export const EventsCount = pure<{
   closePopover: () => void;
   isOpen: boolean;
-  items: React.ReactNode[];
+  items: React.ReactElement[];
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
@@ -177,6 +178,7 @@ export class Footer extends React.Component<FooterProps, FooterState> {
       compact,
       hasNextPage,
       height,
+      isEventViewer,
       isLive,
       isLoading,
       itemsCount,
@@ -190,6 +192,7 @@ export class Footer extends React.Component<FooterProps, FooterState> {
       compact !== this.props.compact ||
       hasNextPage !== this.props.hasNextPage ||
       height !== this.props.height ||
+      isEventViewer !== this.props.isEventViewer ||
       isLive !== this.props.isLive ||
       isLoading !== this.props.isLoading ||
       isPopoverOpen !== this.state.isPopoverOpen ||
@@ -224,6 +227,7 @@ export class Footer extends React.Component<FooterProps, FooterState> {
   public render() {
     const {
       height,
+      isEventViewer,
       isLive,
       isLoading,
       itemsCount,
@@ -243,7 +247,7 @@ export class Footer extends React.Component<FooterProps, FooterState> {
             data-test-subj="LoadingPanelTimeline"
             height="35px"
             showBorder={false}
-            text={`${i18n.LOADING_TIMELINE_DATA}...`}
+            text={isEventViewer ? `${i18n.LOADING_EVENTS}...` : `${i18n.LOADING_TIMELINE_DATA}...`}
             width="100%"
           />
         </LoadingPanelContainer>

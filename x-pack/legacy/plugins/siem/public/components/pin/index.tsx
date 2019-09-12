@@ -25,10 +25,10 @@ interface Props {
 const PinButtonIcon = styled(EuiButtonIcon)<{ pinned: string }>`
   svg {
     ${({ pinned, theme }) => (pinned === 'true' ? `fill: ${theme.eui.euiColorPrimary};` : '')}
-    height: 22px;
+    height: 19px;
     ${({ pinned }) => `left: ${pinned === 'true' ? '-2' : '-1'}`}px;
     position: relative;
-    width: 22px;
+    width: 19px;
   }
 `;
 
@@ -41,7 +41,7 @@ export const Pin = pure<Props>(({ allowUnpinning, pinned, onClick = noop }) => (
     onClick={onClick}
     pinned={pinned.toString()}
     role="button"
-    size="l"
+    size="m"
     iconType={getPinIcon(pinned)}
   />
 ));
