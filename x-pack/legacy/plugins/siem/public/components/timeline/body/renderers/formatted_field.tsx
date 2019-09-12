@@ -71,45 +71,28 @@ export const FormattedFieldValue = pure<{
     );
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
-      <>
+      <EuiToolTip
+        position="left"
+        data-test-subj="message-tool-tip"
+        content={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <span>{fieldName}</span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>{value}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
         {truncate ? (
           <TruncatableText data-test-subj="truncatable-message">
-            <EuiToolTip
-              position="left"
-              data-test-subj="message-tool-tip"
-              content={
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <span>{fieldName}</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span>{value}</span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <>{value}</>
-            </EuiToolTip>
+            <>{value}</>
           </TruncatableText>
         ) : (
-          <EuiToolTip
-            position="left"
-            data-test-subj="message-tool-tip"
-            content={
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <span>{fieldName}</span>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <span>{value}</span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <>{value}</>
-          </EuiToolTip>
+          <>{value}</>
         )}
-      </>
+      </EuiToolTip>
     );
   } else {
     return getOrEmptyTagFromValue(value);

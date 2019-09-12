@@ -66,6 +66,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
                 eventId: _id,
                 field: header,
                 timelineId,
+                truncate: true,
                 values: getMappedNonEcsValue({
                   data,
                   fieldName: header.id,
