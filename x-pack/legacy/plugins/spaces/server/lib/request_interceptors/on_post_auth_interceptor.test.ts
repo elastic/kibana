@@ -8,8 +8,6 @@ import { Legacy } from 'kibana';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   HttpServiceSetup,
-  KibanaRequest,
-  KibanaResponseFactory,
   CoreSetup,
   SavedObjectsService,
 } from '../../../../../../../src/core/server';
@@ -79,7 +77,7 @@ describe('onPostAuthInterceptor', () => {
         {
           method: 'GET',
           path: '/api/test/foo',
-          handler: (req: any) => {
+          handler: (req: Legacy.Request) => {
             return { path: req.path, basePath: http.basePath.get(req) };
           },
         },
@@ -96,12 +94,9 @@ describe('onPostAuthInterceptor', () => {
     if (routes === 'new-platform') {
       const router = http.createRouter('/');
 
-      router.get(
-        { path: '/api/np_test/foo', validate: false },
-        (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
-          return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
-        }
-      );
+      router.get({ path: '/api/np_test/foo', validate: false }, (context, req, h) => {
+        return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
+      });
     }
   }
 
