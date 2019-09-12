@@ -173,17 +173,17 @@ class DraggableWrapperComponent extends React.Component<Props> {
       ? false
       : true;
 
-  // public componentDidMount() {
-  //   const { dataProvider, registerProvider } = this.props;
+  public componentDidMount() {
+    const { dataProvider, registerProvider } = this.props;
 
-  //   registerProvider!({ provider: dataProvider });
-  // }
+    registerProvider!({ provider: dataProvider });
+  }
 
-  // public componentWillUnmount() {
-  //   const { dataProvider, unRegisterProvider } = this.props;
+  public componentWillUnmount() {
+    const { dataProvider, unRegisterProvider } = this.props;
 
-  //   unRegisterProvider!({ id: dataProvider.id });
-  // }
+    unRegisterProvider!({ id: dataProvider.id });
+  }
 
   public render() {
     const { dataProvider, render, width } = this.props;
