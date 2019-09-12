@@ -64,9 +64,10 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     // Listen for dragSelect events
     this.dragSelectSubscriber = dragSelect$.subscribe(({ action, elements = [] }) => {
       const element = d3.select(this.rootNode.parentNode);
-      const { swimlaneCellClick, swimlaneType } = this.props;
+      const { swimlaneType } = this.props;
 
       if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
+        element.classed(SCSS.mlDragselectDragging, false);
         const firstSelectedCell = d3.select(elements[0]).node().__clickData__;
 
         if (typeof firstSelectedCell !== 'undefined' && swimlaneType === firstSelectedCell.swimlaneType) {
@@ -89,9 +90,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
             // immediately clear the selection, otherwise trigger
             // a reload with the updated selected cells.
             if (selectedData.bucketScore === 0) {
-              element.classed(SCSS.mlDragselectDragging, false);
               elements.map(e => d3.select(e).classed('ds-selected', false));
-              swimlaneCellClick({});
+              this.selectCell([], selectedData);
               previousSelectedData = null;
             } else {
               this.selectCell(elements, selectedData);
