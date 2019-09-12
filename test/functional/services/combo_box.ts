@@ -166,11 +166,11 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const menu = await retry.try(async () => {
         await testSubjects.click(comboBoxSelector);
         await this.waitForOptionsListLoading(comboBox);
-        const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+        const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
         if (!isOptionsListOpen) {
           throw new Error('Combo box options list did not open on click');
         }
-        return await testSubjects.find('comboBoxOptionsList');
+        return await testSubjects.find('~comboBoxOptionsList');
       });
       const optionsText = await menu.getVisibleText();
       await this.closeOptionsList(comboBox);
@@ -242,7 +242,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxElement element that wraps up EuiComboBox
      */
     public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (isOptionsListOpen) {
         const input = await comboBoxElement.findByTagName('input');
         await input.pressKeys(browser.keys.ESCAPE);
@@ -255,7 +255,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxElement element that wraps up EuiComboBox
      */
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (!isOptionsListOpen) {
         const toggleBtn = await comboBoxElement.findByCssSelector(
           '[data-test-subj="comboBoxToggleListButton"]'
