@@ -40,16 +40,16 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('mlTabSingleMetricViewer', 'mlPageSingleMetricViewer');
     },
 
+    async navigateToSettings() {
+      await this.navigateToArea('mlTabSettings', 'mlPageSettings');
+    },
+
     async navigateToDataFrames() {
       await this.navigateToArea('mlTabDataFrames', 'mlPageDataFrame');
     },
 
     async navigateToDataVisualizer() {
       await this.navigateToArea('mlTabDataVisualizer', 'mlPageDataVisualizerSelector');
-    },
-
-    async navigateToSettings() {
-      await this.navigateToArea('mlTabSettings', 'mlPageSettings');
     },
   };
 }

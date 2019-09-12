@@ -25,7 +25,7 @@ export default function VisualizationsPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'visualizations',
     require: ['data'],
-    publicDir: resolve(__dirname, 'public/np_ready/public'),
+    publicDir: resolve(__dirname, 'public'),
     config: (Joi: any) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
