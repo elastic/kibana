@@ -100,8 +100,7 @@ export class Plugin {
   };
 
   constructor(
-    // @ts-ignore unused field, but part of the NP setup procedure.
-    private readonly initializerContext: PluginInitializerContext,
+    initializerContext: PluginInitializerContext,
     private readonly legacyRouter: Legacy.Server['route']
   ) {
     this.config$ = initializerContext.config.create<SpacesConfigType>();
