@@ -29,11 +29,11 @@ import {
  *
  * @internal
  */
-export interface DataExpressionsPluginSetupDependencies {
+export interface ExpressionsPluginSetupDependencies {
   inspector: InspectorSetup;
 }
 
-export interface DataExpressionsPluginStartDependencies {
+export interface ExpressionsPluginStartDependencies {
   inspector: InspectorStart;
 }
 
@@ -50,24 +50,20 @@ export interface DataExpressionsStart {
   expressions: ExpressionsStart;
 }
 
-export class DataExpressionsPlugin
-  implements
-    Plugin<DataExpressionsSetup, DataExpressionsStart, DataExpressionsPluginSetupDependencies> {
+export class ExpressionsPlugin
+  implements Plugin<ExpressionsSetup, ExpressionsStart, xpressionsPluginSetupDependencies> {
   // Exposed services, sorted alphabetically
   private readonly expressions: ExpressionsService = new ExpressionsService();
 
-  public setup(core: CoreSetup): DataExpressionsSetup {
+  public setup(core: CoreSetup): ExpressionsSetup {
     return {
-      expressions: this.expressions.setup(),
+      ...this.expressions.setup(),
     };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: DataExpressionsPluginStartDependencies
-  ): DataExpressionsStart {
+  public start(core: CoreStart, plugins: ExpressionsPluginStartDependencies): ExpressionsStart {
     return {
-      expressions: this.expressions.start({ inspector: plugins.inspector }),
+      ...this.expressions.start({ inspector: plugins.inspector }),
     };
   }
 

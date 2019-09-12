@@ -18,11 +18,7 @@
  */
 
 // /// Define plugin function
-import {
-  DataExpressionsPlugin as Plugin,
-  DataExpressionsSetup,
-  DataExpressionsStart,
-} from './plugin';
+import { ExpressionsPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -31,7 +27,4 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataExpressionsSetup = DataExpressionsSetup;
-export type DataExpressionsStart = DataExpressionsStart;
-
-export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
+export * from './expressions';
