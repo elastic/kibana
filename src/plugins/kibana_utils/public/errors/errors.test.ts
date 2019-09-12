@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { DuplicateField, SavedObjectNotFound, KbnError } from './errors';
 
-describe('ui/errors', () => {
+describe('errors', () => {
   const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];
 
   errors.forEach(error => {

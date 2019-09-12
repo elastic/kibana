@@ -24,7 +24,8 @@ import {
   saveObject,
 } from '../resolve_saved_objects';
 
-jest.mock('ui/errors', () => ({
+
+jest.mock('../../../../../../../../../plugins/kibana_utils/public', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
       super();
@@ -36,6 +37,7 @@ jest.mock('ui/errors', () => ({
     }
   },
 }));
+import { SavedObjectNotFound } from '../../../../../../../../../plugins/kibana_utils/public';
 
 describe('resolveSavedObjects', () => {
   describe('resolveSavedObjects', () => {
@@ -81,7 +83,6 @@ describe('resolveSavedObjects', () => {
             return {
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
                 });
@@ -95,7 +96,6 @@ describe('resolveSavedObjects', () => {
             return {
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
                 });
@@ -109,7 +109,6 @@ describe('resolveSavedObjects', () => {
             return {
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
                 });
@@ -175,7 +174,6 @@ describe('resolveSavedObjects', () => {
             return {
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'search',
                 });
@@ -189,7 +187,6 @@ describe('resolveSavedObjects', () => {
             return {
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
                 });
@@ -204,7 +201,6 @@ describe('resolveSavedObjects', () => {
               savedSearchId: '1',
               applyESResp: async () => {},
               save: async () => {
-                const { SavedObjectNotFound } = require('ui/errors');
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
                 });
