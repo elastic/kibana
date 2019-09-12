@@ -84,13 +84,8 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
     labelType="label"
   >
     <EuiButton
-      color="primary"
-      fill={false}
-      iconSide="left"
       isDisabled={false}
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       Apply
     </EuiButton>

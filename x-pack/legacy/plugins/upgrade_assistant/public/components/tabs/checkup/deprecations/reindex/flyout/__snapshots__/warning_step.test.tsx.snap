@@ -119,12 +119,9 @@ exports[`WarningsFlyoutStep renders 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
           flush="left"
-          iconSide="left"
           iconType="cross"
           onClick={[MockFunction]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -140,10 +137,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
           color="danger"
           disabled={true}
           fill={true}
-          iconSide="left"
           onClick={[MockFunction]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Continue with reindex"

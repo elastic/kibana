@@ -34,6 +34,11 @@ export function CodeHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('importRepositoryButton');
     },
 
+    async clickIndexRepositoryButton() {
+      log.info('Click index repository button.');
+      return await testSubjects.click('indexRepositoryButton');
+    },
+
     async clickDeleteRepositoryButton() {
       log.info('Click delete repository button.');
       return await testSubjects.click('deleteRepositoryButton');

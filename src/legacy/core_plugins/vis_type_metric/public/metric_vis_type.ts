@@ -26,7 +26,7 @@ import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 // @ts-ignore
 import { MetricVisComponent } from './components/metric_vis_controller';
 
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 
 export const createMetricVisTypeDefinition = () => {
   return visFactory.createReactVisualization({

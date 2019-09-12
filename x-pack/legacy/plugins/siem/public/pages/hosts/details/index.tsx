@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -35,6 +35,8 @@ import { KpiHostsComponent } from '../../../components/page/hosts';
 
 import { HostDetailsComponentProps } from './type';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
+import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
 
 export { HostDetailsBody } from './body';
 
@@ -51,6 +53,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     setAbsoluteRangeDatePicker,
     to,
   }) => {
+    const capabilities = useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">
@@ -58,7 +61,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={type} />
+                  <HostsKql indexPattern={indexPattern} setQuery={setQuery} type={type} />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -142,7 +145,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
                 <EuiHorizontalRule />
                 <SiemNavigation
-                  navTabs={navTabsHostDetails(detailName)}
+                  navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
                   display="default"
                   showBorder={true}
                 />

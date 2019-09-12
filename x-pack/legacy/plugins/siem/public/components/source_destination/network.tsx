@@ -78,7 +78,7 @@ export const Network = pure<{
             <EuiFlexItemMarginRight grow={false} key={b}>
               <DefaultDraggable
                 field={NETWORK_BYTES_FIELD_NAME}
-                id={`${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
+                id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
                 value={b}
               >
                 <Stats size="xs">
@@ -97,7 +97,7 @@ export const Network = pure<{
           <EuiFlexItemMarginRight grow={false} key={p}>
             <DefaultDraggable
               field={NETWORK_PACKETS_FIELD_NAME}
-              id={`${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
+              id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
               value={p}
             >
               <Stats size="xs">

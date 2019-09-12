@@ -18,7 +18,7 @@ interface Props {
 
 export const EntityDraggable = React.memo<Props>(
   ({ idPrefix, entityName, entityValue }): JSX.Element => {
-    const id = escapeDataProviderId(`${idPrefix}-${entityName}-${entityValue}`);
+    const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
     return (
       <DraggableWrapper
         key={id}
