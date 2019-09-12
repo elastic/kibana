@@ -256,12 +256,9 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionEnabled"
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <button

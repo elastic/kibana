@@ -27,14 +27,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // @ts-ignore internal js that is passed to the browser as is
 import { takePercySnapshot, takePercySnapshotWithAgent } from './take_percy_snapshot';
 
+export const DEFAULT_OPTIONS = {
+  widths: [1200],
+};
+
 export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const lifecycle = getService('lifecycle');
-
-  const DEFAULT_OPTIONS = {
-    widths: [1200],
-  };
 
   let currentTest: Test | undefined;
   lifecycle.on('beforeEachTest', (test: Test) => {
