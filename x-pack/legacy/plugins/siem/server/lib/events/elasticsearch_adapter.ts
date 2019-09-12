@@ -147,20 +147,21 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
-    const eventsOverTimeBucket = getOr(null, 'aggregations.events.buckets', response);
+    const eventsOverTimeBucket = getOr([], 'aggregations.eventActionGroup.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
     return {
       inspect,
-      eventsOverTime: formatEventsOverTimeData(eventsOverTimeBucket),
+      // eventsOverTime: formatMatrixOverTimeData(eventsOverTimeBucket),
+      eventsOverTime: formatEventActionGroupData(eventsOverTimeBucket),
       totalCount,
     };
   }
 }
 
-export const formatEventsOverTimeData = (
+export const formatMatrixOverTimeData = (
   data: EventsOverTimeHistogram[]
 ): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
@@ -169,6 +170,22 @@ export const formatEventsOverTimeData = (
         y: doc_count,
       }))
     : [];
+};
+
+export const formatEventActionGroupData = (
+  data: EventsOverTimeHistogram[]
+): MatrixOverTimeHistogramData[] => {
+  let result: MatrixOverTimeHistogramData[] = [];
+  data.forEach(({ key: group, events }) => {
+    const eventsData = getOr([], 'buckets', events).map(({ key, doc_count }) => ({
+      x: key,
+      y: doc_count,
+      g: group,
+    }));
+    result = [...result, ...eventsData];
+  });
+
+  return result;
 };
 
 export const formatEventsData = (

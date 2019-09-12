@@ -19,6 +19,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
+    stackAccessors: ['g'],
   },
   axis: {
     xTickFormatter: niceTimeFormatter([from, to]),
@@ -27,7 +28,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   settings: {
     legendPosition: Position.Bottom,
     onBrushEnd,
-    showLegend: false,
+    showLegend: true,
     theme: {
       scales: {
         barsPadding: 0.05,

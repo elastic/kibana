@@ -96,7 +96,7 @@ export const BarChartWithCustomPrompt = React.memo<{
     data.length &&
     data.some(
       ({ value }) =>
-        value != null && value.length > 0 && value.every(chart => chart.y != null && chart.y > 0)
+        value != null && value.length > 0 && value.every(chart => chart.y != null && chart.y >= 0)
     ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} configs={configs} />
   ) : (

@@ -890,6 +890,8 @@ export interface MatrixOverTimeHistogramData {
   x: number;
 
   y: number;
+
+  g?: string | null;
 }
 
 export interface HostsData {
@@ -5273,6 +5275,8 @@ export namespace MatrixOverTimeHistogramDataResolvers {
     x?: XResolver<number, TypeParent, Context>;
 
     y?: YResolver<number, TypeParent, Context>;
+
+    g?: GResolver<string | null, TypeParent, Context>;
   }
 
   export type XResolver<
@@ -5282,6 +5286,11 @@ export namespace MatrixOverTimeHistogramDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type YResolver<
     R = number,
+    Parent = MatrixOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GResolver<
+    R = string | null,
     Parent = MatrixOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

@@ -30,20 +30,32 @@ export const buildEventsOverTimeQuery = ({
   const getHistogramAggregation = () => {
     const interval = calculateTimeseriesInterval(from, to, 1);
     const histogramTimestampField = '@timestamp';
-    if (interval != null)
-      return {
-        date_histogram: {
-          field: histogramTimestampField,
-          fixed_interval: `${interval}s`,
+    const dateHistogram = {
+      date_histogram: {
+        field: histogramTimestampField,
+        fixed_interval: `${interval}s`,
+      },
+    };
+    const autoDateHistogram = {
+      auto_date_histogram: {
+        field: histogramTimestampField,
+        buckets: 36,
+      },
+    };
+    return {
+      eventActionGroup: {
+        terms: {
+          field: 'event.action',
+          order: {
+            _count: 'desc',
+          },
+          size: 10,
         },
-      };
-    else
-      return {
-        auto_date_histogram: {
-          field: histogramTimestampField,
-          buckets: 36,
+        aggs: {
+          events: interval ? dateHistogram : autoDateHistogram,
         },
-      };
+      },
+    };
   };
 
   const dslQuery = {
@@ -51,9 +63,7 @@ export const buildEventsOverTimeQuery = ({
     allowNoIndices: true,
     ignoreUnavailable: true,
     body: {
-      aggregations: {
-        events: getHistogramAggregation(),
-      },
+      aggregations: getHistogramAggregation(),
       query: {
         bool: {
           filter,
