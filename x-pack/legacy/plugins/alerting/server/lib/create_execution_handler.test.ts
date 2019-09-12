@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createFireHandler } from './create_fire_handler';
+import { createExecutionHandler } from './create_execution_handler';
 
-const createFireHandlerParams = {
+const createExecutionHandlerParams = {
   executeAction: jest.fn(),
   spaceId: 'default',
   apiKey: 'MTIzOmFiYw==',
@@ -28,10 +28,10 @@ const createFireHandlerParams = {
 beforeEach(() => jest.resetAllMocks());
 
 test('calls executeAction per selected action', async () => {
-  const fireHandler = createFireHandler(createFireHandlerParams);
-  await fireHandler('default', {}, {});
-  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+  await executionHandler('default', {}, {});
+  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
@@ -48,16 +48,16 @@ test('calls executeAction per selected action', async () => {
 });
 
 test('limits executeAction per action group', async () => {
-  const fireHandler = createFireHandler(createFireHandlerParams);
-  await fireHandler('other-group', {}, {});
-  expect(createFireHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
+  const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+  await executionHandler('other-group', {}, {});
+  expect(createExecutionHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
 });
 
 test('context attribute gets parameterized', async () => {
-  const fireHandler = createFireHandler(createFireHandlerParams);
-  await fireHandler('default', { value: 'context-val' }, {});
-  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+  await executionHandler('default', { value: 'context-val' }, {});
+  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
@@ -74,10 +74,10 @@ test('context attribute gets parameterized', async () => {
 });
 
 test('state attribute gets parameterized', async () => {
-  const fireHandler = createFireHandler(createFireHandlerParams);
-  await fireHandler('default', {}, { value: 'state-val' });
-  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+  const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+  await executionHandler('default', {}, { value: 'state-val' });
+  expect(createExecutionHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createExecutionHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
