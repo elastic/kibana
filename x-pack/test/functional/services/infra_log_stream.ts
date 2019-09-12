@@ -13,19 +13,19 @@ export function InfraLogStreamProvider({ getService }: KibanaFunctionalTestDefau
   return {
     async getColumnHeaderLabels(): Promise<string[]> {
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
-        'logColumnHeader'
+        '~logColumnHeader'
       );
       return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
     },
 
     async getStreamEntries(): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAll('streamEntry');
+      return await testSubjects.findAll('~streamEntry');
     },
 
     async getLogColumnsOfStreamEntry(
       entryElement: WebElementWrapper
     ): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAllDescendant('logColumn', entryElement);
+      return await testSubjects.findAllDescendant('~logColumn', entryElement);
     },
   };
 }
