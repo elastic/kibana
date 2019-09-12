@@ -10,9 +10,9 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
   EuiToolTip,
-  EuiEmptyPrompt
+  EuiEmptyPrompt,
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -22,10 +22,10 @@ import { Transaction as ITransaction } from '../../../../../typings/es_schemas/u
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
-import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { TraceSummary } from './TraceSummary/TraceSummary';
 
 function MaybeViewTraceLink({
   transaction,
@@ -139,7 +139,7 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
 
   return (
     <EuiPanel paddingSize="m">
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
@@ -163,13 +163,14 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <StickyTransactionProperties
-        errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
-        transaction={entryTransaction}
-        totalDuration={waterfall.traceRootDuration}
-      />
+      <EuiSpacer size="s" />
 
-      <EuiSpacer />
+      <TraceSummary
+        errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
+        totalDuration={waterfall.traceRootDuration}
+        transaction={entryTransaction}
+      />
+      <EuiSpacer size="s" />
 
       <TransactionTabs
         transaction={entryTransaction}

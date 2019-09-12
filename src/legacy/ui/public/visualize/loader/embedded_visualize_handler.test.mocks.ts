@@ -71,6 +71,3 @@ const MockDataLoader = class {
 jest.mock('./pipeline_data_loader', () => ({
   PipelineDataLoader: MockDataLoader,
 }));
-jest.mock('./visualize_data_loader', () => ({
-  VisualizeDataLoader: MockDataLoader,
-}));

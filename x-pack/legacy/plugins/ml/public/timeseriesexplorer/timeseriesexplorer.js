@@ -22,6 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -103,6 +104,7 @@ function getTimeseriesexplorerDefaultState() {
     focusAnnotationData: [],
     focusChartData: undefined,
     focusForecastData: undefined,
+    fullRefresh: true,
     hasResults: false,
     jobs: [],
     // Counter to keep track of what data sets have been loaded.
@@ -127,9 +129,14 @@ function getTimeseriesexplorerDefaultState() {
   };
 }
 
-const TimeSeriesExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
+const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef }) => (
   <Fragment>
     <NavigationMenu tabId="timeseriesexplorer" />
+    {/* Show animated progress bar while loading */}
+    {loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" color="primary" size="xs" />)}
+    {/* Show a progress bar with progress 0% when not loading.
+        If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
+    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value={0} max={100} color="primary" size="xs" />)}
     <JobSelector {...jobSelectorProps} />
     <div className="ml-time-series-explorer" ref={resizeRef} >
       {children}
@@ -286,6 +293,11 @@ export class TimeSeriesExplorer extends React.Component {
         entities,
         modelPlotEnabled,
       } = this.state;
+
+      this.setState({
+        loading: true,
+        fullRefresh: false,
+      });
 
       getFocusData(
         criteriaFields,
@@ -466,7 +478,11 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  refresh = () => {
+  refresh = (fullRefresh = true) => {
+    if (this.state.loading && fullRefresh === false) {
+      return;
+    }
+
     const { appStateHandler, timefilter } = this.props;
     const {
       detectorId: currentDetectorId,
@@ -481,17 +497,22 @@ export class TimeSeriesExplorer extends React.Component {
 
     this.contextChartSelectedInitCallDone = false;
 
+    // Only when `fullRefresh` is true we'll reset all data
+    // and show the loading spinner within the page.
     this.setState({
-      chartDetails: undefined,
-      contextChartData: undefined,
-      contextForecastData: undefined,
-      focusChartData: undefined,
-      focusForecastData: undefined,
+      fullRefresh,
       loadCounter: currentLoadCounter + 1,
       loading: true,
-      modelPlotEnabled: isModelPlotEnabled(currentSelectedJob, +currentDetectorId, currentEntities),
-      hasResults: false,
-      dataNotChartable: false
+      ...(fullRefresh ? {
+        chartDetails: undefined,
+        contextChartData: undefined,
+        contextForecastData: undefined,
+        focusChartData: undefined,
+        focusForecastData: undefined,
+        modelPlotEnabled: isModelPlotEnabled(currentSelectedJob, +currentDetectorId, currentEntities),
+        hasResults: false,
+        dataNotChartable: false
+      } : {}),
     }, () => {
       const { detectorId, entities, loadCounter, jobs, modelPlotEnabled, selectedJob } = this.state;
       const detectorIndex = +detectorId;
@@ -793,7 +814,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
     this.subscriptions.add(interval$.subscribe(tableControlsListener));
     this.subscriptions.add(severity$.subscribe(tableControlsListener));
-    this.subscriptions.add(mlTimefilterRefresh$.subscribe(this.refresh));
+    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => this.refresh(false)));
 
     // Listen for changes to job selection.
     this.subscriptions.add(this.jobSelectService.subscribe(({ selection: selectedJobIds }) => {
@@ -923,6 +944,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusAnnotationData,
       focusChartData,
       focusForecastData,
+      fullRefresh,
       hasResults,
       jobs,
       loading,
@@ -952,6 +974,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
+      loading,
       svgWidth,
       zoomFrom,
       zoomTo,
@@ -1001,7 +1024,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowModelBounds = showModelBounds;
 
     return (
-      <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+      <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -1041,7 +1064,7 @@ export class TimeSeriesExplorer extends React.Component {
           </EuiFlexGroup>
         </div>
 
-        {(loading === true) && (
+        {(fullRefresh && loading === true) && (
           <LoadingIndicator
             label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
               defaultMessage: 'Loading',
@@ -1049,11 +1072,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === false) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === true) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {

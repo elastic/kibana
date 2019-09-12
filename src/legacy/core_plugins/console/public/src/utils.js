@@ -59,18 +59,39 @@ utils.reformatData = function (data, indent) {
 };
 
 utils.collapseLiteralStrings = function (data) {
-  return data.replace(/"""(?:\s*\r?\n)?((?:.|\r?\n)*?)(?:\r?\n\s*)?"""/g, function (match, literal) {
-    return JSON.stringify(literal);
-  });
+  const splitData = data.split(`"""`);
+  for (let idx = 1; idx < splitData.length - 1; idx += 2) {
+    splitData[idx] = JSON.stringify(splitData[idx]);
+  }
+  return splitData.join('');
 };
 
+/*
+  The following regex describes global match on:
+  1. one colon followed by any number of space characters
+  2. one double quote (not escaped, special case for JSON in JSON).
+  3. greedily match any non double quote and non newline char OR any escaped double quote char (non-capturing).
+  4. handle a special case where an escaped slash may be the last character
+  5. one double quote
+
+  For instance: `: "some characters \" here"`
+  Will match and be expanded to: `"""some characters " here"""`
+
+ */
+
+const LITERAL_STRING_CANDIDATES = /((:[\s\r\n]*)([^\\])"(\\"|[^"\n])*\\?")/g;
+
 utils.expandLiteralStrings = function (data) {
-  return data.replace(/("(?:\\"|[^"])*?")/g, function (match, string) {
-    // expand things with two slashes or more
-    if (string.split(/\\./).length > 2) {
-      string = JSON.parse(string).replace('^\s*\n', '').replace('\n\s*^', '');
-      const append = string.includes('\n') ? '\n' : ''; // only go multi line if the string has multiline
-      return '"""' + append + string + append + '"""';
+  return data.replace(LITERAL_STRING_CANDIDATES, function (match, string) {
+    // Expand to triple quotes if there are _any_ slashes
+    if (string.match(/\\./)) {
+      const firstDoubleQuoteIdx = string.indexOf('"');
+      const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
+      const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
+      const jsonValue = JSON.parse(rawStringifiedValue)
+        .replace('^\s*\n', '')
+        .replace('\n\s*^', '');
+      return `${colonAndAnySpacing}"""${jsonValue}"""`;
     } else {
       return string;
     }

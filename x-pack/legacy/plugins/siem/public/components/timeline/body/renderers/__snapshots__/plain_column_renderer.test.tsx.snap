@@ -8,7 +8,7 @@ exports[`plain_column_renderer rendering renders correctly against snapshot 1`] 
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "id-timeline-column-event_category-for-event-1-event_category-Access",
+        "id": "plain-column-renderer-data-provider-test-event_category-1-event_category-Access",
         "kqlQuery": "",
         "name": "event.category: Access",
         "queryMatch": Object {
@@ -18,7 +18,7 @@ exports[`plain_column_renderer rendering renders correctly against snapshot 1`] 
         },
       }
     }
-    key="timeline-draggable-column-event.category-for-event-1-event.category--Access"
+    key="plain-column-renderer-draggable-wrapper-test-event.category-1-event.category-Access"
     render={[Function]}
   />
 </span>

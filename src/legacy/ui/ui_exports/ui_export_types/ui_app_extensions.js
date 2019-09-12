@@ -34,8 +34,7 @@ const appExtension = wrap(
 // plain extension groups produce lists of modules that will be required by the entry
 // files to include extensions of specific types into specific apps
 export const visTypes = appExtension;
-export const visResponseHandlers = appExtension;
-export const visRequestHandlers = appExtension;
+
 export const visEditorTypes = appExtension;
 export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
