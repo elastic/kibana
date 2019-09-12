@@ -549,7 +549,7 @@ export interface State {
 
   timestamp: UnsignedInteger;
   /** Transport encryption information. */
-  tls?: StateTls | null;
+  tls?: (StateTls | null)[] | null;
 
   url?: StateUrl | null;
 }
@@ -618,7 +618,7 @@ export interface MonitorState {
 /** Contains monitor transmission encryption information. */
 export interface StateTls {
   /** The date and time after which the certificate is invalid. */
-  certificate_not_valid_after?: (string | null)[] | null;
+  certificate_not_valid_after?: string | null;
 
   certificate_not_valid_before?: string | null;
 
