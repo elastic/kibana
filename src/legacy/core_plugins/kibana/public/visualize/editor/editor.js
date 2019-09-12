@@ -78,6 +78,13 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
+            return savedVis;
+          })
           .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
@@ -95,6 +102,13 @@ uiRoutes
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
+            return savedVis;
+          })
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
             return savedVis;
           })
           .catch(redirectWhenMissing({

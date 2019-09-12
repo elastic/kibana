@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export * from './angular';
 export * from './constants';
+export * from './components';
 
 export const getAppDescription = () =>
   i18n.translate('xpack.canvas.appDescription', {
