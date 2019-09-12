@@ -23,5 +23,6 @@ The first week after feature freeze (FF) all known bugs and blockers will be fix
      - The original PR should be marked as tested with `apm-test-plan-done` (the new issue will ensure that the bug is prioritized and later tested)
    
    
-
-
+### Quick links
+ - [Untested PRs](https://github.com/elastic/kibana/pulls?utf8=✓&q=is%3Apr+label%3Av7.4.0+-label%3Aapm-test-plan-done+label%3Aapm-test-plan-7.4.0+)
+ - [Tested PRs](https://github.com/elastic/kibana/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3Av7.4.0+label%3Aapm-test-plan-done+label%3Aapm-test-plan-7.4.0+)
