@@ -17,22 +17,12 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-// @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
-// @ts-ignore
-import { DefaultEditorSize } from 'ui/vis/editor_size';
-import * as types from 'ui/vis/vis';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
-import { VisTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
 interface SetupDependencies {
   Vis: any;
   VisFactoryProvider: any;
   VisTypesRegistryProvider: any;
-  defaultFeedbackMessage: any;
-  visTypeAliasRegistry: VisTypeAliasRegistry;
 }
 
 /**
@@ -41,20 +31,13 @@ interface SetupDependencies {
  * @internal
  */
 export class TypesService {
-  public setup({
-    Vis,
-    VisFactoryProvider,
-    VisTypesRegistryProvider,
-    defaultFeedbackMessage,
-    visTypeAliasRegistry,
-  }: SetupDependencies) {
+  public setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }: SetupDependencies) {
     return {
       Vis,
       VisFactoryProvider,
       registerVisualization: (registerFn: () => any) => {
         VisTypesRegistryProvider.register(registerFn);
       },
-      defaultFeedbackMessage, // make default in base vis type, or move?
       visTypeAliasRegistry,
     };
   }
@@ -64,17 +47,11 @@ export class TypesService {
   }
 }
 
-/** @public */
+/** @internal */
 export type TypesSetup = ReturnType<TypesService['setup']>;
-
-export { visFactory, DefaultEditorSize };
 
 /** @public types */
 export type VisTypeAlias = VisTypeAlias;
-export type Vis = types.Vis;
-export type VisParams = types.VisParams;
-export type VisProvider = types.VisProvider;
-export type VisState = types.VisState;
-// todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
-export { VisTypesRegistry } from 'ui/registry/vis_types';
-export { Status } from 'ui/vis/update_status';
+
+/** @public static code */
+// TODO once items are moved from ui/vis into this service
