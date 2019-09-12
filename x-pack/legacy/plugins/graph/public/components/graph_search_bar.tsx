@@ -135,7 +135,7 @@ export function GraphSearchBar({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill type="submit" disabled={isLoading}>
+            <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
               {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
             </EuiButton>
           </EuiFlexItem>
