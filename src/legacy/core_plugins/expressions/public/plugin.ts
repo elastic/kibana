@@ -42,16 +42,15 @@ export interface ExpressionsPluginStartDependencies {
  *
  * @public
  */
-export interface DataExpressionsSetup {
-  expressions: ExpressionsSetup;
-}
-
-export interface DataExpressionsStart {
-  expressions: ExpressionsStart;
-}
 
 export class ExpressionsPlugin
-  implements Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsPluginSetupDependencies> {
+  implements
+    Plugin<
+      ExpressionsSetup,
+      ExpressionsStart,
+      ExpressionsPluginSetupDependencies,
+      ExpressionsPluginStartDependencies
+    > {
   // Exposed services, sorted alphabetically
   private readonly expressions: ExpressionsService = new ExpressionsService();
 
