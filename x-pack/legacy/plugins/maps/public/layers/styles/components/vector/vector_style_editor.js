@@ -105,6 +105,7 @@ export class VectorStyleEditor extends Component {
         ordinalFields={this.state.ordinalFields}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
+        loadFieldMeta={this.props.layer.loadFieldMeta}
       />
     );
   }
@@ -119,6 +120,7 @@ export class VectorStyleEditor extends Component {
         ordinalFields={this.state.ordinalFields}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
+        loadFieldMeta={this.props.layer.loadFieldMeta}
       />
     );
   }

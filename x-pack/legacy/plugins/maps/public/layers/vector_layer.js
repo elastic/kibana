@@ -13,6 +13,7 @@ import {
   GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
+  FIELD_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE
@@ -236,7 +237,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: SOURCE_DATA_ID_ORIGIN
+        origin: FIELD_ORIGIN.SOURCE
       };
     });
     const joinFields = [];
@@ -244,7 +245,7 @@ export class VectorLayer extends AbstractLayer {
       const fields = join.getJoinFields().map(joinField => {
         return {
           ...joinField,
-          origin: 'join',
+          origin: FIELD_ORIGIN.JOIN,
         };
       });
       joinFields.push(...fields);
@@ -758,4 +759,43 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
+  _getFieldSource = (field) => {
+    if (!field) {
+      return null;
+    }
+
+    if (field.origin === FIELD_ORIGIN.SOURCE) {
+      return this._source;
+    }
+
+    const join = this.getValidJoins().find(join => {
+      const matchingField = join.getJoinFields().find(joinField => {
+        return joinField.name === field.name;
+      });
+      return !!matchingField;
+    });
+
+    if (!join) {
+      return null;
+    }
+
+    return join.getRightJoinSource();
+  }
+
+  // Load meta data for a field.
+  // return { cancel, resultsPromise }
+  // resultsPromise resolves to { range, histogram }
+  loadFieldMeta = (field) => {
+    const source = this._getFieldSource(field);
+
+    if (!source) {
+      throw new Error(`Unable to find source for field: ${field.label}`);
+    }
+
+    if (!source.loadFieldMeta) {
+      throw new Error('Source does not support loading field meta');
+    }
+
+    return source.loadFieldMeta(field);
+  }
 }

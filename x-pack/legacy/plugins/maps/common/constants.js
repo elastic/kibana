@@ -46,6 +46,11 @@ export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 
+export const FIELD_ORIGIN = {
+  SOURCE: 'source',
+  JOIN: 'join'
+};
+
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision

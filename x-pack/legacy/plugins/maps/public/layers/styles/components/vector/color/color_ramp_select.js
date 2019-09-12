@@ -7,10 +7,11 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../../color_utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ColorStops } from './color_stops';
+import { AutoGenerateColorRampPopover } from './auto_generate_color_ramp_popover';
 
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
@@ -54,7 +55,11 @@ export class ColorRampSelect extends Component {
     if (this.props.useCustomColorRamp) {
       colorStopsInput = (
         <Fragment>
-          <EuiSpacer size="m" />
+          <AutoGenerateColorRampPopover
+            onChange={this._onCustomColorRampChange}
+            loadFieldMeta={this.props.loadFieldMeta}
+            field={this.props.field}
+          />
           <ColorStops
             colorStops={this.state.customColorRamp}
             onChange={this._onCustomColorRampChange}
@@ -95,4 +100,6 @@ ColorRampSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   useCustomColorRamp: PropTypes.bool,
   customColorRamp: PropTypes.array,
+  loadFieldMeta: PropTypes.func,
+  field: PropTypes.object,
 };

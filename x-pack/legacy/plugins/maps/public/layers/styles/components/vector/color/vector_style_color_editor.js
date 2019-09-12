@@ -24,6 +24,7 @@ export function VectorStyleColorEditor(props) {
       StaticSelector={StaticColorSelection}
       defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
       defaultStaticStyleOptions={props.defaultStaticStyleOptions}
+      loadFieldMeta={props.loadFieldMeta}
     />
   );
 }

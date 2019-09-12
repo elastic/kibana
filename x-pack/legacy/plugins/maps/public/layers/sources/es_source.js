@@ -291,4 +291,50 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
+  _getRawFieldName = (fieldName) => {
+    const metricField = this.getMetricFields().find(({ propertyKey }) => {
+      return propertyKey === fieldName;
+    });
+
+    return metricField ? metricField.field : null;
+  }
+
+  loadFieldMeta = (field) => {
+    const rawFieldName = this._getRawFieldName(field.name);
+    if (!rawFieldName) {
+      throw new Error(`Unable to find raw field for field: ${field.label}`);
+    }
+
+    const searchSource = new SearchSource();
+
+    const executeSearchSource = async () => {
+      const indexPattern = await this._getIndexPattern();
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 0);
+      searchSource.setField('aggs', {
+        fieldMin: {
+          min: {
+            field: rawFieldName
+          }
+        },
+        fieldMax: {
+          max: {
+            field: rawFieldName
+          }
+        }
+      });
+      const resp = await searchSource.fetch();
+      return {
+        min: _.get(resp, 'aggregations.fieldMin.value', ''),
+        max: _.get(resp, 'aggregations.fieldMax.value', '')
+      };
+    };
+
+    return {
+      cancel: () => {
+        searchSource.cancelQueued();
+      },
+      resultsPromise: executeSearchSource()
+    };
+  }
 }

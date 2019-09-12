@@ -78,6 +78,7 @@ export class StaticDynamicStyleRow extends React.Component {
           ordinalFields={this.props.ordinalFields}
           onChange={this._onDynamicStyleChange}
           styleOptions={this._getStyleOptions()}
+          loadFieldMeta={this.props.loadFieldMeta}
         />
       );
     }

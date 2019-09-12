@@ -118,6 +118,10 @@ export class AbstractSource {
   supportsElasticsearchFilters() {
     return false;
   }
+
+  _getRawFieldName = (/* fieldName */) => {
+    return null;
+  }
 }
 
 

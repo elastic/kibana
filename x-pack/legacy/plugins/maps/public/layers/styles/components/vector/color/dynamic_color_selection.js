@@ -12,7 +12,7 @@ import { FieldSelect, fieldShape } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { EuiSpacer } from '@elastic/eui';
 
-export function DynamicColorSelection({ ordinalFields, onChange, styleOptions }) {
+export function DynamicColorSelection({ ordinalFields, onChange, styleOptions, loadFieldMeta }) {
   const onFieldChange = ({ field }) => {
     onChange({ ...styleOptions, field });
   };
@@ -28,6 +28,8 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
         color={styleOptions.color}
         customColorRamp={styleOptions.customColorRamp}
         useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
+        loadFieldMeta={loadFieldMeta}
+        field={_.get(styleOptions, 'field')}
       />
       <EuiSpacer size="s" />
       <FieldSelect
@@ -42,5 +44,6 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
 DynamicColorSelection.propTypes = {
   ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicColorShape.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  loadFieldMeta: PropTypes.func,
 };
