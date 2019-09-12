@@ -17,6 +17,14 @@
  * under the License.
  */
 
-export { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions_service';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { IInterpreterRenderFunction } from './lib/_types';
+// /// Define plugin function
+import { ExpressionsPlugin as Plugin } from './plugin';
+
+export function plugin() {
+  return new Plugin();
+}
+
+// /// Export types & static code
+
+/** @public types */
+export * from './expressions';
