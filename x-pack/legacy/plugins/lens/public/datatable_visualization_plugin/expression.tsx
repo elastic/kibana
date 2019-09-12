@@ -8,9 +8,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+} from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../types';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public/expressions/lib/_types';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export interface DatatableColumns {

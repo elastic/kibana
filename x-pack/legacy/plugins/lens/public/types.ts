@@ -6,7 +6,8 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { Query, KibanaDatatable } from 'src/plugins/data/common';
+import { Query } from 'src/plugins/data/common';
+import { KibanaDatatable } from '../../../../../src/plugins/expressions/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 

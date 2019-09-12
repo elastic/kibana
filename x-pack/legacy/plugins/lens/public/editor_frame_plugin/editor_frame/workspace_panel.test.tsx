@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
   createMockVisualization,

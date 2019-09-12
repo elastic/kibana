@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;
