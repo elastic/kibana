@@ -47,95 +47,92 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
+          count: 4633,
+          sampleCount: 4633,
           histogram: {
-            doc_count: 4633,
-            histo: {
-              buckets: [
-                {
-                  doc_count: 705,
-                  key: 0,
-                },
-                {
-                  doc_count: 898,
-                  key: 1999,
-                },
-                {
-                  doc_count: 885,
-                  key: 3998,
-                },
-                {
-                  doc_count: 970,
-                  key: 5997,
-                },
-                {
-                  doc_count: 939,
-                  key: 7996,
-                },
-                {
-                  doc_count: 44,
-                  key: 9995,
-                },
-                {
-                  doc_count: 43,
-                  key: 11994,
-                },
-                {
-                  doc_count: 43,
-                  key: 13993,
-                },
-                {
-                  doc_count: 57,
-                  key: 15992,
-                },
-                {
-                  doc_count: 49,
-                  key: 17991,
-                },
-              ],
-            },
-          },
-          top_values: {
-            sum_other_doc_count: 4448,
-            doc_count_error_upper_bound: 0,
             buckets: [
               {
-                doc_count: 147,
+                count: 705,
                 key: 0,
               },
               {
-                doc_count: 5,
+                count: 898,
+                key: 1999,
+              },
+              {
+                count: 885,
+                key: 3998,
+              },
+              {
+                count: 970,
+                key: 5997,
+              },
+              {
+                count: 939,
+                key: 7996,
+              },
+              {
+                count: 44,
+                key: 9995,
+              },
+              {
+                count: 43,
+                key: 11994,
+              },
+              {
+                count: 43,
+                key: 13993,
+              },
+              {
+                count: 57,
+                key: 15992,
+              },
+              {
+                count: 49,
+                key: 17991,
+              },
+            ],
+          },
+          topValues: {
+            buckets: [
+              {
+                count: 147,
+                key: 0,
+              },
+              {
+                count: 5,
                 key: 3954,
               },
               {
-                doc_count: 5,
+                count: 5,
                 key: 6497,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 1840,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 4206,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 4328,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 4669,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 5846,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 5863,
               },
               {
-                doc_count: 4,
+                count: 4,
                 key: 6631,
               },
             ],
@@ -160,26 +157,22 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
+          count: 4633,
           histogram: {
-            histo: {
-              buckets: [
-                {
-                  doc_count: 1161,
-                  key: 1442875680000,
-                  key_as_string: '2015-09-21T22:48:00.000Z',
-                },
-                {
-                  doc_count: 3420,
-                  key: 1442914560000,
-                  key_as_string: '2015-09-22T09:36:00.000Z',
-                },
-                {
-                  doc_count: 52,
-                  key: 1442953440000,
-                  key_as_string: '2015-09-22T20:24:00.000Z',
-                },
-              ],
-            },
+            buckets: [
+              {
+                count: 1161,
+                key: 1442875680000,
+              },
+              {
+                count: 3420,
+                key: 1442914560000,
+              },
+              {
+                count: 52,
+                key: 1442953440000,
+              },
+            ],
           },
         });
       });
@@ -201,49 +194,48 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          doc_count: 4633,
-          top_values: {
-            sum_other_doc_count: 1798,
-            doc_count_error_upper_bound: 0,
+          count: 4633,
+          sampleCount: 4633,
+          topValues: {
             buckets: [
               {
-                doc_count: 832,
+                count: 832,
                 key: 'CN',
               },
               {
-                doc_count: 804,
+                count: 804,
                 key: 'IN',
               },
               {
-                doc_count: 425,
+                count: 425,
                 key: 'US',
               },
               {
-                doc_count: 158,
+                count: 158,
                 key: 'ID',
               },
               {
-                doc_count: 143,
+                count: 143,
                 key: 'BR',
               },
               {
-                doc_count: 116,
+                count: 116,
                 key: 'PK',
               },
               {
-                doc_count: 106,
+                count: 106,
                 key: 'BD',
               },
               {
-                doc_count: 94,
+                count: 94,
                 key: 'NG',
               },
               {
-                doc_count: 84,
+                count: 84,
                 key: 'RU',
               },
               {
-                doc_count: 73,
+                count: 73,
                 key: 'JP',
               },
             ],

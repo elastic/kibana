@@ -23,7 +23,10 @@ export interface TopValuesResult {
 }
 
 export interface FieldStatsResponse<KeyType = unknown> {
+  // Total count of documents
   count?: number;
+  // If sampled, the exact number of documents sampled
+  sampleCount?: number;
   histogram?: BucketedAggregation<KeyType>;
   topValues?: BucketedAggregation<KeyType>;
 }

@@ -51,7 +51,10 @@ export interface FieldItemProps {
 
 interface State {
   isLoading: boolean;
+  // Total number of results
   count?: number;
+  // If sampled, how many documents were seen?
+  sampleCount?: number;
   histogram?: BucketedAggregation<number | string>;
   topValues?: BucketedAggregation<number | string>;
 }
@@ -130,9 +133,27 @@ export function FieldItem({
           ...s,
           isLoading: false,
           count: results.count,
+          sampleCount: results.sampleCount,
           histogram: results.histogram,
           topValues: results.topValues,
         }));
+
+        if (
+          results.histogram &&
+          results.histogram.buckets.length &&
+          results.topValues &&
+          results.topValues.buckets.length
+        ) {
+          const count = results.sampleCount || results.count;
+          const totalValuesCount =
+            results.topValues &&
+            results.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
+          const otherCount = count && totalValuesCount ? count - totalValuesCount : 0;
+          // Default to histogram when top values are less than 10% of total
+          setShowingHistogram(otherCount / totalValuesCount > 0.9);
+        } else {
+          setShowingHistogram(!!results.histogram);
+        }
       })
       .catch(() => {
         setState(s => ({ ...s, isLoading: false }));
@@ -151,9 +172,10 @@ export function FieldItem({
   };
   const seriesColors = new Map([[colors, expectedColor]]);
 
+  const count = state.sampleCount || state.count;
   const totalValuesCount =
     state.topValues && state.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount = state.count && totalValuesCount ? state.count - totalValuesCount : 0;
+  const otherCount = count && totalValuesCount ? count - totalValuesCount : 0;
 
   const euiButtonColor =
     field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
@@ -270,7 +292,7 @@ export function FieldItem({
 
         {state.topValues &&
           (!state.histogram || !showingHistogram) &&
-          (state.count && (
+          (count && (
             <div data-test-subj="lnsFieldListPanel-topValues">
               {state.topValues.buckets.map(topValue => (
                 <React.Fragment key={topValue.key}>
@@ -282,7 +304,7 @@ export function FieldItem({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="eui-textTruncate">
                       <EuiText size="s" textAlign="left" color={euiTextColor}>
-                        {((topValue.count / state.count!) * 100).toFixed(1)}%
+                        {((topValue.count / count!) * 100).toFixed(1)}%
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -290,7 +312,7 @@ export function FieldItem({
                   <div>
                     <EuiFlexItem grow={1}>
                       <EuiProgress
-                        value={topValue.count / state.count!}
+                        value={topValue.count / count!}
                         max={1}
                         size="s"
                         color={euiButtonColor}
@@ -314,18 +336,13 @@ export function FieldItem({
 
                     <EuiFlexItem grow={false} className="eui-textTruncate">
                       <EuiText size="s" color="subdued">
-                        {((otherCount / state.count) * 100).toFixed(1)}%
+                        {((otherCount / count!) * 100).toFixed(1)}%
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
 
                   <div>
-                    <EuiProgress
-                      value={otherCount / state.count}
-                      max={1}
-                      size="s"
-                      color="subdued"
-                    />
+                    <EuiProgress value={otherCount / count} max={1} size="s" color="subdued" />
                   </div>
                 </>
               ) : (
@@ -334,17 +351,30 @@ export function FieldItem({
             </div>
           ))}
 
-        {state.count && (
+        {state.count ? (
           <div>
             <EuiSpacer size="m" />
-
-            <EuiText size="s">
-              {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
-                defaultMessage: '{docCount} documents',
-                values: { docCount: state.count },
-              })}
-            </EuiText>
+            {state.sampleCount ? (
+              <EuiText size="s">
+                {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
+                  defaultMessage: '{percentage}% of {docCount} documents',
+                  values: {
+                    docCount: state.count,
+                    percentage: ((state.sampleCount / state.count) * 100).toFixed(1),
+                  },
+                })}
+              </EuiText>
+            ) : (
+              <EuiText size="s">
+                {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
+                  defaultMessage: '{docCount} documents',
+                  values: { docCount: state.count },
+                })}
+              </EuiText>
+            )}
           </div>
+        ) : (
+          <></>
         )}
       </div>
     </EuiPopover>

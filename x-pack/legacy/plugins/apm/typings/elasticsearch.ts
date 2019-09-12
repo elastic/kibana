@@ -29,7 +29,8 @@ declare module 'elasticsearch' {
     | 'filter'
     | 'filters'
     | 'cardinality'
-    | 'sampler';
+    | 'sampler'
+    | 'value_count';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -87,6 +88,7 @@ declare module 'elasticsearch' {
         max: AggregatedValue;
         min: AggregatedValue;
         sum: AggregatedValue;
+        value_count: AggregatedValue;
         terms: BucketAggregation<
           AggregationOption[AggregationName],
           string | number
