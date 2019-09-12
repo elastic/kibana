@@ -292,7 +292,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
               </EuiButtonEmpty>
             }
           </EuiFlexItem>
-          <EuiFlexItem></EuiFlexItem>
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={reset} disabled={formUntouched}>
               {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {

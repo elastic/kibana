@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import rison from 'rison-node';
 import React from 'react';
-import Rx from 'rxjs';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -63,8 +62,6 @@ import { urlTemplateRegex } from  './services/url_template';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
-
-import inspectTemplate from './angular/templates/inspect.html';
 
 import './angular/directives/graph_inspect';
 
@@ -839,6 +836,9 @@ app.controller('graphuiPlugin', function (
         advancedSettings: { ...$scope.exploreControls },
         updateAdvancedSettings: (updatedSettings) => {
           $scope.exploreControls = updatedSettings;
+          if ($scope.workspace) {
+            $scope.workspace.options.exploreControls = updatedSettings;
+          }
         },
         blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
         unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
