@@ -24,4 +24,4 @@ export { fromUser } from './lib/from_user';
 export { toUser } from './lib/to_user';
 export { getQueryLog } from './lib/get_query_log';
 
-export { Query } from '../../../../../../plugins/data/common/query/types';
+export { Query } from '../../../../../../plugins/data/public';
