@@ -34,8 +34,8 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      */
     public async hasFilter(key: string, value: string, enabled: boolean = true): Promise<boolean> {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
-      return await testSubjects.exists(
-        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`,
+      return testSubjects.exists(
+        `filter filter-${filterActivationState} filter-key-${key} filter-value-${value}`,
         {
           allowHidden: true,
         }
@@ -48,7 +48,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * @param key field name
      */
     public async removeFilter(key: string): Promise<void> {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`deleteFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
@@ -69,19 +69,19 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * @param key field name
      */
     public async toggleFilterEnabled(key: string): Promise<void> {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`disableFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async toggleFilterPinned(key: string): Promise<void> {
-      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`~filter & ~filter-key-${key}`);
       await testSubjects.click(`pinFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async getFilterCount(): Promise<number> {
-      const filters = await testSubjects.findAll('filter');
+      const filters = await testSubjects.findAll('~filter');
       return filters.length;
     }
 
@@ -138,7 +138,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * @param value field value
      */
     public async clickEditFilter(key: string, value: string): Promise<void> {
-      await testSubjects.click(`filter & filter-key-${key} & filter-value-${value}`);
+      await testSubjects.click(`~filter & ~filter-key-${key} & ~filter-value-${value}`);
       await testSubjects.click(`editFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
@@ -147,7 +147,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
      * Returns available phrases in the filter
      */
     public async getFilterEditorSelectedPhrases(): Promise<string[]> {
-      return await comboBox.getComboBoxSelectedOptions('filterParamsComboBox');
+      return await comboBox.getComboBoxSelectedOptions('~filterParamsComboBox');
     }
 
     /**

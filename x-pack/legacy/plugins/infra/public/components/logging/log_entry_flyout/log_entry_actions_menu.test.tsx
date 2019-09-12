@@ -37,7 +37,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('uptimeLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(`"/app/uptime#/?search=(host.ip:HOST_IP)"`);
     });
 
@@ -65,7 +65,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('uptimeLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(`"/app/uptime#/?search=(container.id:CONTAINER_ID)"`);
     });
 
@@ -93,7 +93,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('uptimeLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(`"/app/uptime#/?search=(kubernetes.pod.uid:POD_UID)"`);
     });
 
@@ -125,7 +125,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('uptimeLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(
         `"/app/uptime#/?search=(container.id:CONTAINER_ID OR host.ip:HOST_IP OR kubernetes.pod.uid:POD_UID)"`
       );
@@ -156,7 +156,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper
-          .find(`button${testSubject('uptimeLogEntryActionsMenuItem')}`)
+          .find(`button${testSubject('~uptimeLogEntryActionsMenuItem')}`)
           .prop('disabled')
       ).toEqual(true);
     });
@@ -187,7 +187,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~apmLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(
         `"/app/apm#/traces?kuery=${encodeURIComponent(
           'trace.id:1234567'
@@ -223,7 +223,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`a${testSubject('apmLogEntryActionsMenuItem')}`).prop('href')
+        elementWrapper.find(`a${testSubject('~apmLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(
         `"/app/apm#/traces?kuery=${encodeURIComponent(
           'trace.id:1234567'
@@ -255,7 +255,7 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`button${testSubject('apmLogEntryActionsMenuItem')}`).prop('disabled')
+        elementWrapper.find(`button${testSubject('~apmLogEntryActionsMenuItem')}`).prop('disabled')
       ).toEqual(true);
     });
   });
