@@ -20,7 +20,7 @@ include::timelion.asciidoc[]
 
 include::canvas.asciidoc[]
 
-include::{kib-repo-dir}/ml/index.asciidoc[]
+include::ml/index.asciidoc[]
 
 include::{kib-repo-dir}/maps/index.asciidoc[]
 
