@@ -256,14 +256,14 @@ Params:
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops firing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|scheduleActions(actionGroup, context)|Called to schedule the firing of actions. The actionGroup relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
+|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
 |replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` isn't called during an execution.|
 
 ## Templating actions
