@@ -62,18 +62,26 @@ For a walkthrough of creating an index pattern and visualizing the data,
 see <<getting-started, Getting Started>>. 
 
 [float]
+[configure-rollup-index-pattern]
 ==== Rollup index pattern
 
 If a rollup index is detected in the cluster, clicking *Create index pattern* 
 includes an item for creating a rollup index pattern. You create an 
 index pattern for rolled up data the same way you do for any data.  
 
-You can match an index pattern to only rolled up data, or mix both rolled 
-up and raw data to visualize all data together. An index pattern can match 
-only one rollup index, not multiple. There is no restriction on the 
-number of standard indices that an index pattern can match.
+You can match an index pattern to only rolled up data, or mix rolled up 
+and raw data to visualize all data together. An index pattern can match only 
+one rolled up index, not multiple. There is no restriction on the number of 
+standard indices that an index pattern can match. When matching multiple 
+indices, use a comma to separate the names, with no space after the comma. 
 
-See <<visualize-rollup-data, Creating a visualization using rolled up data>> 
+Dashboards can have a mixture of rollup visualizations and regular 
+visualizations.
++
+[role="screenshot"]
+image::images/management_rolled_dashboard.png[][Rollups in dashboards]
+
+See <<visualize-rollup-data, Use rolled up data in a visualization>> 
 for more detailed information.
 
 [float]

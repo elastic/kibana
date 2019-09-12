@@ -2,7 +2,11 @@
 [[choose-your-data]]
 == Choose the data you want to display
 
-Short description
+Use the following data in your visualizations:
+
+* <<index-patterns, Index pattern>> for the indices that contain the data you want to visualize
+* Data from a <<save-open-search, saved search>>
+* <<visualize-rollup-data, Rolled up data>>
 
 [[visualize-rollup-data]]
 === Use rolled up data in a visualization
@@ -13,11 +17,8 @@ Visualize your rolled up data in charts, tables, maps, and
 more. Most visualizations support rolled up data, with the exception of 
 Timelion, TSVB, and Vega visualizations. 
 
-You can match an index pattern to only rolled up data, or mix both rolled up 
-and raw data to visualize all data together.  An index pattern can match only 
-one rolled up index, not multiple. There is no restriction on the number of 
-standard indices that an index pattern can match. When matching multiple 
-indices, use a comma to separate the names, with no space after the comma. 
+To use rollup up data in your visualization, you must 
+<<configure-rollup-index-pattern,create an index pattern for rollup up data>>.
 
 When you create a visualization from rolled up data:
 
@@ -28,32 +29,10 @@ numeric field values or terms. To lower granularity, ask for a time aggregation
 that takes several time buckets and combines them. For example, if the rollup 
 job is aggregated by hours, ask for buckets of days.
 
+NOTE: Not all queries and filters support rollups.
+
 Rolled up data shows the date histogram interval multiple and the limited 
 metrics aggregations.
 +
 [role="screenshot"]
 image::images/management_rollups_visualization.png[][Rollups in visualizations]
-
-Dashboards can have a mixture of rollup visualizations and regular 
-visualizations.
-+
-[role="screenshot"]
-image::images/management_rolled_dashboard.png[][Rollups in dashboards]
-
-NOTE: Not all queries and filters support rollups.
-
-[float]
-[[create-rollup-index-pattern]]
-==== Create a rollup index pattern
-
-Short description.
-
-. Go to *Management > Kibana > Index patterns.*
-
-. Click *Create index pattern*, then select *Rollup index pattern*.
-+
-*Rollup index pattern* appears only when a rollup index is detected in the 
-cluster.
-+
-[role="screenshot"]
-image::images/management_create_rollup_menu.png[Create index pattern menu]

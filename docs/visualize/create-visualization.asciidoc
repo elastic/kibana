@@ -1,19 +1,25 @@
-[[create-the-data]]
-== Create the visualization
-
-Short description.
-
-. Open *Visualize*.
-
-. Click *Create new visualization*.
-
-. On the *New Visualization* window, select the visualization type.
-
-. On the *New Area/Choose a source* window, choose the data you want to display.
-
 [float]
 [[build-the-visualization]]
-== Build the visualization
+== Build and save the visualization
 
-Something about the visualization builder.
+Use the visualization builder to build your visualization, then save the visualization to use at a later time.
+
+When you have insufficient privileges to save visualizations, the following indicator in {kib}
+displays and the *Save* button won't be visible. For more information on granting access to
+{kib}, see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
+
+. Choose the {ref}/search-aggregations.html[aggregations].
+
+. Change the display *Options*.
+
+. When you are finished, *Save* the visualization.
+
+Next steps:
+
+* Add your visualization to a <<dashboard, dashboard>>.
+
+* Manage your <<managing-saved-objects, saved visualizations>>.
 

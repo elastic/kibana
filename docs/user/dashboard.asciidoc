@@ -131,6 +131,20 @@ Many dashboard elements allow you to drill down into the data and requests
 behind the element. Open the menu in the upper right of the panel and select *Inspect*. 
 The views you see depend on the element that you inspect. 
 
+To inspect a visualization, click the *Inspect* button in the editor or 
+select *Inspect* from the Dashboard panel menu.
+
+The initial view shows the underlying data for the visualization. You can 
+download the data as a comma separated values (CSV) file in 
+*Formatted* or *Raw* format. Formatted downloads the data in table format.
+Raw downloads the data as provided -- dates are timestamps, numbers don’t have
+thousand separators, and so on.
+
+To view the requests that collected the data, select *Requests* from the *View* 
+menu in the upper right.
+
+The views available depend on the inspected visualization.
+
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
