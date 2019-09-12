@@ -27,6 +27,11 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
 
+const RENDER_COMPLETE_EVENT = 'render_complete';
+const DATA_SHARED_ITEM = 'data-shared-item';
+const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
+
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
@@ -48,6 +53,7 @@ export abstract class Embeddable<
 
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
+  // private element:
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -134,8 +140,17 @@ export abstract class Embeddable<
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    this._render(domNode, () => this.onRenderComplete());
+    this._render(domNode, () => this.onRenderComplete(domNode));
+
+    domNode.setAttribute(LOADING_ATTRIBUTE, '');
+    domNode.setAttribute(DATA_SHARED_ITEM, '');
+    domNode.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     return;
+  }
+
+  private incrementRenderingCount(domNode: HTMLElement | Element): void {
+    const renderingCount = Number(domNode.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    domNode.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
   }
 
   // overridden by extending classes
@@ -162,6 +177,7 @@ export abstract class Embeddable<
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
+    this.renderCompleteHelper.destroy();
     return;
   }
 
@@ -176,8 +192,10 @@ export abstract class Embeddable<
     }
   }
 
-  private onRenderComplete(): void {
+  private onRenderComplete(domNode: HTMLElement | Element): void {
     // console.log('RENDERING COMPLETE');
+    domNode.removeAttribute(LOADING_ATTRIBUTE);
+    this.incrementRenderingCount(domNode);
     this.updateOutput({ renderComplete: true } as Partial<TEmbeddableOutput>);
   }
 
