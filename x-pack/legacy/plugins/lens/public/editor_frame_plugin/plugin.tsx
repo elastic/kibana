@@ -33,12 +33,12 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  expressions: typeof expressionsSetup['expressions'];
+  expressions: typeof expressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
-  expressions: typeof expressionsStart['expressions'];
+  expressions: typeof expressionsStart;
   embeddables: ReturnType<EmbeddablePlugin['start']>;
   chrome: Chrome;
 }
@@ -124,13 +124,13 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data: dataSetup,
-    expressions: expressionsSetup.expressions,
+    expressions: expressionsSetup,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(null, {
     data: dataStart,
-    expressions: expressionsStart.expressions,
+    expressions: expressionsStart,
     chrome,
     embeddables: embeddablePlugin,
   });

@@ -8,15 +8,13 @@ import React from 'react';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import {
-  setup as expressionsSetup,
-  start as expressionsStart,
-} from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
+  ExpressionsSetup,
+  ExpressionsStart,
+} from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
 type DataSetup = typeof dataSetup;
-type ExpressionsSetup = typeof expressionsSetup;
-type ExpressionsStart = typeof expressionsStart;
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -88,13 +86,13 @@ type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export type MockedSetupDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
   data: Omit<DataSetup, 'expressions'> & {
-    expressions: jest.Mocked<ExpressionsSetup['expressions']>;
+    expressions: jest.Mocked<ExpressionsSetup>;
   };
 };
 
 export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'data'> & {
   data: Omit<DataSetup, 'expressions'> & {
-    expressions: jest.Mocked<ExpressionsStart['expressions']>;
+    expressions: jest.Mocked<ExpressionsStart>;
   };
 };
 

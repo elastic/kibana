@@ -7,11 +7,12 @@
 import { CoreSetup } from 'src/core/public';
 import { FormatFactory, getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { metricVisualization } from './metric_visualization';
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
 
 export interface MetricVisualizationPluginSetupPlugins {
-  expressions: typeof expressionsSetup;
+  expressions: ExpressionsSetup;
   // TODO this is a simulated NP plugin.
   // Once field formatters are actually migrated, the actual shim can be used
   fieldFormat: {
@@ -26,11 +27,9 @@ class MetricVisualizationPlugin {
     _core: CoreSetup | null,
     { expressions, fieldFormat }: MetricVisualizationPluginSetupPlugins
   ) {
-    expressions.expressions.registerFunction(() => metricChart);
+    expressions.registerFunction(() => metricChart);
 
-    expressions.expressions.registerRenderer(() =>
-      getMetricChartRenderer(fieldFormat.formatFactory)
-    );
+    expressions.registerRenderer(() => getMetricChartRenderer(fieldFormat.formatFactory));
 
     return metricVisualization;
   }
