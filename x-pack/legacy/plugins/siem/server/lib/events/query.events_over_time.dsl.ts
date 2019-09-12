@@ -46,6 +46,7 @@ export const buildEventsOverTimeQuery = ({
       eventActionGroup: {
         terms: {
           field: 'event.action',
+          missing: 'N/A',
           order: {
             _count: 'desc',
           },
