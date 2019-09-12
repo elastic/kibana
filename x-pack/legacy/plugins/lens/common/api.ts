@@ -22,7 +22,7 @@ export interface TopValuesResult {
   topValues: BucketedAggregation<string>;
 }
 
-export interface FieldStatsResponse<KeyType> {
+export interface FieldStatsResponse<KeyType = unknown> {
   count?: number;
   histogram?: BucketedAggregation<KeyType>;
   topValues?: BucketedAggregation<KeyType>;

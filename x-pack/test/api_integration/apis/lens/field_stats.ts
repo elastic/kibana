@@ -36,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_HEADERS)
           .send({
             query: { match_all: {} },
-            earliest: TEST_START_TIME,
-            latest: TEST_END_TIME,
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
             field: {
               name: 'bytes',
@@ -149,8 +149,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_HEADERS)
           .send({
             query: { match_all: {} },
-            earliest: TEST_START_TIME,
-            latest: TEST_END_TIME,
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
             field: {
               name: '@timestamp',
@@ -190,8 +190,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_HEADERS)
           .send({
             query: { match_all: {} },
-            earliest: TEST_START_TIME,
-            latest: TEST_END_TIME,
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
             field: {
               name: 'geo.src',

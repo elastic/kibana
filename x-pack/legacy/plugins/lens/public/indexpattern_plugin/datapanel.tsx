@@ -278,8 +278,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     npStart.core.http
       .post(`/api/lens/index_stats/${currentIndexPattern.title}`, {
         body: JSON.stringify({
-          earliest: dateRange.fromDate,
-          latest: dateRange.toDate,
+          fromDate: dateRange.fromDate,
+          toDate: dateRange.toDate,
           size: 500,
           timeFieldName: currentIndexPattern.timeFieldName,
           fields: allFields

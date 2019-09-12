@@ -349,8 +349,8 @@ describe('IndexPattern Data Panel', () => {
         `/api/lens/index_stats/my-fake-index-pattern`,
         {
           body: JSON.stringify({
-            earliest: 'now-7d',
-            latest: 'now',
+            fromDate: 'now-7d',
+            toDate: 'now',
             size: 500,
             timeFieldName: 'timestamp',
             fields: [
@@ -660,8 +660,8 @@ describe('IndexPattern Data Panel', () => {
             query: {
               bool: { filter: [] },
             },
-            earliest: 'now-7d',
-            latest: 'now',
+            fromDate: 'now-7d',
+            toDate: 'now',
             timeFieldName: 'timestamp',
             field: {
               name: 'bytes',

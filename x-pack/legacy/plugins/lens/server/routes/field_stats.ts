@@ -25,8 +25,8 @@ export async function initFieldsRoute(setup: CoreSetup) {
         body: schema.object(
           {
             query: schema.object({}, { allowUnknowns: true }),
-            earliest: schema.string(),
-            latest: schema.string(),
+            fromDate: schema.string(),
+            toDate: schema.string(),
             timeFieldName: schema.string(),
             field: schema.object(
               {
@@ -43,7 +43,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.dataClient;
-      const { earliest, latest, timeFieldName, field, query } = req.body;
+      const { fromDate, toDate, timeFieldName, field, query } = req.body;
 
       try {
         const filters = {
@@ -52,8 +52,8 @@ export async function initFieldsRoute(setup: CoreSetup) {
               {
                 range: {
                   [timeFieldName]: {
-                    gte: earliest,
-                    lte: latest,
+                    gte: fromDate,
+                    lte: toDate,
                   },
                 },
               },
@@ -82,7 +82,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
           });
         } else if (field.type === 'date') {
           return res.ok({
-            body: await getDateHistogram(search, field, { earliest, latest }),
+            body: await getDateHistogram(search, field, { fromDate, toDate }),
           });
         }
 
@@ -103,7 +103,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
   field: { name: string; type: string; esTypes?: string[] }
-): Promise<FieldStatsResponse<number>> {
+): Promise<FieldStatsResponse> {
   const searchBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -129,6 +129,7 @@ export async function getNumberHistogram(
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
   const terms = minMaxResult.aggregations!.sample.top_values;
+  const topValuesBuckets = bucketsToResponse<{ terms: { field: string; size: number } }>(terms);
 
   let histogramInterval = (maxValue! - minValue!) / 10;
 
@@ -138,11 +139,8 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      topValues: bucketsToResponse<typeof searchBody['sample']['aggs']['top_values'], number>(
-        terms
-      ),
+      topValues: topValuesBuckets,
       histogram: { buckets: [] },
-      // count: minMaxResult.aggregations!.sample.doc_count,
     };
   }
 
@@ -165,17 +163,17 @@ export async function getNumberHistogram(
   >;
 
   return {
-    histogram: bucketsToResponse<typeof histogramBody['sample']['aggs']['histo'], number>(
+    histogram: bucketsToResponse<typeof histogramBody['sample']['aggs']['histo']>(
       histogramResult.aggregations!.sample.histo
     ),
-    topValues: bucketsToResponse<typeof searchBody['sample']['aggs']['top_values'], number>(terms),
+    topValues: topValuesBuckets,
   };
 }
 
 export async function getStringSamples(
   aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string }
-): Promise<FieldStatsResponse<string>> {
+): Promise<FieldStatsResponse> {
   const topValuesBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -192,7 +190,7 @@ export async function getStringSamples(
   >;
 
   return {
-    topValues: bucketsToResponse<typeof topValuesBody['sample']['aggs']['top_values'], string>(
+    topValues: bucketsToResponse<typeof topValuesBody['sample']['aggs']['top_values']>(
       topValuesResult.aggregations!.sample.top_values
     ),
   };
@@ -202,19 +200,19 @@ export async function getStringSamples(
 export async function getDateHistogram(
   aggSearchWithBody: (body: unknown) => unknown,
   field: { name: string; type: string },
-  range: { earliest: string; latest: string }
-): Promise<FieldStatsResponse<string>> {
-  const earliest = DateMath.parse(range.earliest);
-  const latest = DateMath.parse(range.latest);
-  if (!earliest) {
-    throw Error('Invalid earliest value');
+  range: { fromDate: string; toDate: string }
+): Promise<FieldStatsResponse> {
+  const fromDate = DateMath.parse(range.fromDate);
+  const toDate = DateMath.parse(range.toDate);
+  if (!fromDate) {
+    throw Error('Invalid fromDate value');
   }
-  if (!latest) {
-    throw Error('Invalid latest value');
+  if (!toDate) {
+    throw Error('Invalid toDate value');
   }
 
   // TODO: Respect rollup intervals
-  const fixedInterval = `${Math.round((latest.valueOf() - earliest.valueOf()) / 10)}ms`;
+  const fixedInterval = `${Math.round((fromDate.valueOf() - toDate.valueOf()) / 10)}ms`;
 
   const histogramBody = {
     histo: {
@@ -227,13 +225,11 @@ export async function getDateHistogram(
   >;
 
   return {
-    histogram: bucketsToResponse<typeof histogramBody['histo'], string>(
-      results.aggregations!.histo
-    ),
+    histogram: bucketsToResponse<typeof histogramBody['histo']>(results.aggregations!.histo),
   };
 }
 
-function bucketsToResponse<K, KeyType>(agg: BucketAggregation<K, KeyType>) {
+function bucketsToResponse<K>(agg: BucketAggregation<K, unknown>) {
   return {
     buckets: agg.buckets.map(bucket => ({
       count: bucket.doc_count,

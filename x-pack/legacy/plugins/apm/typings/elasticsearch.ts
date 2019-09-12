@@ -87,7 +87,10 @@ declare module 'elasticsearch' {
         max: AggregatedValue;
         min: AggregatedValue;
         sum: AggregatedValue;
-        terms: BucketAggregation<AggregationOption[AggregationName]>;
+        terms: BucketAggregation<
+          AggregationOption[AggregationName],
+          string | number
+        >;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],
           number
