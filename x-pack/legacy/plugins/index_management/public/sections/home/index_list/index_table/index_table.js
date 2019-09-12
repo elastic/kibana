@@ -248,7 +248,9 @@ export class IndexTable extends Component {
             data-test-subj={`indexTableCell-${fieldName}`}
           >
             <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              {this.buildRowCell(fieldName, value, index)}
+              <span className="eui-textLeft">
+                {this.buildRowCell(fieldName, value, index)}
+              </span>
             </div>
           </th>
         );
