@@ -97,6 +97,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   <EuiModalBody>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label={

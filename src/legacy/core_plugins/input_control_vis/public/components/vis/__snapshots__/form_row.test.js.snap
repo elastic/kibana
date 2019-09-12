@@ -4,6 +4,7 @@ exports[`renders control with warning 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   id="controlId"
@@ -33,6 +34,7 @@ exports[`renders disabled control with tooltip 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   id="controlId"
@@ -56,6 +58,7 @@ exports[`renders enabled control 1`] = `
 <EuiFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   id="controlId"

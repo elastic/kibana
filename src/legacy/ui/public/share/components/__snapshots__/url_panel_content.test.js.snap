@@ -7,6 +7,7 @@ exports[`render 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -110,6 +111,7 @@ exports[`render 1`] = `
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -165,6 +167,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -257,6 +260,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -312,6 +316,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={

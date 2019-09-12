@@ -17,6 +17,7 @@ exports[`renders RangeControlEditor 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="stepSize-0"
@@ -40,6 +41,7 @@ exports[`renders RangeControlEditor 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="decimalPlaces-0"
