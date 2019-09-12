@@ -123,6 +123,8 @@ function getTimeseriesexplorerDefaultState() {
     tableData: undefined,
     zoomFrom: undefined,
     zoomTo: undefined,
+    zoomFromFocusLoaded: undefined,
+    zoomToFocusLoaded: undefined,
 
     // Toggles display of model bounds in the focus chart
     showModelBounds: true,
@@ -238,8 +240,8 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       jobs,
       selectedJob,
-      zoomFrom,
-      zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.state;
 
 
@@ -267,8 +269,8 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (
       (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
-      (zoomFrom.getTime() !== selection.from.getTime()) ||
-      (zoomTo.getTime() !== selection.to.getTime())
+      (zoomFromFocusLoaded.getTime() !== selection.from.getTime()) ||
+      (zoomToFocusLoaded.getTime() !== selection.to.getTime())
     ) {
       this.contextChartSelectedInitCallDone = true;
 
@@ -297,6 +299,8 @@ export class TimeSeriesExplorer extends React.Component {
       this.setState({
         loading: true,
         fullRefresh: false,
+        zoomFrom: selection.from,
+        zoomTo: selection.to,
       });
 
       getFocusData(
@@ -316,16 +320,13 @@ export class TimeSeriesExplorer extends React.Component {
           ...refreshFocusData,
           loading: false,
           showModelBoundsCheckbox: (modelPlotEnabled === true) && (refreshFocusData.focusChartData.length > 0),
+          zoomFromFocusLoaded: selection.from,
+          zoomToFocusLoaded: selection.to,
         });
       });
 
       // Load the data for the anomalies table.
       this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf());
-
-      this.setState({
-        zoomFrom: selection.from,
-        zoomTo: selection.to,
-      });
     }
   }
 
@@ -967,6 +968,8 @@ export class TimeSeriesExplorer extends React.Component {
       tableData,
       zoomFrom,
       zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.state;
 
     const chartProps = {
@@ -980,10 +983,12 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
-      skipRefresh: loading || this.props.globalState.ml.skipRefresh,
+      skipRefresh: loading || !!this.props.globalState.ml.skipRefresh,
       svgWidth,
       zoomFrom,
       zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
       autoZoomDuration,
     };
 

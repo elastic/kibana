@@ -113,7 +113,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
     zoomFrom: PropTypes.object,
-    zoomTo: PropTypes.object
+    zoomTo: PropTypes.object,
+    zoomFromFocusLoaded: PropTypes.object,
+    zoomToFocusLoaded: PropTypes.object
   };
 
   rowMouseenterSubscriber = null;
@@ -512,7 +514,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       showAnnotations,
       showForecast,
       showModelBounds,
-      intl
+      intl,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.props;
 
     if (focusChartData === undefined) {
@@ -543,10 +547,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Elasticsearch aggregation returns points at start of bucket,
     // so set the x-axis min to the start of the first aggregation interval,
     // and the x-axis max to the end of the last aggregation interval.
-    const bounds = this.selectedBounds;
-    if (typeof bounds === 'undefined') {
+    if (zoomFromFocusLoaded === undefined || zoomToFocusLoaded === undefined) {
       return;
     }
+    const bounds = { min: moment(zoomFromFocusLoaded.getTime()), max: moment(zoomToFocusLoaded.getTime()) };
+
     const aggMs = focusAggregationInterval.asMilliseconds();
     const earliest = moment(Math.floor((bounds.min.valueOf()) / aggMs) * aggMs);
     const latest = moment(Math.ceil((bounds.max.valueOf()) / aggMs) * aggMs);
