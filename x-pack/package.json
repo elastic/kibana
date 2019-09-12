@@ -261,6 +261,7 @@
     "immer": "^1.5.0",
     "inline-style": "^2.0.0",
     "intl": "^1.2.5",
+    "io-ts": "^1.8.2",
     "isbinaryfile": "4.0.2",
     "isomorphic-git": "0.55.5",
     "joi": "^13.5.2",
