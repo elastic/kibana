@@ -5,10 +5,10 @@
  */
 
 import { useMemo } from 'react';
-import { getWaterfall } from '../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { callApmApi } from '../services/rest/callApmApi';
+import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
   root: undefined,
@@ -38,5 +38,5 @@ export function useWaterfall(urlParams: IUrlParams) {
     transactionId
   ]);
 
-  return { data: waterfall, status, error, exceedsMax: data.trace.exceedsMax };
+  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }

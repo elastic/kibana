@@ -1,0 +1,57 @@
+[[visualize]]
+= Visualize
+
+[partintro]
+--
+Visualize enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to dashboards for analysis.
+ 
+Kibana visualizations are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+ 
+Create visualizations from a search saved in Discover, or start with a new search query.
+ 
+With visualizations, you can:
+* Cool thing 1
+* Cool thing 2
+* Cool thing 3
+
+--
+
+include::visualize/choose-your-visualization.asciidoc[]
+
+include::{kib-repo-dir}/visualize/saving.asciidoc[]
+
+include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+
+<<<<<<< HEAD:docs/visualize.asciidoc
+include::visualize/inspector.asciidoc[]
+=======
+include::{kib-repo-dir}/visualize/xychart.asciidoc[]
+
+include::{kib-repo-dir}/visualize/controls.asciidoc[]
+
+include::{kib-repo-dir}/visualize/datatable.asciidoc[]
+
+include::{kib-repo-dir}/visualize/markdown.asciidoc[]
+
+include::{kib-repo-dir}/visualize/metric.asciidoc[]
+
+include::{kib-repo-dir}/visualize/goal.asciidoc[]
+
+include::{kib-repo-dir}/visualize/pie.asciidoc[]
+
+include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
+
+include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
+
+include::{kib-repo-dir}/visualize/timelion.asciidoc[]
+
+include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
+
+include::{kib-repo-dir}/visualize/tagcloud.asciidoc[]
+
+include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
+
+include::{kib-repo-dir}/visualize/vega.asciidoc[]
+
+include::{kib-repo-dir}/visualize/inspector.asciidoc[]
+>>>>>>> master:docs/user/visualize.asciidoc

@@ -10,5 +10,5 @@ import { Row } from './helpers';
 
 export const plainRowRenderer: RowRenderer = {
   isInstance: _ => true,
-  renderRow: ({ children }) => <Row>{children}</Row>,
+  renderRow: ({ children }) => <Row className="euiTableRow">{children}</Row>,
 };

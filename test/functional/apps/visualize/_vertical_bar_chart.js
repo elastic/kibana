@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
-  describe('vertical bar chart', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
+  describe.skip('vertical bar chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';
@@ -277,7 +278,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with multiple splits', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/45105
+    describe.skip('vertical bar with multiple splits', function () {
       before(initBarChart);
 
       it('should show correct series', async function () {

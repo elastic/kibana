@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { Config } from '../SettingsList';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { SelectWithPlaceholder } from '../../../shared/SelectWithPlaceholder';
+import { Config } from '..';
 
 const selectPlaceholderLabel = `- ${i18n.translate(
   'xpack.apm.settings.agentConf.flyOut.selectPlaceholder',

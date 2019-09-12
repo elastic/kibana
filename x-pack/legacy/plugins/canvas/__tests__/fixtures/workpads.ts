@@ -6,6 +6,16 @@
 import { CanvasWorkpad, CanvasElement, CanvasPage } from '../../types';
 
 const BaseWorkpad: CanvasWorkpad = {
+  '@created': '2019-02-08T18:35:23.029Z',
+  '@timestamp': '2019-02-08T18:35:23.029Z',
+  assets: {
+    'asset-ada763f1-295e-4188-8e08-b5bed9e006a1': {
+      id: 'asset-ada763f1-295e-4188-8e08-b5bed9e006a1',
+      '@created': '2018-01-17T19:13:09.185Z',
+      type: 'dataurl',
+      value: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=',
+    },
+  },
   name: 'base workpad',
   id: 'base-workpad',
   width: 0,

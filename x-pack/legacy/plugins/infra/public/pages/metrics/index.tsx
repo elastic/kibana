@@ -33,7 +33,7 @@ import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
@@ -41,6 +41,7 @@ import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
 import { InfraLoadingPanel } from '../../components/loading';
+import { NodeDetails } from '../../components/metrics/node_details';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -87,7 +88,7 @@ export const MetricDetail = withMetricPageProviders(
         }
         const { sourceId } = useContext(Source.Context);
         const layouts = layoutCreator(theme);
-        const { name, filteredLayouts, loading: metadataLoading, cloudId } = useMetadata(
+        const { name, filteredLayouts, loading: metadataLoading, cloudId, metadata } = useMetadata(
           nodeId,
           nodeType,
           layouts,
@@ -132,11 +133,13 @@ export const MetricDetail = withMetricPageProviders(
           <WithMetricsTime>
             {({
               timeRange,
+              parsedTimeRange,
               setTimeRange,
               refreshInterval,
               setRefreshInterval,
               isAutoReloading,
               setAutoReload,
+              triggerRefresh,
             }) => (
               <ColumnarPage>
                 <Header
@@ -159,7 +162,7 @@ export const MetricDetail = withMetricPageProviders(
                   <WithMetrics
                     layouts={filteredLayouts}
                     sourceId={sourceId}
-                    timerange={timeRange as InfraTimerangeInput}
+                    timerange={parsedTimeRange}
                     nodeType={nodeType}
                     nodeId={nodeId}
                     cloudId={cloudId}
@@ -223,11 +226,12 @@ export const MetricDetail = withMetricPageProviders(
                                             setRefreshInterval={setRefreshInterval}
                                             onChangeTimeRange={setTimeRange}
                                             setAutoReload={setAutoReload}
+                                            onRefresh={triggerRefresh}
                                           />
                                         </MetricsTitleTimeRangeContainer>
                                       </EuiPageHeaderSection>
                                     </EuiPageHeader>
-
+                                    <NodeDetails metadata={metadata} />
                                     <EuiPageContentWithRelative>
                                       <Metrics
                                         label={name}
