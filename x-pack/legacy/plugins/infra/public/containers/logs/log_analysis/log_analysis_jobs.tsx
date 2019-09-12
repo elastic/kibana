@@ -195,13 +195,6 @@ export const useLogAnalysisJobs = ({
     dispatch({ type: 'viewedResults' });
   }, []);
 
-  const setup = useCallback(
-    (start, end) => {
-      setupMlModule(start, end);
-    },
-    [setupMlModule]
-  );
-
   const retry = useCallback(
     (start, end) => {
       dispatch({ type: 'retryingSetup' });
@@ -220,7 +213,7 @@ export const useLogAnalysisJobs = ({
     setupMlModuleRequest,
     jobStatus: statusState.jobStatus,
     isLoadingSetupStatus,
-    setup,
+    setup: setupMlModule,
     retry,
     setupStatus: statusState.setupStatus,
     viewResults,
