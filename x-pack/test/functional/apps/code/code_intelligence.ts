@@ -23,7 +23,8 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+  const exists = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
 
   describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {

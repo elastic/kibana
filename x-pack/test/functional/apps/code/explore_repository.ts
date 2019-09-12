@@ -22,7 +22,8 @@ export default function exploreRepositoryFunctionalTests({
   const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+  const exists = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
 
   const FIND_TIME = config.get('timeouts.find');
 
@@ -267,13 +268,7 @@ export default function exploreRepositoryFunctionalTests({
         });
 
         // Click the structure tree tab
-        await retry.try(async () => {
-          expect(await testSubjects.isEnabled('codeStructureTreeTab')).to.be.ok();
-        });
-        await testSubjects.click('codeStructureTreeTab');
-        await retry.try(async () => {
-          expect(await testSubjects.isSelected('codeStructureTreeTab')).to.be.ok();
-        });
+        await testSubjects.clickWhenNotDisabled('codeStructureTreeTab');
         await retry.tryForTime(300000, async () => {
           expect(await exists('codeStructureTreeNode-User')).to.be(true);
 
