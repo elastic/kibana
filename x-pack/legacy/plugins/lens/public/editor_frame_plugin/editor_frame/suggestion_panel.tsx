@@ -29,6 +29,10 @@ import { debouncedComponent } from '../../debounced_component';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
+// TODO: Remove this <any> when upstream fix is merged https://github.com/elastic/eui/issues/2329
+// eslint-disable-next-line
+const EuiPanelFixed = EuiPanel as React.ComponentType<any>;
+
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
   datasourceMap: Record<string, Datasource>;
@@ -73,7 +77,7 @@ const SuggestionPreview = ({
 
   return (
     <EuiToolTip content={preview.title}>
-      <EuiPanel
+      <EuiPanelFixed
         className={classNames('lnsSuggestionPanel__button', {
           'lnsSuggestionPanel__button-isSelected': selected,
         })}
@@ -115,7 +119,7 @@ const SuggestionPreview = ({
         {showTitleAsLabel && (
           <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
         )}
-      </EuiPanel>
+      </EuiPanelFixed>
     </EuiToolTip>
   );
 };
