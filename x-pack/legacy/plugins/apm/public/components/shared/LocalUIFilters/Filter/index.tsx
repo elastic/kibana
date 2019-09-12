@@ -45,6 +45,11 @@ const ApplyButton = styled(EuiButton)`
   align-self: flex-end;
 `;
 
+// needed for IE11
+const FlexItem = styled(EuiFlexItem)`
+  flex-basis: auto !important;
+`;
+
 interface Props {
   name: string;
   title: string;
@@ -115,7 +120,7 @@ const Filter = ({
           {(list, search) => (
             <SelectContainer>
               <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={true}>
+                <FlexItem grow={true}>
                   <EuiTitle size="xxxs" textTransform="uppercase">
                     <h4>
                       {i18n.translate('xpack.apm.applyFilter', {
@@ -130,8 +135,8 @@ const Filter = ({
                   <EuiSpacer size="s" />
                   {list}
                   <EuiSpacer size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                </FlexItem>
+                <FlexItem grow={false}>
                   <ApplyButton
                     color="primary"
                     fill={true}
@@ -149,7 +154,7 @@ const Filter = ({
                       defaultMessage: 'Apply options'
                     })}
                   </ApplyButton>
-                </EuiFlexItem>
+                </FlexItem>
               </EuiFlexGroup>
             </SelectContainer>
           )}
