@@ -34,6 +34,8 @@ run(
         `!${path}/**/build/**`,
         '--collectCoverageFrom', // Ignore coverage on test files
         `!${path}/**/__tests__/**/*`,
+        '--collectCoverageFrom', // Ignore coverage on example files
+        `!${path}/**/__examples__/**/*`,
         '--collectCoverageFrom', // Include JS files
         `${path}/**/*.js`,
         '--collectCoverageFrom', // Include TS/X files
