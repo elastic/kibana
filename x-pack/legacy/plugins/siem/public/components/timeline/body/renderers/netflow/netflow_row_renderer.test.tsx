@@ -24,14 +24,16 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
+jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
+
 describe('netflowRowRenderer', () => {
   test('renders correctly against snapshot', () => {
     const browserFields: BrowserFields = {};
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
-      width: 500,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -100,8 +102,8 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: justIdAndTimestamp,
-      width: 500,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -115,8 +117,8 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
-      width: 500,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

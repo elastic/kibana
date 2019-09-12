@@ -5,20 +5,16 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  isMultiMetricJobCreator,
-  PopulationJobCreator,
-  isPopulationJobCreator,
-} from '../job_creator';
-import { mlResultsService } from '../../../../services/results_service';
+import { parseInterval } from 'ui/utils/parse_interval';
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
+import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { ANOMALY_SEVERITY } from '../../../../../common/constants/anomalies';
 import { getScoresByRecord } from './searches';
 import { JOB_TYPE } from '../job_creator/util/constants';
 import { ChartLoader } from '../chart_loader';
+import { ES_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 export interface Results {
   progress: number;
@@ -55,12 +51,10 @@ const LAST_UPDATE_DELAY_MS = 500;
 
 export type ResultsSubscriber = (results: Results) => void;
 
-type AnyJobCreator = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
-
 export class ResultsLoader {
   private _results$: BehaviorSubject<Results>;
   private _resultsSearchRunning = false;
-  private _jobCreator: AnyJobCreator;
+  private _jobCreator: JobCreatorType;
   private _chartInterval: MlTimeBuckets;
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
@@ -75,7 +69,7 @@ export class ResultsLoader {
   private _detectorSplitFieldFilters: SplitFieldWithValue | null = null;
   private _splitFieldFiltersLoaded: boolean = false;
 
-  constructor(jobCreator: AnyJobCreator, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
+  constructor(jobCreator: JobCreatorType, chartInterval: MlTimeBuckets, chartLoader: ChartLoader) {
     this._jobCreator = jobCreator;
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
@@ -169,18 +163,27 @@ export class ResultsLoader {
     return this._createModel(resp, dtrIndex);
   }
 
-  private _createModel(resp: any, dtrIndex: number): Record<number, ModelItem[]> {
+  private _createModel(
+    { results }: ModelPlotOutputResults,
+    dtrIndex: number
+  ): Record<number, ModelItem[]> {
     if (this._results.model[dtrIndex] === undefined) {
       this._results.model[dtrIndex] = [];
     }
 
+    const dslName = this._jobCreator.aggregations[dtrIndex].dslName;
+    const isCountAgg = dslName === ES_AGGREGATION.COUNT || dslName === ES_AGGREGATION.CARDINALITY;
+    // if aggregation is count or distinct count, scale the model plot to match the real data.
+    const modelScale = isCountAgg ? this._calculateModelScale() : 1;
+
     // create ModelItem list from search results
-    const model = Object.entries(resp.results).map(
-      ([time, modelItems]) =>
-        ({
-          time: +time,
-          ...modelItems,
-        } as ModelItem)
+    const model: ModelItem[] = Object.entries(results).map(
+      ([time, { actual, modelLower, modelUpper }]) => ({
+        time: +time,
+        actual,
+        modelUpper: (modelUpper === null ? 0 : modelUpper) * modelScale,
+        modelLower: (modelLower === null ? 0 : modelLower) * modelScale,
+      })
     );
 
     if (model.length > 10) {
@@ -238,7 +241,11 @@ export class ResultsLoader {
   }
 
   private async _populateDetectorSplitFieldFilters() {
-    if (isMultiMetricJobCreator(this._jobCreator) || isPopulationJobCreator(this._jobCreator)) {
+    // only apply a split filter for multi-metric jobs
+    // for population jobs, the swimlane will not be 100% accurate as it's not
+    // filtering for the front card. this is a trade off to save loading
+    // lots of data.
+    if (isMultiMetricJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
           this._jobCreator.splitField
@@ -253,5 +260,14 @@ export class ResultsLoader {
       }
     }
     this._detectorSplitFieldFilters = null;
+  }
+
+  // calculate a scale for the model upper and lower by the ratio of chart interval to bucketspan.
+  // this will force the model bounds to be drawn in the correct location
+  private _calculateModelScale(): number {
+    const duration = parseInterval(this._jobCreator.bucketSpan);
+    const bucketSpanMs = duration !== null ? duration.asMilliseconds() : 0;
+    const chartIntervalMs = this._chartInterval.getInterval().asMilliseconds();
+    return chartIntervalMs / bucketSpanMs;
   }
 }

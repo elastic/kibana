@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -27,12 +26,12 @@ import { footerHeight } from '../footer';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
-import { ACTIONS_COLUMN_WIDTH } from './helpers';
+import { getActionsColumnWidth } from './helpers';
 import { Sort } from './sort';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 
-interface Props {
+export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -41,7 +40,7 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
-  isLoading: boolean;
+  isEventViewer?: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
@@ -56,7 +55,6 @@ interface Props {
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
 }
 
 const HorizontalScroll = styled.div<{
@@ -85,7 +83,7 @@ const VerticalScrollContainer = styled.div<{
 VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
-export const Body = pure<Props>(
+export const Body = React.memo<BodyProps>(
   ({
     addNoteToEvent,
     browserFields,
@@ -96,7 +94,7 @@ export const Body = pure<Props>(
     getNotesByIds,
     height,
     id,
-    isLoading,
+    isEventViewer = false,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -109,21 +107,20 @@ export const Body = pure<Props>(
     sort,
     toggleColumn,
     updateNote,
-    width,
   }) => {
     const columnWidths = columnHeaders.reduce(
       (totalWidth, header) => totalWidth + header.width,
-      ACTIONS_COLUMN_WIDTH
+      getActionsColumnWidth(isEventViewer)
     );
 
     return (
       <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
         <EuiText size="s">
           <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
             browserFields={browserFields}
             columnHeaders={columnHeaders}
-            isLoading={isLoading}
+            isEventViewer={isEventViewer}
             onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
@@ -142,7 +139,7 @@ export const Body = pure<Props>(
             minWidth={columnWidths}
           >
             <Events
-              actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -151,7 +148,7 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
-              isLoading={isLoading}
+              isEventViewer={isEventViewer}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUpdateColumns={onUpdateColumns}
@@ -161,7 +158,6 @@ export const Body = pure<Props>(
               toggleColumn={toggleColumn}
               updateNote={updateNote}
               minWidth={columnWidths}
-              width={width}
             />
           </VerticalScrollContainer>
         </EuiText>

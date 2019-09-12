@@ -5,43 +5,33 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-
-import { pure } from 'recompose';
-
-import { i18n } from '@kbn/i18n';
-import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { PageRoute } from '../../components/page_route/pageroute';
 
-export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
-  <>
-    <Switch>
-      <Route
-        strict
-        exact
-        path={match.url}
-        render={props => (
-          <PageRoute
-            {...props}
-            component={Network}
-            title={i18n.translate('xpack.siem.pages.network.networkTitle', {
-              defaultMessage: 'Network',
-            })}
-          />
-        )}
-      />
-      <Route
-        path={`${match.url}/ip/:ip`}
-        render={props => (
-          <PageRoute {...props} component={IPDetails} title={props.match.params.ip} />
-        )}
-      />
-      <Redirect from="/network/" to="/network" />
-    </Switch>
-  </>
+const networkPath = `/:pageName(network)`;
+
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const NetworkContainer = React.memo<Props>(() => (
+  <Switch>
+    <Route strict exact path={networkPath} render={() => <Network />} />
+    <Route
+      path={`${networkPath}/ip/:detailName`}
+      render={({
+        match: {
+          params: { detailName },
+        },
+      }) => <IPDetails detailName={detailName} />}
+    />
+    <Route
+      path="/network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/network/" to={`/network${search}`} />
+      )}
+    />
+  </Switch>
 ));
 
 NetworkContainer.displayName = 'NetworkContainer';

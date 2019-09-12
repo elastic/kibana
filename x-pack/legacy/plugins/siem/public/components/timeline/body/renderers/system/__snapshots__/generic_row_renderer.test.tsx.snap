@@ -2,16 +2,16 @@
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <SystemGenericFileDetails
         browserFields={Object {}}
-        contextId="user_login"
+        contextId="user_login-test"
         data={
           Object {
             "_id": "29",
@@ -97,6 +97,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
           }
         }
         text="some text"
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>
@@ -105,16 +106,16 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
 
 exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <SystemGenericDetails
         browserFields={Object {}}
-        contextId="process_started"
+        contextId="process_started-test"
         data={
           Object {
             "_id": "30",
@@ -200,6 +201,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
           }
         }
         text="some text"
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>

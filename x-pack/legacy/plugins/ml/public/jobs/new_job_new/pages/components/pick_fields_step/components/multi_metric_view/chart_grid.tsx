@@ -27,6 +27,7 @@ interface ChartGridProps {
   deleteDetector?: (index: number) => void;
   jobType: JOB_TYPE;
   animate?: boolean;
+  loading?: boolean;
 }
 
 export const ChartGrid: FC<ChartGridProps> = ({
@@ -39,6 +40,7 @@ export const ChartGrid: FC<ChartGridProps> = ({
   anomalyData,
   deleteDetector,
   jobType,
+  loading = false,
 }) => {
   const animateSplit = useAnimateSplit();
 
@@ -52,26 +54,24 @@ export const ChartGrid: FC<ChartGridProps> = ({
     >
       <EuiFlexGrid columns={chartSettings.cols}>
         {aggFieldPairList.map((af, i) => (
-          <EuiFlexItem key={i}>
-            {lineChartsData[i] !== undefined && (
-              <Fragment>
-                <DetectorTitle
-                  index={i}
-                  agg={aggFieldPairList[i].agg}
-                  field={aggFieldPairList[i].field}
-                  splitField={splitField}
-                  deleteDetector={deleteDetector}
-                />
-                <AnomalyChart
-                  chartType={CHART_TYPE.LINE}
-                  chartData={lineChartsData[i]}
-                  modelData={modelData[i]}
-                  anomalyData={anomalyData[i]}
-                  height={chartSettings.height}
-                  width={chartSettings.width}
-                />
-              </Fragment>
-            )}
+          <EuiFlexItem key={i} data-test-subj={`detector ${i}`}>
+            <Fragment>
+              <DetectorTitle
+                index={i}
+                agg={aggFieldPairList[i].agg}
+                field={aggFieldPairList[i].field}
+                deleteDetector={deleteDetector}
+              />
+              <AnomalyChart
+                chartType={CHART_TYPE.LINE}
+                chartData={lineChartsData[i]}
+                modelData={modelData[i]}
+                anomalyData={anomalyData[i]}
+                height={chartSettings.height}
+                width={chartSettings.width}
+                loading={loading}
+              />
+            </Fragment>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

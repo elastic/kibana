@@ -6,15 +6,10 @@
 
 import { badRequest } from 'boom';
 import { Request } from 'hapi';
-import { KbnServer, Logger, JobParams } from '../../../../types';
-import { SearchPanel, VisPanel } from '../../';
+import { KbnServer, Logger } from '../../../../types';
+import { SearchPanel, VisPanel, JobParamsPanelCsv } from '../../types';
+import { FakeRequest } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
-
-interface FakeRequest {
-  headers: any;
-  getBasePath: (opts: any) => string;
-  server: KbnServer;
-}
 
 export function createGenerateCsv(logger: Logger) {
   return async function generateCsv(
@@ -22,7 +17,7 @@ export function createGenerateCsv(logger: Logger) {
     server: KbnServer,
     visType: string,
     panel: VisPanel | SearchPanel,
-    jobParams: JobParams
+    jobParams: JobParamsPanelCsv
   ) {
     // This should support any vis type that is able to fetch
     // and model data on the server-side

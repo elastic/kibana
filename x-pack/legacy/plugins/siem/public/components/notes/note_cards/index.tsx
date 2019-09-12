@@ -12,6 +12,7 @@ import { Note } from '../../../lib/note';
 import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
+import { useTimelineWidthContext } from '../../timeline/timeline_context';
 
 const AddNoteContainer = styled.div``;
 
@@ -23,12 +24,29 @@ const NoteContainer = styled.div`
 
 NoteContainer.displayName = 'NoteContainer';
 
-const NoteCardsContainer = styled(EuiPanel)<{ width?: string }>`
-  border: none;
-  width: ${({ width = '100%' }) => width};
-`;
+interface NoteCardsCompProps {
+  children: React.ReactNode;
+}
 
-NoteCardsContainer.displayName = 'NoteCardsContainer';
+const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => {
+  const width = useTimelineWidthContext();
+
+  // Passing the styles directly to the component because the width is
+  // being calculated and is recommended by Styled Components for performance
+  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+  return (
+    <EuiPanel
+      data-test-subj="note-cards"
+      hasShadow={false}
+      paddingSize="none"
+      style={{ width: `${width - 10}px`, border: 'none' }}
+    >
+      {children}
+    </EuiPanel>
+  );
+});
+
+NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   padding: 0 5px;
@@ -45,7 +63,6 @@ interface Props {
   showAddNote: boolean;
   toggleShowAddNote: () => void;
   updateNote: UpdateNote;
-  width?: string;
 }
 
 interface State {
@@ -68,16 +85,10 @@ export class NoteCards extends React.PureComponent<Props, State> {
       showAddNote,
       toggleShowAddNote,
       updateNote,
-      width,
     } = this.props;
 
     return (
-      <NoteCardsContainer
-        data-test-subj="note-cards"
-        hasShadow={false}
-        paddingSize="none"
-        width={width}
-      >
+      <NoteCardsComp>
         {noteIds.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
             {getNotesByIds(noteIds).map(note => (
@@ -100,7 +111,7 @@ export class NoteCards extends React.PureComponent<Props, State> {
             />
           </AddNoteContainer>
         ) : null}
-      </NoteCardsContainer>
+      </NoteCardsComp>
     );
   }
 

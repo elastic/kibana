@@ -18,6 +18,7 @@ import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
@@ -47,7 +48,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/single_metric', {
+  .when('/jobs/new_job_old/single_metric', {
     template,
     k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
@@ -147,7 +148,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
-      aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
+      aggTypeOptions: filterAggTypes(aggTypes[METRIC_AGG_TYPE]),
       fields: [],
       timeFields: [],
       intervals: [{
@@ -621,10 +622,13 @@ module
       moveToAdvancedJobCreation(job);
     };
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: $scope.loadVis
+    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
+      fetchSub.unsubscribe();
     });
 
     $scope.$evalAsync(() => {

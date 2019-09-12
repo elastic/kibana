@@ -33,15 +33,15 @@ import { ORIGIN } from '../../tile_map/common/origin';
 export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
-  const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
-    description: i18n.translate('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
-provided base maps, or add your own. Darker colors represent higher values.' }),
+    description: i18n.translate('regionMap.mapVis.regionMapDescription', {
+      defaultMessage:
+        'Show metrics on a thematic map. Use one of the \
+provided base maps, or add your own. Darker colors represent higher values.',
+    }),
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
@@ -49,52 +49,111 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         emsHotLink: '',
-        selectedLayer,
-        selectedJoinField,
         isDisplayWarning: true,
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,
-        showAllShapes: true//still under consideration
-      }
+        showAllShapes: true, //still under consideration
+      },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization,
     editorConfig: {
-      optionsTemplate: (props) =>
-        (<RegionMapOptions
+      optionsTemplate: props => (
+        <RegionMapOptions
           {...props}
           serviceSettings={serviceSettings}
-          includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
         />),
       collections: {
         colorSchemas,
-        vectorLayers,
-        tmsLayers: []
+        vectorLayers: [],
+        tmsLayers: [],
       },
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', {
+            defaultMessage: 'Value',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
-            'sum_bucket', 'min_bucket', 'max_bucket', 'avg_bucket'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          aggFilter: [
+            'count',
+            'avg',
+            'sum',
+            'min',
+            'max',
+            'cardinality',
+            'top_hits',
+            'sum_bucket',
+            'min_bucket',
+            'max_bucket',
+            'avg_bucket',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'Shape field' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', {
+            defaultMessage: 'Shape field',
+          }),
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: ['terms'],
+        },
+      ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+
+      const tmsLayers = await serviceSettings.getTMSServices();
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+
+      const vectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
+      );
+      let selectedLayer = vectorLayers[0];
+      let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      if (regionmapsConfig.includeElasticMapsService) {
+        const layers = await serviceSettings.getFileLayers();
+        const newLayers = layers
+          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+          .filter(
+            (layer) =>
+              !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+          );
+
+        // backfill v1 manifest for now
+        newLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+          }
+        });
+
+        vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+
+        [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+
+        if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
+          vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
         }
-      ])
-    }
+      }
+
+      if (!vis.params.selectedLayer) {
+        vis.params.selectedLayer = selectedLayer;
+        vis.params.selectedJoinField = selectedJoinField;
+      }
+
+      return savedVis;
+    },
   });
 }

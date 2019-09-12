@@ -53,14 +53,20 @@ export async function getLocalUIFilters({
 
   const response = await client.search(params);
 
+  const { aggregations } = response;
+
+  if (!aggregations) {
+    return [];
+  }
+
   return localFilterNames.map(key => {
-    const aggregations = response.aggregations[key];
+    const aggregationsForFilter = aggregations[key];
     const filter = localUIFilters[key];
 
     return {
       ...filter,
       options: sortByOrder(
-        aggregations.by_terms.buckets.map(bucket => {
+        aggregationsForFilter.by_terms.buckets.map(bucket => {
           return {
             name: bucket.key,
             count:

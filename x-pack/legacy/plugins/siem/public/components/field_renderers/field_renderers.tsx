@@ -38,7 +38,7 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
               <DefaultDraggable
-                id={`${IpOverviewId}-${fieldName}`}
+                id={`location-renderer-default-draggable-${IpOverviewId}-${fieldName}`}
                 field={fieldName}
                 value={locationValue}
               />
@@ -59,19 +59,21 @@ export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowTarget: FlowTarget
 ): React.ReactElement =>
-  as && as.as_org && as.asn ? (
+  as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
-          field={`${flowTarget}.autonomous_system.as_org`}
-          value={as.as_org}
+          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.organization.name`}
+          field={`${flowTarget}.as.organization.name`}
+          value={as.organization.name}
         />
-        {' /'}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{'/'}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
-          field={`${flowTarget}.autonomous_system.asn`}
-          value={as.asn}
+          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.number`}
+          field={`${flowTarget}.as.number`}
+          value={`${as.number}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -93,7 +95,11 @@ export const hostIdRenderer = ({
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {host.name && host.name[0] != null ? (
-        <DefaultDraggable id={`${IpOverviewId}-host-id`} field="host.id" value={host.id[0]}>
+        <DefaultDraggable
+          id={`host-id-renderer-default-draggable-${IpOverviewId}-host-id`}
+          field="host.id"
+          value={host.id[0]}
+        >
           {noLink ? (
             <>{host.id}</>
           ) : (
@@ -110,7 +116,11 @@ export const hostIdRenderer = ({
 
 export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name[0]}>
+    <DefaultDraggable
+      id={`host-name-renderer-default-draggable-${IpOverviewId}-host-name`}
+      field={'host.name'}
+      value={host.name[0]}
+    >
       <HostDetailsLink hostName={host.name[0]}>
         {host.name ? host.name : getEmptyTagValue()}
       </HostDetailsLink>
@@ -144,7 +154,9 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
   ({ rowItems, attrName, idPrefix, render, displayCount = 1, maxOverflow = 5 }) => {
     if (rowItems != null && rowItems.length > 0) {
       const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-        const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+        const id = escapeDataProviderId(
+          `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
+        );
         return (
           <EuiFlexItem key={id} grow={false}>
             {index !== 0 && (

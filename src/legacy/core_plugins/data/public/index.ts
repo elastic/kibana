@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -28,19 +28,43 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+export type DataStart = DataStart;
 
-/** @public types */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
+export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
-export { SearchBar, SearchBarProps } from './search';
+export {
+  Field,
+  FieldType,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
+export { Query, QueryBar, QueryBarInput } from './query';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+
+/** @public static code */
+export * from '../common';
 export {
   FilterManager,
   FilterStateManager,
   uniqFilters,
   onlyDisabledFiltersChanged,
 } from './filter/filter_manager';
-
-/** @public static code */
-export * from '../common';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  IndexPatternSelect,
+  IndexPatternsProvider, // LEGACY
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from './index_patterns';

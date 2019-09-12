@@ -143,7 +143,7 @@ export const NodesOverview = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-                      defaultMessage="Showing the last 1 minute of data from the time period"
+                      defaultMessage="Showing the last 1 minute of data at the selected time"
                     />
                   </p>
                 </EuiText>
@@ -181,7 +181,7 @@ export const NodesOverview = injectI18n(
 
     private handleViewChange = (view: string) => this.props.onViewChange(view);
 
-    // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
+    // TODO: Change this to a real implementation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {
       const { metric } = this.props.options;
       const metricFormatter = get(

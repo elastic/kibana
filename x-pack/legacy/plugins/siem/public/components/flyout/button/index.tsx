@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
@@ -78,6 +77,7 @@ export const Badge = (props: EuiBadgeProps) => (
       borderRadius: '5px',
       minWidth: '25px',
       padding: '0px',
+      textAlign: 'center',
       transform: 'translateY(10px)',
       zIndex: 10,
     }}
@@ -93,31 +93,36 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProviders, timelineId }) =>
-  show ? (
-    <Container>
-      <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-        <BadgeButtonContainer
-          className="flyout-overlay"
-          data-test-subj="flyoutOverlay"
-          onClick={onOpen}
-        >
-          {dataProviders.length !== 0 && (
-            <Badge data-test-subj="badge" color="primary">
-              {dataProviders.length}
-            </Badge>
-          )}
-          <Button>
-            <Text data-test-subj="flyoutButton" size="s">
-              {i18n.TIMELINE.toLocaleUpperCase()
-                .split('')
-                .join(' ')}
-            </Text>
-          </Button>
-        </BadgeButtonContainer>
-      </DroppableWrapper>
-    </Container>
-  ) : null
+export const FlyoutButton = React.memo<FlyoutButtonProps>(
+  ({ onOpen, show, dataProviders, timelineId }) =>
+    show ? (
+      <Container>
+        <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
+          <BadgeButtonContainer
+            className="flyout-overlay"
+            data-test-subj="flyoutOverlay"
+            onClick={onOpen}
+          >
+            {dataProviders.length !== 0 && (
+              <Badge data-test-subj="badge" color="primary">
+                {dataProviders.length}
+              </Badge>
+            )}
+            <Button>
+              <Text data-test-subj="flyoutButton" size="s">
+                {i18n.TIMELINE.toLocaleUpperCase()
+                  .split('')
+                  .join(' ')}
+              </Text>
+            </Button>
+          </BadgeButtonContainer>
+        </DroppableWrapper>
+      </Container>
+    ) : null,
+  (prevProps, nextProps) =>
+    prevProps.show === nextProps.show &&
+    prevProps.dataProviders === nextProps.dataProviders &&
+    prevProps.timelineId === nextProps.timelineId
 );
 
 FlyoutButton.displayName = 'FlyoutButton';

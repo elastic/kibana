@@ -6,7 +6,7 @@
 
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
-import { JobCreator } from '../job_creator';
+import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
@@ -34,10 +34,10 @@ export interface BasicValidations {
 }
 
 export class JobValidator {
-  private _jobCreator: JobCreator;
+  private _jobCreator: JobCreatorType;
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
-  private _validateTimeout: NodeJS.Timeout;
+  private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
@@ -46,33 +46,39 @@ export class JobValidator {
     bucketSpan: { valid: true },
     duplicateDetectors: { valid: true },
   };
+  private _validating: boolean = false;
 
-  constructor(jobCreator: JobCreator, existingJobsAndGroups: ExistingJobsAndGroups) {
+  constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
     this._validationSummary = {
       basic: false,
       advanced: false,
     };
-    this._validateTimeout = setTimeout(() => {}, 0);
     this._existingJobsAndGroups = existingJobsAndGroups;
   }
 
-  public validate() {
+  public validate(callback: () => void) {
+    this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
-    return new Promise((resolve: () => void) => {
-      // only validate if the config has changed
-      if (formattedJobConfig !== this._lastJobConfig) {
+    // only validate if the config has changed
+    if (formattedJobConfig !== this._lastJobConfig) {
+      if (this._validateTimeout !== null) {
+        // clear any previous on going validation timeouts
         clearTimeout(this._validateTimeout);
-        this._lastJobConfig = formattedJobConfig;
-        this._validateTimeout = setTimeout(() => {
-          this._runBasicValidation();
-          resolve();
-        }, VALIDATION_DELAY_MS);
-      } else {
-        resolve();
       }
-    });
+      this._lastJobConfig = formattedJobConfig;
+      this._validateTimeout = setTimeout(() => {
+        this._runBasicValidation();
+        this._validating = false;
+        this._validateTimeout = null;
+        callback();
+      }, VALIDATION_DELAY_MS);
+    } else {
+      // _validating is still true if there is a previous validation timeout on going.
+      this._validating = this._validateTimeout !== null;
+    }
+    callback();
   }
 
   private _resetBasicValidations() {
@@ -134,5 +140,9 @@ export class JobValidator {
 
   public set advancedValid(valid: boolean) {
     this._validationSummary.advanced = valid;
+  }
+
+  public get validating(): boolean {
+    return this._validating;
   }
 }

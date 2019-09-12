@@ -425,7 +425,7 @@ Required field for all events.",
           "example": "2016-05-23T08:05:34.853Z",
           "id": "@timestamp",
           "type": "date",
-          "width": 240,
+          "width": 190,
         },
         Object {
           "aggregatable": true,
@@ -681,7 +681,6 @@ In other use cases the message field can be used to concatenate different values
       ]
     }
     id="Y-6TfmcB0WOhS6qyMv3s"
-    isLoading={false}
     onUpdateColumns={[MockFunction]}
     onViewSelected={[MockFunction]}
     timelineId="test"

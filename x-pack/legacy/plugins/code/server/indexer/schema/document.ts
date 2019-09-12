@@ -7,7 +7,29 @@
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryUri } from '../../../model';
 
-// Coorespond to model/search/Document
+// The field name of repository object nested in the Document index.
+export const RepositoryReservedField = 'repository';
+// The field name of repository git status object nested in the Document index.
+export const RepositoryGitStatusReservedField = 'repository_git_status';
+// The field name of repository delete status object nested in the Document index.
+export const RepositoryDeleteStatusReservedField = 'repository_delete_status';
+// The field name of repository lsp index status object nested in the Document index.
+export const RepositoryIndexStatusReservedField = 'repository_index_status';
+// The field name of repository config object nested in the Document index.
+export const RepositoryConfigReservedField = 'repository_config';
+// The field name of repository config object nested in the Document index.
+export const RepositoryRandomPathReservedField = 'repository_random_path';
+
+export const ALL_RESERVED = [
+  RepositoryReservedField,
+  RepositoryGitStatusReservedField,
+  RepositoryDeleteStatusReservedField,
+  RepositoryIndexStatusReservedField,
+  RepositoryConfigReservedField,
+  RepositoryRandomPathReservedField,
+];
+
+// Correspond to model/search/Document
 export const DocumentSchema = {
   repoUri: {
     type: 'keyword',
@@ -19,6 +41,9 @@ export const DocumentSchema = {
       hierarchy: {
         type: 'text',
         analyzer: 'path_hierarchy_analyzer',
+      },
+      keyword: {
+        type: 'keyword',
       },
     },
   },
@@ -40,7 +65,7 @@ export const DocumentSchema = {
   },
   // Repository object resides in this document index.
   // There is always a single Repository object in this index.
-  repository: {
+  [RepositoryReservedField]: {
     properties: {
       uri: {
         type: 'text',
@@ -66,7 +91,7 @@ export const DocumentSchema = {
       },
     },
   },
-  repository_config: {
+  [RepositoryConfigReservedField]: {
     properties: {
       uri: {
         type: 'text',
@@ -82,11 +107,11 @@ export const DocumentSchema = {
       },
     },
   },
-  repository_random_path: {
+  [RepositoryRandomPathReservedField]: {
     type: 'keyword',
   },
   // A single Repository Git Status object resides in this document index.
-  repository_git_status: {
+  [RepositoryGitStatusReservedField]: {
     properties: {
       uri: {
         type: 'text',
@@ -134,7 +159,7 @@ export const DocumentSchema = {
     },
   },
   // A single Repository Delete Status object resides in this document index.
-  repository_delete_status: {
+  [RepositoryDeleteStatusReservedField]: {
     properties: {
       uri: {
         type: 'text',
@@ -151,7 +176,7 @@ export const DocumentSchema = {
     },
   },
   // A single Repository LSP Index Status object resides in this document index.
-  repository_lsp_index_status: {
+  [RepositoryIndexStatusReservedField]: {
     properties: {
       uri: {
         type: 'text',
@@ -166,6 +191,28 @@ export const DocumentSchema = {
         type: 'keyword',
       },
       indexProgress: {
+        properties: {
+          type: {
+            type: 'keyword',
+          },
+          total: {
+            type: 'integer',
+          },
+          success: {
+            type: 'integer',
+          },
+          fail: {
+            type: 'integer',
+          },
+          percentage: {
+            type: 'integer',
+          },
+          checkpoint: {
+            type: 'object',
+          },
+        },
+      },
+      commitIndexProgress: {
         properties: {
           type: {
             type: 'keyword',

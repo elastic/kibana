@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -18,16 +17,18 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { DataFrameAnalyticsId } from '../../../../common';
+import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  DATA_FRAME_TASK_STATE,
+  getDataFrameAnalyticsProgress,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
+  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getActions } from './actions';
 
 enum TASK_STATE_COLOR {
+  analyzing = 'primary',
   failed = 'danger',
   reindexing = 'primary',
   started = 'primary',
@@ -134,6 +135,15 @@ export const getColumns = (
       truncateText: true,
     },
     {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.type', { defaultMessage: 'Type' }),
+      sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
+      truncateText: true,
+      render(item: DataFrameAnalyticsListRow) {
+        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+      },
+      width: '150px',
+    },
+    {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
       sortable: (item: DataFrameAnalyticsListRow) => item.stats.state,
       truncateText: true,
@@ -160,14 +170,14 @@ export const getColumns = (
       name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
         defaultMessage: 'Progress',
       }),
-      sortable: (item: DataFrameAnalyticsListRow) => idx(item, _ => _.stats.progress_percent) || 0,
+      sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        if (item.stats.progress_percent === undefined) {
+        const progress = getDataFrameAnalyticsProgress(item.stats);
+
+        if (progress === undefined) {
           return null;
         }
-
-        const progress = Math.round(item.stats.progress_percent);
 
         // For now all analytics jobs are batch jobs.
         const isBatchTransform = true;
@@ -208,7 +218,15 @@ export const getColumns = (
     },
   ];
 
-  if (isManagementTable === false) {
+  if (isManagementTable === true) {
+    columns.push({
+      name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+        defaultMessage: 'Spaces',
+      }),
+      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+      width: '75px',
+    });
+  } else {
     columns.push({
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',

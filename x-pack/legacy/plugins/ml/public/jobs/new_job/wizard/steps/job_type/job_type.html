@@ -86,7 +86,7 @@
 
       <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/simple/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkSingleMetricJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -118,7 +118,7 @@
           </a>
         </div>
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/simple/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkMultiMetricJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -150,7 +150,7 @@
           </a>
         </div>
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/simple/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkPopulationJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -213,102 +213,6 @@
             </div>
           </a>
         </div>
-        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/new_new_job/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkSingleMetricJob">
-            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
-              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
-                <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon
-                    type="'createSingleMetricJob'"
-                    size="'xl'"
-                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.singleMetricAriaLabelNew' | i18n: {defaultMessage: 'Single metric job NEW'} }}"
-                    class="synopsisIcon"
-                  />
-                </div>
-                <div class="euiFlexItem synopsisContent">
-                  <h4
-                    class="euiTitle euiTitle--small synopsisTitle"
-                    i18n-id="xpack.ml.newJob.wizard.jobType.singleMetricTitleNew"
-                    i18n-default-message="Single metric NEW"
-                  ></h4>
-                  <div class="euiText synopsisBody">
-                    <p>
-                      <span
-                        class="euiTextColor euiTextColor--subdued"
-                        i18n-id="xpack.ml.newJob.wizard.jobType.singleMetricDescriptionNew"
-                        i18n-default-message="Detect anomalies in a single time series."
-                      ></span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/new_new_job/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkMultiMetricJob">
-            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
-              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
-                <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon
-                    type="'createMultiMetricJob'"
-                    size="'xl'"
-                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.multiMetricAriaLabelNew' | i18n: {defaultMessage: 'Multi metric job NEW'} }}"
-                    class="synopsisIcon"
-                  />
-                </div>
-                <div class="euiFlexItem synopsisContent">
-                  <h4
-                    class="euiTitle euiTitle--small synopsisTitle"
-                    i18n-id="xpack.ml.newJob.wizard.jobType.multiMetricTitleNew"
-                    i18n-default-message="Multi metric NEW"
-                  ></h4>
-                  <div class="euiText synopsisBody">
-                    <p>
-                      <span
-                        class="euiTextColor euiTextColor--subdued"
-                        i18n-id="xpack.ml.newJob.wizard.jobType.multiMetricDescriptionNew"
-                        i18n-default-message="Detect anomalies in multiple metrics by splitting a time series by a categorical field."
-                      ></span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/new_new_job/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkPopulationJob">
-            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
-              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
-                <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon
-                    type="'createPopulationJob'"
-                    size="'xl'"
-                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.populationAriaLabelNew' | i18n: {defaultMessage: 'Population job NEW'} }}"
-                    class="synopsisIcon"
-                  />
-                </div>
-                <div class="euiFlexItem synopsisContent">
-                  <h4
-                    class="euiTitle euiTitle--small synopsisTitle"
-                    i18n-id="xpack.ml.newJob.wizard.jobType.populationTitleNew"
-                    i18n-default-message="Population NEW"
-                  ></h4>
-                  <div class="euiText synopsisBody">
-                    <p>
-                      <span
-                        class="euiTextColor euiTextColor--subdued"
-                        i18n-id="xpack.ml.newJob.wizard.jobType.populationDescriptionNew"
-                        i18n-default-message="Detect activity that is unusual compared to the behavior of the population."
-                      ></span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
       </div>
 
       <div class="euiSpacer euiSpacer--xxl"></div>
@@ -327,11 +231,10 @@
       <div class="euiSpacer euiSpacer--m"></div>
 
       <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
-        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+        <div class="euiFlexItem">
           <a
             ng-href="{{getUrl('#jobs/new_job/datavisualizer')}}"
             ng-click="addSelectionToRecentlyAccessed()"
-            ng-class='{disabled: isTimeBasedIndex===false}'
             class="euiLink synopsis">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">

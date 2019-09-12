@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Transform List Actions <StopAction /> Minimal initialization 1`] = `
+<EuiToolTip
+  content="Your license has expired. Please contact your administrator."
+  delay="regular"
+  position="top"
+>
+  <EuiButtonEmpty
+    aria-label="Stop"
+    color="text"
+    disabled={true}
+    iconType="stop"
+    onClick={[Function]}
+    size="xs"
+  >
+    Stop
+  </EuiButtonEmpty>
+</EuiToolTip>
+`;

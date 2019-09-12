@@ -18,19 +18,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { Action, ActionContext } from '../../../../actions';
+import { Action } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
-import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
+import { NotificationsStart } from '../../../../../../../../../../../core/public';
+import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
+import { IContainer } from '../../../../containers';
 
 export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
 
-export class AddPanelAction extends Action {
+interface ActionContext {
+  embeddable: IContainer;
+}
+
+export class AddPanelAction extends Action<ActionContext> {
   public readonly type = ADD_PANEL_ACTION_ID;
 
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
     private readonly getAllFactories: GetEmbeddableFactories,
-    private readonly overlays: OverlayStart,
+    private readonly overlays: KibanaReactOverlays,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
   ) {

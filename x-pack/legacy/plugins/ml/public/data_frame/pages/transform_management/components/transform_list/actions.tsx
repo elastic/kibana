@@ -5,64 +5,25 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
-
-import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
-import { stopTransform } from '../../services/transform_service';
-
+import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
 import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
 
-export const getActions = () => {
-  const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
-
+export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
   return [
     {
       isPrimary: true,
       render: (item: DataFrameTransformListRow) => {
         if (item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED) {
-          return <StartAction item={item} />;
+          return <StartAction items={[item]} forceDisable={forceDisable} />;
         }
-
-        const buttonStopText = i18n.translate('xpack.ml.dataframe.transformList.stopActionName', {
-          defaultMessage: 'Stop',
-        });
-
-        const stopButton = (
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            disabled={!canStartStopDataFrame}
-            iconType="stop"
-            onClick={() => stopTransform(item)}
-            aria-label={buttonStopText}
-          >
-            {buttonStopText}
-          </EuiButtonEmpty>
-        );
-        if (!canStartStopDataFrame) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={createPermissionFailureMessage('canStartStopDataFrame')}
-            >
-              {stopButton}
-            </EuiToolTip>
-          );
-        }
-
-        return stopButton;
+        return <StopAction items={[item]} forceDisable={forceDisable} />;
       },
     },
     {
       render: (item: DataFrameTransformListRow) => {
-        return <DeleteAction item={item} />;
+        return <DeleteAction items={[item]} forceDisable={forceDisable} />;
       },
     },
   ];

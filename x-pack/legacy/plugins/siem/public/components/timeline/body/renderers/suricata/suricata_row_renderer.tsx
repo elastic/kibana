@@ -16,12 +16,12 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ browserFields, data, width, children }) => {
+  renderRow: ({ browserFields, data, children, timelineId }) => {
     return (
-      <Row>
+      <Row className="euiTableRow">
         {children}
-        <RowRendererContainer width={width}>
-          <SuricataDetails data={data} browserFields={browserFields} />
+        <RowRendererContainer>
+          <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
         </RowRendererContainer>
       </Row>
     );

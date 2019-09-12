@@ -5,8 +5,9 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   }
 
   // remove space for global nav elements
-  .header-global-wrapper + .app-wrapper {
-    left: 0;
+  .chrHeaderWrapper ~ .app-wrapper {
+    // Override locked nav at all breakpoints
+    left: 0 !important; // sass-lint:disable-line no-important
     top: 0;
   }
 
@@ -16,7 +17,7 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   }
 
   // hide all the interface parts
-  .header-global-wrapper, // K7 global top nav
+  .chrHeaderWrapper, // K7 global top nav
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,
   .canvasLayout__footer,

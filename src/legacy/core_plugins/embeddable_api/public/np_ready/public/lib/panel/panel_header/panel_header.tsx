@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiBadge } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
@@ -35,10 +34,6 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
 }
 
-interface PanelHeaderUiProps extends PanelHeaderProps {
-  intl: InjectedIntl;
-}
-
 function renderBadges(badges: Action[], embeddable: IEmbeddable) {
   return badges.map(badge => (
     <EuiBadge
@@ -52,16 +47,15 @@ function renderBadges(badges: Action[], embeddable: IEmbeddable) {
   ));
 }
 
-function PanelHeaderUi({
+export function PanelHeader({
   title,
   isViewMode,
   hidePanelTitles,
   getActionContextMenuPanel,
-  intl,
   closeContextMenu,
   badges,
   embeddable,
-}: PanelHeaderUiProps) {
+}: PanelHeaderProps) {
   const classes = classNames('embPanel__header', {
     'embPanel__header--floater': !title || hidePanelTitles,
   });
@@ -90,15 +84,12 @@ function PanelHeaderUi({
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
         title={title}
-        aria-label={intl.formatMessage(
-          {
-            id: 'embeddableApi.panel.dashboardPanelAriaLabel',
-            defaultMessage: 'Dashboard panel: {title}',
-          },
-          {
+        aria-label={i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+          defaultMessage: 'Dashboard panel: {title}',
+          values: {
             title,
-          }
-        )}
+          },
+        })}
       >
         {showTitle ? `${title} ` : ''}
         {renderBadges(badges, embeddable)}
@@ -112,5 +103,3 @@ function PanelHeaderUi({
     </div>
   );
 }
-
-export const PanelHeader = injectI18n(PanelHeaderUi);

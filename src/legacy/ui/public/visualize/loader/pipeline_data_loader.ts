@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { RequestHandlerParams, Vis } from '../../vis';
+import { Vis } from '../../vis';
 import { buildPipeline, runPipeline } from './pipeline_helpers';
+import { RequestHandlerParams } from './embedded_visualize_handler';
 
 export class PipelineDataLoader {
   constructor(private readonly vis: Vis) {}
@@ -26,7 +27,7 @@ export class PipelineDataLoader {
   public async fetch(params: RequestHandlerParams): Promise<any> {
     this.vis.pipelineExpression = await buildPipeline(this.vis, params);
 
-    return await runPipeline(
+    return runPipeline(
       this.vis.pipelineExpression,
       {},
       {
@@ -39,6 +40,7 @@ export class PipelineDataLoader {
             : undefined,
         }),
         inspectorAdapters: params.inspectorAdapters,
+        abortSignal: params.abortSignal,
       }
     );
   }

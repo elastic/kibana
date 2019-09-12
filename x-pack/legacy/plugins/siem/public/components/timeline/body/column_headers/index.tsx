@@ -8,8 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
@@ -47,7 +46,7 @@ interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
-  isLoading: boolean;
+  isEventViewer?: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
@@ -60,17 +59,16 @@ interface Props {
   minWidth: number;
 }
 
-const COLUMN_HEADERS_HEIGHT = '38px';
+const COLUMN_HEADERS_HEIGHT = '39px';
 
 const ColumnHeadersContainer = styled.div<{
   minWidth: number;
 }>`
+  border-bottom: 1px solid ${({ theme }) => `${theme.eui.euiColorLightShade};`}
   display: block;
   height: ${COLUMN_HEADERS_HEIGHT};
   overflow: hidden;
-  overflow-x: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
-  margin-bottom: 2px;
 `;
 
 ColumnHeadersContainer.displayName = 'ColumnHeadersContainer';
@@ -87,13 +85,61 @@ const EventsSelectContainer = styled(EuiFlexItem)`
 
 EventsSelectContainer.displayName = 'EventsSelectContainer';
 
+const HeaderContainer = styled.div<{ isDragging: boolean }>`
+  ${({ theme }) => css`
+  {
+    border-radius: 4px;
+    position: relative;
+
+    &::before {
+      background-image: linear-gradient(
+          135deg,
+          ${theme.eui.euiColorMediumShade} 25%,
+          transparent 25%
+        ),
+        linear-gradient(-135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
+        linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%),
+        linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%);
+      background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+      background-size: 2px 2px;
+      bottom: 2px;
+      content: '';
+      display: block;
+      left: 2px;
+      position: absolute;
+      top: 2px;
+      width: 4px;
+    }
+
+    &:hover,
+    &:focus {
+      transition: background-color 0.7s ease;
+      background-color: #000;
+      color: #fff;
+
+      &::before {
+        background-image: linear-gradient(
+            135deg,
+            ${theme.eui.euiColorEmptyShade} 25%,
+            transparent 25%
+          ),
+          linear-gradient(-135deg, ${theme.eui.euiColorEmptyShade} 25%, transparent 25%),
+          linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%),
+          linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%);
+      }
+    }
+  `}
+`;
+
+HeaderContainer.displayName = 'HeaderContainer';
+
 /** Renders the timeline header columns */
-export const ColumnHeaders = pure<Props>(
+export const ColumnHeaders = React.memo<Props>(
   ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    isLoading,
+    isEventViewer = false,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -106,7 +152,6 @@ export const ColumnHeaders = pure<Props>(
     minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
-
     return (
       <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
         <ColumnHeadersFlexGroup
@@ -131,7 +176,7 @@ export const ColumnHeaders = pure<Props>(
                     columnHeaders={columnHeaders}
                     data-test-subj="field-browser"
                     height={FIELD_BROWSER_HEIGHT}
-                    isLoading={isLoading}
+                    isEventViewer={isEventViewer}
                     onUpdateColumns={onUpdateColumns}
                     timelineId={timelineId}
                     toggleColumn={toggleColumn}
@@ -163,17 +208,17 @@ export const ColumnHeaders = pure<Props>(
                       isDragDisabled={isResizing}
                     >
                       {(provided, snapshot) => (
-                        <div
+                        <HeaderContainer
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          ref={provided.innerRef}
                           data-test-subj="draggable-header"
+                          innerRef={provided.innerRef}
+                          isDragging={snapshot.isDragging}
                         >
                           {!snapshot.isDragging ? (
                             <Header
                               timelineId={timelineId}
                               header={header}
-                              isLoading={isLoading}
                               onColumnRemoved={onColumnRemoved}
                               onColumnResized={onColumnResized}
                               onColumnSorted={onColumnSorted}
@@ -186,7 +231,7 @@ export const ColumnHeaders = pure<Props>(
                               <DraggableFieldBadge fieldId={header.id} />
                             </DragEffects>
                           )}
-                        </div>
+                        </HeaderContainer>
                       )}
                     </Draggable>
                   </EuiFlexItem>

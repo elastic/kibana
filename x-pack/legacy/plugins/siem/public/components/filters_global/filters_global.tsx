@@ -66,7 +66,7 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
         <EuiFlexGroup>
           <EuiFlexItem grow={8}>{children}</EuiFlexItem>
 
-          <FlexItemWithDatePickerFix grow={4}>
+          <FlexItemWithDatePickerFix grow={4} data-test-subj="globalDatePicker">
             <SuperDatePicker id="global" />
           </FlexItemWithDatePickerFix>
         </EuiFlexGroup>

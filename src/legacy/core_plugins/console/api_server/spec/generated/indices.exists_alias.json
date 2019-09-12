@@ -18,6 +18,6 @@
       "_alias/{name}",
       "{indices}/_alias/{name}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
   }
 }

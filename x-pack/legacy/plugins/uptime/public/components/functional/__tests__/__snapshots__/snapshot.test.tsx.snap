@@ -2,30 +2,27 @@
 
 exports[`Snapshot component renders without errors 1`] = `
 <Fragment>
-  <EuiTitle
-    size="xs"
-  >
-    <h5>
-      <FormattedMessage
-        defaultMessage="Current status"
-        id="xpack.uptime.snapshot.endpointStatusTitle"
-        values={Object {}}
-      />
-    </h5>
-  </EuiTitle>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Current status"
+          id="xpack.uptime.snapshot.endpointStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
     <EuiFlexGroup
       direction="column"
+      gutterSize="m"
     >
       <EuiFlexItem
         grow={false}
       >
         <EuiSpacer
-          size="s"
+          size="xs"
         />
       </EuiFlexItem>
       <EuiFlexItem>

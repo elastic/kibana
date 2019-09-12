@@ -10,16 +10,13 @@
 }
 
 .mapLayerPanel__body {
-  @include euiOverflowShadow;
+  @include euiScrollBar;
   padding-bottom: 0; /* 1 */
   flex-grow: 1;
   flex-basis: 1px; /* Fixes scrolling for Firefox */
-  overflow-y: hidden;
+  overflow-y: auto;
 
   .mapLayerPanel__bodyOverflow {
-    @include euiScrollBar;
-    height: 100%;
-    overflow-y: auto;
     padding: $euiSize;
 
     > *:last-child {

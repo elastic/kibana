@@ -5,15 +5,23 @@
  */
 
 import { ActionTypeRegistry } from '../action_type_registry';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
-import { actionType as serverLogActionType } from './server_log';
-import { actionType as slackActionType } from './slack';
-import { actionType as emailActionType } from './email';
-import { actionType as indexActionType } from './es_index';
+import { getActionType as getServerLogActionType } from './server_log';
+import { getActionType as getSlackActionType } from './slack';
+import { getActionType as getEmailActionType } from './email';
+import { getActionType as getIndexActionType } from './es_index';
+import { getActionType as getPagerDutyActionType } from './pagerduty';
+import { getActionType as getWebhookActionType } from './webhook';
 
-export function registerBuiltInActionTypes(actionTypeRegistry: ActionTypeRegistry) {
-  actionTypeRegistry.register(serverLogActionType);
-  actionTypeRegistry.register(slackActionType);
-  actionTypeRegistry.register(emailActionType);
-  actionTypeRegistry.register(indexActionType);
+export function registerBuiltInActionTypes(
+  actionTypeRegistry: ActionTypeRegistry,
+  actionsConfigUtils: ActionsConfigurationUtilities
+) {
+  actionTypeRegistry.register(getServerLogActionType());
+  actionTypeRegistry.register(getSlackActionType());
+  actionTypeRegistry.register(getEmailActionType());
+  actionTypeRegistry.register(getIndexActionType());
+  actionTypeRegistry.register(getPagerDutyActionType());
+  actionTypeRegistry.register(getWebhookActionType(actionsConfigUtils));
 }

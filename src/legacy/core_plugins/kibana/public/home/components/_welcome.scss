@@ -1,6 +1,5 @@
-
 .homWelcome {
-  @include kibanaFullScreenGraphics;
+  @include kibanaFullScreenGraphics($euiZLevel6);
 }
 
 .homWelcome__header {

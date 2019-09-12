@@ -30,7 +30,8 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import '@babel/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
@@ -84,6 +85,7 @@ const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
+    legacyMode: true,
     legacyMetadata: {
       nav: [],
       version: '1.2.3',
@@ -125,9 +127,6 @@ const coreSystem = new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
-      interpreterConfig: {
-        enableInVisualize: true
-      }
     },
   },
   rootDomElement,

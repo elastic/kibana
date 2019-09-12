@@ -15,6 +15,8 @@ import { EventDetails } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('EventDetails', () => {
   describe('rendering', () => {
     test('should match snapshot', () => {
@@ -25,7 +27,6 @@ describe('EventDetails', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             id={mockDetailItemDataId}
-            isLoading={false}
             view="table-view"
             onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}
@@ -48,7 +49,6 @@ describe('EventDetails', () => {
               columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               id={mockDetailItemDataId}
-              isLoading={false}
               view="table-view"
               onUpdateColumns={jest.fn()}
               onViewSelected={jest.fn()}
@@ -75,7 +75,6 @@ describe('EventDetails', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             id={mockDetailItemDataId}
-            isLoading={false}
             view="table-view"
             onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}

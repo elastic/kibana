@@ -11,19 +11,25 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { AutocompleteField } from '../../components/autocomplete_field';
 import { HostsFilter } from '../../containers/hosts';
 import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
-import { hostsModel } from '../../store';
+import { hostsModel, inputsModel } from '../../store';
 
 import * as i18n from './translations';
 
 interface HostsKqlProps {
   indexPattern: StaticIndexPattern;
   type: hostsModel.HostsType;
+  setQuery: (params: {
+    id: string;
+    inspect: null;
+    loading: boolean;
+    refetch: inputsModel.Refetch | inputsModel.RefetchKql;
+  }) => void;
 }
 
-export const HostsKql = pure<HostsKqlProps>(({ indexPattern, type }) => (
+export const HostsKql = pure<HostsKqlProps>(({ indexPattern, setQuery, type }) => (
   <KueryAutocompletion indexPattern={indexPattern}>
     {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-      <HostsFilter indexPattern={indexPattern} type={type}>
+      <HostsFilter indexPattern={indexPattern} setQuery={setQuery} type={type}>
         {({
           applyFilterQueryFromKueryExpression,
           filterQueryDraft,
@@ -31,6 +37,7 @@ export const HostsKql = pure<HostsKqlProps>(({ indexPattern, type }) => (
           setFilterQueryDraftFromKueryExpression,
         }) => (
           <AutocompleteField
+            data-test-subj="kqlInput"
             isLoadingSuggestions={isLoadingSuggestions}
             isValid={isFilterQueryDraftValid}
             loadSuggestions={loadSuggestions}

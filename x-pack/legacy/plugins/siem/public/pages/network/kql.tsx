@@ -11,19 +11,25 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { AutocompleteField } from '../../components/autocomplete_field';
 import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { NetworkFilter } from '../../containers/network';
-import { networkModel } from '../../store';
+import { networkModel, inputsModel } from '../../store';
 
 import * as i18n from './translations';
 
 interface NetworkKqlProps {
   indexPattern: StaticIndexPattern;
   type: networkModel.NetworkType;
+  setQuery: (params: {
+    id: string;
+    inspect: null;
+    loading: boolean;
+    refetch: inputsModel.Refetch | inputsModel.RefetchKql;
+  }) => void;
 }
 
-export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, type }) => (
+export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, setQuery, type }) => (
   <KueryAutocompletion indexPattern={indexPattern}>
     {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-      <NetworkFilter indexPattern={indexPattern} type={type}>
+      <NetworkFilter indexPattern={indexPattern} setQuery={setQuery} type={type}>
         {({
           applyFilterQueryFromKueryExpression,
           filterQueryDraft,
@@ -31,6 +37,7 @@ export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, type }) => (
           setFilterQueryDraftFromKueryExpression,
         }) => (
           <AutocompleteField
+            data-test-subj="kqlInput"
             isLoadingSuggestions={isLoadingSuggestions}
             isValid={isFilterQueryDraftValid}
             loadSuggestions={loadSuggestions}

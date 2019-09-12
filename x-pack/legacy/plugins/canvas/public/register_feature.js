@@ -9,11 +9,13 @@ import {
   FeatureCatalogueCategory,
 } from 'ui/registry/feature_catalogue';
 
+import { getAppDescription } from '../i18n';
+
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'canvas',
     title: 'Canvas',
-    description: 'Showcase your data in a pixel-perfect way.',
+    description: getAppDescription(),
     icon: 'canvasApp',
     path: '/app/canvas',
     showOnHomePage: true,

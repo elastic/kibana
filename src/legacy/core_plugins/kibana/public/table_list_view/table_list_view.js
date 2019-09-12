@@ -39,8 +39,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { npStart } from 'ui/new_platform';
+
 export const EMPTY_FILTER = '';
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
@@ -52,6 +53,12 @@ class TableListViewUi extends React.Component {
   constructor(props) {
     super(props);
 
+    const initialPageSize = npStart.core.uiSettings.get('savedObjects:perPage');
+    this.pagination = {
+      initialPageIndex: 0,
+      initialPageSize,
+      pageSizeOptions: _.uniq([10, 20, 50, initialPageSize]).sort(),
+    };
     this.state = {
       items: [],
       totalItems: 0,
@@ -62,8 +69,6 @@ class TableListViewUi extends React.Component {
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
-      page: 0,
-      perPage: 20,
     };
 
   }
@@ -116,7 +121,8 @@ class TableListViewUi extends React.Component {
       isDeletingItems: true
     });
     try {
-      await this.props.deleteItems(this.state.selectedIds);
+      const itemsById = _.indexBy(this.state.items, 'id');
+      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
       toastNotifications.addDanger({
         title: (
@@ -308,13 +314,6 @@ class TableListViewUi extends React.Component {
   }
 
   renderTable() {
-    const pagination = {
-      pageIndex: this.state.page,
-      pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
-      pageSizeOptions: PAGE_SIZE_OPTIONS,
-    };
-
     const selection = this.props.deleteItems ? {
       onSelectionChange: (selection) => {
         this.setState({
@@ -367,7 +366,7 @@ class TableListViewUi extends React.Component {
         itemId="id"
         items={this.state.items}
         columns={columns}
-        pagination={pagination}
+        pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
         selection={selection}
@@ -482,4 +481,3 @@ TableListViewUi.defaultProps = {
 };
 
 export const TableListView = injectI18n(TableListViewUi);
-

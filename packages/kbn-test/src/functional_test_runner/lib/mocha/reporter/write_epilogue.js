@@ -22,7 +22,7 @@ import { ms } from './ms';
 
 export function writeEpilogue(log, stats) {
   // header
-  log.write();
+  log.write('');
 
   // passes
   log.write(`${colors.pass('%d passing')} (%s)`, stats.passes || 0, ms(stats.duration));
@@ -38,5 +38,5 @@ export function writeEpilogue(log, stats) {
   }
 
   // footer
-  log.write();
+  log.write('');
 }

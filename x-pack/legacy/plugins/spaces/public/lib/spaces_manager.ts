@@ -7,7 +7,10 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
 import { kfetch } from 'ui/kfetch';
+import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { Space } from '../../common/model/space';
+import { GetSpacePurpose } from '../../common/model/types';
+import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/types';
 
 export class SpacesManager extends EventEmitter {
   private spaceSelectorURL: string;
@@ -17,8 +20,8 @@ export class SpacesManager extends EventEmitter {
     this.spaceSelectorURL = spaceSelectorURL;
   }
 
-  public async getSpaces(): Promise<Space[]> {
-    return await kfetch({ pathname: '/api/spaces/space' });
+  public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
+    return await kfetch({ pathname: '/api/spaces/space', query: { purpose } });
   }
 
   public async getSpace(id: string): Promise<Space> {
@@ -48,6 +51,40 @@ export class SpacesManager extends EventEmitter {
     return await kfetch({
       pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
       method: 'DELETE',
+    });
+  }
+
+  public async copySavedObjects(
+    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    spaces: string[],
+    includeReferences: boolean,
+    overwrite: boolean
+  ): Promise<CopySavedObjectsToSpaceResponse> {
+    return await kfetch({
+      pathname: `/api/spaces/_copy_saved_objects`,
+      method: 'POST',
+      body: JSON.stringify({
+        objects,
+        spaces,
+        includeReferences,
+        overwrite,
+      }),
+    });
+  }
+
+  public async resolveCopySavedObjectsErrors(
+    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    retries: unknown,
+    includeReferences: boolean
+  ): Promise<CopySavedObjectsToSpaceResponse> {
+    return await kfetch({
+      pathname: `/api/spaces/_resolve_copy_saved_objects_errors`,
+      method: 'POST',
+      body: JSON.stringify({
+        objects,
+        includeReferences,
+        retries,
+      }),
     });
   }
 

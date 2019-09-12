@@ -14,9 +14,9 @@ import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
+import { ExternalProgram } from './process/external_program';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
-import { ExternalProgram } from './process/external_program';
 
 const GO_LANG_DETACH_PORT = 2091;
 
@@ -24,7 +24,8 @@ export class GoServerLauncher extends AbstractLauncher {
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly installationPath: string
   ) {
     super('go', targetHost, options, loggerFactory);
   }
@@ -76,50 +77,44 @@ export class GoServerLauncher extends AbstractLauncher {
     return path.resolve(installationPath, GoToolchain[0]);
   }
 
-  async spawnProcess(installationPath: string, port: number, log: Logger) {
-    const launchersFound = glob.sync('go-langserver', {
-      cwd: installationPath,
-    });
+  async spawnProcess(port: number, log: Logger) {
+    const launchersFound = glob.sync(
+      process.platform === 'win32' ? 'go-langserver.exe' : 'go-langserver',
+      {
+        cwd: this.installationPath,
+      }
+    );
     if (!launchersFound.length) {
       throw new Error('Cannot find executable go language server');
     }
 
-    let envPath = process.env.PATH;
-    const goToolchain = await this.getBundledGoToolchain(installationPath, log);
+    const goToolchain = await this.getBundledGoToolchain(this.installationPath, log);
     if (!goToolchain) {
       throw new Error('Cannot find go toolchain in bundle installation');
     }
     // Construct $GOROOT from the bundled go toolchain.
     const goRoot = goToolchain;
     const goHome = path.resolve(goToolchain, 'bin');
-    envPath = envPath + ':' + goHome;
     // Construct $GOPATH under 'kibana/data/code'.
     const goPath = this.options.goPath;
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
-    let go111MODULE = 'off';
-    if (this.options.security.installGoDependency) {
-      // There are no proper approaches to disable downloading go dependencies except creating inconsistencies of the
-      // running environments of go-langserver. Given that go language server will do its best to convert the repos
-      // into modules, one of the doable approaches is setting 'GO111MODULE' to false to be incompatible with the
-      // moduled repos.
-      go111MODULE = 'on';
-    }
-
+    const goCache = path.resolve(goPath, '.cache');
     const params: string[] = ['-port=' + port.toString()];
-    const golsp = path.resolve(installationPath, launchersFound[0]);
+    const golsp = path.resolve(this.installationPath, launchersFound[0]);
+    const env = Object.create(process.env);
+    env.PATH = process.platform === 'win32' ? goHome + ';' + env.PATH : goHome + ':' + env.PATH;
     const p = spawn(golsp, params, {
       detached: false,
       stdio: 'pipe',
       env: {
-        ...process.env,
+        ...env,
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         GOROOT: goRoot,
         GOPATH: goPath,
-        PATH: envPath,
-        GO111MODULE: go111MODULE,
+        GOCACHE: goCache,
         CGO_ENABLED: '0',
       },
     });

@@ -23,31 +23,36 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
+import { TimeRange } from 'src/plugins/data/public';
 import { Timefilter } from 'ui/timefilter';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
-  const mockTimefilter: Timefilter = {
-    time: { to: 'now', from: 'now-15m' },
+
+  let mockTime: TimeRange = { to: 'now', from: 'now-15m' };
+  const mockTimefilter: Partial<Timefilter> = {
     setTime(time) {
-      this.time = time;
+      mockTime = time as TimeRange;
     },
     getTime() {
-      return this.time;
+      return mockTime;
     },
     disableAutoRefreshSelector: jest.fn(),
     setRefreshInterval: jest.fn(),
     getRefreshInterval: jest.fn(),
     disableTimeRangeSelector: jest.fn(),
     enableAutoRefreshSelector: jest.fn(),
-    off: jest.fn(),
-    on: jest.fn(),
-    getActiveBounds: () => {},
+    getActiveBounds: jest.fn(),
     enableTimeRangeSelector: () => {},
     isAutoRefreshSelectorEnabled: true,
     isTimeRangeSelectorEnabled: true,
+    getAutoRefreshFetch$: jest.fn(),
+    getEnabledUpdated$: jest.fn(),
+    getRefreshIntervalUpdate$: jest.fn(),
+    getFetch$: jest.fn(),
+    getTimeUpdate$: jest.fn(),
   };
 
   function initDashboardState() {
@@ -64,14 +69,14 @@ describe('DashboardState', function() {
       savedDashboard.timeFrom = 'now/w';
       savedDashboard.timeTo = 'now/w';
 
-      mockTimefilter.time.from = '2015-09-19 06:31:44.000';
-      mockTimefilter.time.to = '2015-09-29 06:31:44.000';
+      mockTime.from = '2015-09-19 06:31:44.000';
+      mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
 
-      expect(mockTimefilter.time.to).toBe('now/w');
-      expect(mockTimefilter.time.from).toBe('now/w');
+      expect(mockTime.to).toBe('now/w');
+      expect(mockTime.from).toBe('now/w');
     });
 
     test('syncs relative time', function() {
@@ -79,14 +84,14 @@ describe('DashboardState', function() {
       savedDashboard.timeFrom = 'now-13d';
       savedDashboard.timeTo = 'now';
 
-      mockTimefilter.time.from = '2015-09-19 06:31:44.000';
-      mockTimefilter.time.to = '2015-09-29 06:31:44.000';
+      mockTime.from = '2015-09-19 06:31:44.000';
+      mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
 
-      expect(mockTimefilter.time.to).toBe('now');
-      expect(mockTimefilter.time.from).toBe('now-13d');
+      expect(mockTime.to).toBe('now');
+      expect(mockTime.from).toBe('now-13d');
     });
 
     test('syncs absolute time', function() {
@@ -94,14 +99,14 @@ describe('DashboardState', function() {
       savedDashboard.timeFrom = '2015-09-19 06:31:44.000';
       savedDashboard.timeTo = '2015-09-29 06:31:44.000';
 
-      mockTimefilter.time.from = 'now/w';
-      mockTimefilter.time.to = 'now/w';
+      mockTime.from = 'now/w';
+      mockTime.to = 'now/w';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
 
-      expect(mockTimefilter.time.to).toBe(savedDashboard.timeTo);
-      expect(mockTimefilter.time.from).toBe(savedDashboard.timeFrom);
+      expect(mockTime.to).toBe(savedDashboard.timeTo);
+      expect(mockTime.from).toBe(savedDashboard.timeFrom);
     });
   });
 

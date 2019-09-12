@@ -6,7 +6,6 @@
 
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { Validation } from '../../../../../common/job_validator';
 
@@ -19,20 +18,15 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
     defaultMessage: 'Job ID',
   });
+  const description = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.description', {
+    defaultMessage:
+      'A unique identifier for the job. Spaces and the characters  / ? , " < > | * are not allowed',
+  });
   return (
-    <EuiDescribedFormGroup
-      idAria="single-example-aria"
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.jobId.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
-        />
-      }
-    >
+    <EuiDescribedFormGroup idAria="description" title={<h3>{title}</h3>} description={description}>
       <EuiFormRow
         label={title}
-        describedByIds={['single-example-aria']}
+        describedByIds={['description']}
         error={validation.message}
         isInvalid={validation.valid === false}
       >

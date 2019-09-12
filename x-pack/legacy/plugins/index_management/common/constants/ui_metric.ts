@@ -41,3 +41,6 @@ export const UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB = 'template_details_summary_t
 export const UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB = 'template_details_settings_tab';
 export const UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB = 'template_details_mappings_tab';
 export const UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB = 'template_details_aliases_tab';
+export const UIM_TEMPLATE_CREATE = 'template_create';
+export const UIM_TEMPLATE_UPDATE = 'template_update';
+export const UIM_TEMPLATE_CLONE = 'template_clone';

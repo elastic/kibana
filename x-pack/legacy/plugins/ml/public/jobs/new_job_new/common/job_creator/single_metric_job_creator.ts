@@ -6,12 +6,15 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
-import { parseInterval } from 'ui/utils/parse_interval';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import {
+  ML_JOB_AGGREGATION,
+  ES_AGGREGATION,
+} from '../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 import { getRichDetectors } from './util/general';
 
@@ -40,6 +43,7 @@ export class SingleMetricJobCreator extends JobCreator {
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
+    this._setBucketSpanMs(bucketSpan);
     this._createDatafeedAggregations();
   }
 
@@ -73,14 +77,14 @@ export class SingleMetricJobCreator extends JobCreator {
       let field = null;
 
       switch (functionName) {
-        case KIBANA_AGGREGATION.COUNT:
+        case ES_AGGREGATION.COUNT:
           this._job_config.analysis_config.summary_count_field_name = 'doc_count';
 
           this._datafeed_config.aggregations = {
             buckets: {
               date_histogram: {
                 field: timeField,
-                interval: `${interval}ms`,
+                fixed_interval: `${interval}ms`,
               },
               aggregations: {
                 [timeField]: {
@@ -92,11 +96,12 @@ export class SingleMetricJobCreator extends JobCreator {
             },
           };
           break;
-        case KIBANA_AGGREGATION.AVG:
-        case KIBANA_AGGREGATION.MEDIAN:
-        case KIBANA_AGGREGATION.SUM:
-        case KIBANA_AGGREGATION.MIN:
-        case KIBANA_AGGREGATION.MAX:
+        case ES_AGGREGATION.AVG:
+        // TODO - fix median aggregations
+        // case ES_AGGREGATION.PERCENTILES:
+        case ES_AGGREGATION.SUM:
+        case ES_AGGREGATION.MIN:
+        case ES_AGGREGATION.MAX:
           field = this._fields[0];
           if (field !== null) {
             const fieldName = field.name;
@@ -106,7 +111,7 @@ export class SingleMetricJobCreator extends JobCreator {
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
+                  fixed_interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
                 },
                 aggregations: {
                   [fieldName]: {
@@ -124,7 +129,7 @@ export class SingleMetricJobCreator extends JobCreator {
             };
           }
           break;
-        case KIBANA_AGGREGATION.CARDINALITY:
+        case ES_AGGREGATION.CARDINALITY:
           field = this._fields[0];
           if (field !== null) {
             const fieldName = field.name;
@@ -135,7 +140,7 @@ export class SingleMetricJobCreator extends JobCreator {
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  interval: `${interval}ms`,
+                  fixed_interval: `${interval}ms`,
                 },
                 aggregations: {
                   [timeField]: {
@@ -154,7 +159,7 @@ export class SingleMetricJobCreator extends JobCreator {
 
             const dtr = this._detectors[0];
             // finally, modify the detector before saving
-            dtr.function = 'non_zero_count';
+            dtr.function = ML_JOB_AGGREGATION.NON_ZERO_COUNT;
             // add a description using the original function name rather 'non_zero_count'
             // as the user may not be aware it's been changed
             dtr.detector_description = `${functionName} (${fieldName})`;
@@ -180,9 +185,8 @@ export class SingleMetricJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
-    const detectors = getRichDetectors(job.analysis_config.detectors);
+    const detectors = getRichDetectors(job, datafeed);
 
     this.removeAllDetectors();
 

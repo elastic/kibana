@@ -18,9 +18,9 @@
  */
 
 import { EmbeddableApiPure } from './types';
-import { Action, ActionContext, buildContextMenuForActions, openContextMenu } from '../lib';
+import { Action, buildContextMenuForActions, openContextMenu } from '../lib';
 
-const executeSingleAction = async (action: Action, actionContext: ActionContext) => {
+const executeSingleAction = async <A extends {} = {}>(action: Action<A>, actionContext: A) => {
   const href = action.getHref(actionContext);
 
   // TODO: Do we need a `getHref()` special case?
@@ -35,9 +35,7 @@ const executeSingleAction = async (action: Action, actionContext: ActionContext)
 export const executeTriggerActions: EmbeddableApiPure['executeTriggerActions'] = ({
   api,
 }) => async (triggerId, actionContext) => {
-  const actions = await api.getTriggerCompatibleActions!(triggerId, {
-    embeddable: actionContext.embeddable,
-  });
+  const actions = await api.getTriggerCompatibleActions!(triggerId, actionContext);
 
   if (!actions.length) {
     throw new Error(
