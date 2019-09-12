@@ -1,9 +1,5 @@
 #!/bin/groovy
 
-properties([
-  durabilityHint('PERFORMANCE_OPTIMIZED'),
-])
-
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
