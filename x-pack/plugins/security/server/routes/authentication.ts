@@ -38,7 +38,7 @@ function defineSAMLRoutes({
 
   router.get(
     {
-      path: '/api/security/authc/saml/capture-url-fragment',
+      path: '/api/security/saml/capture-url-fragment',
       validate: false,
       options: { authRequired: false },
     },
@@ -51,7 +51,7 @@ function defineSAMLRoutes({
           <!DOCTYPE html>
           <title>Kibana SAML Login</title>
           <link rel="icon" href="data:,">
-          <script src="${currentBasePath}/api/security/authc/saml/capture-url-fragment.js"></script>
+          <script src="${currentBasePath}/api/security/saml/capture-url-fragment.js"></script>
         `,
           'text/html'
         )
@@ -61,7 +61,7 @@ function defineSAMLRoutes({
 
   router.get(
     {
-      path: '/api/security/authc/saml/capture-url-fragment.js',
+      path: '/api/security/saml/capture-url-fragment.js',
       validate: false,
       options: { authRequired: false },
     },
@@ -71,7 +71,7 @@ function defineSAMLRoutes({
         createCustomResourceResponse(
           `
           window.location.replace(
-            '${currentBasePath}/api/security/authc/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
+            '${currentBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
           );
         `,
           'text/javascript'
@@ -82,7 +82,7 @@ function defineSAMLRoutes({
 
   router.get(
     {
-      path: '/api/security/authc/saml/start',
+      path: '/api/security/saml/start',
       validate: { query: schema.object({ redirectURLFragment: schema.string() }) },
       options: { authRequired: false },
     },
@@ -111,7 +111,7 @@ function defineSAMLRoutes({
 
   // Generate two identical routes with new and deprecated URL and issue a warning if route with
   // deprecated URL is ever used.
-  for (const path of ['/api/security/authc/saml/callback', '/api/security/v1/saml']) {
+  for (const path of ['/api/security/saml/callback', '/api/security/v1/saml']) {
     router.post(
       {
         path,
@@ -128,7 +128,7 @@ function defineSAMLRoutes({
           if (path === '/api/security/v1/saml') {
             const currentBasePath = basePath.get(request);
             logger.warn(
-              `The "${currentBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${currentBasePath}/api/security/authc/saml/callback" URL instead.`,
+              `The "${currentBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${currentBasePath}/api/security/saml/callback" URL instead.`,
               { tags: ['deprecation'] }
             );
           }

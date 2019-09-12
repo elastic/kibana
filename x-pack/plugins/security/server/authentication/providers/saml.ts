@@ -560,7 +560,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private captureRedirectURL(request: KibanaRequest) {
     return AuthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/api/security/authc/saml/capture-url-fragment`,
+      `${this.options.basePath.get(request)}/api/security/saml/capture-url-fragment`,
       { state: { redirectURLPath: request.url.path } }
     );
   }

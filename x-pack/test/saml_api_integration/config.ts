@@ -39,7 +39,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
-        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/authc/saml/callback`,
+        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
       ],
     },
@@ -49,7 +49,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--server.xsrf.whitelist=["/api/security/authc/saml/callback"]',
+        '--server.xsrf.whitelist=["/api/security/saml/callback"]',
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
       ],
