@@ -69,6 +69,23 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     data-test-subj="toggleYAxisOptions-ValueAxis-1"
+    extraAction={
+      <EuiToolTip
+        content="Remove Y-axis"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Remove Y-axis"
+          color="danger"
+          data-test-subj="removeValueAxisBtn"
+          iconSize="m"
+          iconType="cross"
+          onClick={[Function]}
+          type="button"
+        />
+      </EuiToolTip>
+    }
     id="yAxisAccordionValueAxis-1"
     initialIsOpen={false}
     key="ValueAxis-1"
@@ -111,10 +128,215 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
               },
               "valueAxis": "ValueAxis-1",
             },
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Average",
+              },
+              "valueAxis": "ValueAxis-2",
+            },
           ],
           "valueAxes": Array [
             Object {
               "id": "ValueAxis-1",
+              "labels": Object {
+                "filter": false,
+                "show": true,
+                "truncate": 0,
+              },
+              "position": "left",
+              "scale": Object {
+                "mode": "normal",
+                "type": "linear",
+              },
+              "show": true,
+              "title": Object {},
+            },
+            Object {
+              "id": "ValueAxis-2",
+              "labels": Object {
+                "filter": false,
+                "show": true,
+                "truncate": 0,
+              },
+              "position": "left",
+              "scale": Object {
+                "mode": "normal",
+                "type": "linear",
+              },
+              "show": true,
+              "title": Object {},
+            },
+          ],
+        }
+      }
+      vis={
+        Object {
+          "type": Object {
+            "editorConfig": Object {
+              "collections": Object {
+                "axisModes": Array [
+                  Object {
+                    "text": "Normal",
+                    "value": "normal",
+                  },
+                  Object {
+                    "text": "Percentage",
+                    "value": "percentage",
+                  },
+                  Object {
+                    "text": "Wiggle",
+                    "value": "wiggle",
+                  },
+                  Object {
+                    "text": "Silhouette",
+                    "value": "silhouette",
+                  },
+                ],
+                "positions": Array [
+                  Object {
+                    "text": "Top",
+                    "value": "top",
+                  },
+                  Object {
+                    "text": "Left",
+                    "value": "left",
+                  },
+                  Object {
+                    "text": "Right",
+                    "value": "right",
+                  },
+                  Object {
+                    "text": "Bottom",
+                    "value": "bottom",
+                  },
+                ],
+                "scaleTypes": Array [
+                  Object {
+                    "text": "Linear",
+                    "value": "linear",
+                  },
+                  Object {
+                    "text": "Log",
+                    "value": "log",
+                  },
+                  Object {
+                    "text": "Square root",
+                    "value": "square root",
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+    />
+  </EuiAccordion>
+  <EuiAccordion
+    aria-label="Toggle  options"
+    buttonClassName="eui-textTruncate"
+    buttonContent={
+      <React.Fragment>
+         
+        <EuiToolTip
+          content="Average"
+          delay="regular"
+          position="top"
+        >
+          <React.Fragment>
+            Average
+          </React.Fragment>
+        </EuiToolTip>
+      </React.Fragment>
+    }
+    buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+    className="visEditorSidebar__section visEditorSidebar__collapsible"
+    data-test-subj="toggleYAxisOptions-ValueAxis-2"
+    extraAction={
+      <EuiToolTip
+        content="Remove Y-axis"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Remove Y-axis"
+          color="danger"
+          data-test-subj="removeValueAxisBtn"
+          iconSize="m"
+          iconType="cross"
+          onClick={[Function]}
+          type="button"
+        />
+      </EuiToolTip>
+    }
+    id="yAxisAccordionValueAxis-2"
+    initialIsOpen={false}
+    key="ValueAxis-2"
+    paddingSize="none"
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <ValueAxisOptions
+      addValueAxis={[MockFunction]}
+      axis={
+        Object {
+          "id": "ValueAxis-2",
+          "labels": Object {
+            "filter": false,
+            "show": true,
+            "truncate": 0,
+          },
+          "position": "left",
+          "scale": Object {
+            "mode": "normal",
+            "type": "linear",
+          },
+          "show": true,
+          "title": Object {},
+        }
+      }
+      index={0}
+      isCategoryAxisHorizontal={false}
+      onValueAxisPositionChanged={[MockFunction]}
+      removeValueAxis={[MockFunction]}
+      setParamByIndex={[MockFunction]}
+      stateParams={
+        Object {
+          "seriesParams": Array [
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Count",
+              },
+              "valueAxis": "ValueAxis-1",
+            },
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Average",
+              },
+              "valueAxis": "ValueAxis-2",
+            },
+          ],
+          "valueAxes": Array [
+            Object {
+              "id": "ValueAxis-1",
+              "labels": Object {
+                "filter": false,
+                "show": true,
+                "truncate": 0,
+              },
+              "position": "left",
+              "scale": Object {
+                "mode": "normal",
+                "type": "linear",
+              },
+              "show": true,
+              "title": Object {},
+            },
+            Object {
+              "id": "ValueAxis-2",
               "labels": Object {
                 "filter": false,
                 "show": true,

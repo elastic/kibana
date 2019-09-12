@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../types';
 import {
@@ -36,7 +37,7 @@ describe('ValueAxesPanel component', () => {
   let addValueAxis: jest.Mock;
   let removeValueAxis: jest.Mock;
   let defaultProps: ValueAxesPanelProps;
-  const axis = {
+  const axis1 = {
     id: 'ValueAxis-1',
     position: Positions.LEFT,
     scale: {
@@ -51,26 +52,46 @@ describe('ValueAxesPanel component', () => {
       truncate: 0,
     },
   } as ValueAxis;
-  const seriesParam = {
+  const axis2 = {
+    id: 'ValueAxis-2',
+    position: Positions.LEFT,
+    scale: {
+      mode: AxisModes.NORMAL,
+      type: ScaleTypes.LINEAR,
+    },
+    title: {},
+    show: true,
+    labels: {
+      show: true,
+      filter: false,
+      truncate: 0,
+    },
+  } as ValueAxis;
+  const seriesParam1 = {
     data: {
       label: 'Count',
       id: '1',
     },
-    valueAxis: 'ValueAxis-1',
+  } as SeriesParam;
+  const seriesParam2 = {
+    data: {
+      label: 'Average',
+      id: '1',
+    },
   } as SeriesParam;
 
   beforeEach(() => {
+    seriesParam1.valueAxis = 'ValueAxis-1';
+    seriesParam2.valueAxis = 'ValueAxis-2';
     setParamByIndex = jest.fn();
     onValueAxisPositionChanged = jest.fn();
     addValueAxis = jest.fn();
     removeValueAxis = jest.fn();
 
     defaultProps = {
-      axis,
-      index: 0,
       stateParams: {
-        seriesParams: [seriesParam],
-        valueAxes: [axis],
+        seriesParams: [seriesParam1, seriesParam2],
+        valueAxes: [axis1, axis2],
       } as any,
       vis: {
         type: {
@@ -101,38 +122,65 @@ describe('ValueAxesPanel component', () => {
   });
 
   it('should not display remove button when the only axis', () => {
+    defaultProps.stateParams.valueAxes = [axis1];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     expect(comp.find('[data-test-subj="removeValueAxisBtn"] button').exists()).toBeFalsy();
   });
 
   it('should display remove button when multiple axes', () => {
-    defaultProps.stateParams.valueAxes = [axis, { ...axis, id: 'ValueAxis-2' }];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
 
     expect(comp.find('[data-test-subj="removeValueAxisBtn"] button').exists()).toBeTruthy();
   });
 
   it('should call removeAgg', () => {
-    defaultProps.stateParams.valueAxes = [axis, { ...axis, id: 'ValueAxis-2' }];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     comp
       .find('[data-test-subj="removeValueAxisBtn"] button')
       .first()
       .simulate('click');
 
-    expect(removeValueAxis).toBeCalledWith(axis);
+    expect(removeValueAxis).toBeCalledWith(axis1);
   });
 
-  it('should show description when series match value axis', () => {
+  it('should call addValueAxis', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
-    expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe(
-      'Count'
-    );
+    comp.find('[data-test-subj="visualizeAddYAxisButton"] button').simulate('click');
+
+    expect(addValueAxis).toBeCalled();
   });
 
-  it('should not show description when no series match value axis', () => {
-    defaultProps.stateParams.seriesParams[0].valueAxis = '2';
-    const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
-    expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe('');
+  describe('description', () => {
+    it('should show when one serie matches value axis', () => {
+      const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
+      expect(
+        comp
+          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
+          .first()
+          .text()
+      ).toBe('Count');
+    });
+
+    it('should show when multiple series match value axis', () => {
+      defaultProps.stateParams.seriesParams[1].valueAxis = 'ValueAxis-1';
+      const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
+      expect(
+        comp
+          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
+          .first()
+          .text()
+      ).toBe('Count, Average');
+    });
+
+    it('should not show when no series match value axis', () => {
+      defaultProps.stateParams.seriesParams[0].valueAxis = 'ValueAxis-2';
+      const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
+      expect(
+        comp
+          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
+          .first()
+          .text()
+      ).toBe('');
+    });
   });
 });
