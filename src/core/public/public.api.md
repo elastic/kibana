@@ -5,28 +5,70 @@
 ```ts
 
 import { IconType } from '@elastic/eui';
+import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
+// @public
+export interface App extends AppBase {
+    mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+}
+
+// @public (undocumented)
+export interface AppBase {
+    capabilities?: Partial<Capabilities>;
+    euiIconType?: string;
+    icon?: string;
+    // (undocumented)
+    id: string;
+    order?: number;
+    title: string;
+    tooltip$?: Observable<string>;
+}
+
 // @public (undocumented)
 export interface ApplicationSetup {
-    // Warning: (ae-forgotten-export) The symbol "App" needs to be exported by the entry point index.d.ts
-    registerApp(app: App): void;
-    // Warning: (ae-forgotten-export) The symbol "LegacyApp" needs to be exported by the entry point index.d.ts
-    // 
-    // @internal
-    registerLegacyApp(app: LegacyApp): void;
+    register(app: App): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
 }
 
 // @public (undocumented)
 export interface ApplicationStart {
-    availableApps: readonly App[];
-    // @internal
-    availableLegacyApps: readonly LegacyApp[];
     capabilities: RecursiveReadonly<Capabilities>;
+    getUrlForApp(appId: string, options?: {
+        path?: string;
+    }): string;
+    navigateToApp(appId: string, options?: {
+        path?: string;
+        state?: any;
+    }): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
 }
+
+// @public
+export interface AppMountContext {
+    core: {
+        application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
+        chrome: ChromeStart;
+        docLinks: DocLinksStart;
+        http: HttpStart;
+        i18n: I18nStart;
+        notifications: NotificationsStart;
+        overlays: OverlayStart;
+        uiSettings: UiSettingsClientContract;
+    };
+}
+
+// @public (undocumented)
+export interface AppMountParameters {
+    appBasePath: string;
+    element: HTMLElement;
+}
+
+// @public
+export type AppUnmount = () => void;
 
 // @public
 export interface Capabilities {
@@ -62,6 +104,8 @@ export interface ChromeBreadcrumb {
     'data-test-subj'?: string;
     // (undocumented)
     href?: string;
+    // (undocumented)
+    onClick?: MouseEventHandler<HTMLButtonElement>;
     // (undocumented)
     text: string;
 }
@@ -102,7 +146,7 @@ export interface ChromeNavLink {
     readonly legacy: boolean;
     // @deprecated
     readonly linkToLastSubUrl?: boolean;
-    readonly order: number;
+    readonly order?: number;
     // @deprecated
     readonly subUrlBase?: string;
     readonly title: string;
@@ -183,6 +227,8 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
+    application: ApplicationSetup;
+    // (undocumented)
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -197,7 +243,7 @@ export interface CoreSetup {
 // @public
 export interface CoreStart {
     // (undocumented)
-    application: Pick<ApplicationStart, 'capabilities'>;
+    application: ApplicationStart;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
@@ -502,23 +548,19 @@ export type IContextHandler<TContext extends {}, TReturn, THandlerParameters ext
 // @public
 export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
 
-// @internal (undocumented)
-export interface InternalCoreSetup extends CoreSetup {
-    // (undocumented)
-    application: ApplicationSetup;
+// @public @deprecated
+export interface LegacyCoreSetup extends CoreSetup {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
-    // (undocumented)
+    // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataSetup;
 }
 
-// @internal (undocumented)
-export interface InternalCoreStart extends CoreStart {
-    // (undocumented)
-    application: ApplicationStart;
+// @public @deprecated
+export interface LegacyCoreStart extends CoreStart {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
     // 
-    // (undocumented)
+    // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataStart;
 }
 

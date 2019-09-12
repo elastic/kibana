@@ -17,7 +17,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { DataFrameAnalyticsId } from '../../../../common';
+import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
   getDataFrameAnalyticsProgress,
   DataFrameAnalyticsListColumn,
@@ -106,7 +106,6 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '20%' : undefined,
     },
     // Description is not supported yet by API
     /*
@@ -126,7 +125,6 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '25%' : undefined,
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
@@ -135,7 +133,15 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '20%' : undefined,
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.type', { defaultMessage: 'Type' }),
+      sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
+      truncateText: true,
+      render(item: DataFrameAnalyticsListRow) {
+        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+      },
+      width: '150px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
@@ -218,6 +224,7 @@ export const getColumns = (
         defaultMessage: 'Spaces',
       }),
       render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+      width: '75px',
     });
   } else {
     columns.push({

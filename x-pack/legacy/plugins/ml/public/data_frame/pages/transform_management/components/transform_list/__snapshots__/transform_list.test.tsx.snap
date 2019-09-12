@@ -9,11 +9,8 @@ exports[`Data Frame: Transform List <DataFrameTransformList /> Minimal initializ
     actions={
       Array [
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          type="button"
         >
           Create your first data frame transform
         </EuiButtonEmpty>,

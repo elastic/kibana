@@ -106,8 +106,8 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        hosts: {
-          ...state[hostsType].queries.hosts,
+        [HostsTableType.hosts]: {
+          ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
         },
