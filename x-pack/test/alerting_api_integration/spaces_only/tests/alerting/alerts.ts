@@ -8,11 +8,11 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  destroyEsTestIndex,
+  ESTestIndexTool,
+  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
-  setupEsTestIndex,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,26 +20,26 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('alerts', () => {
-    let esTestIndexName: string;
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await destroyEsTestIndex(es);
-      ({ name: esTestIndexName } = await setupEsTestIndex(es));
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await destroyEsTestIndex(es);
+      await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
     });
 
     async function searchTestIndexDocs(source: string, reference: string) {
       return await es.search({
-        index: esTestIndexName,
+        index: ES_TEST_INDEX_NAME,
         body: {
           query: {
             bool: {
@@ -100,7 +100,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             interval: '1m',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
             actions: [
@@ -108,7 +108,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 group: 'default',
                 id: createdAction.id,
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   message:
                     'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
@@ -129,7 +129,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         reference,
         state: {},
         params: {
-          index: esTestIndexName,
+          index: ES_TEST_INDEX_NAME,
           reference,
         },
       });
@@ -145,7 +145,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           encrypted: 'This value should be encrypted',
         },
         params: {
-          index: esTestIndexName,
+          index: ES_TEST_INDEX_NAME,
           reference,
           message: 'instanceContextValue: true, instanceStateValue: true',
         },
@@ -180,7 +180,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             interval: '1m',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference: 'create-test-2',
             },
             actions: [
@@ -189,7 +189,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 id: createdAction.id,
                 params: {
                   reference,
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   retryAt: retryDate.getTime(),
                 },
               },
@@ -251,7 +251,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               callClusterAuthorizationIndex: authorizationIndex,
               savedObjectsClientType: 'dashboard',
               savedObjectsClientId: '1',
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
           })
@@ -294,7 +294,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           getTestAlertData({
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
-              index: esTestIndexName,
+              index: ES_TEST_INDEX_NAME,
               reference,
             },
             actions: [
@@ -305,7 +305,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               },

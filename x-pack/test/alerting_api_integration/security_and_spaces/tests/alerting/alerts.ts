@@ -8,11 +8,11 @@ import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  destroyEsTestIndex,
+  ESTestIndexTool,
+  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
-  setupEsTestIndex,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,54 +21,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('alerts', () => {
-    let esTestIndexName: string;
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await destroyEsTestIndex(es);
-      ({ name: esTestIndexName } = await setupEsTestIndex(es));
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await destroyEsTestIndex(es);
+      await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
     });
-
-    async function searchTestIndexDocs(source: string, reference: string) {
-      return await es.search({
-        index: esTestIndexName,
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    source,
-                  },
-                },
-                {
-                  term: {
-                    reference,
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-    }
-
-    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
-      return await retry.try(async () => {
-        const searchResult = await searchTestIndexDocs(source, reference);
-        expect(searchResult.hits.total.value).to.eql(numDocs);
-        return searchResult.hits.hits;
-      });
-    }
 
     async function createIndexRecordAction(spaceId: string) {
       const { body: createdAction } = await supertest
@@ -104,7 +72,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 interval: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
                 actions: [
@@ -112,7 +80,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message:
                         'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
@@ -137,7 +105,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              const alertTestRecord = (await waitForTestIndexDocs(
+              const alertTestRecord = (await esTestIndexTool.waitForDocs(
                 'alert:test.always-firing',
                 reference
               ))[0];
@@ -146,11 +114,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference,
                 state: {},
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               });
-              const actionTestRecord = (await waitForTestIndexDocs(
+              const actionTestRecord = (await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
                 reference
               ))[0];
@@ -162,7 +130,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   encrypted: 'This value should be encrypted',
                 },
                 params: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   message: 'instanceContextValue: true, instanceStateValue: true',
                 },
@@ -202,7 +170,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 interval: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
                 },
                 actions: [
@@ -211,7 +179,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     id: createdAction.id,
                     params: {
                       reference,
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       retryAt: retryDate.getTime(),
                     },
                   },
@@ -292,7 +260,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
               })
@@ -312,7 +280,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (await waitForTestIndexDocs(
+              alertTestRecord = (await esTestIndexTool.waitForDocs(
                 'alert:test.authorization',
                 reference
               ))[0];
@@ -335,7 +303,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (await waitForTestIndexDocs(
+              alertTestRecord = (await esTestIndexTool.waitForDocs(
                 'alert:test.authorization',
                 reference
               ))[0];
@@ -376,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
                 actions: [
@@ -387,7 +355,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                       callClusterAuthorizationIndex: authorizationIndex,
                       savedObjectsClientType: 'dashboard',
                       savedObjectsClientId: '1',
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                     },
                   },
@@ -409,7 +377,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (await waitForTestIndexDocs(
+              actionTestRecord = (await esTestIndexTool.waitForDocs(
                 'action:test.authorization',
                 reference
               ))[0];
@@ -432,7 +400,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (await waitForTestIndexDocs(
+              actionTestRecord = (await esTestIndexTool.waitForDocs(
                 'action:test.authorization',
                 reference
               ))[0];
@@ -466,7 +434,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                 },
                 actions: [
@@ -474,7 +442,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message: '',
                     },
@@ -497,8 +465,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'superuser at space1':
               // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
-              await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await searchTestIndexDocs(
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
@@ -522,7 +490,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   groupsToScheduleActionsInSeries: ['default', 'other'],
                 },
@@ -531,7 +499,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message: 'from:default',
                     },
@@ -540,7 +508,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'other',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message: 'from:other',
                     },
@@ -563,8 +531,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'superuser at space1':
               // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
-              await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await searchTestIndexDocs(
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
@@ -592,7 +560,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  index: esTestIndexName,
+                  index: ES_TEST_INDEX_NAME,
                   reference,
                   groupsToScheduleActionsInSeries: ['default', null, 'default'],
                 },
@@ -601,7 +569,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     id: createdAction.id,
                     params: {
-                      index: esTestIndexName,
+                      index: ES_TEST_INDEX_NAME,
                       reference,
                       message: 'from:default',
                     },
@@ -624,8 +592,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'superuser at space1':
               // Wait until alerts scheduled actions 4 times to ensure actions had a chance to execute twice
-              await waitForTestIndexDocs('alert:test.always-firing', reference, 4);
-              const executedActionsResult = await searchTestIndexDocs(
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 4);
+              const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
