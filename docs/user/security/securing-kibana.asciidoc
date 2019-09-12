@@ -1,8 +1,8 @@
 [role="xpack"]
 [[using-kibana-with-security]]
-== Configuring security in {kib}
+== Configuring Security in Kibana
 ++++
-<titleabbrev>Configuring security</titleabbrev>
+<titleabbrev>Configuring Security</titleabbrev>
 ++++
 
 {kib} users have to log in when {security} is enabled on your cluster. You
@@ -16,8 +16,8 @@ must configure credentials for the {kib} server to use for those requests.
 
 With {security} enabled, if you load a {kib} dashboard that accesses data in an
 index that you are not authorized to view, you get an error that indicates the
-index does not exist. {security} do not currently provide a way to control which
-users can load which dashboards.
+index does not exist. {security} does not currently provide a way to control
+which users can load which dashboards.
 
 To use {kib} with {security}:
 
@@ -90,7 +90,7 @@ role:
 
 [source,js]
 --------------------------------------------------------------------------------
-POST /_security/user/jacknich
+POST /_xpack/security/user/jacknich
 {
   "password" : "t0pS3cr3t",
   "roles" : [ "kibana_user" ]
@@ -122,6 +122,10 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 
 --
 
+For more information about the settings in these steps, see
+<<security-settings-kb>>.
+
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
 include::audit-logging.asciidoc[]
+include::{kib-repo-dir}/settings/security-settings.asciidoc[]

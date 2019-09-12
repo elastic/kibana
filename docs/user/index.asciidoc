@@ -4,7 +4,7 @@ include::setup.asciidoc[]
 
 include::{kib-repo-dir}/monitoring/configuring-monitoring.asciidoc[]
 
-include::{kib-repo-dir}/security/securing-kibana.asciidoc[]
+include::security/securing-kibana.asciidoc[]
 
 include::{kib-repo-dir}/settings/settings-xkb.asciidoc[]
 
