@@ -6,28 +6,48 @@
 
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-import {  EuiFlexGroup, EuiFlexItem  } from '@elastic/eui';
-import { WorkspaceField } from '../../types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { bindActionCreators } from 'redux';
 import { FieldPicker } from './field_picker';
+import { FieldEditor } from './field_editor';
+import {
+  selectedFieldsSelector,
+  fieldsSelector,
+  updateFieldProperties,
+  selectField,
+  deselectField,
+  GraphDispatch,
+  GraphState,
+} from '../../state_management';
 
 export interface GraphFieldManagerProps {
-  allFields: WorkspaceField[];
-  updateFieldProperties: (fieldName: string, fieldProperties: Pick<WorkspaceField, 'hopSize' | 'color' | 'icon'>) => void;
-  selectField: (fieldName: string) => void;
-  deselectField: (fieldName: string) => void;
+  state: GraphState;
+  dispatch: GraphDispatch;
 }
 
-export function GraphFieldManager(props: GraphFieldManagerProps) {
-  const selectedFields = props.allFields.filter(field => field.selected);
+export function GraphFieldManager({ state, dispatch }: GraphFieldManagerProps) {
+  const allFields = fieldsSelector(state);
+  const selectedFields = selectedFieldsSelector(state);
+
+  const actionCreators = bindActionCreators(
+    {
+      updateFieldProperties,
+      selectField,
+      deselectField,
+    },
+    dispatch
+  );
 
   return (
     <I18nProvider>
       <EuiFlexGroup>
-        {selectedFields.map(field => <FieldEditor {...props} field={field} />)}
+        {selectedFields.map(field => (
+          <FieldEditor allFields={allFields} {...actionCreators} field={field} />
+        ))}
         <EuiFlexItem grow={false}>
-          <FieldPicker {...props} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <FieldPicker allFields={allFields} {...actionCreators} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </I18nProvider>
   );
 }

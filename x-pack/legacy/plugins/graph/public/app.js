@@ -43,6 +43,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
+import { GraphFieldManager } from './components/graph_field_manager';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -63,6 +64,13 @@ import { urlTemplateRegex } from  './services/url_template';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
+import {
+  store,
+  loadFields,
+  fieldsSelector,
+  selectedFieldsSelector,
+  liveResponseFieldsSelector
+} from './state_management';
 
 import inspectTemplate from './angular/templates/inspect.html';
 
@@ -93,6 +101,13 @@ app.directive('focusOn', function () {
 
 app.directive('graphListing', function (reactDirective) {
   return reactDirective(GraphListing);
+});
+
+app.directive('graphFieldManager', function (reactDirective) {
+  return reactDirective(GraphFieldManager, [
+    ['state', { watchDepth: 'reference' }],
+    ['dispatch', { watchDepth: 'reference' }],
+  ]);
 });
 
 if (uiRoutes.enable) {
@@ -243,33 +258,40 @@ app.controller('graphuiPlugin', function (
   $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
   $scope.searchTerm = '';
 
+  $scope.reduxDispatch = (action) => {
+    store.dispatch(action);
+    if (action.type === 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES' &&
+        action.payload.fieldProperties.color && $scope.workspace) {
+      $scope.workspace.nodes.forEach(function (node) {
+        if (node.data.field === action.payload.fieldName) {
+          node.color = action.payload.fieldProperties.color;
+        }
+      });
+    }
+
+    if (action.type === 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES' &&
+        action.payload.fieldProperties.icon && $scope.workspace) {
+      $scope.workspace.nodes.forEach(function (node) {
+        if (node.data.field === action.payload.fieldName) {
+          node.icon = action.payload.fieldProperties.icon;
+        }
+      });
+    }
+
+    $scope.$digest();
+  };
+  const updateScope = () => {
+    const newState = store.getState();
+    $scope.reduxState = newState;
+    $scope.allFields = fieldsSelector(newState);
+    $scope.selectedFields = selectedFieldsSelector(newState);
+    $scope.liveResponseFields = liveResponseFieldsSelector(newState);
+  };
+  store.subscribe(updateScope);
+  updateScope();
+
   //So scope properties can be used consistently with ng-model
   $scope.grr = $scope;
-
-  //Updates styling on all nodes in the UI that use this field
-  $scope.applyColor = function (fieldDef, color) {
-    fieldDef.color = color;
-    if ($scope.workspace) {
-      $scope.workspace.nodes.forEach(function (node) {
-        if (node.data.field === fieldDef.name) {
-          node.color = color;
-        }
-      });
-    }
-  };
-
-  //Updates styling on all nodes in the UI that use this field
-  $scope.applyIcon = function (fieldDef, icon) {
-    fieldDef.icon = icon;
-    if ($scope.workspace) {
-      $scope.workspace.nodes.forEach(function (node) {
-        if (node.data.field === fieldDef.name) {
-          node.icon = icon;
-        }
-      });
-    }
-  };
-
 
   $scope.toggleDrillDownIcon = function (urlTemplate, icon) {
     urlTemplate.icon === icon ? urlTemplate.icon = null : urlTemplate.icon = icon;
@@ -292,71 +314,6 @@ app.controller('graphuiPlugin', function (
     } else {
       $scope.detail = null;
     }
-  };
-
-
-  //A live response field is one that is both selected and actively enabled for returning in responses
-  // We call this function to refresh the array whenever there is a change in the conditions.
-  $scope.updateLiveResponseFields = function () {
-    $scope.liveResponseFields = $scope.selectedFields.filter(function (fieldDef) {
-      return (fieldDef.hopSize > 0) && fieldDef.selected;
-    });
-  };
-
-  $scope.selectedFieldConfigHopSizeChanged = function () {
-    // Only vertex fields with hop size > 0 are deemed "live"
-    // so when there is a change we re-evaluate the list of live fields
-    $scope.updateLiveResponseFields();
-  };
-
-  $scope.hideAllConfigPanels = function () {
-    $scope.selectedFieldConfig = null;
-    $scope.closeMenus();
-  };
-
-  $scope.setAllFieldStatesToDefault = function () {
-    $scope.selectedFields = [];
-    $scope.basicModeSelectedSingleField = null;
-    $scope.liveResponseFields = [];
-
-    // Default field state is not selected
-    $scope.allFields.forEach(function (fieldDef) {
-      fieldDef.selected = false;
-    });
-  };
-
-  $scope.addFieldToSelection =  function () {
-    $scope.selectedField.selected = true;
-    if ($scope.selectedFields.indexOf($scope.selectedField) < 0) {
-      $scope.selectedFields.push($scope.selectedField);
-    }
-    $scope.updateLiveResponseFields();
-    //Force load of the config panel for the field
-    $scope.clickVertexFieldIcon($scope.selectedField);
-  };
-
-  $scope.clickVertexFieldIcon = function (field, $event) {
-    // Shift click is a fast way to toggle if the field is active or not.
-    if ($event && field) {
-      if ($event.shiftKey) {
-        if (field.hopSize === 0) {
-          field.hopSize = field.lastValidHopSize ? field.lastValidHopSize : 5;
-        }else {
-          field.lastValidHopSize = field.hopSize;
-          field.hopSize = 0;
-        }
-        $scope.updateLiveResponseFields();
-        return;
-      }
-    }
-
-    // Check if user is toggling off an already-open config panel for the current field
-    if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
-      $scope.currentlyDisplayedKey = null;
-      return;
-    }
-    $scope.selectedFieldConfig = field;
-    $scope.currentlyDisplayedKey = 'fieldConfig';
   };
 
   function canWipeWorkspace(yesFn, noFn) {
@@ -400,7 +357,7 @@ app.controller('graphuiPlugin', function (
     return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
       .then(handleSuccess)
       .then(function (indexPattern) {
-        $scope.allFields = mapFields(indexPattern);
+        store.dispatch(loadFields(mapFields(indexPattern)));
         $scope.filteredFields = $scope.allFields;
         if ($scope.allFields.length > 0) {
           $scope.selectedField = $scope.allFields[0];
@@ -481,33 +438,6 @@ app.controller('graphuiPlugin', function (
     if ($scope.closeMenus) $scope.closeMenus();
   };
 
-  $scope.toggleShowAdvancedFieldsConfig = function () {
-    if ($scope.currentlyDisplayedKey !== 'fields') {
-      $scope.currentlyDisplayedKey = 'fields';
-      //Default the selected field
-      $scope.selectedField = null;
-      $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
-        return !fieldDef.selected;
-      });
-      if ($scope.filteredFields.length > 0) {
-        $scope.selectedField = $scope.filteredFields[0];
-      }
-    } else {
-      $scope.currentlyDisplayedKey = undefined;
-    }
-  };
-
-  $scope.removeVertexFieldSelection = function () {
-    $scope.selectedFieldConfig.selected = false;
-    // Find and remove field from array (important not to just make a new filtered array because
-    // this array instance is shared with $scope.workspace)
-    const i = $scope.selectedFields.indexOf($scope.selectedFieldConfig);
-    if (i !== -1) {
-      $scope.selectedFields.splice(i, 1);
-    }
-    $scope.updateLiveResponseFields();
-    $scope.hideAllConfigPanels();
-  };
 
   $scope.selectSelected = function (node) {
     $scope.detail = {
@@ -518,14 +448,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.isSelectedSelected = function (node) {
     return $scope.selectedSelectedVertex === node;
-  };
-
-  $scope.filterFieldsKeyDown = function () {
-    const lcFilter = $scope.fieldNamesFilterString.toLowerCase();
-    $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
-      return !fieldDef.selected && (!lcFilter || lcFilter === ''
-      || fieldDef.name.toLowerCase().indexOf(lcFilter) >= 0);
-    });
   };
 
   $scope.saveUrlTemplate = function (index, urlTemplate) {
@@ -894,21 +816,15 @@ app.controller('graphuiPlugin', function (
         advancedSettings,
         workspace,
         allFields,
-        selectedFields,
       } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
 
       // wire up stuff to angular
-      $scope.allFields = allFields;
-      $scope.selectedFields = selectedFields;
+      store.dispatch(loadFields(allFields));
       $scope.workspace = workspace;
       $scope.exploreControls = advancedSettings;
       $scope.urlTemplates = urlTemplates;
       $scope.updateLiveResponseFields();
       $scope.workspace.runLayout();
-      $scope.filteredFields = $scope.allFields;
-      if ($scope.allFields.length > 0) {
-        $scope.selectedField = $scope.allFields[0];
-      }
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
         $scope.searchTerm = $route.current.params.query;
@@ -943,8 +859,7 @@ app.controller('graphuiPlugin', function (
         selectedIndex: $scope.selectedIndex,
         selectedFields: $scope.selectedFields
       },
-      $scope.graphSavePolicy === 'configAndData' ||
-          ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData)
+      canSaveData
     );
 
     return $scope.savedWorkspace.save(saveOptions).then(function (id) {

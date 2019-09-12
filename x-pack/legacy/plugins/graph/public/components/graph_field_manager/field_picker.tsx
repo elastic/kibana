@@ -14,10 +14,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GraphFieldManagerProps } from '.';
 import { WorkspaceField } from '../../types';
 
-export function FieldPicker(props: GraphFieldManagerProps) {
+export interface FieldPickerProps {
+  allFields: WorkspaceField[];
+  selectField: (fieldName: string) => void;
+  deselectField: (fieldName: string) => void;
+}
+
+export function FieldPicker(props: FieldPickerProps) {
   const [open, setOpen] = useState(false);
   const [fieldOptions, setFieldOptions] = useState(toOptions(props.allFields));
 
@@ -63,8 +68,8 @@ export function FieldPicker(props: GraphFieldManagerProps) {
               fill
               onClick={() => {
                 fieldOptions.forEach((option, index) => {
-                  if (option.checked) {
-                    props.selectField(unselectedFields[index]);
+                  if (option.checked === 'on') {
+                    props.selectField(unselectedFields[index].name);
                   }
                 });
               }}
@@ -83,7 +88,6 @@ export function FieldPicker(props: GraphFieldManagerProps) {
 function toOptions(fields: WorkspaceField[]): Array<{ label: string; checked?: 'on' | 'off' }> {
   return fields.map(field => ({
     label: field.name,
-    checked: 'off',
     // TODO icon for data type
   }));
 }
