@@ -9,6 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { i18n } from '@kbn/i18n';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -185,8 +186,16 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     };
 
     const res = await server.inject(request);
-    if (res.statusCode !== 200) {
-      throw res;
+    if (res.statusCode >= 300) {
+      const message = i18n.translate('xpack.infra.TSVBRequest.error', {
+        defaultMessage: 'Internal request: {method} {path} returned status code {statusCode}',
+        values: {
+          method: 'POST',
+          path: url,
+          statusCode: res.statusCode,
+        },
+      });
+      throw new Error(message);
     }
 
     return res.result as InfraTSVBResponse;
