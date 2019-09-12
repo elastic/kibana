@@ -17,6 +17,7 @@ import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
+import { TimelineEvent } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
@@ -185,7 +186,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                 executeQuery={!!this.state.expanded[event._id]}
               >
                 {({ detailsData, loading }) => (
-                  <div
+                  <TimelineEvent
                     data-test-subj="event"
                     ref={divElement => {
                       if (divElement != null) {
@@ -233,7 +234,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                         toggleColumn={toggleColumn}
                       />
                     </div>
-                  </div>
+                  </TimelineEvent>
                 )}
               </TimelineDetailsComponentQuery>
             );
