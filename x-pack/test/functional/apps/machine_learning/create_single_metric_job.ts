@@ -13,9 +13,15 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const jobId = `fq_single_1_${Date.now()}`;
+  const jobDescription =
+    'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
+  const jobGroups = ['automated', 'farequote', 'single-metric'];
+  const aggAndFieldIdentifier = 'Mean(responsetime)';
+  const bucketSpan = '30m';
+  const memoryLimit = '15MB';
 
   describe('single metric job creation', function() {
-    this.tags('smoke');
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
     });
@@ -58,14 +64,12 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('selects field and aggregation', async () => {
-      const identifier = 'Mean(responsetime)';
       await ml.jobWizardCommon.assertAggAndFieldInputExists();
-      await ml.jobWizardCommon.selectAggAndField(identifier);
-      await ml.jobWizardCommon.assertAggAndFieldSelection(identifier);
+      await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier);
+      await ml.jobWizardCommon.assertAggAndFieldSelection(aggAndFieldIdentifier);
     });
 
     it('inputs the bucket span', async () => {
-      const bucketSpan = '30m';
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.setBucketSpan(bucketSpan);
       await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
@@ -83,15 +87,12 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('inputs the job description', async () => {
-      const jobDescription =
-        'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
       await ml.jobWizardCommon.assertJobDescriptionInputExists();
       await ml.jobWizardCommon.setJobDescription(jobDescription);
       await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
     });
 
     it('inputs job groups', async () => {
-      const jobGroups = ['automated', 'farequote', 'single-metric'];
       await ml.jobWizardCommon.assertJobGroupInputExists();
       for (const jobGroup of jobGroups) {
         await ml.jobWizardCommon.addJobGroup(jobGroup);
@@ -114,7 +115,6 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('inputs the model memory limit', async () => {
-      const memoryLimit = '15MB';
       await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
       await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
       await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
@@ -138,9 +138,56 @@ export default function({ getService }: FtrProviderContext) {
     it('displays the created job in the job list', async () => {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
-      await ml.jobManagement.filterJobsTable(jobId);
-      const jobRow = await ml.jobManagement.getJobRowByJobId(jobId);
-      expect(jobRow).to.not.be(null);
+
+      await ml.jobTable.waitForJobsToLoad();
+      await ml.jobTable.filterWithSearchString(jobId);
+      const rows = await ml.jobTable.parseJobTable();
+      expect(rows.filter(row => row.id === jobId)).to.have.length(1);
+    });
+
+    it('displays details for the created job in the job list', async () => {
+      const expectedRow = {
+        id: jobId,
+        description: jobDescription,
+        jobGroups,
+        recordCount: '2,399',
+        memoryStatus: 'ok',
+        jobState: 'closed',
+        datafeedState: 'stopped',
+        latestTimestamp: '2016-02-11 23:56:59',
+      };
+      await ml.jobTable.assertJobRowFields(jobId, expectedRow);
+
+      const expectedCounts = {
+        job_id: jobId,
+        processed_record_count: '2,399',
+        processed_field_count: '4,798',
+        input_bytes: '180.6 KB',
+        input_field_count: '4,798',
+        invalid_date_count: '0',
+        missing_field_count: '0',
+        out_of_order_timestamp_count: '0',
+        empty_bucket_count: '0',
+        sparse_bucket_count: '0',
+        bucket_count: '239',
+        earliest_record_timestamp: '2016-02-07 00:02:50',
+        latest_record_timestamp: '2016-02-11 23:56:59',
+        input_record_count: '2,399',
+        latest_bucket_timestamp: '2016-02-11 23:30:00',
+      };
+      const expectedModelSizeStats = {
+        job_id: jobId,
+        result_type: 'model_size_stats',
+        model_bytes_exceeded: '0',
+        model_bytes_memory_limit: '15728640',
+        total_by_field_count: '3',
+        total_over_field_count: '0',
+        total_partition_field_count: '2',
+        bucket_allocation_failures_count: '0',
+        memory_status: 'ok',
+        timestamp: '2016-02-11 23:00:00',
+      };
+      await ml.jobTable.assertJobRowDetailsCounts(jobId, expectedCounts, expectedModelSizeStats);
     });
   });
 }

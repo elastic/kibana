@@ -24,9 +24,6 @@ const ProviderBadgeStyled = styled(EuiBadge)`
       padding: 0px 3px;
     }
   }
-  .field-value {
-    font-weight: 200;
-  }
   &.globalFilterItem {
     white-space: nowrap;
     &.globalFilterItem-isDisabled {
@@ -34,6 +31,16 @@ const ProviderBadgeStyled = styled(EuiBadge)`
       font-weight: 400;
       font-style: italic;
     }
+  }
+  .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
+    flex-direction: row;
+  }
+  .euiBadge.euiBadge--iconLeft
+    &.euiBadge.euiBadge--iconRight
+    .euiBadge__content
+    .euiBadge__iconButton {
+    margin-right: 0;
+    margin-left: 4px;
   }
 `;
 

@@ -5,10 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import {
-  // @ts-ignore
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import * as React from 'react';
 
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
@@ -34,26 +31,28 @@ export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
     const fieldsByName = getAllFieldsByName(browserFields);
     return (
-      <EuiInMemoryTable
-        items={sortBy(data, ['field']).map(item => {
-          return {
-            ...item,
-            ...fieldsByName[item.field],
-            valuesConcatenated: item.values != null ? item.values.join() : '',
-          };
-        })}
-        columns={getColumns({
-          browserFields,
-          columnHeaders,
-          eventId,
-          onUpdateColumns,
-          timelineId,
-          toggleColumn,
-        })}
-        pagination={false}
-        search={search}
-        sorting={true}
-      />
+      <div className="euiTable--compressed">
+        <EuiInMemoryTable
+          items={sortBy(data, ['field']).map(item => {
+            return {
+              ...item,
+              ...fieldsByName[item.field],
+              valuesConcatenated: item.values != null ? item.values.join() : '',
+            };
+          })}
+          columns={getColumns({
+            browserFields,
+            columnHeaders,
+            eventId,
+            onUpdateColumns,
+            contextId: timelineId,
+            toggleColumn,
+          })}
+          pagination={false}
+          search={search}
+          sorting={true}
+        />
+      </div>
     );
   }
 );

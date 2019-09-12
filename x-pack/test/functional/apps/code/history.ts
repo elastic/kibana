@@ -28,7 +28,7 @@ export default function manageRepositoriesFunctionalTests({
   // FLAKY: https://github.com/elastic/kibana/issues/37859
   describe.skip('History', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
       let driver: any;

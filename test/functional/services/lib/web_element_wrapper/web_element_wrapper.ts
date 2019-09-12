@@ -58,6 +58,7 @@ export class WebElementWrapper {
   private Keys: IKey = this.webDriver.Key;
   private driver: WebDriver = this.webDriver.driver;
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
+  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
 
   public static create(
     webElement: WebElement | WebElementWrapper,
@@ -147,6 +148,12 @@ export class WebElementWrapper {
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
+  }
+
+  private getActions(): any {
+    return this.isW3CEnabled
+      ? (this.driver as any).actions()
+      : (this.driver as any).actions({ bridge: true });
   }
 
   /**
@@ -402,26 +409,78 @@ export class WebElementWrapper {
   }
 
   /**
-   * Moves the remote environment’s mouse cursor to the current element
+   * Moves the remote environment’s mouse cursor to the current element with optional offset
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
-   *
+   * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
-  public async moveMouseTo() {
+  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.browserType === Browsers.Firefox) {
-        const actions = (wrapper.driver as any).actions();
-        await actions.move({ x: 0, y: 0 }).perform();
-        await actions.move({ x: 10, y: 10, origin: wrapper._webElement }).perform();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .perform();
       } else {
-        const mouse = (wrapper.driver.actions() as any).mouse();
-        const actions = (wrapper.driver as any).actions({ bridge: true });
-        await actions
-          .pause(mouse)
-          .move({ origin: wrapper._webElement })
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
           .perform();
       }
+    });
+  }
+
+  /**
+   * Inserts an action for moving the mouse to element center, unless optional offset is provided.
+   * Then adds an action for left-click (down/up) with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+   *
+   * @param { xOffset: 0, yOffset: 0 } options Optional
+   * @return {Promise<void>}
+   */
+  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }): Promise<void> {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      } else {
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      }
+    });
+  }
+
+  /**
+   * Inserts action for performing a double left-click with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+   * @param {WebElementWrapper} element
+   * @return {Promise<void>}
+   */
+  public async doubleClick(): Promise<void> {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper
+        .getActions()
+        .doubleClick(wrapper._webElement)
+        .perform();
     });
   }
 
