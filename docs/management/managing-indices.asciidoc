@@ -115,7 +115,7 @@ and you'll leave them blank in this example.
 [role="screenshot"]
 image::images/management_index_create_wizard.png[Create wizard]
 
-The second step in the *Create template* allows you to define index settings.  
+The second step in the *Create template* wizard allows you to define index settings.  
 These settings are optional, and this example skips this step. 
 
 The logs data set requires a 
