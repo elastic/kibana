@@ -70,8 +70,12 @@ export const FilterRatioAgg = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.filterRatio.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.filterRatio.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -85,7 +89,10 @@ export const FilterRatioAgg = props => {
           <EuiFormRow
             id={htmlId('numerator')}
             label={
-              <FormattedMessage id="visTypeTimeseries.filterRatio.numeratorLabel" defaultMessage="Numerator" />
+              <FormattedMessage
+                id="visTypeTimeseries.filterRatio.numeratorLabel"
+                defaultMessage="Numerator"
+              />
             }
           >
             <EuiFieldText onChange={handleTextChange('numerator')} value={model.numerator} />
@@ -117,6 +124,7 @@ export const FilterRatioAgg = props => {
               defaultMessage="Metric Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('metric')}
             siblings={props.siblings}
@@ -130,7 +138,12 @@ export const FilterRatioAgg = props => {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('aggField')}
-              label={<FormattedMessage id="visTypeTimeseries.filterRatio.fieldLabel" defaultMessage="Field" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.filterRatio.fieldLabel"
+                  defaultMessage="Field"
+                />
+              }
             >
               <FieldSelect
                 fields={fields}
