@@ -422,9 +422,9 @@ export function getAutoplay(state: State): State['transient']['autoplay'] {
   return get(state, 'transient.autoplay');
 }
 
-export function getRenderedWorkpad(state) {
+export function getRenderedWorkpad(state: State) {
   const currentPages = getPages(state);
-  const args = get(state, ['transient', 'resolvedArgs']);
+  const args = get<State, State['transient']['resolvedArgs']>(state, ['transient', 'resolvedArgs']);
   const renderedPages = currentPages.map(page => {
     const { elements, ...rest } = page;
     return {

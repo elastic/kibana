@@ -5,36 +5,39 @@
  */
 
 import React from 'react';
-import { useExternalEmbedState } from '../../context';
 import { Page } from '../page';
-import { setPage } from '../../context/actions';
 import { CanvasRenderedPage } from '../../types';
 
-// @ts-ignore CSS Module
-import css from './page_preview.module';
+import css from './page_preview.module.scss';
 
-interface Props {
-  number: number;
+export type onClickProp = (index: number) => void;
+
+export interface Props {
   height: number;
+  index: number;
+  onClick: onClickProp;
   page: CanvasRenderedPage;
+  workpadHeight: number;
+  workpadWidth: number;
 }
 
 /**
  * The small preview of the page shown within the `Scrubber`.
  */
-export const PagePreview = ({ number, page, height }: Props) => {
-  const [{ workpad }, dispatch] = useExternalEmbedState();
-  if (!workpad) {
-    return null;
-  }
-
-  const onClick = (index: number) => dispatch(setPage(index));
-  const { height: workpadHeight, width: workpadWidth } = workpad;
+export const PagePreview = ({
+  height,
+  index,
+  onClick,
+  page,
+  workpadHeight,
+  workpadWidth,
+}: Props) => {
   const scale = height / workpadHeight;
   const style = {
     height: workpadHeight * scale,
     width: workpadWidth * scale,
   };
+
   const transform = {
     ...style,
     transform: `scale3d(${scale}, ${scale}, 1)`,
@@ -43,12 +46,12 @@ export const PagePreview = ({ number, page, height }: Props) => {
   return (
     <div
       className={css.root}
-      onClick={() => onClick(number)}
-      onKeyPress={() => onClick(number)}
+      onClick={() => onClick(index)}
+      onKeyPress={() => onClick(index)}
       style={style}
     >
       <div className={css.preview} style={transform}>
-        <Page page={page} />
+        <Page {...{ page }} height={workpadHeight} width={workpadWidth} />
       </div>
     </div>
   );

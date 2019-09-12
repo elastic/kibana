@@ -6,28 +6,22 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { useExternalEmbedState } from '../../context';
 
+interface Props {
+  title: string;
+}
 /**
  * The title of the workpad displayed in the right-hand of the footer.
  */
-export const Title = () => {
-  const [{ workpad }] = useExternalEmbedState();
-
-  if (!workpad) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="logoKibana" size="m" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-        <EuiText color="ghost" size="s">
-          <div className="eui-textTruncate">{workpad.name}</div>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+export const Title = ({ title }: Props) => (
+  <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="logoKibana" size="m" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false} style={{ minWidth: 0, cursor: 'default' }}>
+      <EuiText color="ghost" size="s">
+        <div className="eui-textTruncate">{title}</div>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

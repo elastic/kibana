@@ -14,12 +14,13 @@ import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasRenderedElement } from '../types';
 import { ExternalEmbedContext } from '../context';
 
-// @ts-ignore CSS Module
-import css from './rendered_element.module';
+import css from './rendered_element.module.scss';
+import { RendererSpec } from '../../types';
 
 interface Props {
   element: CanvasRenderedElement;
-  number?: number;
+  index: number;
+  fn: RendererSpec;
 }
 
 /**
@@ -38,31 +39,34 @@ export class RenderedElement extends React.PureComponent<Props> {
   }
 
   componentDidMount() {
-    const [{ renderersRegistry }] = this.context;
-    const { element } = this.props;
+    const { element, fn } = this.props;
     const { expressionRenderable } = element;
     const { value } = expressionRenderable;
     const { as } = value;
-    const fn = renderersRegistry.get(as);
+    const { current } = this.ref;
+
+    if (!current) {
+      return;
+    }
 
     try {
       // TODO: These are stubbed, but may need implementation.
-      fn.render(this.ref.current, value.value, {
+      fn.render(current, value.value, {
         done: () => {},
         onDestroy: () => {},
         onResize: () => {},
         setFilter: () => {},
-        getFilter: () => {},
+        getFilter: () => '',
       });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e.message);
+      console.log(as, e.message);
     }
   }
 
   render() {
-    const { element, number } = this.props;
-    const shape = elementToShape(element, number || 1);
+    const { element, index } = this.props;
+    const shape = elementToShape(element, index || 1);
     const { id, expressionRenderable, position } = element;
     const { value } = expressionRenderable;
     const { as, css: elementCSS, containerStyle } = value;

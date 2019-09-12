@@ -27,10 +27,6 @@ module.exports = {
   resolve: {
     alias: {
       ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
-      'data/interpreter': path.resolve(
-        KIBANA_ROOT,
-        'src/plugins/data/public/expressions/interpreter'
-      ),
       'kbn/interpreter': path.resolve(KIBANA_ROOT, 'packages/kbn-interpreter/target/common'),
       'types/interpreter': path.resolve(
         KIBANA_ROOT,

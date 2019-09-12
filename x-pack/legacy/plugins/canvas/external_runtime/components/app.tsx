@@ -5,22 +5,15 @@
  */
 
 import React from 'react';
-// @ts-ignore Untyped package
-import { RenderFunctionsRegistry } from 'data/interpreter';
-import { Canvas } from './canvas';
-import {
-  initialExternalEmbedState,
-  ExternalEmbedStateProvider,
-  ExternalEmbedState,
-} from '../context';
+import { Canvas } from './canvas.container';
+import { initialExternalEmbedState, ExternalEmbedStateProvider } from '../context';
 // @ts-ignore Untyped local
 import { renderFunctions } from '../../canvas_plugin_src/renderers';
-import { CanvasRenderedWorkpad } from '../types';
+import { CanvasRenderedWorkpad, ExternalEmbedState, Stage } from '../types';
+import { RendererFactory, RendererSpec } from '../../types';
 
 interface Props {
-  height: number;
-  width: number;
-  page: number;
+  stage: Stage;
   workpad: CanvasRenderedWorkpad;
 }
 
@@ -28,23 +21,20 @@ interface Props {
  * The overall Embedded Workpad app; the highest-layer component.
  */
 export const App = (props: Props) => {
-  const { workpad, page, height, width } = props;
+  const { workpad, stage } = props;
 
-  // Register all of the rendering experessions with a bespoke registry.
-  const renderersRegistry = new RenderFunctionsRegistry();
-
-  renderFunctions.forEach((fn: Function | undefined) => {
+  const renderers: { [key: string]: RendererSpec } = {};
+  renderFunctions.forEach((fn: RendererFactory | undefined) => {
     if (fn) {
-      renderersRegistry.register(fn);
+      const func = fn();
+      renderers[func.name] = func;
     }
   });
 
   const initialState: ExternalEmbedState = {
     ...initialExternalEmbedState,
-    height,
-    page,
-    renderersRegistry,
-    width,
+    stage,
+    renderers,
     workpad,
   };
 

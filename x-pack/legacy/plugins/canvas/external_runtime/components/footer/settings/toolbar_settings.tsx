@@ -6,23 +6,18 @@
 
 import React from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { useExternalEmbedState, setToolbarAutohide } from '../../../context';
 
-// @ts-ignore CSS Module
-import css from './settings.module';
+export type onSetAutohideProp = (isAutohide: boolean) => void;
 
 interface Props {
-  onChange?: () => void;
+  isAutohide: boolean;
+  onSetAutohide?: onSetAutohideProp;
 }
 
 /**
  * The settings panel for the Toolbar of an Embedded Workpad.
  */
-export const ToolbarSettings = ({ onChange = () => {} }: Props) => {
-  const [{ settings }, dispatch] = useExternalEmbedState();
-
-  const { toolbar } = settings;
-
+export const ToolbarSettings = ({ isAutohide, onSetAutohide = () => {} }: Props) => {
   return (
     <div style={{ padding: 16 }}>
       <EuiFormRow helpText="Hide the toolbar when the mouse is not within the Canvas?">
@@ -30,11 +25,8 @@ export const ToolbarSettings = ({ onChange = () => {} }: Props) => {
           name="toolbarHide"
           id="toolbarHide"
           label="Hide Toolbar"
-          checked={toolbar.autohide}
-          onChange={() => {
-            onChange();
-            dispatch(setToolbarAutohide(!toolbar.autohide));
-          }}
+          checked={isAutohide}
+          onChange={() => onSetAutohide(!isAutohide)}
         />
       </EuiFormRow>
     </div>

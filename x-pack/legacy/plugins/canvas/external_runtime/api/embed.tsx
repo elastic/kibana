@@ -74,7 +74,7 @@ const updateArea = async (area: Element) => {
         height = workpad.height * (width / workpad.width);
       }
 
-      const options = {
+      const stage = {
         height: height || workpad.height,
         width: width || workpad.width,
         page: page ? page : workpad.page,
@@ -83,7 +83,7 @@ const updateArea = async (area: Element) => {
       area.classList.add('kbnCanvas');
       area.removeAttribute(EMBED);
 
-      render(<App workpad={workpad} {...options} />, area);
+      render(<App workpad={workpad} {...{ stage }} />, area);
     }
   }
 };
