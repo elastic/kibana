@@ -25,11 +25,11 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
 
   class GlobalNav {
     public async moveMouseToLogo(): Promise<void> {
-      await testSubjects.moveMouseTo('headerGlobalNav logo');
+      await testSubjects.moveMouseTo('headerGlobalNav > logo');
     }
 
     public async clickLogo(): Promise<void> {
-      return await testSubjects.click('headerGlobalNav logo');
+      return await testSubjects.click('headerGlobalNav > logo');
     }
 
     public async exists(): Promise<boolean> {
@@ -37,11 +37,15 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
     }
 
     public async getFirstBreadcrumb(): Promise<string> {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
+      return await testSubjects.getVisibleText(
+        'headerGlobalNav > breadcrumbs > ~breadcrumb & ~first'
+      );
     }
 
     public async getLastBreadcrumb(): Promise<string> {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
+      return await testSubjects.getVisibleText(
+        'headerGlobalNav > breadcrumbs > ~breadcrumb & ~last'
+      );
     }
 
     public async badgeExistsOrFail(expectedLabel: string): Promise<void> {

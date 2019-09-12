@@ -25,8 +25,8 @@ import { MarkdownPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
 const plugins: Readonly<MarkdownPluginSetupDependencies> = {
+  expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
-  data: npSetup.plugins.data,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
