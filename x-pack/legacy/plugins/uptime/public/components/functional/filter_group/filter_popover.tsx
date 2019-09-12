@@ -64,6 +64,7 @@ export const FilterPopover = ({
       }}
       id={id}
       isOpen={isOpen}
+      ownFocus={true}
       withTitle
       zIndex={1000}
     >
