@@ -9,7 +9,6 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { i18n } from '@kbn/i18n';
 import { get, isFunction } from 'lodash';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
