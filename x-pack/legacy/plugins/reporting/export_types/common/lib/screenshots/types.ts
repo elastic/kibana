@@ -10,6 +10,7 @@ import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
+  browser: HeadlessBrowser;
   logger: LevelLogger;
   url: string;
   conditionalHeaders: ConditionalHeaders;

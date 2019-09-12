@@ -5,18 +5,20 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, mergeMap } from 'rxjs/operators';
+import { first, toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore untyped module
-import { pdf } from './pdf';
+import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
+// @ts-ignore untyped module
+import { pdf } from './pdf';
 
 interface ScreenshotData {
   base64EncodedData: string;
@@ -45,6 +47,7 @@ const formatDate = (date: Date, timezone: string) => {
 
 function generatePdfObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
+  const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const captureConcurrency = 1;
 
   return function generatePdfObservable(
@@ -59,10 +62,30 @@ function generatePdfObservableFn(server: KbnServer) {
     const layout = createLayout(server, layoutParams) as LayoutInstance;
 
     const screenshots$ = Rx.from(urls).pipe(
-      mergeMap(
-        url => screenshotsObservable({ logger, url, conditionalHeaders, layout, browserTimezone }),
-        captureConcurrency
-      )
+      mergeMap((url: string) => {
+        const create$ = browserDriverFactory.create({
+          viewport: layout.getBrowserViewport(),
+          browserTimezone,
+        });
+
+        return create$.pipe(
+          mergeMap(({ driver$ }) => {
+            return driver$.pipe(
+              mergeMap(async (browser: HeadlessBrowser) => {
+                return screenshotsObservable({
+                  browser,
+                  logger,
+                  url,
+                  conditionalHeaders,
+                  layout,
+                  browserTimezone,
+                });
+              }, captureConcurrency)
+            );
+          }),
+          first()
+        );
+      })
     );
 
     return screenshots$.pipe(
