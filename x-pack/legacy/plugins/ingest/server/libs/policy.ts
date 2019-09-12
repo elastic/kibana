@@ -298,12 +298,9 @@ export class PolicyLib {
     };
   }
 
-  public async listDataSources() {
-    throw new Error('Not yet implamented');
-  }
-
   private async _update(oldPolicy: PolicyFile, policy: Partial<PolicyFile>) {
     const policyData = {
+      // @ts-ignore because types seem fine, but failing saying only 1 arg, however it works perfectly
       ...assign<PolicyFile>({}, omit(oldPolicy, ['id']), policy),
       version: oldPolicy.version + 1,
     };

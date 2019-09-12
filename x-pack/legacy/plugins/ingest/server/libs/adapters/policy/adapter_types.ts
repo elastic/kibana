@@ -14,8 +14,9 @@ export const RuntimeDatasourceInput = t.intersection([
     'DatasourceInput'
   ),
   t.partial({
-    meta: t.union([t.string]),
+    meta: t.string,
   }),
+  t.UnknownRecord,
 ]);
 
 const RuntimeDatasource = t.interface(
@@ -48,7 +49,11 @@ export const NewRuntimePolicyFile = t.interface(
     monitoring_enabled: t.boolean,
     shared_id: t.string,
     version: t.number,
-    status: t.union(['active', 'locked', 'inactive'].map(s => t.literal(s))),
+    status: t.keyof({
+      active: null,
+      locked: null,
+      inactive: null,
+    }),
     agent_version: t.string,
     data_sources: t.array(RuntimeDatasource),
     created_on: t.string,
