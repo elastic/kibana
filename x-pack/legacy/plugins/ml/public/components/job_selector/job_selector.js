@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
@@ -182,9 +181,6 @@ export function JobSelector({
   }
 
   function applySelection() {
-    // Don't update skipRefresh yet to avoid firing multiple events via
-    // applyTimeRangeFromSelection() and setGlobalState().
-    closeFlyout(false);
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection = [];
     const groupSelection = [];
@@ -202,12 +198,29 @@ export function JobSelector({
     // create a Set to remove duplicate values
     const allNewSelectionUnique = Array.from(new Set(allNewSelection));
 
+    const isPrevousSelection = isEqual(
+      { selectedJobIds, selectedGroups },
+      { selectedJobIds: allNewSelectionUnique, selectedGroups: groupSelection }
+    );
+
     setSelectedIds(newSelection);
     setNewSelection([]);
-    // When calling `applyTimeRangeFromSelection()` here
-    // Single Metric Viewer will still skip and
-    // update triggered by timefilter.
+
+    // If the job selection is unchanged, then we close the modal and
+    // disable skipping the timefilter listener flag in globalState.
+    // If the job selection changed, this will not
+    // update skipRefresh yet to avoid firing multiple events via
+    // applyTimeRangeFromSelection() and setGlobalState().
+    closeFlyout(isPrevousSelection);
+
+    // If the job selection changed, then when
+    // calling `applyTimeRangeFromSelection()` here
+    // Single Metric Viewer will skip an update
+    // triggered by timefilter to avoid a race
+    // condition caused by the job update listener
+    // that's also going to be triggered.
     applyTimeRangeFromSelection(allNewSelectionUnique);
+
     // Set `skipRefresh` again to `false` here so after
     // both the time range and jobs have been updated
     // Single Metric Viewer should again update itself.

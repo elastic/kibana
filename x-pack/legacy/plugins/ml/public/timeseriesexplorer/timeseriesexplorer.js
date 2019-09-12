@@ -267,6 +267,11 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.UNSET_ZOOM);
     }
 
+    this.setState({
+      zoomFrom: selection.from,
+      zoomTo: selection.to,
+    });
+
     if (
       (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
       (zoomFromFocusLoaded.getTime() !== selection.from.getTime()) ||
