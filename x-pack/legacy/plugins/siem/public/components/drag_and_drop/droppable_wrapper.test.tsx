@@ -33,7 +33,7 @@ describe('DroppableWrapper', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it renders the children', () => {
+    test('it renders the children when a render prop is not provided', () => {
       const message = 'draggable wrapper content';
 
       const wrapper = mount(
@@ -47,6 +47,41 @@ describe('DroppableWrapper', () => {
       );
 
       expect(wrapper.text()).toEqual(message);
+    });
+
+    test('it does NOT render the children if a render method is provided', () => {
+      const message = 'draggable wrapper content';
+
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DroppableWrapper render={() => null} droppableId="testing">
+                <div data-test-subj="this-should-not-render">{message}</div>
+              </DroppableWrapper>
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="this-should-not-render"]').exists()).toBe(false);
+    });
+
+    test('it renders the render prop contents when a render prop is provided', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DroppableWrapper
+                render={({ isDraggingOver }) => <div>{`isDraggingOver is: ${isDraggingOver}`}</div>}
+                droppableId="testing"
+              />
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('isDraggingOver is: false');
     });
   });
 });

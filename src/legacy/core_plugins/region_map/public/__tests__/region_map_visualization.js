@@ -39,7 +39,7 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup } from '../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -106,7 +106,7 @@ describe('RegionMapsVisualizationTests', function () {
         uiSettings,
       };
 
-      setup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+      visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
 
       Vis = Private(visModule.VisProvider);
       RegionMapsVisualization = createRegionMapVisualization(dependencies);

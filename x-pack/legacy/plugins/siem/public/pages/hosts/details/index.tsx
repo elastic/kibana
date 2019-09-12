@@ -61,7 +61,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={type} />
+                  <HostsKql indexPattern={indexPattern} setQuery={setQuery} type={type} />
                 </FiltersGlobal>
 
                 <HeaderPage
