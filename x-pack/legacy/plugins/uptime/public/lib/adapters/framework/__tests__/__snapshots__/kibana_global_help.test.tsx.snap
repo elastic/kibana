@@ -14,14 +14,10 @@ exports[`renderUptimeKibanaGlobalHelp renders links with expected urls 1`] = `
   <EuiSpacer />
   <EuiButton
     aria-label="Go to Uptime documentation"
-    color="primary"
     fill={true}
     href="https://elastic.co/guide/en/kibana/master/xpack-uptime.html"
-    iconSide="left"
     iconType="popout"
-    size="m"
     target="_blank"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Uptime documentation"

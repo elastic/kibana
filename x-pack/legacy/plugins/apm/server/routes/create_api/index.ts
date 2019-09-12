@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge, pick, omit } from 'lodash';
+import { merge, pick, omit, difference } from 'lodash';
 import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import { Request, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import {
   ServerAPI,
   RouteFactoryFn,
@@ -17,6 +18,8 @@ import {
   Params
 } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
+
+const debugRt = t.partial({ _debug: jsonRt.pipe(t.boolean) });
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -36,21 +39,16 @@ export function createApi() {
           any
         >;
 
+        const bodyRt = params.body;
+        const fallbackBodyRt = bodyRt || t.null;
+
         const rts = {
           // add _debug query parameter to all routes
           query: params.query
-            ? t.exact(
-                t.intersection([
-                  params.query,
-                  t.partial({ _debug: jsonRt.pipe(t.boolean) })
-                ])
-              )
-            : t.union([
-                t.strict({}),
-                t.strict({ _debug: jsonRt.pipe(t.boolean) })
-              ]),
-          path: params.path || t.strict({}),
-          body: params.body || t.null
+            ? t.exact(t.intersection([params.query, debugRt]))
+            : t.exact(debugRt),
+          path: params.path ? t.exact(params.path) : t.strict({}),
+          body: bodyRt && 'props' in bodyRt ? t.exact(bodyRt) : fallbackBodyRt
         };
 
         server.route(
@@ -74,25 +72,31 @@ export function createApi() {
                   keyof typeof rts
                 >).reduce(
                   (acc, key) => {
-                    let codec = rts[key];
+                    const codec = rts[key];
                     const value = paramMap[key];
-
-                    // Use exact props where possible (only possible for types with props)
-                    if ('props' in codec) {
-                      codec = t.exact(codec);
-                    }
 
                     const result = codec.decode(value);
 
-                    if (result.isLeft()) {
+                    if (isLeft(result)) {
                       throw Boom.badRequest(PathReporter.report(result)[0]);
+                    }
+
+                    const strippedKeys = difference(
+                      Object.keys(value || {}),
+                      Object.keys(result.right || {})
+                    );
+
+                    if (strippedKeys.length) {
+                      throw Boom.badRequest(
+                        `Unknown keys specified: ${strippedKeys}`
+                      );
                     }
 
                     // hide _debug from route handlers
                     const parsedValue =
                       key === 'query'
-                        ? omit(result.value, '_debug')
-                        : result.value;
+                        ? omit(result.right, '_debug')
+                        : result.right;
 
                     return {
                       ...acc,
