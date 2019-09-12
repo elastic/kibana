@@ -335,7 +335,6 @@ class ManageSpacePageUI extends Component<Props, State> {
       color,
       disabledFeatures = [],
       imageUrl,
-      imageFilename,
     } = this.state.space;
 
     const params = {
@@ -346,7 +345,6 @@ class ManageSpacePageUI extends Component<Props, State> {
       color,
       disabledFeatures,
       imageUrl,
-      imageFilename,
     };
 
     let action;

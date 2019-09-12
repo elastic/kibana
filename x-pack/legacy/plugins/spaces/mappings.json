@@ -23,10 +23,8 @@
         "type": "keyword"
       },
       "imageUrl": {
-        "type": "text"
-      },
-      "imageFilename": {
-        "type": "text"
+        "type": "text",
+        "index": false
       },
       "_reserved": {
         "type": "boolean"

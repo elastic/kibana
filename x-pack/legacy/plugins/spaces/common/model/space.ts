@@ -13,5 +13,4 @@ export interface Space {
   disabledFeatures: string[];
   _reserved?: boolean;
   imageUrl?: string;
-  imageFilename?: string;
 }
