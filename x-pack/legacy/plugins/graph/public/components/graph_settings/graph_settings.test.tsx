@@ -102,6 +102,7 @@ describe('graph_settings', () => {
         },
       },
     ],
+    canEditDrillDownUrls: true,
   };
 
   let subject: Rx.BehaviorSubject<jest.Mocked<GraphSettingsProps>>;

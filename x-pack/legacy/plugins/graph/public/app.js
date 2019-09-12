@@ -772,7 +772,8 @@ app.controller('graphuiPlugin', function (
         urlTemplates: [...$scope.urlTemplates],
         removeUrlTemplate: $scope.removeUrlTemplate,
         saveUrlTemplate: $scope.saveUrlTemplate,
-        allFields: [...$scope.allFields]
+        allFields: [...$scope.allFields],
+        canEditDrillDownUrls: $scope.canEditDrillDownUrls
       }), $scope.$digest.bind($scope));
       currentSettingsFlyout = npStart.core.overlays.openFlyout(<GraphSettings
         observable={settingsObservable}
