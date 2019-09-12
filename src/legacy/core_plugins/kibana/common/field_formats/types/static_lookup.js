@@ -43,6 +43,6 @@ export function createStaticLookupFormat(FieldFormat) {
 
     static id = 'static_lookup';
     static title = 'Static Lookup';
-    static fieldType = ['string', 'number'];
+    static fieldType = ['string', 'number', 'ip', 'boolean'];
   };
 }
