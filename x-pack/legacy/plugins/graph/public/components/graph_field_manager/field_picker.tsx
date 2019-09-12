@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, ReactNode } from 'react';
 import {
   EuiPopover,
   EuiButtonEmpty,
@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WorkspaceField } from '../../types';
+
+import { FieldIcon } from './field_icon';
 
 export interface FieldPickerProps {
   allFields: WorkspaceField[];
@@ -52,7 +54,12 @@ export function FieldPicker(props: FieldPickerProps) {
       isOpen={open}
       closePopover={() => setOpen(false)}
     >
-      <EuiSelectable searchable options={fieldOptions} onChange={setFieldOptions}>
+      <EuiSelectable
+        searchable
+        options={fieldOptions}
+        onChange={setFieldOptions}
+        className="gphFieldPickerList"
+      >
         {(list, search) => (
           <Fragment>
             <EuiText size="xs">
@@ -61,12 +68,13 @@ export function FieldPicker(props: FieldPickerProps) {
                   'Select the fields you want to explore. Each field will be a separate vertex type',
               })}
             </EuiText>
-            <EuiSpacer />
+            <EuiSpacer size="s" />
             {search}
             {list}
             <EuiButton
               fill
               onClick={() => {
+                setOpen(false);
                 fieldOptions.forEach((option, index) => {
                   if (option.checked === 'on') {
                     props.selectField(unselectedFields[index].name);
@@ -85,9 +93,11 @@ export function FieldPicker(props: FieldPickerProps) {
   );
 }
 
-function toOptions(fields: WorkspaceField[]): Array<{ label: string; checked?: 'on' | 'off' }> {
+function toOptions(
+  fields: WorkspaceField[]
+): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
   return fields.map(field => ({
     label: field.name,
-    // TODO icon for data type
+    prepend: <FieldIcon type={field.type} />,
   }));
 }

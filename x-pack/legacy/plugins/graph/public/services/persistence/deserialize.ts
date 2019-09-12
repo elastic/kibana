@@ -89,6 +89,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
       icon: getSuitableIcon(field.name),
       color: colorChoices[index % colorChoices.length],
       selected: false,
+      type: field.type,
     }))
     .sort((a, b) => {
       if (a.name < b.name) {

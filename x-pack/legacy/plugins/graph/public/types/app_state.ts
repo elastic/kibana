@@ -24,6 +24,7 @@ export interface WorkspaceField {
   color: string;
   icon: FontawesomeIcon;
   selected: boolean;
+  type: string;
 }
 
 export interface AdvancedSettings {
