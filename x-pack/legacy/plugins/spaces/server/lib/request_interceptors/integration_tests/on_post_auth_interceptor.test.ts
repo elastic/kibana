@@ -5,6 +5,8 @@
  */
 import * as Rx from 'rxjs';
 import { Legacy } from 'kibana';
+// @ts-ignore
+import { kibanaTestUser } from '@kbn/test';
 import { initSpacesOnRequestInterceptor } from '../on_request_interceptor';
 import {
   HttpServiceSetup,
@@ -31,8 +33,9 @@ describe('onPostAuthInterceptor', () => {
 
   const defaultRoute = '/app/kibana';
   const headers = {
-    // credentials from kibanaTestUser via @kbn/test
-    authorization: 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ==',
+    authorization: `Basic ${Buffer.from(
+      `${kibanaTestUser.username}:${kibanaTestUser.password}`
+    ).toString('base64')}`,
   };
 
   beforeEach(async () => {
