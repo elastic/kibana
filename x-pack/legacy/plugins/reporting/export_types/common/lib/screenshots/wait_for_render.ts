@@ -60,6 +60,6 @@ export const waitForRenderComplete = async (
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
     })
     .then(() => {
-      logger.error('rendering is complete');
+      logger.debug('rendering is complete');
     });
 };

@@ -177,7 +177,7 @@ export abstract class Embeddable<
   }
 
   private onRenderComplete(): void {
-    console.log('RENDERING COMPLETE');
+    // console.log('RENDERING COMPLETE');
     this.updateOutput({ renderComplete: true } as Partial<TEmbeddableOutput>);
   }
 
