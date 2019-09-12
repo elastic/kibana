@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const API_BASE_PATH = '/api/remote_clusters';
+require('@kbn/plugin-helpers').babelRegister();
+require('@kbn/test').runFtrCli();

@@ -27,18 +27,18 @@ For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_
 
 --
 
-include::canvas/canvas-tutorial.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
 
-include::canvas/canvas-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-workpad.asciidoc[]
 
-include::canvas/canvas-elements.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
 
-include::canvas/canvas-present-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
 
-include::canvas/canvas-share-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
 
-//include::canvas/canvas-expressions.asciidoc[]
+//include::{kib-repo-dir}/canvas/canvas-expressions.asciidoc[]
 
-include::canvas/canvas-function-reference.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-function-reference.asciidoc[]
 
-include::canvas/canvas-tinymath-functions.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]

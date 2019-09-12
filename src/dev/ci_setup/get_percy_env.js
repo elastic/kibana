@@ -23,11 +23,7 @@ const pkg = require('../../../package.json');
 const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
 const shortCommit = commit.slice(0, 8);
 
-if (!process.env.JOB_NAME) {
-  throw new Error('getPercyEnv: [JOB_NAME] environment variable required');
-}
-
-const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
+const isPr = !!process.env.ghprbPullId;
 if (isPr && !(process.env.PR_TARGET_BRANCH && process.env.PR_SOURCE_BRANCH)) {
   throw new Error(
     'getPercyEnv: Unable to determine percy environment in prs without [PR_TARGET_BRANCH] and [PR_SOURCE_BRANCH] environment variables'
