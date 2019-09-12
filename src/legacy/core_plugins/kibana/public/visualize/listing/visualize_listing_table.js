@@ -109,6 +109,19 @@ class VisualizeListingTableUi extends Component {
           </span>
         )
       },
+      {
+        field: 'description',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
+        sortable: true,
+        render: (field, record) =>  (
+          <span>
+            {record.description}
+          </span>
+        )
+      },
     ];
 
     return tableColumns;

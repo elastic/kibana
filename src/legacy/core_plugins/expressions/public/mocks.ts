@@ -17,19 +17,21 @@
  * under the License.
  */
 
-import { DataExpressionsSetup } from '.';
+import { ExpressionsSetup, ExpressionsStart } from '.';
 
 function createExpressionsSetupMock() {
-  const mock: MockedKeys<Partial<DataExpressionsSetup>> = {};
+  const mock: MockedKeys<Partial<ExpressionsSetup>> = {};
 
   return mock;
 }
 
 function createExpressionsStartMock() {
-  return {};
+  const mock: MockedKeys<Partial<ExpressionsStart>> = {};
+
+  return mock;
 }
 
-export const dataPluginMock = {
+export const expressionsPluginMock = {
   createSetup: createExpressionsSetupMock,
   createStart: createExpressionsStartMock,
 };

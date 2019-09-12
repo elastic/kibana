@@ -22,7 +22,7 @@ time field, you can use the *Data Visualizer* to identify possible fields for
 {anomaly-detect}:
 
 [role="screenshot"]
-image::ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample flight data]
+image::user/ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample flight data]
 
 experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in 
 size). The *Data Visualizer* identifies the file format and field mappings. You 
@@ -33,20 +33,20 @@ If you have a trial or platinum license, you can
 Management* pane: 
 
 [role="screenshot"]
-image::ml/images/ml-job-management.jpg[Job Management]
+image::user/ml/images/ml-job-management.jpg[Job Management]
 
 You can use the *Settings* pane to create and edit 
 {stack-ov}/ml-calendars.html[calendars] and the filters that are used in 
 {stack-ov}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
-image::ml/images/ml-settings.jpg[Calendar Management]
+image::user/ml/images/ml-settings.jpg[Calendar Management]
 
 The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
 {anomaly-jobs}. For example:
 
 [role="screenshot"]
-image::ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
+image::user/ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
 
 You can optionally add annotations by drag-selecting a period of time in
 the *Single Metric Viewer* and adding a description. For example, you can add an
@@ -54,7 +54,7 @@ explanation for anomalies in that time period or provide notes about what is
 occurring in your operational environment at that time:
 
 [role="screenshot"]
-image::ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
+image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
 
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected 
