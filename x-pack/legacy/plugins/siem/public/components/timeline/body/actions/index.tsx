@@ -74,7 +74,7 @@ export const Actions = React.memo<Props>(
 
       <TimelineCell>
         <TimelineCellContent textAlign="center">
-          {loading && <EuiLoadingSpinner size="m" />}
+          {loading && <EuiLoadingSpinner />}
 
           {!loading && (
             <EuiButtonIcon
