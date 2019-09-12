@@ -6,18 +6,12 @@
 
 import React from 'react';
 
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
 import { replaceKqlQueryLocationForHostPage } from './replace_kql_query_location_for_host_page';
-
-interface MlHostConditionalProps {
-  match: RouteMatch<{}>;
-  location: Location;
-}
 
 interface QueryStringType {
   '?_g': string;
@@ -25,12 +19,14 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match }) => (
+type MlHostConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
       exact
-      path={match.url}
+      path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
@@ -43,7 +39,7 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
       }}
     />
     <Route
-      path={`${match.url}/:hostName`}
+      path={`${url}/:hostName`}
       render={({
         location,
         match: {
@@ -63,7 +59,7 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts?${reEncoded}`} />;
+          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
           if (queryStringDecoded.kqlQuery != null) {
@@ -77,10 +73,10 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
             );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts?${reEncoded}`} />;
+          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/${hostName}?${reEncoded}`} />;
+          return <Redirect to={`/hosts/${hostName}/anomalies?${reEncoded}`} />;
         }
       }}
     />
