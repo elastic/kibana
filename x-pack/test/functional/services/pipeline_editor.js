@@ -25,9 +25,9 @@ export function PipelineEditorProvider({ getService }) {
   const SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS = '~pipelineEdit > selectQueueMaxBytesUnits';
   const SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES = '~pipelineEdit > inputQueueCheckpointWrites';
 
-  const SUBJ_BTN_SAVE = 'pipelineEdit > btnSavePipeline';
-  const SUBJ_BTN_CANCEL = 'pipelineEdit > btnCancel';
-  const SUBJ_BTN_DELETE = 'pipelineEdit > btnDeletePipeline';
+  const SUBJ_BTN_SAVE = '~pipelineEdit > btnSavePipeline';
+  const SUBJ_BTN_CANCEL = '~pipelineEdit > btnCancel';
+  const SUBJ_BTN_DELETE = '~pipelineEdit > btnDeletePipeline';
   const SUBJ_LNK_BREADCRUMB_MANAGEMENT = 'breadcrumbs > lnkBreadcrumb0';
   const SUBJ_CONFIRM_MODAL_TEXT = 'confirmModalBodyText';
 

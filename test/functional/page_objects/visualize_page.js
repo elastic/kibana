@@ -606,7 +606,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleAggregationEditor(agg) {
-      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await testSubjects.click(`aggregationEditor${agg} > toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
