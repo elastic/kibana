@@ -22,7 +22,7 @@ export const AnalysisPageContent = () => {
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
-  } else if (setupStatus === 'unknown') {
+  } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {

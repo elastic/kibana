@@ -23,7 +23,8 @@ type JobStatus =
   | 'failed';
 
 export type SetupStatus =
-  | 'unknown' // initial state, we're still waiting to load the job status
+  | 'initializing' // acquiring job statuses to determine setup status
+  | 'unknown' // job status could not be acquired (failed request etc)
   | 'required' // jobs are missing
   | 'pending' // called module setup, waiting for response
   | 'retrying' // cleaning up and calling module setup again
@@ -48,6 +49,7 @@ type StatusReducerActions =
     }
   | { type: 'failedSetup' }
   | { type: 'retryingSetup' }
+  | { type: 'fetchingJobStatuses' }
   | {
       type: 'fetchedJobStatuses';
       spaceId: string;
@@ -61,7 +63,7 @@ const initialState: StatusReducerState = {
   jobStatus: {
     'log-entry-rate': 'unknown',
   },
-  setupStatus: 'unknown',
+  setupStatus: 'initializing',
 };
 
 function statusReducer(
@@ -112,6 +114,12 @@ function statusReducer(
       return {
         ...state,
         setupStatus: 'retrying',
+      };
+    }
+    case 'fetchingJobStatuses': {
+      return {
+        ...state,
+        setupStatus: 'initializing',
       };
     }
     case 'fetchedJobStatuses': {
@@ -194,6 +202,7 @@ export const useLogAnalysisJobs = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
+        dispatch({ type: 'fetchingJobStatuses' });
         return await callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
