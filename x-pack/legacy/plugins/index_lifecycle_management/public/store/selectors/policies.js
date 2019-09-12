@@ -246,7 +246,7 @@ export const phaseToES = (phase, originalEsPhase) => {
     delete esPhase.min_age;
   }
 
-  {esPhase.actions = esPhase.actions || {};}
+  esPhase.actions = esPhase.actions || {};
 
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     esPhase.actions.rollover = {};
