@@ -54,7 +54,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await testSubjects.click('graphCreateWorkspacePromptButton');
-        const breadcrumb = await testSubjects.find('graphCurrentWorkspaceBreadcrumb');
+        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });
     });

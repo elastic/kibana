@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -12,11 +13,11 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
 
   return new (class MlJobTable {
     public async parseJobTable() {
-      const table = await testSubjects.find('mlJobListTable');
+      const table = await testSubjects.find('~mlJobListTable');
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('row').toArray()) {
+      for (const tr of $.findTestSubjects('~row').toArray()) {
         const $tr = $(tr);
 
         const $description = $tr.findTestSubject('description').find('.euiTableCellContent');
@@ -82,10 +83,10 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         await testSubjects.click(this.detailsSelector(jobId, 'tab-counts'));
 
         const countsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts counts')
+          this.detailsSelector(jobId, 'details-counts > counts')
         );
         const modelSizeStatsTable = await testSubjects.find(
-          this.detailsSelector(jobId, 'details-counts modelSizeStats')
+          this.detailsSelector(jobId, 'details-counts > modelSizeStats')
         );
 
         // parse a table by reading each row
@@ -118,13 +119,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public rowSelector(jobId: string, subSelector?: string) {
-      const row = `mlJobListTable row-${jobId}`;
-      return !subSelector ? row : `${row} ${subSelector}`;
+      const row = `~mlJobListTable > ~row-${jobId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
     public detailsSelector(jobId: string, subSelector?: string) {
-      const row = `mlJobListTable details-${jobId}`;
-      return !subSelector ? row : `${row} ${subSelector}`;
+      const row = `~mlJobListTable > ~details-${jobId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
     public async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
@@ -158,12 +159,12 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async waitForJobsToLoad() {
       await retry.waitFor(
         'jobs table to exist',
-        async () => await testSubjects.exists('mlJobListTable')
+        async () => await testSubjects.exists('~mlJobListTable')
       );
 
       await retry.waitFor(
         'jobs table to be done loading',
-        async () => await testSubjects.exists('mlJobListTable&loaded')
+        async () => await testSubjects.exists('mlJobListTable loaded')
       );
     }
 
@@ -173,6 +174,41 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+    }
+
+    public async assertJobRowFields(jobId: string, expectedRow: object) {
+      const rows = await this.parseJobTable();
+      const jobRow = rows.filter(row => row.id === jobId)[0];
+      expect(jobRow).to.eql(expectedRow);
+    }
+
+    public async assertJobRowDetailsCounts(
+      jobId: string,
+      expectedCounts: object,
+      expectedModelSizeStats: object
+    ) {
+      const countDetails = await this.parseJobCounts(jobId);
+      const counts = countDetails.counts;
+
+      // fields that have changing values are only validated
+      // to be present and then removed so they don't make
+      // the object validation fail
+      expect(counts).to.have.property('last_data_time');
+      delete counts.last_data_time;
+
+      expect(counts).to.eql(expectedCounts);
+
+      const modelSizeStats = countDetails.modelSizeStats;
+
+      // fields that have changing values are only validated
+      // to be present and then removed so they don't make
+      // the object validation fail
+      expect(modelSizeStats).to.have.property('log_time');
+      delete modelSizeStats.log_time;
+      expect(modelSizeStats).to.have.property('model_bytes');
+      delete modelSizeStats.model_bytes;
+
+      expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
   })();
 }

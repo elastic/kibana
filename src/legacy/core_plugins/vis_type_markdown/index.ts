@@ -25,7 +25,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const markdownPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'markdown_vis',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'expressions'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

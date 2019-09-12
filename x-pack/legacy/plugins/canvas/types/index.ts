@@ -10,7 +10,7 @@ export {
   BackgroundRepeat,
   BackgroundSize,
 } from '../../../../../src/legacy/core_plugins/interpreter/public/types/style';
-export * from '../../../../../src/plugins/data/common/expressions/types';
+export * from '../../../../../src/plugins/expressions/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';

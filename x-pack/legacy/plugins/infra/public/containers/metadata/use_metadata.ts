@@ -50,6 +50,7 @@ export function useMetadata(
     filteredLayouts: (response && getFilteredLayouts(layouts, response.features)) || [],
     error: (error && error.message) || null,
     loading,
+    metadata: response,
     cloudId:
       (response &&
         response.info &&
