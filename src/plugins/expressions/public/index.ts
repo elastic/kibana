@@ -17,33 +17,13 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from '../../query/types';
+import { PluginInitializerContext } from '../../../core/public';
+import { ExpressionsPublicPlugin } from './plugin';
 
-const name = 'kibana_context';
-
-export interface KibanaContext {
-  type: typeof name;
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsPublicPlugin(initializerContext);
 }
 
-export const kibanaContext = () => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: name,
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  },
-});
+export { ExpressionsPublicPlugin as Plugin };
+
+export * from '../common';
