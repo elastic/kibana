@@ -12,27 +12,27 @@ my_plugin/
 ├── public
 │   ├── applications
 │   │   ├── my_app
-│   │   │   └── selectors.ts
-│   │   └── selectors.ts
+│   │   │   └── index.ts
+│   │   └── index.ts
 │   ├── services
 │   │   ├── my_service
-│   │   │   └── selectors.ts
-│   │   └── selectors.ts
-│   ├── selectors.ts
+│   │   │   └── index.ts
+│   │   └── index.ts
+│   ├── index.ts
 │   └── plugin.ts
 └── server
     ├── routes
-    │   └── selectors.ts
+    │   └── index.ts
     ├── services
     │   ├── my_service
-    │   │   └── selectors.ts
-    │   └── selectors.ts
-    ├── selectors.ts
+    │   │   └── index.ts
+    │   └── index.ts
+    ├── index.ts
     └── plugin.ts
 ```
 
-- Both `server` and `public` should have an `selectors.ts` and a `plugin.ts` file:
-  - `selectors.ts` should only contain:
+- Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
+  - `index.ts` should only contain:
     - The `plugin` export
     - The `config` export (server only, optional)
     - Type exports for your Setup and Start interfaces, and any relevant sub-types
@@ -50,7 +50,7 @@ my_plugin/
 ### The PluginInitializer
 
 ```ts
-// my_plugin/public/selectors.ts
+// my_plugin/public/index.ts
 
 import { PluginInitializer } from '../../src/core/public';
 import { MyPlugin, MyPluginSetup, MyPluginStart } from './plugin';

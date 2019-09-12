@@ -52,10 +52,10 @@ src/plugins
   demo
     kibana.json [1]
     public
-      selectors.ts [2]
+      index.ts [2]
       plugin.ts [3]
     server
-      selectors.ts [4]
+      index.ts [4]
       plugin.ts [5]
 ```
 
@@ -72,7 +72,7 @@ src/plugins
 
 Note that `package.json` files are irrelevant to and ignored by the new platform.
 
-**[2] `public/selectors.ts`** is the entry point into the client-side code of this plugin. It must export a function named `plugin`, which will receive a standard set of core capabilities as an argument (e.g. logger). It should return an instance of its plugin definition for the platform to register at load time.
+**[2] `public/index.ts`** is the entry point into the client-side code of this plugin. It must export a function named `plugin`, which will receive a standard set of core capabilities as an argument (e.g. logger). It should return an instance of its plugin definition for the platform to register at load time.
 
 ```ts
 import { PluginInitializerContext } from '../../../core/public';
@@ -106,7 +106,7 @@ export class Plugin {
 }
 ```
 
-**[4] `server/selectors.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
+**[4] `server/index.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
 ```ts
 import { PluginInitializerContext } from '../../../core/server';
@@ -398,7 +398,7 @@ Second, it forced you to clearly define the dependencies you have on capabilitie
 While most plugin logic is now decoupled from hapi, the plugin definition itself still uses hapi to expose functionality for other plugins to consume and access functionality from both core and a different plugin.
 
 ```ts
-// selectors.ts
+// index.ts
 
 export default (kibana) => {
   return new kibana.Plugin({
@@ -485,7 +485,7 @@ export class Plugin {
 The legacy plugin definition is still the one that is being executed, so we now "shim" this new plugin definition into the legacy world by instantiating it and wiring it up inside of the legacy `init` function.
 
 ```ts
-// selectors.ts
+// index.ts
 
 import { Plugin } from './server/plugin';
 
@@ -530,7 +530,7 @@ As core capabilities are migrated to services in the new platform, they are made
 For the most part, care has been taken when migrating services to the new platform to preserve the existing APIs as much as possible, but there will be times when new APIs differ from the legacy equivalents. Start things off by having your core shim extend the equivalent new platform contract.
 
 ```ts
-// selectors.ts
+// index.ts
 
 init(server) {
   // core shim
@@ -658,12 +658,12 @@ export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, D
 }
 ```
 
-#### 2. Export all static code and types from `public/selectors.ts`
+#### 2. Export all static code and types from `public/index.ts`
 
-If your plugin needs to share static code with other plugins, this code must be exported from your top-level `public/selectors.ts`. This includes any type interfaces that you wish to make public. For details on the types of code that you can safely share outside of the runtime lifecycle contracts, see [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+If your plugin needs to share static code with other plugins, this code must be exported from your top-level `public/index.ts`. This includes any type interfaces that you wish to make public. For details on the types of code that you can safely share outside of the runtime lifecycle contracts, see [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
 
 ```ts
-// public/selectors.ts
+// public/index.ts
 import { DemoSetup, DemoStart } from './plugin';
 
 const myPureFn = (x: number): number => x + 1;
@@ -683,7 +683,7 @@ export {
 While you're at it, you can also add your plugin initializer to this file:
 
 ```ts
-// public/selectors.ts
+// public/index.ts
 import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
 import { DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps, DemoPlugin } from './plugin';
 
@@ -767,7 +767,7 @@ Concerns around ownership or duplication of a given module should be raised and 
 
 A great outcome is a module being deleted altogether because it isn't used or it was used so lightly that it was easy to refactor away.
 
-If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/selectors.ts`. We have identified owners for most of the legacy UI modules; if you aren't sure where you should move something that you own, please consult with the platform team.
+If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/index.ts`. We have identified owners for most of the legacy UI modules; if you aren't sure where you should move something that you own, please consult with the platform team.
 
 Depending on the module's level of complexity and the number of other places in Kibana that rely on it, there are a number of strategies you could use for this:
 
@@ -844,7 +844,7 @@ With the previous steps resolved, this final step should be easy, but the exact 
 
 For a few plugins, some of these steps (such as angular removal) could be a months-long process. In those cases, it may be helpful from an organizational perspective to maintain a clear separation of code that is and isn't "ready" for the new platform.
 
-One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `selectors.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
+One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
 
 ## Frequently asked questions
 
@@ -961,7 +961,7 @@ In any case, you will also need to carefully consider backward compatibility (BW
 Ok, you've decided you want to export static code from your plugin, how do you do it? The New Platform only considers values exported from `my_plugin/public` and `my_plugin/server` to be stable. The linter will only let you import statically from these top-level modules. In the future, our tooling will enforce that these APIs do not break between minor versions. All code shared among plugins should be exported in these modules like so:
 
 ```ts
-// my_plugin/public/selectors.ts
+// my_plugin/public/index.ts
 export { MyPureComponent } from './components';
 
 // regular plugin export used by core to initialize your plugin
@@ -1108,8 +1108,8 @@ In order to have access to your plugin config, you *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
 ```typescript
-selectors.ts
-import selectors.ts, TypeOf } from '@kbn/config-schema';
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
 export const plugin = ...
 export const config = {
   schema: schema.object(...),

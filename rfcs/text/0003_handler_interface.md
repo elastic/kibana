@@ -249,7 +249,7 @@ interface HttpSetup {
 A consuming plugin could extend the `RequestContext` to be type-safe like this:
 
 ```ts
-// my_plugin/server/selectors.ts
+// my_plugin/server/index.ts
 import { RequestContext } from '../../core/server';
 
 // The plugin *should* add a new property to the RequestContext interface from

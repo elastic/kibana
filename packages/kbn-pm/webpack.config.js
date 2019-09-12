@@ -22,7 +22,7 @@ const path = require('path');
 module.exports = {
   mode: 'none',
   entry: {
-    index: './src/selectors.ts',
+    index: './src/index.ts',
   },
   target: 'node',
 
