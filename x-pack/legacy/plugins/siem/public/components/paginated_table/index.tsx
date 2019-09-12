@@ -139,6 +139,7 @@ export const PaginatedTable = memo<SiemTables>(
     updateLimitPagination,
     updateProps,
   }) => {
+    const [myLoading, setMyLoading] = useState(loading);
     const [myActivePage, setActivePage] = useState(activePage);
     const [showInspect, setShowInspect] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
@@ -157,6 +158,10 @@ export const PaginatedTable = memo<SiemTables>(
         setLoadingInitial(false);
       }
     }, effectDeps);
+
+    useEffect(() => {
+      setMyLoading(loading);
+    }, [loading]);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
@@ -281,8 +286,7 @@ export const PaginatedTable = memo<SiemTables>(
                 />
               </PaginationWrapper>
             </FooterAction>
-
-            {(isInspect || loading) && (
+            {(isInspect || myLoading) && (
               <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
             )}
           </>

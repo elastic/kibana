@@ -36,6 +36,7 @@ export class QueryTemplatePaginated<
   TVariables = OperationVariables
 > extends React.PureComponent<T, TData, TVariables> {
   private queryVariables: TVariables | null = null;
+  private myLoading: boolean = false;
   private fetchMore!: (
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
@@ -83,10 +84,16 @@ export class QueryTemplatePaginated<
   }
 
   public isItAValidLoading(loading: boolean, variables: TVariables, networkStatus: NetworkStatus) {
-    const isLoading =
+    if (
+      !this.myLoading &&
       (!isEqual(variables, this.queryVariables) || networkStatus === NetworkStatus.refetch) &&
-      loading;
+      loading
+    ) {
+      this.myLoading = true;
+    } else if (this.myLoading && !loading) {
+      this.myLoading = false;
+    }
     this.setPrevVariables(variables);
-    return isLoading;
+    return this.myLoading;
   }
 }
