@@ -19,7 +19,7 @@ import {
   GetTlsQuery,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { tlsQuery } from './index.gql_query';
@@ -29,6 +29,7 @@ const ID = 'tlsQuery';
 export interface TlsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -92,12 +93,12 @@ class TlsComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
         query={tlsQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
         variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const tls = getOr([], 'source.Tls.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -120,10 +121,12 @@ class TlsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
             inspect: getOr(null, 'source.Tls.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Tls.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),

@@ -32,6 +32,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   indexPattern: StaticIndexPattern;
   ip: string;
   loading: boolean;
@@ -94,6 +95,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       id,
       indexPattern,
       ip,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -126,6 +128,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         headerTitle={i18n.DOMAINS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

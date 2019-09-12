@@ -19,7 +19,7 @@ import {
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
 
@@ -28,6 +28,7 @@ const ID = 'networkDnsQuery';
 export interface NetworkDnsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   networkDns: NetworkDnsEdges[];
@@ -88,13 +89,13 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
 
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         query={networkDnsQuery}
         skip={skip}
         variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkDns = getOr([], `source.NetworkDns.edges`, data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -117,10 +118,12 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
             inspect: getOr(null, 'source.NetworkDns.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),

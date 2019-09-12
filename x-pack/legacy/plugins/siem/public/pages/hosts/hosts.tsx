@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -52,8 +52,12 @@ interface HostsComponentDispatchProps {
   }>;
 }
 
-export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
+export type CommonChildren =
+  | React.NamedExoticComponent<HostsComponentsQueryProps>
+  | ((args: HostsComponentsQueryProps) => JSX.Element);
+export type AnonamaliesChildren =
+  | React.NamedExoticComponent<AnomaliesQueryTabBodyProps>
+  | ((args: AnomaliesQueryTabBodyProps) => JSX.Element);
 
 export type HostsQueryProps = GlobalTimeArgs;
 
@@ -63,7 +67,7 @@ export type HostsComponentProps = HostsComponentReduxProps &
 
 const HostsComponent = React.memo<HostsComponentProps>(
   ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
-    const capabilities = useContext(MlCapabilitiesContext);
+    const capabilities = React.useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">

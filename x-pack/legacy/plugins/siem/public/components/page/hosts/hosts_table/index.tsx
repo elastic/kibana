@@ -38,6 +38,7 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   indexPattern: StaticIndexPattern;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -114,6 +115,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       direction,
       fakeTotalCount,
       id,
+      isInspect,
       indexPattern,
       limit,
       loading,
@@ -134,6 +136,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloQueryResult } from 'apollo-client';
+import { ApolloQueryResult, NetworkStatus } from 'apollo-client';
+import { isEqual } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
-import memoizeOne from 'memoize-one';
 import { ESQuery } from '../../common/typed_json';
 import { inputsModel } from '../store/model';
 import { generateTablePaginationOptions } from '../components/paginated_table/helpers';
@@ -34,6 +35,7 @@ export class QueryTemplatePaginated<
   TData = any,
   TVariables = OperationVariables
 > extends React.PureComponent<T, TData, TVariables> {
+  private queryVariables: TVariables | null = null;
   private fetchMore!: (
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
@@ -75,4 +77,16 @@ export class QueryTemplatePaginated<
   ): inputsModel.Refetch => () => {
     refetch({ ...variables, pagination: generateTablePaginationOptions(0, limit) });
   };
+
+  public setPrevVariables(vars: TVariables) {
+    this.queryVariables = vars;
+  }
+
+  public isItAValidLoading(loading: boolean, variables: TVariables, networkStatus: NetworkStatus) {
+    const isLoading =
+      (!isEqual(variables, this.queryVariables) || networkStatus === NetworkStatus.refetch) &&
+      loading;
+    this.setPrevVariables(variables);
+    return isLoading;
+  }
 }

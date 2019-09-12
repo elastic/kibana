@@ -28,6 +28,7 @@ const ID = 'uncommonProcessesQuery';
 export interface UncommonProcessesArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -87,7 +88,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
         skip={skip}
         variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -110,10 +111,12 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
             inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),

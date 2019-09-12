@@ -163,3 +163,30 @@ export const addTimelineLink = (linkToId: InputsModelId, state: InputsModel): In
     linkTo: [linkToId],
   },
 });
+
+export interface DeleteOnlyOneQueryParams {
+  id: string;
+  inputId: InputsModelId;
+  state: InputsModel;
+}
+
+export const deleteOnlyOneQuery = ({
+  inputId,
+  id,
+  state,
+}: DeleteOnlyOneQueryParams): InputsModel => {
+  const queryIndex = state[inputId].query.findIndex(q => q.id === id);
+  return {
+    ...state,
+    [inputId]: {
+      ...get(inputId, state),
+      query:
+        queryIndex > -1
+          ? [
+              ...state[inputId].query.slice(0, queryIndex),
+              ...state[inputId].query.slice(queryIndex + 1),
+            ]
+          : [...state[inputId].query],
+    },
+  };
+};

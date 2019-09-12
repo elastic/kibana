@@ -24,6 +24,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -75,6 +76,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
       fakeTotalCount,
       flowTarget,
       id,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -95,6 +97,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

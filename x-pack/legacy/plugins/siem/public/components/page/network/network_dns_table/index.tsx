@@ -24,6 +24,7 @@ interface OwnProps {
   data: NetworkDnsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -78,6 +79,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       dnsSortField,
       fakeTotalCount,
       id,
+      isInspect,
       isPtrIncluded,
       limit,
       loading,
@@ -101,6 +103,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
         itemsPerRow={rowItems}
+        isInspect={isInspect}
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}

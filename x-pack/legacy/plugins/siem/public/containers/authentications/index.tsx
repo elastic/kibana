@@ -29,6 +29,7 @@ export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -87,7 +88,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
         skip={skip}
         variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -110,11 +111,13 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             authentications,
             id,
             inspect: getOr(null, 'source.Authentications.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),

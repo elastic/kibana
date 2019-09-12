@@ -21,6 +21,7 @@ interface OwnProps {
   data: TlsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -71,6 +72,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
       data,
       fakeTotalCount,
       id,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -90,6 +92,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

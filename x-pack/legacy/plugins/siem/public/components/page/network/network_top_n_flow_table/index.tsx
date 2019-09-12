@@ -31,6 +31,7 @@ interface OwnProps {
   flowTargeted: FlowTargetNew;
   id: string;
   indexPattern: StaticIndexPattern;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -87,6 +88,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       flowTargeted,
       id,
       indexPattern,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -128,6 +130,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         headerTitle={headerTitle}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

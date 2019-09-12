@@ -24,6 +24,7 @@ interface OwnProps {
   data: UncommonProcessesEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -87,6 +88,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     data,
     fakeTotalCount,
     id,
+    isInspect,
     limit,
     loading,
     loadPage,
@@ -103,6 +105,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
+      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

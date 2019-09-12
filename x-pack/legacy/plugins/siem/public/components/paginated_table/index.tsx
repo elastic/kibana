@@ -87,6 +87,7 @@ export interface BasicTableProps<T> {
   headerUnit: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
+  isInspect?: boolean;
   limit: number;
   loading: boolean;
   loadPage: (activePage: number) => void;
@@ -124,6 +125,7 @@ export const PaginatedTable = memo<SiemTables>(
     headerTooltip,
     headerUnit,
     id,
+    isInspect,
     itemsPerRow,
     limit,
     loading,
@@ -141,6 +143,7 @@ export const PaginatedTable = memo<SiemTables>(
     const [showInspect, setShowInspect] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
+
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
     const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
@@ -252,7 +255,6 @@ export const PaginatedTable = memo<SiemTables>(
                   : null
               }
             />
-
             <FooterAction>
               <EuiFlexItem>
                 {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
@@ -279,7 +281,9 @@ export const PaginatedTable = memo<SiemTables>(
               </PaginationWrapper>
             </FooterAction>
 
-            {loading && <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />}
+            {(isInspect || loading) && (
+              <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
+            )}
           </>
         )}
       </Panel>
