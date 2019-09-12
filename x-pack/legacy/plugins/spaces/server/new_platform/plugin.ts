@@ -37,12 +37,6 @@ import { getActiveSpace } from '../lib/get_active_space';
 import { toggleUICapabilities } from '../lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from '../lib/request_interceptors';
 
-export interface SpacesCoreSetup {
-  http: HttpServiceSetup;
-  savedObjects: SavedObjectsService;
-  elasticsearch: ElasticsearchServiceSetup;
-}
-
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
