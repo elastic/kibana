@@ -4,7 +4,7 @@ include::setup.asciidoc[]
 
 include::{kib-repo-dir}/monitoring/configuring-monitoring.asciidoc[]
 
-include::{kib-repo-dir}/security/securing-kibana.asciidoc[]
+include::security/securing-kibana.asciidoc[]
 
 include::{kib-repo-dir}/settings/settings-xkb.asciidoc[]
 
@@ -42,7 +42,7 @@ include::management.asciidoc[]
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
-include::{kib-repo-dir}/security/index.asciidoc[]
+include::security/index.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
 
