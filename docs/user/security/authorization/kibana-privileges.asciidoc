@@ -14,7 +14,7 @@ Assigning a base privilege grants access to all available features in Kibana (Di
 From the role management screen:
 
 [role="screenshot"]
-image::security/images/assign_base_privilege.png[Assign base privilege]
+image::user/security/images/assign_base_privilege.png[Assign base privilege]
 
 From the <<role-management-api-put, role management API>>:
 [source,js]
@@ -47,7 +47,7 @@ Assigning a feature privilege grants access to a specific feature.
 From the role management screen:
 
 [role="screenshot"]
-image::security/images/assign_feature_privilege.png[Assign feature privilege]
+image::user/security/images/assign_feature_privilege.png[Assign feature privilege]
 
 From the <<role-management-api-put, role management API>>:
 [source,js]
