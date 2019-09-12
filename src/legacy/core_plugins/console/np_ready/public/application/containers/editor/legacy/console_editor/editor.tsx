@@ -32,9 +32,9 @@ import { registerCommands } from './keyboard_shortcuts';
 
 // @ts-ignore
 import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+import { useEditorActionContext } from '../../context';
 
 export interface EditorProps {
-  onEditorReady?: (editor: any) => void;
   sendCurrentRequest?: () => void;
   docLinkVersion: string;
 }
@@ -47,10 +47,12 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
+function Component({ docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
   const {
     services: { history, settings },
   } = useAppContext();
+
+  const dispatch = useEditorActionContext();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -71,9 +73,8 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeInput($editor, $actions, history, settings);
-    if (onEditorReady) {
-      onEditorReady({ editor: editorInstanceRef.current, element: editorRef.current! });
-    }
+
+    dispatch({ type: 'inputReady' });
 
     setTextArea(editorRef.current!.querySelector('textarea'));
   }, []);

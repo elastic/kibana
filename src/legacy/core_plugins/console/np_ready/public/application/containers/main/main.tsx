@@ -20,7 +20,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BehaviorSubject, combineLatest } from 'rxjs';
 
 // @ts-ignore
 import mappings from '../../../../../public/quarantined/src/mappings';
@@ -44,15 +43,10 @@ import { useAppContext } from '../../context';
 import { StorageKeys, DevToolsSettings } from '../../../services';
 
 import { getTopNavConfig } from './get_top_nav';
+import { useEditorReadContext } from '../editor/context/editor_context';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
-
-// We only run certain initialization after we know all our editors have
-// been instantiated -- which is what we use the below streams for.
-const inputReadySubject$ = new BehaviorSubject<any>(null);
-const outputReadySubject$ = new BehaviorSubject<any>(null);
-const editorsReady$ = combineLatest(inputReadySubject$, outputReadySubject$);
 
 export function Main() {
   const {
@@ -60,6 +54,8 @@ export function Main() {
     docLinkVersion,
     ResizeChecker,
   } = useAppContext();
+
+  const { editorsReady } = useEditorReadContext();
 
   const [editorReady, setEditorReady] = useState<boolean>(false);
   const [inputEditor, setInputEditor] = useState<any>(null);
@@ -73,14 +69,6 @@ export function Main() {
   const [showHelp, setShowHelp] = useState(false);
 
   const containerRef = useRef<null | HTMLDivElement>(null);
-
-  const onInputEditorReady = useCallback((value: any) => {
-    inputReadySubject$.next(value);
-  }, []);
-
-  const onOutputEditorReady = useCallback((value: any) => {
-    outputReadySubject$.next(value);
-  }, []);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -175,30 +163,28 @@ export function Main() {
   };
 
   useEffect(() => {
-    let resizerSubscriptions: Array<() => void> = [];
-    const subscription = editorsReady$.subscribe(([input, output]) => {
+    if (editorsReady) {
       settings.registerOutput(output.editor);
       settings.registerInput(input.editor);
       history.setEditor(input.editor);
 
       init(input.editor, output.editor, history);
 
-      resizerSubscriptions = resizerSubscriptions.concat([
+      const resizerSubscriptions = [
         subscribeResizeChecker(ResizeChecker, containerRef.current!, input.editor, output.editor),
         subscribeResizeChecker(ResizeChecker, input.element, input.editor),
         subscribeResizeChecker(ResizeChecker, output.element, output.editor),
-      ]);
+      ];
 
       setInputEditor(input.editor);
       setOutputEditor(output.editor);
       setEditorReady(true);
-    });
-
-    return () => {
-      resizerSubscriptions.map(done => done());
-      subscription.unsubscribe();
-    };
-  }, []);
+      return () => {
+        resizerSubscriptions.map(done => done());
+        subscription.unsubscribe();
+      };
+    }
+  }, [editorsReady]);
 
   return (
     <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>

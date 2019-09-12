@@ -78,8 +78,8 @@ export class History {
   addToHistory(endpoint: string, method: string, data: any) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
-    $.each(keys, (i, k) => {
-      this.storage.delete(k);
+    keys.forEach(key => {
+      this.storage.delete(key);
     });
 
     const timestamp = new Date().getTime();
