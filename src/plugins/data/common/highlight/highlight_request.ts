@@ -17,10 +17,19 @@
  * under the License.
  */
 
-// By default, ElasticSearch surrounds matched values in <em></em>. This is not ideal because it is possible that
-// the value could contain <em></em> in the value. We define these custom tags that we would never expect to see
-// inside a field value.
-export const highlightTags = {
-  pre: '@kibana-highlighted-field@',
-  post: '@/kibana-highlighted-field@'
-};
+import { highlightTags } from './highlight_tags';
+
+const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
+
+export function getHighlightRequest(query: any, getConfig: Function) {
+  if (!getConfig('doc_table:highlight')) return;
+
+  return {
+    pre_tags: [highlightTags.pre],
+    post_tags: [highlightTags.post],
+    fields: {
+      '*': {},
+    },
+    fragment_size: FRAGMENT_SIZE,
+  };
+}
