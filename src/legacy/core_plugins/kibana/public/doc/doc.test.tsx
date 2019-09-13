@@ -45,7 +45,7 @@ async function mountDoc(search: () => void, update = false) {
   const props = {
     id: '1',
     index: 'index1',
-    esClient: { search },
+    esClient: { search } as any,
     indexPattern: {
       getComputedFields: () => [],
     } as any,

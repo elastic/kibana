@@ -21,14 +21,39 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPattern } from 'ui/index_patterns';
 import { metadata } from 'ui/metadata';
+import { ElasticSearchHit } from 'ui/registry/doc_views_types';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
 
+export interface ElasticSearchResult {
+  hits: {
+    hits: [ElasticSearchHit];
+    max_score: number;
+  };
+  timed_out: boolean;
+  took: number;
+  shards: Record<string, unknown>;
+}
+
 export interface DocProps {
+  /**
+   * Id of the doc in ES
+   */
   id: string;
+  /**
+   * Index in ES to query
+   */
   index: string;
+  /**
+   * IndexPattern used for adding additional fields (stored_fields, script_fields, docvalue_fields)
+   */
   indexPattern: IndexPattern;
-  esClient: any;
+  /**
+   * Client of ElasticSearch to use for the query
+   */
+  esClient: {
+    search: (payload: { index: string; body: Record<string, any> }) => Promise<ElasticSearchResult>;
+  };
 }
 
 export function Doc(props: DocProps) {
