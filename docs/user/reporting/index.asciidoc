@@ -12,7 +12,7 @@ are exported to CSV.
 Reporting is located in the share menu from the {kib} toolbar:
 
 [role="screenshot"]
-image::reporting/images/share-button.png["Share"]
+image::user/reporting/images/share-button.png["Share"]
 
 You can also <<automating-report-generation, generate reports automatically>>.
 
