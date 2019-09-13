@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
-import { get, isEmpty } from 'lodash/fp';
 import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {

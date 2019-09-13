@@ -27,7 +27,6 @@ export interface TimelineRefetchProps {
   id: string;
   inputId: InputsModelId;
   inspect: inputsModel.InspectQuery | null;
-  isInspected?: boolean;
   loading: boolean;
   refetch: inputsModel.Refetch | null;
 }
@@ -35,7 +34,7 @@ export interface TimelineRefetchProps {
 type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
 
 const TimelineRefetchComponent = memo<OwnProps>(
-  ({ id, inputId, inspect, isInspected, loading, refetch, setTimelineQuery }) => {
+  ({ id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
     useEffect(() => {
       setTimelineQuery({ id, inputId, inspect, loading, refetch });
     }, [id, inputId, loading, refetch, inspect]);
