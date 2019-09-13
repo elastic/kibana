@@ -17,62 +17,74 @@
  * under the License.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-
 import { Doc, DocProps } from './doc';
+
+// Suppress warnings about "act" until we use React 16.9
+/* eslint-disable no-console */
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
 
 export const waitForPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 
-function buildProps(search: () => {}) {
-  const indexPattern = {
-    getComputedFields: () => [],
-  } as any;
-
-  return {
+/**
+ * this works but logs ugly error messages until we're using React 16.9
+ * should be adapted when we upgrade
+ * @param search
+ * @param update
+ */
+async function mountDoc(search: () => void, update = false) {
+  const props = {
     id: '1',
     index: 'index1',
     esClient: { search },
-    indexPattern,
+    indexPattern: {
+      getComputedFields: () => [],
+    } as any,
   } as DocProps;
+  let comp;
+  act(() => {
+    comp = mountWithIntl(<Doc {...props} />);
+    if (update) comp.update();
+  });
+  if (update) {
+    await waitForPromises();
+    // @ts-ignore
+    comp.update();
+  }
+  return comp;
 }
 
 describe('Test of <Doc /> of Discover', () => {
   it('renders loading msg', async () => {
-    const search = jest.fn();
-    const comp = mountWithIntl(<Doc {...buildProps(search)} />);
-
+    const comp = await mountDoc(jest.fn());
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
   });
 
   it('renders notFound msg', async () => {
     const search = jest.fn(() => Promise.reject({ status: 404 }));
-    const comp = mountWithIntl(<Doc {...buildProps(search)} />);
-    await waitForPromises();
-    comp.update();
-
+    const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-msg-notFound').length).toBe(1);
   });
 
   it('renders error msg', async () => {
     const search = jest.fn(() => Promise.reject('whatever'));
-    const comp = mountWithIntl(<Doc {...buildProps(search)} />);
-
-    await waitForPromises();
-    comp.update();
-
+    const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
 
   it('renders elasticsearch hit ', async () => {
-    const result = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
-    const search = jest.fn(() => Promise.resolve(result));
-    const comp = mountWithIntl(<Doc {...buildProps(search)} />);
-
-    await waitForPromises();
-    comp.update();
-
+    const hit = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
+    const search = jest.fn(() => Promise.resolve(hit));
+    const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-hit').length).toBe(1);
   });
 });

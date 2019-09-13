@@ -28,6 +28,10 @@ export enum ElasticRequestState {
   Error,
 }
 
+/**
+ * helper function to build a query body for Elasticsearch
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current//query-dsl-ids-query.html
+ */
 export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<string, any> {
   const computedFields = indexPattern.getComputedFields();
 
@@ -44,6 +48,9 @@ export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<
   };
 }
 
+/**
+ * Custom react hook for querying a single doc in ElasticSearch
+ */
 export function useEsDocSearch({
   esClient,
   id,
