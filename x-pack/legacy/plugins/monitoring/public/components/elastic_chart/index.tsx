@@ -17,9 +17,13 @@ import {
   Settings,
   ScaleType,
   Theme,
+  CursorEvent,
   LIGHT_THEME,
   DARK_THEME,
+  CrosshairStyle,
 } from '@elastic/charts';
+import { CursorUpdateListener } from '@elastic/charts/dist/chart_types/xy_chart/store/chart_state';
+import { AxisSpec } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import {
   EuiPageContent,
   EuiSpacer,
@@ -37,7 +41,10 @@ import { Series } from './helpers/types';
 
 interface PropsSeries {
   series: Series[];
+  onCursorUpdate?: CursorUpdateListener;
+  chartRef: React.RefObject<Chart>;
 }
+
 type OptionalComponent = JSX.Element | null;
 type StaticComponent = JSX.Element;
 
@@ -47,6 +54,10 @@ const getBaseTheme = (): Theme => {
     : LIGHT_THEME;
   return {
     ...modeTheme,
+    crosshair: {
+      band: { fill: 'red', visible: true },
+      line: {} as CrosshairStyle['line'],
+    },
     lineSeriesStyle: {
       line: {
         strokeWidth: 2,
@@ -63,16 +74,16 @@ const getBaseTheme = (): Theme => {
   };
 };
 
-const gridLines = {
+const gridLines: AxisSpec = {
   showGridLines: true,
   gridLineStyle: {
     stroke: 'black',
     strokeWidth: 0.5,
     opacity: 0.1,
   },
-};
+} as AxisSpec;
 
-const MonitoringChart = ({ series }: PropsSeries): OptionalComponent => {
+const MonitoringChart = ({ series, onCursorUpdate, chartRef }: PropsSeries): OptionalComponent => {
   if (!series) {
     return null;
   }
@@ -81,8 +92,14 @@ const MonitoringChart = ({ series }: PropsSeries): OptionalComponent => {
   const { timeRange } = firstSeries;
   const { min, max } = timeRange;
   return (
-    <Chart>
-      <Settings showLegend legendPosition="bottom" xDomain={{ min, max }} theme={getBaseTheme()} />
+    <Chart ref={chartRef}>
+      <Settings
+        showLegend
+        legendPosition="bottom"
+        xDomain={{ min, max }}
+        theme={getBaseTheme()}
+        onCursorUpdate={onCursorUpdate}
+      />
       <Axis
         id={getAxisId('bottom')}
         position="bottom"
@@ -90,7 +107,7 @@ const MonitoringChart = ({ series }: PropsSeries): OptionalComponent => {
         tickFormat={formatTimeValues}
       />
       <Axis id={getAxisId('left')} {...gridLines} tickFormat={formatTicksValues(firstSeries)} />
-      {series.map((item: any, index: number) => (
+      {series.map((item: Series, index: number) => (
         <LineSeries
           key={index}
           id={getSpecId(item.metric.label)}
@@ -107,7 +124,8 @@ const MonitoringChart = ({ series }: PropsSeries): OptionalComponent => {
   );
 };
 
-export const MonitoringTimeseriesContainer = ({ series }: PropsSeries): OptionalComponent => {
+const MonitoringTimeseriesContainer = (props: PropsSeries): OptionalComponent => {
+  const { series } = props;
   if (!series) {
     return null;
   }
@@ -124,7 +142,7 @@ export const MonitoringTimeseriesContainer = ({ series }: PropsSeries): Optional
         bucketSize,
       },
     }),
-  ].concat(series.map((item: any) => `${item.metric.label}: ${item.metric.description}`));
+  ].concat(series.map((item: Series) => `${item.metric.label}: ${item.metric.description}`));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
@@ -162,13 +180,25 @@ export const MonitoringTimeseriesContainer = ({ series }: PropsSeries): Optional
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ height: '250px' }}>
-        <MonitoringChart {...{ series }} />
+        <MonitoringChart {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 export const MonitoringCharts = ({ metrics }: { metrics: Series[][] }): StaticComponent => {
+  const chartRefs: Array<React.RefObject<Chart>> = metrics.map(() => React.createRef<Chart>());
+  const timers: NodeJS.Timeout[] = [];
+  const onCursorUpdate: CursorUpdateListener = (event: CursorEvent | undefined): void => {
+    chartRefs.forEach((ref: React.RefObject<Chart>, i: number) => {
+      clearTimeout(timers[i]);
+      timers[i] = setTimeout(
+        () => ref.current && ref.current!.dispatchExternalCursorEvent(event),
+        i * 5
+      );
+    });
+  };
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -176,7 +206,9 @@ export const MonitoringCharts = ({ metrics }: { metrics: Series[][] }): StaticCo
         <EuiFlexGrid columns={2} gutterSize="s">
           {metrics.map((series: Series[], index: number) => (
             <EuiFlexItem key={index}>
-              <MonitoringTimeseriesContainer {...{ series }} />
+              <MonitoringTimeseriesContainer
+                {...{ series, onCursorUpdate, chartRef: chartRefs[index] }}
+              />
               <EuiSpacer size="xs" />
             </EuiFlexItem>
           ))}
