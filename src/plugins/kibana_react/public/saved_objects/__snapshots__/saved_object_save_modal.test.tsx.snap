@@ -53,6 +53,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={true}
             hasEmptyLabelSpace={false}
             label={
