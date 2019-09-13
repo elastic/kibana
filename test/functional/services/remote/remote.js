@@ -34,7 +34,7 @@ export async function RemoteProvider({ getService }) {
   let browserDriverUrl = config.get(browserType + 'driver.url');
   if (process.env.PARALLEL_PIPELINE_WORKER_INDEX) {
     const parsedUrl = new URL(browserDriverUrl);
-    parsedUrl.port = `4444${process.env.PARALLEL_PIPELINE_WORKER_INDEX}`;
+    parsedUrl.port = 4444 + Number.parseInt(process.env.PARALLEL_PIPELINE_WORKER_INDEX);
     browserDriverUrl = parsedUrl.href;
   }
 
