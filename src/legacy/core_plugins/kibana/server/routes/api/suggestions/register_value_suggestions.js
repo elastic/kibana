@@ -28,16 +28,28 @@ export function registerValueSuggestions(server) {
     method: ['POST'],
     handler: async function (req) {
       const { index } = req.params;
-      const { field, query, boolFilter } = req.payload;
+      const { field: fieldName, query, boolFilter } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+
+      const savedObjectsClient = req.getSavedObjectsClient();
+      const savedObjectsResponse = await savedObjectsClient.find(
+        { type: 'index-pattern', fields: ['fields'], search: index, searchFields: ['title'] }
+      );
+      const indexPattern = savedObjectsResponse.total > 0 ? savedObjectsResponse.saved_objects[0] : null;
+      const fields = indexPattern ? JSON.parse(indexPattern.attributes.fields) : null;
+      const field = fields ? fields.find((field) => field.name === fieldName) : fieldName;
+
       const body = getBody(
         { field, query, boolFilter },
         autocompleteTerminateAfter,
         autocompleteTimeout
       );
+
       try {
         const response = await callWithRequest(req, 'search', { index, body });
-        const buckets = get(response, 'aggregations.suggestions.buckets') || [];
+        const buckets = get(response, 'aggregations.suggestions.buckets')
+          || get(response, 'aggregations.nestedSuggestions.suggestions.buckets')
+          || [];
         const suggestions = map(buckets, 'key');
         return suggestions;
       } catch (error) {
@@ -55,7 +67,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
   // the amount of information that needs to be transmitted to the coordinating node
   const shardSize = 10;
 
-  return {
+  const body = {
     size: 0,
     timeout: `${timeout}ms`,
     terminate_after: terminateAfter,
@@ -67,7 +79,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
     aggs: {
       suggestions: {
         terms: {
-          field,
+          field: field.name || field,
           include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
           shard_size: shardSize,
@@ -75,6 +87,22 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
       },
     },
   };
+
+  if (field.subType && field.subType.nested) {
+    return {
+      ...body,
+      aggs: {
+        nestedSuggestions: {
+          nested: {
+            path: field.subType.nested.path,
+          },
+          aggs: body.aggs,
+        },
+      }
+    };
+  }
+
+  return body;
 }
 
 function getEscapedQuery(query = '') {

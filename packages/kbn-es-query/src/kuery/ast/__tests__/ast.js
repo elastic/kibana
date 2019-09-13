@@ -34,7 +34,7 @@ describe('kuery AST API', function () {
   describe('fromKueryExpressionWithCursor', () => {
     it('should ', () => {
       const actual = ast.fromKueryExpression(
-        'level1:{ l@kuery-cursor@ }',
+        'level1:{ foo: @kuery-cursor@ }',
         { cursorSymbol: '@kuery-cursor@', parseCursor: true }
       );
 

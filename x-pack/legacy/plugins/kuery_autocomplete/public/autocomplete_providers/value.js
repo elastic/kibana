@@ -26,9 +26,11 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     prefix,
     suffix,
     fieldName,
+    nestedPath,
   }) {
-    const fields = allFields.filter(field => field.name === fieldName);
-    const query = `${prefix}${suffix}`;
+    const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
+    const fields = allFields.filter(field => field.name === fullFieldName);
+    const query = `${prefix}${suffix}`.trim();
 
     const suggestionsByField = fields.map(field => {
       return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
