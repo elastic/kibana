@@ -17,16 +17,24 @@
  * under the License.
  */
 
+import mkdirp from 'mkdirp';
 import { resolve } from 'path';
 import { writeFile } from 'fs';
-import mkdirp from 'mkdirp';
 import del from 'del';
-import { promisify } from 'bluebird';
+import Bluebird, { promisify } from 'bluebird';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-const writeFileAsync = promisify(writeFile);
-const mkdirAsync = promisify(mkdirp);
+interface Test {
+  fullTitle(): string;
+}
 
-export async function FailureDebuggingProvider({ getService }) {
+type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
+type MkDirAsync = (dirName: string) => Bluebird<mkdirp.Made>;
+
+const writeFileAsync = promisify(writeFile) as WriteFileAsync;
+const mkdirAsync = promisify(mkdirp) as MkDirAsync;
+
+export async function FailureDebuggingProvider({ getService }: FtrProviderContext) {
   const screenshots = getService('screenshots');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
@@ -40,26 +48,23 @@ export async function FailureDebuggingProvider({ getService }) {
     log.info(`Current URL is: ${currentUrl}`);
   }
 
-  async function savePageHtml(name) {
+  async function savePageHtml(name: string) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
-    const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
+    const htmlOutputFileName = resolve(
+      config.get('failureDebugging.htmlDirectory'),
+      `${name}.html`
+    );
     const pageSource = await browser.getPageSource();
     log.info(`Saving page source to: ${htmlOutputFileName}`);
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
-  async function onFailure(_, test) {
+  async function onFailure(_: any, test: Test) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
 
-    await Promise.all([
-      screenshots.takeForFailure(name),
-      logCurrentUrl(),
-      savePageHtml(name),
-    ]);
+    await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }
 
-  lifecycle
-    .on('testFailure', onFailure)
-    .on('testHookFailure', onFailure);
+  lifecycle.on('testFailure', onFailure).on('testHookFailure', onFailure);
 }

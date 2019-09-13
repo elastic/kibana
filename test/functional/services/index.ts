@@ -31,7 +31,6 @@ import {
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
-// @ts-ignore not TS yet
 import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
 import { FindProvider } from './find';
@@ -42,7 +41,6 @@ import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { ScreenshotsProvider } from './screenshots';
-// @ts-ignore not TS yet
 import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
@@ -50,7 +48,6 @@ import { ToastsProvider } from './toasts';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
-// @ts-ignore not TS yet
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 
 export const services = {
