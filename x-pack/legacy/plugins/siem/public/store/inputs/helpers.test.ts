@@ -19,7 +19,7 @@ import {
   addGlobalLink,
   removeTimelineLink,
   addTimelineLink,
-  deleteOnlyOneQuery,
+  deleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -251,7 +251,7 @@ describe('Inputs', () => {
       };
       newState = upsertQuery(deleteQuery);
       expect(
-        deleteOnlyOneQuery({
+        deleteOneQuery({
           inputId: 'global',
           id: 'deleteQuery',
           state: newState,
