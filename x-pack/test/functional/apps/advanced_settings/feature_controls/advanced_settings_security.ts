@@ -12,7 +12,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
 
   describe('security feature controls', () => {
@@ -186,14 +185,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Discover', 'Management']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: 10000,
-        });
+      it(`FORCED FAILURE does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
+        throw new Error('FORCED FAILURE');
       });
     });
   });
