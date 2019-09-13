@@ -222,7 +222,6 @@ export class HeadlessChromiumDriver {
   }
 
   public getPid(): number {
-    const process = this.page.browser().process();
-    return process.pid;
+    return this.page.browser().process().pid;
   }
 }

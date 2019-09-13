@@ -77,6 +77,7 @@ function generatePdfObservableFn(server: KbnServer) {
         mergeMap(({ driver$ }) => {
           return driver$.pipe(
             mergeMap((browser: HeadlessBrowser) => {
+              logger.info(`Using browser process: ${browser.getPid()}`);
               return Rx.from(urls).pipe(
                 mergeMap((url: string) => {
                   return screenshotsObservable({
