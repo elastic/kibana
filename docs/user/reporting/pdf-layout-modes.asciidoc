@@ -5,7 +5,7 @@ When creating a PDF report, there are two layout modes *Optimize PDF for printin
 
 --
 [role="screenshot"]
-image:reporting/images/preserve-layout-switch.png["PDF Reporting",link="preserve-layout-switch.png"]
+image:user/reporting/images/preserve-layout-switch.png["PDF Reporting",link="preserve-layout-switch.png"]
 --
 
 [float]
@@ -15,7 +15,7 @@ This will create a print friendly PDF with multiple A4 portrait pages, with 2 vi
 
 --
 [role="screenshot"]
-image:reporting/images/print-layout.png["optimize-pdf-for-printing",link="print-layout.png"]
+image:user/reporting/images/print-layout.png["optimize-pdf-for-printing",link="print-layout.png"]
 --
 
 [float]
@@ -25,5 +25,5 @@ This will create a PDF preserving the existing layout and size of the Visualizat
 
 --
 [role="screenshot"]
-image:reporting/images/preserve-layout.png["Preserve existing layout in PDF",link="preserve-layout.png"]
+image:user/reporting/images/preserve-layout.png["Preserve existing layout in PDF",link="preserve-layout.png"]
 --
