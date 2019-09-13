@@ -100,19 +100,6 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
   expect(getMock.calls[0][1]).toBe(savedObjectId);
 });
 
-test(`logs no warnings when title and relativeUrl is passed`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
-
-  const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
-
-  await compatibilityShim(createJobMock)({ title: 'Phenomenal Dashboard', relativeUrl: '/abc' }, null, mockRequest);
-
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
-  expect(mockLogger.error.mock.calls.length).toBe(0);
-
-});
 test(`logs no warnings when title and relativeUrls is passed`, async () => {
   const mockLogger = createMockLogger();
   const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
@@ -132,7 +119,7 @@ test(`logs warning if title can not be provided`, async () => {
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
-  await compatibilityShim(createJobMock)({ relativeUrl: '/abc' }, null, mockRequest);
+  await compatibilityShim(createJobMock)({ relativeUrls: ['/abc'] }, null, mockRequest);
 
   expect(mockLogger.warning.mock.calls.length).toBe(1);
   expect(mockLogger.warning.mock.calls[0][0]).toEqual(
@@ -172,7 +159,7 @@ test(`passes objectType through`, async () => {
   const mockRequest = createMockRequest();
 
   const objectType = 'foo';
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something', objectType }, null, mockRequest);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls: ['/something'], objectType }, null, mockRequest);
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -261,7 +248,7 @@ test(`passes headers and request through`, async () => {
   const headers = {};
   const request = createMockRequest();
 
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrl: '/something' }, headers, request);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls: ['/something'] }, headers, request);
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
