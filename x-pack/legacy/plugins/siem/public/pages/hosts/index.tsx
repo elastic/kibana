@@ -41,7 +41,7 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 export const HostsContainer = React.memo<Props>(({ url }) => (
   <GlobalTime>
-    {({ to, from, setQuery, isInitializing }) => (
+    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
       <Switch>
         <Route
           strict
@@ -54,6 +54,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 <>
                   <Hosts from={from} to={to} setQuery={setQuery} isInitializing={isInitializing} />
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -76,6 +77,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -88,6 +90,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -100,6 +103,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -112,6 +116,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -124,6 +129,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -152,6 +158,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.hosts})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -165,6 +172,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.authentications})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -178,6 +186,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.uncommonProcesses})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -191,6 +200,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.anomalies})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}

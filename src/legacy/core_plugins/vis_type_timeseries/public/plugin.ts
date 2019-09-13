@@ -17,15 +17,15 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricsFn } from './metrics_fn';
 import { createMetricsTypeDefinition } from './metrics_type';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
@@ -37,8 +37,11 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(core: CoreSetup, { data, visualizations }: MetricsPluginSetupDependencies) {
-    data.expressions.registerFunction(createMetricsFn);
+  public async setup(
+    core: CoreSetup,
+    { expressions, visualizations }: MetricsPluginSetupDependencies
+  ) {
+    expressions.registerFunction(createMetricsFn);
     visualizations.types.registerVisualization(createMetricsTypeDefinition);
   }
 

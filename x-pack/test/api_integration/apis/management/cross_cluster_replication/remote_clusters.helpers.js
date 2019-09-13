@@ -16,13 +16,16 @@ export const registerHelpers = (supertest) => {
   const addCluster = (name = REMOTE_CLUSTER_NAME) => {
     remoteClustersCreated.push(name);
 
+    // TODO how could this get pulled out of the ES config instead?
+    const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0] : '9300';
+
     return supertest
       .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
       .set('kbn-xsrf', 'xxx')
       .send({
         'name': name,
         'seeds': [
-          'localhost:9300'
+          `localhost:${esTransportPort}`
         ],
         'skipUnavailable': true,
       });

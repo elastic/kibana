@@ -8,6 +8,7 @@ import { ColumnHeader } from '../../components/timeline/body/column_headers/colu
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
+import { defaultHeaders as eventsDefaultHeaders } from '../../components/events_viewer/default_headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { Direction, PinnedEvent } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -133,3 +134,33 @@ export const timelineDefaults: Readonly<
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };
+
+export const eventsDefaults: Readonly<
+  Pick<
+    TimelineModel,
+    | 'columns'
+    | 'dataProviders'
+    | 'description'
+    | 'eventIdToNoteIds'
+    | 'highlightedDropAndProviderId'
+    | 'historyIds'
+    | 'isFavorite'
+    | 'isLive'
+    | 'itemsPerPage'
+    | 'itemsPerPageOptions'
+    | 'kqlMode'
+    | 'kqlQuery'
+    | 'title'
+    | 'noteIds'
+    | 'pinnedEventIds'
+    | 'pinnedEventsSaveObject'
+    | 'dateRange'
+    | 'show'
+    | 'sort'
+    | 'width'
+    | 'isSaving'
+    | 'isLoading'
+    | 'savedObjectId'
+    | 'version'
+  >
+> = { ...timelineDefaults, columns: eventsDefaultHeaders };
