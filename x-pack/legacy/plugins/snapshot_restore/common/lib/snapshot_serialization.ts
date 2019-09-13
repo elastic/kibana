@@ -15,6 +15,8 @@ import {
   SnapshotRetentionEs,
 } from '../types';
 
+import { deserializeTime, serializeTime } from './time_serialization';
+
 export function deserializeSnapshotDetails(
   repository: string,
   snapshotDetailsEs: SnapshotDetailsEs,
@@ -145,8 +147,21 @@ export function deserializeSnapshotRetention(
     min_count: minCount,
   } = snapshotRetentionEs;
 
+  let expireAfterValue;
+  let expireAfterUnit;
+
+  if (expireAfter) {
+    const { timeValue, timeUnit } = deserializeTime(expireAfter);
+
+    if (timeValue && timeUnit) {
+      expireAfterValue = timeValue;
+      expireAfterUnit = timeUnit;
+    }
+  }
+
   const snapshotRetention: SnapshotRetention = {
-    expireAfter,
+    expireAfterValue,
+    expireAfterUnit,
     maxCount,
     minCount,
   };
@@ -161,19 +176,29 @@ export function deserializeSnapshotRetention(
 
 export function serializeSnapshotRetention(
   snapshotRetention: SnapshotRetention
-): SnapshotRetentionEs {
-  const { expireAfter, minCount, maxCount } = snapshotRetention;
+): SnapshotRetentionEs | undefined {
+  const { expireAfterValue, expireAfterUnit, minCount, maxCount } = snapshotRetention;
 
   const snapshotRetentionEs: SnapshotRetentionEs = {
-    expire_after: expireAfter,
-    min_count: minCount,
-    max_count: maxCount,
+    expire_after:
+      expireAfterValue && expireAfterUnit
+        ? serializeTime(expireAfterValue, expireAfterUnit)
+        : undefined,
+    min_count: !minCount ? undefined : minCount,
+    max_count: !maxCount ? undefined : maxCount,
   };
 
-  return Object.entries(snapshotRetentionEs).reduce((retention: any, [key, value]) => {
-    if (value !== undefined) {
-      retention[key] = value;
-    }
-    return retention;
-  }, {});
+  const flattenedSnapshotRetentionEs = Object.entries(snapshotRetentionEs).reduce(
+    (retention: any, [key, value]) => {
+      if (value !== undefined) {
+        retention[key] = value;
+      }
+      return retention;
+    },
+    {}
+  );
+
+  return Object.entries(flattenedSnapshotRetentionEs).length
+    ? flattenedSnapshotRetentionEs
+    : undefined;
 }

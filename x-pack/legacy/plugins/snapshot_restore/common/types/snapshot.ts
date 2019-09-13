@@ -81,9 +81,10 @@ interface SnapshotDetailsShardsStatusEs {
 }
 
 export interface SnapshotRetention {
-  expireAfter?: string;
-  maxCount?: number;
-  minCount?: number;
+  expireAfterValue?: number | '';
+  expireAfterUnit?: string;
+  maxCount?: number | '';
+  minCount?: number | '';
 }
 
 export interface SnapshotRetentionEs {

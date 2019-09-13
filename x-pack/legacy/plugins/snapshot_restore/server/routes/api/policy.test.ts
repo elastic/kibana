@@ -25,6 +25,11 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       schedule: '0 30 1 * * ?',
       repository: 'my-backups',
       config: {},
+      retention: {
+        expire_after: '15d',
+        min_count: 5,
+        max_count: 10,
+      },
     },
     next_execution_millis: 1562722200000,
   };
@@ -35,6 +40,12 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     schedule: '0 30 1 * * ?',
     repository: 'my-backups',
     config: {},
+    retention: {
+      expireAfterValue: 15,
+      expireAfterUnit: 'd',
+      minCount: 5,
+      maxCount: 10,
+    },
     nextExecutionMillis: 1562722200000,
   };
 

@@ -9,18 +9,28 @@ import {
   EuiDescribedFormGroup,
   EuiTitle,
   EuiFormRow,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
   EuiFieldNumber,
+  EuiSelect,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
+import { TIME_UNITS } from '../../../../../common/constants';
 import { documentationLinksService } from '../../../services/documentation';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
+import { textService } from '../../../services/text';
+
+const getExpirationTimeOptions = (unitSize = '0') =>
+  Object.entries(TIME_UNITS).map(([_key, value]) => {
+    return {
+      text: textService.getTimeUnitLabel(value, unitSize),
+      value,
+    };
+  });
 
 export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
   policy,
@@ -43,7 +53,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
 
   // State for touched inputs
   const [touched, setTouched] = useState({
-    expireAfter: false,
+    expireAfterValue: false,
     minCount: false,
     maxCount: false,
   });
@@ -77,28 +87,39 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           />
         }
         describedByIds={['expirationDescription']}
-        isInvalid={touched.expireAfter && Boolean(errors.expireAfter)}
+        isInvalid={touched.expireAfterValue && Boolean(errors.expireAfterValue)}
         error={errors.expireAfter}
         fullWidth
       >
-        <EuiFieldText
-          defaultValue={retention.expireAfter}
-          fullWidth
-          onBlur={() => setTouched({ ...touched, expireAfter: true })}
-          onChange={e => {
-            updatePolicyRetention({
-              expireAfter: e.target.value,
-            });
-          }}
-          placeholder={i18n.translate(
-            'xpack.snapshotRestore.policyForm.stepRetention.expireAfterPlaceholder',
-            {
-              defaultMessage: '15d',
-              description: 'Example expiration value',
-            }
-          )}
-          data-test-subj="expireAfterInput"
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={retention.expireAfterValue || ''}
+              onBlur={() => setTouched({ ...touched, expireAfterValue: true })}
+              onChange={e => {
+                const value = e.target.value;
+                updatePolicyRetention({
+                  expireAfterValue: value !== '' ? Number(value) : value,
+                });
+              }}
+              data-test-subj="expireAfterValueInput"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSelect
+              value={retention.expireAfterUnit}
+              options={getExpirationTimeOptions(
+                retention.expireAfterValue ? retention.expireAfterValue.toString() : undefined
+              )}
+              onChange={e => {
+                updatePolicyRetention({
+                  expireAfterUnit: e.target.value,
+                });
+              }}
+              data-test-subj="expireAfterUnitSelect"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
@@ -138,11 +159,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       >
         <EuiFieldNumber
           fullWidth
-          value={retention.minCount}
+          value={retention.minCount || ''}
           onBlur={() => setTouched({ ...touched, minCount: true })}
           onChange={e => {
+            const value = e.target.value;
             updatePolicyRetention({
-              minCount: Number(e.target.value),
+              minCount: value !== '' ? Number(value) : value,
             });
           }}
           data-test-subj="minCountInput"
@@ -162,11 +184,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       >
         <EuiFieldNumber
           fullWidth
-          value={retention.maxCount}
+          value={retention.maxCount || ''}
           onBlur={() => setTouched({ ...touched, maxCount: true })}
           onChange={e => {
+            const value = e.target.value;
             updatePolicyRetention({
-              maxCount: Number(e.target.value),
+              maxCount: value !== '' ? Number(value) : value,
             });
           }}
           data-test-subj="maxCountInput"

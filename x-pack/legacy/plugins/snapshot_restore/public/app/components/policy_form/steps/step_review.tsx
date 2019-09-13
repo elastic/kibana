@@ -48,6 +48,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   const hiddenIndicesCount =
     displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
+  const serializedPolicy = serializePolicy(policy);
+
   const EditStepTooltip = ({ step }: { step: number }) => (
     <EuiToolTip
       content={
@@ -272,7 +274,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {retention ? (
+
+      {retention && serializedPolicy.retention ? (
         <Fragment>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
@@ -287,27 +290,42 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiSpacer size="s" />
 
           <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.expireAfterLabel"
-                defaultMessage="Expire after"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{retention.expireAfter}</EuiDescriptionListDescription>
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.minCountLabel"
-                defaultMessage="Min count"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{retention.minCount}</EuiDescriptionListDescription>
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.maxCountLabel"
-                defaultMessage="Max count"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{retention.maxCount}</EuiDescriptionListDescription>
+            {retention.expireAfterValue && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.expireAfterLabel"
+                    defaultMessage="Expire after"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {retention.expireAfterValue}
+                  {retention.expireAfterUnit}
+                </EuiDescriptionListDescription>
+              </Fragment>
+            )}
+            {retention.minCount && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.minCountLabel"
+                    defaultMessage="Min count"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{retention.minCount}</EuiDescriptionListDescription>
+              </Fragment>
+            )}
+            {retention.maxCount && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.maxCountLabel"
+                    defaultMessage="Max count"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{retention.maxCount}</EuiDescriptionListDescription>
+              </Fragment>
+            )}
           </EuiDescriptionList>
         </Fragment>
       ) : null}
@@ -316,7 +334,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
 
   const renderRequestTab = () => {
     const endpoint = `PUT _slm/policy/${name}`;
-    const json = JSON.stringify(serializePolicy(policy), null, 2);
+    const json = JSON.stringify(serializedPolicy, null, 2);
+
     return (
       <Fragment>
         <EuiSpacer size="m" />

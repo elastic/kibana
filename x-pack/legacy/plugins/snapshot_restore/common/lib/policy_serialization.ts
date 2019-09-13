@@ -107,7 +107,11 @@ export const serializePolicy = (policy: SlmPolicyPayload): SlmPolicyEs['policy']
   }
 
   if (retention) {
-    policyEs.retention = serializeSnapshotRetention(retention);
+    const serializedRetention = serializeSnapshotRetention(retention);
+
+    if (serializedRetention) {
+      policyEs.retention = serializeSnapshotRetention(retention);
+    }
   }
 
   return policyEs;

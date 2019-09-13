@@ -8,6 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 
 import { SectionError, SectionLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
@@ -44,6 +45,12 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     schedule: '',
     repository: '',
     config: {},
+    retention: {
+      expireAfterValue: '',
+      expireAfterUnit: TIME_UNITS.DAY,
+      maxCount: '',
+      minCount: '',
+    },
   });
 
   const {

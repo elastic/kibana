@@ -13,6 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
 import { useAppDependencies } from '../../index';
 import {
@@ -68,6 +69,11 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     ...originalPolicy,
     config: {
       ...(originalPolicy.config || {}),
+    },
+    retention: {
+      ...(originalPolicy.retention || {
+        expireAfterUnit: TIME_UNITS.DAY,
+      }),
     },
   });
 

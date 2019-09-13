@@ -8,6 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 
 import { PolicyForm, SectionError, SectionLoading } from '../../components';
 import { useAppDependencies } from '../../index';
@@ -64,6 +65,12 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     schedule: DEFAULT_POLICY_SCHEDULE,
     repository: '',
     config: {},
+    retention: {
+      expireAfterValue: '',
+      expireAfterUnit: TIME_UNITS.DAY,
+      maxCount: '',
+      minCount: '',
+    },
   };
 
   const renderSaveError = () => {

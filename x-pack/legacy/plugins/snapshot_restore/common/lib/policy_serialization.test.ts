@@ -51,7 +51,8 @@ describe('repository_serialization', () => {
           },
         },
         retention: {
-          expireAfter: '14d',
+          expireAfterValue: 14,
+          expireAfterUnit: 'd',
           maxCount: 30,
           minCount: 4,
         },
@@ -140,7 +141,8 @@ describe('repository_serialization', () => {
             },
           },
           retention: {
-            expireAfter: '14d',
+            expireAfterValue: 14,
+            expireAfterUnit: 'd',
             maxCount: 30,
             minCount: 4,
           },
