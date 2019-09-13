@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementHandle } from 'puppeteer';
 import { KbnServer } from '../../../../types';
 import { ScreenshotObservableOpts, Screenshot, TimeRange } from './types';
 import { checkForToastMessage } from './check_for_toast';
