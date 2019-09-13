@@ -17,40 +17,39 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { getHighlightRequest } from '../highlight_request';
+import { getHighlightRequest } from './highlight_request';
 
 describe('getHighlightRequest', () => {
-  let configMock;
-  const getConfig = (key) => configMock[key];
+  let configMock: Record<string, any>;
+  const getConfig = (key: string) => configMock[key];
   const queryStringQuery = { query_string: { query: 'foo' } };
 
-  beforeEach(function () {
+  beforeEach(function() {
     configMock = {};
     configMock['doc_table:highlight'] = true;
   });
 
-  it('should be a function', () => {
-    expect(getHighlightRequest).to.be.a(Function);
+  test('should be a function', () => {
+    expect(getHighlightRequest).toBeInstanceOf(Function);
   });
 
-  it('should not modify the original query', () => {
+  test('should not modify the original query', () => {
     getHighlightRequest(queryStringQuery, getConfig);
-    expect(queryStringQuery.query_string).to.not.have.property('highlight');
+    expect(queryStringQuery.query_string).not.toHaveProperty('highlight');
   });
 
-  it('should return undefined if highlighting is turned off', () => {
+  test('should return undefined if highlighting is turned off', () => {
     configMock['doc_table:highlight'] = false;
     const request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request).to.be(undefined);
+    expect(request).toBe(undefined);
   });
 
-  it('should enable/disable highlighting if config is changed', () => {
+  test('should enable/disable highlighting if config is changed', () => {
     let request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request).to.not.be(undefined);
+    expect(request).not.toBe(undefined);
 
     configMock['doc_table:highlight'] = false;
     request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request).to.be(undefined);
+    expect(request).toBe(undefined);
   });
 });
