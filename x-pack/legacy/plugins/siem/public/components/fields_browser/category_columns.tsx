@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
 import { OnUpdateColumns } from '../timeline/events';
@@ -27,20 +34,16 @@ CategoryName.displayName = 'CategoryName';
 
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
-  height: 25px;
   left: 5px;
+  padding: 8px;
   position: absolute;
-  top: -5px;
-  width: 30px;
+  top: -8px;
 `;
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
-  left: -2px;
-  position: relative;
-  top: -6px;
 `;
 
 HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
@@ -121,7 +124,10 @@ export const getCategoryColumns = ({
             <EuiFlexItem grow={false}>
               <WithHoverActions
                 hoverContent={
-                  <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="s">
+                  <HoverActionsContainer
+                    data-test-subj="hover-actions-container"
+                    paddingSize="none"
+                  >
                     <HoverActionsFlexGroup
                       alignItems="center"
                       direction="row"
@@ -146,7 +152,7 @@ export const getCategoryColumns = ({
                       timelineId,
                     })}
                   >
-                    {categoryId}
+                    <EuiText size="xs">{categoryId}</EuiText>
                   </CategoryName>
                 )}
               />

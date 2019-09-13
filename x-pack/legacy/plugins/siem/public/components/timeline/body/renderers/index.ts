@@ -16,12 +16,19 @@ import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek/zeek_row_renderer';
 import { systemRowRenderers } from './system/generic_row_renderer';
 
+// The row renderers are order dependent and will return the first renderer
+// which returns true from its isInstance call. The bottom renderers which
+// are netflowRenderer and plainRowRenderer are the most accepting where
+// netflowRowRenderer returns true on any netflow related data set including
+// Suricata and Zeek which is why Suricata and Zeek are above it. The
+// plainRowRenderer always returns true to everything which is why it always
+// should be last.
 export const rowRenderers: RowRenderer[] = [
   ...auditdRowRenderers,
-  netflowRowRenderer,
-  suricataRowRenderer,
   ...systemRowRenderers,
+  suricataRowRenderer,
   zeekRowRenderer,
+  netflowRowRenderer,
   plainRowRenderer, // falls-back to the plain row renderer
 ];
 

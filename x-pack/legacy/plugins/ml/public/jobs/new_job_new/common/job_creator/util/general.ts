@@ -13,14 +13,7 @@ import {
 } from '../../../../../../common/constants/aggregation_types';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import {
-  JobCreator,
-  SingleMetricJobCreator,
-  MultiMetricJobCreator,
-  PopulationJobCreator,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-} from '../';
+import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
@@ -133,9 +126,10 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 }
 
 function stashCombinedJob(
-  jobCreator: JobCreator,
+  jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
-  advanced: boolean = false
+  advanced: boolean = false,
+  includeTimeRange: boolean = false
 ) {
   const combinedJob = {
     ...jobCreator.jobConfig,
@@ -145,16 +139,22 @@ function stashCombinedJob(
     mlJobService.currentJob = combinedJob;
   } else {
     mlJobService.tempJobCloningObjects.job = combinedJob;
-  }
 
-  if (skipTimeRangeStep === true) {
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+    // skip over the time picker step of the wizard
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+
+    if (includeTimeRange === true) {
+      // auto select the start and end dates of the time picker
+      mlJobService.tempJobCloningObjects.start = jobCreator.start;
+      mlJobService.tempJobCloningObjects.end = jobCreator.end;
+    }
   }
 }
 
-export function convertToMultiMetricJob(jobCreator: JobCreator) {
+export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-  stashCombinedJob(jobCreator, true, false);
+  jobCreator.modelPlot = false;
+  stashCombinedJob(jobCreator, true, false, true);
 
   window.location.href = window.location.href.replace(
     JOB_TYPE.SINGLE_METRIC,
@@ -162,11 +162,9 @@ export function convertToMultiMetricJob(jobCreator: JobCreator) {
   );
 }
 
-export function convertToAdvancedJob(
-  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator
-) {
+export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, false, true);
+  stashCombinedJob(jobCreator, false, true, false);
 
   let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
@@ -178,9 +176,9 @@ export function convertToAdvancedJob(
   window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
 }
 
-export function resetJob(jobCreator: JobCreator) {
+export function resetJob(jobCreator: JobCreatorType) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, false);
+  stashCombinedJob(jobCreator, true, false, true);
 
   window.location.href = '#/jobs/new_job';
 }

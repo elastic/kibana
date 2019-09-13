@@ -13,8 +13,10 @@ import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 
-import { getArgs, UncommonProcessTable } from '.';
+import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
 import { mockData } from './mock';
+import { HostsType } from '../../../../store/hosts/model';
+import * as i18n from './translations';
 
 describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
@@ -27,6 +29,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -50,6 +53,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -79,6 +83,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -109,6 +114,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -139,6 +145,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -169,6 +176,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -199,6 +207,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -228,6 +237,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -257,6 +267,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -297,6 +308,37 @@ describe('Uncommon Process Table Component', () => {
 
     test('it returns null if given undefined', () => {
       expect(getArgs(undefined)).toEqual(null);
+    });
+  });
+
+  describe('#getUncommonColumnsCurated', () => {
+    test('on hosts page, we expect to get all columns', () => {
+      expect(getUncommonColumnsCurated(HostsType.page).length).toEqual(6);
+    });
+
+    test('on host details page, we expect to remove two columns', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.length).toEqual(4);
+    });
+
+    test('on host page, we should have hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.page);
+      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(true);
+    });
+
+    test('on host page, we should have number of hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.page);
+      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
+    });
+
+    test('on host details page, we should not have hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(false);
+    });
+
+    test('on host details page, we should not have number of hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });
 });

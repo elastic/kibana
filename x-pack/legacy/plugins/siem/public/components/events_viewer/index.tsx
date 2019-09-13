@@ -19,7 +19,6 @@ import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
 
 import { EventsViewer } from './events_viewer';
-import { defaultHeaders } from './default_headers';
 
 export interface OwnProps {
   end: number;
@@ -84,7 +83,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders });
+        createTimeline({ id, columns });
       }
     }, []);
 
@@ -157,11 +156,11 @@ StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
 
 const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getEvents = timelineSelectors.getEventsByIdSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const timeline: TimelineModel = getTimeline(state, id);
-    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = timeline;
+    const events: TimelineModel = getEvents(state, id);
+    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
 
     return {
       columns,

@@ -28,7 +28,7 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
@@ -37,7 +37,7 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
+export { Query, QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */

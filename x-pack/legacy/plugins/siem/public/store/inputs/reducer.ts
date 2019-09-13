@@ -22,6 +22,7 @@ import {
   removeGlobalLinkTo,
   addGlobalLinkTo,
   addTimelineLinkTo,
+  deleteOneQuery,
 } from './actions';
 import {
   setIsInspected,
@@ -32,6 +33,7 @@ import {
   addGlobalLink,
   removeTimelineLink,
   addTimelineLink,
+  deleteOneQuery as helperDeleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 import {
@@ -129,6 +131,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
     upsertQuery({ inputId, id, inspect, loading, refetch, state })
   )
+  .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({
     ...state,
     [id]: {

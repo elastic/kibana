@@ -26,6 +26,7 @@ import {
   getIndexPatternTitles,
   getJobsToDisplay,
   getJobsToInstall,
+  getStablePatternTitles,
 } from './helpers';
 import { configTemplates } from './config_templates';
 import { useStateToaster } from '../toasters';
@@ -163,6 +164,7 @@ export const MlPopover = React.memo(() => {
   // Install Config Templates as effect of opening popover
   useEffect(() => {
     if (
+      isPopoverOpen &&
       jobSummaryData != null &&
       configuredIndexPatternTitles.length > 0 &&
       configTemplatesToInstall.length > 0
@@ -189,7 +191,7 @@ export const MlPopover = React.memo(() => {
       };
       setupJobs();
     }
-  }, [jobSummaryData, configuredIndexPatternTitles]);
+  }, [jobSummaryData, getStablePatternTitles(configuredIndexPatternTitles)]);
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI

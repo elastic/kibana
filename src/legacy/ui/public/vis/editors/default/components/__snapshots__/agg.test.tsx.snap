@@ -24,10 +24,8 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
           aria-label="Enable aggregation"
           color="text"
           data-test-subj="toggleDisableAggregationBtn enable"
-          iconSize="m"
           iconType="eyeClosed"
           onClick={[Function]}
-          type="button"
         />
       </EuiToolTip>
     </div>

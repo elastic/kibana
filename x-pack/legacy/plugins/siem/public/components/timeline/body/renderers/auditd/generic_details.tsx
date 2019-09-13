@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -108,50 +107,53 @@ interface GenericDetailsProps {
   data: Ecs;
   contextId: string;
   text: string;
+  timelineId: string;
 }
 
-export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
-  const id = data._id;
-  const session: string | null | undefined = get('auditd.session[0]', data);
-  const hostName: string | null | undefined = get('host.name[0]', data);
-  const userName: string | null | undefined = get('user.name[0]', data);
-  const result: string | null | undefined = get('auditd.result[0]', data);
-  const processPid: number | null | undefined = get('process.pid[0]', data);
-  const processName: string | null | undefined = get('process.name[0]', data);
-  const processExecutable: string | null | undefined = get('process.executable[0]', data);
-  const processTitle: string | null | undefined = get('process.title[0]', data);
-  const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
-  const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
-  const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
-  const rawArgs: string[] | null | undefined = get('process.args', data);
-  const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
-  if (data.process != null) {
-    return (
-      <Details>
-        <AuditdGenericLine
-          id={id}
-          contextId={contextId}
-          text={text}
-          hostName={hostName}
-          userName={userName}
-          processName={processName}
-          processPid={processPid}
-          processExecutable={processExecutable}
-          processTitle={processTitle}
-          workingDirectory={workingDirectory}
-          args={args}
-          session={session}
-          primary={primary}
-          result={result}
-          secondary={secondary}
-        />
-        <EuiSpacer size="s" />
-        <NetflowRenderer data={data} />
-      </Details>
-    );
-  } else {
-    return null;
+export const AuditdGenericDetails = pure<GenericDetailsProps>(
+  ({ data, contextId, text, timelineId }) => {
+    const id = data._id;
+    const session: string | null | undefined = get('auditd.session[0]', data);
+    const hostName: string | null | undefined = get('host.name[0]', data);
+    const userName: string | null | undefined = get('user.name[0]', data);
+    const result: string | null | undefined = get('auditd.result[0]', data);
+    const processPid: number | null | undefined = get('process.pid[0]', data);
+    const processName: string | null | undefined = get('process.name[0]', data);
+    const processExecutable: string | null | undefined = get('process.executable[0]', data);
+    const processTitle: string | null | undefined = get('process.title[0]', data);
+    const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+    const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
+    const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
+    const rawArgs: string[] | null | undefined = get('process.args', data);
+    const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
+    if (data.process != null) {
+      return (
+        <Details>
+          <AuditdGenericLine
+            id={id}
+            contextId={contextId}
+            text={text}
+            hostName={hostName}
+            userName={userName}
+            processName={processName}
+            processPid={processPid}
+            processExecutable={processExecutable}
+            processTitle={processTitle}
+            workingDirectory={workingDirectory}
+            args={args}
+            session={session}
+            primary={primary}
+            result={result}
+            secondary={secondary}
+          />
+          <EuiSpacer size="s" />
+          <NetflowRenderer data={data} timelineId={timelineId} />
+        </Details>
+      );
+    } else {
+      return null;
+    }
   }
-});
+);
 
 AuditdGenericDetails.displayName = 'AuditdGenericDetails';

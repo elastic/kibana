@@ -22,24 +22,7 @@ export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    expressions: {
-      registerFunction: jest.fn(),
-      registerRenderer: jest.fn(),
-      registerType: jest.fn(),
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-        functions: {
-          register: () => {},
-        } as any,
-        renderers: {
-          register: () => {},
-        } as any,
-        types: {
-          register: () => {},
-        } as any,
-      },
-    },
-  };
+  const setupContract: Setup = {};
   return setupContract;
 };
 

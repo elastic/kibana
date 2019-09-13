@@ -37,11 +37,13 @@ export const ABSOLUTE_DATE_RANGE = {
     '/app/siem#/network/?kqlQuery=(filterQuery:!n,queryLocation:network.page)&timerange=(global:(linkTo:!(),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(),timerange:(from:1564776209186,kind:absolute,to:1564779809186)))',
   urlKqlNetworkNetwork: `/app/siem#/network/?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
   urlKqlNetworkHosts: `/app/siem#/network/?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
-  urlKqlHostsNetwork: `/app/siem#/hosts/?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
-  urlKqlHostsHosts: `/app/siem#/hosts/?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
+  urlKqlHostsNetwork: `/app/siem#/hosts/allHosts?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
+  urlKqlHostsHosts: `/app/siem#/hosts/allHosts?_g=()&kqlQuery=(filterQuery:(expression:'source.ip:%20"10.142.0.9"',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
+  urlHost:
+    '/app/siem#/hosts/authentications?timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))',
 };
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
-  '[data-test-subj="globalDatePicker"] [data-test-subj="superDatePickerstartDatePopoverButton"]';
+  'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';
 export const DATE_PICKER_END_DATE_POPOVER_BUTTON =
   '[data-test-subj="globalDatePicker"] [data-test-subj="superDatePickerendDatePopoverButton"]';
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE =
@@ -56,3 +58,6 @@ export const DATE_PICKER_APPLY_BUTTON_TIMELINE =
 export const DATE_PICKER_ABSOLUTE_INPUT = '[data-test-subj="superDatePickerAbsoluteDateInput"]';
 export const KQL_INPUT = '[data-test-subj="kqlInput"]';
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+
+export const HOST_DETAIL_SIEM_KIBANA = '[data-test-subj="all-hosts"] a.euiLink';
+export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
