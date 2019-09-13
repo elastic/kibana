@@ -243,7 +243,9 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
-  type TLS {
+  "Contains monitor transmission encryption information."
+  type PingTLS {
+    "The date and time after which the certificate is invalid."
     certificate_not_valid_after: String
     certificate_not_valid_before: String
     certificates: String
@@ -265,8 +267,6 @@ export const pingsSchema = gql`
     id: String!
     "The timestamp of the ping's creation"
     timestamp: String!
-    "Milliseconds from the timestamp to the current time"
-    millisFromNow: String
     "The agent that recorded the ping"
     beat: Beat
     container: Container
@@ -285,7 +285,7 @@ export const pingsSchema = gql`
     summary: Summary
     tags: String
     tcp: TCP
-    tls: TLS
+    tls: PingTLS
     url: URL
   }
 `;

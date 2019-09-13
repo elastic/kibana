@@ -22,7 +22,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { setup } from '../../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
 
@@ -86,7 +86,7 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       size,
       mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
       savedObjectsClient: this.savedObjectsClient,
-      visTypes: setup.types.visTypeAliasRegistry.get(),
+      visTypes: visualizationsSetup.types.visTypeAliasRegistry.get(),
     });
   };
 

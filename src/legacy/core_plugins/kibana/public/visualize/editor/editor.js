@@ -78,6 +78,13 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
+            return savedVis;
+          })
           .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
@@ -95,6 +102,13 @@ uiRoutes
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
+            return savedVis;
+          })
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
             return savedVis;
           })
           .catch(redirectWhenMissing({
@@ -172,10 +186,11 @@ function VisEditor(
       }
     },
     run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate, newDescription }) => {
         const currentTitle = savedVis.title;
         savedVis.title = newTitle;
         savedVis.copyOnSave = newCopyOnSave;
+        savedVis.description = newDescription;
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -205,6 +220,7 @@ function VisEditor(
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
           confirmButtonLabel={confirmButtonLabel}
+          description={savedVis.description}
         />);
       showSaveModal(saveModal);
     }

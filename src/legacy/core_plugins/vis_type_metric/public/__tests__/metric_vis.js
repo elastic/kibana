@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import { setup as setupVisualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
 import { createMetricVisTypeDefinition } from '../metric_vis_type';
 
 describe('metric_vis - createMetricVisTypeDefinition', () => {
@@ -38,7 +38,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
         const Vis = Private(VisProvider);
         const metricVisType = createMetricVisTypeDefinition();
 
-        setupVisualizations.types.registerVisualization(() => metricVisType);
+        visualizationsSetup.types.registerVisualization(() => metricVisType);
 
         const indexPattern = Private(LogstashIndexPatternStubProvider);
 

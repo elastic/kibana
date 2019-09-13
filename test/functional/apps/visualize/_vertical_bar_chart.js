@@ -277,7 +277,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with multiple splits', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/45105
+    describe.skip('vertical bar with multiple splits', function () {
       before(initBarChart);
 
       it('should show correct series', async function () {

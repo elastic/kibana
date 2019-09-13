@@ -572,14 +572,6 @@
             "deprecationReason": null
           },
           {
-            "name": "millisFromNow",
-            "description": "Milliseconds from the timestamp to the current time",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "beat",
             "description": "The agent that recorded the ping",
             "args": [],
@@ -719,7 +711,7 @@
             "name": "tls",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TLS", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "PingTLS", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1871,12 +1863,12 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TLS",
-        "description": "",
+        "name": "PingTLS",
+        "description": "Contains monitor transmission encryption information.",
         "fields": [
           {
             "name": "certificate_not_valid_after",
-            "description": "",
+            "description": "The date and time after which the certificate is invalid.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
@@ -2880,6 +2872,18 @@
             "deprecationReason": null
           },
           {
+            "name": "tls",
+            "description": "Transport encryption information.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "StateTLS", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "",
             "args": [],
@@ -3182,6 +3186,49 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StateTLS",
+        "description": "Contains monitor transmission encryption information.",
+        "fields": [
+          {
+            "name": "certificate_not_valid_after",
+            "description": "The date and time after which the certificate is invalid.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "certificate_not_valid_before",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "certificates",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rtt",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

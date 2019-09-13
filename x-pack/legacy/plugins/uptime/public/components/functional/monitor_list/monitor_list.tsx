@@ -105,7 +105,8 @@ export const MonitorListComponent = (props: Props) => {
         <EuiBasicTable
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}
-          isExpandable
+          isExpandable={true}
+          hasActions={true}
           itemId="monitor_id"
           itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
             return {
@@ -135,38 +136,6 @@ export const MonitorListComponent = (props: Props) => {
           // TODO: reintegrate sorting in future release
           // sorting={sorting}
           columns={[
-            {
-              align: 'left',
-              field: 'monitor_id',
-              name: '',
-              sortable: true,
-              width: '40px',
-              render: (id: string) => {
-                return (
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
-                      {
-                        defaultMessage: 'Expand row for monitor with ID {id}',
-                        description:
-                          'The user can click a button on this table and expand further details.',
-                        values: {
-                          id,
-                        },
-                      }
-                    )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
-                    onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
-                        updateDrawerIds(drawerIds.filter(p => p !== id));
-                      } else {
-                        updateDrawerIds([...drawerIds, id]);
-                      }
-                    }}
-                  />
-                );
-              },
-            },
             {
               align: 'left',
               field: 'state.monitor.status',
@@ -214,6 +183,9 @@ export const MonitorListComponent = (props: Props) => {
               name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
                 defaultMessage: 'Downtime history',
               }),
+              mobileOptions: {
+                show: false,
+              },
               render: (histogramSeries: SummaryHistogramPoint[] | null) => (
                 <MonitorBarSeries
                   absoluteStartDate={absoluteStartDate}
@@ -224,8 +196,13 @@ export const MonitorListComponent = (props: Props) => {
               ),
             },
             {
+              id: 'actions',
               align: 'right',
               field: 'state',
+              hasActions: true,
+              mobileOptions: {
+                header: false,
+              },
               name: i18n.translate(
                 'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
                 {
@@ -237,6 +214,39 @@ export const MonitorListComponent = (props: Props) => {
               render: (state: any, summary: MonitorSummary) => (
                 <MonitorListActionsPopover summary={summary} />
               ),
+            },
+            {
+              align: 'left',
+              field: 'monitor_id',
+              name: '',
+              sortable: true,
+              width: '40px',
+              isExpander: true,
+              render: (id: string) => {
+                return (
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.uptime.monitorList.expandDrawerButton.ariaLabel',
+                      {
+                        defaultMessage: 'Expand row for monitor with ID {id}',
+                        description:
+                          'The user can click a button on this table and expand further details.',
+                        values: {
+                          id,
+                        },
+                      }
+                    )}
+                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                    onClick={() => {
+                      if (drawerIds.find(i => id === i)) {
+                        updateDrawerIds(drawerIds.filter(p => p !== id));
+                      } else {
+                        updateDrawerIds([...drawerIds, id]);
+                      }
+                    }}
+                  />
+                );
+              },
             },
           ]}
         />

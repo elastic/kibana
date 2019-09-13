@@ -172,7 +172,8 @@ export class AggType {
     aggConfigs: AggConfigs,
     aggConfig: AggConfig,
     searchSource: SearchSource,
-    inspectorAdapters: Adapters
+    inspectorAdapters: Adapters,
+    abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
    * Pick a format for the values produced by this agg type,

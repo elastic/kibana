@@ -40,24 +40,12 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
     )
   );
 
-  const increasePredecessorCount = (state) => (
-    value = state.queryParameters.defaultStepSize,
-  ) => (
-    setPredecessorCount(state)(state.queryParameters.predecessorCount + value)
-  );
-
   const setSuccessorCount = (state) => (successorCount) => (
     state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
       successorCount,
     )
-  );
-
-  const increaseSuccessorCount = (state) => (
-    value = state.queryParameters.defaultStepSize,
-  ) => (
-    setSuccessorCount(state)(state.queryParameters.successorCount + value)
   );
 
   const setQueryParameters = (state) => (queryParameters) => (
@@ -82,8 +70,6 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
   return {
     addFilter,
     updateFilters,
-    increasePredecessorCount,
-    increaseSuccessorCount,
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,

@@ -8,13 +8,13 @@ The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 ## Terminology
 
-**Alert Type**: A function that takes parameters and fires actions to alert instances.
+**Alert Type**: A function that takes parameters and executes actions to alert instances.
 
 **Alert**: A configuration that defines a schedule, an alert type w/ parameters, state information and actions.
 
 **Alert Instance**: The instance(s) created from an alert type execution.
 
-A Kibana alert detects a condition and fires one or more actions when that condition occurs.  Alerts work by going through the followings steps:
+A Kibana alert detects a condition and executes one or more actions when that condition occurs.  Alerts work by going through the followings steps:
 
 1. Run a periodic check to detect a condition (the check is provided by an Alert Type) 
 2. Convert that condition into one or more stateful Alert Instances
@@ -59,7 +59,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 ### Example
 
-This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
+This example receives server and threshold as parameters. It will read the CPU usage of the server and schedule actions to be executed (asynchronously by the task manager) if the reading is greater than the threshold.
 
 ```
 import { schema } from '@kbn/config-schema';
@@ -85,14 +85,14 @@ server.plugins.alerting.registerType({
 		// Call a function to get the server's current CPU usage
 		const currentCpuUsage = await getCpuUsage(server);
 
-		// Only fire if CPU usage is greater than threshold
+		// Only execute if CPU usage is greater than threshold
 		if (currentCpuUsage > threshold) {
 			// The first argument is a unique identifier the alert instance is about. In this scenario
 			// the provided server will be used. Also, this id will be used to make `getState()` return
 			// previous state, if any, on matching identifiers.
 			const alertInstance = services.alertInstanceFactory(server);
 
-			// State from last execution. This will exist if an alert instance was created and fired
+			// State from last execution. This will exist if an alert instance was created and executed
 			// in the previous execution
 			const { cpuUsage: previousCpuUsage } = alertInstance.getState();
 
@@ -101,8 +101,8 @@ server.plugins.alerting.registerType({
 				cpuUsage: currentCpuUsage,
 			});
 
-			// 'default' refers to a group of actions to fire, see 'actions' in create alert section
-			alertInstance.fire('default', {
+			// 'default' refers to a group of actions to be scheduled for execution, see 'actions' in create alert section
+			alertInstance.scheduleActions('default', {
 				server,
 				hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
 			});
@@ -112,14 +112,14 @@ server.plugins.alerting.registerType({
 		// within the `state` function parameter at the next execution
 		return {
 			// This is an example attribute you could set, it makes more sense to use this state when
-			// the alert type fires multiple instances but wants a single place to track certain values.
+			// the alert type executes multiple instances but wants a single place to track certain values.
 			lastChecked: new Date(),
 		};
 	},
 });
 ```
 
-This example only receives threshold as a parameter. It will read the CPU usage of all the servers and fire individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
+This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```
 server.plugins.alerting.registerType({
@@ -144,14 +144,14 @@ server.plugins.alerting.registerType({
 		const cpuUsageByServer = await getCpuUsageByServer();
 
 		for (const { server, cpuUsage: currentCpuUsage } of cpuUsageByServer) {
-			// Only fire if CPU usage is greater than threshold
+			// Only execute if CPU usage is greater than threshold
 			if (currentCpuUsage > threshold) {
 				// The first argument is a unique identifier the alert instance is about. In this scenario
 				// the provided server will be used. Also, this id will be used to make `getState()` return
 				// previous state, if any, on matching identifiers.
 				const alertInstance = services.alertInstanceFactory(server);
 
-				// State from last execution. This will exist if an alert instance was created and fired
+				// State from last execution. This will exist if an alert instance was created and executed
 				// in the previous execution
 				const { cpuUsage: previousCpuUsage } = alertInstance.getState();
 
@@ -160,8 +160,8 @@ server.plugins.alerting.registerType({
 					cpuUsage: currentCpuUsage,
 				});
 
-				// 'default' refers to a group of actions to fire, see 'actions' in create alert section
-				alertInstance.fire('default', {
+				// 'default' refers to a group of actions to be scheduled for execution, see 'actions' in create alert section
+				alertInstance.scheduleActions('default', {
 					server,
 					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
 				});
@@ -191,7 +191,7 @@ Payload:
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
 |interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
-|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
+|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
 
@@ -233,7 +233,7 @@ Payload:
 |---|---|---|
 |interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
-|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
+|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `POST /api/alert/{id}/_enable`: Enable an alert
 
@@ -256,32 +256,32 @@ Params:
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops firing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|fire(actionGroup, context)|Called to fire actions. The actionGroup relates to the group of alert `actions` to fire and the context will be used for templating purposes. This should only be called once per alert instance.|
-|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when fire isn't called during an execution.|
+|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
+|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` isn't called during an execution.|
 
 ## Templating actions
 
 There needs to be a way to map alert context into action parameters. For this, we started off by adding template support. Any string within the `params` of an alert saved object's `actions` will be processed as a template and can inject context or state values. 
 
-When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.fire(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
+When an alert instance executes, the first argument is the `group` of actions to execute and the second is the context the alert exposes to templates. We iterate through each action params attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.scheduleActions(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
 
 ### Examples
 
-The following code would be within an alert type. As you can see `cpuUsage ` will replace the state of the alert instance and `server` is the context for the alert instance to fire. The difference between the two is `cpuUsage ` will be accessible at the next execution.
+The following code would be within an alert type. As you can see `cpuUsage ` will replace the state of the alert instance and `server` is the context for the alert instance to execute. The difference between the two is `cpuUsage ` will be accessible at the next execution.
 
 ```
 alertInstanceFactory('server_1')
   .replaceState({
     cpuUsage: 80,
   })
-  .fire('default', {
+  .scheduleActions('default', {
     server: 'server_1',
   });
 ```

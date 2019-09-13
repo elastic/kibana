@@ -60,13 +60,9 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
     />
   </EuiFormRow>
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     isDisabled={false}
     onClick={[Function]}
     size="s"
-    type="button"
   >
     Create filter
   </EuiButton>
@@ -162,13 +158,9 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     />
   </EuiFormRow>
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     isDisabled={false}
     onClick={[Function]}
     size="s"
-    type="button"
   >
     Create filter
   </EuiButton>
@@ -268,13 +260,9 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     />
   </EuiFormRow>
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     isDisabled={false}
     onClick={[Function]}
     size="s"
-    type="button"
   >
     Create filter
   </EuiButton>
