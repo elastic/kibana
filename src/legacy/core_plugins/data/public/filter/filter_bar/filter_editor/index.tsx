@@ -192,7 +192,12 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderIndexPatternInput() {
-    if (this.props.indexPatterns.length <= 1) {
+    if (
+      this.props.indexPatterns.length <= 1 &&
+      this.props.indexPatterns.find(
+        indexPattern => indexPattern === this.state.selectedIndexPattern
+      )
+    ) {
       return '';
     }
     const { selectedIndexPattern } = this.state;
