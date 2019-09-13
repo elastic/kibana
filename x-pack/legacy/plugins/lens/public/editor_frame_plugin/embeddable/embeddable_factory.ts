@@ -9,11 +9,8 @@ import { Chrome } from 'ui/chrome';
 
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import {
-  IndexPatterns,
-  ExpressionRenderer,
-  IndexPattern,
-} from 'src/legacy/core_plugins/data/public';
+import { IndexPatterns, IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,

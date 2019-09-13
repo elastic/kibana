@@ -5,7 +5,7 @@
  */
 
 import { mergeTables } from './merge_tables';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/public';
 
 describe('lens_merge_tables', () => {
   it('should produce a row with the nested table as defined', () => {

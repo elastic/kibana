@@ -8,8 +8,8 @@ import { CoreSetup, UiSettingsClientContract } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
-import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
+import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
@@ -66,7 +66,7 @@ const plugin = new XyVisualizationPlugin();
 
 export const xyVisualizationSetup = () =>
   plugin.setup(null, {
-    expressions: dataSetup.expressions,
+    expressions: expressionsSetup,
     fieldFormat: {
       formatFactory: getFormat,
     },
