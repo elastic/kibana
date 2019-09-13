@@ -20,9 +20,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { CustomExtentsOptions, CustomExtentsOptionsProps } from './custom_extents_options';
-import { Axis } from '../../../types';
-import { YExtents } from './y_extents';
+import { CustomExtentsOptions, CustomExtentsOptionsProps } from '../custom_extents_options';
+import { Axis } from '../../../../types';
+import { YExtents } from '../y_extents';
 
 describe('CustomExtentsOptions component', () => {
   let setValueAxis: jest.Mock;

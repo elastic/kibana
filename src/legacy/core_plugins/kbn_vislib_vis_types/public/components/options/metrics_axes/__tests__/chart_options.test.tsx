@@ -20,10 +20,10 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { ChartOptions, ChartOptionsParams } from './chart_options';
-import { SeriesParam, ValueAxis } from '../../../types';
-import { Positions, ScaleTypes } from '../../../utils/collections';
-import { LineOptions } from './line_options';
+import { ChartOptions, ChartOptionsParams } from '../chart_options';
+import { SeriesParam, ValueAxis } from '../../../../types';
+import { Positions, ScaleTypes } from '../../../../utils/collections';
+import { LineOptions } from '../line_options';
 import {
   ChartTypes,
   ChartModes,
@@ -31,7 +31,7 @@ import {
   interpolationModes,
   chartTypes,
   chartModes,
-} from '../../../utils/collections';
+} from '../../../../utils/collections';
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;

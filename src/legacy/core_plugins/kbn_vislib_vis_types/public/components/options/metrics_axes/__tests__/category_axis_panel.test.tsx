@@ -20,10 +20,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { Axis } from '../../../types';
-import { ScaleTypes, Positions, positions, AxisTypes } from '../../../utils/collections';
-import { LabelOptions } from './label_options';
+import { CategoryAxisPanel, CategoryAxisPanelProps } from '../category_axis_panel';
+import { Axis } from '../../../../types';
+import { ScaleTypes, Positions, positions, AxisTypes } from '../../../../utils/collections';
+import { LabelOptions } from '../label_options';
 
 describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;

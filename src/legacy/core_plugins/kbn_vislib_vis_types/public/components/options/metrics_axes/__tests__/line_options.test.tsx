@@ -21,15 +21,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
-import { LineOptions, LineOptionsParams } from './line_options';
-import { SeriesParam } from '../../../types';
-import { NumberInputOption } from '../../common';
+import { LineOptions, LineOptionsParams } from '../line_options';
+import { SeriesParam } from '../../../../types';
+import { NumberInputOption } from '../../../common';
 import {
   ChartTypes,
   ChartModes,
   InterpolationModes,
   interpolationModes,
-} from '../../../utils/collections';
+} from '../../../../utils/collections';
 
 describe('LineOptions component', () => {
   let setChart: jest.Mock;

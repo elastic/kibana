@@ -1,0 +1,275 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricsAxisOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <SeriesPanel
+    aggs={
+      Object {
+        "aggs": Array [
+          Object {
+            "id": "1",
+            "makeLabel": [Function],
+          },
+        ],
+        "bySchemaName": [Function],
+      }
+    }
+    aggsLabels=""
+    changeValueAxis={[Function]}
+    setMultipleValidity={[MockFunction]}
+    setParamByIndex={[Function]}
+    setValue={[MockFunction]}
+    setVisType={[MockFunction]}
+    stateParams={
+      Object {
+        "categoryAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+        "seriesParams": Array [
+          Object {
+            "data": Object {
+              "id": "1",
+              "label": "Count",
+            },
+            "type": "area",
+            "valueAxis": "ValueAxis-1",
+          },
+        ],
+        "valueAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+      }
+    }
+    vis={
+      Object {
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <ValueAxesPanel
+    addValueAxis={[Function]}
+    aggs={
+      Object {
+        "aggs": Array [
+          Object {
+            "id": "1",
+            "makeLabel": [Function],
+          },
+        ],
+        "bySchemaName": [Function],
+      }
+    }
+    aggsLabels=""
+    isCategoryAxisHorizontal={true}
+    onValueAxisPositionChanged={[Function]}
+    removeValueAxis={[Function]}
+    setMultipleValidity={[MockFunction]}
+    setParamByIndex={[Function]}
+    setValue={[MockFunction]}
+    setVisType={[MockFunction]}
+    stateParams={
+      Object {
+        "categoryAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+        "seriesParams": Array [
+          Object {
+            "data": Object {
+              "id": "1",
+              "label": "Count",
+            },
+            "type": "area",
+            "valueAxis": "ValueAxis-1",
+          },
+        ],
+        "valueAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+      }
+    }
+    vis={
+      Object {
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <CategoryAxisPanel
+    aggs={
+      Object {
+        "aggs": Array [
+          Object {
+            "id": "1",
+            "makeLabel": [Function],
+          },
+        ],
+        "bySchemaName": [Function],
+      }
+    }
+    aggsLabels=""
+    axis={
+      Object {
+        "id": "ValueAxis-1",
+        "labels": Object {
+          "filter": false,
+          "show": true,
+          "truncate": 0,
+        },
+        "name": "ValueAxis-1",
+        "position": "left",
+        "scale": Object {
+          "type": "linear",
+        },
+        "show": true,
+        "title": Object {},
+      }
+    }
+    onPositionChanged={[Function]}
+    setCategoryAxis={[Function]}
+    setMultipleValidity={[MockFunction]}
+    setValue={[MockFunction]}
+    setVisType={[MockFunction]}
+    stateParams={
+      Object {
+        "categoryAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+        "seriesParams": Array [
+          Object {
+            "data": Object {
+              "id": "1",
+              "label": "Count",
+            },
+            "type": "area",
+            "valueAxis": "ValueAxis-1",
+          },
+        ],
+        "valueAxes": Array [
+          Object {
+            "id": "ValueAxis-1",
+            "labels": Object {
+              "filter": false,
+              "show": true,
+              "truncate": 0,
+            },
+            "name": "ValueAxis-1",
+            "position": "left",
+            "scale": Object {
+              "type": "linear",
+            },
+            "show": true,
+            "title": Object {},
+          },
+        ],
+      }
+    }
+    vis={
+      Object {
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+</Fragment>
+`;

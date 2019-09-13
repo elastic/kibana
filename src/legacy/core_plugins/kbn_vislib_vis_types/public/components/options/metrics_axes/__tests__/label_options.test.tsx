@@ -21,9 +21,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
-import { LabelOptions, LabelOptionsProps } from './label_options';
-import { Axis } from '../../../types';
-import { TruncateLabelsOption } from '../../common';
+import { LabelOptions, LabelOptionsProps } from '../label_options';
+import { Axis } from '../../../../types';
+import { TruncateLabelsOption } from '../../../common';
 
 describe('LabelOptions component', () => {
   let setValue: jest.Mock;

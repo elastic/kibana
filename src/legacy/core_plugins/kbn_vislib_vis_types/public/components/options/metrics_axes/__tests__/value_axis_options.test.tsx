@@ -20,10 +20,10 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
-import { Axis } from '../../../types';
-import { TextInputOption } from '../../common';
-import { LabelOptions } from './label_options';
+import { ValueAxisOptions, ValueAxisOptionsParams } from '../value_axis_options';
+import { Axis } from '../../../../types';
+import { TextInputOption } from '../../../common';
+import { LabelOptions } from '../label_options';
 import {
   ScaleTypes,
   Positions,
@@ -31,7 +31,7 @@ import {
   scaleTypes,
   axisModes,
   positions,
-} from '../../../utils/collections';
+} from '../../../../utils/collections';
 
 describe('ValueAxisOptions component', () => {
   let setParamByIndex: jest.Mock;
