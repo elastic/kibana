@@ -1,0 +1,17 @@
+  Command Help:
+    For information about individual commands, run
+
+    $ npm run esIndexDump -- COMMAND_NAME --help
+
+  Examples:
+    Dump an index to disk:
+      Dump the `logstash-0` index, to `test/fixtures/dump_data/my_test_data`
+      WARNING: If the `my_test_data` dump exists it will be deleted!
+
+      $ npm run esIndexDump -- dump my_test_data logstash-0
+
+    Load an index from disk
+      Import the `my_test_data` dump, into the `logstash-100` index.
+      WARNING: If the `logstash-100` index exists it will be deleted!
+
+      $ npm run esIndexDump -- load my_test_data logstash-100

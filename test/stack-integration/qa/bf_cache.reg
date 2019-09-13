@@ -1,0 +1,85 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BFCACHE]
+"iexplore.exe"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\0]
+@=""
+"DisplayName"="Computer"
+"PMDisplayName"="Computer [Protected Mode]"
+"Description"="Your computer"
+"Icon"="shell32.dll#0016"
+"LowIcon"="inetcpl.cpl#005422"
+"CurrentLevel"=dword:00000000
+"Flags"=dword:00000021
+"1200"=dword:00000000
+"1400"=dword:00000000
+"2001"=dword:00000000
+"2004"=dword:00000000
+"2007"=dword:00000003
+"2500"=dword:00000003
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\1]
+@=""
+"DisplayName"="Local intranet"
+"PMDisplayName"="Local intranet [Protected Mode]"
+"Description"="This zone contains all Web sites that are on your organization's intranet."
+"Icon"="shell32.dll#0018"
+"LowIcon"="inetcpl.cpl#005423"
+"CurrentLevel"=dword:00010500
+"Flags"=dword:000000db
+"1200"=dword:00000000
+"1400"=dword:00000000
+"2500"=dword:00000003
+"2001"=dword:00000000
+"2004"=dword:00000000
+"2007"=dword:00010000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\2]
+@=""
+"DisplayName"="Trusted sites"
+"PMDisplayName"="Trusted sites [Protected Mode]"
+"Description"="This zone contains Web sites that you trust not to damage your computer or data."
+"Icon"="inetcpl.cpl#00004480"
+"LowIcon"="inetcpl.cpl#005424"
+"CurrentLevel"=dword:00011000
+"Flags"=dword:00000047
+"1200"=dword:00000000
+"1400"=dword:00000000
+"2001"=dword:00000000
+"2004"=dword:00000000
+"2007"=dword:00010000
+"2500"=dword:00000003
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3]
+@=""
+"DisplayName"="Internet"
+"PMDisplayName"="Internet [Protected Mode]"
+"Description"="This zone contains all Web sites you haven't placed in other zones"
+"Icon"="inetcpl.cpl#001313"
+"LowIcon"="inetcpl.cpl#005425"
+"CurrentLevel"=dword:00011500
+"Flags"=dword:00000001
+"1200"=dword:00000000
+"1400"=dword:00000000
+"2001"=dword:00000000
+"2004"=dword:00000000
+"2007"=dword:00010000
+"2500"=dword:00000003
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\4]
+@=""
+"DisplayName"="Restricted sites"
+"PMDisplayName"="Restricted sites [Protected Mode]"
+"Description"="This zone contains Web sites that could potentially damage your computer or data."
+"Icon"="inetcpl.cpl#00004481"
+"LowIcon"="inetcpl.cpl#005426"
+"CurrentLevel"=dword:00012000
+"Flags"=dword:00000003
+"1200"=dword:00000003
+"1400"=dword:00000003
+"2001"=dword:00000003
+"2004"=dword:00000003
+"2007"=dword:00000003
+"1C00"=dword:00000000
+"2500"=dword:00000003

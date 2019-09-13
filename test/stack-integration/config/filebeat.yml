@@ -1,0 +1,29 @@
+filebeat.modules:
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/*.log
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  protocol: https
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/elasticsearch.crt
+  ssl.key: /etc/elasticsearch/x-pack/elasticsearch.key
+
+#setup.dashboards.snapshot: true
+
+setup.kibana:
+  protocol: https
+  host: localhost:5601
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/kibana.crt
+  ssl.key: /etc/elasticsearch/x-pack/kibana.key
+logging.to_files: true
+logging.files:

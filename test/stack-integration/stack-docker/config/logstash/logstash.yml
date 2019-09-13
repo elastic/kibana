@@ -1,0 +1,6 @@
+http.host: 0.0.0.0
+# read password from logstash.keystore
+xpack.monitoring.elasticsearch.password: ${ELASTIC_PASSWORD}
+xpack.monitoring.elasticsearch.hosts: https://elasticsearch:9200
+xpack.monitoring.elasticsearch.username: logstash_system
+xpack.monitoring.elasticsearch.ssl.certificate_authority: /certs/ssl/ca/ca.crt

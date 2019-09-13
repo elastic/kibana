@@ -1,0 +1,1 @@
+role/logstash_reader { "cluster": [], "indices": [ { "names": [ "logstash-*", "makelogs-*","*:*"],   "privileges": ["read","view_index_metadata","read_cross_cluster"] } ]}

@@ -1,0 +1,72 @@
+trial	active	Monitoring: Multicluster support (need more than 1 cluster to test this)
+trial	active	Users/Roles: functional on Management page
+trial	active	Reporting:   functional on  Management page
+trial	active	User: usernameshows near bottom of navigation panel
+trial	active	User: 'Logout' near bottom of navigation panel
+trial	active	Graph: in the navigation panel and works
+trial	active	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is in the menu and works
+trial	active	Tile Map: has 16-18 levels
+		
+trial	expired	Monitoring: Elasticsearch does not show new data (or do we just have to wait for collection?)
+trial	expired	Users/Roles: gone from Management page
+trial	expired	Reporting:   gone from Management page
+trial	expired	User: username no longer shows near bottom of navigation panel
+trial	expired	User: no 'Logout' near bottom of navigation panel
+trial	expired	Graph: not in the navigation panel
+trial	expired	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is gone from menu
+trial	expired	Tile Map: has 10 levels
+		
+basic	active	Monitoring: works for single cluster only (hmm, need more than 1 cluster to test this)
+basic	active	Users/Roles: gone from Management page
+basic	active	Reporting:   gone from Management page
+basic	active	User: username no longer shows near bottom of navigation panel
+basic	active	User: no 'Logout' near bottom of navigation panel
+basic	active	Graph: not in the navigation panel
+basic	active	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is gone from menu
+basic	active	Tile Map: has 16 - 18 levels
+		
+basic	expired	Monitoring: works for single cluster only (hmm, need more than 1 cluster to test this)
+basic	expired	Users/Roles: gone from Management page
+basic	expired	Reporting:   gone from Management page
+basic	expired	User: username no longer shows near bottom of navigation panel
+basic	expired	User: no 'Logout' near bottom of navigation panel
+basic	expired	Graph: not in the navigation panel
+basic	expired	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is gone from menu
+basic	expired	Tile Map: has 10 levels
+		
+		
+gold	active	Monitoring: Multicluster support (need more than 1 cluster to test this)
+gold	active	Users/Roles: gone from Management page
+gold	active	Reporting:   gone from Management page
+gold	active	User: usernameshows near bottom of navigation panel
+gold	active	User: 'Logout' near bottom of navigation panel
+gold	active	Graph: not in the navigation panel
+gold	active	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is in the menu and works
+gold	active	Tile Map: has 16 - 18 levels
+		
+gold	expired	Monitoring: works for single cluster only (hmm, need more than 1 cluster to test this)
+gold	expired	Users/Roles: gone from Management page
+gold	expired	Reporting:   gone from Management page
+gold	expired	User: username no longer shows near bottom of navigation panel
+gold	expired	User: no 'Logout' near bottom of navigation panel
+gold	expired	Graph: not in the navigation panel
+gold	expired	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is gone from menu
+gold	expired	Tile Map: has 10 levels
+		
+platinum	active	Monitoring: Multicluster support (need more than 1 cluster to test this)
+platinum	active	Users/Roles: functional on Management page
+platinum	active	Reporting:   functional on  Management page
+platinum	active	User: usernameshows near bottom of navigation panel
+platinum	active	User: 'Logout' near bottom of navigation panel
+platinum	active	Graph: in the navigation panel and works
+platinum	active	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is in the menu and works
+platinum	active	Tile Map: has 16-18 levels
+		
+platinum	expired	Monitoring: Elasticsearch does not show new data (or do we just have to wait for collection?)
+platinum	expired	Users/Roles: gone from Management page
+platinum	expired	Reporting:   gone from Management page
+platinum	expired	User: username no longer shows near bottom of navigation panel
+platinum	expired	User: no 'Logout' near bottom of navigation panel
+platinum	expired	Graph: not in the navigation panel
+platinum	expired	Reporting: Check Discover, Visualize, and Dashboard (open any saved Viz or Dshbrd), Reporting is gone from menu
+platinum	expired	Tile Map: has 10 levels

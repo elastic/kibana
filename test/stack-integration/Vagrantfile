@@ -1,0 +1,188 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # see https://atlas.hashicorp.com/elastic for boxes available
+
+  config.vm.define "w2012_zip", autostart: false do |cfg|
+    cfg.vm.box = "elastic/windows-2012_r2-x86_64"
+    # cfg.vm.box = "elastic/windows-2016-x86_64"
+    # cfg.vm.box = "elastic/windows-10-x86_64"
+
+    config.vm.provision "shell", path: "qa/provision.bat"
+    config.vm.guest = :windows
+
+    # port forwarding for RDP and WinRM
+    config.vm.network "forwarded_port", guest: 5985, host: 5985, id: "winrm", auto_correct: true
+
+    # WinRM Settings
+    config.vm.communicator = "winrm"
+  end
+
+  config.vm.define "w2012_ie", autostart: false do |cfg|
+    cfg.vm.box = "elastic/windows-2012_r2-x86_64"
+    config.vm.provision "shell", path: "qa/provision.bat"
+    config.vm.guest = :windows
+
+	# port forward for selenium connection for IE
+    config.vm.network "forwarded_port", guest: 4444, host: 4444
+
+    # port forwarding for RDP and WinRM
+    config.vm.network "forwarded_port", guest: 5985, host: 5985, id: "winrm", auto_correct: true
+
+    # WinRM Settings
+    config.vm.communicator = "winrm"
+  end
+
+  config.vm.define "w10_zip", autostart: false do |cfg|
+    cfg.vm.box = "elastic/windows-10-x86_64"
+    config.vm.provision "shell", path: "qa/provision.bat"
+    config.vm.guest = :windows
+
+    # port forwarding for RDP and WinRM
+    config.vm.network "forwarded_port", guest: 5985, host: 5985, id: "winrm", auto_correct: true
+
+    # WinRM Settings
+    config.vm.communicator = "winrm"
+  end
+
+  config.vm.define "w2016_zip_oss", autostart: false do |cfg|
+    cfg.vm.box = "elastic/windows-2016-x86_64"
+    config.vm.provision "shell", path: "qa/provision.bat"
+    config.vm.guest = :windows
+
+    # port forwarding for RDP and WinRM
+    config.vm.network "forwarded_port", guest: 5985, host: 5985, id: "winrm", auto_correct: true
+
+    # WinRM Settings
+    config.vm.communicator = "winrm"
+  end
+
+  config.vm.define "centos7_rpm", autostart: false do |cfg|
+    cfg.vm.box = "elastic/centos-7-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "ubuntu18_docker", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-18.04-x86_64"
+    config.vm.provision "shell", path: "qa/docker_phase1.sh"
+  end
+
+  config.vm.define "ubuntu18_deb_oidc", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-18.04-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "centos6_rpm_oss", autostart: false do |cfg|
+    cfg.vm.box = "elastic/centos-6-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "centos6_rpm", autostart: false do |cfg|
+    cfg.vm.box = "elastic/centos-6-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "ubuntu18_deb", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-18.04-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "ubuntu16_tar_ccs", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "ubuntu16_tar", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+#   config.vm.define "sles-12_tar_oss", autostart: false do |cfg|
+#     cfg.vm.box = "elastic/sles-12-x86_64"
+#     config.vm.provision "shell", path: "provision/sles-12_tar_oss.sh"
+#   end
+#   sles-12_tar_oss: Untar logstash-oss-6.5.3
+# sles-12_tar_oss: ++ tar -xf logstash-oss-6.5.3.tar.gz --directory /home/vagrant
+# sles-12_tar_oss: tar:
+# sles-12_tar_oss: logstash-6.5.3/vendor/bundle/jruby/2.3.0/gems/pry-0.10.4-java/lib/pry/commands/exit_program.rb: Cannot open: No space left on device
+# sles-12_tar_oss: tar:
+# sles-12_tar_oss: Exiting with failure status due to previous errors
+
+
+  config.vm.define "ubuntu16_tar_oss", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+
+  config.vm.define "oraclelinux-7_rpm", autostart: false do |cfg|
+    cfg.vm.box = "elastic/oraclelinux-7-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "debian-9_deb_oss", autostart: false do |cfg|
+    cfg.vm.box = "elastic/debian-9-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "debian-9_deb", autostart: false do |cfg|
+    cfg.vm.box = "elastic/debian-9-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+
+  config.vm.define "ubuntu16_deb_desktop_saml", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-selenium-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+    config.vm.network :forwarded_port, guest:4444, host:4444
+    config.vm.network :forwarded_port, guest:9515, host:9515
+  end
+
+  config.vm.define "centos7_rpm_kerberos", autostart: false do |cfg|
+    cfg.vm.box = "elastic/centos-7-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+  end
+  
+  config.vm.define "ubuntu16_deb_desktop_oidc", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-selenium-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+    config.vm.network :forwarded_port, guest:4444, host:4444
+    config.vm.network :forwarded_port, guest:9515, host:9515
+  end
+  
+  config.vm.define "ubuntu16_deb_desktop_krb", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-selenium-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+    config.vm.network :forwarded_port, guest:4444, host:4444
+    config.vm.network :forwarded_port, guest:9515, host:9515
+  end
+
+  config.vm.define "ubuntu16_deb_desktop", autostart: false do |cfg|
+    cfg.vm.box = "elastic/ubuntu-16.04-selenium-x86_64"
+    config.vm.provision "shell", path: "qa/phase1.sh"
+    config.vm.network :forwarded_port, guest:4444, host:4444
+    config.vm.network :forwarded_port, guest:9515, host:9515
+  end
+
+  config.vm.network :forwarded_port, guest:5601, host:5601
+  config.vm.network :forwarded_port, guest:5602, host:5602
+  config.vm.network :forwarded_port, guest:9200, host:9200
+  config.vm.network :forwarded_port, guest:9210, host:9210
+  #config.vm.network "forwarded_port", guest: 3389, host: 3389
+
+  config.ssh.insert_key = false
+#  config.ssh.username = 'vagrant'
+#  config.ssh.password = 'vagrant'
+
+
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 10240
+    # vb.memory = 8192
+    vb.cpus = 4
+    vb.customize ["modifyvm", :id, "--vram", "256"]
+    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//vagrant","1"]
+    vb.customize ["setextradata", :id, "servideomodehint","1024x768x32"]
+    vb.customize ["modifyvm", :id, "--accelerate3d", "off"]
+  end
+
+end

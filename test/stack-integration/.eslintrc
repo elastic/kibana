@@ -1,0 +1,6 @@
+---
+extends: '@elastic/kibana'
+rules:
+  no-unused-vars: 1
+  no-extra-semi: off
+  quotes: off

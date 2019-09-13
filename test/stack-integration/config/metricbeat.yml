@@ -1,0 +1,56 @@
+metricbeat.config.modules:
+  path: ${path.config}/conf.d/*.yml
+  reload.period: 10s
+  reload.enabled: false
+metricbeat.max_start_delay: 10s
+metricbeat.modules:
+- module: system
+  enabled: true
+  period: 10s
+  metricsets:
+    - cpu
+    - load
+    - memory
+    - network
+    - process
+    - process_summary
+  processes: ['.*']
+- module: system
+  enabled: true
+  period: 1m
+  metricsets:
+    - filesystem
+    - fsstat
+- module: elasticsearch
+  metricsets: ["node", "node_stats"]
+  enabled: false
+  period: 10s
+  hosts: ["localhost:9200"]
+- module: kibana
+  metricsets: ["status"]
+  enabled: false
+  period: 10s
+  hosts: ["localhost:5601"]
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  protocol: https
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/elasticsearch.crt
+  ssl.key: /etc/elasticsearch/x-pack/elasticsearch.key
+
+#setup.dashboards.snapshot: true
+
+setup.kibana:
+  protocol: https
+  host: localhost:5601
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/kibana.crt
+  ssl.key: /etc/elasticsearch/x-pack/kibana.key
+

@@ -1,0 +1,121 @@
+###################### Winlogbeat Configuration Example ##########################
+
+# This file is an example configuration file highlighting only the most common
+# options. The winlogbeat.reference.yml file from the same directory contains all the
+# supported options with more comments. You can use it as a reference.
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/winlogbeat/index.html
+
+#======================= Winlogbeat specific options ==========================
+
+# event_logs specifies a list of event logs to monitor as well as any
+# accompanying options. The YAML data type of event_logs is a list of
+# dictionaries.
+#
+# The supported keys are name (required), tags, fields, fields_under_root,
+# forwarded, ignore_older, level, event_id, provider, and include_xml. Please
+# visit the documentation for the complete details of each option.
+# https://go.es.io/WinlogbeatConfig
+winlogbeat.event_logs:
+  - name: Application
+    ignore_older: 72h
+  - name: Security
+    ignore_older: 72h
+  - name: System
+    ignore_older: 72h
+
+#================================ General =====================================
+
+# The name of the shipper that publishes the network data. It can be used to group
+# all the transactions sent by a single shipper in the web interface.
+#name:
+
+# The tags of the shipper are included in their own field with each
+# transaction published.
+#tags: ["service-X", "web-tier"]
+
+# Optional fields that you can specify to add additional information to the
+# output.
+#fields:
+#  env: staging
+
+
+#============================== Dashboards =====================================
+# These settings control loading the sample dashboards to the Kibana index. Loading
+# the dashboards is disabled by default and can be enabled either by setting the
+# options here, or by using the `-setup` CLI flag or the `setup` command.
+#setup.dashboards.enabled: false
+
+# The URL from where to download the dashboards archive. By default this URL
+# has a value which is computed based on the Beat name and version. For released
+# versions, this URL points to the dashboard archive on the artifacts.elastic.co
+# website.
+#setup.dashboards.url:
+
+#============================== Kibana =====================================
+
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
+setup.kibana:
+  protocol: https
+  host: localhost:5601
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/kibana.crt
+  ssl.key: /etc/elasticsearch/x-pack/kibana.key
+  # Kibana Host
+  # Scheme and port can be left out and will be set to the default (http and 5601)
+  # In case you specify and additional path, the scheme is required: http://localhost:5601/path
+  # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
+  #host: "localhost:5601"
+
+#================================ Outputs =====================================
+
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+
+#-------------------------- Elasticsearch output ------------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["localhost:9200"]
+  protocol: https
+  username: "beats_internal"
+  password: "changeme"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/elasticsearch/x-pack/ca.crt"]
+  ssl.certificate: /etc/elasticsearch/x-pack/elasticsearch.crt
+  ssl.key: /etc/elasticsearch/x-pack/elasticsearch.key
+  ssl.enabled: true
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+#----------------------------- Logstash output --------------------------------
+#output.logstash:
+  # The Logstash hosts
+  #hosts: ["localhost:5044"]
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  #ssl.certificate_authorities: ["C:/windowsInstalls/6.0.0-beta1/winlogbeat/ca.crt"]
+
+  # Certificate for SSL client authentication
+  #ssl.certificate: C:/windowsInstalls/6.0.0-beta1/winlogbeat/elasticsearch.crt
+
+  # Client Certificate Key
+  #ssl.key: C:/windowsInstalls/6.0.0-beta1/winlogbeat/elasticsearch.key
+
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: critical, error, warning, info, debug
+#logging.level: debug
+
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+#logging.selectors: ["*"]

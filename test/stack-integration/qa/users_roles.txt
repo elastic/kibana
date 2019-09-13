@@ -1,0 +1,15 @@
+role/beats_writer { "cluster": ["manage_index_templates","monitor","manage_ilm"], "indices": [ { "names": [ "*beat-*" ], "privileges": ["write","delete","create_index","manage","manage_ilm"] } ] }
+role/kibana_readonly { "cluster": [], "indices": [ { "names": [ ".kibana*" ], "privileges": ["read","view_index_metadata"] } ]}
+role/logstash_writer { "cluster": ["manage_index_templates","monitor"], "indices": [ { "names": [ "logstash-*" ], "privileges": ["write","delete","create_index"] } ]}
+role/beats_reader { "cluster": [], "indices": [ { "names": [ "*beat-*" ], "privileges": ["read","view_index_metadata"] } ]}
+role/logstash_reader { "cluster": [], "indices": [ { "names": [ "logstash-*", "makelogs*","*:*"],   "privileges": ["read","view_index_metadata","read_cross_cluster"] } ]}
+role/test_reader { "cluster": [], "indices": [ { "names": [ "*test" ], "privileges": ["read","view_index_metadata","read_cross_cluster"] } ]}
+role/apm_reader { "cluster": [], "indices": [ { "names": [ "apm-*" ], "privileges": ["read","view_index_metadata","read_cross_cluster"] } ]}
+role/security_manager { "cluster": ["manage_security"]}
+role/farequote_reader { "cluster": [], "indices": [ { "names": [ "farequote" ], "privileges": ["read","view_index_metadata","read_cross_cluster"] } ]}
+user/beats_internal { "password" : "changeme",  "roles" : [ "beats_writer","beats_reader","kibana_user","machine_learning_admin"], "full_name" : "beats_internal", "email" : "beats_internal@test.co"}
+user/readonly { "password" : "changeme", "roles" : [ "kibana_readonly" ], "full_name" : "Kibana ReadOnly user", "email" : "readonly@elastic.co" }
+user/ironman { "password" : "changeme", "roles" : [ "kibanaUser" ], "full_name" : "Tony Stark", "email" : "tony@starkcorp.co", "metadata" : { "intelligence" : 7  }}
+user/logstash_internal { "password" : "changeme", "roles" : [ "logstash_writer" ], "full_name" : "logstash_internal", "email" : "logstash_internal@test.co" }
+user/power { "password" : "changeme", "roles" : [ "beats_reader","logstash_reader","kibana_user", "monitoring_user","security_manager","reporting_user", "test_reader","apm_reader","farequote_reader","watcher_user","watcher_admin","machine_learning_admin","machine_learning_user" ], "full_name" : "power", "email" : "poweruser@test.co" }
+user/beats_setup { "password" : "changeme", "roles" : [ "kibana_system", "machine_learning_admin", "beats_reader" ], "full_name" : "beats_setup", "email" : "beats_setup@test.co" }
