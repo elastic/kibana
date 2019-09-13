@@ -52,12 +52,8 @@ interface HostsComponentDispatchProps {
   }>;
 }
 
-export type CommonChildren =
-  | React.NamedExoticComponent<HostsComponentsQueryProps>
-  | ((args: HostsComponentsQueryProps) => JSX.Element);
-export type AnonamaliesChildren =
-  | React.NamedExoticComponent<AnomaliesQueryTabBodyProps>
-  | ((args: AnomaliesQueryTabBodyProps) => JSX.Element);
+export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
+export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
 
 export type HostsQueryProps = GlobalTimeArgs;
 

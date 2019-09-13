@@ -41,15 +41,12 @@ const TimelineRefetchComponent = memo<OwnProps>(
   ({ deleteEventQuery, id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
     useEffect(() => {
       setTimelineQuery({ id, inputId, inspect, loading, refetch });
-    }, [loading, refetch, inspect]);
-
-    useEffect(() => {
       if (inputId === 'global') {
         return () => {
           deleteEventQuery({ id, inputId });
         };
       }
-    }, [inputId, id]);
+    }, [id, inputId, loading, refetch, inspect]);
 
     return null;
   }

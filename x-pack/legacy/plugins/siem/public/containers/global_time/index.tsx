@@ -19,10 +19,6 @@ interface SetQuery {
   refetch: inputsModel.Refetch | inputsModel.RefetchKql;
 }
 
-interface DeleteQuery {
-  id: string;
-}
-
 interface GlobalQuery extends SetQuery {
   inputId: InputsModelId;
 }
@@ -31,7 +27,7 @@ export interface GlobalTimeArgs {
   from: number;
   to: number;
   setQuery: ({ id, inspect, loading, refetch }: SetQuery) => void;
-  deleteQuery?: ({ id }: DeleteQuery) => void;
+  deleteQuery?: ({ id }: { id: string }) => void;
   isInitializing: boolean;
 }
 
@@ -72,7 +68,7 @@ export const GlobalTimeComponent = React.memo(
           to,
           setQuery: ({ id, inspect, loading, refetch }: SetQuery) =>
             setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
-          deleteQuery: ({ id }: DeleteQuery) => deleteOneQuery({ inputId: 'global', id }),
+          deleteQuery: ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
         })}
       </>
     );
