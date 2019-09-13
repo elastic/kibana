@@ -51,6 +51,7 @@ export function createEsTestCluster(options = {}) {
     license,
     basePath,
   };
+  const transportPort = esTestConfig.getTransportPort();
 
   const cluster = new Cluster(log);
 
@@ -84,6 +85,7 @@ export function createEsTestCluster(options = {}) {
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           'discovery.type=single-node',
+          `transport.port=${transportPort}`,
           ...esArgs,
         ],
       });
