@@ -455,7 +455,7 @@ export class CodeQueryBar extends Component<Props, State> {
                 <div className="kuiLocalSearch" role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
-                      className="kuiLocalSearchAssistedInput__input codeSearchBar__input"
+                      className="kuiLocalSearchAssistedInput__input codeQueryBar__input"
                       placeholder={SearchScopePlaceholderText[this.props.searchScope]}
                       value={this.state.query}
                       onKeyDown={this.onKeyDown}
