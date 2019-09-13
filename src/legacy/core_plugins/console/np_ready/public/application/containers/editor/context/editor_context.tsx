@@ -23,12 +23,6 @@ import { DevToolsSettings } from '../../../../services';
 
 export interface ContextValue {
   editorsReady: boolean;
-  input: {
-    value: string;
-  };
-  output: {
-    value: string;
-  };
   settings: DevToolsSettings;
 }
 
@@ -41,8 +35,6 @@ export interface EditorContextArgs {
 }
 
 const initialValue: ContextValue = {
-  input: { value: '' },
-  output: { value: '' },
   editorsReady: false,
   settings: null as any,
 };

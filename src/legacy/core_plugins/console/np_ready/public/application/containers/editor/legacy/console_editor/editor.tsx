@@ -53,13 +53,6 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-// const sendCurrentRequest = useCallback(() => {
-//   inputEditor.focus();
-//   inputEditor.sendCurrentRequestToES(() => {
-//     setPastRequests(history.getHistory());
-//   }, outputEditor);
-// }, [inputEditor, outputEditor]);
-
 const DEFAULT_INPUT_VALUE = `GET _search
 {
   "query": {
