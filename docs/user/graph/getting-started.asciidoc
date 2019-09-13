@@ -12,7 +12,7 @@ locally, go to `http://localhost:5601/`.
 
 . Click **Graph** in the side navigation to open the graph explorer.
 +
-image::graph/images/graph-open.jpg["Accessing Graph"]
+image::user/graph/images/graph-open.jpg["Accessing Graph"]
 
 . Select an index pattern to specify what indices you want to explore.
 For example, if you are indexing log data with Logstash, you could select the
