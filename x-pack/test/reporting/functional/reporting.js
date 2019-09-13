@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
           await expectDisabledGenerateReportButton();
         });
 
-        it('becomes available when saved', async () => {
+        it.skip('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('mypdfdash');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
