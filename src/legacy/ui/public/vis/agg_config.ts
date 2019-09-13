@@ -26,7 +26,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { BucketAggType } from 'ui/agg_types';
 import { AggGroupNames } from './editors/default/agg_groups';
 import { AggType, FieldParamType } from '../agg_types';
 // @ts-ignore

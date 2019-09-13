@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
-
-import { GlobalTime } from '../../containers/global_time';
 
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 
@@ -24,36 +21,43 @@ interface HostsBodyComponentProps extends HostsComponentProps {
   children: CommonChildren | AnonamaliesChildren;
 }
 
-const HostsBodyComponent = pure<HostsBodyComponentProps>(
-  ({ filterQuery, kqlQueryExpression, setAbsoluteRangeDatePicker, children }) => {
+const HostsBodyComponent = memo<HostsBodyComponentProps>(
+  ({
+    deleteQuery,
+    filterQuery,
+    kqlQueryExpression,
+    setAbsoluteRangeDatePicker,
+    children,
+    to,
+    from,
+    setQuery,
+    isInitializing,
+  }) => {
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <GlobalTime>
-              {({ to, from, setQuery, isInitializing }) => (
-                <>
-                  {children({
-                    endDate: to,
-                    filterQuery,
-                    kqlQueryExpression,
-                    skip: isInitializing,
-                    setQuery,
-                    startDate: from,
-                    type: hostsModel.HostsType.page,
-                    indexPattern,
-                    narrowDateRange: (score: Anomaly, interval: string) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    },
-                  })}
-                </>
-              )}
-            </GlobalTime>
+            <>
+              {children({
+                deleteQuery,
+                endDate: to,
+                filterQuery,
+                kqlQueryExpression,
+                skip: isInitializing,
+                setQuery,
+                startDate: from,
+                type: hostsModel.HostsType.page,
+                indexPattern,
+                narrowDateRange: (score: Anomaly, interval: string) => {
+                  const fromTo = scoreIntervalToDateTime(score, interval);
+                  setAbsoluteRangeDatePicker({
+                    id: 'global',
+                    from: fromTo.from,
+                    to: fromTo.to,
+                  });
+                },
+              })}
+            </>
           ) : null
         }
       </WithSource>
