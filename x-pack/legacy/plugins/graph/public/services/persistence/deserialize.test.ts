@@ -97,7 +97,7 @@ describe('deserialize', () => {
           {
             description: 'Template',
             url: 'test-url',
-            encoderID: 'esq-rison-loose',
+            encoderID: 'kql-loose',
             iconClass: 'd',
           },
         ],
@@ -155,6 +155,7 @@ describe('deserialize', () => {
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
+            "label": "folder open",
             "patterns": Array [
               /category/i,
               /folder/i,
