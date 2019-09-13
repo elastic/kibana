@@ -27,7 +27,7 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
     const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
     const index = DocumentSearchIndexWithScope([repoUri]);
 
-    const rawRes = await this.client.search({
+    let rawRes = await this.client.search({
       index,
       body: {
         query: {
@@ -39,7 +39,38 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
         },
       },
     });
+    if (rawRes.hits.hits.length === 0) {
+      // Fall back with match query with gauss score normalization on path length.
+      rawRes = await this.client.search({
+        index,
+        body: {
+          query: {
+            script_score: {
+              query: {
+                term: {
+                  'path.hierarchy': {
+                    value: filePath,
+                  },
+                },
+              },
+              script: {
+                source:
+                  "decayNumericGauss(params.origin, params.scale, params.offset, params.decay, doc['path.keyword'][0].split('/').length())",
+                params: {
+                  // TODO: by the spliting the filepath by `/`.
+                  origin: filePath.split('/').length,
+                  scale: 20, // TODO: tune param
+                  offset: 0,
+                  decay: 0.8,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
 
+    const total = rawRes.hits.total.value;
     const hits: any[] = rawRes.hits.hits;
     const results: SearchResultItem[] = hits.map(hit => {
       const doc: Document = hit._source;
@@ -55,7 +86,7 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
       };
       return item;
     });
-    const total = rawRes.hits.total.value;
+
     return {
       results,
       took: rawRes.took,
