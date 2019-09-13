@@ -178,7 +178,6 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           />
         }
         describedByIds={['countDescription']}
-        isInvalid={touched.maxCount && Boolean(errors.maxCount)}
         error={errors.maxCount}
         fullWidth
       >

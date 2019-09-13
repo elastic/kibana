@@ -18,7 +18,7 @@ const isStringEmpty = (str: string | null): boolean => {
 export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
   const i18n = textService.i18n;
 
-  const { name, snapshotName, schedule, repository, config } = policy;
+  const { name, snapshotName, schedule, repository, config, retention } = policy;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -28,6 +28,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
       schedule: [],
       repository: [],
       indices: [],
+      minCount: [],
     },
   };
 
@@ -79,6 +80,18 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     );
   }
 
+  if (
+    retention &&
+    retention.minCount &&
+    retention.maxCount &&
+    retention.minCount > retention.maxCount
+  ) {
+    validation.errors.minCount.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountError', {
+        defaultMessage: 'Min count cannot be greater than max count',
+      })
+    );
+  }
   // Remove fields with no errors
   validation.errors = Object.entries(validation.errors)
     .filter(([key, value]) => value.length > 0)
