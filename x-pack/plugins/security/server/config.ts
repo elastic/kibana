@@ -42,7 +42,7 @@ export const ConfigSchema = schema.object(
         'saml',
         schema.object({
           realm: schema.string(),
-          maxURLToStoreSize: schema.byteSize({ defaultValue: '2kb', min: '100b' }),
+          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
         })
       ),
     }),

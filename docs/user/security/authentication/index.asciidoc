@@ -129,7 +129,7 @@ size of the URL {kib} is allowed to store during SAML handshake, the default val
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.authc.saml.maxURLToStoreSize: 1kb
+xpack.security.authc.saml.maxRedirectURLSize: 1kb
 --------------------------------------------------------------------------------
 
 [[oidc]]

@@ -70,11 +70,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Maximum size of the URL we store in the session during SAML handshake.
    */
-  private readonly maxURLToStoreSize: ByteSizeValue;
+  private readonly maxRedirectURLSize: ByteSizeValue;
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    samlOptions?: Readonly<{ realm?: string; maxURLToStoreSize?: ByteSizeValue }>
+    samlOptions?: Readonly<{ realm?: string; maxRedirectURLSize?: ByteSizeValue }>
   ) {
     super(options);
 
@@ -82,12 +82,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       throw new Error('Realm name must be specified');
     }
 
-    if (!samlOptions.maxURLToStoreSize) {
-      throw new Error(`maxURLToStoreSize must be specified`);
+    if (!samlOptions.maxRedirectURLSize) {
+      throw new Error(`maxRedirectURLSize must be specified`);
     }
 
     this.realm = samlOptions.realm;
-    this.maxURLToStoreSize = samlOptions.maxURLToStoreSize;
+    this.maxRedirectURLSize = samlOptions.maxRedirectURLSize;
   }
 
   /**
@@ -105,16 +105,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (attempt.step === SAMLLoginStep.RedirectURLFragmentCaptured) {
       if (!state || !state.redirectURL) {
-        const message = 'State does not include path to redirect to.';
+        const message = 'State does not include URL path to redirect to.';
         this.logger.debug(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
 
-      let redirectURL = state.redirectURL + attempt.redirectURLFragment;
+      let redirectURL = `${state.redirectURL}${attempt.redirectURLFragment}`;
       const redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
-      if (this.maxURLToStoreSize.isLessThan(redirectURLSize)) {
+      if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
         this.logger.warn(
-          `Max URL size should not exceed ${this.maxURLToStoreSize.toString()} but it was ${redirectURLSize.toString()}. Only URL path is captured.`
+          `Max URL size should not exceed ${this.maxRedirectURLSize.toString()} but it was ${redirectURLSize.toString()}. Only URL path is captured.`
         );
         redirectURL = state.redirectURL;
       } else {
@@ -289,7 +289,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       requestId: '',
       redirectURL: '',
     };
-    if (state && (!stateRequestId || !stateRedirectURL)) {
+    if (state && !stateRequestId) {
       const message = 'SAML response state does not have corresponding request id.';
       this.logger.debug(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
@@ -570,12 +570,24 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
-    // We should use `serverBasePath` for `capture-url-fragment` URL as soon as it's provided by the core.
-    // Using request scoped base path doesn't hurt, but isn't consistent. We should still use request scoped
-    // base path for the `redirectURL` though.
     const basePath = this.options.basePath.get(request);
+    const redirectURL = `${basePath}${request.url.path}`;
+
+    // If the size of the path already exceeds the maximum allowed size of the URL to store in the
+    // session there is no reason to try to capture URL fragment and we start handshake immediately.
+    // In this case user will be redirected to the Kibana home/root after successful login.
+    const redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
+    if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
+      this.logger.warn(
+        `Max URL path size should not exceed ${this.maxRedirectURLSize.toString()} but it was ${redirectURLSize.toString()}. URL is not captured.`
+      );
+      return this.authenticateViaHandshake(request, '');
+    }
+
+    // We should use `serverBasePath` here as soon as it's provided by the core. Using request scoped
+    // base path doesn't hurt, but isn't consistent with the rest of API routes.
     return AuthenticationResult.redirectTo(`${basePath}/api/security/saml/capture-url-fragment`, {
-      state: { redirectURL: `${basePath}${request.url.path}` },
+      state: { redirectURL },
     });
   }
 }
