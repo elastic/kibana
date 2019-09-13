@@ -18,7 +18,6 @@ import React from 'react';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { SearchScope } from '../../../model';
-import { ScopeTabs } from './scope_tabs';
 
 interface Props {
   query: string;
@@ -74,7 +73,6 @@ export class SideBar extends React.PureComponent<Props> {
   public render() {
     return (
       <div className="codeSidebar__container">
-        <ScopeTabs query={this.props.query} scope={this.props.scope} />
         <div className="codeFilter__group">
           <EuiFlexGroup
             className="codeFilter__title"
