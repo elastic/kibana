@@ -23,11 +23,13 @@ import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: AggConfigs;
+  aggsLabels: string;
   hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;
   uiState: PersistedState;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
+  setVisType(type: string): void;
   setTouched(isTouched: boolean): void;
 }

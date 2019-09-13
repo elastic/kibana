@@ -10,7 +10,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  // const filterBar = getService('filterBar');
+  const filterBar = getService('filterBar');
 
   describe('tooltip filter actions', () => {
 
@@ -29,11 +29,6 @@ export default function ({ getPageObjects, getService }) {
       expect(exists).to.be(true);
     });
 
-    /**
-     * @todo Re-enable this test when https://github.com/elastic/kibana/pull/41272#issuecomment-519868543
-     * is resolved.
-     */
-    /*
     it('should create filters when create filter button is clicked', async () => {
       await testSubjects.click('mapTooltipCreateFilterButton');
 
@@ -43,7 +38,5 @@ export default function ({ getPageObjects, getService }) {
       const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
       expect(hasJoinFilter).to.be(true);
     });
-    */
-
   });
 }

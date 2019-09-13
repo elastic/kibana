@@ -147,6 +147,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       {({
                         id,
                         inspect,
+                        isInspected,
                         domains,
                         totalCount,
                         pageInfo,
@@ -162,6 +163,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           flowTarget={flowTarget}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           ip={ip}
+                          isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
                           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
@@ -188,6 +190,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       {({
                         id,
                         inspect,
+                        isInspected,
                         users,
                         totalCount,
                         pageInfo,
@@ -199,6 +202,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           data={users}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           flowTarget={flowTarget}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           loading={loading}
@@ -224,11 +228,22 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       startDate={from}
                       type={networkModel.NetworkType.details}
                     >
-                      {({ id, inspect, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        tls,
+                        totalCount,
+                        pageInfo,
+                        loading,
+                        loadPage,
+                        refetch,
+                      }) => (
                         <TlsTableManage
                           data={tls}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           loading={loading}
                           loadPage={loadPage}

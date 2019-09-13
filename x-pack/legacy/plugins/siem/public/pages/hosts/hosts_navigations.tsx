@@ -146,6 +146,7 @@ interface OwnProps {
   kqlQueryExpression: string;
 }
 export type HostsComponentsQueryProps = OwnProps & {
+  deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: StaticIndexPattern;
   skip: boolean;
   setQuery: ({
@@ -173,6 +174,7 @@ const HostsTableManage = manageQuery(HostsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const HostsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   indexPattern,
@@ -190,13 +192,15 @@ export const HostsQueryTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
+      {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, isInspected, refetch }) => (
         <HostsTableManage
+          deleteQuery={deleteQuery}
           data={hosts}
           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
           id={id}
           indexPattern={indexPattern}
           inspect={inspect}
+          isInspect={isInspected}
           loading={loading}
           loadPage={loadPage}
           refetch={refetch}
@@ -211,6 +215,7 @@ export const HostsQueryTabBody = ({
 };
 
 export const AuthenticationsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   skip,
@@ -227,26 +232,41 @@ export const AuthenticationsQueryTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ authentications, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
-        <AuthenticationTableManage
-          data={authentications}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          setQuery={setQuery}
-          totalCount={totalCount}
-          type={type}
-        />
-      )}
+      {({
+        authentications,
+        totalCount,
+        loading,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => {
+        return (
+          <AuthenticationTableManage
+            data={authentications}
+            deleteQuery={deleteQuery}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+            id={id}
+            inspect={inspect}
+            isInspect={isInspected}
+            loading={loading}
+            loadPage={loadPage}
+            refetch={refetch}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+            setQuery={setQuery}
+            totalCount={totalCount}
+            type={type}
+          />
+        );
+      }}
     </AuthenticationsQuery>
   );
 };
 
 export const UncommonProcessTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   skip,
@@ -263,12 +283,24 @@ export const UncommonProcessTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({ uncommonProcesses, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
+      {({
+        uncommonProcesses,
+        totalCount,
+        loading,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => (
         <UncommonProcessTableManage
+          deleteQuery={deleteQuery}
           data={uncommonProcesses}
           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
           id={id}
           inspect={inspect}
+          isInspect={isInspected}
           loading={loading}
           loadPage={loadPage}
           refetch={refetch}

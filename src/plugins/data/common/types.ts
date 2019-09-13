@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './timefilter/types';
+export * from '.';

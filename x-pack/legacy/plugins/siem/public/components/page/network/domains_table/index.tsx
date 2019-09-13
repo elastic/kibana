@@ -32,6 +32,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   indexPattern: StaticIndexPattern;
   ip: string;
   loading: boolean;
@@ -42,6 +43,7 @@ interface OwnProps {
 }
 
 interface DomainsTableReduxProps {
+  activePage: number;
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
   limit: number;
@@ -84,6 +86,7 @@ export const DomainsTableId = 'domains-table';
 class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       domainsSortField,
       fakeTotalCount,
@@ -92,6 +95,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       id,
       indexPattern,
       ip,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -104,6 +108,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getDomainsColumns(
           indexPattern,
           ip,
@@ -123,6 +128,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         headerTitle={i18n.DOMAINS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
@@ -140,7 +146,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
-        updateProps={{ domainsSortField, flowDirection, flowTarget, totalCount }}
       />
     );
   }

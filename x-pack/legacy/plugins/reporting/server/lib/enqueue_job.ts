@@ -9,7 +9,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import { oncePerServer } from './once_per_server';
-import { KbnServer, Logger, JobParams, ConditionalHeaders } from '../../types';
+import { KbnServer, Logger, ConditionalHeaders } from '../../types';
 
 interface ConfirmedJob {
   id: string;
@@ -29,7 +29,7 @@ function enqueueJobFn(server: KbnServer) {
   return async function enqueueJob(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: JobParams,
+    jobParams: object,
     user: string,
     headers: ConditionalHeaders,
     request: Request
