@@ -99,7 +99,6 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       if (aceTextAreaElement) {
         document.removeEventListener('keydown', documentKeyDownListener);
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
-        document.removeChild(overlayMountNode.current!);
       }
     };
   }, [aceTextAreaElement]);

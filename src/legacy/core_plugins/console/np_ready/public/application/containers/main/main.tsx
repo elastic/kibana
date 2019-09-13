@@ -176,12 +176,16 @@ export function Main() {
 
   useEffect(() => {
     let resizerSubscriptions: Array<() => void> = [];
-    const subscription = editorsReady$.subscribe(([input, output]) => {
+    const readySubscription = editorsReady$.subscribe(([input, output]) => {
       settings.registerOutput(output.editor);
       settings.registerInput(input.editor);
       history.setEditor(input.editor);
 
       init(input.editor, output.editor, history);
+
+      // This may kick of a polling mechanic, needs to be refactored to more
+      // standard subscription pattern.
+      mappings.retrieveAutoCompleteInfo();
 
       resizerSubscriptions = resizerSubscriptions.concat([
         subscribeResizeChecker(ResizeChecker, containerRef.current!, input.editor, output.editor),
@@ -196,7 +200,8 @@ export function Main() {
 
     return () => {
       resizerSubscriptions.map(done => done());
-      subscription.unsubscribe();
+      readySubscription.unsubscribe();
+      mappings.clearSubscriptions();
     };
   }, []);
 

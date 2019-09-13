@@ -34,7 +34,7 @@ import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import template from '../../public/quarantined/index.html';
-import { App } from '../../../../../core/public';
+import { App, AppUnmount } from '../../../../../core/public';
 
 export interface XPluginSet {
   __LEGACY: {
@@ -64,12 +64,14 @@ uiRoutes.when('/dev_tools/console', {
         throw new Error(message);
       }
 
+      let unmount: AppUnmount | Promise<AppUnmount>;
+
       const mockedSetupCore = {
         ...npSetup.core,
         application: {
           register(app: App): void {
             try {
-              app.mount(anyObject, { element: targetElement, appBasePath: '' });
+              unmount = app.mount(anyObject, { element: targetElement, appBasePath: '' });
             } catch (e) {
               npSetup.core.fatalErrors.add(e);
             }
@@ -87,6 +89,13 @@ uiRoutes.when('/dev_tools/console', {
         },
       });
       pluginInstance.start(npStart.core);
+
+      $scope.$on('$destroy', async () => {
+        if (unmount) {
+          const fn = await unmount;
+          fn();
+        }
+      });
     };
   },
   template,
