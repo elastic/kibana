@@ -24,6 +24,7 @@ interface OwnProps {
   data: UncommonProcessesEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -32,6 +33,7 @@ interface OwnProps {
 }
 
 interface UncommonProcessTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -82,9 +84,11 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
+    isInspect,
     limit,
     loading,
     loadPage,
@@ -95,11 +99,13 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     type,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getUncommonColumnsCurated(type)}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
+      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -121,7 +127,6 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
           tableType,
         })
       }
-      updateProps={{ totalCount }}
     />
   )
 );

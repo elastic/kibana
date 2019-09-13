@@ -13,10 +13,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
 import { OnUpdateColumns } from '../timeline/events';

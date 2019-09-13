@@ -168,11 +168,11 @@ export default function(kibana: any) {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         async executor({ services, params, state }: AlertExecutorOptions) {
-          const actionGroupToFire = params.actionGroupToFire || 'default';
+          const actionGroupToSchedule = params.actionGroupToSchedule || 'default';
           services
             .alertInstanceFactory('1')
             .replaceState({ instanceStateValue: true })
-            .fire(actionGroupToFire, {
+            .scheduleActions(actionGroupToSchedule, {
               instanceContextValue: true,
             });
           await services.callCluster('index', {
