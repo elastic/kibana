@@ -5,27 +5,30 @@
  */
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { setMockCapabilities } from '../../../../__mocks__/ui_capabilities';
 import { SecureSpaceMessage } from './secure_space_message';
 
+let mockShowLinks: boolean = true;
+jest.mock('../../../../../../xpack_main/public/services/xpack_info', () => {
+  return {
+    xpackInfo: {
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'features.security.showLinks') {
+          return mockShowLinks;
+        }
+        throw new Error(`unexpected key: ${key}`);
+      }),
+    },
+  };
+});
+
 describe('SecureSpaceMessage', () => {
-  it(`doesn't render if UI Capabilities does not allow security to be managed`, () => {
-    setMockCapabilities({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      spaces: { manage: false },
-    });
+  it(`doesn't render if security is not enabled`, () => {
+    mockShowLinks = false;
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 
-  it(`renders if user profile allows security to be managed`, () => {
-    setMockCapabilities({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      spaces: { manage: true },
-    });
+  it(`renders if security is enabled`, () => {
+    mockShowLinks = true;
     expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 });
