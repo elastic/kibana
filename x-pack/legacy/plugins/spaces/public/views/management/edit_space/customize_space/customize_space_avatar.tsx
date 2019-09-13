@@ -164,7 +164,6 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
 
   public filePickerOrImage() {
     const { intl } = this.props;
-    const { space } = this.props;
 
     if (!this.props.space.imageUrl) {
       return (
