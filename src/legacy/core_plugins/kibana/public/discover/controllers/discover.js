@@ -880,9 +880,25 @@ function discoverController(
   };
 
   $scope.updateDataSource = Promise.method(function updateDataSource() {
-    $scope.searchSource
+    const { indexPattern, searchSource } = $scope;
+    const { timeFieldName } = indexPattern;
+    const sort = getSort($state.sort, indexPattern)
+      .map(sortPair => {
+        if (indexPattern.isTimeNanosBased() && sortPair[timeFieldName]) {
+          // for sorting on indices where the same field can be date or date_nanos
+          // it's necessary to add the numeric_type
+          return ({
+            [timeFieldName]: {
+              order: sortPair[timeFieldName],
+              numeric_type: 'date_nanos'
+            }
+          });
+        }
+        return sortPair;
+      });
+    searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('sort', sort)
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', queryFilter.getFilters());
   });
