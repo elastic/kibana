@@ -20,20 +20,16 @@
 import sinon from 'sinon';
 import $ from 'jquery';
 
-// @ts-ignore
-import mappings from '../../../../../../../public/quarantined/src/mappings';
-import { loadRemote } from './load_remote_editor_state';
+import { loadRemoteState } from './load_remote_editor_state';
 
 describe('[Legacy Console] loading remote editor state', () => {
   const sandbox = sinon.createSandbox();
 
   let inputMock: any;
-  let outputMock: any;
   let ajaxDoneStub: any;
   beforeEach(() => {
     ajaxDoneStub = sinon.stub();
     sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub } as any);
-    sandbox.stub(mappings, 'retrieveAutoCompleteInfo');
 
     inputMock = {
       update: sinon.stub(),
@@ -52,9 +48,9 @@ describe('[Legacy Console] loading remote editor state', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    loadRemote({
+    loadRemoteState({
       input: inputMock,
-      sourceLocation: 'https://state.link.com/content',
+      url: 'https://state.link.com/content',
     });
 
     sinon.assert.calledOnce($.ajax as any);
@@ -62,6 +58,7 @@ describe('[Legacy Console] loading remote editor state', () => {
       url: 'https://state.link.com/content',
       dataType: 'text',
       kbnXsrfToken: false,
+      headers: {},
     });
 
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);
@@ -70,18 +67,15 @@ describe('[Legacy Console] loading remote editor state', () => {
     sinon.assert.calledOnce(inputMock.updateActionsBar);
     sinon.assert.calledOnce(inputMock.update);
     sinon.assert.calledWithExactly(inputMock.update, sinon.match.same(mockContent));
-
-    sinon.assert.calledOnce(outputMock.update);
-    sinon.assert.calledWithExactly(outputMock.update, '');
   });
 
   it('correctly loads state from GitHub API HTTPS links.', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    load({
+    loadRemoteState({
       input: inputMock,
-      sourceLocation: 'https://api.github.com/content',
+      url: 'https://api.github.com/content',
     });
 
     sinon.assert.calledOnce($.ajax as any);
@@ -98,8 +92,5 @@ describe('[Legacy Console] loading remote editor state', () => {
     sinon.assert.calledOnce(inputMock.updateActionsBar);
     sinon.assert.calledOnce(inputMock.update);
     sinon.assert.calledWithExactly(inputMock.update, sinon.match.same(mockContent));
-
-    sinon.assert.calledOnce(outputMock.update);
-    sinon.assert.calledWithExactly(outputMock.update, '');
   });
 });

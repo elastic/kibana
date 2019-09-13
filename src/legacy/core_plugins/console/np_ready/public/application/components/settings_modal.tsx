@@ -41,7 +41,7 @@ import { DevToolsSettings } from '../../services';
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
 interface Props {
-  onSaveSettings: (newSettings: DevToolsSettings) => Promise<void>;
+  onSaveSettings: (newSettings: DevToolsSettings) => void;
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: any) => void;
   settings: DevToolsSettings;

@@ -17,25 +17,9 @@
  * under the License.
  */
 
-import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
+import { DevToolsSettings } from '../../../../../services';
 
-let input;
-export function initializeInput($el, $actionsEl) {
-  input = new SenseEditor($el);
-
-  input.autocomplete = new Autocomplete(input);
-  input.$actions = $actionsEl;
-
-  /**
-   * Init the editor
-   */
-  input.focus();
-  input.highlightCurrentRequestsAndUpdateActionBar();
-
-  return input;
-}
-
-export default function getInput() {
-  return input;
+export function applyCurrentSettings(editor: any, settings: DevToolsSettings) {
+  editor.getSession().setUseWrapMode(settings.wrapMode);
+  editor.$el.css('font-size', settings.fontSize + 'px');
 }

@@ -50,6 +50,4 @@ export function loadRemoteState({ url, input }: InitializationArgs) {
     input.updateActionsBar();
   });
   input.moveToNextRequestEdge(true);
-
-  // mappings.retrieveAutoCompleteInfo();
 }

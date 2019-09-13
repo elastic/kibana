@@ -22,33 +22,55 @@ import { Reducer } from 'react';
 import { instance as registry } from './editor_registry';
 import { ContextValue } from './editor_context';
 
-export type ActionType =
-  | 'setInputValue'
-  | 'setOutputValue'
-  | 'appendOutputValue'
-  | 'setInputEditor'
-  | 'setOutputEditor';
+import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
+import {
+  sendCurrentRequestToES,
+  EsRequestArgs,
+} from '../legacy/console_editor/send_current_request_to_es';
+import { DevToolsSettings } from '../../../../services';
 
-export interface Action {
-  type: ActionType;
-  value?: any;
-}
+export type Action =
+  | { type: 'setInputEditor'; value: any }
+  | { type: 'setOutputEditor'; value: any }
+  | { type: 'restoreRequest'; value: any }
+  | { type: 'updateSettings'; value: DevToolsSettings }
+  | { type: 'sendRequestToEs'; value: EsRequestArgs }
+  | { type: 'updateRequestHistory'; value: any };
 
-export const reducer: Reducer<ContextValue, Action> = (state, { type, value }) => {
+export const reducer: Reducer<ContextValue, Action> = (state, action) => {
   const nextState = { ...state };
 
-  if (type === 'setInputEditor') {
-    registry.setInputEditor(value);
+  if (action.type === 'setInputEditor') {
+    registry.setInputEditor(action.value);
     if (registry.getOutputEditor()) {
       nextState.editorsReady = true;
     }
   }
 
-  if (type === 'setOutputEditor') {
-    registry.setOutputEditor(value);
+  if (action.type === 'setOutputEditor') {
+    registry.setOutputEditor(action.value);
     if (registry.getInputEditor()) {
       nextState.editorsReady = true;
     }
+  }
+
+  if (action.type === 'restoreRequest') {
+    restoreRequestFromHistory(registry.getInputEditor(), action.value);
+  }
+
+  if (action.type === 'updateSettings') {
+    nextState.settings = action.value;
+  }
+
+  if (action.type === 'sendRequestToEs') {
+    const { addedToHistoryCb, isPolling, isUsingTripleQuotes } = action.value;
+    sendCurrentRequestToES({
+      input: registry.getInputEditor(),
+      output: registry.getOutputEditor(),
+      addedToHistoryCb,
+      isUsingTripleQuotes,
+      isPolling,
+    });
   }
 
   return nextState;

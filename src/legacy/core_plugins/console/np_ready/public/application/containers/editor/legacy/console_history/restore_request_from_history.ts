@@ -17,25 +17,34 @@
  * under the License.
  */
 
-import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
+export function restoreRequestFromHistory(input: any, req: any) {
+  const session = input.getSession();
+  let pos = input.getCursorPosition();
+  let prefix = '';
+  let suffix = '\n';
+  if (input.parser.isStartRequestRow(pos.row)) {
+    pos.column = 0;
+    suffix += '\n';
+  } else if (input.parser.isEndRequestRow(pos.row)) {
+    const line = session.getLine(pos.row);
+    pos.column = line.length;
+    prefix = '\n\n';
+  } else if (input.parser.isInBetweenRequestsRow(pos.row)) {
+    pos.column = 0;
+  } else {
+    pos = input.nextRequestEnd(pos);
+    prefix = '\n\n';
+  }
 
-let input;
-export function initializeInput($el, $actionsEl) {
-  input = new SenseEditor($el);
+  let s = prefix + req.method + ' ' + req.endpoint;
+  if (req.data) {
+    s += '\n' + req.data;
+  }
 
-  input.autocomplete = new Autocomplete(input);
-  input.$actions = $actionsEl;
+  s += suffix;
 
-  /**
-   * Init the editor
-   */
+  session.insert(pos, s);
+  input.clearSelection();
+  input.moveCursorTo(pos.row + prefix.length, 0);
   input.focus();
-  input.highlightCurrentRequestsAndUpdateActionBar();
-
-  return input;
-}
-
-export default function getInput() {
-  return input;
 }

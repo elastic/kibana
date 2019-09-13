@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 interface Props {
   getCurl: (cb: (text: string) => void) => void;
   getDocumentation: () => Promise<string | null>;
-  autoIndent: (ev: React.MouseEvent) => void;
+  autoIndent: (ev?: React.MouseEvent) => void;
 }
 
 interface State {

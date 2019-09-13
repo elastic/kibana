@@ -22,15 +22,13 @@ import $ from 'jquery';
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
 import { useAppContext } from '../../../../context';
-import { useEditorActionContext } from '../../context';
+import { useEditorActionContext, useEditorReadContext } from '../../context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { applyCurrentSettings } from './apply_editor_settings';
 
-export interface EditorOutputProps {
-  onReady?: (ref: any) => void;
-}
-
-function Component({ onReady }: EditorOutputProps) {
+function _EditorOuput() {
   const editorRef = useRef<null | HTMLDivElement>(null);
+  const editorInstanceRef = useRef<null | any>(null);
   const {
     services: { settings },
     ResizeChecker,
@@ -38,18 +36,28 @@ function Component({ onReady }: EditorOutputProps) {
 
   const dispatch = useEditorActionContext();
 
+  const { settings: readOnlySettings } = useEditorReadContext();
+
   useEffect(() => {
     const editor$ = $(editorRef.current!);
-    const outputEditor = initializeOutput(editor$, settings);
-    outputEditor.update('');
-    const unsubscribe = subscribeResizeChecker(ResizeChecker, editorRef.current!, outputEditor);
+    editorInstanceRef.current = initializeOutput(editor$, settings);
+    editorInstanceRef.current.update('');
+    const unsubscribe = subscribeResizeChecker(
+      ResizeChecker,
+      editorRef.current!,
+      editorInstanceRef.current
+    );
 
-    dispatch({ type: 'setOutputEditor', value: outputEditor });
+    dispatch({ type: 'setOutputEditor', value: editorInstanceRef.current });
 
     return () => {
       unsubscribe();
     };
-  });
+  }, []);
+
+  useEffect(() => {
+    applyCurrentSettings(editorInstanceRef.current, readOnlySettings);
+  }, [readOnlySettings]);
 
   return (
     <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
@@ -58,4 +66,4 @@ function Component({ onReady }: EditorOutputProps) {
   );
 }
 
-export const EditorOutput = React.memo(Component);
+export const EditorOutput = React.memo(_EditorOuput);

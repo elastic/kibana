@@ -18,8 +18,8 @@
  */
 
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
-
 import { Action, reducer } from './reducer';
+import { DevToolsSettings } from '../../../../services';
 
 export interface ContextValue {
   editorsReady: boolean;
@@ -29,6 +29,7 @@ export interface ContextValue {
   output: {
     value: string;
   };
+  settings: DevToolsSettings;
 }
 
 const EditorReadContext = createContext<ContextValue>(null as any);
@@ -36,16 +37,21 @@ const EditorActionContext = createContext<Dispatch<Action>>(null as any);
 
 export interface EditorContextArgs {
   children: any;
+  settings: DevToolsSettings;
 }
 
 const initialValue: ContextValue = {
   input: { value: '' },
   output: { value: '' },
   editorsReady: false,
+  settings: null as any,
 };
 
-export function EditorContextProvider({ children }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(reducer, initialValue);
+export function EditorContextProvider({ children, settings }: EditorContextArgs) {
+  const [state, dispatch] = useReducer(reducer, initialValue, value => ({
+    ...value,
+    settings,
+  }));
   return (
     <EditorReadContext.Provider value={state}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>

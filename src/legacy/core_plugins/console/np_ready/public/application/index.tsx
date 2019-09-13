@@ -44,7 +44,7 @@ export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChe
       <AppContextProvider
         value={{ ...deps, services: { storage, history, settings }, ResizeChecker }}
       >
-        <EditorContextProvider>
+        <EditorContextProvider settings={settings.toJSON()}>
           <Main />
         </EditorContextProvider>
       </AppContextProvider>
