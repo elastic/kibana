@@ -71,22 +71,22 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         if (imgDimx <= MAX_IMAGE_SIZE && imgDimy <= MAX_IMAGE_SIZE) {
           thisInstance.storeImageChanges(imgUrl);
         } else {
-          const oc = document.createElement('canvas');
-          const octx = oc.getContext('2d');
+          const imageCanvas = document.createElement('canvas');
+          const canvasContext = imageCanvas.getContext('2d');
           if (imgDimx >= imgDimy) {
-            oc.width = MAX_IMAGE_SIZE;
-            oc.height = Math.floor((imgDimy * MAX_IMAGE_SIZE) / imgDimx);
-            if (octx) {
-              octx.drawImage(image, 0, 0, oc.width, oc.height);
-              const resizedImageUrl = oc.toDataURL();
+            imageCanvas.width = MAX_IMAGE_SIZE;
+            imageCanvas.height = Math.floor((imgDimy * MAX_IMAGE_SIZE) / imgDimx);
+            if (canvasContext) {
+              canvasContext.drawImage(image, 0, 0, imageCanvas.width, imageCanvas.height);
+              const resizedImageUrl = imageCanvas.toDataURL();
               thisInstance.storeImageChanges(resizedImageUrl);
             }
           } else {
-            oc.height = MAX_IMAGE_SIZE;
-            oc.width = Math.floor((imgDimx * MAX_IMAGE_SIZE) / imgDimy);
-            if (octx) {
-              octx.drawImage(image, 0, 0, oc.width, oc.height);
-              const resizedImageUrl = oc.toDataURL();
+            imageCanvas.height = MAX_IMAGE_SIZE;
+            imageCanvas.width = Math.floor((imgDimx * MAX_IMAGE_SIZE) / imgDimy);
+            if (canvasContext) {
+              canvasContext.drawImage(image, 0, 0, imageCanvas.width, imageCanvas.height);
+              const resizedImageUrl = imageCanvas.toDataURL();
               thisInstance.storeImageChanges(resizedImageUrl);
             }
           }
@@ -128,7 +128,9 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               // without defaulting to the derived initials provided by `getSpaceInitials`
               value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
               onChange={this.onInitialsChange}
-              disabled={this.state.imageUrl && this.state.imageUrl !== '' ? true : false}
+              disabled={
+                this.props.space.imageUrl && this.props.space.imageUrl !== '' ? true : false
+              }
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -162,8 +164,9 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
 
   public filePickerOrImage() {
     const { intl } = this.props;
+    const { space } = this.props;
 
-    if (!this.state.imageUrl) {
+    if (!this.props.space.imageUrl) {
       return (
         <EuiFormRow
           label={intl.formatMessage({

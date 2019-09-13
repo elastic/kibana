@@ -6,9 +6,6 @@
 
 import { fromByteArray } from 'base64-js';
 
-// @ts-ignore @types/mime doesn't resolve mime/lite for some reason.
-import mime from 'mime/lite';
-
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
 export function encode(data: any | null, type = 'text/plain') {
