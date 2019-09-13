@@ -125,18 +125,14 @@ export function getCreateTaskRunnerFunction({
         await Promise.all(
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
-
-            // Cleanup resolved alert instances to avoid over populating the alertInstances object
-            if (alertInstance.isResolved(throttle)) {
-              delete alertInstances[alertInstanceId];
-              return;
-            }
-
             if (alertInstance.hasScheduledActions(throttle)) {
               const { actionGroup, context, state } = alertInstance.getSechduledActionOptions()!;
               alertInstance.updateLastScheduledActions(actionGroup);
               alertInstance.unscheduleActions();
               return executionHandler(actionGroup, context, state);
+            } else {
+              // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
+              delete alertInstances[alertInstanceId];
             }
           })
         );

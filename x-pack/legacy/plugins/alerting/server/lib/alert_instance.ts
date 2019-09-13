@@ -54,11 +54,6 @@ export class AlertInstance {
     return true;
   }
 
-  isResolved(throttle: string | null) {
-    // At this time we'll consider instances that didn't schedule actions as resolved
-    return !this.hasScheduledActions(throttle);
-  }
-
   getSechduledActionOptions() {
     return this.scheduledExecutionOptions;
   }
