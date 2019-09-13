@@ -37,7 +37,7 @@ interface StatusReducerState {
   setupStatus: SetupStatus;
 }
 
-type StatusReducerActions =
+type StatusReducerAction =
   | { type: 'startedSetup' }
   | {
       type: 'finishedSetup';
@@ -64,10 +64,7 @@ const initialState: StatusReducerState = {
   setupStatus: 'initializing',
 };
 
-function statusReducer(
-  state: StatusReducerState,
-  action: StatusReducerActions
-): StatusReducerState {
+function statusReducer(state: StatusReducerState, action: StatusReducerAction): StatusReducerState {
   switch (action.type) {
     case 'startedSetup': {
       return {
