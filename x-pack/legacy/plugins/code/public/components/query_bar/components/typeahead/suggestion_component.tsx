@@ -71,7 +71,7 @@ export const SuggestionComponent: SFC<Props> = props => {
     >
       <div className="codeSearch-suggestion--inner">
         {icon}
-        <div>
+        <div className="codeSearch__suggestionTextContainer">
           <div className="codeSearch__suggestion-text" data-test-subj={`codeTypeaheadItem`}>
             {renderMatchingText(props.suggestion.text)}
           </div>

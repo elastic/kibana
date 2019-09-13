@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
   describe('Elasticsearch index detail', () => {
 
     afterEach(async () => {
-      await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsIndices'); // return back for next test
+      await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       await indicesList.clearFilter();
     });
 
