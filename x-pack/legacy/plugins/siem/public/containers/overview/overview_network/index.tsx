@@ -15,7 +15,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
 import { State } from '../../../store';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
-import { createFilter } from '../../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
 import { overviewNetworkQuery } from './index.gql_query';
@@ -45,7 +45,7 @@ export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & Overvie
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
       query={overviewNetworkQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       variables={{
         sourceId,

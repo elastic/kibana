@@ -28,7 +28,13 @@ const startMock = coreMock.createStart();
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-    QueryBar: () => <div className="queryBar"></div>,
+    QueryBarInput: () => <div className="queryBar"></div>,
+  };
+});
+
+jest.mock('../../../query/query_bar', () => {
+  return {
+    QueryBarTopRow: () => <div className="queryBar"></div>,
   };
 });
 
