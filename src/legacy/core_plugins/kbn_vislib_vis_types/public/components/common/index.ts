@@ -24,3 +24,4 @@ export { SelectOption } from './select';
 export { SwitchOption } from './switch';
 export { TextInputOption } from './text_input';
 export { TruncateLabelsOption } from './truncate_labels';
+export { ValidationWrapper, ValidationVisOptionsProps } from './validation_wrapper';

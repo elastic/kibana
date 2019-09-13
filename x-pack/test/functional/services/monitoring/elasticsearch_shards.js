@@ -27,10 +27,10 @@ const classificationsAndTooltipsReducer = (classifications, tooltips) => {
 export function MonitoringElasticsearchShardsProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_UNASSIGNED_SHARDS         = `clusterView-Unassigned shardIcon`;
+  const SUBJ_UNASSIGNED_SHARDS         = `clusterView-Unassigned > shardIcon`;
   const SUBJ_ASSIGNED_CONTAINER_PREFIX = 'clusterView-Assigned-';
   const SUBJ_SHOW_SYSTEM_INDICES       = 'shardShowSystemIndices';
-  const getAssignedShardsSelector      = parent => parent + ' shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
+  const getAssignedShardsSelector      = parent => parent + '> shardIcon'; // will be used in a descendant search starting with SUBJ_ASSIGNED_CONTAINER
 
   return new class ElasticsearchShards {
 

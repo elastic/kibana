@@ -185,6 +185,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }
   }
+  isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
   showMorePagesIndicator={true}
