@@ -137,6 +137,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
           </EuiFormRow>
           {advancedEditorMessages.map((advancedEditorMessage, i) => (
             <Fragment key={i}>
+              <EuiSpacer />
               <EuiCallOut
                 title={
                   advancedEditorMessage.message !== ''
@@ -154,7 +155,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
                   <p>{advancedEditorMessage.error}</p>
                 ) : null}
               </EuiCallOut>
-              <EuiSpacer size="s" />
+              <EuiSpacer />
             </Fragment>
           ))}
           <EuiFormRow
