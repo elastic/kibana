@@ -460,70 +460,93 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
-              <EuiPopover
-                anchorPosition="downCenter"
-                button={
-                  <EuiLink
-                    color="primary"
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Show phase definition"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
-                      values={Object {}}
-                    />
-                  </EuiLink>
-                }
-                closePopover={[Function]}
-                display="inlineBlock"
-                hasArrow={true}
-                id="phaseExecutionPopover"
-                isOpen={false}
-                key="phaseExecutionPopover"
-                ownFocus={false}
-                panelPaddingSize="m"
-                withTitle={true}
-              >
-                <EuiOutsideClickDetector
-                  isDisabled={true}
-                  onOutsideClick={[Function]}
+              <EuiDescriptionListTitle>
+                <dt
+                  className="euiDescriptionList__title"
                 >
-                  <div
-                    className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
-                    id="phaseExecutionPopover"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
-                  >
-                    <div
-                      className="euiPopover__anchor"
+                  <strong>
+                    <FormattedMessage
+                      defaultMessage="Phase definition"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle"
+                      values={Object {}}
                     >
+                      Phase definition
+                    </FormattedMessage>
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="phaseDefinition_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <EuiPopover
+                    anchorPosition="downCenter"
+                    button={
                       <EuiLink
                         color="primary"
                         onClick={[Function]}
                         type="button"
                       >
-                        <button
-                          className="euiLink euiLink--primary"
-                          onClick={[Function]}
-                          type="button"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Show phase definition"
-                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
-                            values={Object {}}
-                          >
-                            Show phase definition
-                          </FormattedMessage>
-                        </button>
+                        <FormattedMessage
+                          defaultMessage="Show definition"
+                          id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                          values={Object {}}
+                        />
                       </EuiLink>
-                    </div>
-                  </div>
-                </EuiOutsideClickDetector>
-              </EuiPopover>
+                    }
+                    closePopover={[Function]}
+                    display="inlineBlock"
+                    hasArrow={true}
+                    id="phaseExecutionPopover"
+                    isOpen={false}
+                    key="phaseExecutionPopover"
+                    ownFocus={false}
+                    panelPaddingSize="m"
+                    withTitle={true}
+                  >
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+                        id="phaseExecutionPopover"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
+                      >
+                        <div
+                          className="euiPopover__anchor"
+                        >
+                          <EuiLink
+                            color="primary"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <button
+                              className="euiLink euiLink--primary"
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Show definition"
+                                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                                values={Object {}}
+                              >
+                                Show definition
+                              </FormattedMessage>
+                            </button>
+                          </EuiLink>
+                        </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </dd>
+              </EuiDescriptionListDescription>
             </dl>
           </EuiDescriptionList>
         </div>
