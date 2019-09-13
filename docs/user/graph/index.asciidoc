@@ -32,7 +32,7 @@ relationship between any two vertices is a _connection_. The connection
 summarizes the documents that contain both vertices' terms.
 
 [role="screenshot"]
-image::graph/images/graph-vertices-connections.jpg["Graph components"]
+image::user/graph/images/graph-vertices-connections.jpg["Graph components"]
 
 NOTE: If you're into https://en.wikipedia.org/wiki/Graph_theory[graph theory],
 you might know vertices and connections as _nodes_ and _edges_. They're the
