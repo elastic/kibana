@@ -12,6 +12,7 @@ import numeral from '@elastic/numeral';
 
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
+import { maxLengthValidator } from './validators';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -223,7 +224,7 @@ export function mlFunctionToESAggregation(functionName) {
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
 export function isJobIdValid(jobId) {
-  return (jobId.match(/^[a-z0-9\-\_]{1,64}$/g) && !jobId.match(/^([_-].*)?(.*[_-])?$/g)) ? true : false;
+  return (jobId.match(/^[a-z0-9\-\_]+$/g) && !jobId.match(/^([_-].*)?(.*[_-])?$/g)) ? true : false;
 }
 
 // To get median data for jobs and charts we need to use Elasticsearch's
@@ -271,12 +272,16 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   let valid = true;
 
   if (job) {
+    const JOB_ID_MAX_LENGTH = 64;
     // Job details
     if (_.isEmpty(job.job_id)) {
       messages.push({ id: 'job_id_empty' });
       valid = false;
     } else if (isJobIdValid(job.job_id) === false) {
       messages.push({ id: 'job_id_invalid' });
+      valid = false;
+    } else if (maxLengthValidator(JOB_ID_MAX_LENGTH)(job.job_id)) {
+      messages.push({ id: 'invalid_max_length', maxLength: JOB_ID_MAX_LENGTH });
       valid = false;
     } else {
       messages.push({ id: 'job_id_valid' });
