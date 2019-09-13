@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/public';
 
 interface FilterRatioKey {
   id: string;

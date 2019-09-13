@@ -18,7 +18,6 @@
  */
 
 export * from './types';
-export * from './expression_types';
 export { Type } from './interpreter';
 export { interpreterProvider } from './interpreter_provider';
 export { serializeProvider, getType } from './serialize_provider';
