@@ -67,8 +67,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     public readonly isFirefox: boolean = browserType === Browsers.Firefox;
 
-    public readonly isInternetExplorer: boolean = browserType === Browsers.InternetExplorer;
-
     /**
      * Is WebDriver instance W3C compatible
      */
@@ -128,12 +126,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getCurrentUrl(): Promise<string> {
       // strip _t=Date query param when url is read
-      let current;
-      if (this.isInternetExplorer) {
-        current = await driver.executeScript<string>('return window.document.location.href');
-      } else {
-        current = await driver.getCurrentUrl();
-      }
+      const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete (parsed.query as any)._t;
         return void 0;

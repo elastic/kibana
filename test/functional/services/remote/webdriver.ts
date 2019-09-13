@@ -23,14 +23,10 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// import ieCapabilities from 'selenium-webdriver/lib/capabilities';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore types not available
-import ie from 'selenium-webdriver/ie';
-import { Options } from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
@@ -93,7 +89,6 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
-
       case 'firefox':
         const firefoxOptions = new firefox.Options();
         if (headlessBrowser === '1') {
@@ -105,27 +100,6 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
-
-      case 'ie':
-        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
-        // console.log(`${process.env['PATH']}`);
-        process.env.PATH = 'node_modules\\iedriver\\lib\\iedriver\\;' + process.env.PATH;
-
-        const ieCapabilities = Capabilities.ie();
-        ieCapabilities.set('se:ieOptions', {
-          'ie.ensureCleanSession': true,
-          ignoreProtectedModeSettings: true,
-          ignoreZoomSetting: false, // requires us to have 100% zoom level
-          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
-          requireWindowFocus: true,
-          logLevel: 'TRACE',
-        });
-
-        return new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(ieCapabilities)
-          .build();
-
       default:
         throw new Error(`${browserType} is not supported yet`);
     }

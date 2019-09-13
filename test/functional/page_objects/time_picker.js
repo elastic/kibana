@@ -54,7 +54,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       const panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', startTime);
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
@@ -74,13 +73,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
         const input = await testSubjects.find(dataTestsubj);
         await input.clearValue();
         await input.type(value);
-      } else if (browser.isInternetExplorer) {
-        const input = await testSubjects.find(dataTestsubj);
-        const currentValue = await input.getAttribute('value');
-        await input.type((browser.keys.ARROW_RIGHT).repeat(currentValue.length));
-        await input.type((browser.keys.BACK_SPACE).repeat(currentValue.length));
-        await input.type(value);
-        await input.click();
       } else {
         await testSubjects.setValue(dataTestsubj, value);
       }
@@ -98,7 +90,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerendDatePopoverButton');
       let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
 
 
@@ -107,7 +98,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.waitPanelIsGone(panel);
       panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');

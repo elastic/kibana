@@ -250,7 +250,7 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
-    if (options.charByChar === true || this.browserType === Browsers.InternetExplorer) {
+    if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
