@@ -17,16 +17,25 @@
  * under the License.
  */
 
-/**
- * Convert a value to a presentable string
- * @param  {any} val - the value to transform
- * @return {string}
- */
-export function asPrettyString(val) {
-  if (val === null || val === undefined) return ' - ';
-  switch (typeof val) {
-    case 'string': return val;
-    case 'object': return JSON.stringify(val, null, '  ');
-    default: return '' + val;
-  }
-}
+import { asPrettyString } from './as_pretty_string';
+
+describe('asPrettyString', () => {
+  test('Converts null and undefined values into a string signifying no value', () => {
+    expect(asPrettyString(null)).toBe(' - ');
+    expect(asPrettyString(undefined)).toBe(' - ');
+  });
+
+  test('Does not mutate string values', () => {
+    const s = 'I am a string!@';
+    expect(asPrettyString(s)).toBe(s);
+  });
+
+  test('Converts objects values into presentable strings', () => {
+    expect(asPrettyString({ key: 'value' })).toBe('{\n  "key": "value"\n}');
+  });
+
+  test('Converts other non-string values into strings', () => {
+    expect(asPrettyString(true)).toBe('true');
+    expect(asPrettyString(123)).toBe('123');
+  });
+});

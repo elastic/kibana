@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { asPrettyString } from '../as_pretty_string';
-
-describe('asPrettyString', () => {
-
-  it('Converts null and undefined values into a string signifying no value', () => {
-    expect(asPrettyString(null)).to.equal(' - ');
-    expect(asPrettyString(undefined)).to.equal(' - ');
-  });
-
-  it('Does not mutate string values', () => {
-    const s = 'I am a string!@';
-    expect(asPrettyString(s)).to.equal(s);
-  });
-
-  it('Converts objects values into presentable strings', () => {
-    expect(asPrettyString({ key: 'value' })).to.equal('{\n  "key": "value"\n}');
-  });
-
-  it('Converts other non-string values into strings', () => {
-    expect(asPrettyString(true)).to.equal('true');
-    expect(asPrettyString(123)).to.equal('123');
-  });
-
-});
+/**
+ * Convert a value to a presentable string
+ */
+export function asPrettyString(val: any): string {
+  if (val === null || val === undefined) return ' - ';
+  switch (typeof val) {
+    case 'string':
+      return val;
+    case 'object':
+      return JSON.stringify(val, null, '  ');
+    default:
+      return '' + val;
+  }
+}
