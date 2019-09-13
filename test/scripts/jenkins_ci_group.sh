@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
 set -e
-trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-if [[ "$IS_PIPELINE_JOB" ]] ; then
+if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+else
   source src/dev/ci_setup/setup_env.sh
 fi
 
 export TEST_BROWSER_HEADLESS=1
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;	
+  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
   node scripts/build --debug --oss;
 else
   installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
