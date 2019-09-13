@@ -4,7 +4,7 @@
 [partintro]
 --
 
-beta[] 
+beta[]
 
 Interaction with source code is pervasive and essential for any technology company. Speed of innovation is limited by how easy it is to search, navigate, and gain insight into your source code.
 Elastic *Code* provides an easy-to-use code search solution that scales with your organization and empowers your team to understand your codebase faster than ever before.
@@ -15,7 +15,7 @@ Elastic *Code* provides an easy-to-use code search solution that scales with you
 * Symbol table
 * Full-text search with repo and language filters
 
-<<code-getting-started, Get Started>> with *Code* by importing your first repo.
+<<code-import-first-repo, Get Started>> with *Code* by importing your first repo.
 --
 
-include::code-getting-started.asciidoc[]
+include::code-import-first-repo.asciidoc[]
