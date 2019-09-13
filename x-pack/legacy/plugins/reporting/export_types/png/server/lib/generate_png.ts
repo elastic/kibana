@@ -9,7 +9,7 @@ import { toArray, mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
+import { screenshotsFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
 import { LayoutParams } from '../../../common/layouts/layout';
 
@@ -22,7 +22,7 @@ interface UrlScreenshot {
 }
 
 function generatePngObservableFn(server: KbnServer) {
-  const screenshotsObservable = screenshotsObservableFactory(server);
+  const screenshotsObservable = screenshotsFactory(server);
   const captureConcurrency = 1;
 
   // prettier-ignore

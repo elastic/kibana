@@ -15,13 +15,13 @@ import { getNumberOfItems } from './get_number_of_items';
 import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
 import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
-import { getScreenshots } from './get_screenshots';
+import { captureScreenshotData } from './capture_screenshots';
 
-export function screenshotsObservableFactory(server: KbnServer) {
+export function screenshotsFactory(server: KbnServer) {
   const config = server.config();
   const captureConfig = config.get('xpack.reporting.capture');
 
-  return async function screenshotsObservable({
+  return async function getScreenshots({
     browser,
     logger,
     url,
@@ -58,10 +58,12 @@ export function screenshotsObservableFactory(server: KbnServer) {
 
     await waitForRenderComplete(captureConfig, browser, layout, logger);
 
+    // TODO since it's really unclear why we are getting timeRange here, this logic belongs in generate_pdf / generate_png
     const timeRange = await getTimeRange(browser, layout, logger);
 
     const elementsPositionAndAttributes = await getElementPositionAndAttributes(browser, layout);
-    const screenshots = await getScreenshots({
+
+    const screenshots = await captureScreenshotData({
       browser,
       elementsPositionAndAttributes,
       logger,

@@ -17,7 +17,7 @@ const getAsyncDurationLogger = (logger: LevelLogger) => {
   };
 };
 
-export const getScreenshots = async ({
+export const captureScreenshotData = async ({
   browser,
   elementsPositionAndAttributes,
   logger,
