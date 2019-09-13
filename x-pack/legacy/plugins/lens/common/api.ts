@@ -24,9 +24,13 @@ export interface TopValuesResult {
 
 export interface FieldStatsResponse<KeyType = unknown> {
   // Total count of documents
-  count?: number;
-  // If sampled, the exact number of documents sampled
-  sampleCount?: number;
+  totalDocuments?: number;
+  // If sampled, the exact number of matching documents
+  sampledDocuments?: number;
+  // If sampled, the exact number of values sampled. Can be higher than documents
+  // because Elasticsearch supports arrays for all fields
+  sampledValues?: number;
+  // Histogram and values are based on distinct values, not based on documents
   histogram?: BucketedAggregation<KeyType>;
   topValues?: BucketedAggregation<KeyType>;
 }

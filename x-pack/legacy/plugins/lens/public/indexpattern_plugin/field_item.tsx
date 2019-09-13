@@ -51,10 +51,9 @@ export interface FieldItemProps {
 
 interface State {
   isLoading: boolean;
-  // Total number of results
-  count?: number;
-  // If sampled, how many documents were seen?
-  sampleCount?: number;
+  totalDocuments?: number;
+  sampledDocuments?: number;
+  sampledValues?: number;
   histogram?: BucketedAggregation<number | string>;
   topValues?: BucketedAggregation<number | string>;
 }
@@ -132,8 +131,9 @@ export function FieldItem({
         setState(s => ({
           ...s,
           isLoading: false,
-          count: results.count,
-          sampleCount: results.sampleCount,
+          totalDocuments: results.totalDocuments,
+          sampledDocuments: results.sampledDocuments,
+          sampledValues: results.sampledValues,
           histogram: results.histogram,
           topValues: results.topValues,
         }));
@@ -144,7 +144,7 @@ export function FieldItem({
           results.topValues &&
           results.topValues.buckets.length
         ) {
-          const count = results.sampleCount || results.count;
+          const count = results.sampledValues || results.sampledDocuments || results.totalDocuments;
           const totalValuesCount =
             results.topValues &&
             results.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
@@ -172,10 +172,10 @@ export function FieldItem({
   };
   const seriesColors = new Map([[colors, expectedColor]]);
 
-  const count = state.sampleCount || state.count;
-  const totalValuesCount =
+  const bucketedValuesCount =
     state.topValues && state.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount = count && totalValuesCount ? count - totalValuesCount : 0;
+  const otherCount =
+    state.sampledValues && bucketedValuesCount ? state.sampledValues - bucketedValuesCount : 0;
 
   const euiButtonColor =
     field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
@@ -290,77 +290,80 @@ export function FieldItem({
           </Chart>
         )}
 
-        {state.topValues &&
-          (!state.histogram || !showingHistogram) &&
-          (count && (
-            <div data-test-subj="lnsFieldListPanel-topValues">
-              {state.topValues.buckets.map(topValue => (
-                <React.Fragment key={topValue.key}>
-                  <EuiFlexGroup alignItems="stretch" key={topValue.key}>
-                    <EuiFlexItem grow={true} className="eui-textTruncate">
-                      <EuiToolTip content={formatter.convert(topValue.key)}>
-                        <EuiText size="s">{formatter.convert(topValue.key)}</EuiText>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="eui-textTruncate">
-                      <EuiText size="s" textAlign="left" color={euiTextColor}>
-                        {((topValue.count / count!) * 100).toFixed(1)}%
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+        {state.topValues && state.sampledValues && (!state.histogram || !showingHistogram) && (
+          <div data-test-subj="lnsFieldListPanel-topValues">
+            {state.topValues.buckets.map(topValue => (
+              <React.Fragment key={topValue.key}>
+                <EuiFlexGroup alignItems="stretch" key={topValue.key}>
+                  <EuiFlexItem grow={true} className="eui-textTruncate">
+                    <EuiToolTip content={formatter.convert(topValue.key)}>
+                      <EuiText size="s">{formatter.convert(topValue.key)}</EuiText>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} className="eui-textTruncate">
+                    <EuiText size="s" textAlign="left" color={euiTextColor}>
+                      {((topValue.count / state.sampledValues!) * 100).toFixed(1)}%
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                  <div>
-                    <EuiFlexItem grow={1}>
-                      <EuiProgress
-                        value={topValue.count / count!}
-                        max={1}
-                        size="s"
-                        color={euiButtonColor}
-                      />
-                    </EuiFlexItem>
-                  </div>
+                <div>
+                  <EuiFlexItem grow={1}>
+                    <EuiProgress
+                      value={topValue.count / state.sampledValues!}
+                      max={1}
+                      size="s"
+                      color={euiButtonColor}
+                    />
+                  </EuiFlexItem>
+                </div>
 
-                  <EuiSpacer size="xs" />
-                </React.Fragment>
-              ))}
-              {otherCount ? (
-                <>
-                  <EuiFlexGroup alignItems="stretch">
-                    <EuiFlexItem grow={true} className="eui-textTruncate">
-                      <EuiText size="s">
-                        {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
-                          defaultMessage: 'Other',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
+                <EuiSpacer size="xs" />
+              </React.Fragment>
+            ))}
+            {otherCount ? (
+              <>
+                <EuiFlexGroup alignItems="stretch">
+                  <EuiFlexItem grow={true} className="eui-textTruncate">
+                    <EuiText size="s">
+                      {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
+                        defaultMessage: 'Other',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
 
-                    <EuiFlexItem grow={false} className="eui-textTruncate">
-                      <EuiText size="s" color="subdued">
-                        {((otherCount / count!) * 100).toFixed(1)}%
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiFlexItem grow={false} className="eui-textTruncate">
+                    <EuiText size="s" color="subdued">
+                      {((otherCount / state.sampledValues!) * 100).toFixed(1)}%
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                  <div>
-                    <EuiProgress value={otherCount / count} max={1} size="s" color="subdued" />
-                  </div>
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-          ))}
+                <div>
+                  <EuiProgress
+                    value={otherCount / state.sampledValues!}
+                    max={1}
+                    size="s"
+                    color="subdued"
+                  />
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+        )}
 
-        {state.count ? (
+        {state.totalDocuments ? (
           <div>
             <EuiSpacer size="m" />
-            {state.sampleCount ? (
+            {state.sampledDocuments ? (
               <EuiText size="s">
                 {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
                   defaultMessage: '{percentage}% of {docCount} documents',
                   values: {
-                    docCount: state.count,
-                    percentage: ((state.sampleCount / state.count) * 100).toFixed(1),
+                    docCount: state.totalDocuments,
+                    percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(1),
                   },
                 })}
               </EuiText>
@@ -368,7 +371,7 @@ export function FieldItem({
               <EuiText size="s">
                 {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
                   defaultMessage: '{docCount} documents',
-                  values: { docCount: state.count },
+                  values: { docCount: state.totalDocuments },
                 })}
               </EuiText>
             )}

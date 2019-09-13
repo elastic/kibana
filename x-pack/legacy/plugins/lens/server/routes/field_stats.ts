@@ -143,8 +143,9 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      count: minMaxResult.hits.total,
-      sampleCount: minMaxResult.aggregations!.sample.sample_count.value!,
+      totalDocuments: minMaxResult.hits.total,
+      sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+      sampledDocuments: (minMaxResult.aggregations!.sample.doc_count as unknown) as number,
       topValues: topValuesBuckets,
       histogram: { buckets: [] },
     };
@@ -169,8 +170,9 @@ export async function getNumberHistogram(
   >;
 
   return {
-    count: minMaxResult.hits.total,
-    sampleCount: minMaxResult.aggregations!.sample.sample_count.value!,
+    totalDocuments: minMaxResult.hits.total,
+    sampledDocuments: (minMaxResult.aggregations!.sample.doc_count as unknown) as number,
+    sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: bucketsToResponse<typeof histogramBody['sample']['aggs']['histo']>(
       histogramResult.aggregations!.sample.histo
     ),
@@ -199,8 +201,9 @@ export async function getStringSamples(
   >;
 
   return {
-    count: topValuesResult.hits.total,
-    sampleCount: topValuesResult.aggregations!.sample.sample_count.value!,
+    totalDocuments: topValuesResult.hits.total,
+    sampledDocuments: (topValuesResult.aggregations!.sample.doc_count as unknown) as number,
+    sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: bucketsToResponse<typeof topValuesBody['sample']['aggs']['top_values']>(
       topValuesResult.aggregations!.sample.top_values
     ),
@@ -225,7 +228,7 @@ export async function getDateHistogram(
   const interval = Math.round((toDate.valueOf() - fromDate.valueOf()) / 10);
   if (interval < 1) {
     return {
-      count: 0,
+      totalDocuments: 0,
       histogram: { buckets: [] },
     };
   }
@@ -244,7 +247,7 @@ export async function getDateHistogram(
   >;
 
   return {
-    count: results.hits.total,
+    totalDocuments: results.hits.total,
     histogram: bucketsToResponse<typeof histogramBody['histo']>(results.aggregations!.histo),
   };
 }
