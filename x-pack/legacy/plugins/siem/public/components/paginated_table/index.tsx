@@ -153,7 +153,7 @@ export const PaginatedTable = memo<SiemTables>(
       if (headerCount >= 0 && loadingInitial) {
         setLoadingInitial(false);
       }
-    }, [headerCount]);
+    }, [loadingInitial, headerCount]);
 
     useEffect(() => {
       setMyLoading(loading);
