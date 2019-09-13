@@ -19,6 +19,7 @@ import { getFilterQuery, type, makeMapStateToProps } from './utils';
 const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
   ({
     children,
+    deleteQuery,
     filterQueryExpression,
     from,
     isInitializing,
@@ -33,6 +34,7 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <>
               {children({
+                deleteQuery,
                 endDate: to,
                 filterQuery: getFilterQuery(detailName, filterQueryExpression, indexPattern),
                 kqlQueryExpression: getHostDetailsEventsKqlQueryExpression({
