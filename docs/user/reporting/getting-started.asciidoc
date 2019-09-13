@@ -28,7 +28,7 @@ in the report.
 +
 --
 [role="screenshot"]
-image:reporting/images/share-button.png["Reporting Button",link="share-button.png"]
+image:user/reporting/images/share-button.png["Reporting Button",link="share-button.png"]
 --
 
 . Depending on the {kib} application, choose the appropriate options:
