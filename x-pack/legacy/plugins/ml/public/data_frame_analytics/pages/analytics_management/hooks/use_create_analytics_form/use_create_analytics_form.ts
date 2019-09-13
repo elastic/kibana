@@ -105,7 +105,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} created.',
+            defaultMessage: 'Request to create data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
@@ -273,7 +273,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} started.',
+            defaultMessage: 'Request to start data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),

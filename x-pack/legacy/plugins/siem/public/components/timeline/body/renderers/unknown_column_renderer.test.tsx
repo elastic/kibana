@@ -31,6 +31,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -46,6 +47,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('a made up column name', mockDatum),
       field: defaultHeaders.find(h => h.id === 'a made up column name')!,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <ThemeProvider theme={theme}>
@@ -61,6 +63,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <ThemeProvider theme={theme}>

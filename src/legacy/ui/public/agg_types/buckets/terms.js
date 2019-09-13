@@ -26,12 +26,12 @@ import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { OrderAggParamEditor } from '../controls/order_agg';
-import { OrderParamEditor } from '../controls/order';
-import { OrderByParamEditor, aggFilter } from '../controls/order_by';
-import { SizeParamEditor } from '../controls/size';
-import { MissingBucketParamEditor } from '../controls/missing_bucket';
-import { OtherBucketParamEditor } from '../controls/other_bucket';
+import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
+import { OrderParamEditor } from '../../vis/editors/default/controls/order';
+import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
+import { SizeParamEditor } from '../../vis/editors/default/controls/size';
+import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
+import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
 
 const orderAggSchema = (new Schemas([
   {

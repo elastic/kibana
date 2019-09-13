@@ -6,6 +6,9 @@
 
 import Boom from 'boom';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -23,9 +26,10 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
     method: 'POST',
     path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
     handler: async (req, res) => {
-      const payload = getLogEntryRateRequestPayloadRT
-        .decode(req.payload)
-        .getOrElseL(throwErrors(Boom.badRequest));
+      const payload = pipe(
+        getLogEntryRateRequestPayloadRT.decode(req.payload),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
       const logEntryRateBuckets = await logAnalysis
         .getLogEntryRateBuckets(

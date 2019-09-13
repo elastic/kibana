@@ -1,13 +1,13 @@
 [role="xpack"]
 [[spaces-api-resolve-copy-saved-objects-conflicts]]
-=== Resolve Copy Saved Objects to Space Conflicts
+=== Resolve copy saved objects to space conflicts API
 ++++
 <titleabbrev>Resolve copy to space conflicts</titleabbrev>
 ++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 Overwrites specific saved objects that were returned as errors from the <<spaces-api-copy-saved-objects, Copy Saved Objects to Space API>>.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 ////
 Use the appropriate heading levels for your book.

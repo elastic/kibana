@@ -11,7 +11,6 @@ import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import {
   Action,
   IEmbeddable,
-  ActionContext,
   IncompatibleActionError,
   Embeddable,
   EmbeddableInput,
@@ -33,7 +32,11 @@ function hasTimeRange(
   return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
 }
 
-export class CustomTimeRangeBadge extends Action {
+interface ActionContext {
+  embeddable: Embeddable<TimeRangeInput>;
+}
+
+export class CustomTimeRangeBadge extends Action<ActionContext> {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
   private openModal: OpenModal;
   private dateFormat: string;
@@ -55,7 +58,7 @@ export class CustomTimeRangeBadge extends Action {
     this.commonlyUsedRanges = commonlyUsedRanges;
   }
 
-  public getDisplayName({ embeddable }: ActionContext<Embeddable<TimeRangeInput>>) {
+  public getDisplayName({ embeddable }: ActionContext) {
     return prettyDuration(
       embeddable.getInput().timeRange.from,
       embeddable.getInput().timeRange.to,

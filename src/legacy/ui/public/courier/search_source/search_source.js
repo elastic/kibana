@@ -77,7 +77,7 @@ import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
+import { getHighlightRequest } from '../../../../../plugins/data/common/highlight';
 
 const FIELDS = [
   'type',
