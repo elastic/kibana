@@ -13,14 +13,15 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
-  SortDirection,
 } from '@elastic/eui';
 
 import {
-  DataFrameAnalyticsId,
-  moveToAnalyticsWizard,
-  useRefreshAnalyticsList,
-} from '../../../../common';
+  OnTableChangeArg,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../../common/types/eui/in_memory_table';
+
+import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 
@@ -33,11 +34,11 @@ import {
   Query,
   Clause,
 } from './common';
+import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, AnalyticsTable } from './analytics_table';
-import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -63,10 +64,19 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
-export const DataFrameAnalyticsList: FC = () => {
+interface Props {
+  isManagementTable?: boolean;
+  blockRefresh?: boolean;
+  openCreateJobModal?: ActionDispatchers['openModal'];
+}
+// isManagementTable - for use in Kibana managagement ML section
+export const DataFrameAnalyticsList: FC<Props> = ({
+  isManagementTable = false,
+  blockRefresh = false,
+  openCreateJobModal,
+}) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [blockRefresh, setBlockRefresh] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
@@ -80,7 +90,7 @@ export const DataFrameAnalyticsList: FC = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -97,8 +107,6 @@ export const DataFrameAnalyticsList: FC = () => {
     isLoading: setIsLoading,
     onRefresh: () => getAnalytics(true),
   });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
@@ -204,28 +212,28 @@ export const DataFrameAnalyticsList: FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-                defaultMessage: 'No data frame analytics found',
+                defaultMessage: 'No data frame analytics jobs found',
               })}
             </h2>
           }
-          actions={[
-            <EuiButtonEmpty
-              onClick={moveToAnalyticsWizard}
-              isDisabled={disabled}
-              style={{ display: 'none' }}
-            >
-              {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-                defaultMessage: 'Create your first data frame analytics',
-              })}
-            </EuiButtonEmpty>,
-          ]}
+          actions={
+            !isManagementTable && openCreateJobModal !== undefined
+              ? [
+                  <EuiButtonEmpty onClick={openCreateJobModal} isDisabled={disabled}>
+                    {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
+                      defaultMessage: 'Create your first data frame analytics job',
+                    })}
+                  </EuiButtonEmpty>,
+                ]
+              : []
+          }
           data-test-subj="mlNoDataFrameAnalyticsFound"
         />
       </Fragment>
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, isManagementTable);
 
   const sorting = {
     sort: {
@@ -288,11 +296,8 @@ export const DataFrameAnalyticsList: FC = () => {
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: SortDirection.ASC },
-  }: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: string };
-  }) => {
+    sort = { field: DataFrameAnalyticsListColumn.id, direction: SORT_DIRECTION.ASC },
+  }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
@@ -306,6 +311,7 @@ export const DataFrameAnalyticsList: FC = () => {
     <Fragment>
       <ProgressBar isLoading={isLoading} />
       <AnalyticsTable
+        allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}
         error={searchError}
@@ -315,7 +321,7 @@ export const DataFrameAnalyticsList: FC = () => {
         items={filterActive ? filteredAnalytics : analytics}
         itemId={DataFrameAnalyticsListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
         search={search}

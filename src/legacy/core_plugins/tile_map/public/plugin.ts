@@ -23,7 +23,7 @@ import {
   PluginInitializerContext,
   UiSettingsClientContract,
 } from '../../../../core/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
@@ -40,7 +40,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
 
 /** @internal */
 export interface TileMapPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -55,16 +55,16 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, visualizations, __LEGACY }: TileMapPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: TileMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
+    expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.registerVisualization(() =>
       createTileMapTypeDefinition(visualizationDependencies)
     );
   }

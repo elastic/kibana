@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, memo, FC } from 'react';
+import React, { memo, FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { Validation } from '../../../../../common/job_validator';
 
@@ -14,21 +16,23 @@ interface Props {
 }
 
 export const Description: FC<Props> = memo(({ children, validation }) => {
-  const title = 'Bucket span';
+  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.title', {
+    defaultMessage: 'Bucket span',
+  });
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
-        <Fragment>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-        </Fragment>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.description"
+          defaultMessage="Set the interval for time series analysis, typically between 15m to 1h."
+        />
       }
     >
       <EuiFormRow
         label={title}
-        describedByIds={['single-example-aria']}
+        describedByIds={['description']}
         error={validation.message}
         isInvalid={validation.valid === false}
       >

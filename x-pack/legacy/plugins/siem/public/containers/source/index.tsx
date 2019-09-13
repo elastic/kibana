@@ -22,11 +22,12 @@ export interface BrowserField {
   category: string;
   description: string | null;
   example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
   indexes: string[];
   name: string;
   searchable: boolean;
   type: string;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

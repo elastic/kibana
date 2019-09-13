@@ -45,6 +45,7 @@ export function maps(kibana) {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
           emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
@@ -119,15 +120,15 @@ export function maps(kibana) {
         privileges: {
           all: {
             savedObject: {
-              all: ['map'],
+              all: ['map', 'query'],
               read: ['index-pattern']
             },
-            ui: ['save', 'show'],
+            ui: ['save', 'show', 'saveQuery'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern']
+              read: ['map', 'index-pattern', 'query']
             },
             ui: ['show'],
           },

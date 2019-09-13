@@ -8,28 +8,26 @@ import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
 
-export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
+export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,
     jobCreatorUpdated,
     chartLoader,
     chartInterval,
-    resultsLoader,
   } = useContext(JobCreatorContext);
 
   if (isMultiMetricJobCreator(jc) === false) {
@@ -43,14 +41,14 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     jobCreator.aggFieldPairs
   );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
-  const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
-  const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
+  const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     addDetector(selectedOptionsIn);
@@ -74,17 +72,8 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setAggFieldPairList([...aggFieldPairList]);
   }
 
-  function setResultsWrapper(results: Results) {
-    setModelData(results.model);
-    setAnomalyData(results.anomalies);
-  }
-
   useEffect(() => {
-    // subscribe to progress and results
-    const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
-    return () => {
-      subscription.unsubscribe();
-    };
+    setPageReady(true);
   }, []);
 
   // watch for changes in detector list length
@@ -106,6 +95,12 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       setEnd(jobCreator.end);
       loadCharts();
     }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
+      loadCharts();
+    }
+
     setSplitField(jobCreator.splitField);
   }, [jobCreatorUpdated]);
 
@@ -117,7 +112,9 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       chartLoader
         .loadFieldExampleValues(splitField)
         .then(setFieldValues)
-        .catch(() => {});
+        .catch(error => {
+          mlMessageBarService.notify.error(error);
+        });
     } else {
       setFieldValues([]);
     }
@@ -130,64 +127,58 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     loadCharts();
   }, [fieldValues]);
 
-  function getChartSettings(): ChartSettings {
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: chartInterval.getInterval().asMilliseconds(),
-    };
-    if (aggFieldPairList.length > 2) {
-      cs.cols = 3;
-      cs.height = '150px';
-      cs.intervalMs = cs.intervalMs * 3;
-    } else if (aggFieldPairList.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
+  async function loadCharts() {
+    if (allDataReady()) {
+      setLoadingData(true);
+      try {
+        const cs = getChartSettings(jobCreator, chartInterval);
+        setChartSettings(cs);
+        const resp: LineChartData = await chartLoader.loadLineCharts(
+          jobCreator.start,
+          jobCreator.end,
+          aggFieldPairList,
+          jobCreator.splitField,
+          fieldValues.length > 0 ? fieldValues[0] : null,
+          cs.intervalMs
+        );
+        setLineChartsData(resp);
+      } catch (error) {
+        mlMessageBarService.notify.error(error);
+        setLineChartsData([]);
+      }
+      setLoadingData(false);
     }
-    return cs;
   }
 
-  async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
-    if (aggFieldPairList.length > 0) {
-      const resp: LineChartData = await chartLoader.loadLineCharts(
-        jobCreator.start,
-        jobCreator.end,
-        aggFieldPairList,
-        jobCreator.splitField,
-        fieldValues.length > 0 ? fieldValues[0] : null,
-        cs.intervalMs
-      );
-
-      setLineChartsData(resp);
-    }
+  function allDataReady() {
+    return (
+      pageReady &&
+      aggFieldPairList.length > 0 &&
+      (splitField === null || (splitField !== null && fieldValues.length > 0))
+    );
   }
 
   return (
     <Fragment>
-      {lineChartsData && (
-        <ChartGrid
-          aggFieldPairList={aggFieldPairList}
-          chartSettings={chartSettings}
-          splitField={splitField}
-          fieldValues={fieldValues}
-          lineChartsData={lineChartsData}
-          modelData={modelData}
-          anomalyData={anomalyData}
-          deleteDetector={isActive ? deleteDetector : undefined}
-          jobType={jobCreator.type}
-        />
-      )}
-      {isActive && (
-        <MetricSelector
-          fields={fields}
-          detectorChangeHandler={detectorChangeHandler}
-          selectedOptions={selectedOptions}
-          removeOptions={aggFieldPairList}
-        />
-      )}
+      <ChartGrid
+        aggFieldPairList={aggFieldPairList}
+        chartSettings={chartSettings}
+        splitField={splitField}
+        fieldValues={fieldValues}
+        lineChartsData={lineChartsData}
+        modelData={[]}
+        anomalyData={[]}
+        deleteDetector={deleteDetector}
+        jobType={jobCreator.type}
+        loading={loadingData}
+      />
+
+      <MetricSelector
+        fields={fields}
+        detectorChangeHandler={detectorChangeHandler}
+        selectedOptions={selectedOptions}
+        removeOptions={aggFieldPairList}
+      />
     </Fragment>
   );
 };

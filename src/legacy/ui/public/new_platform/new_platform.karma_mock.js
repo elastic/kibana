@@ -20,18 +20,20 @@
 import sinon from 'sinon';
 
 export const npSetup = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
     data: {
-      expressions: {
-        registerFunction: sinon.fake(),
-        registerRenderer: sinon.fake(),
-        registerType: sinon.fake(),
-      },
     },
     inspector: {
       registerView: () => undefined,
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: {
           register: () => undefined,
         },
@@ -41,8 +43,15 @@ export const npSetup = {
 };
 
 export const npStart = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
     data: {},
     inspector: {
       isAvailable: () => false,

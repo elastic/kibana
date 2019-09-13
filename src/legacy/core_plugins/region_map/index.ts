@@ -25,10 +25,9 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const regionMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'region_map',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'expressions'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars(server) {
         const { regionmap } = server.config().get('map');

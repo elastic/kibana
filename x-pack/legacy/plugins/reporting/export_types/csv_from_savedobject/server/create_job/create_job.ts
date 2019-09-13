@@ -8,9 +8,9 @@ import { notFound, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 
-import { PLUGIN_ID } from '../../../../common/constants';
+import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
-import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
+import { KbnServer } from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -18,7 +18,9 @@ import {
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-} from '../../';
+  JobDocPayloadPanelCsv,
+  JobParamsPanelCsv,
+} from '../../types';
 import { createJobSearch } from './create_job_search';
 
 interface VisData {
@@ -27,17 +29,25 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (jobParams: JobParams, headers: any, req: Request) => Promise<JobDocPayload>;
+type CreateJobFn = (
+  jobParams: JobParamsPanelCsv,
+  headers: any,
+  req: Request
+) => Promise<JobDocPayloadPanelCsv>;
 
 function createJobFn(server: KbnServer): CreateJobFn {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'savedobject-csv']);
+  const logger = LevelLogger.createForServer(server, [
+    PLUGIN_ID,
+    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+    'create-job',
+  ]);
 
   return async function createJob(
-    jobParams: JobParams,
+    jobParams: JobParamsPanelCsv,
     headers: any,
     req: Request
-  ): Promise<JobDocPayload> {
+  ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();
@@ -84,7 +94,6 @@ function createJobFn(server: KbnServer): CreateJobFn {
       });
 
     return {
-      basePath: req.getBasePath(),
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
       type: null, // resolved in executeJob

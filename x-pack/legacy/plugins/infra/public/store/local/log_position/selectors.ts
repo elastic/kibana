@@ -13,6 +13,10 @@ export const selectTargetPosition = (state: LogPositionState) => state.targetPos
 export const selectIsAutoReloading = (state: LogPositionState) =>
   state.updatePolicy.policy === 'interval';
 
+export const selectAutoReloadScrollLock = (state: LogPositionState) => state.autoReloadScrollLock;
+
+export const selectAutoReloadJustAborted = (state: LogPositionState) => state.autoReloadJustAborted;
+
 export const selectFirstVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.startKey ? state.visiblePositions.startKey : null;
 
@@ -22,11 +26,17 @@ export const selectMiddleVisiblePosition = (state: LogPositionState) =>
 export const selectLastVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.endKey ? state.visiblePositions.endKey : null;
 
+export const selectControlsShouldDisplayTargetPosition = (state: LogPositionState) =>
+  state.controlsShouldDisplayTargetPosition;
+
 export const selectVisibleMidpointOrTarget = createSelector(
   selectMiddleVisiblePosition,
   selectTargetPosition,
-  (middleVisiblePosition, targetPosition) => {
-    if (middleVisiblePosition) {
+  selectControlsShouldDisplayTargetPosition,
+  (middleVisiblePosition, targetPosition, displayTargetPosition) => {
+    if (displayTargetPosition) {
+      return targetPosition;
+    } else if (middleVisiblePosition) {
       return middleVisiblePosition;
     } else if (targetPosition) {
       return targetPosition;

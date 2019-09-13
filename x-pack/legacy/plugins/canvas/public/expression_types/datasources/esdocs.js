@@ -13,7 +13,7 @@ import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-const EsdocsDatasource = ({ args, updateArgs }) => {
+const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -58,7 +58,11 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   const fields = getFields();
   const [sortField, sortOrder] = getSortBy();
 
-  const index = getIndex().toLowerCase();
+  const index = getIndex();
+
+  if (!index && defaultIndex) {
+    setArg('index', defaultIndex);
+  }
 
   const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
 
@@ -117,6 +121,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
 EsdocsDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const esdocs = () => ({

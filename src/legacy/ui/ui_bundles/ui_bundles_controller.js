@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, relative, isAbsolute } from 'path';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
@@ -25,13 +25,15 @@ import { existsSync } from 'fs';
 import del from 'del';
 import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
+import jsonStableStringify from 'json-stable-stringify';
 
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
 
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
 const mkdirpAsync = promisify(mkdirp);
+const REPO_ROOT = fromRoot();
 
 function getWebpackAliases(pluginSpecs) {
   return pluginSpecs.reduce((aliases, spec) => {
@@ -48,6 +50,23 @@ function getWebpackAliases(pluginSpecs) {
   }, {});
 }
 
+// Recursively clone appExtensions, sorting array and normalizing absolute paths
+function stableCloneAppExtensions(appExtensions) {
+  return Object.fromEntries(
+    Object.entries(appExtensions).map(([extensionType, moduleIds]) => [
+      extensionType,
+      moduleIds
+        .map(moduleId => {
+          if (isAbsolute(moduleId)) {
+            moduleId = `absolute:${relative(REPO_ROOT, moduleId)}`;
+          }
+          return moduleId.replace(/\\/g, '/');
+        })
+        .sort((a, b) => a.localeCompare(b))
+    ])
+  );
+}
+
 export class UiBundlesController {
   constructor(kbnServer) {
     const { config, uiApps, uiExports, pluginSpecs } = kbnServer;
@@ -59,9 +78,7 @@ export class UiBundlesController {
       sourceMaps: config.get('optimize.sourceMaps'),
       kbnVersion: config.get('pkg.version'),
       buildNum: config.get('pkg.buildNum'),
-      plugins: pluginSpecs
-        .map(spec => spec.getId())
-        .sort((a, b) => a.localeCompare(b))
+      appExtensions: stableCloneAppExtensions(uiExports.appExtensions),
     };
 
     this._filter = makeRe(config.get('optimize.bundleFilter') || '*', {
@@ -80,6 +97,13 @@ export class UiBundlesController {
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
+
+    // create a bundle for core-only with no modules
+    this.add({
+      id: 'core',
+      modules: [],
+      template: appEntryTemplate
+    });
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -143,7 +167,9 @@ export class UiBundlesController {
   }
 
   getContext() {
-    return JSON.stringify(this._context, null, '  ');
+    return jsonStableStringify(this._context, {
+      space: '  '
+    });
   }
 
   resolvePath(...args) {

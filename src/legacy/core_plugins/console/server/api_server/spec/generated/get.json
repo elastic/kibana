@@ -1,0 +1,29 @@
+{
+  "get": {
+    "url_params": {
+      "stored_fields": [],
+      "preference": "random",
+      "realtime": "__flag__",
+      "refresh": "__flag__",
+      "routing": "",
+      "_source": [],
+      "_source_excludes": [],
+      "_source_includes": [],
+      "version": "",
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte",
+        "force"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_doc/{id}",
+      "{indices}/{type}/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
+  }
+}

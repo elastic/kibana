@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { ACTIONS_COLUMN_WIDTH } from '../helpers';
+import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { defaultHeaders } from './default_headers';
 import { Direction } from '../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../public/containers/source/mock';
@@ -35,10 +35,9 @@ describe('ColumnHeaders', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <ColumnHeaders
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
-          isLoading={false}
           minWidth={1000}
           onColumnSorted={jest.fn()}
           onColumnRemoved={jest.fn()}
@@ -47,6 +46,7 @@ describe('ColumnHeaders', () => {
           showEventsSelect={false}
           sort={sort}
           timelineId={'test'}
+          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -56,10 +56,9 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            isLoading={false}
             minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
@@ -68,6 +67,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -84,10 +84,9 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            isLoading={false}
             minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
@@ -96,6 +95,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -114,10 +114,9 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            isLoading={false}
             minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
@@ -126,6 +125,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

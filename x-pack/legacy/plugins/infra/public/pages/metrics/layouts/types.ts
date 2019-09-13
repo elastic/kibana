@@ -25,6 +25,7 @@ interface SeriesOverrides {
   name?: string;
   formatter?: InfraFormatterType;
   formatterTemplate?: string;
+  gaugeMax?: number;
 }
 
 interface SeriesOverrideObject {

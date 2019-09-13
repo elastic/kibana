@@ -34,11 +34,7 @@
  * data that will eventually be injected by the new platform.
  */
 
-import { npSetup } from 'ui/new_platform';
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
-// @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
+import { npSetup, npStart } from 'ui/new_platform';
 import { LegacyDependenciesPlugin } from './shim/legacy_dependencies_plugin';
 import { plugin } from '.';
 
@@ -47,8 +43,6 @@ const legacyPlugin = new LegacyDependenciesPlugin();
 
 export const setup = dataPlugin.setup(npSetup.core, {
   __LEGACY: legacyPlugin.setup(),
-  interpreter: {
-    renderersRegistry,
-    getInterpreter,
-  },
 });
+
+export const start = dataPlugin.start(npStart.core);

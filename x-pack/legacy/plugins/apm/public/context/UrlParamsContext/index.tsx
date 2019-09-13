@@ -12,19 +12,31 @@ import React, {
   useState
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { uniqueId } from 'lodash';
+import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
 import { UIFilters } from '../../../typings/ui-filters';
+import {
+  localUIFilterNames,
+  LocalUIFilterName
+} from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../utils/pickKeys';
+import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
-  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
+function useUiFilters(params: IUrlParams): UIFilters {
+  const { kuery, environment, ...urlParams } = params;
+  const localUiFilters = mapValues(
+    pickKeys(urlParams, ...localUIFilterNames),
+    val => (val ? val.split(',') : [])
+  ) as Partial<Record<LocalUIFilterName, string[]>>;
+
+  return useDeepObjectIdentity({ kuery, environment, ...localUiFilters });
 }
 
 const defaultRefresh = (time: TimeRange) => {};

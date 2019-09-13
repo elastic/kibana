@@ -7,6 +7,7 @@ jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
 import '../../../__mocks__/ui_capabilities';
+import '../../../__mocks__/xpack_info';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -16,6 +17,7 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
 import { spacesManagerMock } from '../../../lib/mocks';
+import { SpacesManager } from '../../../lib';
 
 const space = {
   id: 'my-space',
@@ -35,7 +37,7 @@ describe('ManageSpacePage', () => {
 
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         spacesNavState={spacesNavState}
         intl={null as any}
       />
@@ -81,7 +83,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         spacesNavState={spacesNavState}
         intl={null as any}
       />
@@ -127,7 +129,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         spacesNavState={spacesNavState}
         intl={null as any}
       />
@@ -182,7 +184,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         spacesNavState={spacesNavState}
         intl={null as any}
       />

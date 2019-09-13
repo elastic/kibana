@@ -2,13 +2,13 @@
 
 exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <ZeekDetails
         browserFields={
           Object {
@@ -19,6 +19,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "agent",
                   "description": "Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but \`agent.id\` does not.",
                   "example": "8a4f500f",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -33,6 +34,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "agent",
                   "description": null,
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -47,6 +49,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "agent",
                   "description": "Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.",
                   "example": "8a4f500d",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -61,6 +64,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "agent",
                   "description": "Name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.",
                   "example": "foo",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -79,6 +83,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "auditd",
                   "description": null,
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                   ],
@@ -91,6 +96,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "auditd",
                   "description": null,
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                   ],
@@ -103,6 +109,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "auditd",
                   "description": null,
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                   ],
@@ -119,6 +126,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "base",
                   "description": "Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.",
                   "example": "2016-05-23T08:05:34.853Z",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -137,6 +145,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "client",
                   "description": "Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -151,6 +160,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "client",
                   "description": "Bytes sent from the client to the server.",
                   "example": "184",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -165,6 +175,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "client",
                   "description": "Client domain.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -179,6 +190,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "client",
                   "description": "Country ISO code.",
                   "example": "CA",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -197,6 +209,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "cloud",
                   "description": "The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.",
                   "example": "666777888999",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -211,6 +224,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "cloud",
                   "description": "Availability zone in which this host is running.",
                   "example": "us-east-1c",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -229,6 +243,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "container",
                   "description": "Unique container id.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -243,6 +258,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "container",
                   "description": "Name of the image the container was built on.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -257,6 +273,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "container",
                   "description": "Container image tag.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -275,6 +292,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "destination",
                   "description": "Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -289,6 +307,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "destination",
                   "description": "Bytes sent from the destination to the source.",
                   "example": "184",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -303,6 +322,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "destination",
                   "description": "Destination domain.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -317,6 +337,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "destination",
                   "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
                   "example": "",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -331,6 +352,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "destination",
                   "description": "Port of the destination.",
                   "example": "",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -349,6 +371,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "event",
                   "description": "event.end contains the date when the event ended or when the activity was last observed.",
                   "example": null,
+                  "format": "",
                   "indexes": Array [
                     "auditbeat-*",
                     "filebeat-*",
@@ -368,6 +391,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "source",
                   "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
                   "example": "",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -382,6 +406,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "category": "source",
                   "description": "Port of the source.",
                   "example": "",
+                  "format": "",
                   "indexes": Array [
                     "auditbeat",
                     "filebeat",
@@ -458,6 +483,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
             },
           }
         }
+        timelineId="test"
       />
     </RowRendererContainer>
   </Row>

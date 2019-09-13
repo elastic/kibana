@@ -6,6 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Field, Aggregation, SplitField } from '../../../../../../../../common/types/fields';
 
@@ -13,7 +14,10 @@ interface DetectorTitleProps {
   index: number;
   agg: Aggregation;
   field: Field;
-  splitField: SplitField;
+  byField?: {
+    field: SplitField;
+    value: string | null;
+  };
   deleteDetector?: (dtrIds: number) => void;
 }
 
@@ -21,14 +25,22 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
   index,
   agg,
   field,
-  splitField,
+  byField,
   deleteDetector,
+  children,
 }) => {
+  const splitField = children === false && byField !== undefined ? byField.field : null;
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <span style={{ fontSize: 'small' }}>{getTitle(agg, field, splitField)}</span>
+      <EuiFlexItem>
+        <span style={{ fontSize: 'small' }} data-test-subj="detectorTitle">
+          {getTitle(agg, field, splitField)}
+        </span>
       </EuiFlexItem>
+
+      {children !== false && (
+        <EuiFlexItem style={{ width: '100%', maxWidth: '400px' }}>{children}</EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         {deleteDetector !== undefined && (
@@ -46,10 +58,13 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
 };
 
 function getTitle(agg: Aggregation, field: Field, splitField: SplitField): string {
-  // let title = ${agg.title}(${field.name})`;
-  // if (splitField !== null) {
-  //   title += ` split by ${splitField.name}`;
-  // }
-  // return title;
-  return `${agg.title}(${field.name})`;
+  const title = `${agg.title}(${field.name})`;
+  if (splitField === null) {
+    return title;
+  } else {
+    return i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.detectorTitle.placeholder', {
+      defaultMessage: '{title} split by {field}',
+      values: { title, field: splitField.name },
+    });
+  }
 }

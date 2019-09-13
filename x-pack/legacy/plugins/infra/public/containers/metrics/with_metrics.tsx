@@ -10,8 +10,8 @@ import {
   InfraMetric,
   InfraMetricData,
   InfraNodeType,
-  InfraTimerangeInput,
   MetricsQuery,
+  InfraTimerangeInput,
 } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
@@ -28,6 +28,7 @@ interface WithMetricsProps {
   layouts: InfraMetricLayout[];
   nodeType: InfraNodeType;
   nodeId: string;
+  cloudId: string;
   sourceId: string;
   timerange: InfraTimerangeInput;
 }
@@ -39,6 +40,7 @@ export const WithMetrics = ({
   timerange,
   nodeType,
   nodeId,
+  cloudId,
 }: WithMetricsProps) => {
   const metrics = layouts.reduce(
     (acc, item) => {
@@ -57,6 +59,7 @@ export const WithMetrics = ({
         metrics,
         nodeType,
         nodeId,
+        cloudId,
         timerange,
       }}
     >

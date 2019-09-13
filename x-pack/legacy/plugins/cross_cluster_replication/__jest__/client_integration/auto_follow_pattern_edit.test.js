@@ -8,27 +8,8 @@ import { AutoFollowPatternForm } from '../../public/app/components/auto_follow_p
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path || 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-  }
-}));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
-});
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;

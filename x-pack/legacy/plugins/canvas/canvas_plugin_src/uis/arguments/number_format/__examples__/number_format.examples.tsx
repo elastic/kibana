@@ -23,6 +23,7 @@ storiesOf('arguments/NumberFormat', module)
       onValueChange={action('onValueChange')}
       argValue=""
       argId="NumberFormatExample1"
+      renderError={action('renderError')}
     />
   ))
   .add('with preset format', () => (
@@ -31,6 +32,7 @@ storiesOf('arguments/NumberFormat', module)
       onValueChange={action('onValueChange')}
       argValue="$0.00"
       argId="NumberFormatExample2"
+      renderError={action('renderError')}
     />
   ))
   .add('with custom format', () => (
@@ -39,5 +41,6 @@ storiesOf('arguments/NumberFormat', module)
       onValueChange={action('onValueChange')}
       argValue="0.0[000]a"
       argId="NumberFormatExample3"
+      renderError={action('renderError')}
     />
   ));

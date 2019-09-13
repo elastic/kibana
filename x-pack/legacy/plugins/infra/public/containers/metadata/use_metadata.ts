@@ -5,6 +5,9 @@
  */
 
 import { useEffect } from 'react';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { InfraMetadata, InfraMetadataRT } from '../../../common/http_api/metadata_api';
@@ -19,7 +22,10 @@ export function useMetadata(
   sourceId: string
 ) {
   const decodeResponse = (response: any) => {
-    return InfraMetadataRT.decode(response).getOrElseL(throwErrors(createPlainError));
+    return pipe(
+      InfraMetadataRT.decode(response),
+      fold(throwErrors(createPlainError), identity)
+    );
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
@@ -44,5 +50,13 @@ export function useMetadata(
     filteredLayouts: (response && getFilteredLayouts(layouts, response.features)) || [],
     error: (error && error.message) || null,
     loading,
+    metadata: response,
+    cloudId:
+      (response &&
+        response.info &&
+        response.info.cloud &&
+        response.info.cloud.instance &&
+        response.info.cloud.instance.id) ||
+      '',
   };
 }

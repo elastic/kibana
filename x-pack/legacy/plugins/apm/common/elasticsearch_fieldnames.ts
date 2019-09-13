@@ -57,3 +57,9 @@ export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
   'jvm.memory.non_heap.committed';
 export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
 export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
+
+export const HOST_NAME = 'host.hostname';
+export const CONTAINER_ID = 'container.id';
+export const POD_NAME = 'kubernetes.pod.name';
+
+export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';

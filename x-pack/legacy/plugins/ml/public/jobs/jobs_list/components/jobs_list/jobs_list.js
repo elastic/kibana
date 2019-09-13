@@ -80,6 +80,11 @@ class JobsListUI extends Component {
   };
 
   getJobIdLink(id) {
+    // Don't allow link to job if ML is not enabled in current space
+    if (this.props.isMlEnabledInSpace === false) {
+      return id;
+    }
+
     return (
       <EuiLink href={getJobIdUrl(id)}>
         {id}
@@ -162,11 +167,13 @@ class JobsListUI extends Component {
               { itemId: item.id }
               )}
             data-row-id={item.id}
+            data-test-subj="detailsToggle"
           />
         ),
         width: '3%'
       }, {
         field: 'id',
+        'data-test-subj': 'id',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.idLabel',
           defaultMessage: 'ID'
@@ -188,6 +195,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         field: 'description',
+        'data-test-subj': 'description',
         render: (description, item) => (
           <JobDescription job={item} />
         ),
@@ -195,6 +203,7 @@ class JobsListUI extends Component {
         width: '20%'
       }, {
         field: 'processed_record_count',
+        'data-test-subj': 'recordCount',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.processedRecordsLabel',
           defaultMessage: 'Processed records'
@@ -206,6 +215,7 @@ class JobsListUI extends Component {
         width: '10%'
       }, {
         field: 'memory_status',
+        'data-test-subj': 'memoryStatus',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.memoryStatusLabel',
           defaultMessage: 'Memory status'
@@ -215,6 +225,7 @@ class JobsListUI extends Component {
         width: '5%'
       }, {
         field: 'jobState',
+        'data-test-subj': 'jobState',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.jobStateLabel',
           defaultMessage: 'Job state'
@@ -224,6 +235,7 @@ class JobsListUI extends Component {
         width: '8%'
       }, {
         field: 'datafeedState',
+        'data-test-subj': 'datafeedState',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.datafeedStateLabel',
           defaultMessage: 'Datafeed state'
@@ -253,6 +265,10 @@ class JobsListUI extends Component {
           <EuiBadge color={'hollow'}>{'all'}</EuiBadge>
         )
       });
+      // Remove actions if Ml not enabled in current space
+      if (this.props.isMlEnabledInSpace === false) {
+        columns.pop();
+      }
     } else {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
@@ -262,6 +278,7 @@ class JobsListUI extends Component {
         }),
         truncateText: false,
         field: 'latestTimestampSortValue',
+        'data-test-subj': 'latestTimestamp',
         sortable: true,
         render: (time, item) => (
           <span className="euiTableCellContent__text">
@@ -314,7 +331,7 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
-        data-test-subj="mlJobListTable"
+        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
         loading={loading === true}
         noItemsMessage={loading ?
           intl.formatMessage({
@@ -337,6 +354,9 @@ class JobsListUI extends Component {
         isExpandable={true}
         sorting={sorting}
         hasActions={true}
+        rowProps={item => ({
+          'data-test-subj': `row row-${item.id}`
+        })}
       />
     );
   }
@@ -344,6 +364,8 @@ class JobsListUI extends Component {
 JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
+  isManagementTable: PropTypes.bool,
+  isMlEnabledInSpace: PropTypes.bool,
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
@@ -355,6 +377,8 @@ JobsListUI.propTypes = {
   loading: PropTypes.bool,
 };
 JobsListUI.defaultProps = {
+  isManagementTable: false,
+  isMlEnabledInSpace: true,
   loading: false,
 };
 

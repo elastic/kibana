@@ -15,6 +15,10 @@ import {
   UpdateQueryParams,
   SetIsInspectedParams,
   setIsInspected,
+  removeGlobalLink,
+  addGlobalLink,
+  removeTimelineLink,
+  addTimelineLink,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -202,6 +206,25 @@ describe('Inputs', () => {
         refetch,
         selectedInspectIndex: 0,
       });
+    });
+  });
+
+  describe('#LinkTo', () => {
+    test('remove/empty global link to from inputs', () => {
+      const newState: InputsModel = removeGlobalLink(state);
+      expect(newState.global.linkTo).toEqual([]);
+    });
+    test('add global link Lock from inputs', () => {
+      const newState: InputsModel = addGlobalLink('timeline', state);
+      expect(newState.global.linkTo).toEqual(['timeline']);
+    });
+    test('remove/empty timeline link Lock from inputs', () => {
+      const newState: InputsModel = removeTimelineLink(state);
+      expect(newState.timeline.linkTo).toEqual([]);
+    });
+    test('add timeline link Lock from inputs', () => {
+      const newState: InputsModel = addTimelineLink('global', state);
+      expect(newState.timeline.linkTo).toEqual(['global']);
     });
   });
 });

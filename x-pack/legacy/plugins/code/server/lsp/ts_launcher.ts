@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChildProcess, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import getPort from 'get-port';
-import { resolve } from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
+import { ExternalProgram } from './process/external_program';
+import { ControlledProgram } from './process/controlled_program';
 
 const TS_LANG_DETACH_PORT = 2089;
 
@@ -20,7 +21,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly installationPath: string
   ) {
     super('typescript', targetHost, options, loggerFactory);
   }
@@ -31,6 +33,8 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     }
     return TS_LANG_DETACH_PORT;
   }
+
+  protected startupTimeout = 5000;
 
   createExpander(
     proxy: LanguageServerProxy,
@@ -51,11 +55,10 @@ export class TypescriptServerLauncher extends AbstractLauncher {
       this.log
     );
   }
-  async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
-    const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
+  async spawnProcess(port: number, log: Logger): Promise<ControlledProgram> {
+    const p = spawn(process.execPath, [this.installationPath, '-p', port.toString(), '-c', '1'], {
       detached: false,
       stdio: 'pipe',
-      cwd: resolve(installationPath, '../..'),
     });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
@@ -63,6 +66,6 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     p.stderr.on('data', data => {
       log.stderr(data.toString());
     });
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 }

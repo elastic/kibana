@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, memo, FC } from 'react';
+import React, { memo, FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 interface Props {
@@ -12,19 +14,24 @@ interface Props {
 }
 
 export const Description: FC<Props> = memo(({ children }) => {
-  const title = 'Use dedicated index';
+  const title = i18n.translate(
+    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.useDedicatedIndex.title',
+    {
+      defaultMessage: 'Use dedicated index',
+    }
+  );
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
-        <Fragment>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-        </Fragment>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.useDedicatedIndex.description"
+          defaultMessage="Select to store results in a separate index for this job."
+        />
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+      <EuiFormRow label={title} describedByIds={['description']}>
         {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>

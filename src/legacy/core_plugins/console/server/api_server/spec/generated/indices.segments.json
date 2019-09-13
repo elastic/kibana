@@ -1,0 +1,23 @@
+{
+  "indices.segments": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "verbose": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_segments",
+      "{indices}/_segments"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html"
+  }
+}

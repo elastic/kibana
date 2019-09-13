@@ -16,6 +16,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 1,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -26,7 +27,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -78,6 +79,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 3,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -88,7 +90,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -139,6 +141,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 1,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -149,7 +152,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -201,6 +204,7 @@ Object {
     },
     "concurrency": 4,
     "loadDelay": 3000,
+    "maxAttempts": 3,
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -211,7 +215,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",

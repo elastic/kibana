@@ -126,13 +126,14 @@ export const LogsToolbar = injectI18n(({ intl }) => {
               jumpToTargetPositionTime,
               startLiveStreaming,
               stopLiveStreaming,
+              targetPosition,
             }) => (
               <LogTimeControls
                 currentTime={visibleMidpointTime}
                 isLiveStreaming={isAutoReloading}
                 jumpToTime={jumpToTargetPositionTime}
-                startLiveStreaming={interval => {
-                  startLiveStreaming(interval);
+                startLiveStreaming={() => {
+                  startLiveStreaming();
                   setSurroundingLogsId(null);
                 }}
                 stopLiveStreaming={stopLiveStreaming}

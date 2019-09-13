@@ -14,13 +14,20 @@ declare interface JobService {
   tempJobCloningObjects: {
     job: any;
     skipTimeRangeStep: boolean;
+    start?: number;
+    end?: number;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;
   cloneJob(job: any): any;
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
-  startDatafeed(datafeedId: string, jobId: string, start: number, end: number): Promise<any>;
+  startDatafeed(
+    datafeedId: string,
+    jobId: string,
+    start: number | undefined,
+    end: number | undefined
+  ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): ExistingJobsAndGroups;
 }

@@ -22,7 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButton,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -104,6 +104,7 @@ function getTimeseriesexplorerDefaultState() {
     focusAnnotationData: [],
     focusChartData: undefined,
     focusForecastData: undefined,
+    fullRefresh: true,
     hasResults: false,
     jobs: [],
     // Counter to keep track of what data sets have been loaded.
@@ -128,9 +129,14 @@ function getTimeseriesexplorerDefaultState() {
   };
 }
 
-const TimeSeriesExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
+const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef }) => (
   <Fragment>
     <NavigationMenu tabId="timeseriesexplorer" />
+    {/* Show animated progress bar while loading */}
+    {loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" color="primary" size="xs" />)}
+    {/* Show a progress bar with progress 0% when not loading.
+        If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
+    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value={0} max={100} color="primary" size="xs" />)}
     <JobSelector {...jobSelectorProps} />
     <div className="ml-time-series-explorer" ref={resizeRef} >
       {children}
@@ -170,10 +176,14 @@ export class TimeSeriesExplorer extends React.Component {
   detectorIndexChangeHandler = (e) => {
     const id = e.target.value;
     if (id !== undefined) {
-      this.setState({ detectorId: id });
+      this.setState({ detectorId: id }, () => {
+        this.updateControlsForDetector(
+          () => this.loadEntityValues(
+            () => this.saveSeriesPropertiesAndRefresh()
+          )
+        );
+      });
     }
-    this.updateControlsForDetector();
-    this.loadEntityValues();
   };
 
   toggleShowAnnotationsHandler = () => {
@@ -284,6 +294,11 @@ export class TimeSeriesExplorer extends React.Component {
         modelPlotEnabled,
       } = this.state;
 
+      this.setState({
+        loading: true,
+        fullRefresh: false,
+      });
+
       getFocusData(
         criteriaFields,
         +detectorId,
@@ -322,7 +337,7 @@ export class TimeSeriesExplorer extends React.Component {
         }
         return stateEntity;
       })
-    }));
+    }), () => this.saveSeriesPropertiesAndRefresh());
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -378,7 +393,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  loadEntityValues = () => {
+  loadEntityValues = (callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
@@ -411,7 +426,7 @@ export class TimeSeriesExplorer extends React.Component {
               }
               return entity;
             })
-          });
+          }, callback);
         }
       });
   }
@@ -463,7 +478,11 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  refresh = () => {
+  refresh = (fullRefresh = true) => {
+    if (this.state.loading && fullRefresh === false) {
+      return;
+    }
+
     const { appStateHandler, timefilter } = this.props;
     const {
       detectorId: currentDetectorId,
@@ -478,17 +497,22 @@ export class TimeSeriesExplorer extends React.Component {
 
     this.contextChartSelectedInitCallDone = false;
 
+    // Only when `fullRefresh` is true we'll reset all data
+    // and show the loading spinner within the page.
     this.setState({
-      chartDetails: undefined,
-      contextChartData: undefined,
-      contextForecastData: undefined,
-      focusChartData: undefined,
-      focusForecastData: undefined,
+      fullRefresh,
       loadCounter: currentLoadCounter + 1,
       loading: true,
-      modelPlotEnabled: isModelPlotEnabled(currentSelectedJob, +currentDetectorId, currentEntities),
-      hasResults: false,
-      dataNotChartable: false
+      ...(fullRefresh ? {
+        chartDetails: undefined,
+        contextChartData: undefined,
+        contextForecastData: undefined,
+        focusChartData: undefined,
+        focusForecastData: undefined,
+        modelPlotEnabled: isModelPlotEnabled(currentSelectedJob, +currentDetectorId, currentEntities),
+        hasResults: false,
+        dataNotChartable: false
+      } : {}),
     }, () => {
       const { detectorId, entities, loadCounter, jobs, modelPlotEnabled, selectedJob } = this.state;
       const detectorIndex = +detectorId;
@@ -653,7 +677,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  updateControlsForDetector = () => {
+  updateControlsForDetector = (callback = () => {}) => {
     const { appStateHandler } = this.props;
     const { detectorId, selectedJob } = this.state;
     // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
@@ -684,7 +708,7 @@ export class TimeSeriesExplorer extends React.Component {
       entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
-    this.setState({ entities });
+    this.setState({ entities }, callback);
   }
 
   loadForJobId(jobId, jobs) {
@@ -739,16 +763,16 @@ export class TimeSeriesExplorer extends React.Component {
     this.setState(
       { detectorId, detectors, selectedJob },
       () => {
-        this.updateControlsForDetector();
-
-        // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-        mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-          .catch((err) => { console.log('Error populating field formats:', err); })
+        this.updateControlsForDetector(() => {
+          // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
+          mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
+            .catch((err) => { console.log('Error populating field formats:', err); })
           // Load the data - if the FieldFormats failed to populate
           // the default formatting will be used for metric values.
-          .then(() => {
-            this.refresh();
-          });
+            .then(() => {
+              this.refresh();
+            });
+        });
       }
     );
   }
@@ -790,7 +814,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
     this.subscriptions.add(interval$.subscribe(tableControlsListener));
     this.subscriptions.add(severity$.subscribe(tableControlsListener));
-    this.subscriptions.add(mlTimefilterRefresh$.subscribe(this.refresh));
+    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => this.refresh(false)));
 
     // Listen for changes to job selection.
     this.subscriptions.add(this.jobSelectService.subscribe(({ selection: selectedJobIds }) => {
@@ -882,7 +906,8 @@ export class TimeSeriesExplorer extends React.Component {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('timeUpdate', this.refresh);
+
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(this.refresh));
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -894,7 +919,6 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
-    this.props.timefilter.off('timeUpdate', this.refresh);
     this.resizeChecker.destroy();
     this.unsubscribeFromGlobalState();
   }
@@ -920,6 +944,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusAnnotationData,
       focusChartData,
       focusForecastData,
+      fullRefresh,
       hasResults,
       jobs,
       loading,
@@ -949,6 +974,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
+      loading,
       svgWidth,
       zoomFrom,
       zoomTo,
@@ -998,7 +1024,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowModelBounds = showModelBounds;
 
     return (
-      <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+      <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -1024,19 +1050,6 @@ export class TimeSeriesExplorer extends React.Component {
                 />
               );
             })}
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButton
-                  fill
-                  iconType="refresh"
-                  onClick={this.saveSeriesPropertiesAndRefresh}
-                >
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.refreshButtonAriaLabel', {
-                    defaultMessage: 'Refresh'
-                  })}
-                </EuiButton>
-              </EuiFormRow>
-            </EuiFlexItem>
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
@@ -1051,7 +1064,7 @@ export class TimeSeriesExplorer extends React.Component {
           </EuiFlexGroup>
         </div>
 
-        {(loading === true) && (
+        {(fullRefresh && loading === true) && (
           <LoadingIndicator
             label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
               defaultMessage: 'Loading',
@@ -1059,11 +1072,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === false) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === true) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {

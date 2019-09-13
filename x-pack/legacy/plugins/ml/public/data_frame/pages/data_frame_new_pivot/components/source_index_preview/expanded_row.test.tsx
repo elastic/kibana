@@ -7,22 +7,38 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { getNestedProperty } from '../../../../../util/object_utils';
+import { getFlattenedFields } from '../../../../common';
+
 import { ExpandedRow } from './expanded_row';
 
 describe('Data Frame: <ExpandedRow />', () => {
   test('Test against strings, objects and arrays.', () => {
+    const source = {
+      name: 'the-name',
+      nested: {
+        inner1: 'the-inner-1',
+        inner2: 'the-inner-2',
+      },
+      arrayString: ['the-array-string-1', 'the-array-string-2'],
+      arrayObject: [{ object1: 'the-object-1' }, { object2: 'the-objects-2' }],
+    } as Record<string, any>;
+
+    const flattenedSource = getFlattenedFields(source).reduce(
+      (p, c) => {
+        p[c] = getNestedProperty(source, c);
+        if (p[c] === undefined) {
+          p[c] = source[`"${c}"`];
+        }
+        return p;
+      },
+      {} as Record<string, any>
+    );
+
     const props = {
       item: {
         _id: 'the-id',
-        _source: {
-          name: 'the-name',
-          nested: {
-            inner1: 'the-inner-1',
-            inner2: 'the-inner-2',
-          },
-          arrayString: ['the-array-string-1', 'the-array-string-2'],
-          arrayObject: [{ object1: 'the-object-1' }, { object2: 'the-objects-2' }],
-        },
+        _source: flattenedSource,
       },
     };
 

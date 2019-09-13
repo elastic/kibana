@@ -5,7 +5,7 @@
  */
 
 import { logout } from '../../lib/logout';
-import { HOSTS_PAGE, NETWORK_PAGE, OVERVIEW_PAGE, TIMELINES_PAGE } from '../../lib/urls';
+import { OVERVIEW_PAGE, TIMELINES_PAGE } from '../../lib/urls';
 import {
   NAVIGATION_HOSTS,
   NAVIGATION_NETWORK,
@@ -16,7 +16,7 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('top-level navigation common to all pages in the SIEM app', () => {
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('navigates to the Overview page', () => {
@@ -28,7 +28,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Hosts page', () => {
-    loginAndWaitForPage(NETWORK_PAGE);
+    loginAndWaitForPage(TIMELINES_PAGE);
 
     cy.get(NAVIGATION_HOSTS).click({ force: true });
 
@@ -36,7 +36,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Network page', () => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(TIMELINES_PAGE);
 
     cy.get(NAVIGATION_NETWORK).click({ force: true });
 

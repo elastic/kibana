@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
-import { DataFrameTransformListRow } from './common';
+import { DataFrameTransformListRow } from '../../../../common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -52,28 +52,10 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     }
   );
   if (item.stats.node !== undefined) {
-    stateItems.push(
-      {
-        title: 'node.id',
-        description: item.stats.node.id,
-      },
-      {
-        title: 'node.name',
-        description: item.stats.node.name,
-      },
-      {
-        title: 'node.ephemeral_id',
-        description: item.stats.node.ephemeral_id,
-      },
-      {
-        title: 'node.transport_address',
-        description: item.stats.node.transport_address,
-      },
-      {
-        title: 'node.attributes',
-        description: getItemDescription(item.stats.node.attributes),
-      }
-    );
+    stateItems.push({
+      title: 'node.name',
+      description: item.stats.node.name,
+    });
   }
 
   const state: SectionConfig = {

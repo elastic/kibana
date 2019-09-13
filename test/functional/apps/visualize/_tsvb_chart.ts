@@ -27,7 +27,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
-  describe('visual builder', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/45315
+  describe.skip('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
@@ -93,7 +94,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch index patterns', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/44132
+    describe.skip('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');

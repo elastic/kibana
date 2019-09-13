@@ -34,7 +34,7 @@ export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React
 
     public render() {
       const otherProps = omit(['refetch', 'setQuery'], this.props);
-      return <WrappedComponent {...otherProps} />;
+      return <WrappedComponent {...(otherProps as T)} />;
     }
   }
   ManageQuery.displayName = `ManageQuery (${WrappedComponent.displayName || 'Unknown'})`;

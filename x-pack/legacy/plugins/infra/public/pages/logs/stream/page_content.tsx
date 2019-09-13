@@ -6,32 +6,12 @@
 
 import React, { useContext } from 'react';
 
-import { SourceErrorPage } from '../../../components/source_error_page';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
 
 export const StreamPageContent: React.FunctionComponent = () => {
-  const {
-    hasFailedLoadingSource,
-    isLoadingSource,
-    logIndicesExist,
-    loadSource,
-    loadSourceFailureMessage,
-  } = useContext(Source.Context);
+  const { logIndicesExist } = useContext(Source.Context);
 
-  return (
-    <>
-      {isLoadingSource ? (
-        <SourceLoadingPage />
-      ) : logIndicesExist ? (
-        <LogsPageLogsContent />
-      ) : hasFailedLoadingSource ? (
-        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-      ) : (
-        <LogsPageNoIndicesContent />
-      )}
-    </>
-  );
+  return <>{logIndicesExist ? <LogsPageLogsContent /> : <LogsPageNoIndicesContent />}</>;
 };

@@ -15,7 +15,10 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraMetricsRequestOptions {
-  nodeId: string;
+  nodeIds: {
+    nodeId: string;
+    cloudId?: string | null;
+  };
   nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
@@ -44,6 +47,8 @@ export enum InfraMetricModelMetricType {
   positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
+  sum = 'sum',
+  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
 }
 
 export interface InfraMetricModel {
@@ -56,6 +61,7 @@ export interface InfraMetricModel {
   series: InfraMetricModelSeries[];
   filter?: string;
   map_field_to?: string;
+  id_type?: 'cloud' | 'node';
 }
 
 export interface InfraMetricModelSeries {

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getColorRampStops } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
-import { getDefaultProperties } from './vector_style_defaults';
+import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
@@ -28,8 +28,12 @@ export class VectorStyle extends AbstractStyle {
   static type = 'VECTOR';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
-  static getComputedFieldName(fieldName) {
-    return `__kbn__scaled(${fieldName})`;
+  static getComputedFieldName(styleName, fieldName) {
+    return `${VectorStyle.getComputedFieldNamePrefix(fieldName)}__${styleName}`;
+  }
+
+  static getComputedFieldNamePrefix(fieldName) {
+    return `__kbn__dynamic__${fieldName}`;
   }
 
   constructor(descriptor = {}, source) {
@@ -326,14 +330,22 @@ export class VectorStyle extends AbstractStyle {
 
         // "feature-state" data expressions are not supported with layout properties.
         // To work around this limitation, some styling values must fall back to geojson property values.
-        let supportsFeatureState = true;
-        let isScaled = true;
+        let supportsFeatureState;
+        let isScaled;
         if (styleName === 'iconSize'
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
+          isScaled = true;
         } else if (styleName === 'iconOrientation') {
           supportsFeatureState = false;
           isScaled = false;
+        } else if ((styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR)
+          && options.useCustomColorRamp) {
+          supportsFeatureState = true;
+          isScaled = false;
+        } else {
+          supportsFeatureState = true;
+          isScaled = true;
         }
 
         return {
@@ -341,7 +353,7 @@ export class VectorStyle extends AbstractStyle {
           isScaled,
           name,
           range: this._getFieldRange(name),
-          computedName: VectorStyle.getComputedFieldName(name),
+          computedName: VectorStyle.getComputedFieldName(styleName, name),
         };
       });
   }
@@ -417,9 +429,18 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ fieldName, color }) {
-    const colorStops = getColorRampStops(color);
-    const targetName = VectorStyle.getComputedFieldName(fieldName);
+  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
+    if (isSteps) {
+      const firstStopValue = colorStops[0];
+      const lessThenFirstStopValue = firstStopValue - 1;
+      return [
+        'step',
+        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        ...colorStops
+      ];
+    }
+
     return [
       'interpolate',
       ['linear'],
@@ -429,8 +450,7 @@ export class VectorStyle extends AbstractStyle {
     ];
   }
 
-  _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
-    const targetName = VectorStyle.getComputedFieldName(fieldName);
+  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
     return   [
       'interpolate',
       ['linear'],
@@ -440,7 +460,7 @@ export class VectorStyle extends AbstractStyle {
     ];
   }
 
-  _getMBColor(styleDescriptor) {
+  _getMBColor(styleName, styleDescriptor) {
     const isStatic = styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC;
     if (isStatic) {
       return _.get(styleDescriptor, 'options.color', null);
@@ -448,14 +468,31 @@ export class VectorStyle extends AbstractStyle {
 
     const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.color');
-    if (isDynamicConfigComplete) {
-      return this._getMBDataDrivenColor({
-        fieldName: styleDescriptor.options.field.name,
-        color: styleDescriptor.options.color,
-      });
+    if (!isDynamicConfigComplete) {
+      return null;
     }
 
-    return null;
+    if (styleDescriptor.options.useCustomColorRamp &&
+      (!styleDescriptor.options.customColorRamp ||
+      !styleDescriptor.options.customColorRamp.length)) {
+      return null;
+    }
+
+    return this._getMBDataDrivenColor({
+      targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
+      colorStops: this._getMBColorStops(styleDescriptor),
+      isSteps: styleDescriptor.options.useCustomColorRamp,
+    });
+  }
+
+  _getMBColorStops(styleDescriptor) {
+    if (styleDescriptor.options.useCustomColorRamp) {
+      return styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
+    }
+
+    return getColorRampStops(styleDescriptor.options.color);
   }
 
   _isSizeDynamicConfigComplete(styleDescriptor) {
@@ -464,14 +501,14 @@ export class VectorStyle extends AbstractStyle {
       && _.has(styleDescriptor, 'options.maxSize');
   }
 
-  _getMbSize(styleDescriptor) {
+  _getMbSize(styleName, styleDescriptor) {
     if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
       return styleDescriptor.options.size;
     }
 
     if (this._isSizeDynamicConfigComplete(styleDescriptor)) {
       return this._getMbDataDrivenSize({
-        fieldName: styleDescriptor.options.field.name,
+        targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
         minSize: styleDescriptor.options.minSize,
         maxSize: styleDescriptor.options.maxSize,
       });
@@ -482,7 +519,7 @@ export class VectorStyle extends AbstractStyle {
 
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(this._descriptor.properties.fillColor);
+      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', alpha);
     } else {
@@ -491,7 +528,7 @@ export class VectorStyle extends AbstractStyle {
     }
 
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(this._descriptor.properties.lineColor);
+      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
 
@@ -501,7 +538,7 @@ export class VectorStyle extends AbstractStyle {
     }
 
     if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(this._descriptor.properties.lineWidth);
+      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
       mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
@@ -510,7 +547,7 @@ export class VectorStyle extends AbstractStyle {
 
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(this._descriptor.properties.fillColor);
+      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', alpha);
     } else {
@@ -518,7 +555,7 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(this._descriptor.properties.lineColor);
+      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
 
@@ -527,13 +564,13 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
     if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(this._descriptor.properties.lineWidth);
+      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
     }
     if (this._descriptor.properties.iconSize) {
-      const iconSize = this._getMbSize(this._descriptor.properties.iconSize);
+      const iconSize = this._getMbSize(vectorStyles.ICON_SIZE, this._descriptor.properties.iconSize);
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
@@ -545,9 +582,9 @@ export class VectorStyle extends AbstractStyle {
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
-    const color = this._getMBColor(this._descriptor.properties.fillColor);
-    const haloColor = this._getMBColor(this._descriptor.properties.lineColor);
-    const haloWidth = this._getMbSize(this._descriptor.properties.lineWidth);
+    const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
+    const haloColor = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
+    const haloWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
     mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
@@ -572,7 +609,7 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
-      const targetName = VectorStyle.getComputedFieldName(iconSize.options.field.name);
+      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_SIZE, iconSize.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -587,7 +624,7 @@ export class VectorStyle extends AbstractStyle {
     if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
     } else if (_.has(iconOrientation, 'options.field.name')) {
-      const targetName = VectorStyle.getComputedFieldName(iconOrientation.options.field.name);
+      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
         'coalesce', ['get', targetName], 0

@@ -5,7 +5,7 @@
  */
 
 
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, SETTINGS } from '../breadcrumbs';
 import { i18n } from '@kbn/i18n';
 
 
@@ -13,7 +13,9 @@ export function getSettingsBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
   return [
-    ML_BREADCRUMB
+    ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    SETTINGS
   ];
 }
 

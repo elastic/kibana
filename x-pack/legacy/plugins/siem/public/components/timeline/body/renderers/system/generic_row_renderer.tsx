@@ -30,15 +30,16 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <SystemGenericDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
     </Row>
@@ -62,15 +63,16 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <Row className="euiTableRow">
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
     </Row>

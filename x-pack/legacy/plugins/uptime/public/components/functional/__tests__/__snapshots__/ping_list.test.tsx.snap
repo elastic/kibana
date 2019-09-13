@@ -2,41 +2,21 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="hollow"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiFlexGroup
       justifyContent="spaceBetween"
     >
@@ -183,19 +163,21 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "name": "Error type",
           },
           Object {
-            "align": "left",
-            "field": "error.message",
-            "name": "Error message",
-            "render": [Function],
-          },
-          Object {
             "align": "right",
             "field": "http.response.status_code",
             "name": "Response code",
             "render": [Function],
           },
+          Object {
+            "align": "right",
+            "isExpander": true,
+            "render": [Function],
+            "width": "40px",
+          },
         ]
       }
+      itemId="id"
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           Object {
@@ -204,6 +186,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id1",
             "monitor": Object {
               "duration": Object {
                 "us": 1430,
@@ -223,6 +206,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id2",
             "monitor": Object {
               "duration": Object {
                 "us": 1370,
@@ -239,6 +223,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           Object {
             "error": null,
             "http": null,
+            "id": "id3",
             "monitor": Object {
               "duration": Object {
                 "us": 1452,
@@ -258,6 +243,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id4",
             "monitor": Object {
               "duration": Object {
                 "us": 1094,
@@ -277,6 +263,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id5",
             "monitor": Object {
               "duration": Object {
                 "us": 1597,
@@ -296,6 +283,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id6",
             "monitor": Object {
               "duration": Object {
                 "us": 1699,
@@ -315,6 +303,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id7",
             "monitor": Object {
               "duration": Object {
                 "us": 5384,
@@ -334,6 +323,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               "type": "io",
             },
             "http": null,
+            "id": "id8",
             "monitor": Object {
               "duration": Object {
                 "us": 5397,
@@ -354,6 +344,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 "status_code": 200,
               },
             },
+            "id": "id9",
             "monitor": Object {
               "duration": Object {
                 "us": 127511,
@@ -374,6 +365,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 "status_code": 200,
               },
             },
+            "id": "id10",
             "monitor": Object {
               "duration": Object {
                 "us": 287543,

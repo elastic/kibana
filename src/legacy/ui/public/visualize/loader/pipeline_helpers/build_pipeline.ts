@@ -19,15 +19,12 @@
 
 import { cloneDeep, get } from 'lodash';
 // @ts-ignore
-import { setBounds } from 'ui/agg_types/buckets/date_histogram';
+import { setBounds } from 'ui/agg_types';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-
-interface SchemaFormat {
-  id: string;
-  params?: any;
-}
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -36,7 +33,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
-  format: SchemaFormat | {};
+  format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
 }
@@ -78,37 +75,6 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createFormat = (agg: AggConfig): SchemaFormat => {
-    const format: SchemaFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
-    const formats: any = {
-      date_range: () => ({ id: 'string' }),
-      percentile_ranks: () => ({ id: 'percent' }),
-      count: () => ({ id: 'number' }),
-      cardinality: () => ({ id: 'number' }),
-      date_histogram: () => ({
-        id: 'date',
-        params: {
-          pattern: agg.buckets.getScaledDateFormat(),
-        },
-      }),
-      terms: () => ({
-        id: 'terms',
-        params: {
-          id: format.id,
-          otherBucketLabel: agg.params.otherBucketLabel,
-          missingBucketLabel: agg.params.missingBucketLabel,
-          ...format.params,
-        },
-      }),
-      range: () => ({
-        id: 'range',
-        params: { id: format.id, ...format.params },
-      }),
-    };
-
-    return formats[agg.type.name] ? formats[agg.type.name]() : format;
-  };
-
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;
@@ -127,7 +93,9 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     ].includes(agg.type.name);
 
     const format = createFormat(
-      hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
+      hasSubAgg
+        ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
+        : agg
     );
 
     const params: SchemaConfigParams = {};
@@ -450,7 +418,7 @@ const buildVisConfig: BuildVisConfigFunction = {
 
 export const buildVislibDimensions = async (
   vis: any,
-  params: { searchSource: any; timeRange?: any }
+  params: { searchSource: any; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   const dimensions = {
@@ -471,9 +439,20 @@ export const buildVislibDimensions = async (
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
-      const intervalParam = xAgg.type.params.byName.interval;
+      const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
+      const searchRequest = {
+        whenAborted: (fn: any) => {
+          if (params.abortSignal) {
+            params.abortSignal.addEventListener('abort', fn);
+          }
+        },
+      };
+      await intervalParam.modifyAggConfigOnSearchRequestStart(
+        xAgg,
+        params.searchSource,
+        searchRequest
+      );
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }
@@ -487,7 +466,7 @@ export const buildVislibDimensions = async (
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
 export const getVisParams = async (
   vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
+  params: { searchSource: SearchSource; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
@@ -542,7 +521,7 @@ export const buildPipeline = async (
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.toExpression) {
     pipeline += await vis.type.toExpression(vis, params);
   } else {

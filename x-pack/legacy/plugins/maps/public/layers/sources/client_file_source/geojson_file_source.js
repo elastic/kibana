@@ -18,12 +18,17 @@ import _ from 'lodash';
 import {
   DEFAULT_APPLY_GLOBAL_QUERY
 } from './constants';
+import { i18n } from '@kbn/i18n';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
-  static title = 'Upload GeoJSON vector file';
-  static description = 'Upload a GeoJSON file and index in Elasticsearch';
+  static title = i18n.translate('xpack.maps.source.geojsonFileTitle', {
+    defaultMessage: 'Uploaded GeoJSON'
+  });
+  static description = i18n.translate('xpack.maps.source.geojsonFileDescription', {
+    defaultMessage: 'Upload and index GeoJSON data in Elasticsearch'
+  });
   static icon = 'importAction';
   static isIndexingSource = true;
   static isBeta = true;

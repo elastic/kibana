@@ -57,6 +57,42 @@ const dataPath = (settings, log) => {
   }
 };
 
+const NONCE_STRING = `{nonce}`;
+// Policies that should include the 'self' source
+const SELF_POLICIES = Object.freeze(['script-src', 'style-src']);
+const SELF_STRING = `'self'`;
+
+const cspRules = (settings, log) => {
+  const rules = _.get(settings, 'csp.rules');
+  if (!rules) {
+    return;
+  }
+
+  const parsed = new Map(rules.map(ruleStr => {
+    const parts = ruleStr.split(/\s+/);
+    return [parts[0], parts.slice(1)];
+  }));
+
+  settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
+    if (sourceList.find(source => source.includes(NONCE_STRING))) {
+      log(`csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`);
+      sourceList = sourceList.filter(source => !source.includes(NONCE_STRING));
+
+      // Add 'self' if not present
+      if (!sourceList.find(source => source.includes(SELF_STRING))) {
+        sourceList.push(SELF_STRING);
+      }
+    }
+
+    if (SELF_POLICIES.includes(policy) && !sourceList.find(source => source.includes(SELF_STRING))) {
+      log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
+      sourceList.push(SELF_STRING);
+    }
+
+    return `${policy} ${sourceList.join(' ')}`.trim();
+  });
+};
+
 const deprecations = [
   //server
   unused('server.xsrf.token'),
@@ -69,7 +105,8 @@ const deprecations = [
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
   configPath,
-  dataPath
+  dataPath,
+  cspRules
 ];
 
 export const transformDeprecations = createTransform(deprecations);

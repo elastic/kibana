@@ -6,8 +6,6 @@
 
 import * as Rx from 'rxjs';
 import { first, mergeMap } from 'rxjs/operators';
-import { PLUGIN_ID } from '../../../../common/constants';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
 import { KbnServer } from '../../../../types';
 import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
@@ -30,33 +28,24 @@ import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 
 export function screenshotsObservableFactory(server: KbnServer) {
-  const logger = Logger.createForServer(server, [PLUGIN_ID, 'screenshots']);
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const config = server.config();
   const captureConfig = config.get('xpack.reporting.capture');
 
   return function screenshotsObservable({
+    logger,
     url,
     conditionalHeaders,
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<void> {
-    logger.debug(`Creating browser driver factory`);
-
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,
     });
 
     return create$.pipe(
-      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        logger.debug('Driver factory created');
-        message$.subscribe((line: string) => {
-          logger.debug(line, ['browser']);
-        });
-        consoleMessage$.subscribe((line: string) => {
-          logger.debug(line, ['browserConsole']);
-        });
+      mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
@@ -72,9 +61,11 @@ export function screenshotsObservableFactory(server: KbnServer) {
               // know how many items to expect since gridster incrementally adds panels
               // we have to use this hint to wait for all of them
               const renderSuccess = browser.waitForSelector(
-                `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`
+                `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`,
+                {},
+                logger
               );
-              const renderError = checkForToastMessage(browser, layout);
+              const renderError = checkForToastMessage(browser, layout, logger);
               return Rx.race(Rx.from(renderSuccess), Rx.from(renderError));
             },
             browser => browser
@@ -87,15 +78,13 @@ export function screenshotsObservableFactory(server: KbnServer) {
             async ({ browser, itemsCount }) => {
               logger.debug('setting viewport');
               const viewport = layout.getViewport(itemsCount);
-              return await browser.setViewport(viewport);
+              return await browser.setViewport(viewport, logger);
             },
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
-            ({ browser, itemsCount }) => {
-              logger.debug(`waiting for ${itemsCount} to be in the DOM`);
-              return waitForElementsToBeInDOM(browser, itemsCount, layout);
-            },
+            ({ browser, itemsCount }) =>
+              waitForElementsToBeInDOM(browser, itemsCount, layout, logger),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
@@ -109,9 +98,8 @@ export function screenshotsObservableFactory(server: KbnServer) {
           mergeMap(
             async ({ browser }) => {
               if (layout.positionElements) {
-                logger.debug('positioning elements');
                 // position panel elements for print layout
-                return await layout.positionElements(browser);
+                return await layout.positionElements(browser, logger);
               }
             },
             ({ browser }) => browser

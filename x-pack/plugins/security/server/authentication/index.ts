@@ -14,13 +14,14 @@ import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
-import { createAPIKey, CreateAPIKeyOptions } from './api_keys';
+import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { BasicCredentials, OIDCAuthenticationFlow } from './providers';
+export { OIDCAuthenticationFlow } from './providers';
+export { CreateAPIKeyResult } from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
@@ -103,7 +104,7 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return response.redirected(undefined, {
+      return response.redirected({
         headers: {
           location: authenticationResult.redirectURL!,
         },
@@ -116,36 +117,39 @@ export async function setupAuthentication({
       // proxy Elasticsearch "native" errors
       const statusCode = getErrorStatusCode(error);
       if (typeof statusCode === 'number') {
-        return response.customError(error, {
+        return response.customError({
+          body: error,
           statusCode,
           headers: authenticationResult.authResponseHeaders,
         });
       }
 
-      return response.unauthorized(undefined, {
+      return response.unauthorized({
         headers: authenticationResult.authResponseHeaders,
       });
     }
 
-    authLogger.info('Could not handle authentication attempt');
-    return response.unauthorized(undefined, {
+    authLogger.debug('Could not handle authentication attempt');
+    return response.unauthorized({
       headers: authenticationResult.authResponseHeaders,
     });
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
 
+  const apiKeys = new APIKeys({
+    clusterClient,
+    logger: loggers.get('api-key'),
+    isSecurityFeatureDisabled,
+  });
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getCurrentUser,
-    createAPIKey: (request: KibanaRequest, body: CreateAPIKeyOptions['body']) =>
-      createAPIKey({
-        body,
-        loggers,
-        isSecurityFeatureDisabled,
-        callAsCurrentUser: clusterClient.asScoped(request).callAsCurrentUser,
-      }),
+    createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
+      apiKeys.create(request, params),
+    invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidate(request, params),
     isAuthenticated: async (request: KibanaRequest) => {
       try {
         await getCurrentUser(request);

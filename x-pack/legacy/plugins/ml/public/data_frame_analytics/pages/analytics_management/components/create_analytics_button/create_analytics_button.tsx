@@ -4,37 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { Fragment, FC } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
+import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
 
-import { moveToAnalyticsWizard } from '../../../../common';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsButton: FC = () => {
-  const disabled =
-    !checkPermission('canCreateDataFrameAnalytics') ||
-    !checkPermission('canStartStopDataFrameAnalytics');
+import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
+import { CreateAnalyticsForm } from '../create_analytics_form';
+import { CreateAnalyticsModal } from '../create_analytics_modal';
+
+export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
+  const { disabled, isAdvancedEditorEnabled, isModalVisible } = props.state;
+  const { openModal } = props.actions;
 
   const button = (
     <EuiButton
-      disabled={true}
+      disabled={disabled}
       fill
-      onClick={moveToAnalyticsWizard}
+      onClick={openModal}
       iconType="plusInCircle"
       size="s"
       data-test-subj="mlDataFrameAnalyticsButtonCreate"
     >
-      <FormattedMessage
-        id="xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton"
-        defaultMessage="Create data frame analytics job"
-      />
+      {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
+        defaultMessage: 'Create analytics job',
+      })}
     </EuiButton>
   );
 
@@ -49,5 +48,15 @@ export const CreateAnalyticsButton: FC = () => {
     );
   }
 
-  return button;
+  return (
+    <Fragment>
+      {button}
+      {isModalVisible && (
+        <CreateAnalyticsModal {...props}>
+          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
+          {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
+        </CreateAnalyticsModal>
+      )}
+    </Fragment>
+  );
 };

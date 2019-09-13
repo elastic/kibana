@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 import { toArray } from 'rxjs/operators';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { findPluginSpecs } from '../../legacy/plugin_discovery';
 import { collectUiExports } from '../../legacy/ui';
 import { buildAll } from '../../legacy/server/sass/build_all';

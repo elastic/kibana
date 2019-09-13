@@ -119,7 +119,6 @@ export const search = handleActions<SearchState, SearchPayload>(
           }
           draft.isLoading = true;
           delete draft.error;
-          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
@@ -157,7 +156,7 @@ export const search = handleActions<SearchState, SearchPayload>(
           took,
           stats: {
             total,
-            from: from! + 1,
+            from: from as number,
             to: from! + results!.length,
             page: page!,
             totalPage: totalPage!,

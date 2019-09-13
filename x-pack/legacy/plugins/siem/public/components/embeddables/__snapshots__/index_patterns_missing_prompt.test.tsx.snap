@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      color="primary"
+      fill={true}
+      href="/test/base/path/app/kibana#/management/kibana/index_patterns"
+      target="_blank"
+    >
+      Configure index patterns
+    </EuiButton>
+  }
+  body={
+    <React.Fragment>
+      <p>
+        An ECS compliant Kibana index pattern must be configured to view event data on the map. When using beats, you can run the following setup commands to create the required Kibana index patterns, otherwise you can configure them manually within Kibana settings.
+      </p>
+      <p>
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/beats/auditbeat/current/load-kibana-dashboards.html"
+          target="blank"
+          type="button"
+        >
+          auditbeat-*
+        </EuiLink>
+        , 
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/beats/filebeat/current/load-kibana-dashboards.html"
+          target="blank"
+          type="button"
+        >
+          filebeat-*
+        </EuiLink>
+        , 
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/beats/packetbeat/current/load-kibana-dashboards.html"
+          target="blank"
+          type="button"
+        >
+          packetbeat-*
+        </EuiLink>
+        , 
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/beats/winlogbeat/current/load-kibana-dashboards.html"
+          target="blank"
+          type="button"
+        >
+          winlogbeat-*
+        </EuiLink>
+      </p>
+    </React.Fragment>
+  }
+  iconColor="subdued"
+  iconType="gisApp"
+  title={
+    <h2>
+      Required Index Patterns Not Configured
+    </h2>
+  }
+  titleSize="xs"
+/>
+`;

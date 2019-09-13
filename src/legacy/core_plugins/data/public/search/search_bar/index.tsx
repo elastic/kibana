@@ -17,4 +17,25 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
+import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
+import { Query } from '../../query/query_bar';
+
 export * from './components';
+
+type SavedQueryTimeFilter = TimeRange & {
+  refreshInterval: RefreshInterval;
+};
+
+export interface SavedQuery {
+  id: string;
+  attributes: SavedQueryAttributes;
+}
+
+export interface SavedQueryAttributes {
+  title: string;
+  description: string;
+  query: Query;
+  filters?: Filter[];
+  timefilter?: SavedQueryTimeFilter;
+}

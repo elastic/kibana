@@ -8,11 +8,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps app', function() {
-    this.tags('ciGroup7');
+    this.tags('ciGroup2');
 
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./logs_source_configuration'));
     loadTestFile(require.resolve('./metrics_source_configuration'));
+    loadTestFile(require.resolve('./link_to'));
   });
 };
