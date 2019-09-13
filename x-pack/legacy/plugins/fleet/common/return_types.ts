@@ -45,6 +45,7 @@ export interface ReturnTypeCheckin extends BaseReturnType {
     type: string;
     data?: object;
   }>;
+  policy: { [k: string]: any };
 }
 
 export interface ReturnTypeBulkDelete extends BaseReturnType {
