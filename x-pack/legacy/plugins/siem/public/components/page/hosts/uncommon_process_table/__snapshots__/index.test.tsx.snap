@@ -203,6 +203,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
     }
     fakeTotalCount={50}
     id="uncommonProcess"
+    isInspect={false}
     loadPage={[MockFunction]}
     loading={false}
     showMorePagesIndicator={true}

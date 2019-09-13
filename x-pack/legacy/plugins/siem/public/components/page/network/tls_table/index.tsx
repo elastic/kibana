@@ -21,6 +21,7 @@ interface OwnProps {
   data: TlsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -29,8 +30,9 @@ interface OwnProps {
 }
 
 interface TlsTableReduxProps {
-  tlsSortField: TlsSortField;
+  activePage: number;
   limit: number;
+  tlsSortField: TlsSortField;
 }
 
 interface TlsTableDispatchProps {
@@ -66,9 +68,11 @@ export const tlsTableId = 'tls-table';
 class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       id,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -81,12 +85,14 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getTlsColumns(tlsTableId)}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
@@ -102,7 +108,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
           })
         }
         updateLimitPagination={newLimit => updateTlsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ tlsSortField, totalCount }}
       />
     );
   }
