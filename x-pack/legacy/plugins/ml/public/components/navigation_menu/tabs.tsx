@@ -17,12 +17,8 @@ interface Props {
   tabId: TabId;
 }
 
-function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
-  const TAB_MAP: Record<TabId, Tab[]> = {
-    // overview: [],
-    datavisualizer: [],
-    data_frames: [],
-    data_frame_analytics: [],
+export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
+  const TAB_MAP: Partial<Record<TabId, Tab[]>> = {
     anomaly_detection: [
       {
         id: 'jobs',
@@ -55,7 +51,7 @@ function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
     ],
   };
 
-  return TAB_MAP[tabId];
+  return TAB_MAP[tabId] || [];
 }
 
 enum TAB_TEST_SUBJECT {
