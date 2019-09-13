@@ -12,7 +12,6 @@ import styled from 'styled-components';
 const Wrapper = styled.span`
   .euiToolTipAnchor {
     display: inline;
-    // max-width: 100%;
   }
 `;
 Wrapper.displayName = 'Wrapper';

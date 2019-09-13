@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import uuid from 'uuid';
-import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';

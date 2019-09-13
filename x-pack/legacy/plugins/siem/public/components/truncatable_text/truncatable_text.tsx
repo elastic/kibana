@@ -9,6 +9,8 @@ import styled from 'styled-components';
 /**
  * Applies CSS styling to enable text to be truncated with an ellipsis.
  * Example: "Don't leave me hanging..."
+ *
+ * Note: Requires a parent container with a defined width or max-width.
  */
 
 export const TruncatableText = styled.span`

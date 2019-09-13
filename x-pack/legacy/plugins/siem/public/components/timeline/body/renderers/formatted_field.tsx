@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isNumber, isString } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -17,7 +17,6 @@ import { FormattedIp } from '../../../formatted_ip';
 import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
 import { TruncatableText, TruncatableTooltip } from '../../../truncatable_text';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../helpers';
 import {
   DATE_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,

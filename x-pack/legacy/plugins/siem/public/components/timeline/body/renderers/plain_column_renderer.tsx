@@ -7,20 +7,19 @@
 import { isNumber } from 'lodash/fp';
 import React from 'react';
 
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { getEmptyTagValue } from '../../../empty_value';
+import { FormattedIp } from '../../../formatted_ip';
+import { IS_OPERATOR, DataProvider } from '../../data_providers/data_provider';
+import { Provider } from '../../data_providers/provider';
+import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from './column_renderer';
 import { IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
 import { FormattedFieldValue } from './formatted_field';
 import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';
-
-import { ColumnHeader } from '../column_headers/column_header';
-import { IS_OPERATOR, DataProvider } from '../../data_providers/data_provider';
-import { Provider } from '../../data_providers/provider';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../empty_value';
-import { FormattedIp } from '../../../formatted_ip';
-import { TimelineNonEcsData } from '../../../../graphql/types';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
