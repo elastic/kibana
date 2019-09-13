@@ -7,7 +7,7 @@ image::images/code-repo-management.png[]
 
 [float]
 ==== Add and delete a repo
-The <<code-getting-started, Getting Started>> provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
+The <<code-import-first-repo, Import your first repository>> page provides step-by-step instructions for adding a GitHub repo to *Code*.  You can fine tune the hostname of the git clone URL in your `kibana.yml` file.
 
 For security reasons, Code allows only a few trusted hostnames, such as github.com, by default. You can add an SSH key to {kib} to clone private repos.
 
