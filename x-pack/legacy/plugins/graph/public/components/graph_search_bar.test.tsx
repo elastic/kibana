@@ -10,7 +10,6 @@ import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IndexPatternSavedObject } from '../types';
 import { act } from 'react-dom/test-utils';
-import { EuiFieldText } from '@elastic/eui';
 import { IndexPattern, QueryBarInput } from 'src/legacy/core_plugins/data/public';
 
 jest.mock('ui/new_platform');
