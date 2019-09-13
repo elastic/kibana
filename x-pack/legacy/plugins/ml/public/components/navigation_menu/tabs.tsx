@@ -17,8 +17,8 @@ interface Props {
   tabId: TabId;
 }
 
-function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
-  const TAB_MAP: Record<TabId, Tab[]> = {
+export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
+  const TAB_MAP: Partial<Record<TabId, Tab[]>> = {
     // overview: [],
     datavisualizer: [],
     data_frames: [],
@@ -55,7 +55,7 @@ function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
     ],
   };
 
-  return TAB_MAP[tabId];
+  return TAB_MAP[tabId] || [];
 }
 
 enum TAB_TEST_SUBJECT {

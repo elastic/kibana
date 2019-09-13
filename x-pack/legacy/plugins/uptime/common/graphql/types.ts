@@ -53,8 +53,6 @@ export interface Ping {
   id: string;
   /** The timestamp of the ping's creation */
   timestamp: string;
-  /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -90,7 +88,7 @@ export interface Ping {
 
   tcp?: Tcp | null;
 
-  tls?: Tls | null;
+  tls?: PingTls | null;
 
   url?: Url | null;
 }
@@ -356,9 +354,9 @@ export interface Tcp {
   rtt?: Rtt | null;
 }
 /** Contains monitor transmission encryption information. */
-export interface Tls {
+export interface PingTls {
   /** The date and time after which the certificate is invalid. */
-  certificate_not_valid_after?: (string | null)[] | null;
+  certificate_not_valid_after?: string | null;
 
   certificate_not_valid_before?: string | null;
 
@@ -528,7 +526,7 @@ export interface State {
 
   timestamp: UnsignedInteger;
   /** Transport encryption information. */
-  tls?: Tls | null;
+  tls?: (StateTls | null)[] | null;
 
   url?: StateUrl | null;
 }
@@ -593,6 +591,17 @@ export interface MonitorState {
   id?: string | null;
 
   type?: string | null;
+}
+/** Contains monitor transmission encryption information. */
+export interface StateTls {
+  /** The date and time after which the certificate is invalid. */
+  certificate_not_valid_after?: string | null;
+
+  certificate_not_valid_before?: string | null;
+
+  certificates?: string | null;
+
+  rtt?: Rtt | null;
 }
 
 export interface StateUrl {
