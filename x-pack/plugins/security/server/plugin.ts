@@ -27,6 +27,7 @@ export interface LegacyAPI {
   xpackInfo: Pick<XPackInfo, 'isAvailable' | 'feature'>;
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
   cspRules: string;
+  serverBasePath?: string;
 }
 
 /**

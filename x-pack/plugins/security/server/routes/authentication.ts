@@ -17,13 +17,7 @@ export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
 /**
  * Defines routes required for SAML authentication.
  */
-function defineSAMLRoutes({
-  basePath,
-  router,
-  logger,
-  authc,
-  getLegacyAPI,
-}: RouteDefinitionParams) {
+function defineSAMLRoutes({ router, logger, authc, getLegacyAPI }: RouteDefinitionParams) {
   function createCustomResourceResponse(body: string, contentType: string) {
     return {
       body,
@@ -43,7 +37,7 @@ function defineSAMLRoutes({
       options: { authRequired: false },
     },
     (context, request, response) => {
-      const currentBasePath = basePath.get(request);
+      const serverBasePath = getLegacyAPI().serverBasePath || '';
       // We're also preventing `favicon.ico` request since it can cause new SAML handshake.
       return response.custom(
         createCustomResourceResponse(
@@ -51,7 +45,7 @@ function defineSAMLRoutes({
           <!DOCTYPE html>
           <title>Kibana SAML Login</title>
           <link rel="icon" href="data:,">
-          <script src="${currentBasePath}/api/security/saml/capture-url-fragment.js"></script>
+          <script src="${serverBasePath}/api/security/saml/capture-url-fragment.js"></script>
         `,
           'text/html'
         )
@@ -66,12 +60,12 @@ function defineSAMLRoutes({
       options: { authRequired: false },
     },
     (context, request, response) => {
-      const currentBasePath = basePath.get(request);
+      const serverBasePath = getLegacyAPI().serverBasePath || '';
       return response.custom(
         createCustomResourceResponse(
           `
           window.location.replace(
-            '${currentBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
+            '${serverBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
           );
         `,
           'text/javascript'
@@ -126,9 +120,9 @@ function defineSAMLRoutes({
       async (context, request, response) => {
         try {
           if (path === '/api/security/v1/saml') {
-            const currentBasePath = basePath.get(request);
+            const serverBasePath = getLegacyAPI().serverBasePath || '';
             logger.warn(
-              `The "${currentBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${currentBasePath}/api/security/saml/callback" URL instead.`,
+              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/saml/callback" URL instead.`,
               { tags: ['deprecation'] }
             );
           }

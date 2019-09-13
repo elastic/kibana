@@ -570,6 +570,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
+    // We should use `serverBasePath` for `capture-url-fragment` URL as soon as it's provided by the core.
+    // Using request scoped base path doesn't hurt, but isn't consistent. We should still use request scoped
+    // base path for the `redirectURL` though.
     const basePath = this.options.basePath.get(request);
     return AuthenticationResult.redirectTo(`${basePath}/api/security/saml/capture-url-fragment`, {
       state: { redirectURL: `${basePath}${request.url.path}` },
