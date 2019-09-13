@@ -50,6 +50,8 @@ export const SimpleSettings = injectI18n(function ({
         />
       </EuiFormRow>
 
+      <EuiSpacer size="m" />
+
       <EuiCheckbox
         id="createIndexPattern"
         label={
