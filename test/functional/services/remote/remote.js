@@ -31,7 +31,14 @@ export async function RemoteProvider({ getService }) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
-  const browserDriverApi = await BrowserDriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
+  let browserDriverUrl = config.get(browserType + 'driver.url');
+  if (process.env.PARALLEL_PIPELINE_WORKER_INDEX) {
+    const parsedUrl = new URL(browserDriverUrl);
+    parsedUrl.port = `4444${process.env.PARALLEL_PIPELINE_WORKER_INDEX}`;
+    browserDriverUrl = parsedUrl.href;
+  }
+
+  const browserDriverApi = await BrowserDriverApi.factory(log, browserDriverUrl, browserType);
   lifecycle.on('cleanup', async () => await browserDriverApi.stop());
 
   await browserDriverApi.start();

@@ -36,7 +36,7 @@ if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   export KIBANA_INSTALL_DIR="$installDir"
 else
   installDir="$PARENT_DIR/install/kibana"
-  destDir="${installDir}-${CI_WORKER_NUMBER}"
+  destDir="${installDir}-${PARALLEL_PIPELINE_WORKER_INDEX}"
   cp -R "$installDir" "$destDir"
 
   export KIBANA_INSTALL_DIR="$destDir"
