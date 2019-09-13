@@ -30,16 +30,16 @@ export function parseDuration(duration: string): number {
 export function getDurationSchema() {
   return Joi.alternatives().try(
     Joi.string()
-      .regex(SECONDS_REGEX, 'seconds (5s)')
+      .regex(SECONDS_REGEX, 'seconds')
       .required(),
     Joi.string()
-      .regex(MINUTES_REGEX, 'minutes (5m)')
+      .regex(MINUTES_REGEX, 'minutes')
       .required(),
     Joi.string()
-      .regex(HOURS_REGEX, 'hours (5h)')
+      .regex(HOURS_REGEX, 'hours')
       .required(),
     Joi.string()
-      .regex(DAYS_REGEX, 'days (5d)')
+      .regex(DAYS_REGEX, 'days')
       .required()
   );
 }
