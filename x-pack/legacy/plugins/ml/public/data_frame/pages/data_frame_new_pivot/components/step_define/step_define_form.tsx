@@ -817,7 +817,6 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           </EuiFormRow>
           {!valid && (
             <Fragment>
-              <EuiSpacer size="m" />
               <EuiFormHelpText style={{ maxWidth: '320px' }}>
                 {i18n.translate('xpack.ml.dataframe.stepDefineForm.formHelp', {
                   defaultMessage:

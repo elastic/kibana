@@ -15,7 +15,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
@@ -260,19 +259,16 @@ export const PopoverForm: React.SFC<Props> = ({
         </EuiFormRow>
       )}
       {isUnsupportedAgg && (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiCodeEditor
-            mode="json"
-            theme="github"
-            width="100%"
-            height="200px"
-            value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
-            setOptions={{ fontSize: '12px', showLineNumbers: false }}
-            isReadOnly
-            aria-label="Read only code editor"
-          />
-        </Fragment>
+        <EuiCodeEditor
+          mode="json"
+          theme="github"
+          width="100%"
+          height="200px"
+          value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
+          setOptions={{ fontSize: '12px', showLineNumbers: false }}
+          isReadOnly
+          aria-label="Read only code editor"
+        />
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
