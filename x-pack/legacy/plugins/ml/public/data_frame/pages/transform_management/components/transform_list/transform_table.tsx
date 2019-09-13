@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 
 import { EuiProgress } from '@elastic/eui';
 
-import { MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
+import { MlInMemoryTable } from '../../../../../components/ml_in_memory_table';
 
 // The built in loading progress bar of EuiInMemoryTable causes a full DOM replacement
 // of the table and doesn't play well with auto-refreshing. That's why we're displaying

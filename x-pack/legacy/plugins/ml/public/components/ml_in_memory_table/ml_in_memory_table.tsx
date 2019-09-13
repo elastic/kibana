@@ -71,9 +71,10 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-import { MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
+// import { MlInMemoryTable as InMemoryTable } from '../../../common/types/eui/in_memory_table';
+import { MlInMemoryTable as InMemoryTable } from './types';
 
-export class AnalyticsTable extends MlInMemoryTable {
+export class MlInMemoryTable extends InMemoryTable {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
     const derivedState = {
       ...prevState.prevProps,

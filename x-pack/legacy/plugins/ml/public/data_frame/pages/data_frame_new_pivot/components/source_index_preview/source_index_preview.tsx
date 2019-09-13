@@ -33,7 +33,7 @@ import {
   MlInMemoryTable,
   SortingPropType,
   SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { Dictionary } from '../../../../../../common/types/common';

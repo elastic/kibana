@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
-import { AnalyticsPanel } from './analytics_panel';
+import { AnalyticsPanel } from './analytics_panel/';
 
 // Fetch jobs and determine what to show
 export const OverviewContent: FC = () => (
