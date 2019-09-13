@@ -20,9 +20,7 @@
 import { constant, trimRight, trimLeft, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { FieldFormatConvert } from './types';
-
-// @ts-ignore
-import { asPrettyString } from '../../core_plugins/kibana/common/utils/as_pretty_string';
+import { asPrettyString } from '../../../plugins/data/common/utils/as_pretty_string';
 
 const getTestFormat = (
   _convert: FieldFormatConvert = {
