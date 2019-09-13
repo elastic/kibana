@@ -10,6 +10,7 @@ import {
   EuiFieldText,
   EuiFlexItem,
   EuiFormRow,
+  // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
   EuiFilePicker,
   EuiButton,
   isValidHex,
