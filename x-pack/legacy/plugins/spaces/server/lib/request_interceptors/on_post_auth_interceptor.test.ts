@@ -7,26 +7,26 @@ import * as Rx from 'rxjs';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
-import { initSpacesOnRequestInterceptor } from '../on_request_interceptor';
+import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   HttpServiceSetup,
   CoreSetup,
   SavedObjectsService,
-} from '../../../../../../../../src/core/server';
+} from '../../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
   loggingServiceMock,
-} from '../../../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
-import { LegacyAPI } from '../../../new_platform/plugin';
-import { SpacesService } from '../../../new_platform/spaces_service';
-import { OptionalPlugin } from '../../../../../../server/lib/optional_plugin';
-import { SpacesAuditLogger } from '../../audit_logger';
-import { SecurityPlugin } from '../../../../../security';
-import { convertSavedObjectToSpace } from '../../../routes/lib';
-import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
-import { Feature } from '../../../../../../../plugins/features/server';
-import { initSpacesOnPostAuthRequestInterceptor } from '../on_post_auth_interceptor';
+} from '../../../../../../../src/core/server/mocks';
+import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
+import { LegacyAPI } from '../../new_platform/plugin';
+import { SpacesService } from '../../new_platform/spaces_service';
+import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
+import { SpacesAuditLogger } from '../audit_logger';
+import { SecurityPlugin } from '../../../../security';
+import { convertSavedObjectToSpace } from '../../routes/lib';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
+import { Feature } from '../../../../../../plugins/features/server';
+import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 
 describe('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
@@ -40,7 +40,7 @@ describe('onPostAuthInterceptor', () => {
 
   beforeEach(async () => {
     root = kbnTestServer.createRoot();
-  });
+  }, 30000);
 
   afterEach(async () => await root.shutdown());
 
@@ -243,7 +243,7 @@ describe('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual(`/spaces/space_selector`);
-    });
+    }, 30000);
 
     it('when accessing the kibana app it always allows the request to continue', async () => {
       const spaces = [
@@ -260,7 +260,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/a-space/app/kibana', spaces);
 
       expect(response.status).toEqual(200);
-    });
+    }, 30000);
 
     it('allows the request to continue when accessing an API endpoint within a non-existent space', async () => {
       const spaces = [
@@ -276,7 +276,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/not-found/api/test/foo', spaces);
 
       expect(response.status).toEqual(200);
-    });
+    }, 30000);
   });
 
   describe('requests handled completely in the new platform', () => {
@@ -295,7 +295,7 @@ describe('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual(`/spaces/space_selector`);
-    });
+    }, 30000);
 
     it('allows the request to continue when accessing an API endpoint within a non-existent space', async () => {
       const spaces = [
@@ -311,7 +311,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/not-found/api/np_test/foo', spaces);
 
       expect(response.status).toEqual(200);
-    });
+    }, 30000);
   });
 
   it('handles space retrieval errors gracefully', async () => {

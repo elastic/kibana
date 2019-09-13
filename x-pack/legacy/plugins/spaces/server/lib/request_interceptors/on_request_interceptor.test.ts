@@ -6,23 +6,23 @@
 
 import { Legacy } from 'kibana';
 import { schema } from '@kbn/config-schema';
-import { initSpacesOnRequestInterceptor } from '../on_request_interceptor';
+import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   HttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-} from '../../../../../../../../src/core/server';
+} from '../../../../../../../src/core/server';
 
-import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
-import { LegacyAPI } from '../../../new_platform/plugin';
+import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
+import { LegacyAPI } from '../../new_platform/plugin';
 
 describe('onRequestInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
     root = kbnTestServer.createRoot();
-  });
+  }, 30000);
 
   afterEach(async () => await root.shutdown());
 
@@ -138,7 +138,7 @@ describe('onRequestInterceptor', () => {
         path,
         basePath: '', // no base path set for route within the default space
       });
-    });
+    }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
       await setup();
@@ -152,7 +152,7 @@ describe('onRequestInterceptor', () => {
         path: '/foo',
         basePath: '/s/foo-space',
       });
-    });
+    }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
       await setup();
@@ -163,7 +163,7 @@ describe('onRequestInterceptor', () => {
         path: '/some/path/s/foo/bar',
         basePath: '', // no base path set for route within the default space
       });
-    });
+    }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
       await setup();
@@ -177,7 +177,7 @@ describe('onRequestInterceptor', () => {
           queryParam: 'queryValue',
         },
       });
-    });
+    }, 30000);
   });
 
   describe('requests handled completely in the new platform', () => {
@@ -190,7 +190,7 @@ describe('onRequestInterceptor', () => {
         path,
         basePath: '', // no base path set for route within the default space
       });
-    });
+    }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
       await setup({ basePath: '/', routes: 'new-platform' });
@@ -201,7 +201,7 @@ describe('onRequestInterceptor', () => {
         path: '/np_foo',
         basePath: '/s/foo-space',
       });
-    });
+    }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
       await setup({ basePath: '/', routes: 'new-platform' });
@@ -212,7 +212,7 @@ describe('onRequestInterceptor', () => {
         path: '/some/path/s/np_foo/bar',
         basePath: '', // no base path set for route within the default space
       });
-    });
+    }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
       await setup({ basePath: '/', routes: 'new-platform' });
@@ -226,6 +226,6 @@ describe('onRequestInterceptor', () => {
           queryParam: 'queryValue',
         },
       });
-    });
+    }, 30000);
   });
 });
