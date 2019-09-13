@@ -7,6 +7,7 @@
 import { get, set } from 'lodash';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
+import mockChartsData from './monitor_charts_mock.json';
 
 const assertCloseTo = (actual: number, expected: number, precision: number) => {
   if (Math.abs(expected - actual) > precision) {
@@ -100,5 +101,18 @@ describe('ElasticsearchMonitorsAdapter', () => {
       '36000ms'
     );
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('has fun times', async () => {
+    const searchMock = jest.fn();
+    searchMock.mockReturnValue(mockChartsData);
+    const database = {
+      search: searchMock,
+      count: jest.fn(),
+      head: jest.fn(),
+    };
+    const adapter = new ElasticsearchMonitorsAdapter(database);
+    const res = await adapter.getMonitorChartsData({}, 'fooid', 'now-15m', 'now');
+    expect(res).toMatchSnapshot();
   });
 });

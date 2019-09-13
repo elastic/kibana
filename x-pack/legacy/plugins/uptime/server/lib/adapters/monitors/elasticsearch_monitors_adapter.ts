@@ -81,7 +81,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
-              missing: null,
+              min_doc_count: 0,
             },
             aggs: {
               location: {
@@ -121,14 +121,23 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       statusMaxCount: 0,
     };
 
+    const resultLocations = new Set<string>();
+
     const linesByLocation: { [key: string]: LocationDurationLine } = {};
     dateBuckets.forEach(dateBucket => {
       const x = get(dateBucket, 'key');
       const docCount = get(dateBucket, 'doc_count', 0);
+      const bucketLocations = new Set<string>();
 
       dateBucket.location.buckets.forEach(
         (locationBucket: { key: string; duration: { avg: number } }) => {
           const locationName = locationBucket.key;
+          if (!bucketLocations.has(locationName)) {
+            bucketLocations.add(locationName);
+          }
+          if (!resultLocations.has(locationName)) {
+            resultLocations.add(locationName);
+          }
           let ldl: LocationDurationLine = get(linesByLocation, locationName);
           if (!ldl) {
             ldl = { name: locationName, line: [] };
@@ -138,6 +147,23 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
       );
+
+      if (dateBucket.location.buckets.length < resultLocations.size) {
+        resultLocations.forEach(resultLocation => {
+          if (location && location !== resultLocation) return;
+          if (!bucketLocations.has(resultLocation)) {
+            const locationLine = monitorChartsData.locationDurationLines.find(
+              ({ name }) => name === resultLocation
+            );
+            if (locationLine) {
+              locationLine.line.push({
+                x,
+                y: null,
+              });
+            }
+          }
+        });
+      }
 
       monitorChartsData.status.push(
         formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)

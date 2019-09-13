@@ -56,26 +56,25 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChart = ({ locationDurationLines, meanColor }: DurationChartProps) => {
+export const DurationChart = ({
+  locationDurationLines,
+  meanColor,
+  loading,
+}: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average-');
 
-  const lineSeries = locationDurationLines.map(line => {
-    const locationSpecId = getSpecId('loc-avg' + line.name);
-    console.log(line);
-    console.log(line.line[2]);
-    const l = line.line.map((v, i) => (i % 3 !== 0 ? v : { ...v, y: null }));
-    console.log(l);
-    
+  const lineSeries = locationDurationLines.map(durationLine => {
+    const locationSpecId = getSpecId('loc-avg' + durationLine.name);
     return (
       <LineSeries
         curve={CurveType.CURVE_MONOTONE_X}
         customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-        data={l.map(({ x, y }) => [x || 0, y])}
+        data={durationLine.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
         id={locationSpecId}
-        key={`locline-${line.name}`}
-        name={line.name}
+        key={`locline-${durationLine.name}`}
+        name={durationLine.name}
         xAccessor={0}
         xScaleType={ScaleType.Time}
         yAccessors={[1]}
