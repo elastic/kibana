@@ -14,8 +14,6 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
       >
         <EuiPanel
           className="euiPageContent euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
