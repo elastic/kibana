@@ -1,5 +1,4 @@
-import axios from 'axios';
-import get from 'lodash.get';
+import axios, { AxiosError } from 'axios';
 import { HandledError } from '../HandledError';
 import { logger } from '../logger';
 
@@ -51,15 +50,20 @@ export async function gqlRequest<DataResponse>({
     }
 
     return data.data;
-  } catch (e) {
+  } catch (ex) {
+    const e = ex as AxiosError<{ errors: { message: string }[] | undefined }>;
     logger.info(e.message);
-    logger.info(e.response);
-    const responseError = get(e, 'response.data.errors') as {
-      message: string;
-    }[];
-    if (responseError) {
+
+    if (
+      e.response &&
+      e.response.data &&
+      Array.isArray(e.response.data.errors)
+    ) {
+      logger.info(e.config);
+      logger.info(e.response.headers);
+      logger.info(e.response.data);
       throw new HandledError(
-        responseError.map(error => error.message).join(', ')
+        e.response.data.errors.map(error => error.message).join(', ')
       );
     }
 

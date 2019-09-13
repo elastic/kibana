@@ -1,4 +1,4 @@
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 
 export interface GithubIssue {
   html_url: string;
@@ -16,11 +16,8 @@ export interface GithubSearch<T> {
   items: T[];
 }
 
-// TODO: Make PR to DefinitelyTypes to make AxiosError a generic that takes the error response as T
-export interface GithubApiError extends AxiosError {
-  response?: AxiosResponse<{
-    message: string;
-    errors?: {}[];
-    documentation_url: string;
-  }>;
-}
+export type GithubApiError = AxiosError<{
+  message: string;
+  errors?: {}[];
+  documentation_url: string;
+}>;
