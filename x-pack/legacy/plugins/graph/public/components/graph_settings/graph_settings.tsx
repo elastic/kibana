@@ -68,7 +68,7 @@ export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) 
         <EuiTitle size="m">
           <h2>{i18n.translate('xpack.graph.settings.title', { defaultMessage: 'Settings' })}</h2>
         </EuiTitle>
-        <EuiTabs style={{ marginBottom: '-25px' }}>
+        <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
             .filter(({ id }) => id !== 'drillDowns' || currentProps.canEditDrillDownUrls)
             .map(({ title }, index) => (
