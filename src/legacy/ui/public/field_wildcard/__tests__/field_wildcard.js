@@ -20,19 +20,12 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
-import { FieldWildcardProvider } from '../../field_wildcard';
+import { fieldWildcardFilter, makeRegEx } from '../../field_wildcard';
 
 describe('fieldWildcard', function () {
-  let fieldWildcardFilter;
-  let makeRegEx;
+  const metaFields = ['_id', '_type', '_source'];
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (config, Private) {
-    config.set('metaFields', ['_id', '_type', '_source']);
-    const fieldWildcard = Private(FieldWildcardProvider);
-    fieldWildcardFilter = fieldWildcard.fieldWildcardFilter;
-    makeRegEx = fieldWildcard.makeRegEx;
-  }));
 
   describe('makeRegEx', function () {
     it('matches * in any position', function () {
@@ -70,7 +63,7 @@ describe('fieldWildcard', function () {
     });
 
     it('filters nothing when given an empty array', function () {
-      const filter = fieldWildcardFilter([]);
+      const filter = fieldWildcardFilter([], metaFields);
       const original = [
         'foo',
         'bar',
@@ -82,7 +75,7 @@ describe('fieldWildcard', function () {
     });
 
     it('does not filter metaFields', function () {
-      const filter = fieldWildcardFilter([ '_*' ]);
+      const filter = fieldWildcardFilter([ '_*' ], metaFields);
 
       const original = [
         '_id',
@@ -97,7 +90,7 @@ describe('fieldWildcard', function () {
       const filter = fieldWildcardFilter([
         'f*',
         '*4'
-      ]);
+      ], metaFields);
 
       const original = [
         'foo',
@@ -114,7 +107,7 @@ describe('fieldWildcard', function () {
         'f*',
         '*4',
         'undefined'
-      ]);
+      ], metaFields);
 
       const original = [
         'foo',

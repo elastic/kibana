@@ -25,7 +25,7 @@ import { callClient } from './call_client';
  * is loading).
  */
 export function FetchSoonProvider(es, config, esShardTimeout) {
-  /**
+/**
    * Delays executing a function for a given amount of time, and returns a promise that resolves
    * with the result.
    * @param fn The function to invoke

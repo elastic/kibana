@@ -20,18 +20,16 @@
 import '../../../private';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { NormalizeSortRequestProvider } from '../_normalize_sort_request';
+import { normalizeSortRequest } from '../_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('SearchSource#normalizeSortRequest', function () {
-  let normalizeSortRequest;
   let indexPattern;
   let normalizedSort;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    normalizeSortRequest = Private(NormalizeSortRequestProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     normalizedSort = [{

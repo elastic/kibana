@@ -26,12 +26,9 @@ import '../directives/listen';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 
-import { FetchSoonProvider } from './fetch';
 import { SearchPoll } from './search_poll';
 
-uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
-  const fetchSoon = Private(FetchSoonProvider);
-
+uiModules.get('kibana/courier').service('courier', () => {
   // This manages the doc fetch interval.
   const searchPoll = new SearchPoll();
 
@@ -65,16 +62,6 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
 
       addFatalErrorCallback(closeOnFatal);
       updateRefreshInterval();
-    }
-
-    /**
-     * Fetch the pending requests.
-     */
-    fetch() {
-      fetchSoon.fetchQueued().then(() => {
-        // Reset the timer using the time that we get this response as the starting point.
-        searchPoll.resetTimer();
-      });
     }
   }
 

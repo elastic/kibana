@@ -73,11 +73,12 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
-import { NormalizeSortRequestProvider } from './_normalize_sort_request';
+import { normalizeSortRequest } from './_normalize_sort_request';
 
 import { FetchSoonProvider } from '../fetch';
-import { FieldWildcardProvider } from '../../field_wildcard';
+import { fieldWildcardFilter } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../../plugins/data/common/highlight';
+import chrome from '../../chrome';
 
 const FIELDS = [
   'type',
@@ -110,14 +111,12 @@ function isIndexPattern(val) {
   return Boolean(val && typeof val.title === 'string');
 }
 
-export function SearchSourceProvider(Private, config) {
-  const normalizeSortRequest = Private(NormalizeSortRequestProvider);
+const config = chrome.getUiSettingsClient();
+const getConfig = (...args) => config.get(...args);
+const forIp = Symbol('for which index pattern?');
+
+export function SearchSourceProvider(Private) {
   const fetchSoon = Private(FetchSoonProvider);
-  const { fieldWildcardFilter } = Private(FieldWildcardProvider);
-  const getConfig = (...args) => config.get(...args);
-
-  const forIp = Symbol('for which index pattern?');
-
   class SearchSource {
     constructor(initialFields) {
       this._id = _.uniqueId('data_source');
@@ -132,7 +131,7 @@ export function SearchSourceProvider(Private, config) {
 
       this._filterPredicates = [
         (filter) => {
-          // remove null/undefined filters
+        // remove null/undefined filters
           return filter;
         },
         (filter) => {
@@ -401,7 +400,7 @@ export function SearchSourceProvider(Private, config) {
           addToBody();
           break;
         case 'sort':
-          val = normalizeSortRequest(val, this.getField('index'));
+          val = normalizeSortRequest(val, this.getField('index'), config.get('sort:options'));
           addToBody();
           break;
         case 'query':
@@ -481,7 +480,7 @@ export function SearchSourceProvider(Private, config) {
 
           if (flatData.body._source) {
             // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatData.body._source.excludes);
+            const filter = fieldWildcardFilter(flatData.body._source.excludes, config.get('metaFields'));
             flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
               docvalueField => filter(docvalueField.field)
             );
