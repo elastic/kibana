@@ -52,7 +52,7 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
     await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
-    const { actions } = await libs.agents.checkin(
+    const { actions, policy } = await libs.agents.checkin(
       request.params.agentId,
       events,
       request.payload.local_metadata
@@ -61,6 +61,7 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     return {
       action: 'checkin',
       success: true,
+      policy,
       actions: actions.map(a => ({
         type: a.type,
       })),
