@@ -188,7 +188,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('Print PNG button', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/43131
+      describe.skip('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
