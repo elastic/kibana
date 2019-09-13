@@ -12,8 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { defaultHeaders, mockTimelineData } from '../../mock';
-import { mockIndexPattern } from '../../mock';
+import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
 
