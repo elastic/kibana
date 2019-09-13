@@ -22,11 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface TruncateLabelsOptionProps {
+  disabled?: boolean;
   value: number | null;
   setValue: (paramName: 'truncate', value: null | number) => void;
 }
 
-function TruncateLabelsOption({ value, setValue }: TruncateLabelsOptionProps) {
+function TruncateLabelsOption({ disabled, value, setValue }: TruncateLabelsOptionProps) {
   const onChange = (ev: ChangeEvent<HTMLInputElement>) =>
     setValue('truncate', ev.target.value === '' ? null : parseFloat(ev.target.value));
 
@@ -35,10 +36,15 @@ function TruncateLabelsOption({ value, setValue }: TruncateLabelsOptionProps) {
       label={i18n.translate('kbnVislibVisTypes.controls.truncateLabel', {
         defaultMessage: 'Truncate',
       })}
-      fullWidth={true}
+      fullWidth
       compressed
     >
-      <EuiFieldNumber value={value === null ? '' : value} onChange={onChange} fullWidth={true} />
+      <EuiFieldNumber
+        disabled={disabled}
+        value={value === null ? '' : value}
+        onChange={onChange}
+        fullWidth
+      />
     </EuiFormRow>
   );
 }

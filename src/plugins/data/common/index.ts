@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './expressions';
+export * from './timefilter/types';
+export * from './query/types';

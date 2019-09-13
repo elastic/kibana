@@ -34,7 +34,7 @@ You can create two types of filters by interacting with your map:
 [[maps-spatial-filters]]
 ==== Spatial filters
 
-A spatial filter narrow searchs results to documents that either intersect with, are within, or do not intersect with the specified geometry.
+A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.
 
 You can create spatial filters in two ways:
 
