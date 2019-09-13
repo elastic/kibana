@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { asPrettyString } from '../../utils/as_pretty_string';
+import { asPrettyString } from '../../../../../../plugins/data/common/utils/as_pretty_string';
 
 export function createBoolFormat(FieldFormat) {
   return class BoolFormat extends FieldFormat {
