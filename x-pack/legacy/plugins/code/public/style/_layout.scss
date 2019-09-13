@@ -112,13 +112,13 @@
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
-  max-width: 256px;
-  min-width: 256px;
+  max-width: $codeSideBarWidth;
+  min-width: $codeSideBarWidth;
 }
 
 .codeSearchbar__container {
   height: 3.5rem;
-  padding: $euiSizeS;
+  padding: $codeSearchBarPadding;
   border-bottom: $euiBorderWidthThin solid $euiBorderColor;
 }
 

@@ -8,3 +8,7 @@
 .codeQueryBar__input {
   padding-right: 10rem;
 }
+
+.codeQueryBar__scope {
+  width: calc(#{$codeSideBarWidth} - #{$codeSearchBarPadding});
+}

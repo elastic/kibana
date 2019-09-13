@@ -435,7 +435,7 @@ export class CodeQueryBar extends Component<Props, State> {
       : '';
     return (
       <EuiFlexGroup responsive={false} gutterSize="none">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className="codeQueryBar__scope" grow={false}>
           <ScopeSelector scope={this.props.searchScope} onScopeChanged={this.onScopeChange} />
         </EuiFlexItem>
         <EuiFlexItem>

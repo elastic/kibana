@@ -57,7 +57,6 @@ export class ScopeSelector extends Component<Props> {
   public render() {
     return (
       <EuiSuperSelect
-        style={{ width: pxToRem(200) }}
         options={this.scopeOptions}
         valueOfSelected={this.props.scope}
         onChange={this.props.onScopeChanged}
