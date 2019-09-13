@@ -91,8 +91,8 @@ export class VisualizationsPlugin
       }),
       types: this.types.setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }),
       visualizations: {
-        getAll: () => new Map(this.visualizations),
-        register: (obj: VisType): Map<string, VisType> => this.visualizations.set(obj.name, obj),
+        // getAll: () => new Map(this.visualizations),
+        // register: (obj: VisType): Map<string, VisType> => this.visualizations.set(obj.name, obj),
       },
     };
   }

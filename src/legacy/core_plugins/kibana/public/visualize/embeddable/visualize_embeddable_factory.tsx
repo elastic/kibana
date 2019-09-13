@@ -72,7 +72,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     return new VisualizeEmbeddableFactory(() => VisTypesRegistryProvider);

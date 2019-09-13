@@ -27,6 +27,7 @@ export interface VisTypesPluginContract {
 
 const visTypes: Map<string, VisType> = new Map();
 
+// todo - no longer a provider
 export const VisTypesRegistryProvider = {
   register: (obj: VisType) => {
     visTypes.set(obj.name, obj);
