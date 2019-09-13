@@ -34,7 +34,7 @@ export const indexNameField = (i18n: any) => (
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_NAME',
-      message: i18n.translate('xpack.forms.fieldValidation.indexNameStartsWithDotError', {
+      message: i18n.translate('xpack.esUi.forms.fieldValidation.indexNameStartsWithDotError', {
         defaultMessage: 'The index name cannot start with a dot (.).',
       }),
     };
@@ -45,7 +45,7 @@ export const indexNameField = (i18n: any) => (
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_NAME',
-      message: i18n.translate('xpack.forms.fieldValidation.indexNameStartsWithDotError', {
+      message: i18n.translate('xpack.esUi.forms.fieldValidation.indexNameSpacesError', {
         defaultMessage: 'The index name cannot contain spaces.',
       }),
     };
@@ -54,7 +54,7 @@ export const indexNameField = (i18n: any) => (
   const { charsFound, doesContain } = containsChars(INDEX_ILLEGAL_CHARACTERS)(value as string);
   if (doesContain) {
     return {
-      message: i18n.translate('xpack.forms.fieldValidation.indexNameInvalidCharactersError', {
+      message: i18n.translate('xpack.esUi.forms.fieldValidation.indexNameInvalidCharactersError', {
         defaultMessage:
           'The index name contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
         values: {

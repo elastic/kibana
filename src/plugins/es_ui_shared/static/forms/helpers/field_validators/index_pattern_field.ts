@@ -38,7 +38,7 @@ export const indexPatternField = (i18n: any) => (
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_PATTERN',
-      message: i18n.translate('xpack.forms.fieldValidation.indexPatternSpacesError', {
+      message: i18n.translate('xpack.esUi.forms.fieldValidation.indexPatternSpacesError', {
         defaultMessage: 'The index pattern cannot contain spaces.',
       }),
     };
@@ -51,14 +51,17 @@ export const indexPatternField = (i18n: any) => (
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_PATTERN',
-      message: i18n.translate('xpack.forms.fieldValidation.indexPatternInvalidCharactersError', {
-        defaultMessage:
-          'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
-        values: {
-          characterList: errors[ILLEGAL_CHARACTERS].join(' '),
-          characterListLength: errors[ILLEGAL_CHARACTERS].length,
-        },
-      }),
+      message: i18n.translate(
+        'xpack.esUi.forms.fieldValidation.indexPatternInvalidCharactersError',
+        {
+          defaultMessage:
+            'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
+          values: {
+            characterList: errors[ILLEGAL_CHARACTERS].join(' '),
+            characterListLength: errors[ILLEGAL_CHARACTERS].length,
+          },
+        }
+      ),
     };
   }
 };
