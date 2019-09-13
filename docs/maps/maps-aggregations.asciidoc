@@ -40,6 +40,18 @@ This field will be used in the terms aggregation to group your documents into en
 This field will be used to sort your documents in the top hits aggregation.
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
 
+[role="xpack"]
+[[point-to-point]]
+=== Point to point
+
+A point-to-point connection plots aggregated data paths between the source and the destination.
+Thicker, darker lines symbolize more connections between a source and destination, and thinner, lighter lines symbolize less connections.
+
+Point to point uses an {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by destination.
+Then, a nested {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] groups sources for each destination into grids.
+A line connects each source grid centroid to each destination.
+
+image::maps/images/point_to_point.png[]
 
 [role="xpack"]
 [[terms-join]]
@@ -49,9 +61,9 @@ Use term joins to augment vector features with properties for <<maps-vector-styl
 
 Term joins are available for <<vector-layer, vector layers>> with the following sources:
 
-* Custom vector shapes
+* Configured GeoJSON
 * Documents
-* Vector shapes
+* EMS Boundaries
 
 ==== Example term join
 

@@ -6,8 +6,16 @@
 
 import React from 'react';
 
-import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from '@elastic/charts';
-import { getAxisId } from '@elastic/charts';
+import {
+  Chart,
+  BarSeries,
+  Axis,
+  Position,
+  getAxisId,
+  getSpecId,
+  ScaleType,
+  Settings,
+} from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
   ChartConfigsData,
