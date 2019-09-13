@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreStart, CoreSetup } from 'kibana/public';
+import { CoreStart, CoreSetup } from 'src/core/public';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
 export class EuiChartUtils {

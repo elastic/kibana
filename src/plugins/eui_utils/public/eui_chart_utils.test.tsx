@@ -28,7 +28,7 @@ describe('EuiChartUtils', () => {
 
   describe('getChartsTheme()', () => {
     it('returns the light theme when not in dark mode', () => {
-      expect(getStart().getChartsTheme().lineSeriesStyle.point.fill).toEqual(
+      expect(getStart().getChartsTheme().lineSeriesStyle!.point!.fill).toEqual(
         'rgba(255, 255, 255, 1)'
       );
     });
@@ -41,7 +41,7 @@ describe('EuiChartUtils', () => {
           return new EuiChartUtils().start(startMock);
         };
 
-        expect(darkStart().getChartsTheme().lineSeriesStyle.point.fill).toEqual(
+        expect(darkStart().getChartsTheme().lineSeriesStyle!.point!.fill).toEqual(
           'rgba(29, 30, 36, 1)'
         );
       });
