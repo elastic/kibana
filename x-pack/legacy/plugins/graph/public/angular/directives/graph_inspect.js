@@ -5,10 +5,10 @@
  */
 
 import { uiModules } from 'ui/modules';
-import template from '../templates/settings.html';
+import template from '../templates/inspect.html';
 const app = uiModules.get('app/graph');
 
-app.directive('graphSettings', function () {
+app.directive('graphInspect', function () {
   return {
     replace: true,
     restrict: 'E',
