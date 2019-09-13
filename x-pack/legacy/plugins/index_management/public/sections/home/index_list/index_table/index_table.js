@@ -401,6 +401,7 @@ export class IndexTable extends Component {
       indicesLoading,
       indicesError,
       allIndices,
+      pager,
     } = this.props;
 
     let emptyState;
@@ -524,7 +525,6 @@ export class IndexTable extends Component {
         </EuiFlexGroup>
         {this.renderFilterError()}
         <EuiSpacer size="m" />
-
         {indices.length > 0 ? (
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <EuiTable className="indTable">
@@ -536,8 +536,8 @@ export class IndexTable extends Component {
                 >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexTable.captionText"
-                    defaultMessage="Below is a table of {count} items."
-                    values={{ count: indices.length }}
+                    defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
+                    values={{ count: indices.length, total: pager.totalItems }}
                   />
                 </caption>
               </EuiScreenReaderOnly>

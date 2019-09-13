@@ -396,6 +396,7 @@ export class PolicyTable extends Component {
       policyFilterChanged,
       filter,
       policyListLoaded,
+      policies,
     } = this.props;
     const { selectedPoliciesMap } = this.state;
     const numSelected = Object.keys(selectedPoliciesMap).length;
@@ -415,8 +416,9 @@ export class PolicyTable extends Component {
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.policyTable.captionText"
-                  defaultMessage="Below is a table of {count} items."
-                  values={{ count: totalNumberOfPolicies }}
+                  defaultMessage="Below is the index lifecycle policy table
+                    containing {count, plural, one {# row} other {# rows}} out of {total}."
+                  values={{ count: policies.length, total: totalNumberOfPolicies }}
                 />
               </caption>
             </EuiScreenReaderOnly>
