@@ -24,6 +24,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -32,8 +33,9 @@ interface OwnProps {
 }
 
 interface UsersTableReduxProps {
-  usersSortField: UsersSortField;
+  activePage: number;
   limit: number;
+  usersSortField: UsersSortField;
 }
 
 interface UsersTableDispatchProps {
@@ -69,10 +71,12 @@ export const usersTableId = 'users-table';
 class UsersTableComponent extends React.PureComponent<UsersTableProps> {
   public render() {
     const {
+      activePage,
       data,
       fakeTotalCount,
       flowTarget,
       id,
+      isInspect,
       limit,
       loading,
       loadPage,
@@ -86,12 +90,14 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
 
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getUsersColumns(flowTarget, usersTableId)}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
@@ -107,7 +113,6 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
           })
         }
         updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ flowTarget, totalCount, usersSortField }}
       />
     );
   }

@@ -27,6 +27,7 @@ import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
 
 import { EventsViewerHeader } from './events_viewer_header';
+import { TimelineRefetch } from '../timeline/refetch_timeline';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -145,6 +146,13 @@ export const EventsViewer = React.memo<Props>(
 
                       <div data-test-subj="events-container" style={{ width: `${width}px` }}>
                         <ManageTimelineContext loading={loading} width={width}>
+                          <TimelineRefetch
+                            id={id}
+                            inputId="global"
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                          />
                           <StatefulBody
                             browserFields={browserFields}
                             data={events}
