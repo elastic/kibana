@@ -51,10 +51,6 @@ test('render correctly with input query string changed', done => {
     return;
   };
 
-  const emptyAsyncFn = (query: string): Promise<any> => {
-    return Promise.resolve();
-  };
-
   const fileSuggestionsSpy = sinon.fake.returns(
     Promise.resolve(props[AutocompleteSuggestionType.FILE])
   );
@@ -65,19 +61,9 @@ test('render correctly with input query string changed', done => {
     Promise.resolve(props[AutocompleteSuggestionType.REPOSITORY])
   );
 
-  const mockFileSuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockFileSuggestionsProvider.getSuggestions = fileSuggestionsSpy;
-  const mockSymbolSuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockSymbolSuggestionsProvider.getSuggestions = symbolSuggestionsSpy;
-  const mockRepositorySuggestionsProvider = {
-    getSuggestions: emptyAsyncFn,
-  };
-  mockRepositorySuggestionsProvider.getSuggestions = repoSuggestionsSpy;
-
+  const mockFileSuggestionsProvider = { getSuggestions: fileSuggestionsSpy };
+  const mockSymbolSuggestionsProvider = { getSuggestions: symbolSuggestionsSpy };
+  const mockRepositorySuggestionsProvider = { getSuggestions: repoSuggestionsSpy };
   const submitSpy = sinon.spy();
 
   const queryBarComp = mount(
@@ -128,4 +114,56 @@ test('render correctly with input query string changed', done => {
 
     done();
   }, 1000);
+});
+
+test('invokes onSearchScopeChanged and gets new suggestions when the scope is changed', async () => {
+  const noOp = () => {};
+  const wait = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const fileSuggestionsSpy = jest.fn(() => Promise.resolve(props[AutocompleteSuggestionType.FILE]));
+  const symbolSuggestionsSpy = jest.fn(() =>
+    Promise.resolve(props[AutocompleteSuggestionType.SYMBOL])
+  );
+  const repoSuggestionsSpy = jest.fn(() =>
+    Promise.resolve(props[AutocompleteSuggestionType.REPOSITORY])
+  );
+  const suggestionsProviderSpies = [
+    { getSuggestions: fileSuggestionsSpy },
+    { getSuggestions: symbolSuggestionsSpy },
+    { getSuggestions: repoSuggestionsSpy },
+  ];
+  const onSearchScopeChangedSpy = jest.fn();
+
+  const wrapper = mount(
+    <CodeQueryBar
+      repositorySearch={noOp}
+      saveSearchOptions={noOp}
+      repoSearchResults={[]}
+      searchLoading={false}
+      searchOptions={{ repoScope: [], defaultRepoScopeOn: false }}
+      query="testQuery"
+      appName="testAppName"
+      suggestionProviders={suggestionsProviderSpies}
+      enableSubmitWhenOptionsChanged={false}
+      onSubmit={noOp}
+      onSelect={noOp}
+      onSearchScopeChanged={onSearchScopeChangedSpy}
+      searchScope={SearchScope.DEFAULT}
+      defaultRepoOptions={[]}
+    />
+  );
+
+  wrapper
+    .find('ScopeSelector')
+    .find('button')
+    .simulate('click');
+  wrapper
+    .find('ScopeSelector')
+    .find('EuiContextMenuItem')
+    .at(1)
+    .simulate('click');
+  await wait(200); // wait for getSuggestions' debounce
+
+  expect(onSearchScopeChangedSpy).toHaveBeenCalledWith(AutocompleteSuggestionType.SYMBOL);
+  expect(symbolSuggestionsSpy).toHaveBeenCalledWith('testQuery', SearchScope.DEFAULT, []);
 });

@@ -15,10 +15,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import styled, { css } from 'styled-components';
 
-import { useContext } from 'react';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnUpdateColumns } from '../timeline/events';

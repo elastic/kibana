@@ -25,8 +25,8 @@ import { MetricsPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
 const plugins: Readonly<MetricsPluginSetupDependencies> = {
+  expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
-  data: npSetup.plugins.data,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

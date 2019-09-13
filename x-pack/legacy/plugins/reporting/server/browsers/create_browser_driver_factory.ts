@@ -12,8 +12,11 @@ import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
 import { KbnServer } from '../../types';
 import { PLUGIN_ID } from '../../common/constants';
+import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
-export async function createBrowserDriverFactory(server: KbnServer) {
+export async function createBrowserDriverFactory(
+  server: KbnServer
+): Promise<HeadlessChromiumDriverFactory> {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'browser-driver']);
 

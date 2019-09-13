@@ -19,11 +19,11 @@
 
 import { cloneDeep, get } from 'lodash';
 // @ts-ignore
-import { setBounds } from 'ui/agg_types/buckets/date_histogram';
+import { setBounds } from 'ui/agg_types';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {

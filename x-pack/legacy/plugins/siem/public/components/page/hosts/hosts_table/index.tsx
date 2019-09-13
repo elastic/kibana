@@ -38,6 +38,7 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   indexPattern: StaticIndexPattern;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -47,6 +48,7 @@ interface OwnProps {
 }
 
 interface HostsTableReduxProps {
+  activePage: number;
   limit: number;
   sortField: HostsFields;
   direction: Direction;
@@ -108,10 +110,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
 
   public render() {
     const {
+      activePage,
       data,
       direction,
       fakeTotalCount,
       id,
+      isInspect,
       indexPattern,
       limit,
       loading,
@@ -125,12 +129,14 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     } = this.props;
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={this.memoizedColumns(type, indexPattern)}
         dataTestSubj="all-hosts"
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
+        isInspect={isInspect}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
@@ -154,7 +160,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
             tableType,
           })
         }
-        updateProps={{ direction, sortField, totalCount }}
       />
     );
   }

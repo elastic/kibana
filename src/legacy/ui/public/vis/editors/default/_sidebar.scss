@@ -165,11 +165,6 @@
   margin-left: $euiSizeS;
 }
 
-.visEditorSidebar__collapsibleTitleDescription {
-  flex: 1 1 0;
-  @include euiTextTruncate;
-}
-
 //
 // FORMS
 //
@@ -181,11 +176,6 @@
 
 .visEditorSidebar__select {
   @include __legacySelectStyles__bad;
-}
-
-.visEditorSidebar__formTitle {
-  @include euiTitle('xxs');
-  margin: $euiSizeS 0;
 }
 
 .visEditorSidebar__formRow {
