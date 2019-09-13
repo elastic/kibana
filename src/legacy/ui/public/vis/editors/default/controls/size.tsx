@@ -60,7 +60,6 @@ function SizeParamEditor({
         value={isUndefined(value) ? '' : value}
         onChange={ev => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
         fullWidth={true}
-        compressed
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={1}
