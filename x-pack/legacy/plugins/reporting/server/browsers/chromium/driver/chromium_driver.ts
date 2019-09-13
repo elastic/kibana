@@ -220,4 +220,9 @@ export class HeadlessChromiumDriver {
 
     return port === conditions.port.toString();
   }
+
+  public getPid(): number {
+    const process = this.page.browser().process();
+    return process.pid;
+  }
 }

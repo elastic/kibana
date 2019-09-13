@@ -17,7 +17,7 @@ import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
-// @ts-ignore
+// @ts-ignore untyped module
 import { pdf } from './pdf';
 
 interface ScreenshotData {
@@ -55,7 +55,6 @@ const formatDate = (date: Date, timezone: string) => {
 function generatePdfObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
-  const captureConcurrency = 1;
 
   // NOTE: return type is faulty: "Buffer" could instead be anything
   return function generatePdfObservable(
@@ -90,42 +89,40 @@ function generatePdfObservableFn(server: KbnServer) {
                   });
                 })
               );
-            }, captureConcurrency)
+            }),
+            first()
           );
-        }),
-        first() // fixme: takeUntil urls.length
+        })
       )
       .pipe(
         toArray(),
-        mergeMap(
-          async (urlScreenshots: UrlScreenshot[]): Promise<Buffer> => {
-            const pdfOutput: PdfMaker = pdf.create(layout, logo);
+        mergeMap(async (urlScreenshots: UrlScreenshot[]) => {
+          const pdfOutput: PdfMaker = pdf.create(layout, logo);
 
-            if (title) {
-              const timeRange = getTimeRange(urlScreenshots);
-              title += timeRange
-                ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
-                    timeRange.to,
-                    browserTimezone
-                  )}`
-                : '';
-              pdfOutput.setTitle(title);
-            }
+          if (title) {
+            const timeRange = getTimeRange(urlScreenshots);
+            title += timeRange
+              ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
+                  timeRange.to,
+                  browserTimezone
+                )}`
+              : '';
+            pdfOutput.setTitle(title);
+          }
 
-            urlScreenshots.forEach(({ screenshots }) => {
-              screenshots.forEach(screenshot => {
-                pdfOutput.addImage(screenshot.base64EncodedData, {
-                  title: screenshot.title,
-                  description: screenshot.description,
-                });
+          urlScreenshots.forEach(({ screenshots }) => {
+            screenshots.forEach(screenshot => {
+              pdfOutput.addImage(screenshot.base64EncodedData, {
+                title: screenshot.title,
+                description: screenshot.description,
               });
             });
+          });
 
-            pdfOutput.generate();
-            const buffer = await pdfOutput.getBuffer();
-            return buffer;
-          }
-        )
+          pdfOutput.generate();
+          const buffer = await pdfOutput.getBuffer();
+          return buffer;
+        })
       );
   };
 }

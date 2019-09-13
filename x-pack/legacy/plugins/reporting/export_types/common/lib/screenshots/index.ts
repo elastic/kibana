@@ -41,7 +41,10 @@ export function screenshotsObservableFactory(server: KbnServer) {
       .catch(() => {});
 
     const successSelectors = `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`;
-    await browser.waitForSelector(successSelectors, {}, logger);
+    await Promise.race([
+      browser.waitForSelector(successSelectors, {}, logger), // finds DOM attributes for Kibana embeddables
+      checkForToastMessage(browser, layout, logger), // if this wins the race, there's an error on the page
+    ]);
 
     const itemsCount = await getNumberOfItems(browser, layout, logger);
     const viewport = layout.getViewport(itemsCount);

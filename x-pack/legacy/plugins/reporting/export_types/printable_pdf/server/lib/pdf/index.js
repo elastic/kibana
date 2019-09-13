@@ -29,7 +29,7 @@ function getFont(text) {
   }
 }
 
-export class PdfMaker {
+class PdfMaker {
   constructor(layout, logo) {
     const fontPath = (filename) => path.resolve(assetPath, 'fonts', filename);
     const fonts = {
@@ -141,7 +141,6 @@ export class PdfMaker {
     }
     return new Promise((resolve, reject) => {
       const concatStream = concat(function (pdfBuffer) {
-        console.log(typeof pdfBuffer);
         resolve(pdfBuffer);
       });
 
