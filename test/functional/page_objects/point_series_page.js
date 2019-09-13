@@ -24,11 +24,11 @@ export function PointSeriesPageProvider({ getService }) {
 
   class PointSeriesVis {
     async clickOptions() {
-      return await find.clickByPartialLinkText('Panel Settings');
+      return await find.clickByPartialLinkText('Panel settings');
     }
 
     async clickAxisOptions() {
-      return await find.clickByPartialLinkText('Metrics & Axes');
+      return await find.clickByPartialLinkText('Metrics & axes');
     }
 
     async clickAddAxis() {
@@ -36,7 +36,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setAxisTitle(title, { index = 0 } = {}) {
-      return await find.setValue(`#valueAxisTitle${index}`, title);
+      return await testSubjects.setValue(`valueAxisTitle${index}`, title);
     }
 
     async getValueAxesCount() {
@@ -103,11 +103,11 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setValueAxisPosition(axis, position) {
-      await find.clickByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`);
+      await find.clickByCssSelector(`select#valueAxisPosition${axis} option[value="${position}"]`);
     }
 
     async setCategoryAxisPosition(newValue) {
-      await find.clickByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`);
+      await find.clickByCssSelector(`select#categoryAxisPosition option[value="${newValue}"]`);
     }
 
     async setSeriesAxis(series, axis) {
@@ -115,7 +115,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setSeriesType(series, type) {
-      await find.clickByCssSelector(`select#seriesType${series} option[label="${type}"]`);
+      await find.clickByCssSelector(`select#seriesType${series} option[value="${type}"]`);
     }
   }
 

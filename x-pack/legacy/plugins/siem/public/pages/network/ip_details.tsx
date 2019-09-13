@@ -69,22 +69,26 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
           const ip = decodeIpv6(detailName);
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
-              <FiltersGlobal>
-                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-              </FiltersGlobal>
-
-              <HeaderPage
-                data-test-subj="ip-details-headline"
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-                title={ip}
-                draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-              >
-                <FlowTargetSelectConnected />
-              </HeaderPage>
-
               <GlobalTime>
                 {({ to, from, setQuery, isInitializing }) => (
                   <>
+                    <FiltersGlobal>
+                      <NetworkKql
+                        indexPattern={indexPattern}
+                        setQuery={setQuery}
+                        type={networkModel.NetworkType.details}
+                      />
+                    </FiltersGlobal>
+
+                    <HeaderPage
+                      data-test-subj="ip-details-headline"
+                      subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                      title={ip}
+                      draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                    >
+                      <FlowTargetSelectConnected />
+                    </HeaderPage>
+
                     <IpOverviewQuery
                       skip={isInitializing}
                       sourceId="default"
@@ -143,6 +147,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       {({
                         id,
                         inspect,
+                        isInspected,
                         domains,
                         totalCount,
                         pageInfo,
@@ -158,6 +163,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           flowTarget={flowTarget}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           ip={ip}
+                          isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
                           showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
@@ -184,6 +190,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       {({
                         id,
                         inspect,
+                        isInspected,
                         users,
                         totalCount,
                         pageInfo,
@@ -195,6 +202,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           data={users}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           flowTarget={flowTarget}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           loading={loading}
@@ -220,11 +228,22 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       startDate={from}
                       type={networkModel.NetworkType.details}
                     >
-                      {({ id, inspect, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        tls,
+                        totalCount,
+                        pageInfo,
+                        loading,
+                        loadPage,
+                        refetch,
+                      }) => (
                         <TlsTableManage
                           data={tls}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           loading={loading}
                           loadPage={loadPage}
