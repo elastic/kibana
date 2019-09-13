@@ -19,11 +19,13 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 
+import { BrowserFields } from '../../../containers/source';
+import { TWENTY_PERCENT_ALPHA_HEX_SUFFIX } from '../../drag_and_drop/helpers';
+
 import { DataProvider } from './data_provider';
 import { ProviderItemAnd } from './provider_item_and';
 
 import * as i18n from './translations';
-import { BrowserFields } from '../../../containers/source';
 
 const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
   margin: 0px 8px;
@@ -34,7 +36,7 @@ DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersCon
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   min-width: 230px;
   width: auto;
-  border: 0.1rem dashed ${props => props.theme.eui.euiColorMediumShade};
+  border: 0.1rem dashed ${props => props.theme.eui.euiColorSuccess};
   border-radius: 5px;
   text-align: center;
   padding: 3px 10px;
@@ -45,7 +47,7 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
     props.hasAndItem
       ? `&:hover {
     transition: background-color 0.7s ease;
-    background-color: ${props.theme.eui.euiColorEmptyShade};
+    background-color: ${() => props.theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX};
   }`
       : ''};
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};

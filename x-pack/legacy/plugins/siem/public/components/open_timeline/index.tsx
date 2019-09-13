@@ -11,10 +11,10 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
 
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
-import { DeleteTimelineMutation, SortFieldTimeline } from '../../graphql/types';
+import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
 import {
   createTimeline as dispatchCreateNewTimeline,
@@ -40,8 +40,6 @@ import {
   OpenTimelineDispatchProps,
   OpenTimelineReduxProps,
 } from './types';
-import { AllTimelinesQuery } from '../../containers/timeline/all';
-import { Direction } from '../../graphql/types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
 export interface OpenTimelineState {

@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore
