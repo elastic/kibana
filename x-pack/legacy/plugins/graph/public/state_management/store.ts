@@ -13,7 +13,7 @@ export interface GraphState {
 
 const rootReducer = combineReducers({ fields: fieldsReducer });
 
-export const store = createStore(rootReducer);
+export const createGraphStore = () => createStore(rootReducer);
 
 export type GraphStore = Store<GraphState, AnyAction>;
 export type GraphDispatch = Dispatch<AnyAction>;
