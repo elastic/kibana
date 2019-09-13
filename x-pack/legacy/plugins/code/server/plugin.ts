@@ -114,8 +114,6 @@ export class CodePlugin {
         },
       },
     });
-
-    initCodeUsageCollector(server);
   }
 
   // TODO: CodeStart will not have the register route api.
@@ -244,6 +242,10 @@ export class CodePlugin {
     await tryMigrateIndices(esClient, this.log);
 
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+
+    // TODO: extend the usage collection to cluster mode.
+    initCodeUsageCollector(server, esClient, lspService);
+
     return codeServices;
   }
 
