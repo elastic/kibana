@@ -16,7 +16,7 @@ interface ScheduleRequest extends Hapi.Request {
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
-    throttle?: string;
+    throttle: string | null;
   };
 }
 

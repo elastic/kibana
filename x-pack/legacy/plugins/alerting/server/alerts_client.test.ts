@@ -45,6 +45,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
     enabled: true,
     alertTypeId: '123',
     interval: '10s',
+    throttle: null,
     alertTypeParams: {
       bar: true,
     },

@@ -35,7 +35,7 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  hasScheduledActions(throttle?: string) {
+  hasScheduledActions(throttle: string | null) {
     // scheduleActions function wasn't called
     if (this.scheduledExecutionOptions === undefined) {
       return false;
@@ -54,7 +54,7 @@ export class AlertInstance {
     return true;
   }
 
-  isResolved(throttle?: string) {
+  isResolved(throttle: string | null) {
     // At this time we'll consider instances that didn't schedule actions as resolved
     return !this.hasScheduledActions(throttle);
   }
@@ -73,7 +73,7 @@ export class AlertInstance {
   }
 
   scheduleActions(actionGroup: string, context: Context = {}) {
-    if (this.hasScheduledActions()) {
+    if (this.hasScheduledActions(null)) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
     this.scheduledExecutionOptions = { actionGroup, context, state: this.state };

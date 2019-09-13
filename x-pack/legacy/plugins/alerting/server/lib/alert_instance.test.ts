@@ -18,7 +18,7 @@ afterAll(() => clock.restore());
 describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.hasScheduledActions()).toEqual(false);
+    expect(alertInstance.hasScheduledActions(null)).toEqual(false);
   });
 
   test(`should throttle when group didn't change and throttle period is still active`, () => {
@@ -75,9 +75,9 @@ describe('unscheduleActions()', () => {
   test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
-    expect(alertInstance.hasScheduledActions()).toEqual(true);
+    expect(alertInstance.hasScheduledActions(null)).toEqual(true);
     alertInstance.unscheduleActions();
-    expect(alertInstance.hasScheduledActions()).toEqual(false);
+    expect(alertInstance.hasScheduledActions(null)).toEqual(false);
   });
 
   test('makes getSechduledActionOptions() return undefined', () => {
@@ -113,7 +113,7 @@ describe('scheduleActions()', () => {
       },
     });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.hasScheduledActions()).toEqual(true);
+    expect(alertInstance.hasScheduledActions(null)).toEqual(true);
   });
 
   test('makes hasScheduledActions() return false when throttled', () => {
@@ -215,7 +215,7 @@ describe('isResolved', () => {
       state: { foo: true },
       meta: {},
     });
-    expect(alertInstance.isResolved()).toEqual(true);
+    expect(alertInstance.isResolved(null)).toEqual(true);
   });
 
   test('returns false when scheduling actions', () => {
@@ -224,7 +224,7 @@ describe('isResolved', () => {
       meta: {},
     });
     alertInstance.scheduleActions('default');
-    expect(alertInstance.isResolved()).toEqual(false);
+    expect(alertInstance.isResolved(null)).toEqual(false);
   });
 
   test(`returns true when some groups are still throttled but didn't schedule actions`, () => {
