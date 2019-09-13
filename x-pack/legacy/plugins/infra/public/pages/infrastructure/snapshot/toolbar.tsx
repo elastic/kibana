@@ -19,6 +19,7 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
+import { WaffleSavedViewsControl } from '../../../components/waffle/waffle_saved_views_control';
 
 export const SnapshotToolbar = injectI18n(({ intl }) => (
   <Toolbar>
@@ -109,6 +110,9 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <WaffleSavedViewsControl />
                 </EuiFlexItem>
               </React.Fragment>
             )}
