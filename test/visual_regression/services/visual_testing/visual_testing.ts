@@ -34,6 +34,7 @@ export const DEFAULT_OPTIONS = {
 export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
+  const find = getService('find');
   const lifecycle = getService('lifecycle');
 
   let currentTest: Test | undefined;
@@ -83,6 +84,11 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
       return snapshot !== false
         ? snapshot
         : await browser.execute<[], string>(takePercySnapshotWithAgent);
+    }
+
+    public async showElementInPercy(selector: string) {
+      const el = await find.byCssSelector(selector);
+      await el.addClass('showInPercy');
     }
   })();
 }

@@ -31,9 +31,13 @@
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
 
-// helper class that hides elements when rendered in percy
+// helper class to show (i.e. whitelist) elements
 @media only percy {
-  .hideInPercy {
+  * {
     visibility: hidden;
+  }
+
+  .showInPercy * {
+    visibility: visible;
   }
 }
