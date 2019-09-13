@@ -47,8 +47,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          count: 4633,
-          sampleCount: 4633,
+          totalDocuments: 4633,
+          sampledDocuments: 4633,
+          sampledValues: 4633,
           histogram: {
             buckets: [
               {
@@ -157,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          count: 4633,
+          totalDocuments: 4633,
           histogram: {
             buckets: [
               {
@@ -194,8 +195,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          count: 4633,
-          sampleCount: 4633,
+          totalDocuments: 4633,
+          sampledDocuments: 4633,
+          sampledValues: 4633,
           topValues: {
             buckets: [
               {
