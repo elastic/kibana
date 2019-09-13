@@ -6253,10 +6253,10 @@ backo2@1.0.2:
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
-backport@4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-4.7.0.tgz#84116db79874de03ed6da8c41ffaec5e5bc92444"
-  integrity sha512-r49zkob3I0q0ds9ErtZKj3FHrZfwVDUjwhMfVNPluVXP6cp0zmKzcfpPDwbrhrNt5pXDzVLg7vHkJABLYHtYjQ==
+backport@4.7.1:
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-4.7.1.tgz#52a8ba0efca9a013d284638913f59c929b400d91"
+  integrity sha512-VpK3VjUY9O6NXB+G5VPM+5ZgX0px+PxrtQQ3pnYmuyFP4rdyUa7i3FsFigiYH75eht5hs1TCkraGyzxS1FignQ==
   dependencies:
     "@types/yargs-parser" "^13.1.0"
     axios "^0.19.0"
