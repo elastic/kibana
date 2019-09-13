@@ -385,12 +385,17 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
       this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+      const newSelectedBounds = { min: moment(new Date(focusLoadFrom)), max: moment(focusLoadFrom) };
+      this.selectedBounds = newSelectedBounds;
     } else {
       // Don't set the brush if the selection is the full context chart domain.
       this.setBrushVisibility(false);
-      const selectedBounds = this.contextXScale.domain();
-      this.selectedBounds = { min: moment(new Date(selectedBounds[0])), max: moment(selectedBounds[1]) };
-      contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
+      const contextXScaleDomain = this.contextXScale.domain();
+      const newSelectedBounds =  { min: moment(new Date(contextXScaleDomain[0])), max: moment(contextXScaleDomain[1]) };
+      if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
+        this.selectedBounds = newSelectedBounds;
+        contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
+      }
     }
   }
 
