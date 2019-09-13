@@ -30,7 +30,7 @@ export interface HostsQuery extends BasicQueryPaginated {
   sortField: HostsFields;
 }
 
-interface Queries {
+export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
   [HostsTableType.events]: BasicQueryPaginated;

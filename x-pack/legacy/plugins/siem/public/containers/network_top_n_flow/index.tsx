@@ -20,7 +20,7 @@ import {
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkTopNFlowQuery } from './index.gql_query';
 
@@ -29,6 +29,7 @@ const ID = 'networkTopNFlowQuery';
 export interface NetworkTopNFlowArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   networkTopNFlow: NetworkTopNFlowEdges[];
@@ -72,28 +73,29 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       startDate,
       topNFlowSort,
     } = this.props;
+    const variables: GetNetworkTopNFlowQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowTarget,
+      inspect: isInspected,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: topNFlowSort,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         query={networkTopNFlowQuery}
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: topNFlowSort,
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -116,14 +118,16 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
             inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}

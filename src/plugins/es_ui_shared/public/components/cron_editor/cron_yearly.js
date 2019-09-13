@@ -20,6 +20,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -114,6 +115,9 @@ export const CronYearly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
+            aria-label={i18n.translate('esUi.cronEditor.cronYearly.hourSelectLabel', {
+              defaultMessage: 'Hour'
+            })}
             onChange={e => onChange({ hour: e.target.value })}
             fullWidth
             prepend={(
@@ -134,6 +138,9 @@ export const CronYearly = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
+            aria-label={i18n.translate('esUi.cronEditor.cronYearly.minuteSelectLabel', {
+              defaultMessage: 'Minute'
+            })}
             onChange={e => onChange({ minute: e.target.value })}
             fullWidth
             prepend={(
