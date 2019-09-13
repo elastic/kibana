@@ -27,6 +27,7 @@ interface SwitchOptionProps<ParamName extends string> {
   tooltip?: string;
   disabled?: boolean;
   value?: boolean;
+  noStyle?: boolean;
   paramName: ParamName;
   setValue: (paramName: ParamName, value: boolean) => void;
 }
@@ -36,12 +37,13 @@ function SwitchOption<ParamName extends string>({
   tooltip,
   label,
   disabled,
+  noStyle = false,
   paramName,
   value = false,
   setValue,
 }: SwitchOptionProps<ParamName>) {
   return (
-    <div className="visEditorSidebar__switchOptionFormRow">
+    <div className={noStyle ? undefined : 'visEditorSidebar__switchOptionFormRow'}>
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
           label={label}

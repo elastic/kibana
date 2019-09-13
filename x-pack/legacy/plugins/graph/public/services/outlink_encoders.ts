@@ -8,6 +8,7 @@ import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 import { Workspace } from '../types';
+import { asKQL } from './kql_encoder';
 
 export interface OutlinkEncoder {
   id: string;
@@ -18,6 +19,32 @@ export interface OutlinkEncoder {
 }
 
 export const outlinkEncoders: OutlinkEncoder[] = [
+  {
+    id: 'kql-loose',
+    title: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseTitle', {
+      defaultMessage: 'KQL OR query',
+    }),
+    description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
+      defaultMessage: 'KQL query, compatible with Discover, Visualize and Dashboards',
+    }),
+    encode(workspace) {
+      return asKQL(workspace, 'or');
+    },
+    type: 'kql',
+  },
+  {
+    id: 'kql',
+    title: i18n.translate('xpack.graph.outlinkEncoders.kqlTitle', {
+      defaultMessage: 'KQL AND query',
+    }),
+    description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
+      defaultMessage: 'KQL query, compatible with Discover, Visualize and Dashboards',
+    }),
+    encode(workspace) {
+      return asKQL(workspace, 'and');
+    },
+    type: 'kql',
+  },
   {
     id: 'esq-rison-loose',
     title: i18n.translate('xpack.graph.outlinkEncoders.esqRisonLooseTitle', {
