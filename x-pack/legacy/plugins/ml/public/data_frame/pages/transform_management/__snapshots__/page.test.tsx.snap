@@ -60,11 +60,7 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
         <EuiSpacer
           size="l"
         />
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
-        >
+        <EuiPanel>
           <DataFrameTransformList
             isInitialized={false}
             transforms={Array []}

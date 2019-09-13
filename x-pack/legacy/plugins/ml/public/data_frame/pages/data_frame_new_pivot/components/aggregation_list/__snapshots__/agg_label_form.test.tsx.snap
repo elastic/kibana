@@ -24,12 +24,9 @@ exports[`Data Frame: <AggLabelForm /> Date histogram aggregation 1`] = `
       button={
         <EuiButtonIcon
           aria-label="Edit aggregation"
-          color="primary"
-          iconSize="m"
           iconType="pencil"
           onClick={[Function]}
           size="s"
-          type="button"
         />
       }
       closePopover={[Function]}
@@ -61,12 +58,9 @@ exports[`Data Frame: <AggLabelForm /> Date histogram aggregation 1`] = `
   >
     <EuiButtonIcon
       aria-label="Delete item"
-      color="primary"
-      iconSize="m"
       iconType="cross"
       onClick={[Function]}
       size="s"
-      type="button"
     />
   </EuiFlexItem>
 </EuiFlexGroup>

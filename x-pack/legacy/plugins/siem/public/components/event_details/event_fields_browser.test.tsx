@@ -217,7 +217,7 @@ describe('EventFieldsBrowser', () => {
       );
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-@timestamp"]')
           .at(0)
           .text()
       ).toEqual('Feb 28, 2019 @ 16:50:54.621');

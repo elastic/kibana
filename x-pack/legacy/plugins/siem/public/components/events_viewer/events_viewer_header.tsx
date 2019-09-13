@@ -37,7 +37,7 @@ export const EventsViewerHeader = React.memo<Props>(({ id, showInspect, totalCou
         <InspectButton
           compact={true}
           isDisabled={false}
-          inputId="timeline"
+          inputId="global"
           inspectIndex={0}
           queryId={id}
           show={showInspect}

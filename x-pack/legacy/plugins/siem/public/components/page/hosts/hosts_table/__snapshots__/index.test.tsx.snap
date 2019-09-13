@@ -153,6 +153,7 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }
   }
+  isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
   showMorePagesIndicator={true}
