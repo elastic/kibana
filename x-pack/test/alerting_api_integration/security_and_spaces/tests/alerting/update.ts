@@ -83,6 +83,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              throttle: '1m',
               alertTypeId: '1',
               alertTypeParams: {
                 foo: true,
@@ -145,10 +146,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['interval', 'alertTypeParams', 'actions'],
+                  keys: ['throttle', 'interval', 'alertTypeParams', 'actions'],
                 },
               });
               break;
@@ -178,6 +179,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send({
               interval: '10s',
+              throttle: '1m',
               alertTypeParams: {},
               actions: [],
             });

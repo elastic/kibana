@@ -34,7 +34,9 @@ export function updateAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
-            throttle: getDurationSchema().default(null),
+            throttle: getDurationSchema()
+              .required()
+              .allow(null),
             interval: getDurationSchema().required(),
             alertTypeParams: Joi.object().required(),
             actions: Joi.array()
