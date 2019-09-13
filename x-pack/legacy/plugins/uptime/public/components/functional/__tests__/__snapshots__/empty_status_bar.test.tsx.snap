@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyStatusBar component renders a default message when no message provided 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiFlexGroup
     gutterSize="l"
   >
@@ -19,11 +15,7 @@ exports[`EmptyStatusBar component renders a default message when no message prov
 `;
 
 exports[`EmptyStatusBar component renders a message when provided 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiFlexGroup
     gutterSize="l"
   >

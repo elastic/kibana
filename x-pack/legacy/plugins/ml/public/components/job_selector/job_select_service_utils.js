@@ -101,12 +101,32 @@ function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
   return { jobIds, selectedGroups: groups };
 }
 
-export function setGlobalState(globalState, { selectedIds, selectedGroups }) {
+// TODO:
+// Merge `setGlobalStateSkipRefresh()` and `setGlobalState()` into
+// a single function similar to how we do `appStateHandler()`.
+// When changing jobs in job selector it would trigger multiple events
+// which in return would be consumed by Single Metric Viewer and could cause
+// race conditions when updating the whole page. Because we don't control
+// the internals of the involved timefilter event triggering, we use
+// a global `skipRefresh` to control when Single Metric Viewer should
+// skip updates triggered by timefilter.
+export function setGlobalStateSkipRefresh(globalState, skipRefresh) {
+  globalState.fetch();
+  if (globalState.ml === undefined) {
+    globalState.ml = {};
+  }
+  globalState.ml.skipRefresh = skipRefresh;
+  globalState.save();
+}
+
+export function setGlobalState(globalState, { selectedIds, selectedGroups, skipRefresh }) {
+  globalState.fetch();
   if (globalState.ml === undefined) {
     globalState.ml = {};
   }
   globalState.ml.jobIds = selectedIds;
   globalState.ml.groups = selectedGroups || [];
+  globalState.ml.skipRefresh = !!skipRefresh;
   globalState.save();
 }
 

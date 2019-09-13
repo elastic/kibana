@@ -123,6 +123,8 @@ function getTimeseriesexplorerDefaultState() {
     tableData: undefined,
     zoomFrom: undefined,
     zoomTo: undefined,
+    zoomFromFocusLoaded: undefined,
+    zoomToFocusLoaded: undefined,
 
     // Toggles display of model bounds in the focus chart
     showModelBounds: true,
@@ -136,7 +138,7 @@ const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef
     {loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" color="primary" size="xs" />)}
     {/* Show a progress bar with progress 0% when not loading.
         If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
-    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value="0" max="100" color="primary" size="xs" />)}
+    {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value={0} max={100} color="primary" size="xs" />)}
     <JobSelector {...jobSelectorProps} />
     <div className="ml-time-series-explorer" ref={resizeRef} >
       {children}
@@ -238,8 +240,8 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       jobs,
       selectedJob,
-      zoomFrom,
-      zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.state;
 
 
@@ -265,10 +267,15 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.UNSET_ZOOM);
     }
 
+    this.setState({
+      zoomFrom: selection.from,
+      zoomTo: selection.to,
+    });
+
     if (
       (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
-      (zoomFrom.getTime() !== selection.from.getTime()) ||
-      (zoomTo.getTime() !== selection.to.getTime())
+      (zoomFromFocusLoaded.getTime() !== selection.from.getTime()) ||
+      (zoomToFocusLoaded.getTime() !== selection.to.getTime())
     ) {
       this.contextChartSelectedInitCallDone = true;
 
@@ -294,6 +301,13 @@ export class TimeSeriesExplorer extends React.Component {
         modelPlotEnabled,
       } = this.state;
 
+      this.setState({
+        loading: true,
+        fullRefresh: false,
+        zoomFrom: selection.from,
+        zoomTo: selection.to,
+      });
+
       getFocusData(
         criteriaFields,
         +detectorId,
@@ -311,16 +325,13 @@ export class TimeSeriesExplorer extends React.Component {
           ...refreshFocusData,
           loading: false,
           showModelBoundsCheckbox: (modelPlotEnabled === true) && (refreshFocusData.focusChartData.length > 0),
+          zoomFromFocusLoaded: selection.from,
+          zoomToFocusLoaded: selection.to,
         });
       });
 
       // Load the data for the anomalies table.
       this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf());
-
-      this.setState({
-        zoomFrom: selection.from,
-        zoomTo: selection.to,
-      });
     }
   }
 
@@ -474,7 +485,13 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   refresh = (fullRefresh = true) => {
-    if (this.state.loading && fullRefresh === false) {
+    // Skip the refresh if:
+    // a) The global state's `skipRefresh` was set to true by the job selector to avoid race conditions
+    //    when loading the Single Metric Viewer after a job/group and time range update.
+    // b) A 'soft' refresh without a full page reload is already happening.
+    if (get(this.props.globalState, 'ml.skipRefresh') || (
+      this.state.loading && fullRefresh === false
+    )) {
       return;
     }
 
@@ -816,7 +833,7 @@ export class TimeSeriesExplorer extends React.Component {
       const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
       this.contextChartSelectedInitCallDone = false;
-      this.setState({ showForecastCheckbox: false });
+      this.setState({ fullRefresh: false, loading: true, showForecastCheckbox: false });
 
       const timeSeriesJobIds = jobs.map(j => j.id);
 
@@ -902,7 +919,7 @@ export class TimeSeriesExplorer extends React.Component {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(this.refresh));
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(() => this.refresh(false)));
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -956,6 +973,8 @@ export class TimeSeriesExplorer extends React.Component {
       tableData,
       zoomFrom,
       zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.state;
 
     const chartProps = {
@@ -969,9 +988,12 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
+      skipRefresh: loading || !!get(this.props.globalState, 'ml.skipRefresh'),
       svgWidth,
       zoomFrom,
       zoomTo,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
       autoZoomDuration,
     };
 

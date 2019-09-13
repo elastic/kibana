@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel } from '../../store';
@@ -18,36 +19,45 @@ interface TimelineRefetchDispatch {
     inputId: InputsModelId;
     inspect: inputsModel.InspectQuery | null;
     loading: boolean;
-    refetch: inputsModel.Refetch;
+    refetch: inputsModel.Refetch | inputsModel.RefetchKql | null;
+  }>;
+  deleteEventQuery: ActionCreator<{
+    id: string;
+    inputId: InputsModelId;
   }>;
 }
 
-interface TimelineRefetchProps {
-  children: React.ReactNode;
+export interface TimelineRefetchProps {
   id: string;
+  inputId: InputsModelId;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch;
+  refetch: inputsModel.Refetch | null;
 }
 
-type OwnProps = TimelineRefetchDispatch & TimelineRefetchProps;
+type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
 
-class TimelineRefetchComponent extends React.PureComponent<OwnProps> {
-  public componentDidUpdate(prevProps: OwnProps) {
-    const { loading, id, inspect, refetch } = this.props;
-    if (prevProps.loading !== loading) {
-      this.props.setTimelineQuery({ id, inputId: 'timeline', inspect, loading, refetch });
+const TimelineRefetchComponent = memo<OwnProps>(
+  ({ deleteEventQuery, id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
+    useEffect(() => {
+      setTimelineQuery({ id, inputId, inspect, loading, refetch });
+      if (inputId === 'global') {
+        return () => {
+          deleteEventQuery({ id, inputId });
+        };
+      }
+    }, [id, inputId, loading, refetch, inspect]);
+
+    return null;
+  }
+);
+
+export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
+  connect(
+    null,
+    {
+      setTimelineQuery: inputsActions.setQuery,
+      deleteEventQuery: inputsActions.deleteOneQuery,
     }
-  }
-
-  public render() {
-    return <>{this.props.children}</>;
-  }
-}
-
-export const TimelineRefetch = connect(
-  null,
-  {
-    setTimelineQuery: inputsActions.setQuery,
-  }
+  )
 )(TimelineRefetchComponent);

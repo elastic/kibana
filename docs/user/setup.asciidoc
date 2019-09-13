@@ -1,0 +1,63 @@
+[[setup]]
+= Set Up Kibana
+
+[partintro]
+--
+This section includes information on how to setup Kibana and get it running,
+including:
+
+* Downloading
+* Installing
+* Starting
+* Configuring
+* Upgrading
+
+[[supported-platforms]]
+[float]
+== Supported platforms
+
+Packages of Kibana are provided for and tested against Linux, Darwin, and
+Windows. Since Kibana runs on Node.js, we include the necessary Node.js
+binaries for these platforms. Running Kibana against a separately maintained
+version of Node.js is not supported.
+
+[float]
+[[elasticsearch-version]]
+== Elasticsearch version
+
+Kibana should be configured to run against an Elasticsearch node of the same
+version. This is the officially supported configuration.
+
+Running different major version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.x and Elasticsearch 2.x) is not supported, nor is running a minor
+version of Kibana that is newer than the version of Elasticsearch (e.g. Kibana
+5.1 and Elasticsearch 5.0).
+
+Running a minor version of Elasticsearch that is higher than Kibana will
+generally work in order to facilitate an upgrade process where Elasticsearch
+is upgraded first (e.g. Kibana 5.0 and Elasticsearch 5.1). In this
+configuration, a warning will be logged on Kibana server startup, so it's only
+meant to be temporary until Kibana is upgraded to the same version as
+Elasticsearch.
+
+Running different patch version releases of Kibana and Elasticsearch (e.g.
+Kibana 5.0.0 and Elasticsearch 5.0.1) is generally supported, though we
+encourage users to run the same versions of Kibana and Elasticsearch down to
+the patch version.
+--
+
+include::{kib-repo-dir}/setup/install.asciidoc[]
+
+include::{kib-repo-dir}/setup/start-stop.asciidoc[]
+
+include::{kib-repo-dir}/setup/settings.asciidoc[]
+
+include::{kib-repo-dir}/setup/docker.asciidoc[]
+
+include::{kib-repo-dir}/setup/access.asciidoc[]
+
+include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
+
+include::{kib-repo-dir}/setup/production.asciidoc[]
+
+include::{kib-repo-dir}/setup/upgrade.asciidoc[]
