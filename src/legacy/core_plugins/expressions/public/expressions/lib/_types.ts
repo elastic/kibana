@@ -19,9 +19,9 @@
 
 import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
-import { Adapters } from '../../../../../ui/public/inspector';
-import { Query } from '../../query';
-import { ExpressionAST } from '../../../../../../plugins/data/common/expressions/types';
+import { Adapters } from '../../../../../../plugins/inspector/public';
+import { Query } from '../../../../../../plugins/data/public';
+import { ExpressionAST } from '../../../../../../plugins/expressions/common';
 
 export { ExpressionAST, TimeRange, Adapters, Filter, Query };
 

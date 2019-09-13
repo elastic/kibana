@@ -68,4 +68,4 @@ capturing screenshots. Configuring the `xpack.reporting.kibanaServer` settings
 to point to a proxy host requires that the Kibana server has network access to
 the proxy.
 
-include::{kib-repo-dir}/security/reporting.asciidoc[]
+include::{kib-repo-dir}/user/security/reporting.asciidoc[]

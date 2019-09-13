@@ -59,7 +59,7 @@ export class MBMapContainer extends React.Component {
       return {
         prevLayerList: nextLayerList,
         hasSyncedLayerList: false,
-        maxWidth: '260px', // width of table columns max-widths plus all padding
+
       };
     }
 
@@ -73,6 +73,7 @@ export class MBMapContainer extends React.Component {
     this._mbPopup = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false,
+      maxWidth: '260px', // width of table columns max-widths plus all padding
     });
     this._mbDrawControl = new MapboxDraw({
       displayControlsDefault: false,

@@ -8,7 +8,7 @@ necessary to perform an analytics task.
 {kib} provides the following wizards to make it easier to create jobs:
 
 [role="screenshot"]
-image::ml/images/ml-create-job.jpg[Create New Job]
+image::user/ml/images/ml-create-job.jpg[Create New Job]
 
 A _single metric job_ is a simple job that contains a single _detector_. A
 detector defines the type of analysis that will occur and which fields to
@@ -31,7 +31,7 @@ for that context. For example, if you
 appears:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-sample.jpg[A screenshot of the {kib} sample data web log job creation wizard]
+image::user/ml/images/ml-data-recognizer-sample.jpg[A screenshot of the {kib} sample data web log job creation wizard]
 
 TIP: Alternatively, after you load a sample data set on the {kib} home page, you can click *View data* > *ML jobs*. There are {anomaly-jobs} for both the sample eCommerce orders data set and the sample web logs data set.
 
@@ -43,19 +43,19 @@ http://nginx.org/[Nginx] and https://httpd.apache.org/[Apache] HTTP servers to
 appear:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-filebeat.jpg[A screenshot of the {filebeat} job creation wizards]
+image::user/ml/images/ml-data-recognizer-filebeat.jpg[A screenshot of the {filebeat} job creation wizards]
 
 If you use {auditbeat-ref}/index.html[{auditbeat}] to audit process
 activity on your systems, the following wizards appear:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
+image::user/ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
 
 Likewise, if you use the {metricbeat-ref}/metricbeat-module-system.html[{metricbeat} system module] to monitor your servers, the following
 wizards appear:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbeat} job creation wizards]
+image::user/ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbeat} job creation wizards]
 
 These wizards create {anomaly-jobs}, dashboards, searches, and visualizations 
 that are customized to help you analyze your {auditbeat}, {filebeat}, and
