@@ -862,7 +862,7 @@ export interface MatrixOverTimeHistogramData {
 
   y: number;
 
-  g?: string | null;
+  g: string;
 }
 
 export interface HostsData {
@@ -2481,7 +2481,7 @@ export namespace GetEventsOverTimeQuery {
 
     y: number;
 
-    g?: string | null;
+    g: string;
   };
 
   export type Inspect = {

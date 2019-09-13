@@ -40,6 +40,7 @@ export const BarChartBaseComponent = React.memo<{
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
+  const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
   const settings = {
@@ -75,11 +76,11 @@ export const BarChartBaseComponent = React.memo<{
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        tickSize={0}
+        tickSize={tickSize}
         tickFormat={xTickFormatter}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
     </Chart>
   ) : null;
 });

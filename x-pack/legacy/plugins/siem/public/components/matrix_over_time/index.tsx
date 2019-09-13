@@ -4,16 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 
 import { getOr, head, last } from 'lodash/fp';
-import { EuiPanel, EuiLoadingContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import styled from 'styled-components';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { Loader } from '../loader';
+
+export interface MatrixOverTimeBasicProps {
+  id: string;
+  data: MatrixOverTimeHistogramData[];
+  loading: boolean;
+  startDate: number;
+  endDate: number;
+  narrowDateRange: UpdateDateRange;
+  totalCount: number;
+}
+
+export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
+  title: string;
+  subtitle: string;
+  dataKey: string;
+}
 
 const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRange) => ({
   series: {
@@ -24,6 +45,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   axis: {
     xTickFormatter: niceTimeFormatter([from, to]),
     yTickFormatter: (value: string | number): string => value.toLocaleString(),
+    tickSize: 8,
   },
   settings: {
     legendPosition: Position.Bottom,
@@ -47,20 +69,17 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
       },
     },
   },
+  customHeight: 324,
 });
 
-const Panel = styled(EuiPanel)<{ loading: { loading: boolean } }>`
-  height: 388px;
+const Panel = styled(EuiPanel)<{ isLoading: boolean }>`
   position: relative;
-  ${({ loading }) =>
-    loading &&
+
+  ${({ isLoading }) =>
+    isLoading &&
     `
     overflow: hidden;
   `}
-`;
-
-const FlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
 `;
 
 export const MatrixOverTimeHistogram = ({
@@ -73,21 +92,14 @@ export const MatrixOverTimeHistogram = ({
   startDate,
   title,
   subtitle,
-}: {
-  id: string;
-  data: MatrixOverTimeHistogramData[];
-  dataKey: string;
-  loading: boolean;
-  startDate: number;
-  endDate: number;
-  narrowDateRange: UpdateDateRange;
-  title: string;
-  subtitle: string;
-}) => {
+  totalCount,
+}: MatrixOverTimeProps) => {
   const bucketStartDate = getOr(startDate, 'x', head(data));
   const bucketEndDate = getOr(endDate, 'x', last(data));
   const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, narrowDateRange);
   const [showInspect, setShowInspect] = useState(false);
+  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+  const [loadingInitial, setLoadingInitial] = useState(false);
 
   const barChartData: ChartSeriesData[] = [
     {
@@ -95,25 +107,44 @@ export const MatrixOverTimeHistogram = ({
       value: data,
     },
   ];
+
+  useEffect(() => {
+    if (totalCount >= 0 && loadingInitial) {
+      setLoadingInitial(false);
+    }
+  }, [totalCount, showInspect]);
+
   return (
     <Panel
       data-test-subj={`${dataKey}Panel`}
-      loading={{ loading }}
+      isLoading={loading}
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >
-      <FlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <HeaderPanel id={id} title={title} showInspect={showInspect} subtitle={subtitle} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          {loading ? (
-            <EuiLoadingContent data-test-subj={`initialLoadingPanel${dataKey}`} lines={10} />
-          ) : (
-            <BarChart barChart={barChartData} configs={barchartConfigs} />
+      <HeaderPanel
+        id={id}
+        title={title}
+        showInspect={!loadingInitial && showInspect}
+        subtitle={!loadingInitial && subtitle}
+      />
+
+      {loadingInitial ? (
+        <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+      ) : (
+        <>
+          <BarChart barChart={barChartData} configs={barchartConfigs} />
+
+          {loading && (
+            <Loader
+              overlay
+              overlayBackground={
+                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+              }
+              size="xl"
+            />
           )}
-        </EuiFlexItem>
-      </FlexGroup>
+        </>
+      )}
     </Panel>
   );
 };

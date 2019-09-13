@@ -365,17 +365,18 @@ export const EventsTabBody = ({
         startDate={startDate}
         type={hostsModel.HostsType.page}
       >
-        {({ eventsOverTime, loading, id, inspect, refetch }) => (
+        {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
           <EventsOverTimeManage
+            data={eventsOverTime!}
+            endDate={endDate}
             id={id}
             inspect={inspect}
+            loading={loading}
+            narrowDateRange={narrowDateRange}
             refetch={refetch}
             setQuery={setQuery}
-            data={eventsOverTime!}
-            loading={loading}
             startDate={startDate}
-            endDate={endDate}
-            narrowDateRange={narrowDateRange}
+            totalCount={totalCount}
           />
         )}
       </EventsOverTimeQuery>

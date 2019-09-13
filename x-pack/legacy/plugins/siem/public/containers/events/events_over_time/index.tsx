@@ -16,18 +16,19 @@ import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
 import { EventsOverTimeGqlQuery } from './events_over_time.gql_query';
-import { GetEventsOverTimeQuery, EventsOverTimeData } from '../../../graphql/types';
+import { GetEventsOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
 
 const ID = 'eventsOverTimeQuery';
 
 export interface EventsArgs {
+  endDate: number;
+  eventsOverTime: MatrixOverTimeHistogramData[];
   id: string;
   inspect: inputsModel.InspectQuery;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  eventsOverTime: EventsOverTimeData;
   startDate: number;
-  endDate: number;
+  totalCount: number;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -74,15 +75,18 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
         }}
       >
         {({ data, loading, refetch }) => {
-          const eventsOverTime = getOr({}, `source.EventsOverTime`, data);
+          const source = getOr({}, `source.EventsOverTime`, data);
+          const eventsOverTime = getOr({}, `eventsOverTime`, source);
+          const totalCount = getOr(-1, 'totalCount', source);
           return children!({
-            id,
-            inspect: getOr(null, 'inspect', eventsOverTime),
-            refetch,
-            loading,
-            eventsOverTime,
-            startDate: startDate!,
             endDate: endDate!,
+            eventsOverTime,
+            id,
+            inspect: getOr(null, 'inspect', source),
+            loading,
+            refetch,
+            startDate: startDate!,
+            totalCount,
           });
         }}
       </Query>

@@ -88,8 +88,16 @@ export interface RequestDetailsOptions {
   defaultIndex: string[];
 }
 
-export interface EventsOverTimeHistogram {
+interface EventsOverTimeHistogramData {
   key_as_string: string;
   key: number;
+  doc_count: number;
+}
+
+export interface EventsActionGroupData {
+  key: number;
+  events: {
+    bucket: EventsOverTimeHistogramData[];
+  };
   doc_count: number;
 }

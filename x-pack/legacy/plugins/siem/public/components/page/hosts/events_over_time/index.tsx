@@ -6,34 +6,20 @@
 
 import React from 'react';
 
-import { getOr } from 'lodash/fp';
-
-import { EventsOverTimeData } from '../../../../graphql/types';
 import * as i18n from './translation';
+import { MatrixOverTimeHistogram, MatrixOverTimeBasicProps } from '../../../matrix_over_time';
 
-import { UpdateDateRange } from '../../../charts/common';
-import { MatrixOverTimeHistogram } from '../../../matrix_over_time';
-
-export const EventsOverTimeHistogram = (props: {
-  id: string;
-  data: EventsOverTimeData;
-  loading: boolean;
-  startDate: number;
-  endDate: number;
-  narrowDateRange: UpdateDateRange;
-}) => {
+export const EventsOverTimeHistogram = (props: MatrixOverTimeBasicProps) => {
   const dataKey = 'eventsOverTime';
-  const matrixOverTimeData = getOr([], `data.${dataKey}`, props);
-  const totalCount = getOr(0, 'data.totalCount', props);
+  const { totalCount } = props;
   const subtitle = `${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(totalCount)}`;
-  const { data, ...matrixOverTimeProps } = props;
+  const { ...matrixOverTimeProps } = props;
 
   return (
     <MatrixOverTimeHistogram
-      title={i18n.EVENT_COUNT_FREQUENCY}
+      title={i18n.EVENT_COUNT_FREQUENCY_BY_ACTION}
       subtitle={subtitle}
       dataKey={dataKey}
-      data={matrixOverTimeData}
       {...matrixOverTimeProps}
     />
   );

@@ -48,7 +48,7 @@ import {
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
   TimelineRequestOptions,
-  EventsOverTimeHistogram,
+  EventsActionGroupData,
 } from './types';
 import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -154,34 +154,37 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
     return {
       inspect,
-      // eventsOverTime: formatMatrixOverTimeData(eventsOverTimeBucket),
-      eventsOverTime: formatEventActionGroupData(eventsOverTimeBucket),
+      // eventsOverTime: getTotalEventsOverTime(eventsOverTimeBucket),
+      eventsOverTime: getEventsOverTimeByActionName(eventsOverTimeBucket),
       totalCount,
     };
   }
 }
 
-export const formatMatrixOverTimeData = (
-  data: EventsOverTimeHistogram[]
+export const getTotalEventsOverTime = (
+  data: EventsActionGroupData[]
 ): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
         x: key,
         y: doc_count,
+        g: 'total events',
       }))
     : [];
 };
 
-export const formatEventActionGroupData = (
-  data: EventsOverTimeHistogram[]
+const getEventsOverTimeByActionName = (
+  data: EventsActionGroupData[]
 ): MatrixOverTimeHistogramData[] => {
   let result: MatrixOverTimeHistogramData[] = [];
   data.forEach(({ key: group, events }) => {
-    const eventsData = getOr([], 'buckets', events).map(({ key, doc_count }) => ({
-      x: key,
-      y: doc_count,
-      g: group,
-    }));
+    const eventsData = getOr([], 'buckets', events).map(
+      ({ key, doc_count }: { key: number; doc_count: number }) => ({
+        x: key,
+        y: doc_count,
+        g: group,
+      })
+    );
     result = [...result, ...eventsData];
   });
 
