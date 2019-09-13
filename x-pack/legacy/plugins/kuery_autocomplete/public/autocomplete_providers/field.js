@@ -32,11 +32,13 @@ export function getSuggestionsProvider({ indexPatterns }) {
   return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
     const search = `${nestedPath ? `${nestedPath}.` : ''}${prefix}${suffix}`.trim().toLowerCase();
     const fieldNames = allFields.map(field => field.name);
-    const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
+    const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search) && name !== search);
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {
       const field = allFields.find(patternField => patternField.name === fieldName);
-      const remainingPath = field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0);
+      const remainingPath = field.subType && field.subType.nested
+        ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
+        : '';
       const text = field.subType && field.subType.nested && remainingPath.length > 0
         ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(fieldName.slice(field.subType.nested.path.length + 1))} }`
         : `${escapeKuery(fieldName.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
