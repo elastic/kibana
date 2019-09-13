@@ -16,7 +16,7 @@ import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
-import { TruncatableText } from '../../../truncatable_text';
+import { TruncatableText, TruncatableTooltip } from '../../../truncatable_text';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../helpers';
 import {
   DATE_FIELD_TYPE,
@@ -57,11 +57,11 @@ export const FormattedFieldValue = pure<{
     const hostname = `${value}`;
 
     return isString(value) && hostname.length > 0 ? (
-      <EuiToolTip content={value}>
+      <TruncatableTooltip content={value}>
         <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
           {value}
         </HostDetailsLink>
-      </EuiToolTip>
+      </TruncatableTooltip>
     ) : (
       getEmptyTagValue()
     );
@@ -71,28 +71,29 @@ export const FormattedFieldValue = pure<{
     );
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
-      <EuiToolTip
-        position="left"
-        data-test-subj="message-tool-tip"
-        content={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <span>{fieldName}</span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{value}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
+      <>
         {truncate ? (
           <TruncatableText data-test-subj="truncatable-message">
-            <>{value}</>
+            <TruncatableTooltip
+              data-test-subj="message-tool-tip"
+              content={
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <span>{fieldName}</span>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <span>{value}</span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <>{value}</>
+            </TruncatableTooltip>
           </TruncatableText>
         ) : (
           <>{value}</>
         )}
-      </EuiToolTip>
+      </>
     );
   } else {
     return getOrEmptyTagFromValue(value);

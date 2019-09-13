@@ -4,20 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
-
-/**
- * Applies CSS styling to enable text to be truncated with an ellipsis.
- * Example: "Don't leave me hanging..."
- */
-
-export const TruncatableText = styled.span`
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: top;
-  white-space: nowrap;
-`;
-
-TruncatableText.displayName = 'TruncatableText';
+export { TruncatableText } from './truncatable_text';
+export { TruncatableTooltip } from './truncatable_tooltip';
