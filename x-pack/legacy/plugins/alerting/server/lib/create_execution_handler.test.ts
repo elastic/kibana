@@ -15,6 +15,7 @@ const alertType: AlertType = {
 };
 
 const createExecutionHandlerParams = {
+  log: jest.fn(),
   executeAction: jest.fn(),
   spaceId: 'default',
   apiKey: 'MTIzOmFiYw==',
@@ -102,11 +103,12 @@ test('state attribute gets parameterized', async () => {
     `);
 });
 
-test(`throws error when action group isn't part of actionGroups available for the alertType`, async () => {
+test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-  await expect(
-    executionHandler('invalid-group', {}, {})
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Invalid action group \\"invalid-group\\" for alert \\"test\\"."`
+  const result = await executionHandler('invalid-group', {}, {});
+  expect(result).toBeUndefined();
+  expect(createExecutionHandlerParams.log).toHaveBeenCalledWith(
+    ['error', 'alerting'],
+    'Invalid action group "invalid-group" for alert "test".'
   );
 });

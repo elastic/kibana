@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction, State, Context, AlertType } from '../types';
+import { AlertAction, State, Context, AlertType, Log } from '../types';
 import { ActionsPlugin } from '../../../actions';
 import { transformActionParams } from './transform_action_params';
 
@@ -14,9 +14,11 @@ interface CreateExecutionHandlerOptions {
   spaceId: string;
   apiKey?: string;
   alertType: AlertType;
+  log: Log;
 }
 
 export function createExecutionHandler({
+  log,
   executeAction,
   actions: alertActions,
   spaceId,
@@ -25,7 +27,11 @@ export function createExecutionHandler({
 }: CreateExecutionHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
     if (!alertType.actionGroups.includes(actionGroup)) {
-      throw new Error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
+      log(
+        ['error', 'alerting'],
+        `Invalid action group "${actionGroup}" for alert "${alertType.id}".`
+      );
+      return;
     }
     const actions = alertActions
       .filter(({ group }) => group === actionGroup)

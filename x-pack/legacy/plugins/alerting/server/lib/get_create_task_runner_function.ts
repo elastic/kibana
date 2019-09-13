@@ -96,6 +96,7 @@ export function getCreateTaskRunnerFunction({
         });
 
         const executionHandler = createExecutionHandler({
+          log: services.log,
           executeAction,
           apiKey,
           actions: actionsWithIds,
