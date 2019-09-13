@@ -32,7 +32,7 @@ const __LEGACY = new LegacyDependenciesPlugin();
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
-  data: npSetup.plugins.data,
+  expressions: npSetup.plugins.expressions,
   __LEGACY,
 };
 

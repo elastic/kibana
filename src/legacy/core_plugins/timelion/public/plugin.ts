@@ -23,7 +23,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
-import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
+import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
@@ -36,7 +36,7 @@ import {
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
 
   // Temporary solution
@@ -63,8 +63,7 @@ export class TimelionPlugin
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
     const dependencies: LegacyDependenciesPluginSetup = await plugins.__LEGACY.setup();
-
-    plugins.data.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
+    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     plugins.visualizations.types.registerVisualization(() =>
       getTimelionVisualization(dependencies)
     );

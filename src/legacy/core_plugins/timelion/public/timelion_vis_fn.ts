@@ -19,11 +19,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunction,
-  KibanaContext,
-  Render,
-} from 'src/plugins/data/common/expressions/types';
+import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
 import { getTimelionRequestHandler, TimelionSuccessResponse } from './vis/timelion_request_handler';
 import { LegacyDependenciesPluginSetup } from './shim';
 
