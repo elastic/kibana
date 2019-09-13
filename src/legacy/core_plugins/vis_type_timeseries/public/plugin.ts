@@ -42,7 +42,8 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations }: MetricsPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricsFn);
-    visualizations.types.registerVisualization(createMetricsTypeDefinition);
+    // todo - try removing fn call
+    visualizations.types.registerVisualization(createMetricsTypeDefinition());
   }
 
   public start(core: CoreStart) {
