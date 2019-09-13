@@ -26,7 +26,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // Skipping for now until we can get Percy runs more stable
+  // FLAKY: https://github.com/elastic/kibana/issues/45713
   describe.skip('discover app', function () {
     this.tags('ciGroup6');
 
