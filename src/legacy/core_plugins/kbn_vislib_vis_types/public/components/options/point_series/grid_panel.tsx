@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,15 +25,14 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SelectOption, SwitchOption } from '../../common';
 import { BasicVislibParams, ValueAxis } from '../../../types';
 
-function GridOptions({
-  stateParams,
-  setValue,
-  hasHistogramAgg,
-}: VisOptionsProps<BasicVislibParams>) {
-  const setGrid = <T extends keyof BasicVislibParams['grid']>(
-    paramName: T,
-    value: BasicVislibParams['grid'][T]
-  ) => setValue('grid', { ...stateParams.grid, [paramName]: value });
+function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<BasicVislibParams>) {
+  const setGrid = useCallback(
+    <T extends keyof BasicVislibParams['grid']>(
+      paramName: T,
+      value: BasicVislibParams['grid'][T]
+    ) => setValue('grid', { ...stateParams.grid, [paramName]: value }),
+    [stateParams.grid, setValue]
+  );
 
   const options = useMemo(
     () => [
@@ -48,7 +47,7 @@ function GridOptions({
         value: '',
       },
     ],
-    [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
+    [stateParams.valueAxes]
   );
 
   useEffect(() => {
@@ -71,7 +70,7 @@ function GridOptions({
       <SwitchOption
         disabled={hasHistogramAgg}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
-          defaultMessage: 'Show x-axis lines',
+          defaultMessage: 'Show X-axis lines',
         })}
         paramName="categoryLines"
         tooltip={
@@ -103,4 +102,4 @@ function GridOptions({
   );
 }
 
-export { GridOptions };
+export { GridPanel };
