@@ -134,7 +134,7 @@ export class SearchOptions extends Component<Props, State> {
           <EuiFlyoutHeader>
             <EuiTitle size="s">
               <h2 id="flyoutSmallTitle" className="">
-                <EuiNotificationBadge size="m" className="code-notification-badge">
+                <EuiNotificationBadge size="m" className="codeQueryBar__filter-badge">
                   {repoScope.length}
                 </EuiNotificationBadge>
                 <EuiTextColor color="secondary" className="code-flyout-title">
@@ -196,7 +196,7 @@ export class SearchOptions extends Component<Props, State> {
       <div>
         <div className="kuiLocalSearchAssistedInput__assistance">
           <EuiButtonEmpty size="xs" onClick={this.toggleOptionsFlyout}>
-            <EuiNotificationBadge size="m" className="code-notification-badge">
+            <EuiNotificationBadge size="m" className="codeQueryBar__filter-badge">
               {repoScope.length}
             </EuiNotificationBadge>
             <EuiTextColor color="secondary">

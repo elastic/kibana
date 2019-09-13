@@ -12,3 +12,7 @@
 .codeQueryBar__scope {
   width: calc(#{$codeSideBarWidth} - #{$codeSearchBarPadding});
 }
+
+.codeQueryBar__filter-badge {
+  margin-right: $euiSizeS;
+}
