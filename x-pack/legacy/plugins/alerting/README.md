@@ -26,6 +26,12 @@ A Kibana alert detects a condition and executes one or more actions when that co
 1. Develop and register an alert type (see alert types -> example).
 2. Create an alert using the RESTful API (see alerts -> create).
 
+## Limitations
+
+When security is enabled, an SSL connection to Elasticsearch is required in order to use alerting.
+
+When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
+
 ## Alert types
 
 ### Methods
