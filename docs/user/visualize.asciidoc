@@ -4,20 +4,23 @@
 [partintro]
 --
 Visualize enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to dashboards for analysis.
- 
-Kibana visualizations are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
- 
-Create visualizations from a search saved in Discover, or start with a new search query.
- 
-With visualizations, you can:
-* Cool thing 1
-* Cool thing 2
-* Cool thing 3
+
+{kib} visualizations are based on Elasticsearch queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+
+To start creating visualizations, click *Visualize* in the side navigation.
+
+With *Visualize*, you can:
+
+* Choose from a variety of visualizations to display your data
+
+* Choose from a set of aggregations to extract and process your data
+
+* Change the display options to best display your data
 
 --
 
 include::visualize/choose-your-visualization.asciidoc[]
 
-include::{kib-repo-dir}/visualize/saving.asciidoc[]
+include::visualize/choose-your-data.asciidoc[]
 
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+include::visualize/create-visualization.asciidoc[]

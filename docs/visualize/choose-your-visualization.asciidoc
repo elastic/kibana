@@ -1,14 +1,14 @@
 [[choose-your-visualization]]
 == Choose the visualization for your data
 
-This is how you should choose the visualization for your data.
-
-//Some cool table for all visualizations?
+Choose from a variety of visualizations to best display your data.
 
 [[area-chart]]
 === Area chart
 
-Area charts show one or more quantities over time. In area charts, points are plotted and connected by lines to show the value of a quantity at several different times. 
+Area charts show one or more quantities over time. In area charts, points are 
+plotted and connected by lines to show the value of a quantity at several 
+different times. 
  
 With area charts, you can:
 
@@ -18,58 +18,55 @@ With area charts, you can:
 
 * Display the magnitude of trends
  
-//<image>
+[role="screenshot"]
+include::images/visualize-area-chart.png[Area chart with Flights Delay Type sample data]
 
-//Ready to create an area chart? Check out the area chart example.
+Ready to create an area chart? Check out the <<area-chart-tutorial, area chart example>>.
 
 [[visualize-controls]]
 === Controls
 experimental[]
 
-The Controls visualization enables you to add a dropdown menu and radio slider to your Kibana dashboards.
+Controls allows you to add dropdown menus and range sliders to {kib} dashboards.
 
-With the Control visualization, you can:
+With Controls, you can:
 
-* Cool thing 1
+* Interact with the data on your {kib} dashboard
 
-* Cool thing 2
+* Watch your data change in real-time 
 
-* Cool thing 3
+* Drill down into your data with filters
 
 [role="screenshot"]
 image::images/controls/controls_in_dashboard.png[]
 
-//<image>
+[role="screenshot"]
+image::images/visualize-controls.png[Controls with Flights Controls sample data]
 
-//Ready to add a Controls visualization to your dashboard? Refer to Controls example.
+Ready to add Controls to your dashboard? Check out the <<controls-tutorial, Controls example>>.
 
 [[visualize-coordinate-map]]
 === Coordinate map
 
-Short description.
+Mark areas of a geographic area based on the aggregation that you choose. For each bucket, a circle displays on the map, and the circle color indicates the value of the aggregation.
 
-NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the coordinate map.
+NOTE: Since the Maps application provides you with more functionality and is 
+easier to use, it is recommended to use the Maps application instead of the 
+coordinate map.
 
-//<image>
+[role="screenshot"]
+image::images/visualize-coordinate-map.png[]
 
 [[visualize-data-table]]
 === Data table
 
 Mellori’s section.
 
-Short description.
-
-With data tables, you can:
-
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
+Data tables display your raw data in a tabular format.
 
 //<image>
 
-//Ready to create a data table? Check out the data example.
+Ready to create a data table? Check out the <<data-table-tutorial, data example>>.
 
 [[visualize-gauge]]
 === Gauge
@@ -84,26 +81,20 @@ Use the gauge visualization to:
 
 * Determine how a specified field is performing versus how it is expected to perform
 
-//<image>
+[role="screenshot"]
+image::images/visualize-gauge.png[Gauge with Flights Total Flight Cancellations sample data]
 
-//Ready to create a gauge visualization? Check out the gauge example.
+Ready to create a gauge visualization? Check out the <<gauge-tutorial, gauge example>>.
 
 [[visualize-goal]]
 === Goal
 
 The goal visualization displays how your metric progresses toward a fixed goal. 
 
-With the goal visualization, you can:
+[role="screenshot"]
+image::images/visualize-goal.png[Goal with eCommerce Orders sample data]
 
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
-
-//<image>
-
-//Ready to create a goal visualization? Check out the goal example.
+Ready to create a goal visualization? Check out the <<goal-tutorial, goal example>>.
 
 [[visualize-heat-map]]
 === Heat map
@@ -112,7 +103,8 @@ Short description.
 
 NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the heat Map.
 
-//<image>
+[role="screenshot"]
+image::images/visualize-heat-map.png[Heat map with Flights Origin Country vs. Destination Country sample data]
 
 [[visualize-bar-chart]]
 === Horizontal and vertical bar charts
@@ -127,9 +119,10 @@ With bar charts, you can:
 
 * Easily identify the categories that represent the highest and lowest values
 
-//<image>
+[role="screenshot"]
+image::images/visualize-bar-chart.png[Vertical bar chart with Flights Delay Buckets sample data]
 
-//Ready to create a bar chart? Check out the bar chart example.
+Ready to create a bar chart? Check out the <<bar-chart-tutorial, bar chart example>>.
 
 [[visualize-line-chart]]
 === Line chart
@@ -144,9 +137,10 @@ With line charts, you can:
 
 * Compare patterns of multiple variables
 
-//<image>
+[role="screenshot"]
+image::images/visualize-line-chart.png[Line chart with eCommerce Sales by Category sample data]
 
-//Ready to create a line chart? Check out the line chart example?
+Ready to create a line chart? Check out the <<line-chart-tutorial, line chart example>>.
 
 [[visualize-maps-app]]
 === Maps
@@ -157,7 +151,8 @@ For more information about the Maps application, refer to <<maps,Maps>>.
 
 NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the Coordinate Map, Heat Map, and Region Map.
 
-//<image>
+[role="screenshot"]
+image::maps/images/sample_data_web_logs.png[]
 
 [[visualize-markdown]]
 === Markdown
@@ -173,9 +168,10 @@ The Markdown widget is helpful for:
 
 * Cool thing 3
 
-//<image>
+[role="screenshot"]
+image::images/visualize-markdown.png[Markdown with Flights Markdown Instructions sample data]
 
-//Ready to add the Markdown widget to your visualization? Check out the Markdown widget example.
+Ready to use the Markdown widget? Check out the <<markdown-tutorial, Markdown widget example>>.
 
 [[visualize-metric]]
 === Metric
@@ -184,17 +180,10 @@ Mellori's section.
 
 The metric visualization displays a single numeric value for an aggregation.
 
-With the metric visualization, you can:
+[role="screenshot"]
+include::images/visualize-metric.png[Metric with Flights Average Ticket Price sample data]
 
-* Cool thing 1
-
-* Cool thing 2
-
-* Cool thing 3
-
-//<image>
-
-//Ready to create a metric visualization? Check out the metric example.
+Ready to create a metric visualization? Check out the <<metric-tutorial, metric example>>.
 
 [[visualize-pie-chart]]
 === Pie chart
@@ -209,9 +198,10 @@ With pie charts, you can:
 
 * Show percentage or proportional data
 
-//<image>
+[role="screenshot"]
+include::images/visualize-pie-chart.png[Pie chart with Flights Airline Carrier sample data]
 
-//Ready to create a pie chart? Check out the pie chart example.
+Ready to create a pie chart? Check out the <<pie-chart-tutorial, pie chart example>>.
 
 [[visualize-region-map]]
 === Region map
@@ -220,7 +210,8 @@ Short description.
 
 NOTE: Since the Maps application provides you with more functionality and is easier to use, it is recommended to use the Maps application instead of the region map.
 
-//<image>
+[role="screenshot"]
+image::images/visualize-region-map.png[Region map with Flights Origin Country Ticket Prices sample data]
 
 [[visualize-tsvb]]
 === TSVB
@@ -263,7 +254,7 @@ Table:: Display data from multiple time series by defining the field group to sh
 [role="screenshot"]
 image:images/tsvb-table.png["Table visualization"]
 
-//Ready to create a TSVB visualization? Check out the TSVB example.
+Ready to create a TSVB visualization? Check out the <<tsvb-tutorial, TSVB tutorial>>.
 
 [[visualize-tag-cloud]]
 === Tag cloud
@@ -278,9 +269,10 @@ With tag cloud, you can:
 
 * Visualize data tables and surveys
 
-//<image>
+[role="screenshot"]
+image::images/visualize-tag-cloud.png[Tag cloud with Flights Destination Weather sample data]
 
-//Ready to create a tag cloud? Check out the tag cloud example>.
+Ready to create a tag cloud? Check out the <<tag-cloud-tutorial, tag cloud example>>.
 
 [[visualize-timelion]]
 === Timelion
@@ -296,7 +288,8 @@ For example, Timelion enables you to easily get the answers to questions like:
 
 * <<timelion-conditional-intro, How much memory is my system actually using?>>
 
-//<image>
+[role="screenshot"]
+image::images/timlion-customize04.png[]
 
 --
 

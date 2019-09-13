@@ -1,9 +1,21 @@
 [[visualization-tutorials]]
 == Visualization tutorials
 
-Ready to create a visualization? Use these tutorials:
+Ready to create a visualization? Following these tutorials:
 
-* 
+* <<area-chart-tutorial, Area chart>>
+* <<controls-tutorial, Controls>>
+* <<data-table-tutorial, Data table>>
+* <<gauge-tutorial, Gauge>>
+* <<goal-tutorial, Goal>>
+* <<bar-chart-tutorial, Bar chart>>
+* <<line-chart-tutorial, Line chart>>
+* <<markdown-tutorial, Markdown>>
+* <<metric-tutorial, Metric>>
+* <<pie-chart-tutorial, Pie chart>>
+* <<tsvb-tutorial, TSVB>>
+* <<tag-cloud-tutorial, Tag cloud>>
+* <<timelion-tutorials, Timelion>>
 
 [[area-chart-tutorial]]
 === Area chart tutorial
@@ -11,6 +23,8 @@ Ready to create a visualization? Use these tutorials:
 [[controls-tutorial]]
 === Controls tutorial
 experimental[]
+
+Want some more Controls inspiration? Check out the link:https://www.elastic.co/blog/interactive-inputs-on-kibana-dashboards[Interactive Inputs on Kibana Dashboards] blog.
 
 [[data-table-tutorial]]
 === Data table tutorial
@@ -59,7 +73,7 @@ In this tutorial, you'll use the time series data from https://www.elastic.co/gu
 
 [float]
 [[time-series-intro]]
-=== Create time series visualizations
+=== Create a time series visualization
 
 To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
 
@@ -219,7 +233,7 @@ image::images/timelion-customize04.png[]
 
 [float]
 [[mathematical-functions-intro]]
-=== Create visualizations with mathematical functions
+=== Create a visualization with mathematical functions
 
 To create a visualization for inbound and outbound network traffic, use mathematical functions.
 
@@ -326,7 +340,7 @@ image::images/timelion-math05.png[]
 
 [float]
 [[timelion-conditional-intro]]
-=== Create visualizations with conditional logic and tracking trends
+=== Create a visualization with conditional logic and tracking trends
 
 To easily detect outliers and discover patterns over time, modify time series data with conditional logic and create a trend with a moving average.
 
