@@ -11,6 +11,7 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiCheckbox,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export const SimpleSettings = injectI18n(function ({
