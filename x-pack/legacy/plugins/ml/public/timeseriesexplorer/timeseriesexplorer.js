@@ -489,7 +489,7 @@ export class TimeSeriesExplorer extends React.Component {
     // a) The global state's `skipRefresh` was set to true by the job selector to avoid race conditions
     //    when loading the Single Metric Viewer after a job/group and time range update.
     // b) A 'soft' refresh without a full page reload is already happening.
-    if (this.props.globalState.ml.skipRefresh || (
+    if (get(this.props.globalState, 'ml.skipRefresh') || (
       this.state.loading && fullRefresh === false
     )) {
       return;
@@ -988,7 +988,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
-      skipRefresh: loading || !!this.props.globalState.ml.skipRefresh,
+      skipRefresh: loading || !!get(this.props.globalState, 'ml.skipRefresh'),
       svgWidth,
       zoomFrom,
       zoomTo,
