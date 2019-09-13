@@ -24,4 +24,4 @@ export const loginAndWaitForPage = (url: string) => {
 };
 
 export const waitForTableLoad = () =>
-  cy.get('[data-test-state="paginated-table-false"]', { timeout: DEFAULT_TIMEOUT });
+  cy.get('[data-test-subj="paginated-table-false"]', { timeout: DEFAULT_TIMEOUT });

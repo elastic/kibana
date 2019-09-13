@@ -108,7 +108,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
           })
         }
         updateLimitPagination={newLimit => updateTlsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ tlsSortField, totalCount }}
       />
     );
   }

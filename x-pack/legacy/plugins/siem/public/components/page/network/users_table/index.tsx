@@ -113,7 +113,6 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
           })
         }
         updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ flowTarget, totalCount, usersSortField }}
       />
     );
   }

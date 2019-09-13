@@ -160,7 +160,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
             tableType,
           })
         }
-        updateProps={{ direction, sortField, totalCount }}
       />
     );
   }

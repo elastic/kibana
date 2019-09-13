@@ -415,7 +415,6 @@ describe('Paginated Table Component', () => {
         totalCount: 10,
         updateActivePage: activePage => updateActivePage(activePage),
         updateLimitPagination: limit => updateLimitPagination({ limit }),
-        updateProps: { isThisAwesome: false },
       };
 
       // enzyme does not allow us to pass props to child of HOC

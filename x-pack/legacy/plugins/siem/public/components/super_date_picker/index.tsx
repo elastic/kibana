@@ -72,7 +72,7 @@ interface UpdateReduxTime extends OnTimeChangeProps {
 }
 
 interface ReturnUpdateReduxTime {
-  kqlHaveBeenUpdated: boolean;
+  kqlHasBeenUpdated: boolean;
 }
 
 type DispatchUpdateReduxTime = ({
@@ -146,8 +146,8 @@ export const SuperDatePickerComponent = class extends Component<
       />
     );
   }
-  private onRefresh = ({ start, end, refreshInterval }: OnRefreshProps): void => {
-    const { kqlHaveBeenUpdated } = this.props.updateReduxTime({
+  private onRefresh = ({ start, end }: OnRefreshProps): void => {
+    const { kqlHasBeenUpdated } = this.props.updateReduxTime({
       end,
       id: this.props.id,
       isInvalid: false,
@@ -161,7 +161,7 @@ export const SuperDatePickerComponent = class extends Component<
       ? formatDate(end, { roundUp: true })
       : formatDate(end);
     if (
-      !kqlHaveBeenUpdated &&
+      !kqlHasBeenUpdated &&
       (!this.state.isQuickSelection ||
         (this.props.start === currentStart && this.props.end === currentEnd))
     ) {
@@ -275,18 +275,20 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
     );
   }
 
-  let kqlHaveBeenUpdated = false;
-
+  let kqlHasBeenUpdated = false;
   if (kql) {
-    kqlHaveBeenUpdated = kql.refetch(dispatch);
+    // if refetch is successful, it will have a side effect
+    // to set all the tables on its activePage to zero (meaning pagination)
+    kqlHasBeenUpdated = kql.refetch(dispatch);
   }
-
-  if (!kqlHaveBeenUpdated) {
+  if (!kqlHasBeenUpdated) {
+    // Date picker is global to all the page in the app
+    // (Hosts/Network are the only one having tables)
     dispatch(hostsActions.setHostTablesActivePageToZero());
     dispatch(networkActions.setNetworkTablesActivePageToZero());
   }
 
-  return { kqlHaveBeenUpdated };
+  return { kqlHasBeenUpdated };
 };
 
 export const makeMapStateToProps = () => {

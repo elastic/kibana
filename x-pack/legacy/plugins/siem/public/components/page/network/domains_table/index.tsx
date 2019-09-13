@@ -146,7 +146,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
-        updateProps={{ domainsSortField, flowDirection, flowTarget, totalCount }}
       />
     );
   }

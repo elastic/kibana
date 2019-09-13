@@ -99,8 +99,6 @@ export interface BasicTableProps<T> {
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateProps?: { [key: string]: any };
 }
 
 export interface Columns<T> {
@@ -137,7 +135,6 @@ export const PaginatedTable = memo<SiemTables>(
     totalCount,
     updateActivePage,
     updateLimitPagination,
-    updateProps,
   }) => {
     const [myLoading, setMyLoading] = useState(loading);
     const [myActivePage, setActivePage] = useState(activePage);
@@ -147,7 +144,6 @@ export const PaginatedTable = memo<SiemTables>(
 
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
-    const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
 
     useEffect(() => {
       setActivePage(activePage);
@@ -157,7 +153,7 @@ export const PaginatedTable = memo<SiemTables>(
       if (headerCount >= 0 && loadingInitial) {
         setLoadingInitial(false);
       }
-    }, effectDeps);
+    }, [headerCount]);
 
     useEffect(() => {
       setMyLoading(loading);
@@ -222,8 +218,7 @@ export const PaginatedTable = memo<SiemTables>(
 
     return (
       <Panel
-        data-test-subj={dataTestSubj}
-        data-test-state={`${dataTestSubj}-${loading}`}
+        data-test-subj={`${dataTestSubj}-${loading}`}
         loading={{ loading }}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}

@@ -127,7 +127,6 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
           tableType,
         })
       }
-      updateProps={{ totalCount }}
     />
   )
 );
