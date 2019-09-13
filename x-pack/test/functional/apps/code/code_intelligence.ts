@@ -25,7 +25,7 @@ export default function codeIntelligenceFunctionalTests({
   // FAILING: https://github.com/elastic/kibana/issues/36480
   describe.skip('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);

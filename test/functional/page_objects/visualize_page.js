@@ -596,26 +596,26 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `aggregationEditor${aggId} > sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await testSubjects.click(`aggregationEditor${agg} > disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAggregationEditor(agg) {
-      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await testSubjects.click(`aggregationEditor${agg} > toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
+      return await testSubjects.click(`aggregationEditor${agg} > otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
+      return await testSubjects.click(`aggregationEditor${agg} > missingBucketSwitch`);
     }
 
     async isApplyEnabled() {

@@ -66,10 +66,10 @@ export function InfraSourceConfigurationFlyoutProvider({
       await (await this.getAddLogColumnButton()).click();
       const popover = await this.getAddLogColumnPopover();
       await (await testSubjects.findDescendant('fieldSearchInput', popover)).type(fieldName);
-      await (await testSubjects.findDescendant(`addFieldLogColumn:${fieldName}`, popover)).click();
+      await (await testSubjects.findDescendant(`~addFieldLogColumn:${fieldName}`, popover)).click();
     },
     async getLogColumnPanels(): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAllDescendant('logColumnPanel', await this.getFlyout());
+      return await testSubjects.findAllDescendant('~logColumnPanel', await this.getFlyout());
     },
     async removeLogColumn(columnIndex: number) {
       const logColumnPanel = (await this.getLogColumnPanels())[columnIndex];

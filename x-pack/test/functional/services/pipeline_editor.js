@@ -12,23 +12,23 @@ export function PipelineEditorProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   // test subject selectors
-  const SUBJ_CONTAINER = 'pipelineEdit';
-  const getContainerSubjForId = id => `pipelineEdit-${id}`;
-  const SUBJ_INPUT_ID = 'pipelineEdit inputId';
-  const SUBJ_INPUT_DESCRIPTION = 'pipelineEdit inputDescription';
-  const SUBJ_UI_ACE_PIPELINE = 'pipelineEdit acePipeline';
+  const SUBJ_CONTAINER = '~pipelineEdit';
+  const getContainerSubjForId = id => `~pipelineEdit-${id}`;
+  const SUBJ_INPUT_ID = '~pipelineEdit > inputId';
+  const SUBJ_INPUT_DESCRIPTION = '~pipelineEdit > inputDescription';
+  const SUBJ_UI_ACE_PIPELINE = '~pipelineEdit > acePipeline';
 
-  const SUBJ_INPUT_WORKERS = 'pipelineEdit inputWorkers';
-  const SUBJ_INPUT_BATCH_SIZE = 'pipelineEdit inputBatchSize';
-  const SUBJ_SELECT_QUEUE_TYPE = 'pipelineEdit selectQueueType';
-  const SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER = 'pipelineEdit inputQueueMaxBytesNumber';
-  const SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS = 'pipelineEdit selectQueueMaxBytesUnits';
-  const SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES = 'pipelineEdit inputQueueCheckpointWrites';
+  const SUBJ_INPUT_WORKERS = '~pipelineEdit > inputWorkers';
+  const SUBJ_INPUT_BATCH_SIZE = '~pipelineEdit > inputBatchSize';
+  const SUBJ_SELECT_QUEUE_TYPE = '~pipelineEdit > selectQueueType';
+  const SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER = '~pipelineEdit > inputQueueMaxBytesNumber';
+  const SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS = '~pipelineEdit > selectQueueMaxBytesUnits';
+  const SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES = '~pipelineEdit > inputQueueCheckpointWrites';
 
-  const SUBJ_BTN_SAVE = 'pipelineEdit btnSavePipeline';
-  const SUBJ_BTN_CANCEL = 'pipelineEdit btnCancel';
-  const SUBJ_BTN_DELETE = 'pipelineEdit btnDeletePipeline';
-  const SUBJ_LNK_BREADCRUMB_MANAGEMENT = 'breadcrumbs lnkBreadcrumb0';
+  const SUBJ_BTN_SAVE = '~pipelineEdit > btnSavePipeline';
+  const SUBJ_BTN_CANCEL = '~pipelineEdit > btnCancel';
+  const SUBJ_BTN_DELETE = '~pipelineEdit > btnDeletePipeline';
+  const SUBJ_LNK_BREADCRUMB_MANAGEMENT = 'breadcrumbs > lnkBreadcrumb0';
   const SUBJ_CONFIRM_MODAL_TEXT = 'confirmModalBodyText';
 
   const DEFAULT_INPUT_VALUES = {
