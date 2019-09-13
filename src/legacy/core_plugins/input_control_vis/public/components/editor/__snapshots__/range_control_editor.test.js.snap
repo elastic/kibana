@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders RangeControlEditor 1`] = `
-<div>
+<Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
     indexPatternId="indexPattern1"
@@ -64,5 +64,5 @@ exports[`renders RangeControlEditor 1`] = `
       value={0}
     />
   </EuiFormRow>
-</div>
+</Fragment>
 `;

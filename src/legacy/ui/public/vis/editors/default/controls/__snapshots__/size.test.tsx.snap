@@ -20,7 +20,7 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
   labelType="label"
 >
   <EuiFieldNumber
-    compressed={false}
+    compressed={true}
     data-test-subj="sizeParamEditor"
     fullWidth={true}
     isInvalid={false}

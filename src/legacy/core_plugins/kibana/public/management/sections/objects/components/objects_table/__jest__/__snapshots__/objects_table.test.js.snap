@@ -141,6 +141,9 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
         }
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiSwitch
       checked={true}
       label={
