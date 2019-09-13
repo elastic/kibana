@@ -32,7 +32,7 @@ import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
 async function registerVisType() {
-  VisTypesRegistryProvider.register(TimelionVisProvider);	  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const $injector = await chrome.dangerouslyGetActiveInjector();
   const Private = $injector.get('Private');
 
   // register the provider with the visTypes registry so that other know it exists
