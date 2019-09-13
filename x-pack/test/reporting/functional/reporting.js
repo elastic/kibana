@@ -73,7 +73,8 @@ export default function ({ getService, getPageObjects }) {
           await expectDisabledGenerateReportButton();
         });
 
-        it('becomes available when saved', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/45499
+        it.skip('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('mypdfdash');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
