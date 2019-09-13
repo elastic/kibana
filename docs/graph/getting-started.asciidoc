@@ -41,7 +41,7 @@ image::graph/images/graph-link-summary.png["Link summary"]
 . Use the toolbar buttons to explore
 additional connections:
 +
-* To display additional vertices that connect to your graph, click the Expand 
+* To display additional vertices that connect to your graph, click Expand 
 image:graph/images/graph-expand-button.jpg[Expand Selection].
 * To display additional
 connections between the displayed vertices, click Link
