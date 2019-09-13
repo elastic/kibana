@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
@@ -15,7 +14,7 @@ import { JobSelectorTable } from './job_selector_table/';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';
-import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
+import { getGroupsFromJobs, normalizeTimes, setGlobalState, setGlobalStateSkipRefresh } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
@@ -139,12 +138,21 @@ export function JobSelector({
     handleResize();
   }, [handleResize, jobs]);
 
-  function closeFlyout() {
+  // On opening and closing the flyout, optionally update a global `skipRefresh` flag.
+  // This allows us to circumvent race conditions which could happen by triggering both
+  // timefilter and job selector related events in Single Metric Viewer.
+  function closeFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(false);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, false);
+    }
   }
 
-  function showFlyout() {
+  function showFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(true);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, true);
+    }
   }
 
   function handleJobSelectionClick() {
@@ -173,7 +181,6 @@ export function JobSelector({
   }
 
   function applySelection() {
-    closeFlyout();
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection = [];
     const groupSelection = [];
@@ -191,10 +198,33 @@ export function JobSelector({
     // create a Set to remove duplicate values
     const allNewSelectionUnique = Array.from(new Set(allNewSelection));
 
+    const isPrevousSelection = isEqual(
+      { selectedJobIds, selectedGroups },
+      { selectedJobIds: allNewSelectionUnique, selectedGroups: groupSelection }
+    );
+
     setSelectedIds(newSelection);
     setNewSelection([]);
+
+    // If the job selection is unchanged, then we close the modal and
+    // disable skipping the timefilter listener flag in globalState.
+    // If the job selection changed, this will not
+    // update skipRefresh yet to avoid firing multiple events via
+    // applyTimeRangeFromSelection() and setGlobalState().
+    closeFlyout(isPrevousSelection);
+
+    // If the job selection changed, then when
+    // calling `applyTimeRangeFromSelection()` here
+    // Single Metric Viewer will skip an update
+    // triggered by timefilter to avoid a race
+    // condition caused by the job update listener
+    // that's also going to be triggered.
     applyTimeRangeFromSelection(allNewSelectionUnique);
-    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
+
+    // Set `skipRefresh` again to `false` here so after
+    // both the time range and jobs have been updated
+    // Single Metric Viewer should again update itself.
+    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection, skipRefresh: false });
   }
 
   function applyTimeRangeFromSelection(selection) {

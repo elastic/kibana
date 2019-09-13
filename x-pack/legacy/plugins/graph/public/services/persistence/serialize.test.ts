@@ -27,13 +27,38 @@ describe('serialize', () => {
         minDocCount: 3,
       },
       allFields: [
-        { color: 'black', icon: { class: 'a', code: '' }, name: 'field1', selected: true },
-        { color: 'black', icon: { class: 'b', code: '' }, name: 'field2', selected: true },
-        { color: 'black', icon: { class: 'c', code: '' }, name: 'field3', selected: false },
+        {
+          color: 'black',
+          icon: { class: 'a', code: '', label: '' },
+          name: 'field1',
+          selected: true,
+        },
+        {
+          color: 'black',
+          icon: { class: 'b', code: '', label: '' },
+          name: 'field2',
+          selected: true,
+        },
+        {
+          color: 'black',
+          icon: { class: 'c', code: '', label: '' },
+          name: 'field3',
+          selected: false,
+        },
       ],
       selectedFields: [
-        { color: 'black', icon: { class: 'a', code: '' }, name: 'field1', selected: true },
-        { color: 'black', icon: { class: 'b', code: '' }, name: 'field2', selected: true },
+        {
+          color: 'black',
+          icon: { class: 'a', code: '', label: '' },
+          name: 'field1',
+          selected: true,
+        },
+        {
+          color: 'black',
+          icon: { class: 'b', code: '', label: '' },
+          name: 'field2',
+          selected: true,
+        },
       ],
       selectedIndex: {
         attributes: {
@@ -44,7 +69,7 @@ describe('serialize', () => {
         {
           description: 'Template',
           encoder: outlinkEncoders[0],
-          icon: { class: 'd', code: '' },
+          icon: { class: 'd', code: '', label: '' },
           url: 'test-url',
         },
       ],
@@ -205,7 +230,7 @@ describe('serialize', () => {
         "urlTemplates": Array [
           Object {
             "description": "Template",
-            "encoderID": "esq-rison-loose",
+            "encoderID": "kql-loose",
             "iconClass": "d",
             "url": "test-url",
           },
