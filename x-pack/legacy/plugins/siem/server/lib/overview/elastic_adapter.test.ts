@@ -175,7 +175,7 @@ describe('Siem Overview elasticsearch_adapter', () => {
           auditbeatProcess: 0,
           auditbeatUser: 0,
           filebeatSystemModule: 0,
-          winlogbeat: 1,
+          winlogbeat: 0,
         });
       });
     });
