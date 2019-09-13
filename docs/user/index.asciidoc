@@ -50,7 +50,7 @@ include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
 include::{kib-repo-dir}/management/dashboard_only_mode/index.asciidoc[]
 
-include::{kib-repo-dir}/reporting/index.asciidoc[]
+include::reporting/index.asciidoc[]
 
 include::api.asciidoc[]
 
