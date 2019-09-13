@@ -23,6 +23,7 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
+import { EuiChartUtilsStart } from '../../../../plugins/eui_utils/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -34,6 +35,7 @@ export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
+  eui_chart_utils: EuiChartUtilsStart;
 }
 
 export const npSetup = {
