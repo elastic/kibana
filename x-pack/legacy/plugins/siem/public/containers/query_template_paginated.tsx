@@ -49,7 +49,6 @@ export class QueryTemplatePaginated<
     refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>
   ) => inputsModel.Refetch;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(props: T) {
     super(props);
     this.memoizedRefetchQuery = memoizeOne(this.refetchQuery);

@@ -94,6 +94,9 @@ const timelineActionsType = [
   upsertColumn.type,
 ];
 
+const isItAtimelineAction = (timelineId: string | undefined) =>
+  timelineId && timelineId.toLowerCase().startsWith('timeline');
+
 export const createTimelineEpic = <State>(): Epic<
   Action,
   Action,
@@ -123,19 +126,24 @@ export const createTimelineEpic = <State>(): Epic<
     action$.pipe(
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
-        const timelineId: TimelineModel = timeline[get('payload.id', action)];
+        const timelineId: string = get('payload.id', action);
+        const timelineObj: TimelineModel = timeline[timelineId];
         if (action.type === addError.type) {
           return true;
         }
-        if (action.type === createTimeline.type) {
+        if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
-        } else if (action.type === addTimeline.type) {
+        } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           return true;
-        } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
+        } else if (
+          timelineActionsType.includes(action.type) &&
+          !timelineObj.isLoading &&
+          isItAtimelineAction(timelineId)
+        ) {
           return true;
         }
         return false;

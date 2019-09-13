@@ -49,7 +49,9 @@ export const applyDeltaToColumnWidth = actionCreator<{
 export const createTimeline = actionCreator<{
   id: string;
   columns: ColumnHeader[];
+  itemsPerPage?: number;
   show?: boolean;
+  sort?: Sort;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');

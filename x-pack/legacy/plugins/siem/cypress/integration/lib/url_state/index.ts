@@ -59,5 +59,5 @@ export const DATE_PICKER_ABSOLUTE_INPUT = '[data-test-subj="superDatePickerAbsol
 export const KQL_INPUT = '[data-test-subj="kqlInput"]';
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
-export const HOST_DETAIL_SIEM_KIBANA = '[data-test-subj="all-hosts"] a.euiLink';
+export const HOST_DETAIL_SIEM_KIBANA = '[data-test-subj="all-hosts-false"] a.euiLink';
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';

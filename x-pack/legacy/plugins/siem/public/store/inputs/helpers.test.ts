@@ -229,7 +229,7 @@ describe('Inputs', () => {
     });
   });
 
-  describe('deleteOnlyOneQuery', () => {
+  describe('deleteOneQuery', () => {
     test('make sure that we only delete one query', () => {
       const refetch = jest.fn();
       const newQuery: UpdateQueryParams = {

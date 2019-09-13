@@ -5,36 +5,25 @@
  */
 
 import { mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { apolloClientObservable, HookWrapper, mockGlobalState, TestProviders } from '../../mock';
-import { createStore, State } from '../../store';
-
-import { UseUrlState } from './';
-import { defaultProps, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
+import { HookWrapper } from '../../mock';
+import {
+  getMockPropsObj,
+  mockHistory,
+  mockSetAbsoluteRangeDatePicker,
+  mockSetRelativeRangeDatePicker,
+  testCases,
+  mockApplyHostsFilterQuery,
+  mockApplyNetworkFilterQuery,
+} from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { CONSTANTS } from './constants';
 import { RouteSpyState } from '../../utils/route/types';
-import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/home_navigations';
 
 let mockProps: UrlStateContainerPropTypes;
-
-const indexPattern: StaticIndexPattern = {
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-  ],
-};
 
 // const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
 const mockRouteSpy: RouteSpyState = {
@@ -49,31 +38,9 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 }));
 
 describe('UrlStateContainer', () => {
-  const state: State = mockGlobalState;
-
-  let store = createStore(state, apolloClientObservable);
-
-  beforeEach(() => {
-    store = createStore(state, apolloClientObservable);
-  });
   afterEach(() => {
     jest.resetAllMocks();
   });
-  test('mounts and renders', () => {
-    const wrapper = mount(
-      <MockedProvider>
-        <TestProviders store={store}>
-          <Router history={mockHistory}>
-            <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          </Router>
-        </TestProviders>
-      </MockedProvider>
-    );
-    const urlStateComponents = wrapper.find('[data-test-subj="urlStateComponents"]');
-    urlStateComponents.exists();
-    expect(toJson(wrapper)).toMatchSnapshot();
-  });
-
   describe('handleInitialize', () => {
     describe('URL state updates redux', () => {
       describe('relative timerange actions are called with correct data on component mount', () => {
@@ -90,7 +57,7 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             // @ts-ignore property mock does not exists
-            expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
+            expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1558591200000,
               fromStr: 'now-1d/d',
               kind: 'relative',
@@ -99,7 +66,7 @@ describe('UrlStateContainer', () => {
               id: 'global',
             });
             // @ts-ignore property mock does not exists
-            expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
+            expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
               from: 1558732849370,
               fromStr: 'now-15m',
               kind: 'relative',
@@ -120,14 +87,14 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             // @ts-ignore property mock does not exists
-            expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
+            expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1556736012685,
               kind: 'absolute',
               to: 1556822416082,
               id: 'global',
             });
             // @ts-ignore property mock does not exists
-            expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
+            expect(mockSetAbsoluteRangeDatePicker.mock.calls[0][0]).toEqual({
               from: 1556736012685,
               kind: 'absolute',
               to: 1556822416082,
@@ -153,7 +120,9 @@ describe('UrlStateContainer', () => {
               .relativeTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
             const functionName =
-              namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
+              namespaceUpper === 'Network'
+                ? mockApplyNetworkFilterQuery
+                : mockApplyHostsFilterQuery;
             // @ts-ignore property mock does not exists
             expect(functionName.mock.calls[0][0]).toEqual({
               filterQuery: serializedFilterQuery,
@@ -176,7 +145,9 @@ describe('UrlStateContainer', () => {
             }).oppositeQueryLocationSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
             const functionName =
-              namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
+              namespaceUpper === 'Network'
+                ? mockApplyNetworkFilterQuery
+                : mockApplyHostsFilterQuery;
             // @ts-ignore property mock does not exists
             expect(functionName.mock.calls.length).toEqual(0);
           }

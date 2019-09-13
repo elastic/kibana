@@ -397,8 +397,7 @@ describe('Paginated Table Component', () => {
     });
 
     test('should update the page when the activePage is changed from redux', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const ourProps: BasicTableProps<any> = {
+      const ourProps: BasicTableProps<unknown> = {
         activePage: 3,
         columns: getHostsColumns(),
         headerCount: 1,

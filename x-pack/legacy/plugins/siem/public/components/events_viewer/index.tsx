@@ -43,6 +43,8 @@ interface DispatchProps {
   createTimeline: ActionCreator<{
     id: string;
     columns: ColumnHeader[];
+    itemsPerPage?: number;
+    sort?: Sort;
   }>;
   removeColumn: ActionCreator<{
     id: string;
@@ -83,7 +85,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns });
+        createTimeline({ id, columns, sort, itemsPerPage });
       }
     }, []);
 

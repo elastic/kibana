@@ -6,8 +6,8 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Dispatch } from 'redux';
 
+import ApolloClient from 'apollo-client';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -63,39 +63,41 @@ export interface UrlStateStateToPropsType {
   urlState: UrlState;
 }
 
+export interface SetHostsKql {
+  filterQuery: SerializedFilterQuery;
+  hostsType: hostsModel.HostsType;
+}
+
+export interface SetNetworkKql {
+  filterQuery: SerializedFilterQuery;
+  networkType: networkModel.NetworkType;
+}
+
+export interface SetAbsoluteTimerange {
+  from: number;
+  fromStr: undefined;
+  id: InputsModelId;
+  to: number;
+  toStr: undefined;
+}
+
+export interface SetRelativeTimerange {
+  from: number;
+  fromStr: string;
+  id: InputsModelId;
+  to: number;
+  toStr: string;
+}
+
+export interface UpdateTimelineIsLoading {
+  id: string;
+  isLoading: boolean;
+}
+
 export interface UrlStateDispatchToPropsType {
-  addGlobalLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  addTimelineLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  dispatch: Dispatch;
-  removeGlobalLinkTo: ActionCreator<void>;
-  removeTimelineLinkTo: ActionCreator<void>;
-  setHostsKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    hostsType: hostsModel.HostsType;
-  }>;
-  setNetworkKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    networkType: networkModel.NetworkType;
-  }>;
-  setAbsoluteTimerange: ActionCreator<{
-    from: number;
-    fromStr: undefined;
-    id: InputsModelId;
-    to: number;
-    toStr: undefined;
-  }>;
-  setRelativeTimerange: ActionCreator<{
-    from: number;
-    fromStr: string;
-    id: InputsModelId;
-    to: number;
-    toStr: string;
-  }>;
+  setInitialStateFromUrl: DispatchSetInitialStateFromUrl;
   updateTimeline: DispatchUpdateTimeline;
-  updateTimelineIsLoading: ActionCreator<{
-    id: string;
-    isLoading: boolean;
-  }>;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
 }
 
 export type UrlStateContainerPropTypes = RouteSpyState &
@@ -107,3 +109,28 @@ export interface PreviousLocationUrlState {
   pathName: string | undefined;
   urlState: UrlState;
 }
+
+export interface UrlStateToRedux {
+  urlKey: KeyUrlState;
+  newUrlStateString: string;
+}
+
+export interface SetInitialStateFromUrl<TCache> {
+  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
+  detailName: string | undefined;
+  indexPattern: StaticIndexPattern | undefined;
+  pageName: string;
+  updateTimeline: DispatchUpdateTimeline;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
+  urlStateToUpdate: UrlStateToRedux[];
+}
+
+export type DispatchSetInitialStateFromUrl = <TCache>({
+  apolloClient,
+  detailName,
+  indexPattern,
+  pageName,
+  updateTimeline,
+  updateTimelineIsLoading,
+  urlStateToUpdate,
+}: SetInitialStateFromUrl<TCache>) => () => void;
