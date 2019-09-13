@@ -169,9 +169,9 @@ def jobRunner(label, closure) {
     withEnv([
       "CI=true",
       "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
+      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
+      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
+      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${scmVars.GIT_BRANCH}",
     ]) {
