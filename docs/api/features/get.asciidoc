@@ -11,7 +11,7 @@ experimental[This API is *experimental* and may be changed or removed completely
 [[features-api-get-request]]
 ==== Request
 
-`GET /api/features/v1`
+`/api/features/v1`
 
 [[features-api-get-codes]]
 ==== Response code
