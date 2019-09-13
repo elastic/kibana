@@ -17,5 +17,17 @@
  * under the License.
  */
 
-export { QueryBar } from './query_bar';
-export { QueryBarInput } from './query_bar_input';
+/**
+ * Convert a value to a presentable string
+ */
+export function asPrettyString(val: any): string {
+  if (val === null || val === undefined) return ' - ';
+  switch (typeof val) {
+    case 'string':
+      return val;
+    case 'object':
+      return JSON.stringify(val, null, '  ');
+    default:
+      return '' + val;
+  }
+}

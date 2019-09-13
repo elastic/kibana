@@ -788,7 +788,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           return viewBySwimlaneData.points.some((point) => {
             return (
               point.laneLabel === lane &&
-              point.time === selectedCells.times[0]
+              (point.time >= selectedCells.times[0] && point.time <= selectedCells.times[1])
             );
           });
         });
