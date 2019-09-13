@@ -14,14 +14,10 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
   </EuiText>
   <EuiSpacer />
   <EuiButton
-    color="primary"
-    fill={false}
     href="https://www.elastic.co/subscriptions"
     iconSide="right"
     iconType="popout"
-    size="m"
     target="_blank"
-    type="button"
   >
     Subscription options
   </EuiButton>
