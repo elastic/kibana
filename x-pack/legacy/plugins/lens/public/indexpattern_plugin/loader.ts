@@ -5,9 +5,9 @@
  */
 
 import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'src/core/server';
+import { NotificationsSetup } from 'src/core/public';
 import { IndexPatternField } from './indexpattern';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
@@ -35,7 +35,7 @@ interface SavedRestrictionsObject {
 }
 type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 
-export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifications) => {
+export const getIndexPatterns = (chrome: Chrome, notifications: NotificationsSetup) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
     .find<SavedIndexPatternAttributes>({
@@ -64,6 +64,6 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
       });
     })
     .catch(err => {
-      toastNotifications.addDanger('Failed to load index patterns');
+      notifications.toasts.addDanger('Failed to load index patterns');
     });
 };

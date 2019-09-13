@@ -8,19 +8,19 @@ import React from 'react';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 import { Chrome } from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
+import { CoreSetup } from 'src/core/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/query', () => ({
   QueryBar: jest.fn(() => null),
 }));
 
 jest.mock('ui/new_platform');
-jest.mock('ui/notify');
 jest.mock('ui/chrome');
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -38,6 +38,7 @@ function makeDefaultArgs(): jest.Mocked<{
   editorFrame: EditorFrameInstance;
   chrome: Chrome;
   store: Storage;
+  core: CoreSetup;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
@@ -69,6 +70,7 @@ function makeDefaultArgs(): jest.Mocked<{
       load: jest.fn(),
       save: jest.fn(),
     },
+    core: coreMock.createSetup(),
     QueryBar: jest.fn(() => <div />),
     redirectTo: jest.fn(id => {}),
     savedObjectsClient: jest.fn(),
@@ -76,6 +78,7 @@ function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
     chrome: Chrome;
     store: Storage;
+    core: CoreSetup;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
@@ -240,7 +243,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(toastNotifications.addDanger).toHaveBeenCalled();
+      expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
       expect(args.redirectTo).toHaveBeenCalled();
     });
 
@@ -334,7 +337,7 @@ describe('Lens App', () => {
 
         await waitForPromises();
 
-        expect(toastNotifications.addDanger).toHaveBeenCalled();
+        expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
         expect(args.redirectTo).not.toHaveBeenCalled();
         await waitForPromises();
 
@@ -446,6 +449,6 @@ describe('Lens App', () => {
 
     instance.update();
 
-    expect(toastNotifications.addDanger).toHaveBeenCalled();
+    expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 });

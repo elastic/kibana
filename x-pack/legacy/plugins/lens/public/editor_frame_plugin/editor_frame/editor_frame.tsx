@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
+import { CoreSetup, CoreStart } from 'src/core/public';
 import {
   ExpressionRenderer,
   Query,
@@ -29,7 +30,7 @@ export interface EditorFrameProps {
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
-
+  core: CoreSetup | CoreStart;
   dateRange: {
     fromDate: string;
     toDate: string;
@@ -219,6 +220,7 @@ export function EditorFrame(props: EditorFrameProps) {
               : true
           }
           dispatch={dispatch}
+          core={props.core}
           query={props.query}
           dateRange={props.dateRange}
         />

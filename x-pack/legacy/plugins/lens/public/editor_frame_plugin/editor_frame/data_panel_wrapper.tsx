@@ -20,6 +20,7 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
 }
@@ -40,6 +41,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dragDropContext: useContext(DragContext),
     state: props.datasourceState,
     setState: setDatasourceState,
+    core: props.core,
     query: props.query,
     dateRange: props.dateRange,
   };

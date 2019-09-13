@@ -8,8 +8,8 @@ import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
 // The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
 import chrome, { Chrome } from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
+import { npSetup } from 'ui/new_platform';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { getIndexPatternDatasource } from './indexpattern';
@@ -25,7 +25,6 @@ export interface IndexPatternDatasourcePluginPlugins {
   chrome: Chrome;
   interpreter: InterpreterSetup;
   data: typeof dataSetup;
-  toastNotifications: typeof toastNotifications;
 }
 
 export interface InterpreterSetup {
@@ -38,16 +37,14 @@ export interface InterpreterSetup {
 class IndexPatternDatasourcePlugin {
   constructor() {}
 
-  setup(
-    _core: CoreSetup | null,
-    { interpreter, data, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
-  ) {
+  setup(core: CoreSetup, { interpreter, data }: IndexPatternDatasourcePluginPlugins) {
     interpreter.functionsRegistry.register(() => renameColumns);
     interpreter.functionsRegistry.register(() => calculateFilterRatio);
     return getIndexPatternDatasource({
+      core,
       chrome,
       interpreter,
-      toastNotifications: toast,
+      // toastNotifications: core.notifications.toasts,
       data,
       storage: new Storage(localStorage),
       savedObjectsClient: chrome.getSavedObjectsClient(),
@@ -60,12 +57,12 @@ class IndexPatternDatasourcePlugin {
 const plugin = new IndexPatternDatasourcePlugin();
 
 export const indexPatternDatasourceSetup = () =>
-  plugin.setup(null, {
+  plugin.setup(npSetup.core, {
     chrome,
     interpreter: {
       functionsRegistry,
     },
     data: dataSetup,
-    toastNotifications,
+    // toastNotifications,
   });
 export const indexPatternDatasourceStop = () => plugin.stop();

@@ -27,10 +27,10 @@ import {
   ScaleType,
   Settings,
   DataSeriesColorsValues,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { toElasticsearchQuery } from '@kbn/es-query';
-import { npStart } from 'ui/new_platform';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
@@ -41,6 +41,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 
 export interface FieldItemProps {
+  core: DatasourceDataPanelProps['core'];
   field: IndexPatternField;
   indexPattern: IndexPattern;
   highlight?: string;
@@ -66,6 +67,7 @@ function wrapOnDot(str?: string) {
 }
 
 export function FieldItem({
+  core,
   field,
   indexPattern,
   highlight,
@@ -101,7 +103,7 @@ export function FieldItem({
     const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
     formatter = new FormatType(
       indexPattern.fieldFormatMap[field.name].params,
-      npStart.core.uiSettings.get.bind(npStart.core.uiSettings)
+      core.uiSettings.get.bind(core.uiSettings)
     );
   } else {
     formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
@@ -117,7 +119,7 @@ export function FieldItem({
 
     setState(s => ({ ...s, isLoading: true }));
 
-    npStart.core.http
+    core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
           query: toElasticsearchQuery(query, indexPattern),
@@ -203,13 +205,17 @@ export function FieldItem({
               onClick={() => {
                 if (exists) {
                   setOpen(!infoIsOpen);
-                  fetchData();
+                  if (!infoIsOpen) {
+                    fetchData();
+                  }
                 }
               }}
               onKeyPress={event => {
                 if (exists && event.key === 'ENTER') {
                   setOpen(!infoIsOpen);
-                  fetchData();
+                  if (!infoIsOpen) {
+                    fetchData();
+                  }
                 }
               }}
               title={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
@@ -275,7 +281,14 @@ export function FieldItem({
             <Axis
               id={getAxisId('key')}
               position={Position.Left}
-              tickFormat={d => formatter.convert(d)}
+              tickFormat={
+                field.type === 'date'
+                  ? niceTimeFormatter([
+                      state.histogram.buckets[0].key as number,
+                      state.histogram.buckets[state.histogram.buckets.length - 1].key as number,
+                    ])
+                  : d => formatter.convert(d)
+              }
             />
 
             <BarSeries

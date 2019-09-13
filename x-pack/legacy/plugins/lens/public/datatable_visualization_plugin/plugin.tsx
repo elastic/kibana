@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
+import { npSetup } from 'ui/new_platform';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { datatableVisualization } from './visualization';
 import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
@@ -41,7 +41,7 @@ class DatatableVisualizationPlugin {
 const plugin = new DatatableVisualizationPlugin();
 
 export const datatableVisualizationSetup = () =>
-  plugin.setup(null, {
+  plugin.setup(npSetup.core, {
     expressions: dataSetup.expressions,
     fieldFormat: {
       formatFactory: getFormat,

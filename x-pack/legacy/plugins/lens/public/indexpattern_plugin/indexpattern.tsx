@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import {
   DatasourceDimensionPanelProps,
@@ -150,11 +150,12 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
 }
 
 export function getIndexPatternDatasource({
+  core,
   chrome,
-  toastNotifications,
   storage,
   savedObjectsClient,
 }: IndexPatternDatasourcePluginPlugins & {
+  core: CoreSetup;
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
@@ -164,7 +165,7 @@ export function getIndexPatternDatasource({
     async initialize(state?: IndexPatternPersistedState) {
       // TODO: The initial request should only load index pattern names because each saved object is large
       //       Followup requests should load a single index pattern + existence information
-      const indexPatternObjects = await getIndexPatterns(chrome, toastNotifications);
+      const indexPatternObjects = await getIndexPatterns(chrome, core.notifications);
       const indexPatterns: Record<string, IndexPattern> = {};
 
       if (indexPatternObjects) {

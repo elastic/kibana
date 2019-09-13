@@ -30,6 +30,23 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('field distribution', () => {
+      it('should return a 404 for missing index patterns', async () => {
+        await supertest
+          .post('/api/lens/index_stats/logstash/field')
+          .set(COMMON_HEADERS)
+          .send({
+            query: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'bytes',
+              type: 'number',
+            },
+          })
+          .expect(404);
+      });
+
       it('should return an auto histogram for numbers and top values', async () => {
         const { body } = await supertest
           .post('/api/lens/index_stats/logstash-2015.09.22/field')

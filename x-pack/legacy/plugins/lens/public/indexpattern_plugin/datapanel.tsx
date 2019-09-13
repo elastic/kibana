@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { npStart } from 'ui/new_platform';
 import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
@@ -66,6 +65,7 @@ export function IndexPatternDataPanel({
   setState,
   state,
   dragDropContext,
+  core,
   query,
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
@@ -118,6 +118,7 @@ export function IndexPatternDataPanel({
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
+      core={core}
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
@@ -157,11 +158,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   updateFieldsWithCounts,
   showEmptyFields,
   onToggleEmptyFields,
+  core,
 }: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
   dateRange: DatasourceDataPanelProps['dateRange'];
   query: Query;
+  core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showIndexPatternSwitcher: boolean;
   setShowIndexPatternSwitcher: (show: boolean) => void;
@@ -275,7 +278,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
     setLocalState(s => ({ ...s, isLoading: true }));
 
-    npStart.core.http
+    core.http
       .post(`/api/lens/index_stats/${currentIndexPattern.title}`, {
         body: JSON.stringify({
           fromDate: dateRange.fromDate,
@@ -531,6 +534,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 const overallField = fieldByName[field.name];
                 return (
                   <FieldItem
+                    core={core}
                     indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}

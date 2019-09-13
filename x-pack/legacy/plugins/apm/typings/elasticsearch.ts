@@ -75,7 +75,9 @@ declare module 'elasticsearch' {
 
   type SamplerAggregation<SubAggregationMap> = SubAggregation<
     SubAggregationMap
-  >;
+  > & {
+    doc_count: number;
+  };
 
   interface AggregatedValue {
     value: number | null;
@@ -89,10 +91,8 @@ declare module 'elasticsearch' {
         min: AggregatedValue;
         sum: AggregatedValue;
         value_count: AggregatedValue;
-        terms: BucketAggregation<
-          AggregationOption[AggregationName],
-          string | number
-        >;
+        // Elasticsearch might return terms with numbers, but this is a more limited type
+        terms: BucketAggregation<AggregationOption[AggregationName], string>;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],
           number

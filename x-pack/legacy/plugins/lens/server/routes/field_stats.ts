@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { AggregationSearchResponse, BucketAggregation } from 'elasticsearch';
+import { AggregationSearchResponse } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { FieldStatsResponse } from '../../common';
 
@@ -133,7 +133,12 @@ export async function getNumberHistogram(
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
   const terms = minMaxResult.aggregations!.sample.top_values;
-  const topValuesBuckets = bucketsToResponse<{ terms: { field: string; size: number } }>(terms);
+  const topValuesBuckets = {
+    buckets: terms.buckets.map(bucket => ({
+      count: bucket.doc_count,
+      key: bucket.key,
+    })),
+  };
 
   let histogramInterval = (maxValue! - minValue!) / 10;
 
@@ -145,7 +150,7 @@ export async function getNumberHistogram(
     return {
       totalDocuments: minMaxResult.hits.total,
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
-      sampledDocuments: (minMaxResult.aggregations!.sample.doc_count as unknown) as number,
+      sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
       histogram: { buckets: [] },
     };
@@ -171,11 +176,14 @@ export async function getNumberHistogram(
 
   return {
     totalDocuments: minMaxResult.hits.total,
-    sampledDocuments: (minMaxResult.aggregations!.sample.doc_count as unknown) as number,
+    sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
-    histogram: bucketsToResponse<typeof histogramBody['sample']['aggs']['histo']>(
-      histogramResult.aggregations!.sample.histo
-    ),
+    histogram: {
+      buckets: histogramResult.aggregations!.sample.histo.buckets.map(bucket => ({
+        count: bucket.doc_count,
+        key: bucket.key,
+      })),
+    },
     topValues: topValuesBuckets,
   };
 }
@@ -202,11 +210,14 @@ export async function getStringSamples(
 
   return {
     totalDocuments: topValuesResult.hits.total,
-    sampledDocuments: (topValuesResult.aggregations!.sample.doc_count as unknown) as number,
+    sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
-    topValues: bucketsToResponse<typeof topValuesBody['sample']['aggs']['top_values']>(
-      topValuesResult.aggregations!.sample.top_values
-    ),
+    topValues: {
+      buckets: topValuesResult.aggregations!.sample.top_values.buckets.map(bucket => ({
+        count: bucket.doc_count,
+        key: bucket.key,
+      })),
+    },
   };
 }
 
@@ -237,9 +248,7 @@ export async function getDateHistogram(
   const fixedInterval = `${interval}ms`;
 
   const histogramBody = {
-    histo: {
-      date_histogram: { field: field.name, fixed_interval: fixedInterval },
-    },
+    histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
   };
   const results = (await aggSearchWithBody(histogramBody)) as AggregationSearchResponse<
     unknown,
@@ -248,15 +257,11 @@ export async function getDateHistogram(
 
   return {
     totalDocuments: results.hits.total,
-    histogram: bucketsToResponse<typeof histogramBody['histo']>(results.aggregations!.histo),
-  };
-}
-
-function bucketsToResponse<K>(agg: BucketAggregation<K, unknown>) {
-  return {
-    buckets: agg.buckets.map(bucket => ({
-      count: bucket.doc_count,
-      key: bucket.key,
-    })),
+    histogram: {
+      buckets: results.aggregations!.histo.buckets.map(bucket => ({
+        count: bucket.doc_count,
+        key: bucket.key,
+      })),
+    },
   };
 }

@@ -10,6 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
 import { act } from 'react-dom/test-utils';
+import { coreMock } from 'src/core/public/mocks';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -47,6 +48,7 @@ function getDefaultProps() {
     onChange: jest.fn(),
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
+    core: coreMock.createSetup(),
   };
 }
 

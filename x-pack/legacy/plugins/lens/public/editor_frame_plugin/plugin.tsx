@@ -8,6 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import chrome, { Chrome } from 'ui/chrome';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -43,7 +44,7 @@ export class EditorFramePlugin {
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
 
-  public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+  public setup(core: CoreSetup, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.data.expressions.registerFunction(() => mergeTables);
 
     return {
@@ -56,7 +57,7 @@ export class EditorFramePlugin {
     };
   }
 
-  public start(_core: CoreStart | null, plugins: EditorFrameStartPlugins): EditorFrameStart {
+  public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     plugins.embeddables.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
@@ -86,6 +87,7 @@ export class EditorFramePlugin {
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
                 ExpressionRenderer={plugins.data.expressions.ExpressionRenderer}
+                core={core}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
@@ -116,12 +118,12 @@ export class EditorFramePlugin {
 const editorFrame = new EditorFramePlugin();
 
 export const editorFrameSetup = () =>
-  editorFrame.setup(null, {
+  editorFrame.setup(npSetup.core, {
     data: dataSetup,
   });
 
 export const editorFrameStart = () =>
-  editorFrame.start(null, {
+  editorFrame.start(npStart.core, {
     data: dataStart,
     chrome,
     embeddables: embeddablePlugin,
