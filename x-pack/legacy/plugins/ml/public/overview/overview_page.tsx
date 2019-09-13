@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiHorizontalRule, EuiPage, EuiPageBody, EuiTitle } from 
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
-// import { i18n } from '@kbn/i18n';
 
 export const OverviewPage: FC = () => {
   return (
@@ -17,10 +16,6 @@ export const OverviewPage: FC = () => {
       <NavigationMenu tabId="overview" />
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
-          <EuiTitle size="m">
-            <h1>Machine Learning</h1>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
           <EuiFlexGroup>
             <OverviewSideBar />
             <OverviewContent />
