@@ -80,7 +80,7 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
     // expose method for React Consumption
     $scope.getRequestsAsCURL = input.getRequestsAsCURL;
 
-    showProgressBar();
+    $scope.progressBar = showProgressBar();
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {
@@ -130,7 +130,7 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
       // History watches this value and will re-render itself when it changes, so that
       // the list of requests stays up-to-date as new requests are sent.
       $scope.lastRequestTimestamp = new Date().getTime();
-    });
+    }, $scope.progressBar);
     return false;
   };
 

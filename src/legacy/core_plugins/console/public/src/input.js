@@ -72,9 +72,14 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
 
   let CURRENT_REQ_ID = 0;
 
-  function sendCurrentRequestToES(addedToHistoryCb) {
+  function sendCurrentRequestToES(addedToHistoryCb, progressBar) {
 
     const reqId = ++CURRENT_REQ_ID;
+
+    if (progressBar) {
+      progressBar.current.resetProgress();
+      progressBar.current.startProgress();
+    }
 
     input.getRequestsInRange(function (requests) {
       if (reqId !== CURRENT_REQ_ID) {
@@ -87,7 +92,11 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
       }
 
       const isMultiRequest = requests.length > 1;
-      const finishChain = function () { /* noop */ };
+      const finishChain = function () {
+        if (progressBar) {
+          progressBar.current.resetProgress();
+        }
+      };
 
       let isFirstRequest = true;
 

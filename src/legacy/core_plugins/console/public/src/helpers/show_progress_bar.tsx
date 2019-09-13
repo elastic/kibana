@@ -20,13 +20,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ConsoleProgressBar } from '../components/console_progress_bar';
+
 // @ts-ignore
 import storage from '../storage';
 
 export function showProgressBar() {
   const container = document.getElementById('consoleProgressBar');
+  const barRef2 = React.createRef();
   if (container) {
-    const element = <ConsoleProgressBar maxProgressValue={100} />;
+    const queryTimeout = 30;
+    const element = <ConsoleProgressBar maxProgressValue={queryTimeout} ref={barRef2} />;
     ReactDOM.render(element, container);
+    return barRef2;
   }
 }

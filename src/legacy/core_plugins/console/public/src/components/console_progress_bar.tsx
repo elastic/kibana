@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 
 // @ts-ignore
 import { EuiProgress, EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -26,19 +26,62 @@ interface Props {
   maxProgressValue: number;
 }
 
-export function ConsoleProgressBar(props: Props) {
-  return (
-    <div>
-      <EuiToolTip position="top" content={<p>Query run length: 1.34s</p>}>
-        <EuiIcon type="clock" />
-      </EuiToolTip>
-      <EuiProgress
-        value="1"
-        max={props.maxProgressValue}
-        size="xs"
-        color="accent"
-        position="absolute"
-      />
-    </div>
-  );
+export class ConsoleProgressBar extends Component<Props, {}> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      val: 0.0,
+    };
+  }
+
+  private timeoutFunction: any;
+
+  incrementProgress() {
+    let progVal = this.state.val;
+    if (progVal < this.props.maxProgressValue) {
+      progVal += 0.1;
+      this.setState({ val: progVal });
+      const thisInstance = this;
+      this.timeoutFunction = setTimeout(function() {
+        thisInstance.incrementProgress();
+      }, 100);
+    }
+  }
+
+  startProgress() {
+    const thisInstance = this;
+    this.timeoutFunction = setTimeout(function() {
+      thisInstance.incrementProgress();
+    }, 100);
+  }
+
+  resetProgress() {
+    this.setState({ val: 0 });
+    clearTimeout(this.timeoutFunction);
+  }
+
+  render() {
+    const runSeconds = Math.round(this.state.val * 100) / 100;
+    const toolTipText =
+      'Query run time: ' +
+      runSeconds +
+      ' seconds (timeout: ' +
+      this.props.maxProgressValue +
+      ' seconds)';
+    return (
+      <div>
+        <EuiToolTip position="top" content={toolTipText}>
+          <EuiIcon type="clock" />
+        </EuiToolTip>
+        <EuiProgress
+          value={this.state.val}
+          max={this.props.maxProgressValue}
+          size="xs"
+          color="accent"
+          position="absolute"
+        />
+      </div>
+    );
+  }
 }
