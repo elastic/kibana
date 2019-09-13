@@ -34,12 +34,6 @@ export function screenshotsFactory(server: KbnServer) {
   }> {
     await openUrl(browser, url, conditionalHeaders, logger);
 
-    checkForToastMessage(browser, layout, logger)
-      .then((element: ElementHandle<Element>) => {
-        throw new Error('the toast error');
-      })
-      .catch(() => {});
-
     const successSelectors = `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`;
     await Promise.race([
       browser.waitForSelector(successSelectors, {}, logger), // finds DOM attributes for Kibana embeddables
