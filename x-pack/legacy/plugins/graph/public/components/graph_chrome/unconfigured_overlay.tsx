@@ -33,7 +33,7 @@ export function UnconfiguredOverlay({ onSelectFieldsClicked }: UnconfiguredOverl
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton fill size="l" onClick={onSelectFieldsClicked}>
+          <EuiButton fill onClick={onSelectFieldsClicked}>
             {i18n.translate('xpack.graph.unconfiguredOverlay.callToActionLabel', {
               defaultMessage: 'Select fields',
             })}

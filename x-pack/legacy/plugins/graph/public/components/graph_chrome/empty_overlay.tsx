@@ -34,7 +34,7 @@ export function EmptyOverlay({ onFillWorkspace }: EmptyOverlayProps) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton fill size="l" onClick={onFillWorkspace}>
+          <EuiButton fill onClick={onFillWorkspace}>
             {i18n.translate('xpack.graph.emptyOverlay.callToActionLabel', {
               defaultMessage: 'Show top terms and correlations between them',
             })}
