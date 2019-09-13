@@ -33,10 +33,10 @@ describe('All configs should use a single version of Node', () => {
     expect(nodeVersion.trim()).to.be(nvmrc.trim());
   });
 
-  it('FORCE FAILURE should compare .node-version and engines.node from package.json', async () => {
+  it('should compare .node-version and engines.node from package.json', async () => {
     const nodeVersion = await readFile('./.node-version', {
       encoding: 'utf-8',
     });
-    expect(nodeVersion.trim()).to.be(engines.node + ' FORCE FAILURE');
+    expect(nodeVersion.trim()).to.be(engines.node);
   });
 });
