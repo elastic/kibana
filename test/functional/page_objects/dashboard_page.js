@@ -53,7 +53,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': defaultIndex,
       });
-      await this.selectDefaultIndex(defaultIndex);
       await PageObjects.common.navigateToApp('dashboard');
     }
 
