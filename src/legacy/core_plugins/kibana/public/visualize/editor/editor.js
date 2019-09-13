@@ -65,9 +65,9 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
-        const visTypes = Private(VisTypesRegistryProvider);
-        const visType = _.find(visTypes, { name: $route.current.params.type });
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+        const visTypes = VisTypesRegistryProvider;
+        const visType = visTypes.get($route.current.params.type);
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
         if (shouldHaveIndex && !hasIndex) {

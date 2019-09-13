@@ -20,6 +20,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 
 import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup } from './types';
+// TODO
 
 /**
  * Interface for any dependencies on other plugins' contracts.
@@ -89,6 +90,10 @@ export class VisualizationsPlugin
         createFilter,
       }),
       types: this.types.setup({ Vis, VisFactoryProvider, VisTypesRegistryProvider }),
+      visualizations: {
+        getAll: () => new Map(this.visualizations),
+        register: (obj: VisType): Map<string, VisType> => this.visualizations.set(obj.name, obj),
+      },
     };
   }
 

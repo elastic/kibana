@@ -17,37 +17,31 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';
 
-function SelfChangingVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createReactVisualization({
-    name: 'self_changing_vis',
-    title: 'Self Changing Vis',
-    icon: 'visControls',
-    description: 'This visualization is able to change its own settings, that you could also set in the editor.',
-    visConfig: {
-      component: SelfChangingComponent,
-      defaults: {
-        counter: 0,
+VisTypesRegistryProvider.register(visFactory.createReactVisualization({
+  name: 'self_changing_vis',
+  title: 'Self Changing Vis',
+  icon: 'visControls',
+  description: 'This visualization is able to change its own settings, that you could also set in the editor.',
+  visConfig: {
+    component: SelfChangingComponent,
+    defaults: {
+      counter: 0,
+    },
+  },
+  editorConfig: {
+    optionTabs: [
+      {
+        name: 'options',
+        title: 'Options',
+        editor: SelfChangingEditor,
       },
-    },
-    editorConfig: {
-      optionTabs: [
-        {
-          name: 'options',
-          title: 'Options',
-          editor: SelfChangingEditor,
-        },
-      ],
-    },
-    requestHandler: 'none',
-  });
-}
-
-VisTypesRegistryProvider.register(SelfChangingVisType);
+    ],
+  },
+  requestHandler: 'none',
+}));

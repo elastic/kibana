@@ -37,16 +37,21 @@ describe('NewVisModal', () => {
     requestHandler: 'none',
     responseHandler: 'none',
   };
-  const visTypes: VisType[] = [
-    { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams },
-    { name: 'visExp', title: 'Experimental Vis', stage: 'experimental', ...defaultVisTypeParams },
-    {
-      name: 'visWithSearch',
-      title: 'Vis with search',
-      stage: 'production',
-      ...defaultVisTypeParams,
-    },
-  ];
+
+  const vis = { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams };
+  const visExpression = {
+    name: 'visExp',
+    title: 'Experimental Vis',
+    stage: 'experimental',
+    ...defaultVisTypeParams,
+  };
+  const visWithSearch = {
+    name: 'visWithSearch',
+    title: 'Vis with search',
+    stage: 'production',
+    ...defaultVisTypeParams,
+  };
+  const visTypes = [vis, visExpression, visWithSearch] as VisType[];
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(

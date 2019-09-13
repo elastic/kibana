@@ -64,13 +64,13 @@ export const visualization = () => ({
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
+    const visTypes = VisTypesRegistryProvider;
     const indexPatterns = Private(IndexPatternsProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = JSON.parse(args.visConfig);
     const schemas = JSON.parse(args.schemas);
-    const visType = visTypes.byName[args.type || 'histogram'];
+    const visType = visTypes.get(args.type || 'histogram');
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
     const uiStateParams = JSON.parse(args.uiState);

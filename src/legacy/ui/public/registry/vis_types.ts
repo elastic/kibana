@@ -18,16 +18,20 @@
  */
 
 import { VisType } from '../vis';
-import { uiRegistry, UIRegistry } from './_registry';
 
-interface VisTypesRegistryAccessors {
-  byName: { [typeName: string]: VisType };
+export interface VisTypesPluginContract {
+  register: (visType: VisType) => VisTypesPluginContract;
+  get: (name: string) => VisType | undefined;
+  getAll: () => VisType[];
 }
 
-export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
+const visTypes: Map<string, VisType> = new Map();
 
-export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
-  name: 'visTypes',
-  index: ['name'],
-  order: ['title'],
-});
+export const VisTypesRegistryProvider = {
+  register: (obj: VisType) => {
+    visTypes.set(obj.name, obj);
+    return VisTypesRegistryProvider;
+  },
+  get: (key: string) => visTypes.get(key),
+  getAll: () => [...visTypes.values()],
+};

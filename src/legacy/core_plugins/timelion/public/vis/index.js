@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -30,8 +31,16 @@ import '../directives/timelion_expression_input';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
-// register the provider with the visTypes registry so that other know it exists
-VisTypesRegistryProvider.register(TimelionVisProvider);
+async function registerVisType() {
+  VisTypesRegistryProvider.register(TimelionVisProvider);	  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
+
+  // register the provider with the visTypes registry so that other know it exists
+  // eslint-disable-next-line new-cap
+  VisTypesRegistryProvider.register(TimelionVisProvider(Private));
+}
+
+registerVisType();
 
 export default function TimelionVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);

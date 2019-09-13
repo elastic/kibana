@@ -66,7 +66,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
         createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
       };
 
-      visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+      visualizationsSetup.types.registerVisualization(createTableVisTypeDefinition(legacyDependencies));
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

@@ -70,7 +70,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(createRegionMapFn);
 
-    visualizations.types.registerVisualization(() =>
+    visualizations.types.registerVisualization(
       createRegionMapTypeDefinition(visualizationDependencies)
     );
   }

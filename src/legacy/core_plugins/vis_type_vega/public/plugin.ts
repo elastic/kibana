@@ -61,9 +61,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
-    visualizations.types.registerVisualization(() =>
-      createVegaTypeDefinition(visualizationDependencies)
-    );
+    visualizations.types.registerVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
   public start(core: CoreStart) {

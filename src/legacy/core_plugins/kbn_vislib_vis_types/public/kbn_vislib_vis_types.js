@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import histogramVisTypeProvider from './histogram';
@@ -28,11 +29,18 @@ import horizontalBarVisTypeProvider from './horizontal_bar';
 import gaugeVisTypeProvider from './gauge';
 import goalVisTypeProvider from './goal';
 
-VisTypesRegistryProvider.register(histogramVisTypeProvider);
-VisTypesRegistryProvider.register(lineVisTypeProvider);
-VisTypesRegistryProvider.register(pieVisTypeProvider);
-VisTypesRegistryProvider.register(areaVisTypeProvider);
-VisTypesRegistryProvider.register(heatmapVisTypeProvider);
-VisTypesRegistryProvider.register(horizontalBarVisTypeProvider);
-VisTypesRegistryProvider.register(gaugeVisTypeProvider);
-VisTypesRegistryProvider.register(goalVisTypeProvider);
+async function registerItems() {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
+
+  VisTypesRegistryProvider.register(histogramVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(lineVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(pieVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(areaVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(heatmapVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(horizontalBarVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(gaugeVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(goalVisTypeProvider(Private));
+}
+
+registerItems();

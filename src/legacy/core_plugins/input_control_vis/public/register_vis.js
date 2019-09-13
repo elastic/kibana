@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
@@ -26,11 +26,10 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { Status } from 'ui/vis/update_status';
 import { i18n } from '@kbn/i18n';
 
-function InputControlVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+const InputControlVisProvider =
 
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
-  return VisFactory.createBaseVisualization({
+  visFactory.createBaseVisualization({
     name: 'input_control_vis',
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Controls'
@@ -73,7 +72,6 @@ function InputControlVisProvider(Private) {
     requestHandler: 'none',
     responseHandler: 'none',
   });
-}
 
 // register the provider with the visTypes registry
 VisTypesRegistryProvider.register(InputControlVisProvider);

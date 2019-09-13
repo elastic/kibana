@@ -36,7 +36,7 @@ savedObjectManagementRegistry.register({
 });
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
-  const visTypes = Private(VisTypesRegistryProvider);
+  const visTypes = VisTypesRegistryProvider;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
@@ -58,12 +58,12 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       } // eslint-disable-line no-empty
     }
 
-    if (!typeName || !visTypes.byName[typeName]) {
+    if (!typeName || !visTypes.get(typeName)) {
       source.error = 'Unknown visualization type';
       return source;
     }
 
-    source.type = visTypes.byName[typeName];
+    source.type = visTypes.get(typeName);
     source.savedObjectType = 'visualization';
     source.icon = source.type.icon;
     source.image = source.type.image;

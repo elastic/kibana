@@ -55,3 +55,4 @@ export type VisTypeAlias = VisTypeAlias;
 
 /** @public static code */
 // TODO once items are moved from ui/vis into this service
+export { VisTypesPluginContract } from 'ui/registry/vis_types';

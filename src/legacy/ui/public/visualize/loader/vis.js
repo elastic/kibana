@@ -29,13 +29,12 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
+import { VisTypesRegistryProvider as visTypes } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
-  const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   class Vis extends EventEmitter {
@@ -71,7 +70,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
-        this.type = visTypes.byName[type];
+        this.type = visTypes.get(type);
         if (!this.type) {
           throw new Error(`Invalid type "${type}"`);
         }

@@ -106,7 +106,7 @@ describe('RegionMapsVisualizationTests', function () {
         uiSettings,
       };
 
-      visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+      visualizationsSetup.types.registerVisualization(createRegionMapTypeDefinition(dependencies));
 
       Vis = Private(visModule.VisProvider);
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
