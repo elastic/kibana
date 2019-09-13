@@ -26,6 +26,7 @@ import { SlmPolicy } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_POLICY_DETAIL_PANEL_RETENTION_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
@@ -38,7 +39,7 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { TabSummary, TabHistory } from './tabs';
+import { TabSummary, TabRetention, TabHistory } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];
@@ -48,10 +49,12 @@ interface Props {
 }
 
 const TAB_SUMMARY = 'summary';
+const TAB_RETENTION = 'retentin';
 const TAB_HISTORY = 'success';
 
 const tabToUiMetricMap: { [key: string]: string } = {
   [TAB_SUMMARY]: UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
+  [TAB_RETENTION]: UIM_POLICY_DETAIL_PANEL_RETENTION_TAB,
   [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 };
 
@@ -83,6 +86,15 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         <FormattedMessage
           id="xpack.snapshotRestore.policyDetails.summaryTabTitle"
           defaultMessage="Summary"
+        />
+      ),
+    },
+    {
+      id: TAB_RETENTION,
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyDetails.retentionTabTitle"
+          defaultMessage="Retention"
         />
       ),
     },
@@ -122,6 +134,8 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       switch (activeTab) {
         case TAB_HISTORY:
           return <TabHistory policy={policy} />;
+        case TAB_RETENTION:
+          return <TabRetention policy={policy} />;
         default:
           return <TabSummary policy={policy} />;
       }

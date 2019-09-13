@@ -13,11 +13,11 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
   EuiLink,
   EuiIcon,
   EuiToolTip,
-  EuiText,
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
@@ -274,14 +274,20 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
+    </Fragment>
+  );
 
-      {retention && serializedPolicy.retention ? (
+  const renderRetentionTab = () => {
+    const { retention: serializedRetention } = serializedPolicy;
+
+    if (serializedRetention) {
+      return (
         <Fragment>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionRetentionTitle"
+                id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.sectionRetentionTitle"
                 defaultMessage="Snapshot retention"
               />{' '}
               <EditStepTooltip step={3} />
@@ -290,47 +296,71 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiSpacer size="s" />
 
           <EuiDescriptionList textStyle="reverse">
-            {retention.expireAfterValue && (
+            {retention!.expireAfterValue && (
               <Fragment>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.expireAfterLabel"
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.expireAfterLabel"
                     defaultMessage="Expire after"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {retention.expireAfterValue}
-                  {retention.expireAfterUnit}
+                  {retention!.expireAfterValue}
+                  {retention!.expireAfterUnit}
                 </EuiDescriptionListDescription>
               </Fragment>
             )}
-            {retention.minCount && (
+            {retention!.minCount && (
               <Fragment>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.minCountLabel"
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.minCountLabel"
                     defaultMessage="Min count"
                   />
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{retention.minCount}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription>{retention!.minCount}</EuiDescriptionListDescription>
               </Fragment>
             )}
-            {retention.maxCount && (
+            {retention!.maxCount && (
               <Fragment>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.maxCountLabel"
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.maxCountLabel"
                     defaultMessage="Max count"
                   />
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{retention.maxCount}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription>{retention!.maxCount}</EuiDescriptionListDescription>
               </Fragment>
             )}
           </EuiDescriptionList>
         </Fragment>
-      ) : null}
-    </Fragment>
-  );
+      );
+    }
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.noRetentionMessage"
+              defaultMessage="Snapshot retention is not configured. {editLink}"
+              values={{
+                editLink: (
+                  <EuiLink onClick={() => updateCurrentStep(3)}>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.noRetentionLinkText"
+                      defaultMessage="Edit"
+                    />{' '}
+                    <EuiIcon type="pencil" className="eui-alignTop" />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </Fragment>
+    );
+  };
 
   const renderRequestTab = () => {
     const endpoint = `PUT _slm/policy/${name}`;
@@ -365,6 +395,13 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               defaultMessage: 'Summary',
             }),
             content: renderSummaryTab(),
+          },
+          {
+            id: 'retention',
+            name: i18n.translate('xpack.snapshotRestore.policyForm.stepReview.retentionTabTitle', {
+              defaultMessage: 'Retention',
+            }),
+            content: renderRetentionTab(),
           },
           {
             id: 'json',

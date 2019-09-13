@@ -5,4 +5,5 @@
  */
 
 export { TabSummary } from './tab_summary';
+export { TabRetention } from './tab_retention';
 export { TabHistory } from './tab_history';

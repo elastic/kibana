@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -111,6 +112,24 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+    },
+    {
+      field: 'retention',
+      name: i18n.translate('xpack.snapshotRestore.policyList.table.retentionColumnTitle', {
+        defaultMessage: 'Retention',
+      }),
+      render: (retention: SlmPolicy['retention']) =>
+        retention ? (
+          <EuiIcon
+            type="check"
+            aria-label={i18n.translate(
+              'xpack.snapshotRestore.policyList.table.retentionColumnAriaLabel',
+              {
+                defaultMessage: 'Retention configured',
+              }
+            )}
+          />
+        ) : null,
     },
     {
       field: 'nextExecutionMillis',
