@@ -42,16 +42,14 @@ export default function ({ getService }) {
           monitorId: '0002-up',
         },
       };
-      const {
-        body: {
-          data: { responseData },
-        },
-      } = await supertest
+      const res = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
 
-      expectFixtureEql(responseData, 'monitor_status_by_id', res => res.forEach(i => delete i.millisFromNow));
+      console.log('RESPONSE DATA',  JSON.stringify(res.body.data.monitorStatus));
+
+      expectFixtureEql(res.body.data.monitorStatus, 'monitor_status_by_id');
     });
   });
 }
