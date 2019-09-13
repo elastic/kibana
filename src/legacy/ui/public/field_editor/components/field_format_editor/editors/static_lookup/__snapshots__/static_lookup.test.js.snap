@@ -56,13 +56,9 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
     size="m"
   />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add entry"
@@ -151,13 +147,9 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
     size="m"
   />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add entry"
