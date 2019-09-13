@@ -74,7 +74,7 @@ interface State {
   isDateRangeInvalid: boolean;
 }
 
-export class QueryBarUI extends Component<Props, State> {
+export class QueryBarTopRowUI extends Component<Props, State> {
   public static defaultProps = {
     showQueryInput: true,
     showDatePicker: true,
@@ -354,4 +354,4 @@ export class QueryBarUI extends Component<Props, State> {
 }
 
 // @ts-ignore
-export const QueryBar = injectI18n(QueryBarUI);
+export const QueryBarTopRow = injectI18n(QueryBarTopRowUI);
