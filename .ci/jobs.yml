@@ -1,24 +1,6 @@
 JOB:
-  - kibana-visualRegression1
-  - x-pack-visualRegression1
-  - kibana-visualRegression2
-  - x-pack-visualRegression2
-  - kibana-visualRegression3
-  - x-pack-visualRegression3
-  - kibana-visualRegression4
-  - x-pack-visualRegression4
-  - kibana-visualRegression5
-  - x-pack-visualRegression5
-  - kibana-visualRegression6
-  - x-pack-visualRegression6
-  - kibana-visualRegression7
-  - x-pack-visualRegression7
-  - kibana-visualRegression8
-  - x-pack-visualRegression8
-  - kibana-visualRegression9
-  - x-pack-visualRegression9
-  - kibana-visualRegression10
-  - x-pack-visualRegression10
+  - kibana-visualRegression
+  - x-pack-visualRegression
 
 # `~` is yaml for `null`
 exclude: ~
