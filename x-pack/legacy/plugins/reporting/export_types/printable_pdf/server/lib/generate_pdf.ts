@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, mergeMap } from 'rxjs/operators';
+import { toArray, mergeMap, first } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
@@ -92,6 +92,7 @@ function generatePdfObservableFn(server: KbnServer) {
           }, CAPTURE_SCREENSHOT_CONCURRENCY)
         );
       }),
+      first(),
       toArray(), // ???
       mergeMap(
         async (urlScreenshots: UrlScreenshot[]): Promise<Buffer> => {
