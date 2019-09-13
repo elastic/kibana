@@ -34,7 +34,7 @@ export const useJsonStep = ({
     const isValid = content.trim() === '' ? true : isJSON(content);
     if (!isValid) {
       setError(
-        i18n.translate('xpack.validators.string.invalidJSONError', {
+        i18n.translate('xpack.idxMgmt.validators.string.invalidJSONError', {
           defaultMessage: 'Invalid JSON format.',
         })
       );
