@@ -43,7 +43,7 @@ export function registerGenerateFromJobParams(
       },
     },
     handler: async (request: Request, h: ResponseToolkit) => {
-      let jobParamsRison: string;
+      let jobParamsRison: string | null;
 
       if (request.payload) {
         const { jobParams: jobParamsPayload } = request.payload as { jobParams: string };
@@ -53,14 +53,17 @@ export function registerGenerateFromJobParams(
         if (queryJobParams) {
           jobParamsRison = queryJobParams;
         } else {
-          throw boom.badRequest('A jobParams RISON string is required');
+          jobParamsRison = null;
         }
+      }
+
+      if (!jobParamsRison) {
+        throw boom.badRequest('A jobParams RISON string is required');
       }
 
       const { exportType } = request.params;
       let response;
       try {
-        // @ts-ignore
         const jobParams = rison.decode(jobParamsRison);
         response = await handler(exportType, jobParams, request, h);
       } catch (err) {
