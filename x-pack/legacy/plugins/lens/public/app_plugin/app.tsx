@@ -13,7 +13,8 @@ import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
 import { SavedObjectsClientContract } from 'src/core/public';
-import { Query, QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -199,7 +200,7 @@ export function App({
               </EuiFlexItem>
             </EuiFlexGroup>
           </nav>
-          <QueryBar
+          <QueryBarTopRow
             data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
             onSubmit={payload => {

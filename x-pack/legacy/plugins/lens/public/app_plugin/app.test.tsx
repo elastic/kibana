@@ -12,11 +12,11 @@ import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
 import { SavedObjectsClientContract } from 'src/core/public';
 
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/query', () => ({
-  QueryBar: jest.fn(() => null),
+jest.mock('../../../../../../src/legacy/core_plugins/data/public/query/query_bar', () => ({
+  QueryBarTopRow: jest.fn(() => null),
 }));
 
 jest.mock('ui/new_platform');
@@ -69,7 +69,7 @@ function makeDefaultArgs(): jest.Mocked<{
       load: jest.fn(),
       save: jest.fn(),
     },
-    QueryBar: jest.fn(() => <div />),
+    QueryBarTopRow: jest.fn(() => <div />),
     redirectTo: jest.fn(id => {}),
     savedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<{
@@ -186,7 +186,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(QueryBar).toHaveBeenCalledWith(
+      expect(QueryBarTopRow).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -355,7 +355,7 @@ describe('Lens App', () => {
 
       mount(<App {...args} />);
 
-      expect(QueryBar).toHaveBeenCalledWith(
+      expect(QueryBarTopRow).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -378,7 +378,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      expect(QueryBar).toHaveBeenCalledWith(
+      expect(QueryBarTopRow).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [],
         }),
@@ -393,7 +393,7 @@ describe('Lens App', () => {
 
       instance.update();
 
-      expect(QueryBar).toHaveBeenCalledWith(
+      expect(QueryBarTopRow).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: ['newIndex'],
         }),
@@ -417,7 +417,7 @@ describe('Lens App', () => {
 
       instance.update();
 
-      expect(QueryBar).toHaveBeenCalledWith(
+      expect(QueryBarTopRow).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-14d',
           dateRangeTo: 'now-7d',
