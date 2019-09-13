@@ -31,30 +31,30 @@ response code. The weight of the connection between two vertices indicates how s
 are related. 
 +
 [role="screenshot"]
-image::graph/images/graph-url-connections.png["URL connections"]
+image::user/graph/images/graph-url-connections.png["URL connections"]
 
 . To view more information about the relationship, click any connection.
 +
 [role="screenshot"]
-image::graph/images/graph-link-summary.png["Link summary"]
+image::user/graph/images/graph-link-summary.png["Link summary"]
 
 . Use the toolbar buttons to explore
 additional connections:
 +
 * To display additional vertices that connect to your graph, click Expand 
-image:graph/images/graph-expand-button.jpg[Expand Selection].
+image:user/graph/images/graph-expand-button.jpg[Expand Selection].
 * To display additional
 connections between the displayed vertices, click Link
-image:graph/images/graph-link-button.jpg[Add links to existing terms]  
+image:user/graph/images/graph-link-button.jpg[Add links to existing terms]  
 * To explore a particular area of the
 graph, select the vertices you are interested in, and click Expand or Link.
 * To step back through your changes to the graph, click Undo
-image:graph/images/graph-undo-button.jpg[Undo].
+image:user/graph/images/graph-undo-button.jpg[Undo].
 
 . To see more relationships in your data, submit additional queries.
 +
 [role="screenshot"]
-image::graph/images/graph-add-query.png["Adding networks"]
+image::user/graph/images/graph-add-query.png["Adding networks"]
 
 
 NOTE: By default, when you submit a search query, Graph searches all available

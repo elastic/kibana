@@ -1,5 +1,5 @@
-[[code-getting-started]]
-== Getting Started with Code
+[[code-import-first-repo]]
+== Import your first repo
 
 The easiest way to get started with *Code* is to import a real-world repository.
 
