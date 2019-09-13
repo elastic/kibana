@@ -2,11 +2,7 @@
 
 exports[`Should render source settings editor 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiTitle

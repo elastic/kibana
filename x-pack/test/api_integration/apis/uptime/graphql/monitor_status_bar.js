@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-len
 import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import { expectFixtureEql } from './expect_fixture_eql';
 
@@ -45,7 +44,7 @@ export default function ({ getService }) {
       };
       const {
         body: {
-          data: { monitorStatus: responseData },
+          data: { responseData },
         },
       } = await supertest
         .post('/api/uptime/graphql')

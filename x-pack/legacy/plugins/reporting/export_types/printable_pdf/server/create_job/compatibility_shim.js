@@ -45,25 +45,38 @@ export function compatibilityShimFactory(server, logger) {
         browserTimezone,
         objectType,
         title,
-        relativeUrl, // not deprecating
         relativeUrls,
         layout
       },
       headers,
       request
     ) {
-      if (savedObjectId && (relativeUrl || relativeUrls)) {
-        throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
-      }
-      if (!savedObjectId && !relativeUrl && !relativeUrls) {
-        throw new Error(`either relativeUrls or savedObjectId must be provided`);
+
+      // input validation and deprecation logging
+      if (savedObjectId) {
+        if (typeof savedObjectId !== 'string') {
+          throw new Error('Invalid savedObjectId (deprecated). String is expected.');
+        }
+        if (relativeUrls) {
+          throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
+        }
+      } else {
+        if (!relativeUrls) {
+          throw new Error(`Either relativeUrls or savedObjectId must be provided`);
+        }
+        if (!Array.isArray(relativeUrls)) {
+          throw new Error('Invalid relativeUrls. String[] is expected.');
+        }
+        relativeUrls.forEach(url => {
+          if (typeof url !== 'string') {
+            throw new Error('Invalid Relative URL in relativeUrls. String is expected.');
+          }
+        });
       }
 
       let kibanaRelativeUrls;
       if (relativeUrls) {
         kibanaRelativeUrls = relativeUrls;
-      } else if (relativeUrl) {
-        kibanaRelativeUrls = [ relativeUrl ];
       } else {
         kibanaRelativeUrls = [getSavedObjectRelativeUrl(objectType, savedObjectId, queryString)];
         logger.warning(
