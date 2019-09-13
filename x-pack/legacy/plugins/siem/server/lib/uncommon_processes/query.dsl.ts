@@ -135,6 +135,11 @@ export const buildQuery = ({
                       'event.dataset': 'process',
                     },
                   },
+                  {
+                    term: {
+                      'event.action': 'process_started',
+                    },
+                  },
                 ],
               },
             },
@@ -165,6 +170,22 @@ export const buildQuery = ({
                   {
                     term: {
                       'winlog.channel': 'Microsoft-Windows-Sysmon/Operational',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      'event.type': 'process_start',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.category': 'process',
                     },
                   },
                 ],

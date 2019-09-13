@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
@@ -103,7 +103,7 @@ export default function({ getService }: FtrProviderContext) {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
