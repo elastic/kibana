@@ -23,6 +23,18 @@ export default async function ({ readConfigFile }) {
   return {
     ...defaultConfig.getAll(),
     //csp.strict: false
+    testFiles: [
+      require.resolve('./apps/console'),
+      require.resolve('./apps/getting_started'),
+      require.resolve('./apps/context'), // problems on IE
+      require.resolve('./apps/dashboard'),
+      require.resolve('./apps/discover'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/management'),
+      require.resolve('./apps/status_page'),
+      require.resolve('./apps/timelion'),
+      require.resolve('./apps/visualize'),
+    ],
 
     browser: {
       type: 'ie',
@@ -38,6 +50,7 @@ export default async function ({ readConfigFile }) {
         'dateFormat:tz': 'UTC',
         'telemetry:optIn': false,
         'state:storeInSessionStorage': true,
+        'notifications:lifetime:info': 10000,
       },
     },
 
