@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
         auditbeatProcess: 7,
         auditbeatUser: 6,
         filebeatSystemModule: 0,
-        winlogbeat: 0,
+        winlogbeat: 1,
         __typename: 'OverviewHostData',
       };
 
