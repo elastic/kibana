@@ -8,9 +8,8 @@ import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import ApolloClient from 'apollo-client';
-import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
+import { KueryFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { InputsModelId } from '../../store/inputs/constants';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -61,32 +60,6 @@ export interface UrlStateProps {
 
 export interface UrlStateStateToPropsType {
   urlState: UrlState;
-}
-
-export interface SetHostsKql {
-  filterQuery: SerializedFilterQuery;
-  hostsType: hostsModel.HostsType;
-}
-
-export interface SetNetworkKql {
-  filterQuery: SerializedFilterQuery;
-  networkType: networkModel.NetworkType;
-}
-
-export interface SetAbsoluteTimerange {
-  from: number;
-  fromStr: undefined;
-  id: InputsModelId;
-  to: number;
-  toStr: undefined;
-}
-
-export interface SetRelativeTimerange {
-  from: number;
-  fromStr: string;
-  id: InputsModelId;
-  to: number;
-  toStr: string;
 }
 
 export interface UpdateTimelineIsLoading {
