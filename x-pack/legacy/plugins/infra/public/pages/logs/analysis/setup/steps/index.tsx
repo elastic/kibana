@@ -60,7 +60,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         />
       ),
       status:
-        setupStatus === 'pending' || setupStatus === 'retrying'
+        setupStatus === 'pending'
           ? ('incomplete' as EuiStepStatus)
           : setupStatus === 'failed'
           ? ('danger' as EuiStepStatus)

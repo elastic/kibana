@@ -34,7 +34,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
 }: Props) => {
   return (
     <EuiText size="s">
-      {setupStatus === 'pending' || setupStatus === 'retrying' ? (
+      {setupStatus === 'pending' ? (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />

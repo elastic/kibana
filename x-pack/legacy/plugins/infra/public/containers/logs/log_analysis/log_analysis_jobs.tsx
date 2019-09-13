@@ -26,8 +26,7 @@ export type SetupStatus =
   | 'initializing' // acquiring job statuses to determine setup status
   | 'unknown' // job status could not be acquired (failed request etc)
   | 'required' // jobs are missing
-  | 'pending' // called module setup, waiting for response
-  | 'retrying' // cleaning up and calling module setup again
+  | 'pending' // In the process of setting up the module for the first time or retrying, waiting for response
   | 'succeeded' // setup succeeded, notifying user
   | 'failed' // setup failed, notifying user
   | 'hiddenAfterSuccess' // hide the setup screen and we show the results for the first time
@@ -48,7 +47,6 @@ type StatusReducerActions =
       datafeeds: SetupMlModuleResponsePayload['datafeeds'];
     }
   | { type: 'failedSetup' }
-  | { type: 'retryingSetup' }
   | { type: 'fetchingJobStatuses' }
   | {
       type: 'fetchedJobStatuses';
@@ -108,12 +106,6 @@ function statusReducer(
           'log-entry-rate': 'failed',
         },
         setupStatus: 'failed',
-      };
-    }
-    case 'retryingSetup': {
-      return {
-        ...state,
-        setupStatus: 'retrying',
       };
     }
     case 'fetchingJobStatuses': {
@@ -229,7 +221,7 @@ export const useLogAnalysisJobs = ({
 
   const retry = useCallback(
     (start, end) => {
-      dispatch({ type: 'retryingSetup' });
+      dispatch({ type: 'startedSetup' });
       cleanupMLResources()
         .then(() => {
           setupMlModule(start, end);
