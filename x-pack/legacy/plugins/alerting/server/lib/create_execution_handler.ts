@@ -8,19 +8,19 @@ import { AlertAction, State, Context } from '../types';
 import { ActionsPlugin } from '../../../actions';
 import { transformActionParams } from './transform_action_params';
 
-interface CreateFireHandlerOptions {
+interface CreateExecutionHandlerOptions {
   executeAction: ActionsPlugin['execute'];
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;
 }
 
-export function createFireHandler({
+export function createExecutionHandler({
   executeAction,
   actions: alertActions,
   spaceId,
   apiKey,
-}: CreateFireHandlerOptions) {
+}: CreateExecutionHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
     const actions = alertActions
       .filter(({ group }) => group === actionGroup)
