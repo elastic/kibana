@@ -5,7 +5,7 @@ _Graph_ provides a way to discover how items in an {es} index are related. You c
 explore the connections between indexed terms and see which connections are the most meaningful.
 This can be useful in a variety of applications, from fraud detection to recommendation engines.
 
-image::graph/images/graph-network.jpg["Graph network"]
+image::user/graph/images/graph-network.jpg["Graph network"]
 
 For example, you might use Graph to uncover website vulnerabilities that hackers are targeting
 so you can harden your website. Or, you might provide Graph-based personalized recommendations
@@ -25,7 +25,7 @@ In the Graph API, the terms you want to include in the graph are called _vertice
 The relationship between any two vertices is a _connection_. The connection
 summarizes the documents that contain both vertices' terms.
 
-image::graph/images/graph-vertices-connections.jpg["Graph components"]
+image::user/graph/images/graph-vertices-connections.jpg["Graph components"]
 
 NOTE: If you're into https://en.wikipedia.org/wiki/Graph_theory[Graph theory], you might know
 vertices and connections as _nodes_ and _edges_. They're the same thing, we just want to use
@@ -70,19 +70,19 @@ in the graph will be selected from these terms.)
 For example, we indexed user data from Last.fm that contains the top artists played by each
 user. To use the Graph UI to find artists we might like, we can select the Last.fm index, select the field that contains the raw artist information, and search for an artist we like:
 
-image::graph/images/graph-init-screen.jpg["Getting started with graph"]
+image::user/graph/images/graph-init-screen.jpg["Getting started with graph"]
 
 
 The weight of the connection between two vertices indicates how strongly they are related.
 You can click any connection to view more information about the relationship:
 
-image::graph/images/graph-link-summary.jpg["Link summary"]
+image::user/graph/images/graph-link-summary.jpg["Link summary"]
 
-Once you have your initial graph, you can use the toolbar buttons to explore additional connections. Click the Expand button image:graph/images/graph-expand-button.jpg[Expand Selection] to display additional vertices that connect to your graph. Click the Link button image:graph/images/graph-link-button.jpg[Add links to existing terms] to display additional connections between the displayed vertices. To explore a particular area of the graph, select the vertices you are interested in and click the Expand or Link button. To step back through your changes to the graph, click the Undo button image:graph/images/graph-undo-button.jpg[Undo].
+Once you have your initial graph, you can use the toolbar buttons to explore additional connections. Click the Expand button image:user/graph/images/graph-expand-button.jpg[Expand Selection] to display additional vertices that connect to your graph. Click the Link button image:user/graph/images/graph-link-button.jpg[Add links to existing terms] to display additional connections between the displayed vertices. To explore a particular area of the graph, select the vertices you are interested in and click the Expand or Link button. To step back through your changes to the graph, click the Undo button image:user/graph/images/graph-undo-button.jpg[Undo].
 
 To see more relationships within your data, you can submit additional queries.
 
-image::graph/images/graph-add-query.jpg["Adding networks"]
+image::user/graph/images/graph-add-query.jpg["Adding networks"]
 
 NOTE: By default, when you submit a search query Graph searches all available fields. You can constrain your search to a particular field using the Lucene query syntax. For example,
 `country: ireland`.
