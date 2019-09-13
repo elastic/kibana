@@ -1,30 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "space:default",
-    "index": ".kibana_1",
-    "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "space": {
-        "_reserved": true,
-        "color": "#00bfb3",
-        "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
-        "name": "Default"
-      },
-      "type": "space",
-      "updated_at": "2019-09-10T11:14:28.196Z"
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "search:82116b30-d407-11e9-8004-932185690e7b",
     "index": ".kibana_1",
     "source": {
@@ -71,13 +47,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:timestamp-mixed-*",
+    "id": "index-pattern:timestamp-*",
     "index": ".kibana_1",
     "source": {
       "index-pattern": {
-        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"timestamp\",\"type\":\"date_nanos\",\"esTypes\":[\"date\",\"date_nanos\"],\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"timestamp\",\"type\":\"date\",\"esTypes\":[\"date\",\"date_nanos\"],\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
         "timeFieldName": "timestamp",
-        "title": "timestamp-mixed-*"
+        "title": "timestamp-*",
+        "fieldFormatMap": "{\"timestamp\":{\"id\":\"date_nanos\"}}"
       },
       "migrationVersion": {
         "index-pattern": "6.5.0"
