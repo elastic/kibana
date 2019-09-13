@@ -37,7 +37,7 @@ interface PdfMaker {
   setTitle: (title: string) => void;
   addImage: (base64EncodedData: string, options: { title: string; description: string }) => void;
   generate: () => void;
-  getBuffer: () => Buffer;
+  getBuffer: () => Promise<Buffer>;
 }
 
 const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
@@ -95,7 +95,7 @@ function generatePdfObservableFn(server: KbnServer) {
       first(),
       toArray(), // ???
       mergeMap(
-        async (urlScreenshots: UrlScreenshot[]): Promise<Buffer> => {
+        (urlScreenshots: UrlScreenshot[]): Promise<Buffer> => {
           if (title) {
             let pdfTitle: string;
             const timeRange = getTimeRange(urlScreenshots);
@@ -117,8 +117,7 @@ function generatePdfObservableFn(server: KbnServer) {
           });
 
           pdfOutput.generate();
-          const buffer = await pdfOutput.getBuffer();
-          return buffer;
+          return pdfOutput.getBuffer();
         }
       )
     );
