@@ -24,6 +24,11 @@ import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
 import { i18n } from '@kbn/i18n';
 
+import moment from 'moment';
+import { auditSearch } from '@logrhythm/nm-web-shared/services/audit';
+
+const auditTimeFormat = 'YYYY/MM/DD HH:mm:ss';
+
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
  * This can be slightly inefficient if a large number of requests are queued up, we can batch these
@@ -106,8 +111,48 @@ export function FetchNowProvider(Private, Promise) {
       });
   }
 
+  async function auditFetch(searchSource) {
+    const searchSourceFields = searchSource.getFields();
+
+    let queryToAudit = '';
+    if(Array.isArray(searchSourceFields.query)) {
+      queryToAudit = searchSourceFields.query[searchSourceFields.query.length - 1].query || '';
+    } else {
+      queryToAudit = searchSourceFields.query.query || '';
+    }
+
+    const dateFilter = Object.values(searchSource.getParent().getFields().filter().range)[0];
+
+    if (
+      !queryToAudit ||
+      queryToAudit.trim() === '*' ||
+      !dateFilter ||
+      !dateFilter.gte ||
+      !dateFilter.lte
+    ) {
+      return;
+    }
+
+    const formattedFrom = moment(dateFilter.gte).format(auditTimeFormat);
+    const formattedTo = moment(dateFilter.lte).format(auditTimeFormat);
+
+    await auditSearch({
+      query: queryToAudit,
+      from: formattedFrom,
+      to: formattedTo
+    });
+  }
+
   function startRequests(searchRequests) {
-    return Promise.map(searchRequests, function(searchRequest) {
+    if(searchRequests.length > 0) {
+      try {
+        auditFetch(searchRequests[0].source);
+      } catch (err) {
+        console.warn('An error occurred trying to audit the query.', err); // eslint-disable-line
+      }
+    }
+
+    return Promise.map(searchRequests, function (searchRequest) {
       if (searchRequest === ABORTED) {
         return searchRequest;
       }
