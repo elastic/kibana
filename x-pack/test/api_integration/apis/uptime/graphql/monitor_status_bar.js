@@ -29,7 +29,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
 
-      expectFixtureEql(responseData, 'monitor_status_by_id', res => res.forEach(i => delete i.millisFromNow));
+      expectFixtureEql(responseData, 'monitor_status_all', res => res.forEach(i => delete i.millisFromNow));
     });
 
     it('returns the status for only the given monitor', async () => {
