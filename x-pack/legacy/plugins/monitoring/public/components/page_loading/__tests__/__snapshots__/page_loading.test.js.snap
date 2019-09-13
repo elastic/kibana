@@ -3,6 +3,7 @@
 exports[`PageLoading should show a simple page loading component 1`] = `
 <div
   class="euiPage"
+  style="height:calc(100vh - 50px)"
 >
   <div
     class="euiPageBody"

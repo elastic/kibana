@@ -2,8 +2,6 @@
 
 exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
 <ExplainCollectionEnabled
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionEnabled": [Function],
@@ -111,7 +109,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       "timeZone": null,
     }
   }
-  property="xpack.monitoring.collection.enabled"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.enabled",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
