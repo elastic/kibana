@@ -140,7 +140,7 @@ export class SearchOptions extends Component<Props, State> {
                 <EuiTextColor color="secondary" className="code-flyout-title">
                   <FormattedMessage
                     id="xpack.code.searchBar.searchFilterTitle"
-                    defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                    defaultMessage="{filterCount, plural, one {Advanced Filter} other {Advanced Filters}}"
                     values={{ filterCount: repoScope.length }}
                   />
                 </EuiTextColor>
@@ -202,7 +202,7 @@ export class SearchOptions extends Component<Props, State> {
             <EuiTextColor color="secondary">
               <FormattedMessage
                 id="xpack.code.searchBar.searchFilterTitle"
-                defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                defaultMessage="{filterCount, plural, one {Advanced Filter} other {Advanced Filters}}"
                 values={{ filterCount: repoScope.length }}
               />
             </EuiTextColor>
