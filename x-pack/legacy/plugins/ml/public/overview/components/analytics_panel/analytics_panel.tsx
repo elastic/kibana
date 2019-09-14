@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-
+// TODO: panels can be smaller when empty
 export const AnalyticsPanel: FC = () => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
@@ -43,7 +43,7 @@ export const AnalyticsPanel: FC = () => {
   );
 
   return (
-    <EuiPanel>
+    <EuiPanel className="mlOverviewAnalyticsPanel">
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isInitialized === false && <EuiLoadingSpinner />}     
       {isInitialized === true && analytics.length === 0 && (

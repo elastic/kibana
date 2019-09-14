@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StatsBar, TransformStatsBarStats } from './stats_bar';
+export { StatsBar, TransformStatsBarStats, AnalyticStatsBarStats } from './stats_bar';

@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   MlInMemoryTable,
@@ -24,6 +24,7 @@ import {
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/columns';
 import { ANALYTICS_VIEW_ACTION } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { AnalyticsStatsBar } from './analytics_stats_bar';
 
 interface Props {
   items: any[];
@@ -42,6 +43,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       name: 'ID',
       sortable: true,
       truncateText: true,
+      width: '20%',
     },
     {
       name: i18n.translate('xpack.ml.overview.analyticsList.type', { defaultMessage: 'Type' }),
@@ -71,13 +73,14 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
       sortable: true,
+      width: '20%',
     },
     {
       name: i18n.translate('xpack.ml.overview.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
       actions: [ANALYTICS_VIEW_ACTION],
-      width: '200px',
+      width: '100px',
     },
   ];
 
@@ -111,6 +114,21 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
 
   return (
     <Fragment>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiText size="m">
+            <h3>
+              {i18n.translate('xpack.ml.overview.analyticsPanelTitle', {
+                defaultMessage: 'Analytics',
+              })}
+            </h3>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AnalyticsStatsBar analyticsList={items} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"
