@@ -11,7 +11,7 @@ import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { TYPESCRIPT } from './language_servers';
 import { TypescriptServerLauncher } from './ts_launcher';
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 // @ts-ignore
 const options: ServerOptions = createTestServerOption();
@@ -29,13 +29,17 @@ function delay(seconds: number) {
   });
 }
 
-test.skip('typescript language server could be shutdown', async () => {
-  const tsLauncher = new TypescriptServerLauncher('localhost', options, new ConsoleLoggerFactory());
-  const proxy = await tsLauncher.launch(true, 1, TYPESCRIPT.embedPath!);
-  await proxy.initialize(options.workspacePath);
-  await delay(2);
+test('typescript language server could be shutdown', async () => {
+  const tsLauncher = new TypescriptServerLauncher(
+    'localhost',
+    options,
+    new ConsoleLoggerFactory(),
+    TYPESCRIPT.embedPath!
+  );
+  const proxy = await tsLauncher.launch(true, 1);
   expect(tsLauncher.running).toBeTruthy();
+  await proxy.initialize(options.workspacePath);
   await proxy.exit();
-  await delay(2);
+  await delay(3);
   expect(tsLauncher.running).toBeFalsy();
 });

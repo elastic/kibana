@@ -1,0 +1,162 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconSelect /> should render and match a snapshot 1`] = `
+<EuiComboBox
+  compressed={false}
+  fullWidth={false}
+  isClearable={false}
+  onChange={[MockFunction]}
+  options={
+    Array [
+      Object {
+        "label": "Asterisk",
+        "value": "fa-asterisk",
+      },
+      Object {
+        "label": "Bell",
+        "value": "fa-bell",
+      },
+      Object {
+        "label": "Bolt",
+        "value": "fa-bolt",
+      },
+      Object {
+        "label": "Comment",
+        "value": "fa-comment",
+      },
+      Object {
+        "label": "Map Marker",
+        "value": "fa-map-marker",
+      },
+      Object {
+        "label": "Map Pin",
+        "value": "fa-map-pin",
+      },
+      Object {
+        "label": "Star",
+        "value": "fa-star",
+      },
+      Object {
+        "label": "Tag",
+        "value": "fa-tag",
+      },
+      Object {
+        "label": "Bomb",
+        "value": "fa-bomb",
+      },
+      Object {
+        "label": "Bug",
+        "value": "fa-bug",
+      },
+      Object {
+        "label": "Exclamation Circle",
+        "value": "fa-exclamation-circle",
+      },
+      Object {
+        "label": "Exclamation Triangle",
+        "value": "fa-exclamation-triangle",
+      },
+      Object {
+        "label": "Fire",
+        "value": "fa-fire",
+      },
+      Object {
+        "label": "Flag",
+        "value": "fa-flag",
+      },
+      Object {
+        "label": "Heart",
+        "value": "fa-heart",
+      },
+    ]
+  }
+  renderOption={[Function]}
+  selectedOptions={
+    Array [
+      Object {
+        "label": "Bell",
+        "value": "fa-bell",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+/>
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconView /> should render and match a snapshot 1`] = `
+<span>
+  <EuiIcon
+    type="editorComment"
+  />
+   Comment
+</span>
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js ICONS should match and save an icons collection snapshot 1`] = `
+Array [
+  Object {
+    "label": "Asterisk",
+    "value": "fa-asterisk",
+  },
+  Object {
+    "label": "Bell",
+    "value": "fa-bell",
+  },
+  Object {
+    "label": "Bolt",
+    "value": "fa-bolt",
+  },
+  Object {
+    "label": "Comment",
+    "value": "fa-comment",
+  },
+  Object {
+    "label": "Map Marker",
+    "value": "fa-map-marker",
+  },
+  Object {
+    "label": "Map Pin",
+    "value": "fa-map-pin",
+  },
+  Object {
+    "label": "Star",
+    "value": "fa-star",
+  },
+  Object {
+    "label": "Tag",
+    "value": "fa-tag",
+  },
+  Object {
+    "label": "Bomb",
+    "value": "fa-bomb",
+  },
+  Object {
+    "label": "Bug",
+    "value": "fa-bug",
+  },
+  Object {
+    "label": "Exclamation Circle",
+    "value": "fa-exclamation-circle",
+  },
+  Object {
+    "label": "Exclamation Triangle",
+    "value": "fa-exclamation-triangle",
+  },
+  Object {
+    "label": "Fire",
+    "value": "fa-fire",
+  },
+  Object {
+    "label": "Flag",
+    "value": "fa-flag",
+  },
+  Object {
+    "label": "Heart",
+    "value": "fa-heart",
+  },
+]
+`;

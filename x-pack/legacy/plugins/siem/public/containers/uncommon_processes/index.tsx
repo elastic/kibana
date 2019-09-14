@@ -28,6 +28,7 @@ const ID = 'uncommonProcessesQuery';
 export interface UncommonProcessesArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -67,26 +68,27 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetUncommonProcessesQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      inspect: isInspected,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
         query={uncommonProcessesQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          inspect: isInspected,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -109,13 +111,15 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
             inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
             uncommonProcesses,
           });

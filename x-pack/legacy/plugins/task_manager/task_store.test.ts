@@ -159,7 +159,7 @@ describe('TaskStore', () => {
 
   describe('fetch', () => {
     async function testFetch(opts?: FetchOpts, hits: any[] = []) {
-      const callCluster = sinon.spy(async () => ({ hits: { hits } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
         serializer,
@@ -328,7 +328,7 @@ describe('TaskStore', () => {
 
   describe('fetchAvailableTasks', () => {
     async function testFetchAvailableTasks({ opts = {}, hits = [] }: any = {}) {
-      const callCluster = sinon.spy(async () => ({ hits: { hits } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
@@ -350,7 +350,7 @@ describe('TaskStore', () => {
     }
 
     test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         index: 'tasky',
         serializer,

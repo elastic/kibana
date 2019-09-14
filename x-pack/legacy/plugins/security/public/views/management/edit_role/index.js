@@ -92,7 +92,7 @@ const routeDefinition = (action) => ({
       return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
     },
     features() {
-      return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
+      return kfetch({ method: 'get', pathname: '/api/features' }).catch(e => {
         // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
         const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
         if (unauthorizedForFeatures) {

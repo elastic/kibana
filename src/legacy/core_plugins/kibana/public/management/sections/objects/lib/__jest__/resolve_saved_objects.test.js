@@ -238,7 +238,9 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: () => '1',
+              getOwnField: (field) => {
+                return field === 'index' ? '1' : undefined;
+              },
             },
             hydrateIndexPattern,
             save,
@@ -247,7 +249,9 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: () => '3',
+              getOwnField: (field) => {
+                return field === 'index' ? '3' : undefined;
+              },
             },
             hydrateIndexPattern,
             save,
@@ -282,6 +286,63 @@ describe('resolveSavedObjects', () => {
       expect(save).toHaveBeenCalledWith({ confirmOverwrite: !overwriteAll });
       expect(hydrateIndexPattern).toHaveBeenCalledWith('2');
       expect(hydrateIndexPattern).toHaveBeenCalledWith('4');
+    });
+
+    it('should resolve filter index conflicts', async () => {
+      const hydrateIndexPattern = jest.fn();
+      const save = jest.fn();
+
+      const conflictedIndexPatterns = [
+        {
+          obj: {
+            searchSource: {
+              getOwnField: (field) => {
+                return field === 'index' ? '1' : [{ meta: { index: 'filterIndex' } }];
+              },
+              setField: jest.fn(),
+            },
+            hydrateIndexPattern,
+            save,
+          },
+        },
+        {
+          obj: {
+            searchSource: {
+              getOwnField: (field) => {
+                return field === 'index' ? '3' : undefined;
+              },
+            },
+            hydrateIndexPattern,
+            save,
+          },
+        },
+      ];
+
+      const resolutions = [
+        {
+          oldId: '1',
+          newId: '2',
+        },
+        {
+          oldId: '3',
+          newId: '4',
+        },
+        {
+          oldId: 'filterIndex',
+          newId: 'newFilterIndex',
+        },
+      ];
+
+      const overwriteAll = false;
+
+      await resolveIndexPatternConflicts(
+        resolutions,
+        conflictedIndexPatterns,
+        overwriteAll
+      );
+
+      expect(conflictedIndexPatterns[0].obj.searchSource.setField).toHaveBeenCalledWith('filter', [{ meta: { index: 'newFilterIndex' } }]);
+      expect(save.mock.calls.length).toBe(2);
     });
   });
 

@@ -22,7 +22,7 @@ import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import {
   EmbeddableFactory,

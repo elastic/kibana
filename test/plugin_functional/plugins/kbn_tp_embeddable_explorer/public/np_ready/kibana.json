@@ -1,0 +1,10 @@
+{
+  "id": "kbn_tp_embeddable_explorer",
+  "version": "kibana",
+  "requiredPlugins": [
+    "embeddable",
+    "inspector"
+  ],
+  "server": false,
+  "ui": true
+}

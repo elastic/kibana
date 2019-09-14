@@ -19,11 +19,8 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <EuiButtonIcon
           aria-label="Fit to bounds"
-          color="primary"
-          iconSize="m"
           iconType="vector"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Fit"
@@ -86,11 +83,7 @@ exports[`LayerPanel is rendered 1`] = `
       <LayerErrors />
       <LayerSettings />
       <SourceSettings />
-      <EuiPanel
-        grow={true}
-        hasShadow={false}
-        paddingSize="m"
-      >
+      <EuiPanel>
         <JoinEditor />
       </EuiPanel>
       <EuiSpacer

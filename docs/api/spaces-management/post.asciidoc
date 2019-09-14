@@ -1,40 +1,47 @@
 [[spaces-api-post]]
-=== Create Space
+=== Create space API
+++++
+<titleabbrev>Create space</titleabbrev>
+++++
 
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
+Creates a {kib} space.
 
-Creates a new {kib} space. To update an existing space, use the PUT command.
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[spaces-api-post-request]]
 ==== Request
 
-To create a space, issue a POST request to the
-`/api/spaces/space` endpoint.
+`POST /api/spaces/space`
 
-[source,js]
---------------------------------------------------
-POST /api/spaces/space
---------------------------------------------------
+[[spaces-api-post-request-body]]
+==== Request body
 
-==== Request Body
+`id`:: 
+  (Required, string) The space ID that is part of the Kibana URL when inside the space. You are unable to change the ID with the update operation.
 
-The following parameters can be specified in the body of a POST request to create a space:
+`name`:: 
+  (Required, string) The display name for the space.
 
-`id`:: (string) Required identifier for the space. This identifier becomes part of Kibana's URL when inside the space. This cannot be changed by the update operation.
+`description`:: 
+  (Optional, string) The description for the space.
 
-`name`:: (string) Required display name for the space.
+`disabledFeatures`:: 
+  (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
 
-`description`:: (string) Optional description for the space.
+`initials`:: 
+  (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
 
-`disabledFeatures`:: (string array) Optional list of features that are disabled for the space. Use the <<features-api-get, Features API>> to get a list of available features IDs.
+`color`:: 
+  (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+  
+[[spaces-api-post-response-codes]]
+==== Response codes
 
-`initials`:: (string) Optionally specify the initials shown in the Space Avatar for this space. By default, the initials will be automatically generated from the space name.
-If specified, initials should be either 1 or 2 characters.
+`200`::
+  Indicates a successful call.
 
-`color`:: (string) Optionally specify the hex color code used in the Space Avatar for this space. By default, the color will be automatically generated from the space name.
-
-===== Example
+[[spaces-api-post-example]]
+==== Example
 
 [source,js]
 --------------------------------------------------
@@ -49,7 +56,3 @@ POST /api/spaces/space
 }
 --------------------------------------------------
 // KIBANA
-
-==== Response
-
-A successful call returns a response code of `200` with the created Space.
