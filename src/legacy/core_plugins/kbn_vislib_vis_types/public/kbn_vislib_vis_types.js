@@ -29,10 +29,7 @@ import horizontalBarVisTypeProvider from './horizontal_bar';
 import gaugeVisTypeProvider from './gauge';
 import goalVisTypeProvider from './goal';
 
-async function registerItems() {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const Private = $injector.get('Private');
-
+export function registerVisTypes(Private) {
   VisTypesRegistryProvider.register(histogramVisTypeProvider(Private));
   VisTypesRegistryProvider.register(lineVisTypeProvider(Private));
   VisTypesRegistryProvider.register(pieVisTypeProvider(Private));
@@ -43,4 +40,13 @@ async function registerItems() {
   VisTypesRegistryProvider.register(goalVisTypeProvider(Private));
 }
 
+async function registerItems() {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
+
+  registerVisTypes(Private);
+}
+
 registerItems();
+
+

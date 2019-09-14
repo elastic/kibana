@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
 import { VisProvider } from '../../../vis';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
   let Vis;
@@ -28,6 +29,7 @@ describe('get columns', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
+    registerVisTypes(Private);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
