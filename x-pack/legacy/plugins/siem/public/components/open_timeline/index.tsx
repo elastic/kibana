@@ -43,6 +43,7 @@ import {
 import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { Direction } from '../../graphql/types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export interface OpenTimelineState {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -365,8 +366,17 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  createNewTimeline: dispatchCreateNewTimeline,
-  updateIsLoading: dispatchUpdateIsLoading,
+  createNewTimeline: ({
+    id,
+    columns,
+    show,
+  }: {
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
+  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(dispatchUpdateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
