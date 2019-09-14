@@ -939,11 +939,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <EuiPanel
-              grow={true}
-              hasShadow={false}
-              paddingSize="m"
-            >
+            <EuiPanel>
               <div
                 className="euiPanel euiPanel--paddingMedium"
               >
