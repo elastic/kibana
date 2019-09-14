@@ -17,36 +17,40 @@
  * under the License.
  */
 
-import { IndexPatternListConfigRegistry } from './index_pattern_list_config_registry';
+import {
+  indexPatternListConfigs,
+  IndexPatternListConfig,
+  IndexPatternTag,
+} from './index_pattern_list_config';
 
 class IndexPatternList {
-  constructor(registry) {
-    this._plugins = registry.inOrder.map(Plugin => new Plugin());
+  private _plugins: IndexPatternListConfig[];
+
+  constructor() {
+    this._plugins = indexPatternListConfigs.map(Plugin => new Plugin());
   }
 
-  getIndexPatternTags = (indexPattern, isDefault) => {
-    return this._plugins.reduce((tags, plugin) => {
-      return plugin.getIndexPatternTags ? tags.concat(plugin.getIndexPatternTags(indexPattern, isDefault)) : tags;
+  getIndexPatternTags = (indexPattern: any, isDefault: boolean) => {
+    return this._plugins.reduce((tags: IndexPatternTag[], plugin) => {
+      return plugin.getIndexPatternTags
+        ? tags.concat(plugin.getIndexPatternTags(indexPattern, isDefault))
+        : tags;
     }, []);
-  }
+  };
 
-  getFieldInfo = (indexPattern, field) => {
-    return this._plugins.reduce((info, plugin) => {
+  getFieldInfo = (indexPattern: any, field: any): string[] => {
+    return this._plugins.reduce((info: string[], plugin) => {
       return plugin.getFieldInfo ? info.concat(plugin.getFieldInfo(indexPattern, field)) : info;
     }, []);
-  }
+  };
 
-  areScriptedFieldsEnabled = (indexPattern) => {
-    return this._plugins.every((plugin) => {
+  areScriptedFieldsEnabled = (indexPattern: any): boolean => {
+    return this._plugins.every(plugin => {
       return plugin.areScriptedFieldsEnabled ? plugin.areScriptedFieldsEnabled(indexPattern) : true;
     });
-  }
+  };
 }
 
-export const IndexPatternListFactory = (Private) => {
-  return function () {
-    const indexPatternListRegistry = Private(IndexPatternListConfigRegistry);
-    const indexPatternListProvider = new IndexPatternList(indexPatternListRegistry);
-    return indexPatternListProvider;
-  };
+export const IndexPatternListFactory = () => {
+  return () => new IndexPatternList();
 };

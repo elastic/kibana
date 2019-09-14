@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { IndexPatternListConfig } from './index_pattern_list_config';
-import { IndexPatternListConfigRegistry } from './index_pattern_list_config_registry';
+import { addIndexPatternListConfig, IndexPatternListConfig } from './index_pattern_list_config';
 
-IndexPatternListConfigRegistry.register(() => IndexPatternListConfig);
+addIndexPatternListConfig(IndexPatternListConfig);

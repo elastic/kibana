@@ -17,21 +17,41 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
+export interface IndexPatternTag {
+  key: string;
+  name: string;
+}
+
 export class IndexPatternListConfig {
   static key = 'default';
 
-  getIndexPatternTags = (indexPattern, isDefault) => {
-    return isDefault ? [{
-      key: 'default',
-      name: 'Default',
-    }] : [];
-  }
+  getIndexPatternTags = (indexPattern: any, isDefault: boolean): IndexPatternTag[] => {
+    return isDefault
+      ? [
+          {
+            key: 'default',
+            name: i18n.translate(
+              'common.ui.management.editIndexPattern.list.defaultIndexPatternListName',
+              { defaultMessage: 'Default' }
+            ),
+          },
+        ]
+      : [];
+  };
 
-  getFieldInfo = () => {
+  getFieldInfo = (indexPattern: any, field: any): string[] => {
     return [];
-  }
+  };
 
-  areScriptedFieldsEnabled = () => {
+  areScriptedFieldsEnabled = (indexPattern: any): boolean => {
     return true;
-  }
+  };
 }
+
+type IndexPatternListConfigType = typeof IndexPatternListConfig;
+
+export const indexPatternListConfigs: IndexPatternListConfigType[] = [];
+export const addIndexPatternListConfig = (config: IndexPatternListConfigType) =>
+  indexPatternListConfigs.push(config);
