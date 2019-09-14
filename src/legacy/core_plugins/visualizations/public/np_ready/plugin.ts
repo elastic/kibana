@@ -81,7 +81,7 @@ export class VisualizationsPlugin
       createFilter,
       Vis,
       VisFactoryProvider,
-      VisTypesRegistryProvider,
+      VisTypesRegistryProvider, // todo remove this
     } = __LEGACY;
 
     return {

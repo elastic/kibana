@@ -25,6 +25,7 @@ import { VisProvider } from '../../vis';
 import { fieldFormats } from '../../registry/field_formats';
 import { AggType } from '../agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { registerVisTypes } from '../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('AggType Class', function () {
   let indexPattern;
@@ -33,7 +34,7 @@ describe('AggType Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-
+    registerVisTypes(Private);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
