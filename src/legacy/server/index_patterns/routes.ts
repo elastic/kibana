@@ -35,6 +35,16 @@ export function registerRoutes(core: InternalCoreSetup) {
     return new Promise(resolve => resolve(new IndexPatternsService(callCluster)));
   };
 
+  const parseMetaFields = (metaFields: string | string[]) => {
+    let parsedFields = [];
+    if (typeof metaFields === 'string') {
+      parsedFields = JSON.parse(metaFields);
+    } else {
+      parsedFields = metaFields;
+    }
+    return parsedFields;
+  };
+
   const router = core.http.createRouter('/api/index_patterns');
   router.get(
     {
@@ -42,7 +52,13 @@ export function registerRoutes(core: InternalCoreSetup) {
       validate: {
         query: schema.object({
           pattern: schema.string(),
-          meta_fields: schema.string({ defaultValue: '[]' }),
+          meta_fields: schema.oneOf(
+            [
+              schema.string({ defaultValue: '[]' }),
+              schema.arrayOf(schema.string(), { defaultValue: [] }),
+            ],
+            { defaultValue: [] }
+          ),
         }),
       },
     },
@@ -52,7 +68,7 @@ export function registerRoutes(core: InternalCoreSetup) {
 
       let parsedFields = [];
       try {
-        parsedFields = JSON.parse(metaFields);
+        parsedFields = parseMetaFields(metaFields);
       } catch (error) {
         return response.badRequest();
       }
@@ -79,7 +95,13 @@ export function registerRoutes(core: InternalCoreSetup) {
           pattern: schema.string(),
           interval: schema.maybe(schema.string()),
           look_back: schema.number({ min: 1 }),
-          meta_fields: schema.string({ defaultValue: '[]' }),
+          meta_fields: schema.oneOf(
+            [
+              schema.string({ defaultValue: '[]' }),
+              schema.arrayOf(schema.string(), { defaultValue: [] }),
+            ],
+            { defaultValue: [] }
+          ),
         }),
       },
     },
@@ -87,12 +109,19 @@ export function registerRoutes(core: InternalCoreSetup) {
       const indexPatterns = await getIndexPatternsService(request);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
+      let parsedFields = [];
+      try {
+        parsedFields = parseMetaFields(metaFields);
+      } catch (error) {
+        return response.badRequest();
+      }
+
       try {
         const fields = await indexPatterns.getFieldsForTimePattern({
           pattern,
           interval: interval ? interval : '',
           lookBack,
-          metaFields: JSON.parse(metaFields),
+          metaFields: parsedFields,
         });
 
         return response.ok({

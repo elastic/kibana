@@ -49,13 +49,23 @@ export default function ({ getService }) {
           );
         }));
 
-    it('supports `meta_fields` query param', () =>
+    it('supports `meta_fields` query param in JSON format', () =>
       supertest
         .get('/api/index_patterns/_fields_for_time_pattern')
         .query({
           pattern: '[logs-]YYYY.MM.DD',
           look_back: 1,
           meta_fields: JSON.stringify(['a']),
+        })
+        .expect(200));
+
+    it('supports `meta_fields` query param in string array format', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_time_pattern')
+        .query({
+          pattern: '[logs-]YYYY.MM.DD',
+          look_back: 1,
+          meta_fields: ['a', 'b'],
         })
         .expect(200));
 
