@@ -36,9 +36,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     ngMock.inject(Private => {
       setup = () => {
         const Vis = Private(VisProvider);
-        const metricVisType = createMetricVisTypeDefinition();
-
-        visualizationsSetup.types.registerVisualization(metricVisType);
+        visualizationsSetup.types.registerVisualization(createMetricVisTypeDefinition);
 
         const indexPattern = Private(LogstashIndexPatternStubProvider);
 
@@ -68,7 +66,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
         };
 
         const el = document.createElement('div');
-        const Controller = metricVisType.visualization;
+        const Controller = createMetricVisTypeDefinition.visualization;
         const controller = new Controller(el, vis);
         const render = esResponse => {
           controller.render(esResponse, vis.params);
