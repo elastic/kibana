@@ -31,7 +31,7 @@ export const AnalyticsPanel: FC = () => {
   const errorDisplay = (
     <Fragment>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
+        title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
           defaultMessage: 'An error occurred getting the data frame analytics list.',
         })}
         color="danger"

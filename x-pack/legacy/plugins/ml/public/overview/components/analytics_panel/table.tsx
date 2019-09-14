@@ -40,7 +40,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const columns: any[] = [
     {
       field: DataFrameAnalyticsListColumn.id,
-      name: 'ID',
+      name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
       sortable: true,
       truncateText: true,
       width: '20%',
