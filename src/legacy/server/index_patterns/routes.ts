@@ -52,13 +52,9 @@ export function registerRoutes(core: InternalCoreSetup) {
       validate: {
         query: schema.object({
           pattern: schema.string(),
-          meta_fields: schema.oneOf(
-            [
-              schema.string({ defaultValue: '[]' }),
-              schema.arrayOf(schema.string(), { defaultValue: [] }),
-            ],
-            { defaultValue: [] }
-          ),
+          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            defaultValue: [],
+          }),
         }),
       },
     },
@@ -99,13 +95,9 @@ export function registerRoutes(core: InternalCoreSetup) {
           pattern: schema.string(),
           interval: schema.maybe(schema.string()),
           look_back: schema.number({ min: 1 }),
-          meta_fields: schema.oneOf(
-            [
-              schema.string({ defaultValue: '[]' }),
-              schema.arrayOf(schema.string(), { defaultValue: [] }),
-            ],
-            { defaultValue: [] }
-          ),
+          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            defaultValue: [],
+          }),
         }),
       },
     },
