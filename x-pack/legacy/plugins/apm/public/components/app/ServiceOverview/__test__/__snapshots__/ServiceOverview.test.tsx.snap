@@ -158,6 +158,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            data-cy="link-to-service-My Go Service"
             href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
@@ -256,6 +257,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            data-cy="link-to-service-My Python Service"
             href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >

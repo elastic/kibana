@@ -8,6 +8,7 @@ exports[`ServiceOverview -> List should render columns correctly 1`] = `
   position="top"
 >
   <Styled(TransactionOverviewLink)
+    data-cy="link-to-service-opbeans-python"
     serviceName="opbeans-python"
   >
     opbeans-python
