@@ -14,6 +14,7 @@ import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types'
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
+  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
@@ -210,6 +211,15 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery != null &&
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
+    dispatch(
+      dispatchSetKqlFilterQueryDraft({
+        id,
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+        },
+      })
+    );
     dispatch(
       dispatchApplyKqlFilterQuery({
         id,
