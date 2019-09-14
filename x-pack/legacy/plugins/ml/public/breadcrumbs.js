@@ -12,3 +12,24 @@ export const ML_BREADCRUMB = Object.freeze({
   }),
   href: '#/'
 });
+
+export const SETTINGS = Object.freeze({
+  text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
+    defaultMessage: 'Settings'
+  }),
+  href: '#/settings?'
+});
+
+export const ANOMALY_DETECTION_BREADCRUMB = Object.freeze({
+  text: i18n.translate('xpack.ml.anomalyDetectionBreadcrumbLabel', {
+    defaultMessage: 'Anomaly Detection'
+  }),
+  href: '#/jobs?'
+});
+
+export const DATA_VISUALIZER_BREADCRUMB = Object.freeze({
+  text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
+    defaultMessage: 'Data Visualizer'
+  }),
+  href: '#/datavisualizer?'
+});

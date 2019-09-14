@@ -201,7 +201,7 @@ CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYP
 
 When Cypress tests are run on the command line via `yarn cypress:run`,
 reporting artifacts are generated under the `target` directory in the root
-of the Kibana, as detailed for each artifact type in the sections bleow.
+of the Kibana, as detailed for each artifact type in the sections below.
 
 ### HTML Reports
 

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import {
   PluginInitializerContext,
@@ -39,7 +39,7 @@ export interface TableVisualizationDependencies extends LegacyDependenciesPlugin
 
 /** @internal */
 export interface TablePluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -54,14 +54,14 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, visualizations, __LEGACY }: TablePluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: TablePluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<TableVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(createTableVisFn);
+    expressions.registerFunction(createTableVisFn);
 
     visualizations.types.registerVisualization(() =>
       createTableVisTypeDefinition(visualizationDependencies)

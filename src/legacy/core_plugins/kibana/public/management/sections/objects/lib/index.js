@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from './fetch_export_by_type';
 export * from './fetch_export_objects';
 export * from './in_app_url';
 export * from './get_relationships';
