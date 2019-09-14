@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initExternalRolesApi } from './server/routes/api/external/roles';
+import { initExternalApiKeysApi } from './server/routes/api/external/api_keys';
 import { initPrivilegesApi } from './server/routes/api/external/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initGetBuiltinPrivilegesApi } from './server/routes/api/v1/builtin_privileges';
@@ -194,6 +195,7 @@ export const security = (kibana) => new kibana.Plugin({
     initAppAuthorization(server, xpackMainPlugin, authorization);
     initUsersApi(securityPlugin, server);
     initExternalRolesApi(server);
+    initExternalApiKeysApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
     initGetBuiltinPrivilegesApi(server);
