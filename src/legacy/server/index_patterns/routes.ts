@@ -73,17 +73,21 @@ export function registerRoutes(core: InternalCoreSetup) {
         return response.badRequest();
       }
 
-      const fields = await indexPatterns.getFieldsForWildcard({
-        pattern,
-        metaFields: parsedFields,
-      });
+      try {
+        const fields = await indexPatterns.getFieldsForWildcard({
+          pattern,
+          metaFields: parsedFields,
+        });
 
-      return response.ok({
-        body: { fields },
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
+        return response.ok({
+          body: { fields },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.notFound();
+      }
     }
   );
 

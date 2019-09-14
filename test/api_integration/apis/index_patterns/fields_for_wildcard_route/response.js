@@ -145,5 +145,13 @@ export default function ({ getService }) {
           ],
         })
         .then(ensureFieldsAreSorted));
+
+    it('returns 404 when the pattern does not exist', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({
+          pattern: '[non-existing-pattern]its-invalid-*',
+        })
+        .expect(404));
   });
 }
