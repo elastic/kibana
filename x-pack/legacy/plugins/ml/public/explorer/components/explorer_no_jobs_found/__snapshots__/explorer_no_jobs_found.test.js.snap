@@ -7,9 +7,6 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
       color="primary"
       fill={true}
       href="ml#/jobs"
-      iconSide="left"
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Create new job"

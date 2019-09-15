@@ -11,17 +11,18 @@ The first week after feature freeze (FF) all known bugs and blockers will be fix
  - Immediately before starting the test plan all relevant PRs for the release are selected and the label `apm-test-plan-7.4.0` is applied. The "assigned" field will be reset to nobody (read further why)
 
 ### Execution
- - [Find the list](https://github.com/elastic/kibana/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3Av7.4.0+-label%3Atested-after-ff+no%3Aassignee+label%3Aapm-test-plan-7.4.0) of unassigned, untested issues in the test plan
+ - [Find the list](https://github.com/elastic/kibana/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3Av7.4.0+-label%3Aapm-test-plan-done+no%3Aassignee+label%3Aapm-test-plan-7.4.0) of unassigned, untested issues in the test plan
  - Assign yourself to an issue as you start testing it to avoid duplicate work
  - Testing a PR can have two outcomes:
    - It worked as expected:
-     - Apply `tested-after-ff` label
+     - Apply `apm-test-plan-done` label
    - It did not work as expected: 
      - Create a new issue: 
         - Link back to the original PR
         - Add the version labels to the issue and on Zube move it to "Scheduled for release"-column
-     - The original PR should be marked as tested with `tested-after-ff` (the new issue will ensure that the bug is prioritized and later tested)
+     - The original PR should be marked as tested with `apm-test-plan-done` (the new issue will ensure that the bug is prioritized and later tested)
    
    
-
-
+### Quick links
+ - [Untested PRs](https://github.com/elastic/kibana/pulls?utf8=✓&q=is%3Apr+label%3Av7.4.0+-label%3Aapm-test-plan-done+label%3Aapm-test-plan-7.4.0+)
+ - [Tested PRs](https://github.com/elastic/kibana/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3Av7.4.0+label%3Aapm-test-plan-done+label%3Aapm-test-plan-7.4.0+)

@@ -14,6 +14,8 @@ declare interface JobService {
   tempJobCloningObjects: {
     job: any;
     skipTimeRangeStep: boolean;
+    start?: number;
+    end?: number;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;
