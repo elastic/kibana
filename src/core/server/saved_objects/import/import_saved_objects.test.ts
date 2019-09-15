@@ -362,6 +362,17 @@ describe('importSavedObjects()', () => {
         },
       })),
     });
+
+    const clientResponse = {
+      saved_objects: [
+        { id: '1', type: 'index-pattern', attributes: { title: 'My Index Pattern' } },
+        { id: '2', type: 'search', attributes: { title: 'My Search' } },
+        { id: '3', type: 'visualization', attributes: { title: 'My Visualization' } },
+        { id: '4', type: 'dashboard', attributes: { title: 'My Dashboard' } },
+      ],
+    };
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
+
     const result = await importSavedObjects({
       readStream,
       objectLimit: 4,

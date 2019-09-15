@@ -21,13 +21,32 @@ import { SavedObject } from '../types';
 import { extractErrors } from './extract_errors';
 
 describe('extractErrors()', () => {
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+
   test('returns empty array when no errors exist', async () => {
     const savedObjects: SavedObject[] = [];
-    const result = await extractErrors(savedObjects, savedObjects);
+    const result = await extractErrors(savedObjects, savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`Array []`);
   });
 
   test('extracts errors from saved objects', async () => {
+    const clientResponse = {
+      saved_objects: [
+        { id: '2', type: 'dashboard', attributes: { title: 'My Dashboard 2' } },
+        { id: '3', type: 'dashboard', attributes: { title: 'My Dashboard 3' } },
+      ],
+    };
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
+
     const savedObjects: SavedObject[] = [
       {
         id: '1',
@@ -62,7 +81,7 @@ describe('extractErrors()', () => {
         },
       },
     ];
-    const result = await extractErrors(savedObjects, savedObjects);
+    const result = await extractErrors(savedObjects, savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
@@ -85,5 +104,6 @@ Array [
   },
 ]
 `);
+    savedObjectsClient.bulkGet.mockReset();
   });
 });

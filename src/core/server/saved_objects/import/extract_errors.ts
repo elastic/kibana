@@ -23,8 +23,8 @@ import { SavedObjectsImportError } from './types';
 export async function extractErrors(
   savedObjectResults: SavedObject[],
   savedObjectsToImport: SavedObject[],
-  savedObjectsClient?: SavedObjectsClientContract,
-  destSpaceId?: string
+  savedObjectsClient: SavedObjectsClientContract,
+  namespace?: string
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
@@ -33,17 +33,28 @@ export async function extractErrors(
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
-  if (savedObjectsClient) {
-    const bulkGetResult = await savedObjectsClient.bulkGet(savedObjectsToImport, {
-      namespace: destSpaceId,
-    });
 
-    for (const savedObject of bulkGetResult.saved_objects) {
-      savedObjectsTitlesMap.set(
-        `${savedObject.type}:${savedObject.id}`,
-        `${savedObject.attributes.title}`
-      );
+  const errorSavedObjects = new Array();
+  for (const savedObject of savedObjectResults) {
+    if (savedObject.error) {
+      errorSavedObjects.push(savedObject);
     }
+  }
+
+  // return an empty array if there are no errors
+  if (errorSavedObjects.length === 0) {
+    return [];
+  }
+
+  const bulkGetResult = await savedObjectsClient.bulkGet(errorSavedObjects, {
+    namespace,
+  });
+
+  for (const savedObject of bulkGetResult.saved_objects) {
+    savedObjectsTitlesMap.set(
+      `${savedObject.type}:${savedObject.id}`,
+      `${savedObject.attributes.title}`
+    );
   }
 
   for (const savedObject of savedObjectResults) {
@@ -58,10 +69,7 @@ export async function extractErrors(
 
       if (savedObject.error.statusCode === 409) {
         // pick the correct title of the saved object that conflicts
-        let realTitle = title;
-        if (savedObjectsClient) {
-          realTitle = savedObjectsTitlesMap.get(`${savedObject.type}:${savedObject.id}`);
-        }
+        const realTitle = savedObjectsTitlesMap.get(`${savedObject.type}:${savedObject.id}`);
         errors.push({
           id: savedObject.id,
           type: savedObject.type,

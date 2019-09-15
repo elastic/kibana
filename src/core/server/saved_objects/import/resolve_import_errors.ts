@@ -90,7 +90,11 @@ export async function resolveImportErrors({
       namespace,
     });
 
-    const extractErrs = await extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite);
+    const extractErrs = await extractErrors(
+      bulkCreateResult.saved_objects,
+      objectsToOverwrite,
+      savedObjectsClient
+    );
     errorAccumulator = [...errorAccumulator, ...extractErrs];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
@@ -99,7 +103,11 @@ export async function resolveImportErrors({
       namespace,
     });
 
-    const extractErrs = await extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite);
+    const extractErrs = await extractErrors(
+      bulkCreateResult.saved_objects,
+      objectsToNotOverwrite,
+      savedObjectsClient
+    );
     errorAccumulator = [...errorAccumulator, ...extractErrs];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
