@@ -119,6 +119,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     });
   }
 
+  public getVisualizationDescription() {
+    return this.savedVisualization.description;
+  }
+
   public getInspectorAdapters() {
     if (!this.handler) {
       return undefined;
