@@ -4,8 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './chart_utils.test.mocks';
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
+
+jest.mock('ui/timefilter', () => {
+  const dateMath = require('@elastic/datemath');
+  const { dataPluginMock } = require('../../../../../../src/legacy/core_plugins/data/public/mocks');
+  const dataSetup = dataPluginMock.createSetup();
+  const { timefilter } = dataSetup.timefilter;
+  let _time = undefined;
+  timefilter.setTime.mockImplementation((time) => {
+    _time = time;
+  });
+  timefilter.getActiveBounds.mockImplementation(() => {
+    return {
+      min: dateMath.parse(_time.from),
+      max: dateMath.parse(_time.to),
+    };
+  });
+  return {
+    timefilter,
+  };
+});
+import { timefilter } from 'ui/timefilter';
 
 // A copy of these mocks for ui/chrome and ui/timefilter are also
 // used in explorer_charts_container.test.js.
@@ -15,20 +35,6 @@ jest.mock('ui/chrome',
     getBasePath: () => {
       return '<basepath>';
     },
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
   }), { virtual: true });
 
 import d3 from 'd3';
@@ -36,7 +42,6 @@ import moment from 'moment';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { timefilter } from 'ui/timefilter';
 
 import {
   getExploreSeriesLink,
@@ -46,8 +51,6 @@ import {
   removeLabelOverlap
 } from './chart_utils';
 
-timefilter.enableTimeRangeSelector();
-timefilter.enableAutoRefreshSelector();
 timefilter.setTime({
   from: moment(seriesConfig.selectedEarliest).toISOString(),
   to: moment(seriesConfig.selectedLatest).toISOString()
