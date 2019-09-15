@@ -37,6 +37,12 @@ const time = {
 };
 
 export const uiTimefilterMock = {
+  getIsAutoRefreshSelectorEnabled() {
+    return this.isAutoRefreshSelectorEnabled;
+  },
+  getIsTimeRangeSelectorEnabled() {
+    return this.isTimeRangeSelectorEnabled;
+  },
   enableAutoRefreshSelector() {
     this.isAutoRefreshSelectorEnabled = true;
   },
