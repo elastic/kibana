@@ -25,25 +25,29 @@ class IndexPatternCreation {
     this._setCurrentType(type);
   }
 
-  _setCurrentType = (type) => {
+  _setCurrentType = type => {
     const index = type ? indexPatternTypes.findIndex(Plugin => Plugin.key === type) : -1;
     this._currentType = index > -1 && this._allTypes[index] ? this._allTypes[index] : null;
-  }
+  };
 
   getType = () => {
     return this._currentType || null;
-  }
+  };
 
-  getIndexPatternCreationOptions = async (urlHandler) => {
+  getIndexPatternCreationOptions = async urlHandler => {
     const options = [];
-    await Promise.all(this._allTypes.map(async type => {
-      const option = type.getIndexPatternCreationOption ? await type.getIndexPatternCreationOption(urlHandler) : null;
-      if(option) {
-        options.push(option);
-      }
-    }));
+    await Promise.all(
+      this._allTypes.map(async type => {
+        const option = type.getIndexPatternCreationOption
+          ? await type.getIndexPatternCreationOption(urlHandler)
+          : null;
+        if (option) {
+          options.push(option);
+        }
+      })
+    );
     return options;
-  }
+  };
 }
 
 export const IndexPatternCreationFactory = (Private, $http) => {
