@@ -39,27 +39,31 @@ export interface WorkspaceEdge {
   target: WorkspaceNode;
 }
 
-export interface GraphData {
-  nodes: Array<{
+export interface ServerResultNode {
+  field: string;
+  term: string;
+  id: string;
+  label: string;
+  color: string;
+  icon: FontawesomeIcon;
+  data: {
     field: string;
     term: string;
-    id: string;
-    label: string;
-    color: string;
-    icon: FontawesomeIcon;
-    data: {
-      field: string;
-      term: string;
-    };
-  }>;
-  edges: Array<{
-    source: number;
-    target: number;
-    weight: number;
-    width: number;
-    doc_count?: number;
-    inferred: boolean;
-  }>;
+  };
+}
+
+export interface ServerResultEdge {
+  source: number;
+  target: number;
+  weight: number;
+  width: number;
+  doc_count?: number;
+  inferred: boolean;
+}
+
+export interface GraphData {
+  nodes: ServerResultNode[];
+  edges: ServerResultEdge[];
 }
 
 export interface Workspace {

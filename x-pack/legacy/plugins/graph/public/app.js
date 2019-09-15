@@ -63,6 +63,7 @@ import { urlTemplateRegex } from  './services/url_template';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
+import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   store,
   loadFields,
@@ -432,15 +433,22 @@ app.controller('graphuiPlugin', function (
       });
   };
 
-  $scope.fillWorkspace = () => {
-    // TODO:
-    // * fetch top terms for selected fields
-    // * add them to the workspace
-    // * fill in connections
+  $scope.fillWorkspace = async () => {
+    initWorkspaceIfRequired();
+    const fields = selectedFieldsSelector(store.getState());
+    const topTermNodes = await fetchTopNodes(
+      npStart.core.http.post,
+      $scope.selectedIndex.attributes.title,
+      fields
+    );
+    $scope.workspace.mergeGraph({
+      nodes: topTermNodes,
+      edges: []
+    });
+    $scope.workspace.fillInGraph(20);
   };
 
   $scope.submit = function (searchTerm) {
-    $scope.hideAllConfigPanels();
     initWorkspaceIfRequired();
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
@@ -708,6 +716,7 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
+        $scope.resetWorkspace();
         kbnUrl.change('/workspace/', {});
       });  },
     testId: 'graphNewButton',
@@ -829,7 +838,7 @@ app.controller('graphuiPlugin', function (
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
     $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $scope.indices);
+    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $route.current.locals.indexPatterns);
     if(!selectedIndex) {
       toastNotifications.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
