@@ -36,6 +36,8 @@ import { dispatchRenderComplete } from '../../../render_complete';
 import { PipelineDataLoader } from '../pipeline_data_loader';
 import { PersistedState } from '../../../persisted_state';
 import { DataAdapter, RequestAdapter } from '../../../inspector/adapters';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
+
 
 describe('visualize loader', () => {
 
@@ -76,6 +78,7 @@ describe('visualize loader', () => {
     $rootScope = _$rootScope_;
     searchSource = Private(FixturesStubbedSearchSourceProvider);
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
 
     DataLoader = PipelineDataLoader;
     // Create a new Vis object
