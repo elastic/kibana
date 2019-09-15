@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export const indexPatternTypes = [];
-export const addIndexPatternType = type => indexPatternTypes.push(type);
+import { IndexPatternCreationConfigType } from './index_pattern_creation_config';
+
+export const indexPatternTypes: IndexPatternCreationConfigType[] = [];
+export const addIndexPatternType = (type: IndexPatternCreationConfigType) =>
+  indexPatternTypes.push(type);

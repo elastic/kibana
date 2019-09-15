@@ -37,12 +37,24 @@ const indexPatternButtonDescription = i18n.translate(
 export class IndexPatternCreationConfig {
   static key = 'default';
 
+  protected type?: string;
+  protected name: string;
+  protected showSystemIndices: boolean;
+  protected httpClient: object | null;
+  protected isBeta: boolean;
+
   constructor({
     type = undefined,
     name = indexPatternTypeName,
     showSystemIndices = true,
     httpClient = null,
     isBeta = false,
+  }: {
+    type?: string;
+    name?: string;
+    showSystemIndices?: boolean;
+    httpClient?: object | null;
+    isBeta?: boolean;
   }) {
     this.type = type;
     this.name = name;
@@ -51,7 +63,7 @@ export class IndexPatternCreationConfig {
     this.isBeta = isBeta;
   }
 
-  async getIndexPatternCreationOption(urlHandler) {
+  async getIndexPatternCreationOption(urlHandler: any) {
     return {
       text: indexPatternButtonText,
       description: indexPatternButtonDescription,
@@ -98,3 +110,5 @@ export class IndexPatternCreationConfig {
     return {};
   };
 }
+
+export type IndexPatternCreationConfigType = typeof IndexPatternCreationConfig;

@@ -17,15 +17,20 @@
  * under the License.
  */
 
+import { IndexPatternCreationConfig } from './index_pattern_creation_config';
 import { indexPatternTypes } from './index_pattern_types';
 
 class IndexPatternCreation {
-  constructor(httpClient, type) {
+  private _allTypes: IndexPatternCreationConfig[];
+  private _currentType: IndexPatternCreationConfig | null;
+
+  constructor(httpClient: object, type: string) {
     this._allTypes = indexPatternTypes.map(Plugin => new Plugin({ httpClient }));
+    this._currentType = null;
     this._setCurrentType(type);
   }
 
-  _setCurrentType = type => {
+  _setCurrentType = (type: string) => {
     const index = type ? indexPatternTypes.findIndex(Plugin => Plugin.key === type) : -1;
     this._currentType = index > -1 && this._allTypes[index] ? this._allTypes[index] : null;
   };
@@ -34,8 +39,8 @@ class IndexPatternCreation {
     return this._currentType || null;
   };
 
-  getIndexPatternCreationOptions = async urlHandler => {
-    const options = [];
+  getIndexPatternCreationOptions = async (urlHandler: any) => {
+    const options: any[] = [];
     await Promise.all(
       this._allTypes.map(async type => {
         const option = type.getIndexPatternCreationOption
@@ -50,7 +55,7 @@ class IndexPatternCreation {
   };
 }
 
-export const IndexPatternCreationFactory = (Private, $http) => {
+export const IndexPatternCreationFactory = (Private: any, $http: object) => {
   return (type = 'default') => {
     const indexPatternCreationProvider = new IndexPatternCreation($http, type);
     return indexPatternCreationProvider;
