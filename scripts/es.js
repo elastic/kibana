@@ -19,6 +19,13 @@
 
 require('../src/setup_node_env');
 
+// force use of manually created snapshots until live ones are available
+if (!process.env.KBN_ES_SNAPSHOT_URL && !process.argv.some(function (a) { return a.startsWith('--version'); })) {
+  process.env.KBN_ES_SNAPSHOT_URL = 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-8.0.0-SNAPSHOT-{os}-x86_64.{ext}';
+} else if (process.env.KBN_ES_SNAPSHOT_URL === 'false') {
+  delete process.env.KBN_ES_SNAPSHOT_URL;
+}
+
 var resolve = require('path').resolve;
 var pkg = require('../package.json');
 var kbnEs = require('@kbn/es');
