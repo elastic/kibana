@@ -25,6 +25,7 @@ import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { fieldFormats } from '../../registry/field_formats';
+import { registerVisTypes } from '../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('AggConfig', function () {
 
@@ -35,6 +36,7 @@ describe('AggConfig', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
   }));
 
   describe('#toDsl', function () {
