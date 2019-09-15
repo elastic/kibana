@@ -31,4 +31,5 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 // eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-unresolved
 require('@cypress/snapshot').register();
