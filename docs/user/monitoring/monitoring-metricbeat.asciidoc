@@ -10,7 +10,7 @@ In 6.4 and later, you can use {metricbeat} to collect data about {kib}
 and ship it to the monitoring cluster, rather than routing it through the 
 production cluster as described in <<monitoring-kibana>>. 
 
-image::monitoring/images/metricbeat.png[Example monitoring architecture]
+image::user/monitoring/images/metricbeat.png[Example monitoring architecture]
 
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
