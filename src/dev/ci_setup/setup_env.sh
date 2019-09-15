@@ -10,6 +10,9 @@ cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
+# force use of manually created snapshots until live ones are available
+export KBN_ES_SNAPSHOT_URL="https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-master-SNAPSHOT-{os}-x86_64.{ext}"
+
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins
