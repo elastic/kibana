@@ -32,6 +32,7 @@ import termSeries from 'fixtures/vislib/mock_data/terms/_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../persisted_state';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 const dataTypes = [
   ['series pos', seriesPos],
@@ -53,6 +54,7 @@ describe('Vislib Line Chart', function () {
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private, $injector) {
+        registerVisTypes(Private);
         const visLibParams = {
           type: 'line',
           addLegend: true,

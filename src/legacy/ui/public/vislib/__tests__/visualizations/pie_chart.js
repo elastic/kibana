@@ -29,6 +29,8 @@ import '../../../persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { vislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
 import { tabifyAggResponse } from '../../../agg_response/tabify';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
+
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -127,6 +129,7 @@ describe('No global chart settings', function () {
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     responseHandler = vislibSlicesResponseHandlerProvider().handler;
+    registerVisTypes(Private);
 
     let id1 = 1;
     stubVis1 = new Vis(indexPattern, {

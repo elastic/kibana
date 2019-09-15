@@ -33,6 +33,8 @@ const dataTypesArray = {
   'range rows': require('fixtures/vislib/mock_data/range/_rows'),
   'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
 };
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
+
 
 const visLibParams = {
   type: 'area',
@@ -53,6 +55,7 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(dataType, persistedState);
+      registerVisTypes(Private);
     }));
 
     afterEach(function () {

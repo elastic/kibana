@@ -31,6 +31,7 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../persisted_state';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -76,6 +77,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         vislibVis = Private(FixturesVislibVisFixtureProvider);
         PersistedState = $injector.get('PersistedState');
         generateVis();
+        registerVisTypes(Private);
       }));
 
       afterEach(function () {

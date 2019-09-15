@@ -35,6 +35,7 @@ import rowsWithZeros from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../persisted_state';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -72,6 +73,7 @@ dataTypesArray.forEach(function (dataType) {
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
+      registerVisTypes(Private);
     }));
 
     afterEach(function () {
