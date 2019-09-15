@@ -1,16 +1,17 @@
 ### How to run
 
-_Note: Run the following commands from `kibana/x-pack`._
-**Interactive mode**
+_Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/cypress`._
+
+#### Interactive mode
 
 ```
-yarn cypress open --project ./legacy/plugins/apm/cypress/
+yarn cypress open
 ```
 
-**Headless mode**
+#### Headless mode
 
 ```
-yarn cypress run --project ./legacy/plugins/apm/cypress/
+yarn cypress run
 ```
 
 ### Connect to Elasticsearch on Cloud (internal devs only)

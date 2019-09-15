@@ -48,20 +48,18 @@ node scripts/jest.js plugins/apm --updateSnapshot
 
 ### Cypress E2E tests
 
-_Note: Run the following commands from `kibana/x-pack`._
+_Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/cypress`._
 
 #### Interactive mode
 
 ```
-yarn cypress open --project ./legacy/plugins/apm/cypress/
+yarn cypress open
 ```
 
 #### Headless mode
 
 ```
-yarn cypress run --project ./legacy/plugins/apm/cypress/
-```
-
+yarn cypress run
 ```
 
 ---
@@ -73,17 +71,11 @@ _Note: Run the following commands from `kibana/`._
 #### Prettier
 
 ```
-
 yarn prettier "./x-pack/legacy/plugins/apm/\*_/_.{tsx,ts,js}" --write
-
 ```
 
 #### ESLint
 
 ```
-
 yarn eslint ./x-pack/legacy/plugins/apm --fix
-
-```
-
 ```
