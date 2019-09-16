@@ -9,22 +9,22 @@ export const UnitStrings = {
   time: {
     getSecondsText: (seconds: number) =>
       i18n.translate('xpack.canvas.units.time.seconds', {
-        defaultMessage: '{seconds, plural, one {# second} other {# seconds}',
+        defaultMessage: '{seconds, plural, one {# second} other {# seconds}}',
         values: { seconds },
       }),
     getMinutesText: (minutes: number) =>
       i18n.translate('xpack.canvas.units.time.minutes', {
-        defaultMessage: '{minutes, plural, one {# minute} other {# minutes}',
+        defaultMessage: '{minutes, plural, one {# minute} other {# minutes}}',
         values: { minutes },
       }),
     getHoursText: (hours: number) =>
       i18n.translate('xpack.canvas.units.time.hours', {
-        defaultMessage: '{hours, plural, one {# hour} other {# hours}',
+        defaultMessage: '{hours, plural, one {# hour} other {# hours}}',
         values: { hours },
       }),
     getDaysText: (days: number) =>
       i18n.translate('xpack.canvas.units.time.days', {
-        defaultMessage: '{days} {days, plural, one {day} other {days}}',
+        defaultMessage: '{days, plural, one {# day} other {# days}}',
         values: { days },
       }),
     getCycleTimeText: (length: number, format: 'seconds' | 'days' | 'hours' | 'minutes') => {
