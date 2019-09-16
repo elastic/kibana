@@ -13,11 +13,15 @@ export class Cancelable<T> {
   private resolve: Resolve<T> | undefined = undefined;
   private reject: Reject | undefined = undefined;
   private _cancel: Cancel | undefined = undefined;
+  private resolved: boolean = false;
 
   constructor(readonly fn: (resolve: Resolve<T>, reject: Reject, onCancel: OnCancel) => void) {
     this.promise = new Promise<T>((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;
+    }).then((t: T) => {
+      this.resolved = true;
+      return t;
     });
     fn(this.resolve!, this.reject!, (cancel: Cancel) => {
       this._cancel = cancel;
@@ -25,10 +29,12 @@ export class Cancelable<T> {
   }
 
   public cancel(error: any = 'canceled'): void {
-    if (this._cancel) {
-      this._cancel(error);
-    } else if (this.reject) {
-      this.reject(error);
+    if (!this.resolved) {
+      if (this._cancel) {
+        this._cancel(error);
+      } else if (this.reject) {
+        this.reject(error);
+      }
     }
   }
 
@@ -40,8 +46,7 @@ export class Cancelable<T> {
 
   public static fromPromise<T>(promise: Promise<T>) {
     return new Cancelable((resolve, reject, c) => {
-      promise.then(resolve);
-      promise.catch(reject);
+      promise.then(resolve, reject);
     });
   }
 }

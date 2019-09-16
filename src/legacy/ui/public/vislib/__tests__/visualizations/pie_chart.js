@@ -137,7 +137,7 @@ describe('No global chart settings', function () {
     stubVis1.isHierarchical = () => true;
 
     // We need to set the aggs to a known value.
-    _.each(stubVis1.aggs, function (agg) {
+    _.each(stubVis1.aggs.aggs, function (agg) {
       agg.id = 'agg_' + id1++;
     });
   }));
@@ -225,7 +225,7 @@ describe('Vislib PieChart Class Test Suite', function () {
         });
 
         // We need to set the aggs to a known value.
-        _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+        _.each(stubVis.aggs.aggs, function (agg) { agg.id = 'agg_' + id++; });
 
       }));
 

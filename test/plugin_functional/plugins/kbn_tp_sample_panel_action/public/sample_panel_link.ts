@@ -33,7 +33,7 @@ class SamplePanelLink extends Action {
     return 'Sample panel Link';
   }
 
-  public execute() {
+  public async execute() {
     return;
   }
 

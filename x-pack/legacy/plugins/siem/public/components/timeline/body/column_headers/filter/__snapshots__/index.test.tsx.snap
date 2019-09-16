@@ -6,7 +6,7 @@ exports[`Filter renders correctly against snapshot 1`] = `
     Object {
       "columnHeaderType": "text-filter",
       "id": "@timestamp",
-      "width": 240,
+      "width": 190,
     }
   }
 />

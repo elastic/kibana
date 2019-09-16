@@ -1,44 +1,60 @@
 [[saved-objects-api-import]]
-=== Import Objects
+=== Import objects API
+++++
+<titleabbrev>Import objects</titleabbrev>
+++++
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+Create a set of {kib} saved objects from a file created by the export API.
 
-The import saved objects API enables you to create a set of Kibana saved objects from a file created by the export API.
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-import-request]]
 ==== Request
 
 `POST /api/saved_objects/_import`
 
-==== Query Parameters
+[[saved-objects-api-import-query-params]]
+==== Query parameter
 
-`overwrite` (optional)::
-  (boolean) Overwrite saved objects if they exist already
+`overwrite`::
+  (Optional, boolean) Overwrites saved objects.
 
+[[saved-objects-api-import-request-body]]
 ==== Request body
 
-The request body must be of type multipart/form-data.
+The request body must include the multipart/form-data type.
 
 `file`::
   A file exported using the export API.
 
+[[saved-objects-api-import-response-body]]
 ==== Response body
 
-The response body will have a top level `success` property that indicates
-if the import was successful or not as well as a `successCount` indicating how many records are successfully imported.
-In the scenario the import wasn't successful a top level `errors` array will contain the objects that failed to import.
+`success`:: 
+  Top-level property that indicates if the import was successful. 
+
+`successCount`:: 
+  Indicates the number of successfully imported records.
+
+`errors`::
+  (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
+  
+[[saved-objects-api-import-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
 
 ==== Examples
 
-The following example imports an index pattern and dashboard.
+Import an index pattern and dashboard:
 
 [source,js]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson <1>
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
@@ -46,8 +62,7 @@ The `file.ndjson` file would contain the following.
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -57,14 +72,14 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example imports an index pattern and dashboard but has a conflict on the index pattern.
+Import an index pattern and dashboard that includes a conflict on the index pattern:
 
 [source,js]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
@@ -72,8 +87,7 @@ The `file.ndjson` file would contain the following.
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
-The call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -93,14 +107,14 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example imports a visualization and dashboard but the index pattern for the visualization reference doesn't exist.
+Import a visualization and dashboard with an index pattern for the visualization reference that doesn't exist:
 
 [source,js]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
@@ -108,8 +122,7 @@ The `file.ndjson` file would contain the following.
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
 --------------------------------------------------
 
-The call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

@@ -278,6 +278,16 @@ export class CodeQueryBar extends Component<Props, State> {
     this.onInputChange(event.target.value);
   };
 
+  public onScopeChange = (scope: SearchScope) => {
+    const { onSearchScopeChanged } = this.props;
+
+    if (onSearchScopeChanged) {
+      onSearchScopeChanged(scope);
+    }
+
+    this.updateSuggestions();
+  };
+
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
@@ -426,16 +436,15 @@ export class CodeQueryBar extends Component<Props, State> {
     return (
       <EuiFlexGroup responsive={false} gutterSize="none">
         <EuiFlexItem grow={false}>
-          <ScopeSelector
-            scope={this.props.searchScope}
-            onScopeChanged={this.props.onSearchScopeChanged}
-          />
+          <ScopeSelector scope={this.props.searchScope} onScopeChanged={this.onScopeChange} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-            {/* position:relative required on container so the suggestions appear under the query bar*/}
             <div
-              style={{ position: 'relative' }}
+              style={{
+                // position:relative required on container so the suggestions appear under the query bar
+                position: 'relative',
+              }}
               role="combobox"
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}

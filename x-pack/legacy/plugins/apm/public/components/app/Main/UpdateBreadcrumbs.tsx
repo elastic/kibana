@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
@@ -15,7 +15,7 @@ import { routes } from './route_config';
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
 }
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {

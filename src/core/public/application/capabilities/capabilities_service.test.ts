@@ -19,6 +19,7 @@
 
 import { InjectedMetadataService } from '../../injected_metadata';
 import { CapabilitiesService } from './capabilities_service';
+import { LegacyApp, App } from '../types';
 
 describe('#start', () => {
   const injectedMetadata = new InjectedMetadataService({
@@ -39,17 +40,22 @@ describe('#start', () => {
     } as any,
   }).start();
 
-  const apps = [{ id: 'app1' }, { id: 'app2', capabilities: { app2: { feature: true } } }] as any;
-  const legacyApps = [
-    { id: 'legacyApp1' },
-    { id: 'legacyApp2', capabilities: { app2: { feature: true } } },
-  ] as any;
+  const apps = new Map([
+    ['app1', { id: 'app1' }],
+    ['app2', { id: 'app2', capabilities: { app2: { feature: true } } }],
+  ] as Array<[string, App]>);
+  const legacyApps = new Map([
+    ['legacyApp1', { id: 'legacyApp1' }],
+    ['legacyApp2', { id: 'legacyApp2', capabilities: { app2: { feature: true } } }],
+  ] as Array<[string, LegacyApp]>);
 
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
     const startContract = await service.start({ apps, legacyApps, injectedMetadata });
-    expect(startContract.availableApps).toEqual([{ id: 'app1' }]);
-    expect(startContract.availableLegacyApps).toEqual([{ id: 'legacyApp1' }]);
+    expect(startContract.availableApps).toEqual(new Map([['app1', { id: 'app1' }]]));
+    expect(startContract.availableLegacyApps).toEqual(
+      new Map([['legacyApp1', { id: 'legacyApp1' }]])
+    );
   });
 
   it('does not allow Capabilities to be modified', async () => {

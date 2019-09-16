@@ -39,7 +39,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
-    const aggConfig = vis.aggs[0];
+    const aggConfig = vis.aggs.aggs[0];
     aggConfig.params.customLabel = 'my custom field label';
     aggConfig.params.values = [ 5000, 10000 ];
     aggConfig.params.field = {
