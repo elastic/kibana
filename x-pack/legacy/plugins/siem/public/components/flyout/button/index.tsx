@@ -5,6 +5,7 @@
  */
 
 import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
+import { rgba } from 'polished';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -12,8 +13,6 @@ import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineFlyoutButtonPrefix,
   IS_DRAGGING_CLASS_NAME,
-  TEN_PERCENT_ALPHA_HEX_SUFFIX,
-  TWENTY_PERCENT_ALPHA_HEX_SUFFIX,
 } from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 
@@ -59,8 +58,7 @@ const Container = styled.div`
 
   .${IS_DRAGGING_CLASS_NAME} & .${NOT_READY_TO_DROP_CLASS_NAME} {
     color: ${({ theme }) => theme.eui.euiColorSuccess};
-    background: ${({ theme }) =>
-      `${theme.eui.euiColorSuccess}${TEN_PERCENT_ALPHA_HEX_SUFFIX} !important`};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)} !important;
     border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
     border-bottom: none;
     text-decoration: none;
@@ -68,8 +66,7 @@ const Container = styled.div`
 
   .${READY_TO_DROP_CLASS_NAME} {
     color: ${({ theme }) => theme.eui.euiColorSuccess};
-    background: ${({ theme }) =>
-      `${theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX} !important`};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
     border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
     border-bottom: none;
     text-decoration: none;

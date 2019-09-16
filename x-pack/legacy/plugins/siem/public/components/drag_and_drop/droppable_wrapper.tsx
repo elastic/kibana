@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rgba } from 'polished';
 import * as React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-
-import { THIRTY_PERCENT_ALPHA_HEX_SUFFIX, TWENTY_PERCENT_ALPHA_HEX_SUFFIX } from './helpers';
 
 interface Props {
   children?: React.ReactNode;
@@ -34,22 +33,22 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       ? `
     .drop-and-provider-timeline {
       &:hover {
-        background-color: ${props.theme.eui.euiColorSuccess}${THIRTY_PERCENT_ALPHA_HEX_SUFFIX};
+        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
       }
     }
     .drop-and-provider-timeline:hover {
-        background-color: ${props.theme.eui.euiColorSuccess}${THIRTY_PERCENT_ALPHA_HEX_SUFFIX};
+        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
     }
   > div.timeline-drop-area-empty {
      color: ${props.theme.eui.euiColorSuccess}
-     background-color: ${props.theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX};
+     background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
      & .euiTextColor--subdued {
       color: ${props.theme.eui.euiColorSuccess};
      }
   }
   > div.timeline-drop-area {
-    background-color: ${props.theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX};
+    background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
     .provider-item-filter-container div:first-child{
       // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
       transform: none !important;
