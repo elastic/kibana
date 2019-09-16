@@ -18,7 +18,6 @@ import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
-import { trackUiAction as track, METRIC_TYPE } from '../../lib/usage_collector';
 
 enum AdminTabs {
   projects = '0',
@@ -124,7 +123,6 @@ class AdminPage extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    track(METRIC_TYPE.LOADED, 'admin');
     return (
       <div className="codeContainer__root">
         <div className="codeContainer__rootInner">
