@@ -15,10 +15,10 @@ import {
 import { getOr, take } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
 
+import { Dispatch } from 'redux';
 import { inputsModel, State } from '../../store';
-import { inputsActions, timelineActions } from '../../store/actions';
+import { inputsActions, timelineActions, hostsActions, networkActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
@@ -29,7 +29,8 @@ import {
   fromStrSelector,
   toStrSelector,
   isLoadingSelector,
-  refetchSelector,
+  queriesSelector,
+  kqlQuerySelector,
 } from './selectors';
 import { InputsRange, Policy } from '../../store/inputs/model';
 
@@ -60,29 +61,36 @@ interface SuperDatePickerStateRedux {
   start: number;
   end: number;
   isLoading: boolean;
-  refetch: inputsModel.Refetch[];
+  queries: inputsModel.GlobalGraphqlQuery[];
+  kqlQuery: inputsModel.GlobalKqlQuery;
 }
 
-interface SuperDatePickerDispatchProps {
-  setAbsoluteSuperDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-    timelineId?: string;
-  }>;
-  setRelativeSuperDatePicker: ActionCreator<{
-    id: InputsModelId;
-    fromStr: string;
-    from: number;
-    to: number;
-    toStr: string;
-    timelineId?: string;
-  }>;
-  startAutoReload: ActionCreator<{ id: InputsModelId }>;
-  stopAutoReload: ActionCreator<{ id: InputsModelId }>;
-  setDuration: ActionCreator<{ id: InputsModelId; duration: number }>;
-  updateTimelineRange: ActionCreator<{ id: string; start: number; end: number }>;
+interface UpdateReduxTime extends OnTimeChangeProps {
+  id: InputsModelId;
+  kql?: inputsModel.GlobalKqlQuery | undefined;
+  timelineId?: string;
 }
+
+interface ReturnUpdateReduxTime {
+  kqlHasBeenUpdated: boolean;
+}
+
+type DispatchUpdateReduxTime = ({
+  end,
+  id,
+  isQuickSelection,
+  kql,
+  start,
+  timelineId,
+}: UpdateReduxTime) => ReturnUpdateReduxTime;
+
+interface SuperDatePickerDispatchProps {
+  startAutoReload: ({ id }: { id: InputsModelId }) => void;
+  stopAutoReload: ({ id }: { id: InputsModelId }) => void;
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
+  updateReduxTime: DispatchUpdateReduxTime;
+}
+
 interface OwnProps {
   id: InputsModelId;
   disabled?: boolean;
@@ -138,28 +146,31 @@ export const SuperDatePickerComponent = class extends Component<
       />
     );
   }
-  private onRefresh = ({ start, end, refreshInterval }: OnRefreshProps): void => {
-    this.updateReduxTime({
-      start,
+  private onRefresh = ({ start, end }: OnRefreshProps): void => {
+    const { kqlHasBeenUpdated } = this.props.updateReduxTime({
       end,
-      isQuickSelection: this.state.isQuickSelection,
+      id: this.props.id,
       isInvalid: false,
+      isQuickSelection: this.state.isQuickSelection,
+      kql: this.props.kqlQuery,
+      start,
+      timelineId: this.props.timelineId,
     });
-    const currentStart = this.formatDate(start);
+    const currentStart = formatDate(start);
     const currentEnd = this.state.isQuickSelection
-      ? this.formatDate(end, { roundUp: true })
-      : this.formatDate(end);
+      ? formatDate(end, { roundUp: true })
+      : formatDate(end);
     if (
-      !this.state.isQuickSelection ||
-      (this.props.start === currentStart && this.props.end === currentEnd)
+      !kqlHasBeenUpdated &&
+      (!this.state.isQuickSelection ||
+        (this.props.start === currentStart && this.props.end === currentEnd))
     ) {
-      this.refetchQuery(this.props.refetch);
+      this.refetchQuery(this.props.queries);
     }
   };
 
   private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
     const { id, duration, policy, stopAutoReload, startAutoReload } = this.props;
-
     if (duration !== refreshInterval) {
       this.props.setDuration({ id, duration: refreshInterval });
     }
@@ -174,27 +185,25 @@ export const SuperDatePickerComponent = class extends Component<
       !isPaused &&
       (!this.state.isQuickSelection || (this.state.isQuickSelection && this.props.toStr !== 'now'))
     ) {
-      this.refetchQuery(this.props.refetch);
+      this.refetchQuery(this.props.queries);
     }
   };
 
-  private refetchQuery = (query: inputsModel.Refetch[]) => {
-    query.forEach((refetch: inputsModel.Refetch) => refetch());
-  };
-
-  private formatDate = (
-    date: string,
-    options?: {
-      roundUp?: boolean;
-    }
-  ) => {
-    const momentDate = dateMath.parse(date, options);
-    return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
+  private refetchQuery = (queries: inputsModel.GlobalGraphqlQuery[]) => {
+    queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
 
   private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {
     if (!isInvalid) {
-      this.updateReduxTime({ start, end, isQuickSelection, isInvalid });
+      this.props.updateReduxTime({
+        end,
+        id: this.props.id,
+        isInvalid,
+        isQuickSelection,
+        kql: this.props.kqlQuery,
+        start,
+        timelineId: this.props.timelineId,
+      });
       this.setState((prevState: SuperDatePickerState) => {
         const recentlyUsedRanges = [
           { start, end },
@@ -214,41 +223,72 @@ export const SuperDatePickerComponent = class extends Component<
       });
     }
   };
+};
 
-  private updateReduxTime = ({ start, end, isQuickSelection }: OnTimeChangeProps) => {
-    const {
-      id,
-      setAbsoluteSuperDatePicker,
-      setRelativeSuperDatePicker,
-      timelineId,
-      updateTimelineRange,
-    } = this.props;
-    const fromDate = this.formatDate(start);
-    let toDate = this.formatDate(end, { roundUp: true });
-    if (isQuickSelection) {
-      setRelativeSuperDatePicker({
+const formatDate = (
+  date: string,
+  options?: {
+    roundUp?: boolean;
+  }
+) => {
+  const momentDate = dateMath.parse(date, options);
+  return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
+};
+
+const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
+  end,
+  id,
+  isQuickSelection,
+  kql,
+  start,
+  timelineId,
+}: UpdateReduxTime): ReturnUpdateReduxTime => {
+  const fromDate = formatDate(start);
+  let toDate = formatDate(end, { roundUp: true });
+  if (isQuickSelection) {
+    dispatch(
+      inputsActions.setRelativeRangeDatePicker({
         id,
         fromStr: start,
         toStr: end,
         from: fromDate,
         to: toDate,
-      });
-    } else {
-      toDate = this.formatDate(end);
-      setAbsoluteSuperDatePicker({
+      })
+    );
+  } else {
+    toDate = formatDate(end);
+    dispatch(
+      inputsActions.setAbsoluteRangeDatePicker({
         id,
-        from: this.formatDate(start),
-        to: this.formatDate(end),
-      });
-    }
-    if (timelineId != null) {
-      updateTimelineRange({
+        from: formatDate(start),
+        to: formatDate(end),
+      })
+    );
+  }
+  if (timelineId != null) {
+    dispatch(
+      timelineActions.updateRange({
         id: timelineId,
         start: fromDate,
         end: toDate,
-      });
-    }
-  };
+      })
+    );
+  }
+
+  let kqlHasBeenUpdated = false;
+  if (kql) {
+    // if refetch is successful, it will have a side effect
+    // to set all the tables on its activePage to zero (meaning pagination)
+    kqlHasBeenUpdated = kql.refetch(dispatch);
+  }
+  if (!kqlHasBeenUpdated) {
+    // Date picker is global to all the page in the app
+    // (Hosts/Network are the only one having tables)
+    dispatch(hostsActions.setHostTablesActivePageToZero());
+    dispatch(networkActions.setNetworkTablesActivePageToZero());
+  }
+
+  return { kqlHasBeenUpdated };
 };
 
 export const makeMapStateToProps = () => {
@@ -260,7 +300,8 @@ export const makeMapStateToProps = () => {
   const getFromStrSelector = fromStrSelector();
   const getToStrSelector = toStrSelector();
   const getIsLoadingSelector = isLoadingSelector();
-  const getRefetchQuerySelector = refetchSelector();
+  const getQueriesSelector = queriesSelector();
+  const getKqlQuerySelector = kqlQuerySelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
     return {
@@ -272,19 +313,22 @@ export const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      refetch: getRefetchQuerySelector(inputsRange),
+      queries: getQueriesSelector(inputsRange),
+      kqlQuery: getKqlQuerySelector(inputsRange),
     };
   };
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  startAutoReload: ({ id }: { id: InputsModelId }) =>
+    dispatch(inputsActions.startAutoReload({ id })),
+  stopAutoReload: ({ id }: { id: InputsModelId }) => dispatch(inputsActions.stopAutoReload({ id })),
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) =>
+    dispatch(inputsActions.setDuration({ id, duration })),
+  updateReduxTime: dispatchUpdateReduxTime(dispatch),
+});
+
 export const SuperDatePicker = connect(
   makeMapStateToProps,
-  {
-    setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
-    setRelativeSuperDatePicker: inputsActions.setRelativeRangeDatePicker,
-    startAutoReload: inputsActions.startAutoReload,
-    stopAutoReload: inputsActions.stopAutoReload,
-    setDuration: inputsActions.setDuration,
-    updateTimelineRange: timelineActions.updateRange,
-  }
+  mapDispatchToProps
 )(SuperDatePickerComponent);

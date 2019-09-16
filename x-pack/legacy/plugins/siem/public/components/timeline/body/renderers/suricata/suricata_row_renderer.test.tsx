@@ -29,6 +29,7 @@ describe('suricata_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -48,6 +49,7 @@ describe('suricata_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -62,6 +64,7 @@ describe('suricata_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: suricata,
       children: <span>{'some children '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -79,6 +82,7 @@ describe('suricata_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: suricata,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

@@ -8,4 +8,6 @@ include::overview.asciidoc[]
 
 include::install.asciidoc[]
 
+include::deployment-arch.asciidoc[]
+
 include::security.asciidoc[]

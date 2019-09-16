@@ -38,7 +38,6 @@ import { Field, FieldList, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
-// @ts-ignore
 import { flattenHitWrapper } from './flatten_hit';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 

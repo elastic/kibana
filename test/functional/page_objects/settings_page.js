@@ -56,7 +56,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
       if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
+        await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
       }
     }
 
@@ -208,21 +208,21 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldNames() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getFieldTypes() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldType');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getScriptedFieldLangs() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern scriptedFieldLang');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });

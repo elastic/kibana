@@ -193,6 +193,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await row.getVisibleText();
     }
 
+    async getDocTableField(index) {
+      const field = await find.byCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+      );
+      return await field.getVisibleText();
+    }
+
     async clickDocSortDown() {
       await find.clickByCssSelector('.fa-sort-down');
     }

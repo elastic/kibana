@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { all } from 'lodash';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiContextMenu,
@@ -430,10 +431,12 @@ export class IndexActionsContextMenu extends Component {
               {isSystemIndexByName[indexName] ? (
                 <Fragment>
                   {' '}
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexActionsMenu.deleteIndex.systemIndexLabel"
-                    defaultMessage="(System index)"
-                  />
+                  <EuiBadge iconType="alert" color="hollow">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexActionsMenu.deleteIndex.systemIndexLabel"
+                      defaultMessage="System index"
+                    />
+                  </EuiBadge>
                 </Fragment>
               ) : ''}
             </li>
@@ -456,7 +459,7 @@ export class IndexActionsContextMenu extends Component {
             <FormattedMessage
               id="xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutDescription"
               defaultMessage="System indices are critical for internal operations.
-                Deleting an index cannot be undone. Make sure you have appropriate backups."
+                If you delete a system index, you can't recover it. Make sure you have appropriate backups."
             />
           </p>
           <EuiCheckbox
@@ -566,10 +569,12 @@ export class IndexActionsContextMenu extends Component {
                 {isSystemIndexByName[indexName] ? (
                   <Fragment>
                     {' '}
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
-                      defaultMessage="(System index)"
-                    />
+                    <EuiBadge iconType="alert" color="hollow">
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
+                        defaultMessage="System index"
+                      />
+                    </EuiBadge>
                   </Fragment>
                 ) : ''}
               </li>

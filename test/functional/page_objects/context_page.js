@@ -54,19 +54,19 @@ export function ContextPageProvider({ getService, getPageObjects }) {
     }
 
     async getPredecessorCountPicker() {
-      return await testSubjects.find('predecessorCountPicker');
+      return await testSubjects.find('predecessorsCountPicker');
     }
 
     async getSuccessorCountPicker() {
-      return await testSubjects.find('successorCountPicker');
+      return await testSubjects.find('successorsCountPicker');
     }
 
     async getPredecessorLoadMoreButton() {
-      return await testSubjects.find('predecessorLoadMoreButton');
+      return await testSubjects.find('predecessorsLoadMoreButton');
     }
 
     async getSuccessorLoadMoreButton() {
-      return await testSubjects.find('successorLoadMoreButton');
+      return await testSubjects.find('successorsLoadMoreButton');
     }
 
     async clickPredecessorLoadMoreButton() {

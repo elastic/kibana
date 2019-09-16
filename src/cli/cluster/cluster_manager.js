@@ -24,6 +24,7 @@ import opn from 'opn';
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import * as Rx from 'rxjs';
 import { first, mapTo, filter, map, take } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import Log from '../log';
 import Worker from './worker';
@@ -102,8 +103,15 @@ export default class ClusterManager {
 
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
-      const scanDirs = config.get('plugins.scanDirs');
-      const extraPaths = [...pluginPaths, ...scanDirs];
+      const scanDirs = [
+        ...config.get('plugins.scanDirs'),
+        resolve(REPO_ROOT, 'src/plugins'),
+        resolve(REPO_ROOT, 'x-pack/plugins'),
+      ];
+      const extraPaths = [
+        ...pluginPaths,
+        ...scanDirs,
+      ];
 
       const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))

@@ -13,6 +13,30 @@
 import { ML_NOTIFICATION_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
+// filter to match job_type: 'anomaly_detector' or no job_type field at all
+// if no job_type field exist, we can assume the message is for an anomaly detector job
+const anomalyDetectorTypeFilter = {
+  bool: {
+    should: [
+      {
+        term: {
+          job_type: 'anomaly_detector'
+        }
+      },
+      {
+        bool: {
+          must_not: {
+            exists: {
+              field: 'job_type'
+            }
+          }
+        }
+      }
+    ],
+    minimum_should_match: 1
+  }
+};
+
 // search for audit messages, jobId is optional.
 // without it, all jobs will be listed.
 // fromRange should be a string formatted in ES time units. e.g. 12h, 1d, 7d
@@ -74,6 +98,7 @@ function getJobAuditMessages(fromRange, jobId) {
                   }
                 }
               },
+              anomalyDetectorTypeFilter,
               jobFilter,
               timeFilter
             ]
@@ -105,13 +130,16 @@ function getAuditMessagesSummary() {
       body: {
         query: {
           bool: {
-            filter: {
-              range: {
-                timestamp: {
-                  gte: 'now-1d'
+            filter: [
+              {
+                range: {
+                  timestamp: {
+                    gte: 'now-1d'
+                  }
                 }
-              }
-            }
+              },
+              anomalyDetectorTypeFilter
+            ]
           }
         },
         aggs: {

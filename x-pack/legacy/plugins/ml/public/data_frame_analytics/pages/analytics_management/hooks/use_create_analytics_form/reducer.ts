@@ -7,6 +7,8 @@
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 
+import { validateIndexPattern } from 'ui/index_patterns';
+
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { isAnalyticsIdValid } from '../../../../common';
@@ -14,15 +16,45 @@ import { isAnalyticsIdValid } from '../../../../common';
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 
-const validateAdvancedEditor = (state: State): State => {
+const getSourceIndexString = (state: State) => {
+  const { jobConfig } = state;
+
+  const sourceIndex = idx(jobConfig, _ => _.source.index);
+
+  if (typeof sourceIndex === 'string') {
+    return sourceIndex;
+  }
+
+  if (Array.isArray(sourceIndex)) {
+    return sourceIndex.join(',');
+  }
+
+  return '';
+};
+
+export const validateAdvancedEditor = (state: State): State => {
   const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
 
-  const sourceIndexName = idx(jobConfig, _ => _.source.index) || '';
+  const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
-  const sourceIndexNameValid = isValidIndexName(sourceIndexName);
+  // general check against Kibana index pattern names, but since this is about the advanced editor
+  // with support for arrays in the job config, we also need to check that each individual name
+  // doesn't include a comma if index names are supplied as an array.
+  // `validateIndexPattern()` returns a map of messages, we're only interested here if it's valid or not.
+  // If there are no messages, it means the index pattern is valid.
+  let sourceIndexNameValid = Object.keys(validateIndexPattern(sourceIndexName)).length === 0;
+  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  if (sourceIndexNameValid) {
+    if (typeof sourceIndex === 'string') {
+      sourceIndexNameValid = !sourceIndex.includes(',');
+    }
+    if (Array.isArray(sourceIndex)) {
+      sourceIndexNameValid = !sourceIndex.some(d => d.includes(','));
+    }
+  }
 
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
@@ -161,11 +193,9 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.sourceIndex !== undefined) {
-        newFormState.sourceIndexNameExists = state.indexNames.some(
-          name => newFormState.sourceIndex === name
-        );
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
-        newFormState.sourceIndexNameValid = isValidIndexName(newFormState.sourceIndex);
+        const validationMessages = validateIndexPattern(newFormState.sourceIndex);
+        newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
       }
 
       return state.isAdvancedEditorEnabled
@@ -176,9 +206,6 @@ export function reducer(state: State, action: Action): State {
       const newState = { ...state, indexNames: action.indexNames };
       newState.form.destinationIndexNameExists = newState.indexNames.some(
         name => newState.form.destinationIndex === name
-      );
-      newState.form.sourceIndexNameExists = newState.indexNames.some(
-        name => newState.form.sourceIndex === name
       );
       return newState;
     }

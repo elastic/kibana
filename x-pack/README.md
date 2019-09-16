@@ -77,15 +77,25 @@ To do all of this in a single command run:
 node scripts/functional_tests
 ```
 
-#### Running UI tests
+#### Developing functional UI tests
 
-To run _only_ the functional UI tests:
+If you are **developing functional tests** then you probably don't want to rebuild Elasticsearch and wait for all that setup on every test run, so instead use this command to build and start just the Elasticsearch and Kibana servers:
 
 ```sh
-node scripts/functional_tests --config test/functional/config
+node scripts/functional_tests_server
 ```
 
-It does the same as the previous command, except that it only does setup/test/teardown for the UI tests.
+After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
+
+```sh
+node scripts/functional_test_runner
+```
+
+For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
+
+Read more about how the scripts work [here](../scripts/README.md).
+
+For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
 
 #### Running API integration tests
 
@@ -107,7 +117,7 @@ We also have SAML API integration tests which set up Elasticsearch and Kibana wi
 node scripts/functional_tests --config test/saml_api_integration/config
 ```
 
-#### Running and building Jest integration tests
+#### Running Jest integration tests
 
 Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
 
@@ -120,27 +130,3 @@ An example test exists at [test_utils/jest/integration_tests/example_integration
 #### Running Reporting functional tests
 
 See [here](test/reporting/README.md) for more information on running reporting tests.
-
-#### Developing functional tests
-
-If you are **developing functional tests** then you probably don't want to rebuild Elasticsearch and wait for all that setup on every test run, so instead use this command to build and start just the Elasticsearch and Kibana servers:
-
-```sh
-node scripts/functional_tests_server
-```
-
-After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
-
-```sh
-# Make sure you are in the x-pack directory
-cd x-pack
-
-# Invoke the functional_test_runner from Kibana. Try sending --help to learn more
-node ../scripts/functional_test_runner
-```
-
-For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
-
-Read more about how the scripts work [here](scripts/README.md).
-
-For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).

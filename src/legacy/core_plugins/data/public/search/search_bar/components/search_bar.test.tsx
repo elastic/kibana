@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../index_patterns';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
@@ -28,7 +28,13 @@ const startMock = coreMock.createStart();
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-    QueryBar: () => <div className="queryBar"></div>,
+    QueryBarInput: () => <div className="queryBar"></div>,
+  };
+});
+
+jest.mock('../../../query/query_bar', () => {
+  return {
+    QueryBarTopRow: () => <div className="queryBar"></div>,
   };
 });
 

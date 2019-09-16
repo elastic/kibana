@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, sortByOrder } from 'lodash';
+import { flatten, sortByOrder, last } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
 import {
   SERVICE_NAME,
@@ -159,7 +159,7 @@ export async function getTransactionBreakdown({
       const formattedValues = formatBucket(bucket);
       const time = bucket.key;
 
-      return kpiNames.reduce((p, kpiName) => {
+      const updatedSeries = kpiNames.reduce((p, kpiName) => {
         const { name, percentage } = formattedValues.find(
           val => val.name === kpiName
         ) || {
@@ -178,6 +178,29 @@ export async function getTransactionBreakdown({
           })
         };
       }, prev);
+
+      const lastValues = Object.values(updatedSeries).map(last);
+
+      // If for a given timestamp, some series have data, but others do not,
+      // we have to set any null values to 0 to make sure the stacked area chart
+      // is drawn correctly.
+      // If we set all values to 0, the chart always displays null values as 0,
+      // and the chart looks weird.
+      const hasAnyValues = lastValues.some(value => value.y !== null);
+      const hasNullValues = lastValues.some(value => value.y === null);
+
+      if (hasAnyValues && hasNullValues) {
+        Object.values(updatedSeries).forEach(series => {
+          const value = series[series.length - 1];
+          const isEmpty = value.y === null;
+          if (isEmpty) {
+            // local mutation to prevent complicated map/reduce calls
+            value.y = 0;
+          }
+        });
+      }
+
+      return updatedSeries;
     },
     {} as Record<string, Array<{ x: number; y: number | null }>>
   );
