@@ -22,6 +22,7 @@ import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataRequestAbortError } from './util/data_request';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -388,7 +389,9 @@ export class VectorLayer extends AbstractLayer {
         propertiesMap: propertiesMap,
       };
     } catch (e) {
-      onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+      if (!(e instanceof DataRequestAbortError)) {
+        onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+      }
       return {
         dataHasChanged: true,
         join: join,
@@ -489,7 +492,9 @@ export class VectorLayer extends AbstractLayer {
         featureCollection: featureCollection
       };
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      }
       return {
         refreshed: false
       };

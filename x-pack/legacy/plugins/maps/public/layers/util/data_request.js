@@ -43,3 +43,9 @@ export class DataRequest {
 
 }
 
+export class DataRequestAbortError extends Error {
+  constructor() {
+    super();
+  }
+}
+

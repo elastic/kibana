@@ -20,6 +20,7 @@ import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_pro
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -146,8 +147,9 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
-      // If the fetch was aborted, no need to surface this in the UI
-      if (error.name === 'AbortError') return;
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
 
       throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
