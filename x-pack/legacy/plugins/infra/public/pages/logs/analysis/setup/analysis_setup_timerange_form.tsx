@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import moment, { Moment } from 'moment';
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,6 @@ import {
   EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateMLJobsButton } from './create_ml_jobs_button';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -46,18 +45,19 @@ function selectedDateToParam(selectedDate: Moment | null) {
 }
 
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  isSettingUp: boolean;
-  setupMlModule: (startTime: number | undefined, endTime: number | undefined) => Promise<any>;
-}> = ({ isSettingUp, setupMlModule }) => {
-  const [startTime, setStartTime] = useState<Moment | null>(null);
-  const [endTime, setEndTime] = useState<Moment | null>(null);
-
+  setStartTime: (startTime: number | undefined) => void;
+  setEndTime: (endTime: number | undefined) => void;
+  startTime: number | undefined;
+  endTime: number | undefined;
+}> = ({ setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
-  const selectedEndTimeIsToday = !endTime || endTime.isSame(now, 'day');
-
-  const onClickCreateJob = () =>
-    setupMlModule(selectedDateToParam(startTime), selectedDateToParam(endTime));
-
+  const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
+  const startTimeValue = useMemo(() => {
+    return startTime ? moment(startTime) : undefined;
+  }, [startTime]);
+  const endTimeValue = useMemo(() => {
+    return endTime ? moment(endTime) : undefined;
+  }, [endTime]);
   return (
     <EuiForm>
       <EuiDescribedFormGroup
@@ -84,12 +84,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         >
           <EuiFlexGroup gutterSize="s">
             <EuiFormControlLayout
-              clear={startTime ? { onClick: () => setStartTime(null) } : undefined}
+              clear={startTime ? { onClick: () => setStartTime(undefined) } : undefined}
             >
               <EuiDatePicker
                 showTimeSelect
-                selected={startTime}
-                onChange={setStartTime}
+                selected={startTimeValue}
+                onChange={date => setStartTime(selectedDateToParam(date))}
                 placeholder={startTimeDefaultDescription}
                 maxDate={now}
               />
@@ -104,14 +104,16 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={endTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiFormControlLayout clear={endTime ? { onClick: () => setEndTime(null) } : undefined}>
+            <EuiFormControlLayout
+              clear={endTime ? { onClick: () => setEndTime(undefined) } : undefined}
+            >
               <EuiDatePicker
                 showTimeSelect
-                selected={endTime}
-                onChange={setEndTime}
+                selected={endTimeValue}
+                onChange={date => setEndTime(selectedDateToParam(date))}
                 placeholder={endTimeDefaultDescription}
                 openToDate={now}
-                minDate={now}
+                minDate={startTimeValue}
                 minTime={
                   selectedEndTimeIsToday
                     ? now
@@ -126,7 +128,6 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
             </EuiFormControlLayout>
           </EuiFlexGroup>
         </EuiFormRow>
-        <CreateMLJobsButton isLoading={isSettingUp} onClick={onClickCreateJob} />
       </EuiDescribedFormGroup>
     </EuiForm>
   );

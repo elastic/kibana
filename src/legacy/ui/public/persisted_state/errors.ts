@@ -17,29 +17,10 @@
  * under the License.
  */
 
-import { Field } from '../../core_plugins/data/public/index_patterns';
+import { KbnError } from '../../../../plugins/kibana_utils/public';
 
-/** @public **/
-export type ContentType = 'html' | 'text';
-
-/** @public **/
-export { IFieldFormat } from './field_format';
-
-/** @internal **/
-export type HtmlConventTypeConvert = (
-  value: any,
-  field?: Field,
-  hit?: Record<string, any>,
-  meta?: any
-) => string;
-
-/** @internal **/
-export type TextContextTypeConvert = (value: any) => string;
-
-/** @internal **/
-export type FieldFormatConvertFunction = HtmlConventTypeConvert | TextContextTypeConvert;
-
-/** @internal **/
-export interface FieldFormatConvert {
-  [key: string]: FieldFormatConvertFunction;
+export class PersistedStateError extends KbnError {
+  constructor() {
+    super('Error with the persisted state');
+  }
 }

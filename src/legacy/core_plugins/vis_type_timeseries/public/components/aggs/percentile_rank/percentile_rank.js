@@ -77,6 +77,7 @@ export const PercentileRankAgg = props => {
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -88,7 +89,12 @@ export const PercentileRankAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={<FormattedMessage id="visTypeTimeseries.percentileRank.fieldLabel" defaultMessage="Field" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentileRank.fieldLabel"
+                defaultMessage="Field"
+              />
+            }
           >
             <FieldSelect
               fields={fields}
