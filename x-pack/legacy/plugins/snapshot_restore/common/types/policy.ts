@@ -39,6 +39,12 @@ export interface SlmPolicy extends SlmPolicyPayload {
   inProgress?: {
     snapshotName: string;
   };
+  stats?: {
+    snapshotsTaken: number;
+    snapshotsFailed: number;
+    snapshotsDeleted: number;
+    snapshotDeletionFailures: number;
+  };
 }
 
 export interface SlmPolicyEs {
@@ -71,5 +77,11 @@ export interface SlmPolicyEs {
     state: string;
     start_time: string;
     start_time_millis: number;
+  };
+  stats?: {
+    snapshots_taken: number;
+    snapshots_failed: number;
+    snapshots_deleted: number;
+    snapshot_deletion_failures: number;
   };
 }

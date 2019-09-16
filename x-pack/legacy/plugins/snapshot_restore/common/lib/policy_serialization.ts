@@ -22,6 +22,7 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     last_failure: lastFailure,
     last_success: lastSuccess,
     in_progress: inProgress,
+    stats,
   } = esPolicy;
 
   const policy: SlmPolicy = {
@@ -88,6 +89,22 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
 
     policy.inProgress = {
       snapshotName: inProgressSnapshotName,
+    };
+  }
+
+  if (stats) {
+    const {
+      snapshots_taken: snapshotsTaken,
+      snapshots_failed: snapshotsFailed,
+      snapshots_deleted: snapshotsDeleted,
+      snapshot_deletion_failures: snapshotDeletionFailures,
+    } = stats;
+
+    policy.stats = {
+      snapshotsTaken,
+      snapshotsFailed,
+      snapshotsDeleted,
+      snapshotDeletionFailures,
     };
   }
 
