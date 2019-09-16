@@ -14,17 +14,17 @@ import { IntegrationGroup } from '../integration_group';
 import { UptimeSettingsContext } from '../../../contexts';
 import { isIntegrationsPopupOpen } from '../../../state/selectors';
 import { AppState } from '../../../state';
-import { toggleIntegrationsPopUp } from '../../../state/actions';
+import { toggleIntegrationsPopover, PopoverState } from '../../../state/actions';
 
 interface MonitorListActionsPopoverProps {
   summary: MonitorSummary;
-  popoverIsVisible: boolean;
-  togglePopoverIsVisible: typeof toggleIntegrationsPopUp;
+  popoverState: PopoverState | null;
+  togglePopoverIsVisible: typeof toggleIntegrationsPopover;
 }
 
 const MonitorListActionsPopoverComponent = ({
   summary,
-  popoverIsVisible,
+  popoverState,
   togglePopoverIsVisible,
 }: MonitorListActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
@@ -38,7 +38,8 @@ const MonitorListActionsPopoverComponent = ({
   } = useContext(UptimeSettingsContext);
 
   const monitorUrl: string = get(summary, 'state.url.full', undefined);
-
+  const isPopoverOpen: boolean =
+    !!popoverState && popoverState.open && popoverState.id === popoverId;
   return (
     <EuiPopover
       button={
@@ -54,12 +55,12 @@ const MonitorListActionsPopoverComponent = ({
           )}
           color="subdued"
           iconType="boxesHorizontal"
-          onClick={() => togglePopoverIsVisible()}
+          onClick={() => togglePopoverIsVisible({ id: popoverId, open: true })}
         />
       }
-      closePopover={() => togglePopoverIsVisible()}
+      closePopover={() => togglePopoverIsVisible({ id: popoverId, open: false })}
       id={popoverId}
-      isOpen={popoverIsVisible}
+      isOpen={isPopoverOpen}
     >
       <IntegrationGroup
         basePath={basePath}
@@ -75,12 +76,14 @@ const MonitorListActionsPopoverComponent = ({
 };
 
 const mapStateToProps = (state: AppState) => ({
-  popoverIsVisible: isIntegrationsPopupOpen(state),
+  popoverState: isIntegrationsPopupOpen(state),
 });
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    togglePopoverIsVisible: () => dispatch(toggleIntegrationsPopUp()),
+    togglePopoverIsVisible: (popoverState: PopoverState) => {
+      return dispatch(toggleIntegrationsPopover(popoverState));
+    },
   };
 };
 

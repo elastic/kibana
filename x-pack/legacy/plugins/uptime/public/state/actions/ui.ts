@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TOGGLE_INTEGRATION_POPUP = 'TOGGLE_INTEGRATION_POPUP';
+export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
 
-interface ToggleIntegrationPopupAction {
-  type: typeof TOGGLE_INTEGRATION_POPUP;
+export interface PopoverState {
+  id: string;
+  open: boolean;
 }
 
-export function toggleIntegrationsPopUp(): ToggleIntegrationPopupAction {
+interface SetIntegrationPopoverAction {
+  type: typeof SET_INTEGRATION_POPOVER_STATE;
+  payload: PopoverState;
+}
+
+export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
   return {
-    type: TOGGLE_INTEGRATION_POPUP,
+    type: SET_INTEGRATION_POPOVER_STATE,
+    payload: popoverState,
   };
 }
 
-export type UiActionTypes = ToggleIntegrationPopupAction;
+export type UiActionTypes = SetIntegrationPopoverAction;

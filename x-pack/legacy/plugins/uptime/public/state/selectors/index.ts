@@ -5,4 +5,4 @@
  */
 import { AppState } from '../../state';
 
-export const isIntegrationsPopupOpen = (state: AppState) => state.ui.integrationsPopupOpen;
+export const isIntegrationsPopupOpen = (state: AppState) => state.ui.integrationsPopoverOpen;

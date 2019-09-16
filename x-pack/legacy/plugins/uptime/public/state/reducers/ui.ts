@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionTypes, TOGGLE_INTEGRATION_POPUP } from '../actions/ui';
+import { UiActionTypes, PopoverState, SET_INTEGRATION_POPOVER_STATE } from '../actions/ui';
 
 export interface UiState {
-  integrationsPopupOpen: boolean;
+  integrationsPopoverOpen: PopoverState | null;
 }
 
 const initialState: UiState = {
-  integrationsPopupOpen: false,
+  integrationsPopoverOpen: null,
 };
 
 export function uiReducer(state = initialState, action: UiActionTypes): UiState {
   switch (action.type) {
-    case TOGGLE_INTEGRATION_POPUP:
+    case SET_INTEGRATION_POPOVER_STATE:
+      const popoverState = action.payload;
       return {
         ...state,
-        integrationsPopupOpen: !state.integrationsPopupOpen,
+        integrationsPopoverOpen: {
+          id: popoverState.id,
+          open: popoverState.open,
+        },
       };
     default:
       return state;
