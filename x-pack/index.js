@@ -38,7 +38,6 @@ import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { ossTelemetry } from './legacy/plugins/oss_telemetry';
 import { fileUpload } from './legacy/plugins/file_upload';
-import { telemetry } from './legacy/plugins/telemetry';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { actions } from './legacy/plugins/actions';
@@ -48,7 +47,6 @@ import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
-    telemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),

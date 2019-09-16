@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MONITORING_SYSTEM_API_VERSION } from '../../../common/constants';
-import { KIBANA_SYSTEM_ID } from '../../../../telemetry/common/constants';
+import { MONITORING_SYSTEM_API_VERSION, KIBANA_SYSTEM_ID } from '../../../common/constants';
 
 /*
  * Send the Kibana usage data to the ES Monitoring Bulk endpoint

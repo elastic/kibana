@@ -10,7 +10,9 @@ import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
+  TELEMETRY_COLLECTION_INTERVAL,
 } from '../../common/constants';
+
 import {
   sendBulkPayload,
   monitoringBulk,
@@ -44,7 +46,7 @@ export class BulkUploader {
     this._timer = null;
     this._interval = interval;
     this._lastFetchUsageTime = null;
-    this._usageInterval = server.plugins.xpack_main.telemetryCollectionInterval;
+    this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
 
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),

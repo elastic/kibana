@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { getTelemetryOptIn } from '../../../telemetry/server';
+import { getTelemetryOptIn } from '../../../../../../src/legacy/core_plugins/telemetry/server';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchTelemetry } from '../../../telemetry/public/hacks/fetch_telemetry';
-export { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
-export { TelemetryOptInProvider } from '../../../telemetry/public/services/telemetry_opt_in';
-export { OptInExampleFlyout } from '../../../telemetry/public/components';
+import { fetchTelemetry } from '../../../../../../src/legacy/core_plugins/telemetry/public/hacks/fetch_telemetry';
+export { PRIVACY_STATEMENT_URL } from '../../../../../../src/legacy/core_plugins/telemetry/common/constants';
+export { TelemetryOptInProvider } from '../../../../../../src/legacy/core_plugins/telemetry/public/services/telemetry_opt_in';
+export { OptInExampleFlyout } from '../../../../../../src/legacy/core_plugins/telemetry/public/components';
 
 let telemetryEnabled;
 let httpClient;

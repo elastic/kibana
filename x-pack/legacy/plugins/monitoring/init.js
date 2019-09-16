@@ -16,6 +16,8 @@ import {
   getSettingsCollector,
 } from './server/kibana_monitoring/collectors';
 import { initInfraSource } from './server/lib/logs/init_infra_source';
+import { getStatsWithMonitoring } from './server/telemetry';
+import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
@@ -37,6 +39,8 @@ export const init = (monitoringPlugin, server) => {
   collectorSet.register(getOpsStatsCollector(server, kbnServer));
   collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getSettingsCollector(server, kbnServer));
+
+  telemetryCollectionManager.setStatsGetter(getStatsWithMonitoring, 1);
 
   /*
    * Instantiate and start the internal background task that calls collector

@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from 'ui/storage';
-import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -34,7 +34,6 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const storage = new Storage(window.localStorage);

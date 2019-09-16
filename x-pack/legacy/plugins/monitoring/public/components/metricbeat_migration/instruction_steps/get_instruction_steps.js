@@ -28,8 +28,13 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, LOGSTASH_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import {
+  ELASTICSEARCH_CUSTOM_ID,
+  APM_CUSTOM_ID,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+  BEATS_SYSTEM_ID
+} from '../../../../common/constants';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {
   switch (productName) {
