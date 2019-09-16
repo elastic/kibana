@@ -100,6 +100,7 @@ function FilterRow({
           languageSwitcherPopoverAnchorPosition="leftDown"
           store={localStorage}
           uiSettings={npStart.core.uiSettings}
+          http={npStart.core.http}
           savedObjectsClient={npStart.core.savedObjects.client}
         />
       </EuiFormRow>

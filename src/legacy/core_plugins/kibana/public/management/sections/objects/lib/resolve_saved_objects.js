@@ -52,7 +52,7 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
 }
 async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModalPromise) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const emptyPattern = await indexPatterns.get();
+  const emptyPattern = await indexPatterns.make();
   const {
     title,
     timeFieldName,
