@@ -241,14 +241,14 @@ export const getMessages = () => {
     job_id_empty: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdEmptyMessage', {
-        defaultMessage: 'The job name field must not be empty.',
+        defaultMessage: 'Job ID field must not be empty.',
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
     },
     job_id_invalid: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidMessage', {
-        defaultMessage: 'The job name is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, ' +
+        defaultMessage: 'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, ' +
           'hyphens or underscores and must start and end with an alphanumeric character.',
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
@@ -256,7 +256,7 @@ export const getMessages = () => {
     job_id_invalid_max_length: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidMaxLengthErrorMessage', {
-        defaultMessage: 'Job name can\'t contain more than {maxLength, plural, one {# character} other {# characters}}.',
+        defaultMessage: 'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
@@ -266,11 +266,12 @@ export const getMessages = () => {
     job_id_valid: {
       status: 'SUCCESS',
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidHeading', {
-        defaultMessage: 'Job id format is valid',
+        defaultMessage: 'Job ID format is valid',
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +
-          'starts and ends with an alphanumeric character, and is less than {maxLength, plural, one {# character} other {# characters}}.',
+          'starts and ends with an alphanumeric character, and is no more than ' +
+          '{maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
@@ -288,7 +289,7 @@ export const getMessages = () => {
     job_group_id_invalid_max_length: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorMessage', {
-        defaultMessage: 'Job group name can\'t contain more than {maxLength, plural, one {# character} other {# characters}}.',
+        defaultMessage: 'Job group name must be more than {maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
@@ -302,7 +303,8 @@ export const getMessages = () => {
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +
-          'starts and ends with an alphanumeric character, and is less than {maxLength, plural, one {# character} other {# characters}}.',
+          'starts and ends with an alphanumeric character, and is no more than ' +
+          '{maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },

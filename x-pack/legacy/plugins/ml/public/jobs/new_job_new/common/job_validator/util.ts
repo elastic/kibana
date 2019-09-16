@@ -27,7 +27,7 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
       {
         defaultMessage:
-          'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+          'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
           'must start and end with an alphanumeric character',
       }
     );
@@ -38,7 +38,7 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage',
       {
         defaultMessage:
-          "Job name can't contain more than {maxLength, plural, one {# character} other {# characters}}.",
+          'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
@@ -70,7 +70,7 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.jobGroupMaxLengthDescription',
       {
         defaultMessage:
-          "Job group name can't contain more than {maxLength, plural, one {# character} other {# characters}}.",
+          'Job group name must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
