@@ -21,7 +21,7 @@ import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creat
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 
 interface SetupDependencies {
-  httpClient: object;
+  getHttpClient: any;
 }
 
 /**
@@ -30,8 +30,8 @@ interface SetupDependencies {
  * @internal
  */
 export class IndexPatternManagementService {
-  public setup({ httpClient }: SetupDependencies) {
-    const creation = new IndexPatternCreationManager(httpClient);
+  public setup({ getHttpClient }: SetupDependencies) {
+    const creation = new IndexPatternCreationManager(getHttpClient());
     const list = new IndexPatternListManager();
 
     creation.add(IndexPatternCreationConfig);

@@ -25,7 +25,7 @@ import {
 
 interface ManagementPluginSetupDependencies {
   __LEGACY: {
-    $http: object;
+    getHttpClient: any;
   };
 }
 
@@ -55,7 +55,7 @@ export class ManagementPlugin
 
   public setup(core: CoreSetup, { __LEGACY }: ManagementPluginSetupDependencies) {
     return {
-      indexPattern: this.indexPattern.setup({ httpClient: __LEGACY.$http }),
+      indexPattern: this.indexPattern.setup({ getHttpClient: __LEGACY.getHttpClient }),
       savedObjects: this.savedObjects.setup(),
     };
   }
