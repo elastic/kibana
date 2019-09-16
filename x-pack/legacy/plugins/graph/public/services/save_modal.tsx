@@ -7,9 +7,9 @@
 import React from 'react';
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
-import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
+import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
-export function save({
+export function openSaveModal({
   savePolicy,
   hasData,
   workspace,
@@ -55,7 +55,7 @@ export function save({
     });
   };
   showSaveModal(
-    <GraphSaveModal
+    <SaveModal
       savePolicy={savePolicy}
       hasData={hasData}
       onSave={onSave}

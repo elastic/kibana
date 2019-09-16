@@ -40,8 +40,8 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { GraphListing } from './components/graph_listing';
-import { GraphSettings } from './components/graph_settings/graph_settings';
+import { Listing } from './components/listing';
+import { Settings } from './components/settings';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -51,17 +51,17 @@ import {
   colorChoices,
   iconChoicesByClass,
   urlTemplateIconChoices,
-} from './services/style_choices';
+} from './helpers/style_choices';
 import {
   outlinkEncoders,
-} from './services/outlink_encoders';
+} from './helpers/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
-import { save } from  './services/save_modal';
-import { urlTemplateRegex } from  './services/url_template';
+import { openSaveModal } from  './services/save_modal';
+import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
-} from './services/as_observable';
+} from './helpers/as_observable';
 
 import './angular/directives/graph_inspect';
 
@@ -89,7 +89,7 @@ app.directive('focusOn', function () {
 });
 
 app.directive('graphListing', function (reactDirective) {
-  return reactDirective(GraphListing);
+  return reactDirective(Listing);
 });
 
 if (uiRoutes.enable) {
@@ -789,7 +789,7 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        save({
+        openSaveModal({
           savePolicy: $scope.graphSavePolicy,
           hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
           workspace: $scope.savedWorkspace,
@@ -848,9 +848,7 @@ app.controller('graphuiPlugin', function (
         allFields: [...$scope.allFields],
         canEditDrillDownUrls: $scope.canEditDrillDownUrls
       }), $scope.$digest.bind($scope));
-      currentSettingsFlyout = npStart.core.overlays.openFlyout(<GraphSettings
-        observable={settingsObservable}
-      />, {
+      currentSettingsFlyout = npStart.core.overlays.openFlyout(<Settings observable={settingsObservable} />, {
         size: 'm',
         closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
         'data-test-subj': 'graphSettingsFlyout',

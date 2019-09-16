@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiText, EuiSpacer, EuiTextAlign, EuiButton, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GraphSettingsProps } from './graph_settings';
+import { SettingsProps } from './settings';
 import { UrlTemplateForm } from './url_template_form';
 import { useListKeys } from './use_list_keys';
 
@@ -17,7 +17,7 @@ export function UrlTemplateList({
   removeUrlTemplate,
   saveUrlTemplate,
   urlTemplates,
-}: Pick<GraphSettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
+}: Pick<SettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
   const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
   const getListKey = useListKeys(urlTemplates);
 
