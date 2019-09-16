@@ -1,5 +1,7 @@
 #!/bin/groovy
 
+library 'kibana-pipeline-library'
+
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
@@ -242,10 +244,12 @@ def sendInfraMail() {
 
 def sendKibanaMail() {
   catchError {
-    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
+    def buildStatus = buildUtils.getBuildStatus()
+
+    if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
         to: 'build-kibana@elastic.co',
-        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
       )
