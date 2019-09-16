@@ -39,6 +39,7 @@ interface State {
   isPopoverOpen: boolean;
   curlCode: string;
   toasts: [];
+  toastId: number;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -49,6 +50,7 @@ export class ConsoleMenu extends Component<Props, State> {
       curlCode: '',
       isPopoverOpen: false,
       toasts: [],
+      toastId: 1,
     };
   }
 
@@ -109,8 +111,11 @@ export class ConsoleMenu extends Component<Props, State> {
       },
     ];
 
+    const actualToastId = this.state.toastId;
+    this.setState({ toastId: this.state.toastId + 1 });
+
     return {
-      id: '1',
+      id: actualToastId,
       ...copyToast[0],
     };
   };
@@ -124,10 +129,11 @@ export class ConsoleMenu extends Component<Props, State> {
     });
   };
 
-  removeToast = () => {
-    this.setState({
-      toasts: [],
-    });
+  removeToast = (removedToast: any) => {
+    // @ts-ignore
+    const newToastsArray = this.state.toasts.filter(tst => tst.id !== removedToast.id);
+    // @ts-ignore
+    this.setState({ toasts: newToastsArray });
   };
 
   render() {

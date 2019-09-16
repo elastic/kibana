@@ -225,7 +225,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <ConsoleProgressBar ref={progressBarRef} maxProgressValue={30} />
+          <ConsoleProgressBar ref={progressBarRef} kibanaTimeout={30} />
           <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
             <Panel
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}

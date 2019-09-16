@@ -22,8 +22,16 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { EuiProgress, EuiIcon, EuiToolTip } from '@elastic/eui';
 
+/*
+import {
+  ElasticsearchConfig,
+  config,
+} from '../../../../../../../core/server/elasticsearch/elasticsearch_config';
+*/
+
+// @ts-ignore
 interface Props {
-  maxProgressValue: number;
+  kibanaTimeout: number;
 }
 
 export class ConsoleProgressBar extends Component<Props, {}> {
@@ -32,6 +40,8 @@ export class ConsoleProgressBar extends Component<Props, {}> {
 
     this.state = {
       val: 0.0,
+      lastStatementTime: 0.0,
+      queryTimeout: props.kibanaTimeout,
     };
   }
 
@@ -39,9 +49,10 @@ export class ConsoleProgressBar extends Component<Props, {}> {
 
   incrementProgress() {
     let progVal = this.state.val;
-    if (progVal < this.props.maxProgressValue) {
+    if (progVal < this.state.queryTimeout) {
       progVal += 0.1;
       this.setState({ val: progVal });
+      this.setState({ lastStatementTime: progVal });
       const thisInstance = this;
       this.timeoutFunction = setTimeout(function() {
         thisInstance.incrementProgress();
@@ -57,30 +68,24 @@ export class ConsoleProgressBar extends Component<Props, {}> {
   }
 
   resetProgress() {
+    this.setState({ lastStatementTime: this.state.val });
     this.setState({ val: 0 });
     clearTimeout(this.timeoutFunction);
   }
 
   render() {
-    const runSeconds = Math.round(this.state.val * 100) / 100;
-    const toolTipText =
-      'Query run time: ' +
-      runSeconds +
-      ' seconds (timeout: ' +
-      this.props.maxProgressValue +
-      ' seconds)';
+    const runSeconds = Math.round(this.state.lastStatementTime * 100) / 100;
+    const toolTipText = 'Statement run time: ' + runSeconds + 's';
     return (
       <div>
-        <EuiToolTip position="top" content={toolTipText}>
-          <EuiIcon type="clock" />
-        </EuiToolTip>
         <EuiProgress
           value={this.state.val}
-          max={this.props.maxProgressValue}
+          max={this.state.queryTimeout}
           size="xs"
           color="accent"
           position="absolute"
         />
+        <div style={{ float: 'right', marginTop: '-30px' }}>{toolTipText}</div>
       </div>
     );
   }
