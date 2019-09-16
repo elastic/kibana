@@ -323,10 +323,33 @@ export class AbstractESSource extends AbstractVectorSource {
           }
         }
       });
-      const resp = await searchSource.fetch();
+      const minMaxResp = await searchSource.fetch();
+      const min = _.get(minMaxResp, 'aggregations.fieldMin.value', '');
+      const max = _.get(minMaxResp, 'aggregations.fieldMax.value', '');
+
+      const histogram = [];
+      if (min !== '' && max !== '') {
+        searchSource.setField('aggs', {
+          fieldHistogram: {
+            histogram: {
+              field: rawFieldName,
+              interval: (max - min) / 30
+            }
+          }
+        });
+        const histogramResp = await searchSource.fetch();
+        _.get(histogramResp, 'aggregations.fieldHistogram.buckets', []).forEach(bucket => {
+          histogram.push({
+            x: bucket.key,
+            y: _.get(bucket, 'doc_count', 0)
+          });
+        });
+      }
+
       return {
-        min: _.get(resp, 'aggregations.fieldMin.value', ''),
-        max: _.get(resp, 'aggregations.fieldMax.value', '')
+        min,
+        max,
+        histogram,
       };
     };
 

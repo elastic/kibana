@@ -183,6 +183,7 @@
     "@babel/register": "^7.5.5",
     "@babel/runtime": "^7.5.5",
     "@elastic/ctags-langserver": "^0.1.9",
+    "@elastic/charts": "^11.1.1",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "13.8.1",
     "@elastic/javascript-typescript-langserver": "^0.2.2",

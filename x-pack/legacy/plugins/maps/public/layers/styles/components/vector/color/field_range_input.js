@@ -9,14 +9,18 @@ import React, { Component, Fragment } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FieldHistogram } from './field_histogram';
 
 export class FieldRangeInput extends Component {
   state = {
     isLoadingMeta: false,
     errorLoadingMeta: false,
+    histogramData: null,
   };
 
   componentDidMount() {
@@ -58,6 +62,7 @@ export class FieldRangeInput extends Component {
     this.setState({
       isLoadingMeta: false,
       errorLoadingMeta: true,
+      histogramData: fieldMeta.histogram
     });
 
     this.props.onMinChange(fieldMeta.min);
@@ -80,7 +85,18 @@ export class FieldRangeInput extends Component {
     }
 
     if (!this.props.field) {
-      return null;
+      return (
+        <EuiText>
+          <p>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.maps.style.fieldRange.setFieldMessage"
+                defaultMessage="Select a field to load range."
+              />
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      );
     }
 
     return (
@@ -112,6 +128,9 @@ export class FieldRangeInput extends Component {
           })}
           value={this.props.max}
           onChange={this._onMaxChange}
+        />
+        <FieldHistogram
+          data={this.state.histogramData}
         />
         {this.renderLoadFieldMetaButton()}
       </Fragment>

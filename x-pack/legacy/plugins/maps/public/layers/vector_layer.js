@@ -784,7 +784,7 @@ export class VectorLayer extends AbstractLayer {
 
   // Load meta data for a field.
   // return { cancel, resultsPromise }
-  // resultsPromise resolves to { range, histogram }
+  // resultsPromise resolves to { min, max, histogram - Array of {x, y} }
   loadFieldMeta = (field) => {
     const source = this._getFieldSource(field);
 
