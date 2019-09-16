@@ -40,7 +40,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
     const duration = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
-    const certificateValidity = get(tls, 'certificate_not_valid_after', undefined);
+    const certificateValidity: string = get(tls, 'certificate_not_valid_after', undefined);
     return (
       <EuiPanel>
         <EuiFlexGroup gutterSize="l" wrap>
