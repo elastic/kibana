@@ -165,8 +165,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(rows.filter(row => row.id === jobId)).to.have.length(1);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/45450
-    it.skip('displays details for the created job in the job list', async () => {
+    it('displays details for the created job in the job list', async () => {
       const expectedRow = {
         id: jobId,
         description: jobDescription,
@@ -199,7 +198,6 @@ export default function({ getService }: FtrProviderContext) {
       const expectedModelSizeStats = {
         job_id: jobId,
         result_type: 'model_size_stats',
-        model_bytes: '1.8 MB',
         model_bytes_exceeded: '0',
         model_bytes_memory_limit: '20971520',
         total_by_field_count: '59',

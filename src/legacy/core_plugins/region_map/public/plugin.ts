@@ -23,7 +23,7 @@ import {
   PluginInitializerContext,
   UiSettingsClientContract,
 } from '../../../../core/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
@@ -40,7 +40,7 @@ interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSet
 
 /** @internal */
 export interface RegionMapPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -61,14 +61,14 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, visualizations, __LEGACY }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: RegionMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(createRegionMapFn);
+    expressions.registerFunction(createRegionMapFn);
 
     visualizations.types.registerVisualization(() =>
       createRegionMapTypeDefinition(visualizationDependencies)
