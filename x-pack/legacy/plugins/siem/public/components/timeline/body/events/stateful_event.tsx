@@ -17,7 +17,7 @@ import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
-import { TimelineEvent } from '../../styles';
+import { EventsTrAttributes, EventsTrGroup } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -188,7 +188,7 @@ export class StatefulEvent extends React.Component<Props, State> {
                 executeQuery={!!this.state.expanded[event._id]}
               >
                 {({ detailsData, loading }) => (
-                  <TimelineEvent
+                  <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
                     ref={divElement => {
@@ -227,7 +227,8 @@ export class StatefulEvent extends React.Component<Props, State> {
                       ),
                       timelineId,
                     })}
-                    <div data-test-subj="event-details">
+
+                    <EventsTrAttributes data-test-subj="event-details">
                       <ExpandableEvent
                         browserFields={browserFields}
                         columnHeaders={columnHeaders}
@@ -238,8 +239,8 @@ export class StatefulEvent extends React.Component<Props, State> {
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
                       />
-                    </div>
-                  </TimelineEvent>
+                    </EventsTrAttributes>
+                  </EventsTrGroup>
                 )}
               </TimelineDetailsComponentQuery>
             );

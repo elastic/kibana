@@ -10,7 +10,7 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { OnResize, Resizeable } from '../../../resize_handle';
 import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_handle/styled_handles';
 import { OnColumnResized } from '../../events';
-import { TimelineCell, TimelineCellContent, TimelineRowGroupData } from '../../styles';
+import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { FullHeightFlexItem } from '../column_headers/common/styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -57,10 +57,10 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
     const { _id, columnHeaders, columnRenderers, data, timelineId } = this.props;
 
     return (
-      <TimelineRowGroupData data-test-subj="data-driven-columns">
+      <EventsTdGroupData data-test-subj="data-driven-columns">
         {columnHeaders.map((header, index) => (
-          <TimelineCell key={header.id} width={`${header.width}px`}>
-            <TimelineCellContent data-test-subj="cell-container" key={header.id}>
+          <EventsTd key={header.id} width={`${header.width}px`}>
+            <EventsTdContent data-test-subj="cell-container">
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,
                 eventId: _id,
@@ -85,10 +85,10 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
                 render={this.renderCell(header, index)}
                 onResize={this.onResize}
               /> */}
-            </TimelineCellContent>
-          </TimelineCell>
+            </EventsTdContent>
+          </EventsTd>
         ))}
-      </TimelineRowGroupData>
+      </EventsTdGroupData>
     );
   }
 

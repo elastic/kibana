@@ -12,6 +12,7 @@ import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
+import { EventsTrNotes } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { EventColumnView } from './event_column_view';
@@ -72,33 +73,31 @@ export const StatefulEventChild = React.memo<Props>(
     onToggleShowNotes,
     updateNote,
   }) => (
-    <div data-test-subj="event-rows">
-      <div data-test-subj="event-column-data">
-        <EventColumnView
-          id={id}
-          actionsColumnWidth={actionsColumnWidth}
-          associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          data={data}
-          expanded={expanded}
-          eventIdToNoteIds={eventIdToNoteIds}
-          getNotesByIds={getNotesByIds}
-          isEventViewer={isEventViewer}
-          loading={loading}
-          onColumnResized={onColumnResized}
-          onEventToggled={onToggleExpanded(id)}
-          onPinEvent={onPinEvent}
-          onUnPinEvent={onUnPinEvent}
-          pinnedEventIds={pinnedEventIds}
-          showNotes={showNotes}
-          timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes(id)}
-          updateNote={updateNote}
-        />
-      </div>
+    <>
+      <EventColumnView
+        id={id}
+        actionsColumnWidth={actionsColumnWidth}
+        associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        data={data}
+        expanded={expanded}
+        eventIdToNoteIds={eventIdToNoteIds}
+        getNotesByIds={getNotesByIds}
+        isEventViewer={isEventViewer}
+        loading={loading}
+        onColumnResized={onColumnResized}
+        onEventToggled={onToggleExpanded(id)}
+        onPinEvent={onPinEvent}
+        onUnPinEvent={onUnPinEvent}
+        pinnedEventIds={pinnedEventIds}
+        showNotes={showNotes}
+        timelineId={timelineId}
+        toggleShowNotes={onToggleShowNotes(id)}
+        updateNote={updateNote}
+      />
 
-      <div data-test-subj="event-notes-flex-item">
+      <EventsTrNotes data-test-subj="event-notes-flex-item">
         <NoteCards
           associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
           data-test-subj="note-cards"
@@ -109,8 +108,8 @@ export const StatefulEventChild = React.memo<Props>(
           toggleShowAddNote={onToggleShowNotes(id)}
           updateNote={updateNote}
         />
-      </div>
-    </div>
+      </EventsTrNotes>
+    </>
   )
 );
 

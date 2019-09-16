@@ -9,7 +9,7 @@ import styled, { css } from 'styled-components';
 
 import { footerHeight } from './footer';
 
-export const TimelineScroll = styled.div<{ height: number }>`
+export const EventsTable = styled.div<{ height: number }>`
   ${({ height, theme }) => css`
     height: ${height + 'px'};
     overflow: auto;
@@ -32,14 +32,60 @@ export const TimelineScroll = styled.div<{ height: number }>`
     }
   `}
 `;
-TimelineScroll.displayName = 'TimelineScroll';
+EventsTable.displayName = 'EventsTable';
 
-export const EventsContainer = styled.div<{ minWidth: number }>`
+export const EventsThead = styled.div<{ minWidth: number }>`
+  ${({ theme }) => css`
+    background-color: ${theme.eui.euiColorEmptyShade}
+    border-bottom: 2px solid ${theme.eui.euiColorLightShade};
+    display: flex;
+    min-width: ${({ minWidth }) => `${minWidth}px`};
+    position: sticky;
+    top: 0;
+    z-index: ${theme.eui.euiZLevel1};
+  `}
+`;
+EventsThead.displayName = 'EventsThead';
+
+export const EventsTheadActions = styled.div<{ actionsColumnWidth: number }>`
+  display: flex;
+  justify-content: space-between;
+  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
+`;
+EventsTheadActions.displayName = 'EventsTheadActions';
+
+export const EventsTheadData = styled.div`
+  display: flex;
+`;
+EventsTheadData.displayName = 'EventsTheadData';
+
+export const EventsTh = styled.div<{ isDragging?: boolean; width?: string }>`
+  align-items: center;
+  display: flex;
+  width: ${({ width }) => width};
+`;
+EventsTh.displayName = 'EventsTh';
+
+export const EventsThContent = styled.div<{ textAlign?: string }>`
+  ${({ theme }) => css`
+    flex: 1;
+    font-size: ${theme.eui.euiFontSizeXS};
+    font-weight: ${theme.eui.euiFontWeightSemiBold};
+    line-height: ${theme.eui.euiLineHeight};
+    max-width: 100%;
+    min-width: 0;
+    padding: ${theme.eui.paddingSizes.xs};
+    text-align: ${({ textAlign }) => textAlign};
+  `}
+`;
+EventsThContent.displayName = 'EventsThContent';
+
+export const EventsTbody = styled.div<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
 `;
-EventsContainer.displayName = 'EventsContainer';
+EventsTbody.displayName = 'EventsTbody';
 
-export const TimelineEvent = styled.div`
+export const EventsTrGroup = styled.div`
   ${({ theme }) => css`
     & + & {
       border-top: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
@@ -50,38 +96,43 @@ export const TimelineEvent = styled.div`
     }
   `}
 `;
-TimelineEvent.displayName = 'TimelineEvent';
+EventsTrGroup.displayName = 'EventsTrGroup';
 
-export const TimelineRow = styled.div`
+export const EventsTrData = styled.div`
   display: flex;
 `;
-TimelineRow.displayName = 'TimelineRow';
+EventsTrData.displayName = 'EventsTrData';
 
-export const TimelineRowGroup = styled.div`
-  display: flex;
+export const EventsTrNotes = styled.div`
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
 `;
-TimelineRowGroup.displayName = 'TimelineRowGroup';
+EventsTrNotes.displayName = 'EventsTrNotes';
 
-export const TimelineRowGroupActions = styled.div<{ actionsColumnWidth: number }>`
+export const EventsTrAttributes = styled.div`
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
+`;
+EventsTrAttributes.displayName = 'EventsTrAttributes';
+
+export const EventsTdGroupActions = styled.div<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
   width: ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
 `;
-TimelineRowGroupActions.displayName = 'TimelineRowGroupActions';
+EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
-export const TimelineRowGroupData = styled.div`
+export const EventsTdGroupData = styled.div`
   display: flex;
 `;
-TimelineRowGroupData.displayName = 'TimelineRowGroupData';
+EventsTdGroupData.displayName = 'EventsTdGroupData';
 
-export const TimelineCell = styled.div<{ width?: string }>`
+export const EventsTd = styled.div<{ width?: string }>`
   align-items: center;
   display: flex;
   width: ${({ width }) => width};
 `;
-TimelineCell.displayName = 'TimelineCell';
+EventsTd.displayName = 'EventsTd';
 
-export const TimelineCellContent = styled.div<{ textAlign?: string }>`
+export const EventsTdContent = styled.div<{ textAlign?: string }>`
   ${({ theme }) => css`
     flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
@@ -92,4 +143,4 @@ export const TimelineCellContent = styled.div<{ textAlign?: string }>`
     text-align: ${({ textAlign }) => textAlign};
   `}
 `;
-TimelineCellContent.displayName = 'TimelineCellContent';
+EventsTdContent.displayName = 'EventsTdContent';

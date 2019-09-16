@@ -12,7 +12,7 @@ import { maxDelay } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
-import { EventsContainer } from '../../styles';
+import { EventsTbody } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
@@ -62,34 +62,32 @@ export const Events = React.memo<Props>(
     toggleColumn,
     updateNote,
   }) => (
-    <EventsContainer data-test-subj="events" minWidth={minWidth}>
-      <div data-test-subj="events-flex-group">
-        {data.map((event, i) => (
-          <StatefulEvent
-            actionsColumnWidth={actionsColumnWidth}
-            addNoteToEvent={addNoteToEvent}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            columnRenderers={columnRenderers}
-            event={event}
-            eventIdToNoteIds={eventIdToNoteIds}
-            getNotesByIds={getNotesByIds}
-            isEventViewer={isEventViewer}
-            key={event._id}
-            maxDelay={maxDelay(i)}
-            onColumnResized={onColumnResized}
-            onPinEvent={onPinEvent}
-            onUnPinEvent={onUnPinEvent}
-            onUpdateColumns={onUpdateColumns}
-            pinnedEventIds={pinnedEventIds}
-            rowRenderers={rowRenderers}
-            timelineId={id}
-            toggleColumn={toggleColumn}
-            updateNote={updateNote}
-          />
-        ))}
-      </div>
-    </EventsContainer>
+    <EventsTbody data-test-subj="events" minWidth={minWidth}>
+      {data.map((event, i) => (
+        <StatefulEvent
+          actionsColumnWidth={actionsColumnWidth}
+          addNoteToEvent={addNoteToEvent}
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          columnRenderers={columnRenderers}
+          event={event}
+          eventIdToNoteIds={eventIdToNoteIds}
+          getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
+          key={event._id}
+          maxDelay={maxDelay(i)}
+          onColumnResized={onColumnResized}
+          onPinEvent={onPinEvent}
+          onUnPinEvent={onUnPinEvent}
+          onUpdateColumns={onUpdateColumns}
+          pinnedEventIds={pinnedEventIds}
+          rowRenderers={rowRenderers}
+          timelineId={id}
+          toggleColumn={toggleColumn}
+          updateNote={updateNote}
+        />
+      ))}
+    </EventsTbody>
   )
 );
 

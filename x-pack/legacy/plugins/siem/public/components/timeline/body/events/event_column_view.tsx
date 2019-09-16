@@ -11,7 +11,7 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
-import { TimelineRow, TimelineRowGroup } from '../../styles';
+import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
@@ -68,49 +68,45 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => (
-    <TimelineRow data-test-subj="event-column-view">
-      <TimelineRowGroup data-test-subj="actions-column-item">
-        <Actions
-          actionsColumnWidth={actionsColumnWidth}
-          associateNote={associateNote}
-          checked={false}
-          expanded={expanded}
-          data-test-subj="actions"
-          eventId={id}
-          eventIsPinned={eventIsPinned({
-            eventId: id,
-            pinnedEventIds,
-          })}
-          getNotesByIds={getNotesByIds}
-          isEventViewer={isEventViewer}
-          loading={loading}
-          noteIds={eventIdToNoteIds[id] || emptyNotes}
-          onEventToggled={onEventToggled}
-          onPinClicked={getPinOnClick({
-            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-            eventId: id,
-            onPinEvent,
-            onUnPinEvent,
-            pinnedEventIds,
-          })}
-          showCheckboxes={false}
-          showNotes={showNotes}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={updateNote}
-        />
-      </TimelineRowGroup>
+    <EventsTrData data-test-subj="event-column-view">
+      <Actions
+        actionsColumnWidth={actionsColumnWidth}
+        associateNote={associateNote}
+        checked={false}
+        expanded={expanded}
+        data-test-subj="actions"
+        eventId={id}
+        eventIsPinned={eventIsPinned({
+          eventId: id,
+          pinnedEventIds,
+        })}
+        getNotesByIds={getNotesByIds}
+        isEventViewer={isEventViewer}
+        loading={loading}
+        noteIds={eventIdToNoteIds[id] || emptyNotes}
+        onEventToggled={onEventToggled}
+        onPinClicked={getPinOnClick({
+          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+          eventId: id,
+          onPinEvent,
+          onUnPinEvent,
+          pinnedEventIds,
+        })}
+        showCheckboxes={false}
+        showNotes={showNotes}
+        toggleShowNotes={toggleShowNotes}
+        updateNote={updateNote}
+      />
 
-      <TimelineRowGroup data-test-subj="event-columns-item">
-        <DataDrivenColumns
-          _id={id}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          data={data}
-          onColumnResized={onColumnResized}
-          timelineId={timelineId}
-        />
-      </TimelineRowGroup>
-    </TimelineRow>
+      <DataDrivenColumns
+        _id={id}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        data={data}
+        onColumnResized={onColumnResized}
+        timelineId={timelineId}
+      />
+    </EventsTrData>
   ),
   (prevProps, nextProps) => {
     return (

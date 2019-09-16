@@ -19,7 +19,7 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { TimelineScroll } from '../styles';
+import { EventsTable } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
@@ -86,7 +86,7 @@ export const Body = React.memo<BodyProps>(
     );
 
     return (
-      <TimelineScroll height={height}>
+      <EventsTable height={height}>
         <ColumnHeaders
           actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
           browserFields={browserFields}
@@ -125,7 +125,7 @@ export const Body = React.memo<BodyProps>(
           updateNote={updateNote}
           minWidth={columnWidths}
         />
-      </TimelineScroll>
+      </EventsTable>
     );
   }
 );

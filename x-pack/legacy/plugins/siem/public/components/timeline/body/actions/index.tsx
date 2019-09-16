@@ -11,7 +11,7 @@ import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { Pin } from '../../../pin';
 import { NotesButton } from '../../properties/helpers';
-import { TimelineCell, TimelineCellContent, TimelineRowGroupActions } from '../../styles';
+import { EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 
@@ -55,25 +55,25 @@ export const Actions = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => (
-    <TimelineRowGroupActions
+    <EventsTdGroupActions
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
       {showCheckboxes && (
-        <TimelineCell data-test-subj="select-event-container">
-          <TimelineCellContent textAlign="center">
+        <EventsTd data-test-subj="select-event-container">
+          <EventsTdContent textAlign="center">
             <EuiCheckbox
               data-test-subj="select-event"
               id={eventId}
               checked={checked}
               onChange={noop}
             />
-          </TimelineCellContent>
-        </TimelineCell>
+          </EventsTdContent>
+        </EventsTd>
       )}
 
-      <TimelineCell>
-        <TimelineCellContent textAlign="center">
+      <EventsTd>
+        <EventsTdContent textAlign="center">
           {loading && <EuiLoadingSpinner />}
 
           {!loading && (
@@ -85,13 +85,13 @@ export const Actions = React.memo<Props>(
               onClick={onEventToggled}
             />
           )}
-        </TimelineCellContent>
-      </TimelineCell>
+        </EventsTdContent>
+      </EventsTd>
 
       {!isEventViewer && (
         <>
-          <TimelineCell>
-            <TimelineCellContent textAlign="center">
+          <EventsTd>
+            <EventsTdContent textAlign="center">
               <EuiToolTip
                 data-test-subj="timeline-action-pin-tool-tip"
                 content={getPinTooltip({
@@ -106,11 +106,11 @@ export const Actions = React.memo<Props>(
                   pinned={eventIsPinned}
                 />
               </EuiToolTip>
-            </TimelineCellContent>
-          </TimelineCell>
+            </EventsTdContent>
+          </EventsTd>
 
-          <TimelineCell>
-            <TimelineCellContent textAlign="center">
+          <EventsTd>
+            <EventsTdContent textAlign="center">
               <NotesButton
                 animate={false}
                 associateNote={associateNote}
@@ -123,11 +123,11 @@ export const Actions = React.memo<Props>(
                 toolTip={i18n.NOTES_TOOLTIP}
                 updateNote={updateNote}
               />
-            </TimelineCellContent>
-          </TimelineCell>
+            </EventsTdContent>
+          </EventsTd>
         </>
       )}
-    </TimelineRowGroupActions>
+    </EventsTdGroupActions>
   ),
   (nextProps, prevProps) => {
     return (
