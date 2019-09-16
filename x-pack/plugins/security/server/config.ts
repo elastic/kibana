@@ -40,9 +40,6 @@ export const ConfigSchema = schema.object(
       hostname: schema.maybe(schema.string({ hostname: true })),
       port: schema.maybe(schema.number({ min: 0, max: 65535 })),
     }),
-    // This property is deprecated, but we include it here since new platform doesn't support config deprecation
-    // transformations yet (e.g. `rename`), so we handle it manually for now.
-    authProviders: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
       oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
@@ -55,6 +52,23 @@ export const ConfigSchema = schema.object(
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
   { allowUnknowns: true }
 );
+
+// HACK: Since new platform doesn't support config deprecation transformations yet (e.g. `rename`), we have to handle
+// them manually here for the time being. Legacy platform config will log corresponding deprecation warnings.
+const origValidate = ConfigSchema.validate;
+ConfigSchema.validate = (value, context, namespace) => {
+  // Rename deprecated `xpack.security.authProviders` to `xpack.security.authc.providers`.
+  if (value && value.authProviders) {
+    value.authc = {
+      ...(value.authc || {}),
+      providers: value.authProviders,
+    };
+
+    delete value.authProviders;
+  }
+
+  return origValidate.call(ConfigSchema, value, context, namespace);
+};
 
 export function createConfig$(context: PluginInitializerContext, isTLSEnabled: boolean) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -87,17 +101,7 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         secureCookies = true;
       }
 
-      return {
-        ...config,
-        encryptionKey,
-        secureCookies,
-        authc: {
-          ...config.authc,
-          // If deprecated `authProviders` is specified that most likely means that `authc.providers` isn't, but if it's
-          // specified then this case should be caught by the config deprecation subsystem in the legacy platform.
-          providers: config.authProviders || config.authc.providers,
-        },
-      };
+      return { ...config, encryptionKey, secureCookies };
     })
   );
 }
