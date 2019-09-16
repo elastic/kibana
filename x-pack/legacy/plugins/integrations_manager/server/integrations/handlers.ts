@@ -25,6 +25,12 @@ interface PackageRequest extends Request {
   };
 }
 
+interface ListRequest extends Request {
+  query: {
+    'registry-url': string;
+  };
+}
+
 interface InstallAssetRequest extends Request {
   params: AssetRequestParams;
 }
@@ -37,9 +43,10 @@ type AssetRequestParams = PackageRequest['params'] & {
   asset?: AssetType;
 };
 
-export async function handleGetList(req: Request, extra: Extra) {
+export async function handleGetList(req: ListRequest, extra: Extra) {
+  const registryUrl = req.query['registry-url'];
   const savedObjectsClient = getClient(req);
-  const integrationList = await getIntegrations({ savedObjectsClient });
+  const integrationList = await getIntegrations({ savedObjectsClient, registryUrl });
 
   return integrationList;
 }
