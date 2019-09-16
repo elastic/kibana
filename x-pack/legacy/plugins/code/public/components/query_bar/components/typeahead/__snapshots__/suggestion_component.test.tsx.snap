@@ -30,7 +30,9 @@ exports[`render file item 1`] = `
     <div
       className="codeSearch-suggestion--inner"
     >
-      <div>
+      <div
+        className="codeSearch__suggestionTextContainer"
+      >
         <div
           className="codeSearch__suggestion-text"
           data-test-subj="codeTypeaheadItem"
@@ -84,7 +86,9 @@ exports[`render repository item 1`] = `
     <div
       className="codeSearch-suggestion--inner"
     >
-      <div>
+      <div
+        className="codeSearch__suggestionTextContainer"
+      >
         <div
           className="codeSearch__suggestion-text"
           data-test-subj="codeTypeaheadItem"
@@ -166,7 +170,9 @@ exports[`render symbol item 1`] = `
           </div>
         </EuiToken>
       </div>
-      <div>
+      <div
+        className="codeSearch__suggestionTextContainer"
+      >
         <div
           className="codeSearch__suggestion-text"
           data-test-subj="codeTypeaheadItem"

@@ -21,8 +21,6 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-  export const EuiOutsideClickDetector: React.SFC<any>;
   export const EuiSideNav: React.SFC<any>;
 
   export interface EuiTableCriteria {

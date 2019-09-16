@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectFinder,
   SavedObjectMetaData,
@@ -58,9 +57,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
-              <FormattedMessage id="xpack.canvas.embedObject.title" defaultMessage="Embed Object" />
-            </h2>
+            <h2>{strings.getTitleText()}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

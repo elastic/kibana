@@ -11,14 +11,14 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 // @ts-ignore
 import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
-import { SavedGraphWorkspace } from '../types/persistence';
+import { GraphWorkspaceSavedObject } from '../types';
 
 export interface GraphListingProps {
   createItem: () => void;
-  findItems: (query: string, limit: number) => Promise<SavedGraphWorkspace[]>;
+  findItems: (query: string, limit: number) => Promise<GraphWorkspaceSavedObject[]>;
   deleteItems: (ids: string[]) => Promise<void>;
-  editItem: (record: SavedGraphWorkspace) => void;
-  getViewUrl: (record: SavedGraphWorkspace) => string;
+  editItem: (record: GraphWorkspaceSavedObject) => void;
+  getViewUrl: (record: GraphWorkspaceSavedObject) => string;
   listingLimit: number;
   hideWriteControls: boolean;
   capabilities: { save: boolean; delete: boolean };
@@ -131,11 +131,11 @@ interface DataColumn {
   field: string;
   name: string;
   sortable?: boolean;
-  render?: (value: string, item: SavedGraphWorkspace) => React.ReactNode;
+  render?: (value: string, item: GraphWorkspaceSavedObject) => React.ReactNode;
   dataType?: 'auto' | 'string' | 'number' | 'date' | 'boolean';
 }
 
-function getTableColumns(getViewUrl: (record: SavedGraphWorkspace) => string): DataColumn[] {
+function getTableColumns(getViewUrl: (record: GraphWorkspaceSavedObject) => string): DataColumn[] {
   return [
     {
       field: 'title',
