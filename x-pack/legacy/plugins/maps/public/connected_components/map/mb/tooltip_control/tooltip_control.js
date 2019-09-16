@@ -39,9 +39,8 @@ function justifyAnchorLocation(mbLngLat, targetFeature) {
 
 export class TooltipControl extends React.Component {
 
-  constructor() {
-    super();
-    this._areMapHandlersRegistered = false;
+  constructor(props) {
+    super(props);
     this._tooltipContainer = document.createElement('div');
     this._mbPopup = new mapboxgl.Popup({
       closeButton: false,
@@ -50,30 +49,23 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  componentDidUpdate() {
-    if (this.props.mbMap) {
-      this._syncTooltipState();
-
-      if (!this._areMapHandlersRegistered) {
-        this._areMapHandlersRegistered = true;
-        this.props.mbMap.on('mouseout', this._onMouseout);
-        this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
-        this.props.mbMap.on('click', this._lockTooltip);
-      }
-    }
-  }
-
   componentDidMount() {
     this._isMounted = true;
+
+    this.props.mbMap.on('mouseout', this._onMouseout);
+    this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
+    this.props.mbMap.on('click', this._lockTooltip);
+  }
+
+  componentDidUpdate() {
+    this._syncTooltipState();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._areMapHandlersRegistered) {
-      this.props.mbMap.off('mouseout', this._onMouseout);
-      this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
-      this.props.mbMap.off('click', this._lockTooltip);
-    }
+    this.props.mbMap.off('mouseout', this._onMouseout);
+    this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
+    this.props.mbMap.off('click', this._lockTooltip);
     this._hideTooltip();
   }
 

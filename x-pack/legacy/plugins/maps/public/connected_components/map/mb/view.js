@@ -30,6 +30,7 @@ export class MBMapContainer extends React.Component {
   state = {
     prevLayerList: undefined,
     hasSyncedLayerList: false,
+    mbMap: undefined,
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -38,24 +39,10 @@ export class MBMapContainer extends React.Component {
       return {
         prevLayerList: nextLayerList,
         hasSyncedLayerList: false,
-
       };
     }
 
     return null;
-  }
-
-  constructor() {
-    super();
-    this._mbMap = null;
-  }
-
-  componentDidUpdate() {
-    if (this._mbMap) {
-      // do not debounce syncing of map-state
-      this._syncMbMapWithMapState();
-      this._debouncedSync();
-    }
   }
 
   componentDidMount() {
@@ -63,14 +50,22 @@ export class MBMapContainer extends React.Component {
     this._isMounted = true;
   }
 
+  componentDidUpdate() {
+    if (this.state.mbMap) {
+      // do not debounce syncing of map-state
+      this._syncMbMapWithMapState();
+      this._debouncedSync();
+    }
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
     if (this._checker) {
       this._checker.destroy();
     }
-    if (this._mbMap) {
-      this._mbMap.remove();
-      this._mbMap = null;
+    if (this.state.mbMap) {
+      this.state.mbMap.remove();
+      this.state.mbMap = null;
     }
     this.props.onMapDestroyed();
   }
@@ -89,9 +84,9 @@ export class MBMapContainer extends React.Component {
   }, 256);
 
   _getMapState() {
-    const zoom = this._mbMap.getZoom();
-    const mbCenter = this._mbMap.getCenter();
-    const mbBounds = this._mbMap.getBounds();
+    const zoom = this.state.mbMap.getZoom();
+    const mbCenter = this.state.mbMap.getCenter();
+    const mbBounds = this.state.mbMap.getBounds();
     return {
       zoom: _.round(zoom, ZOOM_PRECISION),
       center: {
@@ -159,8 +154,9 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
+    let mbMap;
     try {
-      this._mbMap = await this._createMbMapInstance();
+      mbMap = await this._createMbMapInstance();
     } catch(error) {
       this.props.setMapInitError(error.message);
       return;
@@ -170,15 +166,22 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    this._loadMakiSprites();
+    this.setState(
+      { mbMap },
+      () => {
+        this._loadMakiSprites();
+        this._initResizerChecker();
+        this._registerMapEventListeners();
+        this.props.onMapReady(this._getMapState());
+      });
+  }
 
-    this._initResizerChecker();
-
+  _registerMapEventListeners() {
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
     // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
     // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
-    this._mbMap.on('moveend', _.debounce(() => {
+    this.state.mbMap.on('moveend', _.debounce(() => {
       this.props.extentChanged(this._getMapState());
     }, 100));
 
@@ -188,26 +191,24 @@ export class MBMapContainer extends React.Component {
         lon: e.lngLat.lng
       });
     }, 100);
-    this._mbMap.on('mousemove', throttledSetMouseCoordinates);
-    this._mbMap.on('mouseout', () => {
+    this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
+    this.state.mbMap.on('mouseout', () => {
       throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
       this.props.clearMouseCoordinates();
     });
-
-    this.props.onMapReady(this._getMapState());
   }
 
   _initResizerChecker() {
     this._checker = new ResizeChecker(this.refs.mapContainer);
     this._checker.on('resize', () => {
-      this._mbMap.resize();
+      this.state.mbMap.resize();
     });
   }
 
   _loadMakiSprites() {
     const sprites = isRetina() ? sprites2 : sprites1;
     const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    addSpritesheetToMap(json, sprites, this._mbMap);
+    addSpritesheetToMap(json, sprites, this.state.mbMap);
   }
 
   _syncMbMapWithMapState = () => {
@@ -231,10 +232,10 @@ export class MBMapContainer extends React.Component {
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes
       //the padding is to avoid too tight of a fit around edges
-      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
+      this.state.mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
     } else if (goto.center) {
-      this._mbMap.setZoom(goto.center.zoom);
-      this._mbMap.setCenter({
+      this.state.mbMap.setZoom(goto.center.zoom);
+      this.state.mbMap.setCenter({
         lng: goto.center.lon,
         lat: goto.center.lat
       });
@@ -246,9 +247,9 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    removeOrphanedSourcesAndLayers(this._mbMap, this.props.layerList);
-    this.props.layerList.forEach(layer => layer.syncLayerWithMB(this._mbMap));
-    syncLayerOrderForSingleLayer(this._mbMap, this.props.layerList);
+    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
+    syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
@@ -257,17 +258,27 @@ export class MBMapContainer extends React.Component {
     }
 
     const stats = {
-      center: this._mbMap.getCenter().toArray(),
-      zoom: this._mbMap.getZoom(),
+      center: this.state.mbMap.getCenter().toArray(),
+      zoom: this.state.mbMap.getZoom(),
 
     };
     this.props.inspectorAdapters.map.setMapState({
       stats,
-      style: this._mbMap.getStyle(),
+      style: this.state.mbMap.getStyle(),
     });
   };
 
   render() {
+    let tooltipControl;
+    if (this.state.mbMap) {
+      tooltipControl = (
+        <TooltipControl
+          mbMap={this.state.mbMap}
+          addFilters={this.props.addFilters}
+          geoFields={this.props.geoFields}
+        />
+      );
+    }
     return (
       <div
         id="mapContainer"
@@ -276,14 +287,10 @@ export class MBMapContainer extends React.Component {
         data-test-subj="mapContainer"
       >
         <DrawControl
-          mbMap={this._mbMap}
+          mbMap={this.state.mbMap}
           addFilters={this.props.addFilters}
         />
-        <TooltipControl
-          mbMap={this._mbMap}
-          addFilters={this.props.addFilters}
-          geoFields={this.props.geoFields}
-        />
+        {tooltipControl}
       </div>
     );
   }

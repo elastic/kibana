@@ -15,8 +15,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 export class DrawTooltip extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this._tooltipContainer = document.createElement('div');
     this._mbPopup = new mapboxgl.Popup({
       closeButton: false,
