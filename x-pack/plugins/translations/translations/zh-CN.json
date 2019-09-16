@@ -9381,7 +9381,6 @@
     "xpack.siem.fieldBrowser.resetFieldsLink": "重置字段",
     "xpack.siem.fieldBrowser.viewCategoryTooltip": "查看所有 {categoryId} 字段",
     "xpack.siem.fieldRenderers.moreLabel": "更多",
-    "xpack.siem.fieldRenderers.moreOverflowLabel": "更多......",
     "xpack.siem.flyout.button.timeline": "时间线",
     "xpack.siem.footer.autoRefreshActiveDescription": "自动刷新已启用",
     "xpack.siem.footer.autoRefreshActiveTooltip": "自动刷新已启用时，时间线将显示匹配查询的最近 {numberOfItems} 个事件。",
