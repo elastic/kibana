@@ -18,18 +18,19 @@
  */
 
 import _ from 'lodash';
+import { IndexPattern } from './';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 
-function flattenHit(indexPattern, hit, deep) {
-  const flat = {};
+function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: boolean) {
+  const flat = {} as Record<string, any>;
 
   // recursively merge _source
   const fields = indexPattern.fields.byName;
-  (function flatten(obj, keyPrefix) {
+  (function flatten(obj, keyPrefix = '') {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
-    _.forOwn(obj, function (val, key) {
+    _.forOwn(obj, function(val, key) {
       key = keyPrefix + key;
 
       if (deep) {
@@ -52,28 +53,28 @@ function flattenHit(indexPattern, hit, deep) {
         } else if (Array.isArray(flat[key])) {
           flat[key].push(val);
         } else {
-          flat[key] = [ flat[key], val ];
+          flat[key] = [flat[key], val];
         }
         return;
       }
 
       flatten(val, key);
     });
-  }(hit._source));
+  })(hit._source);
 
   return flat;
 }
 
-function decorateFlattenedWrapper(hit, metaFields) {
-  return function (flattened) {
+function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<string, any>) {
+  return function(flattened: Record<string, any>) {
     // assign the meta fields
-    _.each(metaFields, function (meta) {
+    _.each(metaFields, function(meta) {
       if (meta === '_source') return;
       flattened[meta] = hit[meta];
     });
 
     // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key) {
+    _.forOwn(hit.fields, function(val, key: any) {
       if (key[0] === '_' && !_.contains(metaFields, key)) return;
       flattened[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
     });
@@ -88,8 +89,12 @@ function decorateFlattenedWrapper(hit, metaFields) {
  *
  * @internal
  */
-export function flattenHitWrapper(indexPattern, metaFields = {}, cache = new WeakMap()) {
-  return function cachedFlatten(hit, deep = false) {
+export function flattenHitWrapper(
+  indexPattern: IndexPattern,
+  metaFields = {},
+  cache = new WeakMap()
+) {
+  return function cachedFlatten(hit: Record<string, any>, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
     const flattened = cached || flattenHit(indexPattern, hit, deep);
