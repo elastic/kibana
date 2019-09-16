@@ -10,7 +10,7 @@ import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 
-import { ALLOWED_DATA_UNITS } from '../constants/validation';
+import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 
@@ -272,7 +272,6 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   let valid = true;
 
   if (job) {
-    const JOB_ID_MAX_LENGTH = 64;
     // Job details
     if (_.isEmpty(job.job_id)) {
       messages.push({ id: 'job_id_empty' });
@@ -281,7 +280,7 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
       messages.push({ id: 'job_id_invalid' });
       valid = false;
     } else if (maxLengthValidator(JOB_ID_MAX_LENGTH)(job.job_id)) {
-      messages.push({ id: 'invalid_max_length', maxLength: JOB_ID_MAX_LENGTH });
+      messages.push({ id: 'job_id_invalid_max_length', maxLength: JOB_ID_MAX_LENGTH });
       valid = false;
     } else {
       messages.push({ id: 'job_id_valid' });
@@ -492,22 +491,14 @@ export function validateModelMemoryLimitUnits(job) {
 }
 
 export function validateGroupNames(job) {
-  const messages = [];
-  let valid = true;
-  if (job.groups !== undefined) {
-    let groupIdValid = true;
-    job.groups.forEach(group => {
-      if (isJobIdValid(group) === false) {
-        groupIdValid = false;
-        valid = false;
-      }
-    });
-    if (job.groups.length > 0 && groupIdValid) {
-      messages.push({ id: 'job_group_id_valid' });
-    } else if (job.groups.length > 0 && !groupIdValid) {
-      messages.push({ id: 'job_group_id_invalid' });
-    }
-  }
+  const { groups = [] } = job;
+  const errorMessages = [
+    ...groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : [],
+    ...groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group)) ? [{ id: 'job_group_id_invalid_max_length' }] : [],
+  ];
+  const valid = errorMessages.length === 0;
+  const messages = valid ? [{ id: 'job_group_id_valid' }] : errorMessages;
+
   return {
     valid,
     messages,

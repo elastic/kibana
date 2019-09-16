@@ -11,16 +11,13 @@
 export function maxLengthValidator(
   maxLength: number
 ): (value: string) => { maxLength: { requiredLength: number; actualLength: number } } | null {
-  return value => {
-    if (value && value.length > maxLength) {
-      return {
-        maxLength: {
-          requiredLength: maxLength,
-          actualLength: value.length,
-        },
-      };
-    } else {
-      return null;
-    }
-  };
+  return value =>
+    value && value.length > maxLength
+      ? {
+          maxLength: {
+            requiredLength: maxLength,
+            actualLength: value.length,
+          },
+        }
+      : null;
 }

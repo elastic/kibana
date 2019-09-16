@@ -6,6 +6,7 @@
 
 
 import { i18n } from '@kbn/i18n';
+import { JOB_ID_MAX_LENGTH } from '../../../common/constants/validation';
 
 let messages;
 
@@ -252,12 +253,12 @@ export const getMessages = () => {
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
     },
-    invalid_max_length: {
+    job_id_invalid_max_length: {
       status: 'ERROR',
-      text: i18n.translate('xpack.ml.validation.messages.invalidMaxLengthErrorMessage', {
-        defaultMessage: 'The max length is {maxLength, plural, one {# character} other {# characters}}.',
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidMaxLengthErrorMessage', {
+        defaultMessage: 'Job name can\'t contain more than {maxLength, plural, one {# character} other {# characters}}.',
         values: {
-          maxLength: '{{maxLength}}',
+          maxLength: JOB_ID_MAX_LENGTH,
         },
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
@@ -269,7 +270,10 @@ export const getMessages = () => {
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +
-          'starts and ends with an alphanumeric character, and is less than 64 characters.',
+          'starts and ends with an alphanumeric character, and is less than {maxLength, plural, one {# character} other {# characters}}.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
     },
@@ -281,6 +285,16 @@ export const getMessages = () => {
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
     },
+    job_group_id_invalid_max_length: {
+      status: 'ERROR',
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorMessage', {
+        defaultMessage: 'Job group name can\'t contain more than {maxLength, plural, one {# character} other {# characters}}.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
+      }),
+      url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
+    },
     job_group_id_valid: {
       status: 'SUCCESS',
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidHeading', {
@@ -288,7 +302,10 @@ export const getMessages = () => {
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +
-          'starts and ends with an alphanumeric character, and is less than 64 characters.',
+          'starts and ends with an alphanumeric character, and is less than {maxLength, plural, one {# character} other {# characters}}.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
       }),
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource'
     },
