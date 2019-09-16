@@ -113,6 +113,15 @@ export const monitorStatesSchema = gql`
     scheme: String
   }
 
+  "Contains monitor transmission encryption information."
+  type StateTLS {
+    "The date and time after which the certificate is invalid."
+    certificate_not_valid_after: String
+    certificate_not_valid_before: String
+    certificates: String
+    rtt: RTT
+  }
+
   "Unifies the subsequent data for an uptime monitor."
   type State {
     "The agent processing the monitor."
@@ -125,7 +134,7 @@ export const monitorStatesSchema = gql`
     summary: Summary!
     timestamp: UnsignedInteger!
     "Transport encryption information."
-    tls: TLS
+    tls: [StateTLS]
     url: StateUrl
   }
 
