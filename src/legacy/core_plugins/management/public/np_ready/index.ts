@@ -44,4 +44,7 @@ export {
   IndexPatternListConfig,
 } from './services/index_pattern_management';
 
-export { SavedObjectsManagementAction } from './services/saved_objects_management';
+export {
+  SavedObjectsManagementAction,
+  SavedObjectsManagementRecord,
+} from './services/saved_objects_management';
