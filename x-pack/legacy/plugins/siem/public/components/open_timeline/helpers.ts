@@ -129,7 +129,7 @@ export const defaultTimelineToTimelineModel = (
   }).reduce(
     (acc: TimelineModel, [key, value]) => {
       if (value != null) {
-        acc = set(key, value, acc);
+        return set(key, value, acc);
       }
       return acc;
     },

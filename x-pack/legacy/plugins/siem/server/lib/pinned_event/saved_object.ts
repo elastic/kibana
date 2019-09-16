@@ -116,7 +116,7 @@ export class PinnedEvent {
                       pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
                     )
                 );
-                timelineId = timelineResult.savedObjectId;
+                timelineId = timelineResult.savedObjectId; // eslint-disable-line no-param-reassign
                 return timelineResult.version;
               })()
             : null;

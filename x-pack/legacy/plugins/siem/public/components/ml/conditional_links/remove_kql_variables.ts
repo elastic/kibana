@@ -20,8 +20,7 @@ export const replacement = (match: string, ...parts: string[]): string => {
   }
   const operatorsMatched = parts.reduce<string[]>((accum, part) => {
     if (part != null && operators.includes(part)) {
-      accum = [...accum, part];
-      return accum;
+      return [...accum, part];
     } else {
       return accum;
     }

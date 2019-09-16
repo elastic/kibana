@@ -557,7 +557,7 @@ module.exports = {
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
         // This will be turned on after bug fixes are mostly complete
-        // 'no-param-reassign': 'warn',
+        'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
         // This will be turned on after bug fixes are mostly complete

@@ -162,7 +162,7 @@ const makeMapStateToProps = () => {
     const openTimelineId = Object.entries(getTimelines(state)).reduce(
       (useTimelineId, [timelineId, timelineObj]) => {
         if (timelineObj.savedObjectId != null) {
-          useTimelineId = timelineObj.savedObjectId;
+          return timelineObj.savedObjectId;
         }
         return useTimelineId;
       },

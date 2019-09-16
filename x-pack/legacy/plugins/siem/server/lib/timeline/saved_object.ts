@@ -94,7 +94,7 @@ export class Timeline {
           version,
           ...savedTimeline
         } = await this.getBasicSavedTimeline(request, timelineId);
-        timelineId = savedObjectId;
+        timelineId = savedObjectId; // eslint-disable-line no-param-reassign
         timeline = savedTimeline;
       }
 

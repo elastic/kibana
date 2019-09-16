@@ -280,14 +280,14 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
     const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
-      category = field.split('.')[0];
-      if (isEmpty(category) && baseCategoryFields.includes(category)) {
-        category = 'base';
+      let fieldCategory = field.split('.')[0];
+      if (isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
+        fieldCategory = 'base';
       }
       return [
         ...accumulator,
         {
-          category,
+          category: fieldCategory,
           field,
           values: item,
           originalValue: item,
