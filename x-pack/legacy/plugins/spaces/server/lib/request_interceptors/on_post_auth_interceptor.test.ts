@@ -347,6 +347,73 @@ describe('onPostAuthInterceptor', () => {
     );
   });
 
+  it('redirects to the space selector when accessing the root of the default space', async () => {
+    const spaces = [
+      {
+        id: 'default',
+        type: 'space',
+        attributes: {
+          name: 'Default space',
+          _reserved: true,
+        },
+      },
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+        },
+      },
+    ];
+
+    const { response, spacesService } = await request('/', spaces);
+
+    expect(response.status).toEqual(302);
+    expect(response.header.location).toEqual(`/spaces/space_selector`);
+
+    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      })
+    );
+  }, 30000);
+
+  it('allows the request to continue when accessing the root of a non-default space', async () => {
+    const spaces = [
+      {
+        id: 'default',
+        type: 'space',
+        attributes: {
+          name: 'Default space',
+          _reserved: true,
+        },
+      },
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+        },
+      },
+    ];
+
+    const { response, spacesService } = await request('/s/a-space', spaces);
+
+    // OSS handles this redirection for us
+    expect(response.status).toEqual(302);
+    expect(response.header.location).toEqual(`/s/a-space${defaultRoute}`);
+
+    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      })
+    );
+  }, 30000);
+
   describe('with a single available space', () => {
     it('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
       const spaces = [

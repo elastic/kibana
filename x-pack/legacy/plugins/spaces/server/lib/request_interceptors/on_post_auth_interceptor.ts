@@ -6,11 +6,12 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
+import { addSpaceIdToPath } from '../spaces_url_parser';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { LegacyAPI } from '../../new_platform/plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 export interface OnPostAuthInterceptorDeps {
   getLegacyAPI(): LegacyAPI;
@@ -32,7 +33,11 @@ export function initSpacesOnPostAuthRequestInterceptor({
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const path = request.url.pathname!;
 
-    const isRequestingKibanaRoot = path === '/';
+    const spaceId = spacesService.getSpaceId(request);
+
+    // The root of kibana is also the root of the defaut space,
+    // since the default space does not have a URL Identifier (i.e., `/s/foo`).
+    const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
     const spacesClient = await spacesService.scopedClient(request);
@@ -71,11 +76,8 @@ export function initSpacesOnPostAuthRequestInterceptor({
     // This condition should only happen after selecting a space, or when transitioning from one application to another
     // e.g.: Navigating from Dashboard to Timelion
     if (isRequestingApplication) {
-      let spaceId: string = '';
       let space: Space;
       try {
-        spaceId = getSpaceIdFromPath(http.basePath.get(request), serverBasePath);
-
         log.debug(`Verifying access to space "${spaceId}"`);
 
         space = await spacesClient.get(spaceId);
