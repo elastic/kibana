@@ -6,6 +6,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Integrations Manager Endpoints', () => {
-    loadTestFile(require.resolve('./packages'));
+    loadTestFile(require.resolve('./list'));
   });
 }
