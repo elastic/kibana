@@ -26,7 +26,7 @@ import { ObjDefine } from './obj_define';
 // @ts-ignore
 import { getKbnFieldType } from '../../../../../utils/kbn_field_types';
 // @ts-ignore
-import { FieldFormat } from '../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
