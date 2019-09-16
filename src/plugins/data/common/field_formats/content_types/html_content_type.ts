@@ -18,8 +18,8 @@
  */
 import { escape, isFunction } from 'lodash';
 import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../types';
-import { getHighlightHtml } from '../../../../plugins/data/common/highlight/highlight_html';
-import { asPrettyString } from '../../../../plugins/data/common/utils/as_pretty_string';
+
+import { asPrettyString, getHighlightHtml } from '../utils';
 
 const CONTEXT_TYPE = 'html';
 
