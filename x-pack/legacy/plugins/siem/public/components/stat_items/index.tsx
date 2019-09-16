@@ -47,24 +47,25 @@ const StatValue = styled(EuiTitle)`
 StatValue.displayName = 'StatValue';
 
 interface StatItem {
-  key: string;
-  description?: string;
-  value: number | undefined | null;
   color?: string;
+  description?: string;
   icon?: IconType;
+  key: string;
   name?: string;
+  statKey: string;
+  value: number | undefined | null;
 }
 
 export interface StatItems {
-  key: string;
-  fields: StatItem[];
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
   description?: string;
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
+  fields: StatItem[];
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
   index: number;
-  areachartConfigs?: ChartSeriesConfigs;
-  barchartConfigs?: ChartSeriesConfigs;
+  key: string;
 }
 
 export interface StatItemsProps extends StatItems {
@@ -72,16 +73,16 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
   from: number;
   id: string;
-  to: number;
   narrowDateRange: UpdateDateRange;
+  to: number;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
 const statItemBarchartRotation: Rotation = 90;
 
 export const areachartConfigs = (config?: {
-  xTickFormatter: (value: number) => string;
   onBrushEnd?: BrushEndListener;
+  xTickFormatter: (value: number) => string;
 }) => ({
   series: {
     xScaleType: ScaleType.Time,
@@ -156,12 +157,12 @@ export const addValueToBarChart = (
 };
 
 export const useKpiMatrixStatus = (
-  mappings: Readonly<StatItems[]>,
   data: KpiHostsData | KpiNetworkData,
-  id: string,
   from: number,
-  to: number,
-  narrowDateRange: UpdateDateRange
+  id: string,
+  mappings: Readonly<StatItems[]>,
+  narrowDateRange: UpdateDateRange,
+  to: number
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
@@ -173,11 +174,12 @@ export const useKpiMatrixStatus = (
           areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
           barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
           fields: addValueToFields(stat.fields, data),
+          from,
           id,
           key: `kpi-summary-${stat.key}`,
-          from,
-          to,
           narrowDateRange,
+          statKey: `${stat.key}`,
+          to,
         };
       })
     );
@@ -198,8 +200,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     grow,
     id,
     index,
-    to,
     narrowDateRange,
+    statKey,
+    to,
   }) => {
     const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
@@ -211,7 +214,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem grow={grow}>
+      <FlexItem grow={grow} data-test-subj={statKey}>
         <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
@@ -221,10 +224,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <InspectButton
-                queryId={id}
-                title={`KPI ${description}`}
                 inspectIndex={index}
+                queryId={id}
                 show={isHover}
+                title={`KPI ${description}`}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -236,10 +239,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
-                        type={field.icon}
                         color={field.color}
-                        size="l"
                         data-test-subj="stat-icon"
+                        size="l"
+                        type={field.icon}
                       />
                     </FlexItem>
                   )}
