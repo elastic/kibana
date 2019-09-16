@@ -209,7 +209,7 @@ locations for a Debian-based system:
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | /usr/share/kibana/optimize
+  | /var/lib/kibana/optimize
  d|
 
 | plugins

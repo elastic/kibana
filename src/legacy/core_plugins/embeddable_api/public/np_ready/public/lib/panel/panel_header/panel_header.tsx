@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EuiContextMenuPanelDescriptor, EuiBadge } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { EuiContextMenuPanelDescriptor, EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { Action } from '../../actions';
 import { IEmbeddable } from '../../embeddables';
+import { VisualizeEmbeddable } from '../../../../../../../kibana/public/visualize/embeddable/visualize_embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../kibana/public/visualize/embeddable/constants';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -33,10 +34,6 @@ export interface PanelHeaderProps {
   closeContextMenu: boolean;
   badges: Action[];
   embeddable: IEmbeddable;
-}
-
-interface PanelHeaderUiProps extends PanelHeaderProps {
-  intl: InjectedIntl;
 }
 
 function renderBadges(badges: Action[], embeddable: IEmbeddable) {
@@ -52,16 +49,21 @@ function renderBadges(badges: Action[], embeddable: IEmbeddable) {
   ));
 }
 
-function PanelHeaderUi({
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
+}
+
+export function PanelHeader({
   title,
   isViewMode,
   hidePanelTitles,
   getActionContextMenuPanel,
-  intl,
   closeContextMenu,
   badges,
   embeddable,
-}: PanelHeaderUiProps) {
+}: PanelHeaderProps) {
   const classes = classNames('embPanel__header', {
     'embPanel__header--floater': !title || hidePanelTitles,
   });
@@ -81,6 +83,16 @@ function PanelHeaderUi({
     );
   }
 
+  let viewDescr = '';
+  if (isVisualizeEmbeddable(embeddable)) {
+    const vd = (embeddable as VisualizeEmbeddable).getVisualizationDescription();
+    if (vd) {
+      viewDescr = vd;
+    }
+  } else {
+    viewDescr = '';
+  }
+
   return (
     <div
       className={classes}
@@ -89,19 +101,25 @@ function PanelHeaderUi({
       <div
         data-test-subj="dashboardPanelTitle"
         className="embPanel__title embPanel__dragger"
-        title={title}
-        aria-label={intl.formatMessage(
+        /* title={title} */ /* this is redundant - it shows a tooltip with the view title - and clutters the UI */ aria-label={i18n.translate(
+          'embeddableApi.panel.dashboardPanelAriaLabel',
           {
-            id: 'embeddableApi.panel.dashboardPanelAriaLabel',
             defaultMessage: 'Dashboard panel: {title}',
-          },
-          {
-            title,
+            values: {
+              title,
+            },
           }
         )}
       >
         {showTitle ? `${title} ` : ''}
         {renderBadges(badges, embeddable)}
+        {viewDescr !== '' ? (
+          <EuiToolTip content={viewDescr} delay="regular" position="right">
+            <EuiIcon type="iInCircle" />
+          </EuiToolTip>
+        ) : (
+          ''
+        )}
       </div>
 
       <PanelOptionsMenu
@@ -112,5 +130,3 @@ function PanelHeaderUi({
     </div>
   );
 }
-
-export const PanelHeader = injectI18n(PanelHeaderUi);

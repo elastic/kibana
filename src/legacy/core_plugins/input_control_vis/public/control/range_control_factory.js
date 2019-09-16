@@ -50,6 +50,12 @@ const minMaxAgg = (field) => {
 class RangeControl extends Control {
 
   async fetch() {
+    // Abort any in-progress fetch
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -60,11 +66,15 @@ class RangeControl extends Control {
 
     const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
+    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 
     let resp;
     try {
       resp = await searchSource.fetch();
     } catch(error) {
+      // If the fetch was aborted then no need to surface this error in the UI
+      if (error.name === 'AbortError') return;
+
       this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
         values: { errorMessage: error.message }
@@ -83,6 +93,10 @@ class RangeControl extends Control {
     this.min = min;
     this.max = max;
     this.enable = true;
+  }
+
+  destroy() {
+    if (this.abortController) this.abortController.abort();
   }
 }
 

@@ -30,7 +30,6 @@ interface ExistsOptions {
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
 
@@ -96,7 +95,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick(element);
+        await element.doubleClick();
       });
     }
 

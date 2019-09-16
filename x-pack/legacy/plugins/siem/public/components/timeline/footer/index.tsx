@@ -74,6 +74,7 @@ export const footerHeight = 40; // px
 
 interface FooterProps {
   itemsCount: number;
+  isEventViewer?: boolean;
   isLive: boolean;
   isLoading: boolean;
   itemsPerPage: number;
@@ -99,7 +100,7 @@ interface FooterState {
 export const EventsCount = pure<{
   closePopover: () => void;
   isOpen: boolean;
-  items: React.ReactNode[];
+  items: React.ReactElement[];
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
@@ -111,7 +112,7 @@ export const EventsCount = pure<{
       data-test-subj="timelineSizeRowPopover"
       button={
         <>
-          <EuiBadge color="hollow">
+          <EuiBadge data-test-subj="local-events-count" color="hollow">
             {itemsCount}
             <EuiButtonEmpty
               size="s"
@@ -165,12 +166,44 @@ export const PagingControl = pure<{
 PagingControl.displayName = 'PagingControl';
 
 /** Renders a loading indicator and paging controls */
-export class Footer extends React.PureComponent<FooterProps, FooterState> {
+export class Footer extends React.Component<FooterProps, FooterState> {
   public readonly state = {
     isPopoverOpen: false,
     paginationLoading: false,
     updatedAt: null,
   };
+
+  public shouldComponentUpdate(
+    {
+      compact,
+      hasNextPage,
+      height,
+      isEventViewer,
+      isLive,
+      isLoading,
+      itemsCount,
+      itemsPerPage,
+      itemsPerPageOptions,
+      serverSideEventCount,
+    }: FooterProps,
+    { isPopoverOpen, paginationLoading, updatedAt }: FooterState
+  ) {
+    return (
+      compact !== this.props.compact ||
+      hasNextPage !== this.props.hasNextPage ||
+      height !== this.props.height ||
+      isEventViewer !== this.props.isEventViewer ||
+      isLive !== this.props.isLive ||
+      isLoading !== this.props.isLoading ||
+      isPopoverOpen !== this.state.isPopoverOpen ||
+      itemsCount !== this.props.itemsCount ||
+      itemsPerPage !== this.props.itemsPerPage ||
+      itemsPerPageOptions !== this.props.itemsPerPageOptions ||
+      paginationLoading !== this.state.paginationLoading ||
+      serverSideEventCount !== this.props.serverSideEventCount ||
+      updatedAt !== this.state.updatedAt
+    );
+  }
 
   public componentDidUpdate(prevProps: FooterProps) {
     const { paginationLoading, updatedAt } = this.state;
@@ -194,6 +227,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
   public render() {
     const {
       height,
+      isEventViewer,
       isLive,
       isLoading,
       itemsCount,
@@ -213,7 +247,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             data-test-subj="LoadingPanelTimeline"
             height="35px"
             showBorder={false}
-            text={`${i18n.LOADING_TIMELINE_DATA}...`}
+            text={isEventViewer ? `${i18n.LOADING_EVENTS}...` : `${i18n.LOADING_TIMELINE_DATA}...`}
             width="100%"
           />
         </LoadingPanelContainer>

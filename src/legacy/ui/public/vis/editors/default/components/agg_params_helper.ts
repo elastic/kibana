@@ -66,7 +66,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields = (param as FieldParamType).getAvailableFields(
+      const availableFields: Field[] = (param as FieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
@@ -117,8 +117,8 @@ function getAggTypeOptions(
   indexPattern: IndexPattern,
   groupName: string
 ): ComboBoxGroupedOptions<AggType> {
-  const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
-  return groupAndSortBy(aggTypeOptions, 'subtype', 'title');
+  const aggTypeOptions = aggTypeFilters.filter((aggTypes as any)[groupName], indexPattern, agg);
+  return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
 
 /**

@@ -17,9 +17,16 @@
  * under the License.
  */
 
-// @ts-ignore
-export { registerTimefilterWithGlobalState } from './timefilter';
-export { timefilter, Timefilter, RefreshInterval } from './timefilter';
-export { timeHistory, TimeRange, TimeHistory } from './time_history';
+import uiRoutes from 'ui/routes';
+import { registerTimefilterWithGlobalState, getTimefilterConfig } from './setup_router';
+import { Timefilter, TimeHistory } from '../../../core_plugins/data/public/timefilter';
 
-export { getTime } from './get_time';
+const config = getTimefilterConfig();
+
+export { Timefilter, TimeHistory, getTime } from '../../../core_plugins/data/public/timefilter';
+export const timeHistory = new TimeHistory();
+export const timefilter = new Timefilter(config, timeHistory);
+
+uiRoutes.addSetupWork((globalState, $rootScope) => {
+  return registerTimefilterWithGlobalState(timefilter, globalState, $rootScope);
+});

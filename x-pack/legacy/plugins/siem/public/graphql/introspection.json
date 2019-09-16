@@ -1686,22 +1686,12 @@
                 "defaultValue": null
               },
               {
-                "name": "flowDirection",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowDirection", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "flowTarget",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "FlowTargetNew", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -6081,23 +6071,34 @@
         "description": "",
         "fields": [
           {
-            "name": "as_org",
+            "name": "number",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "asn",
+            "name": "organization",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemOrganization", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
-          },
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AutonomousSystemOrganization",
+        "description": "",
+        "fields": [
           {
-            "name": "ip",
+            "name": "name",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -7417,6 +7418,24 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "FlowTargetNew",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "destination",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "source", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "NetworkTopNFlowSortField",
         "description": "",
@@ -7455,14 +7474,31 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "bytes", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
-            "name": "packets",
+            "name": "bytes_in",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "ipCount", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "bytes_out",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "flows", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "destination_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
@@ -7581,7 +7617,7 @@
             "name": "source",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNFlowItemSource", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7589,23 +7625,7 @@
             "name": "destination",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "client",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "server",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNFlowItemDestination", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7625,14 +7645,14 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TopNFlowItem",
+        "name": "TopNFlowItemSource",
         "description": "",
         "fields": [
           {
-            "name": "count",
+            "name": "autonomous_system",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemItem", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7659,6 +7679,151 @@
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flows",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "destination_ips",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AutonomousSystemItem",
+        "description": "",
+        "fields": [
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "number",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "GeoItem",
+        "description": "",
+        "fields": [
+          {
+            "name": "geo",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoEcsFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flowTarget",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "FlowTarget", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TopNFlowItemDestination",
+        "description": "",
+        "fields": [
+          {
+            "name": "autonomous_system",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "AutonomousSystemItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "domain",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ip",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "flows",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7672,7 +7837,7 @@
         "description": "",
         "fields": [
           {
-            "name": "bytes",
+            "name": "bytes_in",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -7680,34 +7845,10 @@
             "deprecationReason": null
           },
           {
-            "name": "packets",
+            "name": "bytes_out",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "transport",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "direction",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "ENUM", "name": "NetworkDirectionEcs", "ofType": null }
-              }
-            },
             "isDeprecated": false,
             "deprecationReason": null
           }

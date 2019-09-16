@@ -5836,7 +5836,7 @@ Array [
         style={
           Object {
             "height": "256px",
-            "width": "100px",
+            "width": "800px",
           }
         }
       >
@@ -5850,7 +5850,7 @@ Array [
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
           onWheel={[Function]}
-          width={100}
+          width={800}
         >
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
@@ -5861,7 +5861,7 @@ Array [
               className="rv-xy-plot__axis__line"
               style={Object {}}
               x1={0}
-              x2={20}
+              x2={720}
               y1={0}
               y2={0}
             />
@@ -5895,7 +5895,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(1.6666666666666665, 0)"
+                transform="translate(60, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5918,7 +5918,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(3.333333333333333, 0)"
+                transform="translate(120, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5941,7 +5941,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(5, 0)"
+                transform="translate(180, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5964,7 +5964,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(6.666666666666666, 0)"
+                transform="translate(240, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5987,7 +5987,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(8.333333333333334, 0)"
+                transform="translate(300, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6010,7 +6010,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(10, 0)"
+                transform="translate(360, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6033,7 +6033,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(11.666666666666668, 0)"
+                transform="translate(420, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6056,7 +6056,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(13.333333333333332, 0)"
+                transform="translate(480, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6079,7 +6079,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(15, 0)"
+                transform="translate(540, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6102,7 +6102,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(16.666666666666668, 0)"
+                transform="translate(600, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6125,7 +6125,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(18.333333333333332, 0)"
+                transform="translate(660, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6148,7 +6148,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(20, 0)"
+                transform="translate(720, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6199,7 +6199,7 @@ Array [
         style={
           Object {
             "height": "256px",
-            "width": "100px",
+            "width": "800px",
           }
         }
       >
@@ -6213,7 +6213,7 @@ Array [
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
           onWheel={[Function]}
-          width={100}
+          width={800}
         />
       </div>
     </div>

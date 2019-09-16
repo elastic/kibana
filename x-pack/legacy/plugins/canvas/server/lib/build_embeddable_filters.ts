@@ -5,7 +5,7 @@
  */
 
 import { buildQueryFilter, Filter as ESFilterType } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter';
+import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
