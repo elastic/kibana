@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
-export default function ({ getService }) {
+export default function({ getService }: { getService: (service: string) => any }) {
   const log = getService('log');
   const config = getService('config');
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
@@ -27,7 +27,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ tasksToSpawn: 10, durationInSeconds: 60 })
         .expect(200)
-        .then(response => response.body);
+        .then((response: any) => response.body);
 
       log.debug(`Stress Test Result: ${JSON.stringify(stressTestResult)}`);
 

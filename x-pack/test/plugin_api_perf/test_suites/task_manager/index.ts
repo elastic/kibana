@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }: { loadTestFile: (file: string) => void }) {
   describe.skip('task_manager_perf', function taskManagerSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./task_manager_perf_integration'));
