@@ -101,10 +101,14 @@ export function FieldItem({
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
     const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
-    formatter = new FormatType(
-      indexPattern.fieldFormatMap[field.name].params,
-      core.uiSettings.get.bind(core.uiSettings)
-    );
+    if (FormatType) {
+      formatter = new FormatType(
+        indexPattern.fieldFormatMap[field.name].params,
+        core.uiSettings.get.bind(core.uiSettings)
+      );
+    } else {
+      formatter = { convert: (data: unknown) => JSON.stringify(data) };
+    }
   } else {
     formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
   }
@@ -184,6 +188,13 @@ export function FieldItem({
   const euiTextColor =
     field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'default';
 
+  function togglePopover() {
+    setOpen(!infoIsOpen);
+    if (!infoIsOpen) {
+      fetchData();
+    }
+  }
+
   return (
     <EuiPopover
       id="lnsFieldListPanel__field"
@@ -204,18 +215,12 @@ export function FieldItem({
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
                 if (exists) {
-                  setOpen(!infoIsOpen);
-                  if (!infoIsOpen) {
-                    fetchData();
-                  }
+                  togglePopover();
                 }
               }}
               onKeyPress={event => {
                 if (exists && event.key === 'ENTER') {
-                  setOpen(!infoIsOpen);
-                  if (!infoIsOpen) {
-                    fetchData();
-                  }
+                  togglePopover();
                 }
               }}
               title={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {

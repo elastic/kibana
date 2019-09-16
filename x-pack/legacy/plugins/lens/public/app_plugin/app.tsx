@@ -10,9 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
-import { toastNotifications } from 'ui/notify';
-import { Chrome } from 'ui/chrome';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
 import { Document, SavedObjectStore } from '../persistence';
@@ -52,24 +50,24 @@ function isLocalStateDirty(
 
 export function App({
   editorFrame,
+  core,
   store,
-  chrome,
   docId,
   docStorage,
   redirectTo,
   savedObjectsClient,
 }: {
   editorFrame: EditorFrameInstance;
-  chrome: Chrome;
+  core: CoreStart;
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
-  const uiSettings = chrome.getUiSettingsClient();
-  const timeDefaults = uiSettings.get('timepicker:timeDefaults');
-  const language = store.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage');
+  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
+  const language =
+    store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
   const [state, setState] = useState<State>({
     isLoading: !!docId,
@@ -93,9 +91,9 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
-    chrome.breadcrumbs.set([
+    core.chrome.setBreadcrumbs([
       {
-        href: chrome.addBasePath(`/app/kibana#/visualize`),
+        href: core.http.basePath.prepend(`/app/kibana#/visualize`),
         text: i18n.translate('xpack.lens.breadcrumbsTitle', {
           defaultMessage: 'Visualize',
         }),
@@ -131,7 +129,7 @@ export function App({
         .catch(() => {
           setState({ ...state, isLoading: false });
 
-          toastNotifications.addDanger(
+          core.notifications.toasts.addDanger(
             i18n.translate('xpack.lens.editorFrame.docLoadingError', {
               defaultMessage: 'Error loading saved document',
             })
@@ -149,7 +147,7 @@ export function App({
 
   const onError = useCallback(
     (e: { message: string }) =>
-      toastNotifications.addDanger({
+      core.notifications.toasts.addDanger({
         title: e.message,
       }),
     []
@@ -181,7 +179,7 @@ export function App({
                           }
                         })
                         .catch(reason => {
-                          toastNotifications.addDanger(
+                          core.notifications.toasts.addDanger(
                             i18n.translate('xpack.lens.editorFrame.docSavingError', {
                               defaultMessage: 'Error saving document {reason}',
                               values: { reason },
@@ -231,7 +229,7 @@ export function App({
             dateRangeTo={
               state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
             }
-            uiSettings={uiSettings}
+            uiSettings={core.uiSettings}
             savedObjectsClient={savedObjectsClient}
           />
         </div>
