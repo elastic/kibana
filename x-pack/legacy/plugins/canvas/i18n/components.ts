@@ -337,4 +337,41 @@ export const ComponentStrings = {
         },
       }),
   },
+  WorkpadHeaderWorkpadZoom: {
+    getZoomControlsAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomControlsAriaLabel', {
+        defaultMessage: 'Zoom controls',
+      }),
+    getZoomControlsTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomControlsTooltip', {
+        defaultMessage: 'Zoom controls',
+      }),
+    getZoomFitToWindowText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomFitToWindowText', {
+        defaultMessage: 'Fit to window',
+      }),
+    getZoomInText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomInText', {
+        defaultMessage: 'Zoom in',
+      }),
+    getZoomOutText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomOutText', {
+        defaultMessage: 'Zoom out',
+      }),
+    getZoomPanelTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomPanelTitle', {
+        defaultMessage: 'Zoom',
+      }),
+    getZoomPercentage: (scale: number) =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomResetText', {
+        defaultMessage: '{scalePercentage}%',
+        values: {
+          scalePercentage: scale * 100,
+        },
+      }),
+    getZoomResetText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomResetText', {
+        defaultMessage: 'Reset',
+      }),
+  },
 };

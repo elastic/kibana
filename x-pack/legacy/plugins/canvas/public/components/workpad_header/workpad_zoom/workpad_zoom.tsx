@@ -21,6 +21,9 @@ import {
   CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR,
 } from '../../../../common/lib/constants';
 
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderWorkpadZoom: strings } = ComponentStrings;
+
 export interface Props {
   /**
    * current workpad zoom level
@@ -101,14 +104,16 @@ export class WorkpadZoom extends PureComponent<Props> {
   };
 
   _button = (togglePopover: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiButtonIcon iconType="magnifyWithPlus" aria-label="Zoom controls" onClick={togglePopover} />
+    <EuiButtonIcon
+      iconType="magnifyWithPlus"
+      aria-label={strings.getZoomControlsAriaLabel()}
+      onClick={togglePopover}
+    />
   );
-
-  _getPrettyZoomLevel = (scale: number) => `${scale * 100}%`;
 
   _getScaleMenuItems = (): EuiContextMenuPanelItemDescriptor[] =>
     QUICK_ZOOM_LEVELS.map(scale => ({
-      name: this._getPrettyZoomLevel(scale),
+      name: strings.getZoomPercentage(scale),
       icon: 'empty',
       onClick: () => this.props.setZoomScale(scale),
     }));
@@ -117,27 +122,27 @@ export class WorkpadZoom extends PureComponent<Props> {
     const { zoomScale, zoomIn, zoomOut, resetZoom } = this.props;
     const items: EuiContextMenuPanelItemDescriptor[] = [
       {
-        name: 'Fit to window',
+        name: strings.getZoomFitToWindowText(),
         icon: 'empty',
         onClick: this._fitToWindow,
         disabled: zoomScale === MAX_ZOOM_LEVEL,
       },
       ...this._getScaleMenuItems(),
       {
-        name: 'Zoom in',
+        name: strings.getZoomInText(),
         icon: 'magnifyWithPlus',
         onClick: zoomIn,
         disabled: zoomScale === MAX_ZOOM_LEVEL,
         className: 'canvasContextMenu--topBorder',
       },
       {
-        name: 'Zoom out',
+        name: strings.getZoomOutText(),
         icon: 'magnifyWithMinus',
         onClick: zoomOut,
         disabled: zoomScale <= MIN_ZOOM_LEVEL,
       },
       {
-        name: 'Reset',
+        name: strings.getZoomResetText(),
         icon: 'empty',
         onClick: resetZoom,
         disabled: zoomScale >= MAX_ZOOM_LEVEL,
@@ -148,7 +153,7 @@ export class WorkpadZoom extends PureComponent<Props> {
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
-        title: `Zoom`,
+        title: strings.getZoomPanelTitle(),
         items,
       },
     ];
@@ -161,7 +166,7 @@ export class WorkpadZoom extends PureComponent<Props> {
       <Popover
         button={this._button}
         panelPaddingSize="none"
-        tooltip="Zoom controls"
+        tooltip={strings.getZoomControlsTooltip()}
         tooltipPosition="bottom"
       >
         {() => <EuiContextMenu initialPanelId={0} panels={this._getPanels()} />}
