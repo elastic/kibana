@@ -269,8 +269,15 @@ export class MBMapContainer extends React.Component {
   };
 
   render() {
+    let drawControl;
     let tooltipControl;
     if (this.state.mbMap) {
+      drawControl = (
+        <DrawControl
+          mbMap={this.state.mbMap}
+          addFilters={this.props.addFilters}
+        />
+      );
       tooltipControl = (
         <TooltipControl
           mbMap={this.state.mbMap}
@@ -286,10 +293,7 @@ export class MBMapContainer extends React.Component {
         ref="mapContainer"
         data-test-subj="mapContainer"
       >
-        <DrawControl
-          mbMap={this.state.mbMap}
-          addFilters={this.props.addFilters}
-        />
+        {drawControl}
         {tooltipControl}
       </div>
     );
