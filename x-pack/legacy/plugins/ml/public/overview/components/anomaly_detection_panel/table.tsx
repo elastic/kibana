@@ -17,7 +17,7 @@ import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
 import { Group } from './anomaly_detection_panel';
-// import { AnomalyDetectionStatsBar } from './anomaly_detection_stats_bar';
+import { StatsBar } from '../../../components/stats_bar';
 
 // interface AnomalyDetectionListColumns {
 //   id: string;
@@ -41,7 +41,7 @@ interface Props {
   statsBarData: any; // TODO: pull in from statsbar types
   jobsList: any;
 }
-export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -147,9 +147,9 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList }) => {
             </h3>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem grow={false}>
-          <AnomalyDetectionStatsBar jobsList={items} />
-        </EuiFlexItem> */}
+        <EuiFlexItem grow={false}>
+          <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       <MlInMemoryTable

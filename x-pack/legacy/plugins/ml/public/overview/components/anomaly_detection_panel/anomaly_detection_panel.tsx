@@ -41,12 +41,12 @@ export const AnomalyDetectionPanel: FC = () => {
         });
       const groups = getGroupsFromJobs(jobsSummaryList);
       const jobsWithTimerange = getJobsWithTimerange(jobsSummaryList);
-      // const stats = getStatsBarData(jobsSummaryList);
+      const stats = getStatsBarData(jobsSummaryList);
       setIsLoading(false);
       setErrorMessage(undefined);
+      setStatsBarData(stats);
       setGroupsList(groups);
       setJobsList(jobsWithTimerange);
-      // setStatsBarData(stats);
     } catch (e) {
       setErrorMessage(e);
       setIsLoading(false);

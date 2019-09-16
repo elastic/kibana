@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
 import { Group } from './anomaly_detection_panel';
 
 export function getGroupsFromJobs(jobs: any): Group[] {
@@ -51,6 +53,93 @@ export function getGroupsFromJobs(jobs: any): Group[] {
   return Object.values(groups);
 }
 
+export function getStatsBarData(jobsList) {
+  const jobStats = {
+    activeNodes: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
+        defaultMessage: 'Active ML Nodes',
+      }),
+      value: 0,
+      show: true,
+    },
+    total: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
+        defaultMessage: 'Total jobs',
+      }),
+      value: 0,
+      show: true,
+    },
+    open: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
+        defaultMessage: 'Open jobs',
+      }),
+      value: 0,
+      show: true,
+    },
+    closed: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
+        defaultMessage: 'Closed jobs',
+      }),
+      value: 0,
+      show: true,
+    },
+    failed: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
+        defaultMessage: 'Failed jobs',
+      }),
+      value: 0,
+      show: false,
+    },
+    activeDatafeeds: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
+        defaultMessage: 'Active datafeeds',
+      }),
+      value: 0,
+      show: true,
+    },
+  };
+
+  if (jobsList === undefined) {
+    return jobStats;
+  }
+
+  // object to keep track of nodes being used by jobs
+  const mlNodes = {};
+  let failedJobs = 0;
+
+  jobsList.forEach(job => {
+    if (job.jobState === JOB_STATE.OPENED) {
+      jobStats.open.value++;
+    } else if (job.jobState === JOB_STATE.CLOSED) {
+      jobStats.closed.value++;
+    } else if (job.jobState === JOB_STATE.FAILED) {
+      failedJobs++;
+    }
+
+    if (job.hasDatafeed && job.datafeedState === DATAFEED_STATE.STARTED) {
+      jobStats.activeDatafeeds.value++;
+    }
+
+    if (job.nodeName !== undefined) {
+      mlNodes[job.nodeName] = {};
+    }
+  });
+
+  jobStats.total.value = jobsList.length;
+
+  // // Only show failed jobs if it is non-zero
+  if (failedJobs) {
+    jobStats.failed.value = failedJobs;
+    jobStats.failed.show = true;
+  } else {
+    jobStats.failed.show = false;
+  }
+
+  jobStats.activeNodes.value = Object.keys(mlNodes).length;
+
+  return jobStats;
+}
+
 export function getJobsFromGroup(group: Group, jobs: any) {
   return group.jobIds.map(jobId => jobs[jobId]).filter(id => id !== undefined);
 }
@@ -72,8 +161,4 @@ export function getJobsWithTimerange(jobsList: any) {
   });
 
   return jobs;
-}
-
-export function getStatsBarData(jobs: any) {
-  return {};
 }
