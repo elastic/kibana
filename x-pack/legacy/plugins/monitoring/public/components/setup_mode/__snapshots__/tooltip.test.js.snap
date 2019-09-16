@@ -5,7 +5,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
   grow={false}
 >
   <EuiToolTip
-    content="At least one server isn’t monitored using Metricbeat. Click to get the status of each server."
+    content="At least one server isn’t monitored using Metricbeat. Click to get status"
     delay="regular"
     position="top"
   >
@@ -26,7 +26,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
   grow={false}
 >
   <EuiToolTip
-    content="At least one instance isn’t monitored using Metricbeat. Click to get the status of each instance."
+    content="At least one instance isn’t monitored using Metricbeat. Click to get status"
     delay="regular"
     position="top"
   >
@@ -47,7 +47,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
   grow={false}
 >
   <EuiToolTip
-    content="At least one node isn’t monitored using Metricbeat. Click to get the status of each node."
+    content="At least one node isn’t monitored using Metricbeat. Click to get status"
     delay="regular"
     position="top"
   >
@@ -68,7 +68,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
   grow={false}
 >
   <EuiToolTip
-    content="At least one instance isn’t monitored using Metricbeat. Click to get the status of each instance."
+    content="At least one instance isn’t monitored using Metricbeat. Click to get status"
     delay="regular"
     position="top"
   >
@@ -89,7 +89,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
   grow={false}
 >
   <EuiToolTip
-    content="At least one node isn’t monitored using Metricbeat. Click to get the status of each node."
+    content="At least one node isn’t monitored using Metricbeat. Click to get status"
     delay="regular"
     position="top"
   >
@@ -216,7 +216,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
 >
   <EuiToolTip
     content="Metricbeat is monitoring all servers.
-          Click to go to the servers view and disable internal collection."
+          Click to view servers and disable internal collection."
     delay="regular"
     position="top"
   >
@@ -224,9 +224,9 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Internal collection and Metricbeat collection"
+      onClickAriaLabel="Internal collection is on"
     >
-      Internal collection and Metricbeat collection
+      Internal collection is on
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -238,7 +238,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
 >
   <EuiToolTip
     content="Metricbeat is monitoring all instances.
-          Click to go to the instances view and disable internal collection."
+          Click to view instances and disable internal collection."
     delay="regular"
     position="top"
   >
@@ -246,9 +246,9 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Internal collection and Metricbeat collection"
+      onClickAriaLabel="Internal collection is on"
     >
-      Internal collection and Metricbeat collection
+      Internal collection is on
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -260,7 +260,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
 >
   <EuiToolTip
     content="Metricbeat is monitoring all nodes.
-          Click to go to the nodes view and disable internal collection."
+          Click to view nodes and disable internal collection."
     delay="regular"
     position="top"
   >
@@ -268,9 +268,9 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Internal collection and Metricbeat collection"
+      onClickAriaLabel="Internal collection is on"
     >
-      Internal collection and Metricbeat collection
+      Internal collection is on
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -282,7 +282,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
 >
   <EuiToolTip
     content="Metricbeat is monitoring all instances.
-          Click to go to the instances view and disable internal collection."
+          Click to view instances and disable internal collection."
     delay="regular"
     position="top"
   >
@@ -290,9 +290,9 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Internal collection and Metricbeat collection"
+      onClickAriaLabel="Internal collection is on"
     >
-      Internal collection and Metricbeat collection
+      Internal collection is on
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -304,7 +304,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
 >
   <EuiToolTip
     content="Metricbeat is monitoring all nodes.
-          Click to go to the nodes view and disable internal collection."
+          Click to view nodes and disable internal collection."
     delay="regular"
     position="top"
   >
@@ -312,9 +312,9 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Internal collection and Metricbeat collection"
+      onClickAriaLabel="Internal collection is on"
     >
-      Internal collection and Metricbeat collection
+      Internal collection is on
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -333,9 +333,9 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
       color="hollow"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="No monitoring"
+      onClickAriaLabel="No usage"
     >
-      No monitoring
+      No usage
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -354,9 +354,9 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
       color="hollow"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="No monitoring"
+      onClickAriaLabel="No usage"
     >
-      No monitoring
+      No usage
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -375,9 +375,9 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
       color="hollow"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="No monitoring"
+      onClickAriaLabel="No usage"
     >
-      No monitoring
+      No usage
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -396,9 +396,9 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
       color="hollow"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="No monitoring"
+      onClickAriaLabel="No usage"
     >
-      No monitoring
+      No usage
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -417,9 +417,9 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
       color="hollow"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="No monitoring"
+      onClickAriaLabel="No usage"
     >
-      No monitoring
+      No usage
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -438,9 +438,9 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Detected"
+      onClickAriaLabel="No collection"
     >
-      Detected
+      No collection
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -459,9 +459,9 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Detected"
+      onClickAriaLabel="No collection"
     >
-      Detected
+      No collection
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -480,9 +480,9 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Detected"
+      onClickAriaLabel="No collection"
     >
-      Detected
+      No collection
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -501,9 +501,9 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Detected"
+      onClickAriaLabel="No collection"
     >
-      Detected
+      No collection
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
@@ -522,9 +522,9 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       iconType="flag"
       onClick={[Function]}
-      onClickAriaLabel="Detected"
+      onClickAriaLabel="No collection"
     >
-      Detected
+      No collection
     </EuiBadge>
   </EuiToolTip>
 </EuiFlexItem>
