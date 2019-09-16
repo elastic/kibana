@@ -83,6 +83,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         catchError {
           publishJunit()
         }
+
+        catchError {
+          runErrorReporter()
+        }
       }
     }
   }
@@ -146,6 +150,9 @@ def legacyJobRunner(name) {
               }
               catchError {
                 publishJunit()
+              }
+              catchError {
+                runErrorReporter()
               }
             }
           }
@@ -251,7 +258,7 @@ def runbld(script) {
 }
 
 def bash(script) {
-  sh "#!/bin/bash -x\n${script}"
+  sh "#!/bin/bash\n${script}"
 }
 
 def doSetup() {
@@ -264,4 +271,11 @@ def buildOss() {
 
 def buildXpack() {
   runbld "./test/scripts/jenkins_xpack_build_kibana.sh"
+}
+
+def runErrorReporter() {
+  bash """
+    source src/dev/ci_setup/setup_env.sh
+    node src/dev/failed_tests/cli
+  """
 }
