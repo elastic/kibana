@@ -56,6 +56,7 @@ export interface LegacyAPI {
     serverBasePath: string;
     serverDefaultRoute: string;
   };
+  router: Legacy.Server['route'];
 }
 
 export interface PluginsSetup {
@@ -97,10 +98,7 @@ export class Plugin {
     return this.spacesAuditLogger;
   };
 
-  constructor(
-    initializerContext: PluginInitializerContext,
-    private readonly legacyRouter: Legacy.Server['route']
-  ) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<SpacesConfigType>();
     this.log = initializerContext.logger.get();
   }
@@ -181,14 +179,14 @@ export class Plugin {
     );
 
     initInternalApis({
-      legacyRouter: this.legacyRouter,
+      legacyRouter: legacyAPI.router,
       getLegacyAPI: this.getLegacyAPI,
       spacesService,
       xpackMain: xpackMainPlugin,
     });
 
     initExternalSpacesApi({
-      legacyRouter: this.legacyRouter,
+      legacyRouter: legacyAPI.router,
       log: this.log,
       savedObjects: legacyAPI.savedObjects,
       spacesService,

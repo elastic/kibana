@@ -137,13 +137,7 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       } as PluginInitializerContext;
 
-      const core: CoreSetup = ({
-        ...kbnServer.newPlatform.setup.core,
-        http: {
-          ...kbnServer.newPlatform.setup.core.http,
-          route: server.route,
-        },
-      } as unknown) as CoreSetup;
+      const core = (kbnServer.newPlatform.setup.core as unknown) as CoreSetup;
 
       const plugins = {
         xpackMain: server.plugins.xpack_main,
@@ -158,16 +152,15 @@ export const spaces = (kibana: Record<string, any>) =>
         spaces: this,
       };
 
-      const legacyRouter = server.route.bind(server);
-
-      const { spacesService, registerLegacyAPI } = await plugin(
-        initializerContext,
-        legacyRouter
-      ).setup(core, plugins);
+      const { spacesService, registerLegacyAPI } = await plugin(initializerContext).setup(
+        core,
+        plugins
+      );
 
       const config = server.config();
 
       registerLegacyAPI({
+        router: server.route.bind(server),
         legacyConfig: {
           serverBasePath: config.get('server.basePath'),
           serverDefaultRoute: config.get('server.defaultRoute'),

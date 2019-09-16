@@ -5,12 +5,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { Legacy } from 'kibana';
 import { Plugin } from './plugin';
 
-export function plugin(
-  initializerContext: PluginInitializerContext,
-  legacyRouter: Legacy.Server['route']
-) {
-  return new Plugin(initializerContext, legacyRouter);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
