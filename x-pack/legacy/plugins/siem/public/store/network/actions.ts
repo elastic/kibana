@@ -26,6 +26,10 @@ export const updateNetworkPageTableActivePage = actionCreator<{
   tableType: NetworkTableType;
 }>('UPDATE_NETWORK_PAGE_TABLE_ACTIVE_PAGE');
 
+export const setNetworkTablesActivePageToZero = actionCreator(
+  'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
+);
+
 export const updateIpDetailsTableActivePage = actionCreator<{
   activePage: number;
   tableType: IpDetailsTableType;

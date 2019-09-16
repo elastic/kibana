@@ -30,7 +30,12 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
             helpText="Use shorthand notation, like 30s, 10m, or 1h"
             compressed
           >
-            <EuiFieldText isInvalid={isInvalid} value={customInterval} onChange={handleChange} />
+            <EuiFieldText
+              isInvalid={isInvalid}
+              value={customInterval}
+              onChange={handleChange}
+              compressed
+            />
           </EuiFormRow>
         </EuiFlexItem>
 

@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,
   EuiSwitch,
@@ -237,6 +238,23 @@ export class IndexTable extends Component {
     return Object.keys(HEADERS).map(fieldName => {
       const { name } = index;
       const value = index[fieldName];
+
+      if (fieldName === 'name') {
+        return (
+          <th
+            key={`${fieldName}-${name}`}
+            className="euiTableRowCell"
+            scope="row"
+            data-test-subj={`indexTableCell-${fieldName}`}
+          >
+            <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
+              <span className="eui-textLeft">
+                {this.buildRowCell(fieldName, value, index)}
+              </span>
+            </div>
+          </th>
+        );
+      }
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
@@ -333,6 +351,9 @@ export class IndexTable extends Component {
                 this.toggleItem(name);
               }}
               data-test-subj="indexTableRowCheckbox"
+              aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectIndexAriaLabel', {
+                defaultMessage: 'Select this row'
+              })}
             />
           </EuiTableRowCellCheckbox>
           {this.buildRowCells(index)}
@@ -382,6 +403,7 @@ export class IndexTable extends Component {
       indicesLoading,
       indicesError,
       allIndices,
+      pager,
     } = this.props;
 
     let emptyState;
@@ -505,10 +527,22 @@ export class IndexTable extends Component {
         </EuiFlexGroup>
         {this.renderFilterError()}
         <EuiSpacer size="m" />
-
         {indices.length > 0 ? (
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <EuiTable className="indTable">
+              <EuiScreenReaderOnly>
+                <caption
+                  role="status"
+                  aria-relevant="text"
+                  aria-live="polite"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexTable.captionText"
+                    defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
+                    values={{ count: indices.length, total: pager.totalItems }}
+                  />
+                </caption>
+              </EuiScreenReaderOnly>
               <EuiTableHeader>
                 <EuiTableHeaderCellCheckbox>
                   <EuiCheckbox
@@ -516,6 +550,9 @@ export class IndexTable extends Component {
                     checked={this.areAllItemsSelected()}
                     onChange={this.toggleAll}
                     type="inList"
+                    aria-label={i18n.translate('xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel', {
+                      defaultMessage: 'Select all rows'
+                    })}
                   />
                 </EuiTableHeaderCellCheckbox>
                 {this.buildHeader()}

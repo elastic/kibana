@@ -12,7 +12,7 @@ interface ConstructorOptions {
 }
 
 export class AlertInstance {
-  private fireOptions?: Record<string, any>;
+  private scheduledExecutionOptions?: Record<string, any>;
   private meta: Record<string, any>;
   private state: Record<string, any>;
 
@@ -21,16 +21,16 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  shouldFire() {
-    return this.fireOptions !== undefined;
+  hasScheduledActions() {
+    return this.scheduledExecutionOptions !== undefined;
   }
 
-  getFireOptions() {
-    return this.fireOptions;
+  getSechduledActionOptions() {
+    return this.scheduledExecutionOptions;
   }
 
-  resetFire() {
-    this.fireOptions = undefined;
+  unscheduleActions() {
+    this.scheduledExecutionOptions = undefined;
     return this;
   }
 
@@ -42,11 +42,11 @@ export class AlertInstance {
     return this.meta;
   }
 
-  fire(actionGroup: string, context: Context = {}) {
-    if (this.shouldFire()) {
-      throw new Error('Alert instance already fired, cannot fire twice');
+  scheduleActions(actionGroup: string, context: Context = {}) {
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.fireOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
