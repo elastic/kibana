@@ -355,6 +355,7 @@ export class WatcherFlyout extends Component<
               onChange={this.onChangeThreshold}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
@@ -403,6 +404,7 @@ export class WatcherFlyout extends Component<
               disabled={this.state.schedule !== 'daily'}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <EuiRadio
             id="interval"
             label={i18n.translate(
@@ -428,6 +430,7 @@ export class WatcherFlyout extends Component<
                   compressed
                 >
                   <EuiFieldNumber
+                    compressed
                     icon="clock"
                     min={1}
                     value={this.state.interval.value}
@@ -442,6 +445,7 @@ export class WatcherFlyout extends Component<
                 <EuiSelect
                   value={this.state.interval.unit}
                   onChange={this.onChangeIntervalUnit}
+                  compressed
                   options={[
                     {
                       value: 'm',
@@ -531,12 +535,14 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="user"
                 value={this.state.emails}
                 onChange={this.onChangeEmails}
               />
             </EuiFormRow>
           )}
+          <EuiSpacer size="m" />
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
@@ -582,6 +588,7 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="link"
                 value={this.state.slackUrl}
                 onChange={this.onChangeSlackUrl}
