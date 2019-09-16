@@ -40,3 +40,13 @@ This page has moved. Please see <<xpack-logs-configuring>>.
 
 This page is deleted. Please see
 {stack-ov}/ecommerce-dataframes.html[Transforming the eCommerce sample data].
+
+[role="exclude",id="ml-jobs"]
+== Creating {anomaly-jobs}
+
+This page has moved. Please see {stack-ov}/ml-jobs.html[Creating {anomaly-jobs}].
+
+[role="exclude",id="job-tips"]
+== Machine learning job tips
+
+This page has moved. Please see {stack-ov}/job-tips.html[Machine learning job tips].
