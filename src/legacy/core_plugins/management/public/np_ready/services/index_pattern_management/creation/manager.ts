@@ -30,7 +30,7 @@ export class IndexPatternCreationManager {
     this.configs.push(new Config({ httpClient: this.httpClient }));
   }
 
-  public getConfig(key: string) {
+  public getType(key: string) {
     const index = key ? this.configs.findIndex(config => config.key === key) : -1;
     return index > -1 && this.configs[index] ? this.configs[index] : null;
   }
