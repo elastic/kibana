@@ -17,7 +17,7 @@
  * under the License.
  */
 import { buildEsQuery } from '../es_query';
-import { get, set } from 'lodash';
+import { get } from 'lodash';
 /* Creates a filter from a saved query.
   The saved query's time filter is already parsed
   params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
@@ -47,6 +47,7 @@ export function buildSavedQueryFilter(params, indexPattern) {
   const esQueryConfig = get(params, 'esQueryConfig', { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null });
   const convertedQuery = buildEsQuery(indexPattern, query, filters, esQueryConfig);
   filter.query = { ...convertedQuery };
+
   // timefilter addition
   const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
   if (convertedTimeFilter) {

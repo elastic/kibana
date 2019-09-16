@@ -136,47 +136,7 @@ describe('Filter Manager', function () {
       const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
       expect(actual).to.eql(expected);
     });
-    xit('should return a query filter when passed a saved query containing only a query', () => {
-      const item = {
-        'query': {
-          'bool': {
-            'must': [],
-            'filter': [
-              {
-                'bool': {
-                  'should': [
-                    {
-                      'range': {
-                        'bytes': {
-                          'gte': 2000
-                        }
-                      }
-                    }
-                  ],
-                  'minimum_should_match': 1
-                }
-              },
-              {
-                'match_phrase': {
-                  'extension.keyword': {
-                    'query': 'css'
-                  }
-                }
-              },
-              {
-                'range': {
-                  'timestamp': {
-                    'format': 'strict_date_optional_time',
-                    'gte': '2019-09-16T21:18:44.624Z',
-                    'lte': '2019-09-16T22:18:44.624Z'
-                  }
-                }
-              }
-            ],
-            'should': [],
-            'must_not': []
-          }
-        },  };
+    it('should return a query filter when passed a saved query containing only a query', () => {
       const savedQueryTestItem = {
         id: 'foo',
         attributes: {
@@ -235,5 +195,80 @@ describe('Filter Manager', function () {
       const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
       expect(actual).to.eql(expected);
     });
+    it('should return a query filter when passed a saved query not containing a query', () => {
+      const savedQueryTestItem = {
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          filters: [
+            {
+              query: {
+                match_phrase: {
+                  'extension.keyword': {
+                    'query': 'css'
+                  }
+                }
+              },
+              $state: { store: FilterStateStore.APP_STATE },
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+              },
+            },
+          ]
+        }
+      };
+      const testArgs = {
+        params: {
+          savedQuery: savedQueryTestItem,
+          esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
+        },
+        indexPattern: indexPattern
+      };
+      expected = {
+        meta: {
+          index: 'logstash-*',
+          type: 'savedQuery',
+          key: 'foo',
+          value: 'foo',
+          params: {
+            esQueryConfig: {
+              allowLeadingWildcards: true,
+              dateFormatTZ: null,
+              queryStringOptions: {},
+            },
+            savedQuery: savedQueryTestItem,
+          }
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {}
+              },
+              {
+                match_phrase: {
+                  'extension.keyword': {
+                    'query': 'css'
+                  }
+                }
+              }
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          }
+        }
+      };
+      const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
+      expect(actual).to.eql(expected);
+    });
+
   });
 });
