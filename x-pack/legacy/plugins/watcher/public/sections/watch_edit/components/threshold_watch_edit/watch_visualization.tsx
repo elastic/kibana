@@ -27,6 +27,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
 import { npStart } from 'ui/new_platform';
+import { useObservable } from 'src/plugins/kibana_react/public';
+import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/src/themes/charts/themes';
 import { getWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
@@ -92,6 +94,10 @@ const getTimeBuckets = (watch: any) => {
 
 export const WatchVisualization = () => {
   const { watch } = useContext(WatchContext);
+  const chartsTheme = useObservable(
+    npStart.plugins.eui_chart_utils.getChartsTheme$(),
+    EUI_CHARTS_THEME_LIGHT.theme
+  );
   const {
     index,
     timeField,
@@ -212,7 +218,7 @@ export const WatchVisualization = () => {
         {watchVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
-              theme={[customTheme(), npStart.plugins.eui_chart_utils.getChartsTheme()]}
+              theme={[customTheme(), chartsTheme]}
               xDomain={domain}
               showLegend={!!watch.termField}
               legendPosition={Position.Bottom}

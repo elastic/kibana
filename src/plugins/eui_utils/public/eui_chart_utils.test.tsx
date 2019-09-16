@@ -17,33 +17,39 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { EuiChartUtils } from './eui_chart_utils';
 import { coreMock } from '../../../core/public/mocks';
+import { take } from 'rxjs/operators';
 const startMock = coreMock.createStart();
 
 describe('EuiChartUtils', () => {
-  const getStart = () => {
-    return new EuiChartUtils().start(startMock);
-  };
-
   describe('getChartsTheme()', () => {
-    it('returns the light theme when not in dark mode', () => {
-      expect(getStart().getChartsTheme().lineSeriesStyle!.point!.fill).toEqual(
-        'rgba(255, 255, 255, 1)'
-      );
+    it('returns the light theme when not in dark mode', async () => {
+      startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(false));
+
+      expect(
+        (await new EuiChartUtils()
+          .start(startMock)
+          .getChartsTheme$()
+          .pipe(take(1))
+          .toPromise()).lineSeriesStyle!.point!.fill
+      ).toEqual('rgba(255, 255, 255, 1)');
     });
 
     describe('in dark mode', () => {
-      it(`returns the dark theme`, () => {
-        const darkStart = () => {
-          // Fake dark theme turned returning true
-          startMock.uiSettings.get.mockReturnValue(true);
-          return new EuiChartUtils().start(startMock);
-        };
+      it(`returns the dark theme`, async () => {
+        // Fake dark theme turned returning true
+        startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(true));
 
-        expect(darkStart().getChartsTheme().lineSeriesStyle!.point!.fill).toEqual(
-          'rgba(29, 30, 36, 1)'
-        );
+        expect(
+          (await new EuiChartUtils()
+            .start(startMock)
+            .getChartsTheme$()
+            .pipe(take(1))
+            .toPromise()).lineSeriesStyle!.point!.fill
+        ).toEqual('rgba(29, 30, 36, 1)');
       });
     });
   });

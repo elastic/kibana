@@ -17,21 +17,5 @@
  * under the License.
  */
 
-import { CoreStart, CoreSetup } from 'src/core/public';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { map } from 'rxjs/operators';
-
-export class EuiChartUtils {
-  public setup(core: CoreSetup) {}
-  public start(core: CoreStart) {
-    return {
-      getChartsTheme$() {
-        return core.uiSettings
-          .get$('theme:darkMode')
-          .pipe(
-            map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
-          );
-      },
-    };
-  }
-}
+export * from './use_observable';
+export * from './use_unmount';
