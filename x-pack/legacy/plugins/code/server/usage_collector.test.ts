@@ -107,12 +107,24 @@ describe('Code Usage Collector', () => {
       expect(codeStats).toEqual({
         enabled: 1,
         repositories: 2,
-        langserver: {
-          TypeScript: 1,
-          Java: 1,
-          Ctags: 1,
-          Go: 0,
-        },
+        langserver: [
+          {
+            enabled: 1,
+            key: 'TypeScript',
+          },
+          {
+            enabled: 1,
+            key: 'Java',
+          },
+          {
+            enabled: 1,
+            key: 'Ctags',
+          },
+          {
+            enabled: 0,
+            key: 'Go',
+          },
+        ],
       });
     });
   });
