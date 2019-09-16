@@ -10,29 +10,42 @@ import { i18n } from '@kbn/i18n';
 import { AnomalyDetectionTable } from './table';
 // import { metaData } from 'ui/metadata';
 import { ml } from '../../../services/ml_api_service';
-import { getGroupsFromJobs, getStatsBarData } from './utils';
+import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+
+export interface Group {
+  id: string;
+  jobIds: string[];
+  docs_processed: number;
+  latest_timestamp: number;
+  max_anomaly_score: number | null;
+}
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 
 // jobsSummary to get: stats bar info, jobs in group, latest timestamp, docs_processed
 export const AnomalyDetectionPanel: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [groupsList, setGroupsList] = useState([]);
+  const [groupsList, setGroupsList] = useState<Group[]>([]);
+  const [jobsList, setJobsList] = useState({});
   const [statsBarData, setStatsBarData] = useState<any>(undefined);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
   const loadJobs = async () => {
     try {
       const jobsResult = await ml.jobs.jobsSummary([]);
-      const jobsSummaryList = jobsResult.map((job: any) => {
-        job.latestTimestampSortValue = job.latestTimestampMs || 0;
-        return job;
-      });
+      const jobsSummaryList =
+        jobsResult instanceof Array &&
+        jobsResult.map((job: any) => {
+          job.latestTimestampSortValue = job.latestTimestampMs || 0;
+          return job;
+        });
       const groups = getGroupsFromJobs(jobsSummaryList);
+      const jobsWithTimerange = getJobsWithTimerange(jobsSummaryList);
       // const stats = getStatsBarData(jobsSummaryList);
       setIsLoading(false);
       setErrorMessage(undefined);
       setGroupsList(groups);
+      setJobsList(jobsWithTimerange);
       // setStatsBarData(stats);
     } catch (e) {
       setErrorMessage(e);
@@ -85,7 +98,7 @@ export const AnomalyDetectionPanel: FC = () => {
         />
       )}
       {isLoading === false && typeof errorMessage === 'undefined' && groupsList.length > 0 && (
-        <AnomalyDetectionTable items={groupsList} statsBarData={statsBarData} />
+        <AnomalyDetectionTable items={groupsList} jobsList={jobsList} statsBarData={statsBarData} />
       )}
         
     </EuiPanel>

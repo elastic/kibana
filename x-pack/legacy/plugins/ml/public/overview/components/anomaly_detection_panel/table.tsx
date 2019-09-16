@@ -14,6 +14,9 @@ import {
   OnTableChangeArg,
 } from '../../../components/ml_in_memory_table';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { ExplorerLink } from './actions';
+import { getJobsFromGroup } from './utils';
+import { Group } from './anomaly_detection_panel';
 // import { AnomalyDetectionStatsBar } from './anomaly_detection_stats_bar';
 
 // interface AnomalyDetectionListColumns {
@@ -34,10 +37,11 @@ export enum AnomalyDetectionListColumns {
 }
 
 interface Props {
-  items: AnomalyDetectionListColumns[];
+  items: Group[];
   statsBarData: any; // TODO: pull in from statsbar types
+  jobsList: any;
 }
-export const AnomalyDetectionTable: FC<Props> = ({ items }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -45,7 +49,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
-  // item: { id: group-id, max_anomaly_score: <score>, num_jobs: num, latest_timestamp: 123456, docs_processed: num }
   const columns: any[] = [
     {
       field: AnomalyDetectionListColumns.id,
@@ -70,7 +73,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items }) => {
       name: i18n.translate('xpack.ml.overview.anomalyDetectionList.numJobs', {
         defaultMessage: 'Jobs in group',
       }),
-      render: jobIds => jobIds.length,
+      render: (jobIds: Group['jobIds']) => jobIds.length,
       sortable: true,
       truncateText: true,
       width: '100px',
@@ -95,13 +98,13 @@ export const AnomalyDetectionTable: FC<Props> = ({ items }) => {
       sortable: true,
       width: '20%',
     },
-    // {
-    //   name: i18n.translate('xpack.ml.overview.anomalyDetectionList.tableActionLabel', {
-    //     defaultMessage: 'Actions',
-    //   }),
-    //   actions: [ANALYTICS_VIEW_ACTION],
-    //   width: '100px',
-    // },
+    {
+      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.tableActionLabel', {
+        defaultMessage: 'Actions',
+      }),
+      render: (group: Group) => <ExplorerLink jobsList={getJobsFromGroup(group, jobsList)} />,
+      width: '100px',
+    },
   ];
 
   const onTableChange = ({
