@@ -36,10 +36,15 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import angular from 'angular';
 
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {});
+export const setup = pluginInstance.setup(npSetup.core, {
+  __LEGACY: {
+    $http: angular.injector().get('$http'),
+  },
+});
 export const start = pluginInstance.start(npStart.core, {});

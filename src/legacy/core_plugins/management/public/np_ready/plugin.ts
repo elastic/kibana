@@ -17,15 +17,20 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { IndexPatternManagementService, IndexPatternManagementSetup } from './services';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ManagementPluginSetupDependencies {}
+interface ManagementPluginSetupDependencies {
+  __LEGACY: {
+    $http: object;
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ManagementPluginStartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementSetup {}
+export interface ManagementSetup {
+  indexPattern: IndexPatternManagementSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ManagementStart {}
@@ -38,15 +43,21 @@ export class ManagementPlugin
       ManagementPluginSetupDependencies,
       ManagementPluginStartDependencies
     > {
+  private readonly indexPattern = new IndexPatternManagementService();
+
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ManagementPluginSetupDependencies) {
-    return {};
+  public setup(core: CoreSetup, { __LEGACY }: ManagementPluginSetupDependencies) {
+    return {
+      indexPattern: this.indexPattern.setup({ httpClient: __LEGACY.$http }),
+    };
   }
 
   public start(core: CoreStart, plugins: ManagementPluginStartDependencies) {
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.indexPattern.stop();
+  }
 }
