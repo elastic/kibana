@@ -69,13 +69,13 @@ export function Doc(props: DocProps) {
           title={
             <FormattedMessage
               id="kbn.doc.failedToLocateDocumentDescription"
-              defaultMessage="Failed to locate document"
+              defaultMessage="Cannot find document"
             />
           }
         >
           <FormattedMessage
             id="kbn.doc.couldNotFindDocumentsDescription"
-            defaultMessage="No documents matching that ID were found."
+            defaultMessage="No documents match that ID."
           />
         </EuiCallOut>
       )}
@@ -88,7 +88,7 @@ export function Doc(props: DocProps) {
           title={
             <FormattedMessage
               id="kbn.doc.failedToExecuteQueryDescription"
-              defaultMessage="Failed to execute query"
+              defaultMessage="Cannot run search"
             />
           }
         >
