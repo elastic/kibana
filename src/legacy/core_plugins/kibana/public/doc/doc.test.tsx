@@ -19,6 +19,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
@@ -50,14 +51,13 @@ async function mountDoc(search: () => void, update = false) {
       getComputedFields: () => [],
     } as any,
   } as DocProps;
-  let comp;
+  let comp!: ReactWrapper;
   act(() => {
     comp = mountWithIntl(<Doc {...props} />);
     if (update) comp.update();
   });
   if (update) {
     await waitForPromises();
-    // @ts-ignore
     comp.update();
   }
   return comp;
