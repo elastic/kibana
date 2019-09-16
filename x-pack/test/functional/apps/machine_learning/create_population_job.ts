@@ -61,7 +61,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceIndexPattern('ecommerce');
     });
 
-    it('loads the single metric job wizard page', async () => {
+    it('loads the population job wizard page', async () => {
       await ml.jobTypeSelection.selectPopulationJob();
     });
 
