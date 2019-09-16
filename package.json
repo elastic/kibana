@@ -355,7 +355,7 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-plugin-dynamic-import-node": "^2.3.0",
-    "backport": "4.6.5",
+    "backport": "4.7.1",
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
