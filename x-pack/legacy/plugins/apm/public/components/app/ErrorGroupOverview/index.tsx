@@ -73,7 +73,7 @@ const ErrorGroupOverview: React.SFC = () => {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      filterNames: ['host', 'containerId', 'podName'],
       params: {
         serviceName
       },

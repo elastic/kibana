@@ -35,19 +35,6 @@ jest.mock('../components/header', () => ({
   Header: () => 'Header',
 }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('ui/chrome', () => ({
   addBasePath: () => '',
   getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
