@@ -9,10 +9,10 @@ The following asset types have support planned:
 
 **ES Assets**
 
-- Ingest pipelines
-- Index Templates
-- ILM Policies
-- Rollup Jobs
+- Ingest pipelines -- Expected to be unchanged by users
+- Index Templates -- Expected to be unchanged by users
+- ILM Policies -- Expect user edits
+- Rollup Jobs -- Expect user edits
 - ML Jobs\*
 - Data Frame Transforms\*
 
