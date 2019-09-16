@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { Legacy } from 'kibana';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -14,12 +15,8 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const servicesRoute = createRoute(core => ({
-  path: '/api/apm/services',
-  params: {
-    query: t.intersection([uiFiltersRt, rangeRt])
-  },
-  handler: async req => {
+export const servicesRoute = createRoute(core => {
+  const handler = async (req: Legacy.Request) => {
     const setup = await setupRequest(req);
     const services = await getServices(setup);
     const { server } = core.http;
@@ -32,8 +29,18 @@ export const servicesRoute = createRoute(core => ({
     storeApmTelemetry(server, apmTelemetry);
 
     return services;
-  }
-}));
+  };
+  // The Infra UI needs to be able to make requests to this endpoint without
+  // going through the server's router (via server.inject).
+  core.http.server.expose('getServices', handler);
+  return {
+    path: '/api/apm/services',
+    params: {
+      query: t.intersection([uiFiltersRt, rangeRt])
+    },
+    handler
+  };
+});
 
 export const serviceAgentNameRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/agent_name',

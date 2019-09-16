@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit, RouteOptions, ServerInjectResponse } from 'hapi';
+import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
@@ -60,12 +60,6 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
-  makeInternalRequest<T extends object>(
-    req: InfraFrameworkRequest<Legacy.Request>,
-    path: string,
-    method: 'POST' | 'GET' | 'PUT' | 'HEAD' | 'DELETE',
-    payload?: T
-  ): Promise<ServerInjectResponse>;
   getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,

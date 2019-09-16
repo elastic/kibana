@@ -9,7 +9,6 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { i18n } from '@kbn/i18n';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -161,53 +160,35 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     return this.server.savedObjects;
   }
 
-  public async makeInternalRequest<T extends object>(
-    req: InfraFrameworkRequest<Legacy.Request>,
-    path: string,
-    method: 'POST' | 'GET' | 'PUT' | 'HEAD' | 'DELETE' = 'GET',
-    payload?: T
-  ) {
-    const internalRequest = req[internalInfraFrameworkRequest];
-    const server = internalRequest.server;
-
-    // getBasePath returns randomized base path AND spaces path
-    const basePath = internalRequest.getBasePath();
-    const url = `${basePath}${path}`;
-    const request = {
-      url,
-      method,
-      headers: internalRequest.headers,
-      payload,
-    };
-
-    const res = await server.inject(request);
-    if (res.statusCode >= 300) {
-      const message = i18n.translate('xpack.infra.TSVBRequest.error', {
-        defaultMessage: 'Internal request: {method} {path} returned status code {statusCode}',
-        values: {
-          method,
-          path,
-          statusCode: res.statusCode,
-        },
-      });
-      throw new Error(message);
-    }
-
-    return res;
-  }
-
   public async makeTSVBRequest(
     req: InfraFrameworkRequest<Legacy.Request>,
     model: InfraMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
   ) {
-    const payload = {
-      timerange,
-      panels: [model],
-      filters,
+    const internalRequest = req[internalInfraFrameworkRequest];
+    const server = internalRequest.server;
+
+    // getBasePath returns randomized base path AND spaces path
+    const basePath = internalRequest.getBasePath();
+    const url = `${basePath}/api/metrics/vis/data`;
+
+    const request = {
+      url,
+      method: 'POST',
+      headers: internalRequest.headers,
+      payload: {
+        timerange,
+        panels: [model],
+        filters,
+      },
     };
-    const res = await this.makeInternalRequest(req, '/api/metrics/vis/data', 'POST', payload);
+
+    const res = await server.inject(request);
+    if (res.statusCode !== 200) {
+      throw res;
+    }
+
     return res.result as InfraTSVBResponse;
   }
 }

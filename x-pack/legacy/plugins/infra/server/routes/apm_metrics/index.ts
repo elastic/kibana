@@ -33,17 +33,10 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
         );
 
         const { configuration } = await sources.getSourceConfiguration(req, sourceId);
-        const services = await getApmServices(
-          framework,
-          req,
-          configuration,
-          nodeId,
-          nodeType,
-          timeRange
-        );
+        const services = await getApmServices(req, configuration, nodeId, nodeType, timeRange);
         const servicesWithData = await Promise.all(
           services.map(service =>
-            getApmServiceData(framework, req, configuration, service, nodeId, nodeType, timeRange)
+            getApmServiceData(req, configuration, service, nodeId, nodeType, timeRange)
           )
         );
         return pipe(
