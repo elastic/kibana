@@ -41,6 +41,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           ])
         }
         node('flyweight') {
+          // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
+          // The e-mail plugin for the infra e-mail depends upon this being set
+          currentBuild.result = currentBuild.result ?: 'SUCCESS'
+
           sendMail()
         }
       }
@@ -78,6 +82,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
 
         catchError {
           publishJunit()
+        }
+
+        catchError {
+          runErrorReporter()
         }
       }
     }
@@ -142,6 +150,9 @@ def legacyJobRunner(name) {
               }
               catchError {
                 publishJunit()
+              }
+              catchError {
+                runErrorReporter()
               }
             }
           }
@@ -233,9 +244,8 @@ def sendKibanaMail() {
   catchError {
     if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
       emailext(
-        // to: 'build-kibana@elastic.co',
-        to: 'brian.seeders@elastic.co', // TODO switch this out after testing
-        subject: "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        to: 'build-kibana@elastic.co',
+        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
       )
@@ -248,7 +258,7 @@ def runbld(script) {
 }
 
 def bash(script) {
-  sh "#!/bin/bash -x\n${script}"
+  sh "#!/bin/bash\n${script}"
 }
 
 def doSetup() {
@@ -261,4 +271,11 @@ def buildOss() {
 
 def buildXpack() {
   runbld "./test/scripts/jenkins_xpack_build_kibana.sh"
+}
+
+def runErrorReporter() {
+  bash """
+    source src/dev/ci_setup/setup_env.sh
+    node src/dev/failed_tests/cli
+  """
 }

@@ -21,8 +21,6 @@ jest.mock('ui/new_platform');
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { inputControlVis } from './input_control_fn';
 
-jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
-
 describe('interpreter/functions#input_control_vis', () => {
   const fn = functionWrapper(inputControlVis);
   const visConfig = {
