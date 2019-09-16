@@ -133,18 +133,18 @@ export class SearchOptions extends Component<Props, State> {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h2 id="flyoutSmallTitle" className="">
+              <EuiFlexGroup id="flyoutSmallTitle" alignItems="center" gutterSize="none">
                 <EuiNotificationBadge size="m" className="codeQueryBar__filter-badge">
                   {repoScope.length}
                 </EuiNotificationBadge>
-                <EuiTextColor color="secondary" className="code-flyout-title">
+                <EuiTextColor color="secondary">
                   <FormattedMessage
                     id="xpack.code.searchBar.searchFilterTitle"
                     defaultMessage="{filterCount, plural, one {Advanced Filter} other {Advanced Filters}}"
                     values={{ filterCount: repoScope.length }}
                   />
                 </EuiTextColor>
-              </h2>
+              </EuiFlexGroup>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
