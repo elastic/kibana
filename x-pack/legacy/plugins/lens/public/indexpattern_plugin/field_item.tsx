@@ -377,7 +377,7 @@ export function FieldItem({
             <EuiSpacer size="m" />
             {state.sampledDocuments ? (
               <EuiText size="s">
-                {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
+                {i18n.translate('xpack.lens.indexPattern.percentageOfTotalDocsLabel', {
                   defaultMessage: '{percentage}% of {docCount} documents',
                   values: {
                     docCount: state.totalDocuments,
