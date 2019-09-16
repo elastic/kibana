@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
