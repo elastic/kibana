@@ -130,8 +130,8 @@ export class SetupModeRenderer extends React.Component {
                   <EuiTextColor color="ghost">
                     <FormattedMessage
                       id="xpack.monitoring.setupMode.description"
-                      defaultMessage="You are currently in set up mode which enables various configuration UIs.
-                      You will see a ({flagIcon}) flag icon next to all areas that have configuration options."
+                      defaultMessage="You are in setup mode. Click ({flagIcon}) flag icon next to all areas
+                      that have configuration options."
                       values={{
                         flagIcon: (
                           <EuiIcon type="flag"/>
@@ -147,7 +147,7 @@ export class SetupModeRenderer extends React.Component {
                 <EuiFlexItem grow={false}>
                   <EuiButton color="danger" fill size="s" onClick={() => toggleSetupMode(false)}>
                     {i18n.translate('xpack.monitoring.setupMode.exit', {
-                      defaultMessage: `Exit set up mode`
+                      defaultMessage: `Exit setup mode`
                     })}
                   </EuiButton>
                 </EuiFlexItem>

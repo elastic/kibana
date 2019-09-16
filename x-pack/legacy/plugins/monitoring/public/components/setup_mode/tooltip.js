@@ -34,7 +34,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   if (totalUniqueInstanceCount === 0) {
     if (mightExist) {
       const detectedText = i18n.translate('xpack.monitoring.setupMode.tooltip.detected', {
-        defaultMessage: 'Detected'
+        defaultMessage: 'No collection'
       });
       tooltip = (
         <EuiToolTip
@@ -50,8 +50,8 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       );
     }
     else {
-      const noMonitoringText = i18n.translate('xpack.monitoring.setupMode.tooltip.noMonitoring', {
-        defaultMessage: 'No monitoring'
+      const noMonitoringText = i18n.translate('xpack.monitoring.setupMode.tooltip.noUsage', {
+        defaultMessage: 'No usage'
       });
 
       tooltip = (
@@ -77,8 +77,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.oneInternal', {
-          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat.
-          Click to get the status of each {identifier}.`,
+          defaultMessage: `At least one {identifier} isn’t monitored using Metricbeat. Click to get status`,
           values: {
             identifier: getIdentifier(productName)
           }
@@ -92,14 +91,14 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   }
   else if (internalCollectionOn) {
     const internalAndMB = i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-      defaultMessage: 'Internal collection and Metricbeat collection'
+      defaultMessage: 'Internal collection is on'
     });
     tooltip = (
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.monitoring.setupMode.tooltip.disableInternal', {
           defaultMessage: `Metricbeat is monitoring all {identifierPlural}.
-          Click to go to the {identifierPlural} view and disable internal collection.`,
+          Click to view {identifierPlural} and disable internal collection.`,
           values: {
             identifierPlural: getIdentifier(productName, true)
           }
