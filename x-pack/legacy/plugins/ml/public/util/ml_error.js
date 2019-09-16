@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KbnError } from 'ui/errors';
+import { KbnError } from '../../../../../../src/plugins/kibana_utils/public';
 
 export class MLRequestFailure extends KbnError {
   // takes an Error object and and optional response object
