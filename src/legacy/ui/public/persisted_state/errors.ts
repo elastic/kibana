@@ -21,6 +21,6 @@ import { KbnError } from '../../../../plugins/kibana_utils/public';
 
 export class PersistedStateError extends KbnError {
   constructor() {
-    super('Error with the persisted state', PersistedStateError);
+    super('Error with the persisted state');
   }
 }
