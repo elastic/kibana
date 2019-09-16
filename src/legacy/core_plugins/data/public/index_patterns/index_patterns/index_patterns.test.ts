@@ -19,7 +19,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, UiSettingsClientContract } from 'kibana/public';
+import {
+  SavedObjectsClientContract,
+  UiSettingsClientContract,
+  HttpServiceBase,
+} from 'kibana/public';
 
 jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
@@ -65,12 +69,9 @@ describe('IndexPatterns', () => {
   beforeEach(() => {
     const savedObjectsClient = {} as SavedObjectsClientContract;
     const uiSettings = {} as UiSettingsClientContract;
+    const http = {} as HttpServiceBase;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient);
-  });
-
-  test('does not cache gets without an id', () => {
-    expect(indexPatterns.get()).not.toBe(indexPatterns.get());
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
   test('does cache gets for the same id', () => {

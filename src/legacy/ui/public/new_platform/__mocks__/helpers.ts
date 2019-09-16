@@ -20,6 +20,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
@@ -27,10 +28,12 @@ export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
   }),
 };
 

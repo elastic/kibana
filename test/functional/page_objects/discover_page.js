@@ -116,27 +116,25 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async clickHistogramBar(i) {
-      const bars = await find.allByCssSelector(`.series.histogram rect`);
-      await bars[i].click();
+    async clickHistogramBar() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+
+      await browser.getActions()
+        .move({ x: 200, y: 20, origin: el._webElement })
+        .click()
+        .perform();
     }
 
-    async brushHistogram(from, to) {
-      const bars = await find.allByCssSelector('.series.histogram rect');
+    async brushHistogram() {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
       await browser.dragAndDrop(
-        { location: bars[from], offset: { x: 0, y: -5 } },
-        { location: bars[to], offset: { x: 0, y: -5 } }
+        { location: el, offset: { x: 200, y: 20 } },
+        { location: el, offset: { x: 400, y: 30 } }
       );
     }
 
     async getCurrentQueryName() {
       return await globalNav.getLastBreadcrumb();
-    }
-
-    async getBarChartXTicks() {
-      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
-      const $ = await xAxis.parseDomContent();
-      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getBarChartData() {

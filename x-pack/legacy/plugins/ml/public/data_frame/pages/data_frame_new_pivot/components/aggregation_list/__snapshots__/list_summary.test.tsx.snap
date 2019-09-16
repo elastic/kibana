@@ -3,8 +3,6 @@
 exports[`Data Frame: <AggListSummary /> Minimal initialization 1`] = `
 <EuiForm>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="s"
   >
     <div
