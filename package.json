@@ -322,6 +322,7 @@
     "@types/lru-cache": "^5.1.0",
     "@types/markdown-it": "^0.0.7",
     "@types/minimatch": "^2.0.29",
+    "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
