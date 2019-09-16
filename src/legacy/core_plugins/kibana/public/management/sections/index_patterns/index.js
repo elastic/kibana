@@ -18,7 +18,6 @@
  */
 
 import { management } from 'ui/management';
-import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import { setup as managementSetup } from '../../../../../management/public/legacy';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
@@ -110,13 +109,12 @@ uiRoutes.when('/management/kibana/index_patterns', {
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules
   .get('apps/management')
-  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl, Private) {
+  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl) {
     return {
       restrict: 'E',
       transclude: true,
       template: indexTemplate,
       link: async function ($scope) {
-        const indexPatternListProvider = Private(IndexPatternListFactory)();
         const indexPatternCreationOptions = await managementSetup.indexPattern.creation.getIndexPatternCreationOptions(
           url => {
             $scope.$evalAsync(() => kbnUrl.change(url));
@@ -130,7 +128,10 @@ uiModules
                 const id = pattern.id;
                 const title = pattern.get('title');
                 const isDefault = $scope.defaultIndex === id;
-                const tags = indexPatternListProvider.getIndexPatternTags(pattern, isDefault);
+                const tags = managementSetup.indexPattern.list.getIndexPatternTags(
+                  pattern,
+                  isDefault
+                );
 
                 return {
                   id,

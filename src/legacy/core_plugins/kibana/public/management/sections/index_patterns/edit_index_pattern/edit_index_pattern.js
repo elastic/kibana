@@ -28,7 +28,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
-import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
+import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -191,18 +191,17 @@ uiModules
   ) {
     const $state = ($scope.state = new AppState());
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
-    const indexPatternListProvider = Private(IndexPatternListFactory)();
 
     $scope.fieldWildcardMatcher = fieldWildcardMatcher;
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = indexPatternListProvider;
-    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags(
+    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
+    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
+    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -213,7 +212,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        indexPatternListProvider
+        managementSetup.indexPattern.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -325,7 +324,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        indexPatternListProvider
+        managementSetup.indexPattern.list
       );
       if ($scope.fieldFilter === undefined) {
         return;
