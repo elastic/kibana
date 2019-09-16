@@ -24,11 +24,14 @@ import { KbnError } from '../../../../../plugins/kibana_utils/public';
  * @param {Object} resp - optional HTTP response
  */
 export class RequestFailure extends KbnError {
+  public resp: any;
   constructor(err: any, resp?: any) {
     err = err || false;
     super(
       `Request to Elasticsearch failed: ${JSON.stringify(resp || err.message)}`,
       RequestFailure
     );
+
+    this.resp = resp;
   }
 }
