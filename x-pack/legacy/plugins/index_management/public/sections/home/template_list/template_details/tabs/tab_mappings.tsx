@@ -16,10 +16,10 @@ interface Props {
 export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { mappings } = templateDetails;
 
-  if (mappings) {
+  if (mappings && Object.keys(mappings).length) {
     return (
       <div data-test-subj="mappingsTab">
-        <EuiCodeBlock lang="json">{mappings}</EuiCodeBlock>
+        <EuiCodeBlock lang="json">{JSON.stringify(mappings)}</EuiCodeBlock>
       </div>
     );
   }
