@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { addIndexPatternType } from 'ui/management/index_pattern_creation';
+import { setup as managementSetup } from '../../../../../../src/legacy/core_plugins/management/public/legacy';
 import { RollupIndexPatternCreationConfig } from './rollup_index_pattern_creation_config';
 
 export function initIndexPatternCreation() {
-  addIndexPatternType(RollupIndexPatternCreationConfig);
+  managementSetup.indexPattern.creation.add(RollupIndexPatternCreationConfig);
 }

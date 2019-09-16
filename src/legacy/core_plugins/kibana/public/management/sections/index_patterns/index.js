@@ -19,7 +19,7 @@
 
 import { management } from 'ui/management';
 import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
-import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
+import { setup as managementSetup } from '../../../../../management/public/legacy';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
@@ -117,8 +117,7 @@ uiModules
       template: indexTemplate,
       link: async function ($scope) {
         const indexPatternListProvider = Private(IndexPatternListFactory)();
-        const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
-        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions(
+        const indexPatternCreationOptions = await managementSetup.indexPattern.creation.getIndexPatternCreationOptions(
           url => {
             $scope.$evalAsync(() => kbnUrl.change(url));
           }

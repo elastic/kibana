@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { IndexPatternCreationConfig } from 'ui/management/index_pattern_creation';
+import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
 
 import { RollupPrompt } from './components/rollup_prompt';
 import { setHttpClient, getRollupIndices } from '../services/api';
