@@ -26,7 +26,8 @@ export default function codeIntelligenceFunctionalTests({
   const exists = async (selector: string) =>
     await testSubjects.exists(selector, { allowHidden: true });
 
-  describe('Code Intelligence', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/45094
+  describe.skip('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
       const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
