@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './fields';
-export * from './url_templates';
-export * from './advanced_settings';
-export * from './global';
-export * from './store';
+import actionCreatorFactory from 'typescript-fsa';
+const actionCreator = actionCreatorFactory('x-pack/graph');
+
+export const reset = actionCreator<void>('RESET');

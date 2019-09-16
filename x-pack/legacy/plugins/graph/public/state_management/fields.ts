@@ -9,6 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from 'reselect';
 import { WorkspaceField } from '../types';
 import { GraphState } from './store';
+import { reset } from './global';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -25,6 +26,7 @@ export type FieldsState = Record<string, WorkspaceField>;
 const initialFields: FieldsState = {};
 
 export const fieldsReducer = reducerWithInitialState(initialFields)
+  .case(reset, () => initialFields)
   .case(loadFields, (_currentFields, newFields) => {
     const newFieldMap: Record<string, WorkspaceField> = {};
     newFields.forEach(field => {

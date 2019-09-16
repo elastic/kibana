@@ -6,12 +6,20 @@
 
 import { combineReducers, createStore, Store, AnyAction, Dispatch } from 'redux';
 import { fieldsReducer, FieldsState } from './fields';
+import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
+import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
 
 export interface GraphState {
   fields: FieldsState;
+  urlTemplates: UrlTemplatesState;
+  advancedSettings: AdvancedSettingsState;
 }
 
-const rootReducer = combineReducers({ fields: fieldsReducer });
+const rootReducer = combineReducers({
+  fields: fieldsReducer,
+  urlTemplates: urlTemplatesReducer,
+  advancedSettings: advancedSettingsReducer,
+});
 
 export const createGraphStore = () => createStore(rootReducer);
 
