@@ -4,6 +4,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
 <EuiFormRow
   compressed={true}
   describedByIds={Array []}
+  display="row"
   fullWidth={true}
   hasEmptyLabelSpace={false}
   isInvalid={false}
@@ -25,7 +26,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
   labelType="label"
 >
   <EuiSelect
-    compressed={false}
+    compressed={true}
     data-test-subj="visDefaultEditorAggregateWith"
     disabled={false}
     fullWidth={true}
