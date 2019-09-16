@@ -29,7 +29,7 @@ import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_dep
 import { telemetryPlugin } from './server';
 
 import {
-  // createLocalizationUsageCollector,
+  createLocalizationUsageCollector,
   createTelemetryUsageCollector,
   createUiMetricUsageCollector,
 } from './server/collectors';
@@ -97,7 +97,7 @@ const telemetry = (kibana: any) => {
       telemetryPlugin(initializerContext).setup(coreSetup);
 
       // register collectors
-      // TODO: server.usage.collectorSet.register(createLocalizationUsageCollector(server));
+      server.usage.collectorSet.register(createLocalizationUsageCollector(server));
       server.usage.collectorSet.register(createTelemetryUsageCollector(server));
       server.usage.collectorSet.register(createUiMetricUsageCollector(server));
     },
