@@ -311,6 +311,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     let uploadButton = (
       <EuiFilePicker
+        display="default"
         compressed
         className="canvasWorkpad__upload--compressed"
         initialPromptText="Import workpad JSON file"

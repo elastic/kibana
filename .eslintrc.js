@@ -537,8 +537,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'no-duplicate-imports': 'warn',
+        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',

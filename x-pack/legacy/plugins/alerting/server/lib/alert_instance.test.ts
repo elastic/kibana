@@ -6,39 +6,39 @@
 
 import { AlertInstance } from './alert_instance';
 
-describe('shouldFire()', () => {
+describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 });
 
-describe('getFireOptions()', () => {
+describe('getSechduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
   });
 });
 
-describe('resetFire()', () => {
-  test('makes shouldFire() return false', () => {
+describe('unscheduleActions()', () => {
+  test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.shouldFire()).toEqual(true);
-    alertInstance.resetFire();
-    expect(alertInstance.shouldFire()).toEqual(false);
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
+    alertInstance.unscheduleActions();
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
-  test('makes getFireOptions() return undefined', () => {
+  test('makes getSechduledActionOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default');
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.getSechduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: {},
       state: {},
     });
-    alertInstance.resetFire();
-    expect(alertInstance.getFireOptions()).toBeUndefined();
+    alertInstance.unscheduleActions();
+    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -58,29 +58,31 @@ describe('getMeta()', () => {
   });
 });
 
-describe('fire()', () => {
-  test('makes shouldFire() return true', () => {
+describe('scheduleActions()', () => {
+  test('makes hasScheduledActions() return true', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.shouldFire()).toEqual(true);
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
   });
 
-  test('makes getFireOptions() return given options', () => {
+  test('makes getSechduledActionOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
-    expect(alertInstance.getFireOptions()).toEqual({
+    alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
+    expect(alertInstance.getSechduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },
       state: { otherField: true },
     });
   });
 
-  test('cannot fire twice', () => {
+  test('cannot schdule for execution twice', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default', { field: true });
+    alertInstance.scheduleActions('default', { field: true });
     expect(() =>
-      alertInstance.fire('default', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(`"Alert instance already fired, cannot fire twice"`);
+      alertInstance.scheduleActions('default', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
+    );
   });
 });
 
