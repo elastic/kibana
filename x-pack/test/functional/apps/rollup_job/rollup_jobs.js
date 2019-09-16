@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       const hits = await PageObjects.discover.getHitCount();
 
-      expect(hits).to.be('7 hits');
+      expect(hits).to.be('7');
 
 
 
