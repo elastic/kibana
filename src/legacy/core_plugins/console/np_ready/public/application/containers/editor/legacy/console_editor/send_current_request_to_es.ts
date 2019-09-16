@@ -25,7 +25,7 @@ import utils from '../../../../../../../public/quarantined/src/utils';
 import * as es from '../../../../../../../public/quarantined/src/es';
 
 export interface EsRequestArgs {
-  addedToHistoryCb: (esPath: any, esMethod: any, esData: any) => void;
+  callback: (esPath: any, esMethod: any, esData: any) => void;
   input?: any;
   output?: any;
   isPolling: boolean;
@@ -34,7 +34,7 @@ export interface EsRequestArgs {
 
 let CURRENT_REQ_ID = 0;
 export function sendCurrentRequestToES({
-  addedToHistoryCb,
+  callback,
   input,
   output,
   isPolling,
@@ -108,12 +108,6 @@ export function sendCurrentRequestToES({
               mappings.retrieveAutoCompleteInfo();
             }
 
-            // we have someone on the other side. Add to history
-            //
-            if (addedToHistoryCb) {
-              addedToHistoryCb(esPath, esMethod, esData);
-            }
-
             let value = xhr.responseText;
             const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
 
@@ -147,6 +141,8 @@ export function sendCurrentRequestToES({
 
             isFirstRequest = false;
             // single request terminate via sendNextRequest as well
+
+            callback(esPath, esMethod, esData);
             sendNextRequest();
           } else {
             let value;

@@ -63,11 +63,11 @@ export const reducer: Reducer<ContextValue, Action> = (state, action) => {
   }
 
   if (action.type === 'sendRequestToEs') {
-    const { addedToHistoryCb, isPolling, isUsingTripleQuotes } = action.value;
+    const { callback, isPolling, isUsingTripleQuotes } = action.value;
     sendCurrentRequestToES({
       input: registry.getInputEditor(),
       output: registry.getOutputEditor(),
-      addedToHistoryCb,
+      callback,
       isUsingTripleQuotes,
       isPolling,
     });

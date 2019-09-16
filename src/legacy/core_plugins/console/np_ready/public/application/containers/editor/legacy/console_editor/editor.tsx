@@ -116,8 +116,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
         const content = editorInstanceRef.current.getValue();
         history.updateCurrentState(content);
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Ignoring saving error: ' + e);
+        // Ignoring saving error
       }
     }
 
@@ -149,7 +148,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       value: {
         isUsingTripleQuotes: settings.tripleQuotes,
         isPolling: settings.polling,
-        addedToHistoryCb: (esPath: any, esMethod: any, esData: any) =>
+        callback: (esPath: any, esMethod: any, esData: any) =>
           history.addToHistory(esPath, esMethod, esData),
       },
     });
