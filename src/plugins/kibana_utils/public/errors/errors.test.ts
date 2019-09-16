@@ -18,47 +18,10 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  RequestFailure,
-  FetchFailure,
-  VersionConflict,
-  MappingConflict,
-  RestrictedMapping,
-  CacheWriteFailure,
-  FieldNotFoundInCache,
-  DuplicateField,
-  SavedObjectNotFound,
-  PersistedStateError,
-  VislibError,
-  ContainerTooSmall,
-  InvalidWiggleSelection,
-  PieContainsAllZeros,
-  InvalidLogScaleValues,
-  StackedBarChartConfig,
-  NoResults,
-  KbnError
-} from '../errors';
+import { DuplicateField, SavedObjectNotFound, KbnError } from './errors';
 
-describe('ui/errors', () => {
-  const errors = [
-    new RequestFailure('an error', { }),
-    new FetchFailure({ }),
-    new VersionConflict({ }),
-    new MappingConflict({ }),
-    new RestrictedMapping('field', 'indexPattern'),
-    new CacheWriteFailure(),
-    new FieldNotFoundInCache('aname'),
-    new DuplicateField('dupfield'),
-    new SavedObjectNotFound('dashboard', '123'),
-    new PersistedStateError(),
-    new VislibError('err'),
-    new ContainerTooSmall(),
-    new InvalidWiggleSelection(),
-    new PieContainsAllZeros(),
-    new InvalidLogScaleValues(),
-    new StackedBarChartConfig('err'),
-    new NoResults()
-  ];
+describe('errors', () => {
+  const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];
 
   errors.forEach(error => {
     const className = error.constructor.name;
@@ -70,7 +33,7 @@ describe('ui/errors', () => {
       expect(error.stack).to.not.be.empty();
     });
 
-    it (`${className} is an instance of KbnError`, () => {
+    it(`${className} is an instance of KbnError`, () => {
       expect(error instanceof KbnError).to.be(true);
     });
   });
