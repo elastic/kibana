@@ -19,7 +19,7 @@ class OpsMonitor {
   constructor(server, buffer, interval) {
     this._buffer = buffer;
     this._interval = interval;
-    this._oppsy = new Oppsy(server);
+    this._oppsy = new Oppsy(server._hapi);
     this._server = server;
   }
 
@@ -29,7 +29,7 @@ class OpsMonitor {
       // we ship it off to the buffer. Let's create our copy first.
       event = cloneDeep(event);
       // Oppsy used to provide this, but doesn't anymore. Grab it ourselves.
-      this._server.listener.getConnections((_, count) => {
+      this._server._hapi.listener.getConnections((_, count) => {
         event.concurrent_connections = count;
         this._buffer.push(event);
       });

@@ -24,11 +24,10 @@ import { initInfraSource } from './server/lib/logs/init_infra_source';
  * - [3] webserver route handling
  * - [4] start the internal monitoring collector/bulk uploader
  * - [5] expose the monitoring collector object for other plugins to register with
- * @param monitoringPlugin {Object} Monitoring UI plugin
  * @param server {Object} HapiJS server instance
  */
-export const init = (monitoringPlugin, server) => {
-  const kbnServer = monitoringPlugin.kbnServer;
+export const init = (server) => {
+  const kbnServer = server._kbnServer;
   const config = server.config();
   const { collectorSet } = server.usage;
   /*
