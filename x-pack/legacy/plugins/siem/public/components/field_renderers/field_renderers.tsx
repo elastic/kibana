@@ -28,6 +28,9 @@ import { Spacer } from '../page';
 
 export const IpOverviewId = 'ip-overview';
 
+/** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
+
 export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
@@ -145,13 +148,20 @@ interface DefaultFieldRendererProps {
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
-  maxOverflow?: number;
+  moreMaxHeight?: string;
 }
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
 export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
-  ({ rowItems, attrName, idPrefix, render, displayCount = 1, maxOverflow = 5 }) => {
+  ({
+    attrName,
+    displayCount = 1,
+    idPrefix,
+    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+    render,
+    rowItems,
+  }) => {
     if (rowItems != null && rowItems.length > 0) {
       const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
         const id = escapeDataProviderId(
@@ -181,7 +191,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
               idPrefix={idPrefix}
               render={render}
               overflowIndexStart={displayCount}
-              maxOverflowItems={maxOverflow}
+              moreMaxHeight={moreMaxHeight}
             />
           }
         </EuiFlexGroup>
@@ -199,13 +209,43 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 interface DefaultFieldRendererOverflowProps {
   rowItems: string[];
   idPrefix: string;
-  render?: (item: string) => JSX.Element;
+  render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
-  maxOverflowItems?: number;
+  moreMaxHeight: string;
 }
 
-export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowProps>(
-  ({ rowItems, idPrefix, render, overflowIndexStart = 5, maxOverflowItems = 5 }): JSX.Element => {
+interface MoreContainerProps {
+  idPrefix: string;
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[];
+  moreMaxHeight: string;
+  overflowIndexStart: number;
+}
+
+/** A container (with overflow) for showing "More" items in a popover */
+export const MoreContainer = React.memo<MoreContainerProps>(
+  ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
+    <div
+      data-test-subj="more-container"
+      style={{
+        maxHeight: moreMaxHeight,
+        overflow: 'auto',
+        paddingRight: '2px',
+      }}
+    >
+      {rowItems.slice(overflowIndexStart).map((rowItem, i) => (
+        <EuiText key={`${idPrefix}-${rowItem}-${i}`} size="s">
+          {render ? render(rowItem) : rowItem}
+        </EuiText>
+      ))}
+    </div>
+  )
+);
+
+MoreContainer.displayName = 'MoreContainer';
+
+export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
+  ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
       <>
@@ -227,24 +267,13 @@ export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowPro
             isOpen={isOpen}
             closePopover={() => setIsOpen(!isOpen)}
           >
-            <>
-              {rowItems
-                .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-                .map(rowItem => (
-                  <EuiText key={`${idPrefix}-${rowItem}`}>
-                    {render ? render(rowItem) : rowItem}
-                  </EuiText>
-                ))}
-              {rowItems.length > overflowIndexStart + maxOverflowItems && (
-                <b>
-                  <br />
-                  <FormattedMessage
-                    id="xpack.siem.fieldRenderers.moreOverflowLabel"
-                    defaultMessage="More..."
-                  />
-                </b>
-              )}
-            </>
+            <MoreContainer
+              idPrefix={idPrefix}
+              render={render}
+              rowItems={rowItems}
+              moreMaxHeight={moreMaxHeight}
+              overflowIndexStart={overflowIndexStart}
+            ></MoreContainer>
           </EuiPopover>
         )}
       </>
