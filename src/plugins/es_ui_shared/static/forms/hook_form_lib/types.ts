@@ -20,6 +20,10 @@
 import { ReactNode, ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
 import { Subject } from './lib';
 
+// This type will convert all optional property to required ones
+// Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
+type Required<T> = T extends object ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
+
 export interface FormHook<T extends object = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
@@ -30,7 +34,7 @@ export interface FormHook<T extends object = FormData> {
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
   getFieldDefaultValue: (fieldName: string) => unknown;
-  readonly __options: FormOptions;
+  readonly __options: Required<FormOptions>;
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
