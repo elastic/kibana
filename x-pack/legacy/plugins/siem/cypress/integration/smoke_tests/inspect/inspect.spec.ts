@@ -13,7 +13,7 @@ import {
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
 } from '../../lib/inspect/selectors';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 describe('Inspect', () => {
   describe('Hosts and network stats and tables', () => {
@@ -23,7 +23,7 @@ describe('Inspect', () => {
     INSPECT_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
         loginAndWaitForPage(table.url);
-        waitForTableLoad(table.id);
+        cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
         if (table.altInspectId) {
           cy.get(table.altInspectId).trigger('click', { force: true });
         } else {
