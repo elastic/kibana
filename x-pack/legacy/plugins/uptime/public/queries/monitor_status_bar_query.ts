@@ -15,7 +15,6 @@ query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
     location: $location
   ) {
     timestamp
-    millisFromNow
     monitor {
       status
       duration {
@@ -26,6 +25,9 @@ query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
       geo {
         name
       }
+    }
+    tls {
+      certificate_not_valid_after
     }
     url {
       full
