@@ -44,7 +44,7 @@ This page is deleted. Please see
 [role="exclude",id="ml-jobs"]
 == Creating {anomaly-jobs}
 
-This page has moved. Please see {stack-ov}/ml-jobs.html[Creating {anomaly-jobs}].
+This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jobs}].
 
 [role="exclude",id="job-tips"]
 == Machine learning job tips
