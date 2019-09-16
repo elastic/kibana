@@ -38,7 +38,7 @@ export class MBMapContainer extends React.Component {
       return {
         prevLayerList: nextLayerList,
         hasSyncedLayerList: false,
-        maxWidth: '260px', // width of table columns max-widths plus all padding
+
       };
     }
 

@@ -434,13 +434,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionInterval"
             fill={true}
-            iconSide="left"
             isLoading={true}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <button
@@ -749,13 +746,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionInterval"
             fill={true}
-            iconSide="left"
             isLoading={false}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <button
