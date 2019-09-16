@@ -4,38 +4,35 @@
 
 # Summary
 
-Prevent plugin lifecycle functions from blocking Kibana startup
-
-# Basic example
-
-If the proposal involves a new or changed API, include a basic code example.
-Omit this section if it's not applicable.
+Prevent plugin lifecycle methods from blocking Kibana startup by making the
+following changes:
+1. Synchronous lifecycle methods 
+2. Synchronous context provider functions
+3. Core should not expose API's as observables
 
 # Motivation
-We should make it impossible for a single plugin lifecycle function to stall
-all of kibana.
+Plugin lifecycle methods and context provider functions are async
+(promise-returning) functions. Core runs these functions in series and waits
+for each plugin's lifecycle function to resolve before calling the next. This
+allows plugins to depend on the API's returned from other plugins.
 
-### Background:
-Plugin lifecycle functions are async (promise-returning) functions. Core runs
-these functions in series and waits for each plugin's lifecycle function to
-resolve before calling the next. This allows plugins to depend on the API's
-returned from other plugins.
+With the current design, a single lifecycle method or context provider that
+blocks will block all of Kibana from starting up.
+
+We should make it impossible for a single plugin lifecycle function to
+stall all of kibana.
 
 # Detailed design
-1. Lifecycle functions are synchronous functions, they can perform asynchronous
-  operations but Core doesn't wait for these to complete.
 
-2. Context provider functions are synchronous functions.
+### 1. Synchronous lifecycle methods
+Lifecycle methods are synchronous functions, they can perform asynchronous
+operations but Core doesn't wait for these to complete. This guarantees that
+no plugin lifecycle function can block other plugins or core from starting up. 
 
-3. A new Plugin Lifecycle Context is introduced for exposing API's to plugins.
-
-4. Core only exposes it's API's through the Plugin Lifecycle Context.
-
-5. Plugins register their API's with the Plugin Lifecycle Context in order to
-   expose functionality to other plugins.
-
-### 1. Synchronous lifecycle functions
-### 2. Synchronous Context provider functions
+### 2. Synchronous Context Provider functions
+Making context provider functions synchronous guarantees that a context
+handler will never be blocked by registered context providers. They can expose
+asynchronous API's which could potentially have blocking behaviour. 
 
 ```ts
 export type IContextProvider<
@@ -48,7 +45,32 @@ export type IContextProvider<
 ) => TContext[TContextName];
 ```
 
-*(2.1): exposing elasticsearch through the route handler context:*
+### 3. Core should not expose API's as observables
+All Core API's should be reactive, when internal state changes their behaviour
+should change accordingly. But, exposing these internal state changes as part
+of the API contract leaks internal implementation details consumers can't do
+anything useful with and don't care about.
+
+For example: Core currently exposes `core.elasticsearch.adminClient$`, an
+Observable which emits a pre-configured elasticsearch client every time there's
+a configuration change. This includes changes such as the elasticsearch
+cluster `hosts` that alter the behaviour of the elasticsearch client. As a
+plugin author who wants to make search requests against elasticsearch I
+shouldn't have to care about, react to, or keep track of, how many times the
+underlying configuration has changed. I want to use the `callAsInternalUser`
+method and I expect Core to use the most up to date configuration to send this
+request to the correct `hosts`.
+
+This does not mean we should remove all observables from Core's API's. When an
+API consumer is interested in the *state changes itself* it absolutely makes
+sense to expose this as an Observable. Good examples of this is exposing
+plugin config as this is state that changes over time to which a plugin should
+directly react to.
+
+This is important in the context of synchronous lifecycle methods and context 
+handlers since exposing convenient API's become very ugly:
+
+*(3.1): exposing Observable-based API's through the route handler context:*
 ```ts
 // Before: Using an asynchronous context provider
 coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
@@ -66,7 +88,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
 coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
   return {
     elasticsearch: {
-      // (2.1.1) We can expose a convenient API by doing a lot of work
+      // (3.1.1) We can expose a convenient API by doing a lot of work
       adminClient: () => {
         callAsInternalUser: async (...args) => {
           adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
@@ -77,7 +99,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
           return adminClient.asScoped(req).callAsCurrentUser(args);
         }
       },
-      // (2.1.2) A slightly more awkward API to consume, but easier to build up
+      // (3.1.2) Or a lazy approach which perpetuates the problem to consumers:
       dataClient: async () => {
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         dataClient.asScoped(req),
@@ -87,153 +109,107 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
 });
 ```
 
-### 3. & 4. Core only exposes it's API's through the Plugin Lifecycle Context
-
-```ts
-// CoreSetup no longer contains any API's like elasticsearch, saved objects
-interface CoreSetup {
-  withContext((context: SetupContext) => void),
-  registerSetupApi<T extends keyof SetupContext>(
-    name: T,
-    provider: (context: Partial<SetupContext>) => Promise<SetupContext[T]>
-  ),
-}
-```
-
+### 4. Complete example code
+*(4.1) Doing async operations in a plugin's setup lifecycle*
 ```ts
 export class Plugin {
   public setup(core: CoreSetup) {
-    // withContext builds up an updated context and executes the passed in
-    // handler in the same 'tick'.
-    core.withContext(async (context: SetupContext) => {
-      // the only reason for passing an async function is so that we can use
-      // await internally to make it easier to do asynchronous operations in
-      // series. withContext completely ignores the return value of the handler
+    // Async setup is possible and any operations involving asynchronous API's
+    // will still block until these API's are ready, (savedObjects find only 
+    // resolves once the elasticsearch client has established a connection to 
+    // the cluster). The difference is that these details are now internal to
+    // the API.
+    (async () => {
       const docs = await context.core.savedObjects.client.find({...});
       ...
       await context.core.savedObjects.client.update(...);
-    });
+    })();
   }
 }
 ```
 
-### 5. Plugins register their API's with the Plugin Lifecycle Context
+*(4.2) Exposing an API from a plugin's setup lifecycle*
 ```ts
 export class Plugin {
   public async setup(core: CoreSetup) {
-    core.registerSetupApi(
-      name: 'data',
-      provider: (context: SetupContext) => ({
-        ping: () => {
-          return context.core.elasticsearch.adminClient.callAsInternalUser('ping', ...)
-      })
-    );
+    return {
+      ping: async () => {
+        // async & await isn't necessary here, but makes example a bit clearer.
+        // Note that the elasticsearch client no longer exposes an adminClient$
+        // observable.
+        const result = await core.elasticsearch.adminClient.callAsInternalUser('ping', ...);
+        return result;
+      }
+    };
   }
 }
+```
+
+*(4.3) Exposing an observable free Elasticsearch API from the route context*
+```ts
+coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
+  return {
+    elasticsearch: {
+      adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+      dataClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+    },
+  };
+});
 ```
 
 # Drawbacks
-
-Why should we *not* do this? Please consider:
-
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
-
-There are tradeoffs to choosing any path. Attempt to identify them here.
+Not being able to block on a lifecycle method also means plugins can no longer
+be certain that all setup is complete before they reach the start lifecycle.
+Plugins will have to manage such state internally. Core will still expose
+special API's that are able block the setup lifecycle such as registering
+Saved Object migrations, but this will be limited to operations where the risk
+of blocking all of kibana starting up is limited.
 
 # Alternatives
-## 1. Just make lifecycle functions synchronous
-1. Lifecycle functions are synchronous functions, they can perform asynchronous
-  operations but Core doesn't wait for these to complete.
+## 1. Introduce a lifecycle/context provider timeout
+Lifecycle methods and context providers would timeout after X seconds and any
+API's they expose would not be available if the timeout had been reached.
 
-2. Plugins continue to expose their API's by returning from a lifecycle
-function. There are no convenient "context" or the luxury of delaying exposing
-the full API until all dependencies are available. Each API function will have
-to wait for it's dependencies to become available.
+Drawbacks:
+1. For lifecycle methods: there would be no way to recover from a timeout,
+   once a timeout had been reached the API will remain unavailable.
 
-```ts
-export class Plugin {
-  public setup(core: CoreSetup) {
-    return {
-      search: (id) => {
-        return core.elasticsearch.adminClient$.pipe(
-          last(),
-          map((adminClient) => {
-            return adminClient.callAsInternalUser('endpoint', id);
-          })
-        ).toPromise();
-      },
-      getObject: (id) => {
-        return core.savedObjects.client$.pipe(
-          last(),
-          map((soClient) => {
-            return soClient.find(id);
-          })
-        ).toPromise();
-      }
-    }
-  }
-}
-```
+   Context providers have the benefit of being re-created for each handler
+   call, so a single timeout would not permanently disable the API.
 
-## 2. Expose Plugin API's as Observables
+3. Plugins have less control over their behaviour. When an upstream server
+   becomes unavailable, a plugin might prefer to keep retrying the request
+   indefinitely or only timeout after more than X seconds. It also isn't able
+   to expose detailed error information to downstream consumers such as
+   specifying which host or service is unavailable.
 
-The main benefit of this approach is Plugin authors have full control over
-which dependencies they want to block on and can fully control the behaviour (
-e.g. if elasticsearch isn't available within 5 seconds, expose the API anyway
-knowing some functions will always fail).
+5. (minor) Introduces an additional failure condition that needs to be handled.
+   Consumers should handle the API not being available in setup, as well as,
+   error responses from the API itself. Since remote hosts like Elasticsearch
+   could go down even after a successful setup, this effectively means API
+   consumers have to handle the same error condition in two places.
 
-1. Lifecycle functions are synchronous functions, they can perform asynchronous
-  operations but Core doesn't wait for these to complete.
+## 2. Treat anything that blocks Kibana from starting up as a bug
+Effectively do what we've always been doing. We can improve on the status quo
+by logging detailed diagnostic info on any plugins that appear to be blocking
+startup.
 
-2. Plugins register their API's with Core as Observables
+Drawbacks:
+1. Since plugins load serially, even if they don't block startup, all the
+   delays could add up and potentially make startup very slow.
+2. This opens up the potential for a third-party plugin to effectively "break"
+   kibana which creates a bad user experience.
 
-```ts
-interface CoreSetup {
-  ...
-  registerSetupApi<T>(
-    name: string,
-    provider: () => BehaviourSubject[T]>
-  ),
-}
-```
+# Adoption strategy (WIP)
 
-```ts
-export class Plugin {
-  public setup(core: CoreSetup) {
-    core.registerSetupApi(
-      name: 'data',
-      provider: () => {
-        // Here plugin chooses to "block" exposing it's API until both saved
-        // objects and elasticsearch clients are available.
-        return combineLatest(
-          core.elasticsearch.adminClient$,
-          core.savedObjects.client$
-        ).pipe(map((adminClient, savedObjectsClient) => {
-          return {
-            search: (id) => {
-              return adminClient.callAsInternalUser('endpoint', id);
-            },
-            getObject: (id) => {
-              return savedObjectsClient.get(id);
-            }
-          }
-        }))
-      }
-    )
-  }
-}
-```
+Making context provider functions synchronous (2) and not exposing core API's
+as observables (3) would require the least amount of change from plugins since
+adoption on these API's are still fairly low.
 
-# Adoption strategy
+Having synchronous lifecycle methods (1) would have a bigger impact on plugins
+since most NP shims were built with asynchronous methods in mind.
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
-
-# How we teach this
+# How we teach this (TBD)
 
 What names and terminology work best for these concepts and why? How is this
 idea best presented? As a continuation of existing Kibana patterns?
@@ -245,6 +221,5 @@ at any level?
 How should this feature be taught to existing Kibana developers?
 
 # Unresolved questions
-
-Optional, but suggested for first drafts. What parts of the design are still
-TBD?
+Are the drawbacks worth the benefits or can we live with Kibana potentially
+being blocked for the sake of convenient asynchronous lifecycle stages?
