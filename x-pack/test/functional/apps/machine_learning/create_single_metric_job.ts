@@ -178,7 +178,6 @@ export default function({ getService }: FtrProviderContext) {
       const expectedModelSizeStats = {
         job_id: jobId,
         result_type: 'model_size_stats',
-        model_bytes: '47.6 KB',
         model_bytes_exceeded: '0',
         model_bytes_memory_limit: '15728640',
         total_by_field_count: '3',

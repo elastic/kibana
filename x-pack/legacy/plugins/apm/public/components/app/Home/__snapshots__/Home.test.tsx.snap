@@ -42,24 +42,22 @@ exports[`Home component should render services 1`] = `
     expand={false}
     size="m"
   >
-    <Styled(EuiTab)
+    <EuiTabLink
       isSelected={true}
       key="services"
-      onClick={[Function]}
     >
       <ServiceOverviewLink>
         Services
       </ServiceOverviewLink>
-    </Styled(EuiTab)>
-    <Styled(EuiTab)
+    </EuiTabLink>
+    <EuiTabLink
       isSelected={false}
       key="traces"
-      onClick={[Function]}
     >
       <TraceOverviewLink>
         Traces
       </TraceOverviewLink>
-    </Styled(EuiTab)>
+    </EuiTabLink>
   </EuiTabs>
   <EuiSpacer />
   <ServiceOverview />
@@ -108,24 +106,22 @@ exports[`Home component should render traces 1`] = `
     expand={false}
     size="m"
   >
-    <Styled(EuiTab)
+    <EuiTabLink
       isSelected={false}
       key="services"
-      onClick={[Function]}
     >
       <ServiceOverviewLink>
         Services
       </ServiceOverviewLink>
-    </Styled(EuiTab)>
-    <Styled(EuiTab)
+    </EuiTabLink>
+    <EuiTabLink
       isSelected={true}
       key="traces"
-      onClick={[Function]}
     >
       <TraceOverviewLink>
         Traces
       </TraceOverviewLink>
-    </Styled(EuiTab)>
+    </EuiTabLink>
   </EuiTabs>
   <EuiSpacer />
   <TraceOverview />
