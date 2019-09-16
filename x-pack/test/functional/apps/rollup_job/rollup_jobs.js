@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
   // const log = getService('log');
   const es = getService('es');
-  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings']);
+  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
   describe('rollup jobs', function () {
     const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
@@ -81,6 +81,11 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('live*,' + indexName, false, '@timestamp');
+
+      await PageObjects.common.navigateToApp('discover');
+      const hits = await PageObjects.discover.getHitCount();
+
+      expect(hits).to.be('7 hits');
 
 
 
