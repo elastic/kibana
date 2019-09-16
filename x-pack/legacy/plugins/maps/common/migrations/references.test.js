@@ -7,7 +7,7 @@
 /* eslint max-len: 0 */
 
 import { extractReferences, injectReferences } from './references';
-import { ES_GEO_GRID, ES_SEARCH } from '../constants';
+import { ES_GEO_GRID, ES_SEARCH, ES_PEW_PEW } from '../constants';
 
 const layerListJSON = {
   esSearchSource: {
@@ -21,6 +21,10 @@ const layerListJSON = {
   join: {
     withIndexPatternId: '[{\"joins\":[{\"right\":{\"indexPatternId\":\"e20b2a30-f735-11e8-8ce0-9723965e01e3\"}}]}]',
     withIndexPatternRef: '[{\"joins\":[{\"right\":{\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}]',
+  },
+  pewPewSource: {
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${ES_PEW_PEW}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${ES_PEW_PEW}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
   }
 };
 
@@ -67,6 +71,26 @@ describe('extractReferences', () => {
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternRef,
+      },
+      references: [
+        {
+          id: 'c698b940-e149-11e8-a35a-370a8516603a',
+          name: 'layer_0_source_index_pattern',
+          type: 'index-pattern',
+        }
+      ],
+    });
+  });
+
+  test('Should extract index-pattern reference from ES pew pew source descriptor', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.pewPewSource.withIndexPatternRef,
       },
       references: [
         {
@@ -147,6 +171,26 @@ describe('injectReferences', () => {
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternId,
+      }
+    });
+  });
+
+  test('Should inject index-pattern reference into ES pew pew source descriptor', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.pewPewSource.withIndexPatternRef,
+    };
+    const references = [
+      {
+        id: 'c698b940-e149-11e8-a35a-370a8516603a',
+        name: 'layer_0_source_index_pattern',
+        type: 'index-pattern',
+      }
+    ];
+    expect(injectReferences({ attributes, references })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
       }
     });
   });

@@ -16,25 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
-// @ts-ignore
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns/index';
-// @ts-ignore
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns/index';
-// @ts-ignore
-import { IndexPatternSelect } from 'ui/index_patterns/index';
-// @ts-ignore
-import { IndexPatterns } from 'ui/index_patterns/index';
-// @ts-ignore
-import { validateIndexPattern } from 'ui/index_patterns/index';
-
-import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils';
-
-// IndexPattern, StaticIndexPattern, Field
-import * as types from 'ui/index_patterns';
 
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { Field, FieldList, FieldType } from './fields';
+// @ts-ignore
+import { createFlattenHitWrapper } from './index_patterns/flatten_hit';
+import { createIndexPatternSelect } from './components';
+import {
+  formatHitProvider,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
@@ -44,19 +37,26 @@ export interface IndexPatternDependencies {
 /**
  * Index Patterns Service
  *
- * The `setup` method of this service returns the public contract for
- * index patterns. Right now these APIs are simply imported from `ui/public`
- * and re-exported here. Once the index patterns code actually moves to
- * this plugin, the imports above can simply be updated to point to their
- * corresponding local directory.
- *
  * @internal
  */
 export class IndexPatternsService {
   public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
+      FieldList,
+      flattenHitWrapper: createFlattenHitWrapper(),
+      formatHitProvider,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
+      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
+      __LEGACY: {
+        // For BWC we must temporarily export the class implementation of Field,
+        // which is only used externally by the Index Pattern UI.
+        FieldImpl: Field,
+      },
     };
+  }
+
+  public start() {
+    // nothing to do here yet
   }
 
   public stop() {
@@ -64,40 +64,48 @@ export class IndexPatternsService {
   }
 }
 
-// static exports
-
-const constants = {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-};
-
-const fixtures = {
-  mockFields,
-  mockIndexPattern,
-};
-
-const ui = {
-  IndexPatternSelect,
-};
-
-const utils = {
-  getFromSavedObject,
-  isFilterable,
-};
-
-export { validateIndexPattern, constants, fixtures, ui, IndexPatterns, utils };
+// static code
 
 /** @public */
+export { IndexPatternSelect } from './components';
+export { IndexPatternsProvider } from './index_patterns';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  isFilterable,
+  validateIndexPattern,
+  mockFields,
+  mockIndexPattern,
+} from './utils';
+
+/** @public */
+export {
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+} from './errors';
+
+// types
+
+/** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 
 /** @public */
-export type IndexPattern = types.IndexPattern;
+export type IndexPattern = IndexPattern;
 
 /** @public */
-export type StaticIndexPattern = types.StaticIndexPattern;
+export type IndexPatterns = IndexPatterns;
 
 /** @public */
-export type Field = types.Field;
+export type StaticIndexPattern = StaticIndexPattern;
 
 /** @public */
-export type FieldType = types.FieldType;
+export type Field = Field;
+
+/** @public */
+export type FieldType = FieldType;

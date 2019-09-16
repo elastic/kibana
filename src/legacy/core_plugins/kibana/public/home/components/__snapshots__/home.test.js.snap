@@ -28,8 +28,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -54,8 +52,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -104,12 +100,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -151,8 +142,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -177,8 +166,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -240,12 +227,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -287,8 +269,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -326,8 +306,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -376,12 +354,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -423,8 +396,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -449,8 +420,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -499,12 +468,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -546,8 +510,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -572,8 +534,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -622,12 +582,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -669,8 +624,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -695,8 +648,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -745,12 +696,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -792,8 +738,6 @@ exports[`home should render home component 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -818,8 +762,6 @@ exports[`home should render home component 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -868,12 +810,7 @@ exports[`home should render home component 1`] = `
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -915,8 +852,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -941,8 +876,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -991,12 +924,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -1038,8 +966,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -1064,8 +990,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -1114,12 +1038,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -1135,7 +1054,10 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
 <Welcome
+  fetchTelemetry={[MockFunction]}
+  getTelemetryBannerId={[MockFunction]}
   onSkip={[Function]}
+  setOptIn={[MockFunction]}
   urlBasePath="goober"
 />
 `;
@@ -1168,8 +1090,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -1194,8 +1114,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <EuiTitle
@@ -1244,12 +1162,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           size="s"
         />
         <EuiButton
-          color="primary"
-          fill={false}
           href="#/home/feature_directory"
-          iconSide="left"
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"

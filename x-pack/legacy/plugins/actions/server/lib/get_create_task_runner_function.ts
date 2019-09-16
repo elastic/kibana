@@ -6,17 +6,23 @@
 
 import { execute } from './execute';
 import { ExecutorError } from './executor_error';
-import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { SpacesPlugin } from '../../../spaces';
+import {
+  ActionTaskParams,
+  ActionTypeRegistryContract,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
+  isSecurityEnabled: boolean;
 }
 
 interface TaskRunnerOptions {
@@ -29,19 +35,42 @@ export function getCreateTaskRunnerFunction({
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
+  isSecurityEnabled,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { spaceId, id, params } = taskInstance.params;
+        const { spaceId, actionTaskParamsId } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
-        const basePath = getBasePath(spaceId);
+
+        const {
+          attributes: { actionId, params, apiKey },
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
+          'action_task_params',
+          actionTaskParamsId,
+          { namespace }
+        );
+
+        const requestHeaders: Record<string, string> = {};
+        if (isSecurityEnabled && !apiKey) {
+          throw new ExecutorError('API key is required. The attribute "apiKey" is missing.');
+        } else if (isSecurityEnabled) {
+          requestHeaders.authorization = `ApiKey ${apiKey}`;
+        }
+
+        // Since we're using API keys and accessing elasticsearch can only be done
+        // via a request, we're faking one with the proper authorization headers.
+        const fakeRequest: any = {
+          headers: requestHeaders,
+          getBasePath: () => getBasePath(spaceId),
+        };
+
         const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
-          actionId: id,
-          services: getServices(basePath),
+          actionId,
+          services: getServices(fakeRequest),
           params,
         });
         if (executorResult.status === 'error') {
@@ -50,7 +79,7 @@ export function getCreateTaskRunnerFunction({
           throw new ExecutorError(
             executorResult.message,
             executorResult.data,
-            executorResult.retry
+            executorResult.retry == null ? false : executorResult.retry
           );
         }
       },

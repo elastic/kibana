@@ -60,7 +60,8 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNamesMap()[groupName];
   // e.g. buckets can have no aggs
-  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
+  const group: AggConfig[] =
+    state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [];
 
   const stats = {
     max: 0,
@@ -90,7 +91,7 @@ function DefaultEditorAggGroup({
         setAggsState({
           type: AGGS_ACTION_KEYS.TOUCHED,
           payload: true,
-          aggId: Number(aggId),
+          aggId,
         });
       });
     }
@@ -114,7 +115,7 @@ function DefaultEditorAggGroup({
     }
   };
 
-  const setTouchedHandler = (aggId: number, touched: boolean) => {
+  const setTouchedHandler = (aggId: string, touched: boolean) => {
     setAggsState({
       type: AGGS_ACTION_KEYS.TOUCHED,
       payload: touched,
@@ -122,7 +123,7 @@ function DefaultEditorAggGroup({
     });
   };
 
-  const setValidityHandler = (aggId: number, valid: boolean) => {
+  const setValidityHandler = (aggId: string, valid: boolean) => {
     setAggsState({
       type: AGGS_ACTION_KEYS.VALID,
       payload: valid,

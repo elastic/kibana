@@ -13,12 +13,11 @@ import {
   DidChangeWorkspaceFoldersParams,
   InitializeResult,
 } from 'vscode-languageserver-protocol';
-import { RequestCancelled, ServerNotInitialized } from '../../common/lsp_error_codes';
+import { RequestCancelled } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { Cancelable } from '../utils/cancelable';
-import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 interface Job {
@@ -45,7 +44,6 @@ export interface InitializeOptions {
   initialOptions?: object;
 }
 
-export const InitializingError = new ResponseError(ServerNotInitialized, 'Server is initializing');
 export const WorkspaceUnloadedError = new ResponseError(RequestCancelled, 'Workspace unloaded');
 
 export class RequestExpander implements ILanguageServerHandler {
@@ -157,6 +155,7 @@ export class RequestExpander implements ILanguageServerHandler {
           await this.sendInitRequest(workspacePath);
         }
         ws.status = WorkspaceStatus.Initialized;
+        delete ws.initPromise;
       } else {
         for (const w of this.workspaces.values()) {
           if (w.status === WorkspaceStatus.Initialized) {
@@ -226,24 +225,8 @@ export class RequestExpander implements ILanguageServerHandler {
         ws.initPromise = Cancelable.fromPromise(this.initialize(request.workspacePath));
       }
       // Uninitialized or initializing
-      if (ws.status !== WorkspaceStatus.Initialized) {
-        const timeout = request.timeoutForInitializeMs || 0;
-
-        if (timeout > 0 && ws.initPromise) {
-          try {
-            const elapsed = Date.now() - startTime;
-            await promiseTimeout(timeout - elapsed, ws.initPromise.promise);
-          } catch (e) {
-            if (e.isTimeout) {
-              throw InitializingError;
-            }
-            throw e;
-          }
-        } else if (ws.initPromise) {
-          await ws.initPromise.promise;
-        } else {
-          throw InitializingError;
-        }
+      if (ws.status === WorkspaceStatus.Initializing) {
+        await ws.initPromise!.promise;
       }
     }
     return await this.proxy.handleRequest(request);

@@ -75,7 +75,7 @@ export const pie = () => ({
     {
       name: 'tilt',
       displayName: 'Tilt angle',
-      help: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+      help: 'Percentage of tilt where 100 is fully vertical and 0 is completely flat',
       argType: 'percentage',
       default: 1,
     },

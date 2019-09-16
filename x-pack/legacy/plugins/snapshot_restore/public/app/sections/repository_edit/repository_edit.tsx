@@ -12,7 +12,7 @@ import { Repository, EmptyRepository } from '../../../../common/types';
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';
 
 interface MatchParams {
@@ -31,9 +31,10 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('repositoryEdit');
+    docTitleService.setTitle('repositoryEdit');
   }, []);
 
   // Repository state with default empty repository

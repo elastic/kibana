@@ -9,6 +9,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render } from 'react-testing-library';
 
+import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 import { wait } from '../../lib/helpers';
@@ -92,6 +93,6 @@ describe('Last Event Time Stat', () => {
     );
     await wait();
 
-    expect(container.innerHTML).toBe('--');
+    expect(container.innerHTML).toContain(getEmptyValue());
   });
 });

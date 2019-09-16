@@ -64,13 +64,9 @@ exports[`ColorFormatEditorComponent should render multiple colors 1`] = `
     size="m"
   />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add color"
@@ -141,13 +137,9 @@ exports[`ColorFormatEditorComponent should render other type normally (range fie
     size="m"
   />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add color"
@@ -218,13 +210,9 @@ exports[`ColorFormatEditorComponent should render string type normally (regex fi
     size="m"
   />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add color"

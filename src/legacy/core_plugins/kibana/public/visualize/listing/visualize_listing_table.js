@@ -94,7 +94,7 @@ class VisualizeListingTableUi extends Component {
         )
       },
       {
-        field: 'type.title',
+        field: 'typeTitle',
         name: intl.formatMessage({
           id: 'kbn.visualize.listing.table.typeColumnName',
           defaultMessage: 'Type',
@@ -103,11 +103,11 @@ class VisualizeListingTableUi extends Component {
         render: (field, record) =>  (
           <span>
             {this.renderItemTypeIcon(record)}
-            {record.type.title}
+            {record.typeTitle}
             {this.getExperimentalBadge(record)}
           </span>
         )
-      }
+      },
     ];
 
     return tableColumns;
@@ -175,13 +175,13 @@ class VisualizeListingTableUi extends Component {
 
   renderItemTypeIcon(item) {
     let icon;
-    if (item.type.image) {
+    if (item.image) {
       icon = (
         <img
           className="visListingTable__typeImage"
           aria-hidden="true"
           alt=""
-          src={item.type.image}
+          src={item.image}
         />
       );
     } else {
@@ -199,7 +199,7 @@ class VisualizeListingTableUi extends Component {
   }
 
   getExperimentalBadge(item) {
-    return item.type.shouldMarkAsExperimentalInUI() && (
+    return item.isExperimental && (
       <EuiBetaBadge
         className="visListingTable__experimentalIcon"
         label="E"

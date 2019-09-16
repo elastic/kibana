@@ -33,7 +33,7 @@ const MAX_HIT_NUMBER = 5;
 export class DocumentSearchClient extends AbstractSearchClient {
   private HIGHLIGHT_PRE_TAG = '_@-';
   private HIGHLIGHT_POST_TAG = '-@_';
-  private LINE_SEPARATOR = '\n';
+  protected LINE_SEPARATOR = '\n';
 
   constructor(protected readonly client: EsClient, protected readonly log: Logger) {
     super(client, log);
@@ -307,7 +307,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
     };
   }
 
-  private getSourceContent(hitsContent: SourceHit[], doc: Document) {
+  protected getSourceContent(hitsContent: SourceHit[], doc: Document) {
     const docInLines = doc.content.split(this.LINE_SEPARATOR);
     let slicedRanges: LineRange[] = [];
     if (hitsContent.length === 0) {

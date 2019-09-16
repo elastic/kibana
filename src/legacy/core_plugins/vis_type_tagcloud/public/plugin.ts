@@ -40,7 +40,7 @@ export class TagCloudPlugin implements Plugin<void, void> {
 
   public setup(core: CoreSetup, { data, visualizations }: TagCloudPluginSetupDependencies) {
     data.expressions.registerFunction(createTagCloudFn);
-    visualizations.types.VisTypesRegistryProvider.register(createTagCloudTypeDefinition);
+    visualizations.types.registerVisualization(createTagCloudTypeDefinition);
   }
 
   public start(core: CoreStart) {

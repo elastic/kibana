@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const { version } = require('../../package.json');
-const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
+const KIBANA_INSTALL_DIR = process.env.KIBANA_INSTALL_DIR || `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -63,16 +63,17 @@ module.exports = function (grunt) {
   ];
 
   const NODE = 'node';
+  const YARN = 'yarn';
   const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
     process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
       options,
-      cmd: 'yarn',
+      cmd: YARN,
       args: ['run', 'github-checks-reporter', title, cmd, ...args],
     } : { options, cmd, args });
   const gruntTaskWithGithubChecks = (title, task) =>
     scriptWithGithubChecks({
       title,
-      cmd: 'yarn',
+      cmd: YARN,
       args: ['run', 'grunt', task]
     });
 
@@ -158,6 +159,19 @@ module.exports = function (grunt) {
       ]
     }),
 
+    // used by the test:mochaCoverage task
+    mochaCoverage: scriptWithGithubChecks({
+      title: 'Mocha tests coverage',
+      cmd: YARN,
+      args: [
+        'nyc',
+        '--reporter=html',
+        '--report-dir=./target/kibana-coverage/mocha',
+        NODE,
+        'scripts/mocha'
+      ]
+    }),
+
     // used by the test:browser task
     //    runs the kibana server to serve the browser test bundle
     browserTestServer: createKbnServerTask({
@@ -194,7 +208,7 @@ module.exports = function (grunt) {
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
+        '--optimize.bundleDir=' + resolve(__dirname, '../../data/optimize/testdev'),
       ]
     }),
 

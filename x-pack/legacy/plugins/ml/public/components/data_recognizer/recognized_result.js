@@ -22,7 +22,7 @@ export const RecognizedResult = ({
     `index=${indexPattern.id}` :
     `savedSearchId=${savedSearch.id}`;
 
-  const href = `#/jobs/new_job/simple/recognize?id=${config.id}&${id}`;
+  const href = `#/jobs/new_job/recognize?id=${config.id}&${id}`;
 
   let logo = null;
   // if a logo is available, use that, otherwise display the id

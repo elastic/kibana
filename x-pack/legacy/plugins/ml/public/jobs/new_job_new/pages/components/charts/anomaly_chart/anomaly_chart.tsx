@@ -14,6 +14,7 @@ import { Scatter } from './scatter';
 import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
+import { LoadingWrapper } from '../loading_wrapper';
 
 export enum CHART_TYPE {
   LINE,
@@ -27,32 +28,32 @@ interface Props {
   anomalyData: Anomaly[];
   height: string;
   width: string;
+  loading?: boolean;
 }
 
 export const AnomalyChart: FC<Props> = ({
   chartType,
-  chartData,
+  chartData = [],
   modelData,
   anomalyData,
   height,
   width,
+  loading = false,
 }) => {
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
-  if (data.length === 0) {
-    return null;
-  }
-
   const xDomain = getXRange(data);
   return (
-    <div style={{ width, height }} data-test-subj="mlAnomalyChart">
-      <Chart>
-        <Settings xDomain={xDomain} tooltip={TooltipType.None} />
-        <Axes chartData={data} />
-        <Anomalies anomalyData={anomalyData} />
-        <ModelBounds modelData={modelData} />
-        {chartType === CHART_TYPE.LINE && <Line chartData={data} />}
-        {chartType === CHART_TYPE.SCATTER && <Scatter chartData={data} />}
-      </Chart>
+    <div style={{ width, height }} data-test-subj={`mlAnomalyChart ${CHART_TYPE[chartType]}`}>
+      <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
+        <Chart>
+          <Settings xDomain={xDomain} tooltip={TooltipType.None} />
+          <Axes chartData={data} />
+          <Anomalies anomalyData={anomalyData} />
+          <ModelBounds modelData={modelData} />
+          {chartType === CHART_TYPE.LINE && <Line chartData={data} />}
+          {chartType === CHART_TYPE.SCATTER && <Scatter chartData={data} />}
+        </Chart>
+      </LoadingWrapper>
     </div>
   );
 };

@@ -24,7 +24,6 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onFieldSelected={jest.fn()}
           onUpdateColumns={jest.fn()}
@@ -53,7 +52,6 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onFieldSelected={jest.fn()}
           onUpdateColumns={jest.fn()}
@@ -82,7 +80,6 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={{}}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onFieldSelected={jest.fn()}
           onUpdateColumns={jest.fn()}
@@ -111,7 +108,6 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={{}}
-          isLoading={false}
           onCategorySelected={jest.fn()}
           onFieldSelected={jest.fn()}
           onUpdateColumns={jest.fn()}

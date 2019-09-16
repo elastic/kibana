@@ -42,6 +42,7 @@ export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock() {
   const mock: MockedKeys<CoreSetup> = {
+    application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),

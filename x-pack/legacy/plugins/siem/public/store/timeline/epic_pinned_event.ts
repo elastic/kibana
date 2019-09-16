@@ -26,13 +26,13 @@ import {
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { TimelineById } from './types';
+import { ActionTimeline, TimelineById } from './types';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
 export const epicPersistPinnedEvent = (
   apolloClient: ApolloClient<NormalizedCacheObject>,
-  action: Action,
+  action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>
@@ -47,14 +47,11 @@ export const epicPersistPinnedEvent = (
       fetchPolicy: 'no-cache',
       variables: {
         pinnedEventId:
-          timeline[get('payload.id', action)].pinnedEventsSaveObject[
-            get('payload.eventId', action)
-          ] != null
-            ? timeline[get('payload.id', action)].pinnedEventsSaveObject[
-                get('payload.eventId', action)
-              ].pinnedEventId
+          timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId] != null
+            ? timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId]
+                .pinnedEventId
             : null,
-        eventId: get('payload.eventId', action),
+        eventId: action.payload.eventId,
         timelineId: myEpicTimelineId.getTimelineId(),
       },
       refetchQueries,
@@ -62,14 +59,14 @@ export const epicPersistPinnedEvent = (
   ).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimeline]) => {
-      const savedTimeline = recentTimeline[get('payload.id', action)];
+      const savedTimeline = recentTimeline[action.payload.id];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         response != null
           ? updateTimeline({
-              id: get('payload.id', action),
+              id: action.payload.id,
               timeline: {
                 ...savedTimeline,
                 savedObjectId:
@@ -80,29 +77,34 @@ export const epicPersistPinnedEvent = (
                   savedTimeline.version == null && response.timelineVersion != null
                     ? response.timelineVersion
                     : savedTimeline.version,
+                pinnedEventIds: {
+                  ...savedTimeline.pinnedEventIds,
+                  [action.payload.eventId]: true,
+                },
                 pinnedEventsSaveObject: {
                   ...savedTimeline.pinnedEventsSaveObject,
-                  [get('payload.eventId', action)]: response,
+                  [action.payload.eventId]: response,
                 },
               },
             })
           : updateTimeline({
-              id: get('payload.id', action),
+              id: action.payload.id,
               timeline: {
                 ...savedTimeline,
+                pinnedEventIds: omit(action.payload.eventId, savedTimeline.pinnedEventIds),
                 pinnedEventsSaveObject: omit(
-                  get('payload.eventId', action),
+                  action.payload.eventId,
                   savedTimeline.pinnedEventsSaveObject
                 ),
               },
             }),
         ...callOutMsg,
         endTimelineSaving({
-          id: get('payload.id', action),
+          id: action.payload.id,
         }),
       ];
     }),
-    startWith(startTimelineSaving({ id: get('payload.id', action) })),
+    startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),

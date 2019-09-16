@@ -14,7 +14,7 @@ jest.mock('ui/vis/editors/default/schemas', () => {
 });
 jest.mock('../../kibana_services', () => {});
 jest.mock('ui/vis/agg_configs', () => {});
-jest.mock('ui/timefilter/timefilter', () => {});
+jest.mock('ui/timefilter', () => {});
 jest.mock('../vector_layer', () => {});
 
 
@@ -58,7 +58,7 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         iso2: 'CN',
         [COUNT_PROPERTY_NAME]: 61,
-        [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
+        [`__kbn__dynamic__${COUNT_PROPERTY_NAME}__fillColor`]: 1,
       }
     };
     const propertiesMap = new Map();

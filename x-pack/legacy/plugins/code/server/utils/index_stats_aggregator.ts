@@ -7,14 +7,15 @@
 import { IndexStats, IndexStatsKey } from '../../model';
 
 export function aggregateIndexStats(stats: IndexStats[]): IndexStats {
-  const res = new Map<IndexStatsKey, number>()
-    .set(IndexStatsKey.File, 0)
-    .set(IndexStatsKey.Symbol, 0)
-    .set(IndexStatsKey.Reference, 0);
+  const res = new Map<IndexStatsKey, number>();
   stats.forEach((s: IndexStats) => {
     s.forEach((value: number, key: IndexStatsKey) => {
+      if (!res.has(key)) {
+        res.set(key, 0);
+      }
       res.set(key, res.get(key)! + value);
     });
   });
+
   return res;
 }

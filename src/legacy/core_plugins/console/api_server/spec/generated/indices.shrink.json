@@ -12,6 +12,6 @@
     "patterns": [
       "{indices}/_shrink/{target}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
   }
 }

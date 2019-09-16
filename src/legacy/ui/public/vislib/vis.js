@@ -19,15 +19,17 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
+import { EventEmitter } from 'events';
+import chrome from '../chrome';
 import { KbnError } from '../errors';
-import { EventsProvider } from '../events';
 import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
 import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
 import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_pointseries_tooltip_formatter';
 
-export function VislibVisProvider(Private, config) {
-  const Events = Private(EventsProvider);
+const config = chrome.getUiSettingsClient();
+
+export function VislibVisProvider(Private) {
 
   setHierarchicalTooltipFormatter(Private);
   setPointSeriesTooltipFormatter(Private);
@@ -40,9 +42,9 @@ export function VislibVisProvider(Private, config) {
    * @param $el {HTMLElement} jQuery selected HTML element
    * @param config {Object} Parameters that define the chart type and chart options
    */
-  class Vis extends Events {
+  class Vis extends EventEmitter {
     constructor($el, visConfigArgs) {
-      super(arguments);
+      super();
       this.el = $el.get ? $el.get(0) : $el;
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
       this.visConfigArgs.dimmingOpacity = config.get('visualization:dimmingOpacity');
@@ -153,7 +155,7 @@ export function VislibVisProvider(Private, config) {
      */
     on(event, listener) {
       const first = this.listenerCount(event) === 0;
-      const ret = Events.prototype.on.call(this, event, listener);
+      const ret = EventEmitter.prototype.on.call(this, event, listener);
       const added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
@@ -172,11 +174,17 @@ export function VislibVisProvider(Private, config) {
      */
     off(event, listener) {
       const last = this.listenerCount(event) === 1;
-      const ret = Events.prototype.off.call(this, event, listener);
+      const ret = EventEmitter.prototype.off.call(this, event, listener);
       const removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
+      return ret;
+    }
+
+    removeAllListeners(event) {
+      const ret = EventEmitter.prototype.removeAllListeners.call(this, event);
+      this.handler.disable(event);
       return ret;
     }
   }

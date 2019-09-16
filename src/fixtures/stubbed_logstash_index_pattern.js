@@ -40,7 +40,7 @@ export default function stubbedLogstashIndexPatternService(Private) {
     };
   });
 
-  const indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
+  const indexPattern = new StubIndexPattern('logstash-*', cfg => cfg, 'time', fields);
   indexPattern.id = 'logstash-*';
 
   return indexPattern;

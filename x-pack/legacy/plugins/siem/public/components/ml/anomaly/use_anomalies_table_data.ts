@@ -5,13 +5,8 @@
  */
 
 import { useState, useEffect, useContext } from 'react';
-import moment from 'moment-timezone';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
-import {
-  KibanaConfigContext,
-  AppKibanaFrameworkAdapter,
-} from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
@@ -19,6 +14,12 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import {
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_TIMEZONE_BROWSER,
+  DEFAULT_KBN_VERSION,
+} from '../../../../common/constants';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -38,30 +39,17 @@ export const influencersOrCriteriaToString = (
     ? ''
     : influencers.reduce((accum, item) => `${accum}${item.fieldName}:${item.fieldValue}`, '');
 
-export const getTimeZone = (config: Partial<AppKibanaFrameworkAdapter>): string => {
-  if (config.dateFormatTz !== 'Browser' && config.dateFormatTz != null) {
-    return config.dateFormatTz;
-  } else if (config.dateFormatTz === 'Browser' && config.timezone != null) {
-    return config.timezone;
-  } else {
-    return moment.tz.guess();
-  }
-};
-
-export const getThreshold = (
-  config: Partial<AppKibanaFrameworkAdapter>,
-  threshold: number
-): number => {
+export const getThreshold = (anomalyScore: number | undefined, threshold: number): number => {
   if (threshold !== -1) {
     return threshold;
-  } else if (config.anomalyScore == null) {
+  } else if (anomalyScore == null) {
     return 50;
-  } else if (config.anomalyScore < 0) {
+  } else if (anomalyScore < 0) {
     return 0;
-  } else if (config.anomalyScore > 100) {
+  } else if (anomalyScore > 100) {
     return 100;
   } else {
-    return Math.floor(config.anomalyScore);
+    return Math.floor(anomalyScore);
   }
 };
 
@@ -76,10 +64,12 @@ export const useAnomaliesTableData = ({
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [, siemJobs] = useSiemJobs(true);
   const [loading, setLoading] = useState(true);
-  const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async (
     influencersInput: InfluencerInput[],
@@ -94,16 +84,16 @@ export const useAnomaliesTableData = ({
             jobIds: siemJobs,
             criteriaFields: criteriaFieldsInput,
             aggregationInterval: 'auto',
-            threshold: getThreshold(config, threshold),
+            threshold: getThreshold(anomalyScore, threshold),
             earliestMs,
             latestMs,
             influencers: influencersInput,
-            dateFormatTz: getTimeZone(config),
+            dateFormatTz: timezone,
             maxRecords: 500,
             maxExamples: 10,
           },
           {
-            'kbn-version': config.kbnVersion,
+            'kbn-version': kbnVersion,
           }
         );
         setTableData(data);

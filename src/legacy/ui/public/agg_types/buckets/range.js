@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import React from 'react';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterRange } from './create_filter/range';
 import { FieldFormat } from '../../../field_formats/field_format';
 import { RangeKey } from './range_key';
-import { RangesParamEditor } from '../controls/ranges';
+import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 import { i18n } from '@kbn/i18n';
 
 const keyCaches = new WeakMap();
@@ -91,7 +92,7 @@ export const rangeBucketAgg = new BucketAggType({
         { from: 0, to: 1000 },
         { from: 1000, to: 2000 }
       ],
-      editorComponent: RangesParamEditor,
+      editorComponent: ({ value, setValue }) => <RangesParamEditor value={value} setValue={setValue}/>,
       write: function (aggConfig, output) {
         output.params.ranges = aggConfig.params.ranges;
         output.params.keyed = true;

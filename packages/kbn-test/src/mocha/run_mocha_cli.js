@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
+import { REPO_ROOT } from '@kbn/dev-utils';
 import getopts from 'getopts';
 import globby from 'globby';
 
@@ -64,19 +63,17 @@ export function runMochaCli() {
   if (!opts._.length) {
     globby
       .sync(
-        [
-          'src/**/__tests__/**/*.js',
-          'packages/elastic-datemath/test/**/*.js',
-          'packages/kbn-dev-utils/src/**/__tests__/**/*.js',
-          'packages/kbn-es-query/src/**/__tests__/**/*.js',
-          'packages/kbn-eslint-plugin-eslint/**/__tests__/**/*.js',
-          'tasks/**/__tests__/**/*.js',
-        ],
+        ['src/**/__tests__/**/*.js', 'packages/**/__tests__/**/*.js', 'tasks/**/__tests__/**/*.js'],
         {
-          cwd: resolve(__dirname, '../../../..'),
+          cwd: REPO_ROOT,
           onlyFiles: true,
           absolute: true,
-          ignore: ['**/__tests__/fixtures/**', 'src/**/public/**', '**/_*.js'],
+          ignore: [
+            '**/__tests__/fixtures/**',
+            'src/**/public/**',
+            '**/_*.js',
+            'packages/**/target/**',
+          ],
         }
       )
       .forEach(file => {

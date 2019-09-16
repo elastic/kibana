@@ -2,6 +2,6 @@
 
 exports[`formatted_bytes PreferenceFormattedBytes rendering renders correctly against snapshot 1`] = `
 <Fragment>
-  2.676MB
+  2.7MB
 </Fragment>
 `;

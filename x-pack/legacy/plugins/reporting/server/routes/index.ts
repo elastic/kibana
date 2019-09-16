@@ -8,7 +8,6 @@ import boom from 'boom';
 import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
 import { KbnServer, Logger } from '../../types';
-// @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerate } from './generate';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';

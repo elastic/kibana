@@ -18,7 +18,9 @@ import {
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
-const TimelionDatasource = ({ args, updateArgs }) => {
+const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
+  const DEFAULT_QUERY = `.es(index=${defaultIndex})`;
+
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -42,7 +44,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
   // and set them for the data source UI.
   const getQuery = () => {
-    return getSimpleArg(argName, args)[0] || '.es(*)';
+    return getSimpleArg(argName, args)[0] || DEFAULT_QUERY;
   };
 
   const getInterval = () => {
@@ -63,7 +65,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
 
       <EuiFormRow label="Query" helpText="Lucene Query String syntax">
         <EuiTextArea
-          className="canvasTextArea--code"
+          className="canvasTextArea__code"
           value={getQuery()}
           onChange={e => setArg(argName, e.target.value)}
         />
@@ -98,6 +100,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
 TimelionDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const timelion = () => ({

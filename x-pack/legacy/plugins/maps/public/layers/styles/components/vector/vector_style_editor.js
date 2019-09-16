@@ -12,7 +12,15 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
+import {
+  getDefaultDynamicProperties,
+  getDefaultStaticProperties,
+  vectorStyles
+} from '../../vector_style_defaults';
+import {
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS
+} from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
@@ -90,7 +98,8 @@ export class VectorStyleEditor extends Component {
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty="fillColor"
+        styleProperty={vectorStyles.FILL_COLOR}
+        swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
         ordinalFields={this.state.ordinalFields}
@@ -103,7 +112,8 @@ export class VectorStyleEditor extends Component {
   _renderLineColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty="lineColor"
+        styleProperty={vectorStyles.LINE_COLOR}
+        swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
         ordinalFields={this.state.ordinalFields}
@@ -116,7 +126,7 @@ export class VectorStyleEditor extends Component {
   _renderLineWidth() {
     return (
       <VectorStyleSizeEditor
-        styleProperty="lineWidth"
+        styleProperty={vectorStyles.LINE_WIDTH}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineWidth}
         ordinalFields={this.state.ordinalFields}
@@ -129,7 +139,7 @@ export class VectorStyleEditor extends Component {
   _renderSymbolSize() {
     return (
       <VectorStyleSizeEditor
-        styleProperty="iconSize"
+        styleProperty={vectorStyles.ICON_SIZE}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.iconSize}
         ordinalFields={this.state.ordinalFields}
@@ -145,7 +155,7 @@ export class VectorStyleEditor extends Component {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
-            styleProperty="iconOrientation"
+            styleProperty={vectorStyles.ICON_ORIENTATION}
             handlePropertyChange={this.props.handlePropertyChange}
             styleDescriptor={this.props.styleProperties.iconOrientation}
             ordinalFields={this.state.ordinalFields}

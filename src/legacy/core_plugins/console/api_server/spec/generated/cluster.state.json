@@ -24,7 +24,6 @@
       "_cluster/state/{metrics}/{indices}"
     ],
     "url_components": {
-      "indices": null,
       "metrics": [
         "_all",
         "blocks",
@@ -34,8 +33,9 @@
         "routing_nodes",
         "routing_table",
         "version"
-      ]
+      ],
+      "indices": null
     },
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
 }

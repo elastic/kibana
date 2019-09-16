@@ -133,6 +133,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -288,11 +299,8 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="KQL"
@@ -328,11 +336,8 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                           className="euiPopover__anchor"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
@@ -511,6 +516,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -666,11 +682,8 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="Lucene"
@@ -706,11 +719,8 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                           className="euiPopover__anchor"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
@@ -889,6 +899,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -1044,11 +1065,8 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     anchorPosition="downRight"
                     button={
                       <EuiButtonEmpty
-                        color="primary"
-                        iconSide="left"
                         onClick={[Function]}
                         size="xs"
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="KQL"
@@ -1084,11 +1102,8 @@ exports[`QueryBarInput Should render the given query 1`] = `
                           className="euiPopover__anchor"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"

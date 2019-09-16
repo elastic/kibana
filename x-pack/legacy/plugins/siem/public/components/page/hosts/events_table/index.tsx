@@ -154,6 +154,7 @@ const getEventsColumns = (pageType: hostsModel.HostsType): EventsTableColumns =>
       ) : (
         getEmptyTagValue()
       ),
+    width: '15%',
   },
   {
     field: 'node',
@@ -167,6 +168,7 @@ const getEventsColumns = (pageType: hostsModel.HostsType): EventsTableColumns =>
         idPrefix: `host-${pageType}-events-table-${node._id}`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
+    width: '15%',
   },
   {
     field: 'node',
@@ -180,7 +182,7 @@ const getEventsColumns = (pageType: hostsModel.HostsType): EventsTableColumns =>
           attrName: 'event.module',
           idPrefix: `host-${pageType}-events-table-${node._id}`,
         })}
-        {'/'}
+        {' / '}
         {getRowItemDraggables({
           rowItems: getOr(null, 'event.dataset', node),
           attrName: 'event.dataset',
@@ -254,7 +256,7 @@ const getEventsColumns = (pageType: hostsModel.HostsType): EventsTableColumns =>
     name: i18n.MESSAGE,
     sortable: false,
     truncateText: true,
-    width: '25%',
+    width: '15%',
     render: node => {
       const message = getOr(null, 'message[0]', node);
       return message != null ? (
@@ -270,7 +272,7 @@ export const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
   const columns = getEventsColumns(pageType);
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === hostsModel.HostsType.details) {
     return [i18n.HOST_NAME].reduce((acc, name) => {
       acc.splice(acc.findIndex(column => column.name === name), 1);
       return acc;

@@ -31,14 +31,19 @@ uiModules
   .get('app/visualize')
   .directive('visOptionsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
     ['component', { wrapApply: false }],
+    ['aggs', { watchDepth: 'collection' }],
     ['stateParams', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'collection' }],
+    ['uiState', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
     'hasHistogramAgg',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
       restrict: 'E',
+      require: '?^ngModel',
       scope: {
         vis: '=',
         visData: '=',
@@ -49,18 +54,34 @@ uiModules
         onAggParamsChange: '=',
         hasHistogramAgg: '=',
       },
-      link: function ($scope, $el) {
+      link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
           $scope.onAggParamsChange($scope.editorState.params, paramName, value);
+
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity(`visOptions`, isValid);
+        };
+
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
 
         const comp = typeof $scope.editor === 'string' ?
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
+            aggs="editorState.aggs"
             has-histogram-agg="hasHistogramAgg"
             state-params="editorState.params"
             vis="vis"
-            set-value="setValue">
+            ui-state="uiState"
+            set-value="setValue"
+            set-validity="setValidity"
+            set-touched="setTouched">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
         $el.append($editor);

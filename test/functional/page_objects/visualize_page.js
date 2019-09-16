@@ -324,14 +324,18 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    async addInputControl() {
+    async addInputControl(type) {
+      if (type) {
+        const selectInput = await testSubjects.find('selectControlType');
+        await selectInput.type(type);
+      }
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async inputControlSubmit() {
-      await testSubjects.click('inputControlSubmitBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.clickWhenNotDisabled('inputControlSubmitBtn');
+      await this.waitForVisualizationRenderingStabilized();
     }
 
     async inputControlClear() {
@@ -1183,7 +1187,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
+        await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
@@ -1270,6 +1274,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async removeDimension(agg) {
       await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
+    }
+
+    async setFilterParams({ aggNth = 0, indexPattern, field }) {
+      await comboBox.set(`indexPatternSelect-${aggNth}`, indexPattern);
+      await comboBox.set(`fieldSelect-${aggNth}`, field);
+    }
+
+    async setFilterRange({ aggNth = 0, min, max }) {
+      const control = await testSubjects.find(`inputControl${aggNth}`);
+      const inputMin = await control.findByCssSelector('[name$="minValue"]');
+      await inputMin.type(min);
+      const inputMax = await control.findByCssSelector('[name$="maxValue"]');
+      await inputMax.type(max);
     }
   }
 

@@ -7,10 +7,13 @@
 import { Ecs } from '../../../graphql/types';
 
 import {
+  DEFAULT_ACTIONS_COLUMN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
   eventHasNotes,
   eventIsPinned,
+  getActionsColumnWidth,
   getColumnWidthFromType,
   getPinTooltip,
   stringifyEvent,
@@ -247,6 +250,16 @@ describe('helpers', () => {
 
     test('it returns the expected width for a date column', () => {
       expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
+    });
+  });
+
+  describe('getActionsColumnWidth', () => {
+    test('returns the default actions column width when isEventViewer is false', () => {
+      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
+    });
+
+    test('returns the events viewer actions column width when isEventViewer is true', () => {
+      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
     });
   });
 });

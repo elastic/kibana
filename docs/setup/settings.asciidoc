@@ -27,10 +27,8 @@ in a manner that is inconsistent with `/proc/self/cgroup`
 
 `csp.rules:`:: A template
 https://w3c.github.io/webappsec-csp/[content-security-policy] that disables
-certain unnecessary and potentially insecure capabilities in the browser. All
-instances of `{nonce}` will be replaced with an automatically generated nonce
-at load time. We strongly recommend that you keep the default CSP rules that
-ship with Kibana.
+certain unnecessary and potentially insecure capabilities in the browser. We
+strongly recommend that you keep the default CSP rules that ship with Kibana.
 
 `csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable

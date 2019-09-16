@@ -11,7 +11,18 @@ import { Server } from 'hapi';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
-import { APP_ID, APP_NAME, DEFAULT_INDEX_KEY, DEFAULT_ANOMALY_SCORE } from './common/constants';
+import {
+  APP_ID,
+  APP_NAME,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_SIEM_TIME_RANGE,
+  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_INTERVAL_PAUSE,
+  DEFAULT_INTERVAL_VALUE,
+  DEFAULT_FROM,
+  DEFAULT_TO,
+} from './common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -45,6 +56,37 @@ export function siem(kibana: any) {
         },
       ],
       uiSettingDefaults: {
+        [DEFAULT_SIEM_REFRESH_INTERVAL]: {
+          type: 'json',
+          name: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalLabel', {
+            defaultMessage: 'Time picker refresh interval',
+          }),
+          value: `{
+  "pause": ${DEFAULT_INTERVAL_PAUSE},
+  "value": ${DEFAULT_INTERVAL_VALUE}
+}`,
+          description: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalDescription', {
+            defaultMessage: "The SIEM timefilter's default refresh interval",
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [DEFAULT_SIEM_TIME_RANGE]: {
+          type: 'json',
+          name: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeLabel', {
+            defaultMessage: 'Time picker defaults',
+          }),
+          value: `{
+  "from": "${DEFAULT_FROM}",
+  "to": "${DEFAULT_TO}"
+}`,
+          description: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeDescription', {
+            defaultMessage:
+              'The SIEM timefilter selection to use when Kibana is started without one',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
         [DEFAULT_INDEX_KEY]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Default index',
@@ -73,6 +115,7 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },
   });

@@ -18,8 +18,15 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_mapping"
+      "{indices}/_mapping",
+      "{indices}/{type}/_mapping",
+      "{indices}/_mapping/{type}",
+      "{indices}/{type}/_mappings",
+      "{indices}/_mappings/{type}",
+      "_mappings/{type}",
+      "{indices}/_mappings",
+      "_mapping/{type}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
   }
 }

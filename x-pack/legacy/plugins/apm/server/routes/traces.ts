@@ -4,55 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
 
-const ROOT = '/api/apm/traces';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const tracesRoute = createRoute(() => ({
+  path: '/api/apm/traces',
+  params: {
+    query: t.intersection([rangeRt, uiFiltersRt])
+  },
+  handler: async req => {
+    const setup = await setupRequest(req);
+    return getTransactionGroupList({ type: 'top_traces' }, setup);
+  }
+}));
 
-export function initTracesApi(core: InternalCoreSetup) {
-  const { server } = core.http;
-
-  // Get trace list
-  server.route({
-    method: 'GET',
-    path: ROOT,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const setup = await setupRequest(req);
-      return getTransactionGroupList({ type: 'top_traces' }, setup).catch(
-        defaultErrorHandler
-      );
-    }
-  });
-
-  // Get individual trace
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{traceId}`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const { traceId } = req.params;
-      const setup = await setupRequest(req);
-      return getTrace(traceId, setup).catch(defaultErrorHandler);
-    }
-  });
-}
+export const tracesByIdRoute = createRoute(() => ({
+  path: '/api/apm/traces/{traceId}',
+  params: {
+    path: t.type({
+      traceId: t.string
+    }),
+    query: rangeRt
+  },
+  handler: async (req, { path }) => {
+    const { traceId } = path;
+    const setup = await setupRequest(req);
+    return getTrace(traceId, setup);
+  }
+}));

@@ -18,6 +18,8 @@ interface Props extends EuiLinkAnchorProps {
   children?: React.ReactNode;
 }
 
+export type APMLinkExtendProps = Omit<Props, 'path' | 'query'>;
+
 export const PERSISTENT_APM_PARAMS = [
   'kuery',
   'rangeFrom',

@@ -37,8 +37,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -64,8 +64,9 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it uses custom renderer', () => {
@@ -104,8 +105,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -130,8 +131,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns no items when provided a 0 displayCount', () => {
@@ -141,8 +142,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns no items when provided an empty array', () => {
@@ -151,9 +152,11 @@ describe('Table Helpers', () => {
         attrName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
+
+    // Using hostNodes due to this issue: https://github.com/airbnb/enzyme/issues/836
 
     test('it returns 2 items then overflows', () => {
       const rowItems = getRowItemDraggables({
@@ -163,7 +166,7 @@ describe('Table Helpers', () => {
         displayCount: 2,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').length).toBe(2);
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').hostNodes().length).toBe(2);
     });
 
     test('it uses custom renderer', () => {
@@ -191,20 +194,16 @@ describe('Table Helpers', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it does not show "More..." when maxOverflowItems are not exceeded', () => {
+    test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 5);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(JSON.stringify(wrapper.find('EuiToolTip').prop('content'))).not.toContain(
-        'defaultMessage'
-      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
     });
 
-    test('it shows "More..." when maxOverflowItems are exceeded', () => {
+    test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(JSON.stringify(wrapper.find('EuiToolTip').prop('content'))).toContain(
-        'defaultMessage'
-      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
     });
   });
 

@@ -4,39 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import {
   getMockKbnServer,
   getMockTaskInstance,
 } from '../test_utils';
 import { telemetryTaskRunner } from './telemetry_task';
+import * as mapsTelemetry from './maps_telemetry';
+jest.mock('./maps_telemetry');
+
+const expectedAttributes = {
+  expect: 'values',
+  toBe: 'populated'
+};
+
+const generateTelemetry = ({ includeAttributes = true } = {}) => {
+  mapsTelemetry.getMapsTelemetry = async () => ({ // eslint-disable-line
+    attributes: includeAttributes ? expectedAttributes : {}
+  });
+};
 
 describe('telemetryTaskRunner', () => {
   let mockTaskInstance;
   let mockKbnServer;
+  let taskRunner;
+
   beforeEach(() => {
     mockTaskInstance = getMockTaskInstance();
     mockKbnServer = getMockKbnServer();
+    taskRunner = telemetryTaskRunner(mockKbnServer)({ taskInstance: mockTaskInstance });
   });
 
-  test('Returns empty stats on error', async () => {
-    const getNextMidnight = () =>
-      moment()
-        .add(1, 'days')
-        .startOf('day')
-        .toDate();
+  test('returns empty stats as default', async () => {
+    generateTelemetry({ includeAttributes: false });
 
-    const getRunner = telemetryTaskRunner(mockKbnServer);
-    const runResult = await getRunner(
-      { taskInstance: mockTaskInstance }
-    ).run();
+    const runResult = await taskRunner.run();
 
     expect(runResult).toMatchObject({
-      runAt: getNextMidnight(),
       state: {
         runs: 1,
         stats: {},
       },
     });
+  });
+
+  // Return stats when run normally
+  test('returns stats normally', async () => {
+    generateTelemetry();
+
+    const runResult = await taskRunner.run();
+
+    expect(runResult).toMatchObject({
+      state: {
+        runs: 1,
+        stats: expectedAttributes,
+      },
+    });
+  });
+
+  test('cancels when cancel flag set to "true", returns undefined', async () => {
+    generateTelemetry();
+
+    const runResult = await taskRunner.run({ taskCanceled: true });
+
+    expect(runResult).toBe(undefined);
   });
 });

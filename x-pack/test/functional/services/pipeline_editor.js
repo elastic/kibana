@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { props as propsAsync } from 'bluebird';
 
 export function PipelineEditorProvider({ getService }) {
+  const retry = getService('retry');
   const aceEditor = getService('aceEditor');
   const testSubjects = getService('testSubjects');
 
@@ -29,7 +30,6 @@ export function PipelineEditorProvider({ getService }) {
   const SUBJ_BTN_CANCEL = 'pipelineEdit btnCancel';
   const SUBJ_BTN_DELETE = 'pipelineEdit btnDeletePipeline';
   const SUBJ_LNK_BREADCRUMB_MANAGEMENT = 'breadcrumbs lnkBreadcrumb0';
-  const SUBJ_CONFIRM_MODAL_TEXT = 'confirmModalBodyText';
 
   const DEFAULT_INPUT_VALUES = {
     id: '',
@@ -91,9 +91,9 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
-        throw new Error('Expected to find the pipeline editor');
-      }
+      await retry.waitFor('pipeline editor visible', async () => (
+        await testSubjects.exists(SUBJ_CONTAINER)
+      ));
     }
 
     /**
@@ -103,9 +103,9 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertEditorId(id) {
-      if (!(await testSubjects.exists(getContainerSubjForId(id)))) {
-        throw new Error(`Expected editor id to be "${id}"`);
-      }
+      await retry.waitFor(`editor id to be "${id}"`, async () => (
+        await testSubjects.exists(getContainerSubjForId(id))
+      ));
     }
 
     /**
@@ -141,13 +141,9 @@ export function PipelineEditorProvider({ getService }) {
     }
 
     async assertNoDeleteButton() {
-      if (await testSubjects.exists(SUBJ_BTN_DELETE)) {
-        throw new Error('Expected there to be no delete button');
-      }
-    }
-
-    assertUnsavedChangesModal() {
-      return testSubjects.exists(SUBJ_CONFIRM_MODAL_TEXT);
+      await retry.waitFor(`delete button to be hidden`, async () => (
+        !await testSubjects.exists(SUBJ_BTN_DELETE)
+      ));
     }
   }();
 }

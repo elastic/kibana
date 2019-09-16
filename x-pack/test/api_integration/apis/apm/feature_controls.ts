@@ -31,50 +31,32 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   const endpoints = [
     {
-      url: `/api/apm/services/foo/errors?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D&_debug=true`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar`,
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
-      expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
-        expect(result.response.body).to.have.property(
-          'message',
-          "Cannot read property 'distribution' of undefined"
-        );
-      },
+      expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
-      expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
-        expect(result.response.body).to.have.property(
-          'message',
-          "Cannot read property 'distribution' of undefined"
-        );
-      },
+      expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent`,
+      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent&uiFilters=%7B%7D`,
       expectForbidden: expect404,
-      expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
-        expect(result.response.body).to.have.property(
-          'message',
-          "Cannot destructure property `timeseriesData` of 'undefined' or 'null'."
-        );
-      },
+      expectResponse: expect200,
     },
     {
-      url: `/api/apm/services?start=${start}&end=${end}`,
+      url: `/api/apm/services?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -89,51 +71,39 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/traces?start=${start}&end=${end}`,
+      url: `/api/apm/traces?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
       url: `/api/apm/traces/foo?start=${start}&end=${end}`,
       expectForbidden: expect404,
-      expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
-        expect(result.response.body).to.have.property(
-          'message',
-          "Cannot read property 'transactions' of undefined"
-        );
-      },
+      expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar`,
+      url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
+      url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%7D`,
       expectForbidden: expect404,
-      expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
-        expect(result.response.body).to.have.property(
-          'message',
-          "Cannot read property 'stats' of undefined"
-        );
-      },
+      expectResponse: expect200,
     },
   ];
 

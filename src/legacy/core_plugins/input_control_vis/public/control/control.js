@@ -60,6 +60,10 @@ export class Control {
     throw new Error('fetch method not defined, subclass are required to implement');
   }
 
+  destroy() {
+    throw new Error('destroy method not defined, subclass are required to implement');
+  }
+
   format = (value) => {
     const field = this.filterManager.getField();
     if (field) {

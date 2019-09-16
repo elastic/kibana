@@ -31,6 +31,18 @@
       },
       "scheduledTaskId": {
         "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
       }
     }
   }

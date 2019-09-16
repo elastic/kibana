@@ -7,12 +7,14 @@
 import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
 import request, { Cookie } from 'request';
+import { format as formatURL } from 'url';
 import { createTokens, getStateAndNonce } from '../../fixtures/oidc_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const config = getService('config');
 
   describe('OpenID Connect Implicit Flow authentication', () => {
     describe('finishing handshake', () => {
@@ -31,29 +33,35 @@ export default function({ getService }: FtrProviderContext) {
       it('should return an HTML page that will parse URL fragment', async () => {
         const response = await supertest.get('/api/security/v1/oidc/implicit').expect(200);
         const dom = new JSDOM(response.text, {
+          url: formatURL({ ...config.get('servers.kibana'), auth: false }),
           runScripts: 'dangerously',
+          resources: 'usable',
           beforeParse(window) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
-            // tries to do that and we have to workaround this behaviour.
-            Object.defineProperty(window, 'location', {
-              value: {
-                href:
-                  'https://kibana.com/api/security/v1/oidc/implicit#token=some_token&access_token=some_access_token',
-                replace(newLocation: string) {
-                  this.href = newLocation;
+            // tries to do that and we have to workaround this behaviour. We also need to wait until our
+            // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise(resolve => {
+              Object.defineProperty(window, 'location', {
+                value: {
+                  href:
+                    'https://kibana.com/api/security/v1/oidc/implicit#token=some_token&access_token=some_access_token',
+                  replace(newLocation: string) {
+                    this.href = newLocation;
+                    resolve();
+                  },
                 },
-              },
+              });
             });
           },
         });
 
+        await (dom.window as Record<string, any>).__isScriptExecuted__;
+
         // Check that proxy page is returned with proper headers.
-        const scriptNonce = dom.window.document.querySelector('script')!.getAttribute('nonce');
-        expect(scriptNonce).to.have.length(16);
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'nonce-${scriptNonce}'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
+          `script-src 'unsafe-eval' 'self'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.

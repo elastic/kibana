@@ -14,7 +14,8 @@ import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
-  EMPTY_FEATURE_COLLECTION
+  EMPTY_FEATURE_COLLECTION,
+  LAYER_TYPE
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -69,7 +70,7 @@ function generateNumericalId() {
 
 export class VectorLayer extends AbstractLayer {
 
-  static type = 'VECTOR';
+  static type = LAYER_TYPE.VECTOR;
 
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);

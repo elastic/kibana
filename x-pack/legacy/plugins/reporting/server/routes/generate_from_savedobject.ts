@@ -11,7 +11,7 @@ import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../commo
 import { KbnServer } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteOptions } from './lib/route_config_factories';
-import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
+import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 /*
  * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle

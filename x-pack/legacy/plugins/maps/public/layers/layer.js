@@ -165,7 +165,7 @@ export class AbstractLayer {
           tooltipContent = customIconAndTooltipContent.tooltipContent;
         } else {
           footnotes.push({
-            icon: <EuiIcon color="subdued" type="iInCircle" />,
+            icon: <EuiIcon color="subdued" type="partial" size="s" />,
             message: customIconAndTooltipContent.tooltipContent
           });
         }

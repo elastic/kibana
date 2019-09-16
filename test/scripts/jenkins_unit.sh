@@ -6,3 +6,5 @@ trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 export TEST_BROWSER_HEADLESS=1
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+
+source "$KIBANA_DIR/test/scripts/jenkins_xpack.sh"

@@ -11,3 +11,5 @@ export {
 } from './validate_repository';
 
 export { RestoreValidation, validateRestore } from './validate_restore';
+
+export { PolicyValidation, validatePolicy } from './validate_policy';

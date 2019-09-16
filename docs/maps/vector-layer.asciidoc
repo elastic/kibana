@@ -9,10 +9,10 @@ image::maps/images/vector_layer.png[]
 
 You can create a vector layer from the following sources:
 
-*Custom vector shapes*:: Vector shapes from static files configured in kibana.yml.
+*Configured GeoJSON*:: Vector data from hosted GeoJSON configured in kibana.yml.
 See map.regionmap.* in <<settings>> for details.
 
-*Documents*:: Geospatial data from a Kibana index pattern.
+*Documents*:: Vector data from a Kibana index pattern.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 NOTE: Document results are limited to the first 10000 matching documents.
@@ -22,7 +22,7 @@ Use <<maps-aggregations, aggregations>> to plot large data sets.
 Set *Show as* to *grid rectangles* or *points*.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
-*Vector shapes*:: Vector shapes of administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+*EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]

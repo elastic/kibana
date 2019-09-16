@@ -30,7 +30,8 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     const active =
       jobCreator.detectors.length > 0 &&
       jobValidator.bucketSpan.valid &&
-      jobValidator.duplicateDetectors.valid;
+      jobValidator.duplicateDetectors.valid &&
+      jobValidator.validating === false;
     setNextActive(active);
   }, [jobValidatorUpdated]);
 

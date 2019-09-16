@@ -10,6 +10,6 @@
     "patterns": [
       "_cat"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat.html"
   }
 }

@@ -20,4 +20,10 @@ export interface ResourceLocator {
    * @param resource the name of the resource.
    */
   isResourceLocal(resource: string): Promise<boolean>;
+
+  /**
+   * Allocates the resource to nodes and returns the endpoint corresponds to the allocated node.
+   * If the resource cannot be allocated to any node, it returns undefined.
+   */
+  allocate(req: Request, resource: string): Promise<Endpoint | undefined>;
 }

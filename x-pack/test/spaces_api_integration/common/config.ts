@@ -38,6 +38,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
+        retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
       },

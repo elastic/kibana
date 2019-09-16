@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import { Subscription } from 'rxjs';
 import moment from 'moment';
 import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
@@ -53,7 +54,6 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -71,6 +71,10 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+
+const { savedQueryService } = data.search.services;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -191,8 +195,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -205,11 +207,17 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
-  let filterUpdateSubscription;
-  let filterFetchSubscription;
+  const subscriptions = new Subscription();
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -217,6 +225,12 @@ function discoverController(
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.refreshInterval = timefilter.getRefreshInterval();
+  $scope.savedQuery = $route.current.locals.savedQuery;
+  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+
+  $scope.$watch(() => uiCapabilities.discover.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
@@ -226,8 +240,7 @@ function discoverController(
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', () => {
     savedSearch.destroy();
-    if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
-    if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
+    subscriptions.unsubscribe();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -282,6 +295,9 @@ function discoverController(
             title={savedSearch.title}
             showCopyOnSave={savedSearch.id ? true : false}
             objectType="search"
+            description={i18n.translate('kbn.discover.localMenu.saveSaveSearchDescription', {
+              defaultMessage: 'Save your Discover search so you can use it in visualizations and dashboards',
+            })}
           />);
         showSaveModal(saveModal);
       }
@@ -375,7 +391,7 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  if(isDefaultTypeIndexPattern($scope.indexPattern)) {
+  if (isDefaultTypeIndexPattern($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -392,7 +408,7 @@ function discoverController(
   if (savedSearch.id && savedSearch.title) {
     chrome.breadcrumbs.set([{
       text: discoverBreadcrumbsTitle,
-      href: '#/discover'
+      href: '#/discover',
     }, { text: savedSearch.title }]);
   } else {
     chrome.breadcrumbs.set([{
@@ -487,15 +503,18 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.getField('query') || {
-        query: '',
-        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-      },
+      query: ($scope.savedQuery && $scope.savedQuery.attributes.query)
+        || $scope.searchSource.getField('query')
+        || {
+          query: '',
+          language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnField('filter'))
+      filters: ($scope.savedQuery && $scope.savedQuery.attributes.filters)
+        || _.cloneDeep($scope.searchSource.getOwnField('filter'))
     };
   }
 
@@ -548,10 +567,19 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
-        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+          next: $scope.fetch
+        }));
+
+        subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+          next: $scope.updateRefreshInterval
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+          next: $scope.updateTime
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
+          next: $scope.fetch
+        }));
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -564,19 +592,19 @@ function discoverController(
         });
 
         // update data source when filters update
-        filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: () => {
             $scope.filters = queryFilter.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
-        });
+        }));
 
         // fetch data when filters fire fetch event
-        filterFetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: $scope.fetch
-        });
+        }));
 
         // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
@@ -597,7 +625,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
           if (!$scope.opts.timefield) return;
 
-          const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
+          const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
 
           if (buckets && buckets.length === 1) {
             $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -737,6 +765,9 @@ function discoverController(
       })
       .then(onResults)
       .catch((error) => {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
@@ -767,15 +798,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -903,6 +926,69 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = { ...savedQuery };
+  };
+
+  $scope.onClearSavedQuery = () => {
+    delete $scope.savedQuery;
+    delete $state.savedQuery;
+    $state.query = {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+    };
+    queryFilter.removeAll();
+    $state.save();
+    $scope.fetch();
+  };
+
+  const updateStateFromSavedQuery = (savedQuery) => {
+    $state.query = savedQuery.attributes.query;
+    queryFilter.setFilters(savedQuery.attributes.filters || []);
+
+    if (savedQuery.attributes.timefilter) {
+      timefilter.setTime({
+        from: savedQuery.attributes.timefilter.from,
+        to: savedQuery.attributes.timefilter.to,
+      });
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+      }
+    }
+
+    $scope.fetch();
+  };
+
+  $scope.$watch('savedQuery', (newSavedQuery) => {
+    if (!newSavedQuery) return;
+
+    $state.savedQuery = newSavedQuery.id;
+    $state.save();
+
+    updateStateFromSavedQuery(newSavedQuery);
+
+  });
+
+  $scope.$watch('state.savedQuery', newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
+      });
+    }
+  });
+
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!$scope.opts.timefield) return;
@@ -957,13 +1043,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 

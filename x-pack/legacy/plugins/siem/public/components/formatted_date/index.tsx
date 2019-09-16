@@ -6,25 +6,27 @@
 
 import moment from 'moment-timezone';
 import * as React from 'react';
-import { useContext } from 'react';
 import { pure } from 'recompose';
 
 import {
-  AppKibanaFrameworkAdapter,
-  KibanaConfigContext,
-} from '../../lib/adapters/framework/kibana_framework_adapter';
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+  DEFAULT_TIMEZONE_BROWSER,
+} from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
-  const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
+  const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
+  const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+
   return (
     <>
-      {config.dateFormat && config.dateFormatTz && config.timezone
-        ? moment
-            .tz(value, config.dateFormatTz === 'Browser' ? config.timezone : config.dateFormatTz)
-            .format(config.dateFormat)
+      {dateFormat && dateFormatTz && timezone
+        ? moment.tz(value, dateFormatTz === 'Browser' ? timezone : dateFormatTz).format(dateFormat)
         : moment.utc(value).toISOString()}
     </>
   );

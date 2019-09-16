@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -14,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Note } from '../../../../lib/note';
@@ -32,6 +30,7 @@ interface Props {
   eventId: string;
   eventIsPinned: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventViewer?: boolean;
   loading: boolean;
   noteIds: string[];
   onEventToggled: () => void;
@@ -43,24 +42,15 @@ interface Props {
 }
 
 const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   overflow: hidden;
-  padding-top: 4px;
   width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
 `;
 
 ActionsContainer.displayName = 'ActionsContainer';
 
-const ExpandEventContainer = styled.div`
-  height: 25px;
-  width: 25px;
-`;
-
-ExpandEventContainer.displayName = 'ExpandEventContainer';
-
 const ActionLoading = styled(EuiLoadingSpinner)`
-  margin-top: 3px;
-  margin-left: 6px;
+  position: relative;
+  top: 3px;
 `;
 
 ActionLoading.displayName = 'ActionLoading';
@@ -80,16 +70,15 @@ const SelectEventContainer = styled(EuiFlexItem)`
 SelectEventContainer.displayName = 'SelectEventContainer';
 
 const NotesButtonContainer = styled(EuiFlexItem)`
-  margin-left: 5px;
   position: relative;
-  top: -3px;
+  top: -1px;
 `;
 
 NotesButtonContainer.displayName = 'NotesButtonContainer';
 
 const emptyNotes: string[] = [];
 
-export const Actions = pure<Props>(
+export const Actions = React.memo<Props>(
   ({
     actionsColumnWidth,
     associateNote,
@@ -98,6 +87,7 @@ export const Actions = pure<Props>(
     eventId,
     eventIsPinned,
     getNotesByIds,
+    isEventViewer = false,
     loading = false,
     noteIds,
     onEventToggled,
@@ -130,7 +120,7 @@ export const Actions = pure<Props>(
         )}
 
         <EuiFlexItem grow={false}>
-          <ExpandEventContainer>
+          <div>
             {loading && <ActionLoading size="m" />}
             {!loading && (
               <EuiButtonIcon
@@ -140,47 +130,65 @@ export const Actions = pure<Props>(
                 data-test-subj="expand-event"
                 id={eventId}
                 onClick={onEventToggled}
+                size="s"
               />
             )}
-          </ExpandEventContainer>
+          </div>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            data-test-subj="timeline-action-pin-tool-tip"
-            content={getPinTooltip({
-              isPinned: eventIsPinned,
-              eventHasNotes: eventHasNotes(noteIds),
-            })}
-          >
-            <PinContainer>
-              <Pin
-                allowUnpinning={!eventHasNotes(noteIds)}
-                pinned={eventIsPinned}
-                data-test-subj="pin-event"
-                onClick={onPinClicked}
+        {!isEventViewer && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                data-test-subj="timeline-action-pin-tool-tip"
+                content={getPinTooltip({
+                  isPinned: eventIsPinned,
+                  eventHasNotes: eventHasNotes(noteIds),
+                })}
+              >
+                <PinContainer>
+                  <Pin
+                    allowUnpinning={!eventHasNotes(noteIds)}
+                    pinned={eventIsPinned}
+                    data-test-subj="pin-event"
+                    onClick={onPinClicked}
+                  />
+                </PinContainer>
+              </EuiToolTip>
+            </EuiFlexItem>
+
+            <NotesButtonContainer grow={false}>
+              <NotesButton
+                animate={false}
+                associateNote={associateNote}
+                data-test-subj="add-note"
+                getNotesByIds={getNotesByIds}
+                noteIds={noteIds || emptyNotes}
+                showNotes={showNotes}
+                size="s"
+                toggleShowNotes={toggleShowNotes}
+                toolTip={i18n.NOTES_TOOLTIP}
+                updateNote={updateNote}
               />
-            </PinContainer>
-          </EuiToolTip>
-        </EuiFlexItem>
-
-        <NotesButtonContainer grow={false}>
-          <NotesButton
-            animate={false}
-            associateNote={associateNote}
-            data-test-subj="add-note"
-            getNotesByIds={getNotesByIds}
-            noteIds={noteIds || emptyNotes}
-            showNotes={showNotes}
-            size="s"
-            toggleShowNotes={toggleShowNotes}
-            toolTip={i18n.NOTES_TOOLTIP}
-            updateNote={updateNote}
-          />
-        </NotesButtonContainer>
+            </NotesButtonContainer>
+          </>
+        )}
       </EuiFlexGroup>
     </ActionsContainer>
-  )
+  ),
+  (nextProps, prevProps) => {
+    return (
+      prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+      prevProps.checked === nextProps.checked &&
+      prevProps.expanded === nextProps.expanded &&
+      prevProps.eventId === nextProps.eventId &&
+      prevProps.eventIsPinned === nextProps.eventIsPinned &&
+      prevProps.loading === nextProps.loading &&
+      prevProps.noteIds === nextProps.noteIds &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.showNotes === nextProps.showNotes
+    );
+  }
 );
 
 Actions.displayName = 'Actions';

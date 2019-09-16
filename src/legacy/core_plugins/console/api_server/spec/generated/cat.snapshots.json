@@ -16,6 +16,6 @@
       "_cat/snapshots",
       "_cat/snapshots/{repository}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-snapshots.html"
   }
 }

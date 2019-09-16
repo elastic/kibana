@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RepositoryUri } from '../../model';
+import { IndexerType, RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { AbstractIndexer } from './abstract_indexer';
@@ -13,7 +13,7 @@ import { RepositoryAnalysisSettings, RepositoryIndexName, RepositorySchema } fro
 
 // Inherit AbstractIndexer's index creation logics. This is not an actual indexer.
 export class RepositoryIndexInitializer extends AbstractIndexer {
-  protected type: string = 'repository';
+  public type: IndexerType = IndexerType.REPOSITORY;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
