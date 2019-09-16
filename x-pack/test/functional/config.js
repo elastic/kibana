@@ -153,10 +153,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
       },
       rollupJob: {
         pathname: '/app/kibana',
