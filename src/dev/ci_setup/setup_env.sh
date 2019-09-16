@@ -140,7 +140,7 @@ source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 ES_DIR="$PARENT_DIR/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
-if [ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]; then
+if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
   export ES_BUILD_JAVA
 
@@ -152,3 +152,5 @@ if [ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]; then
   echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
+
+env | sort
