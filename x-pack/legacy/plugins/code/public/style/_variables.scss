@@ -1,3 +1,3 @@
-$codeSideBarWidth: 16rem;
+$codeSideBarWidth: calc(#{$euiSize} * 16);
 $codeSideBarIndent: $euiSizeXL;
 $codeSearchBarPadding: $euiSizeS;
