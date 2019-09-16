@@ -52,12 +52,9 @@ uiRoutes.when('/management/kibana/index_pattern', {
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;
 
-      renderCreateIndexPatternWizard(
-        initialQuery,
-        services
-      );
+      renderCreateIndexPatternWizard(initialQuery, services);
     });
 
     $scope.$on('$destroy', destroyCreateIndexPatternWizard);
-  }
+  },
 });
