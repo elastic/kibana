@@ -4,6 +4,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
 <QueryBarInputUI
   appName="discover"
   disableAutoFocus={true}
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -233,6 +255,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -274,6 +318,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       autoFocus={false}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -387,6 +453,28 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
 exports[`QueryBarInput Should pass the query language to the language switcher 1`] = `
 <QueryBarInputUI
   appName="discover"
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -616,6 +704,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -657,6 +767,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       autoFocus={true}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -770,6 +902,28 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
 exports[`QueryBarInput Should render the given query 1`] = `
 <QueryBarInputUI
   appName="discover"
+  http={
+    Object {
+      "addLoadingCount": [MockFunction],
+      "basePath": Object {
+        "get": [MockFunction],
+        "prepend": [MockFunction],
+        "remove": [MockFunction],
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+      "removeAllInterceptors": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
   indexPatterns={
     Array [
       Object {
@@ -999,6 +1153,28 @@ exports[`QueryBarInput Should render the given query 1`] = `
             compressed={false}
             data-test-subj="queryInput"
             fullWidth={true}
+            http={
+              Object {
+                "addLoadingCount": [MockFunction],
+                "basePath": Object {
+                  "get": [MockFunction],
+                  "prepend": [MockFunction],
+                  "remove": [MockFunction],
+                },
+                "delete": [MockFunction],
+                "fetch": [MockFunction],
+                "get": [MockFunction],
+                "getLoadingCount$": [MockFunction],
+                "head": [MockFunction],
+                "intercept": [MockFunction],
+                "options": [MockFunction],
+                "patch": [MockFunction],
+                "post": [MockFunction],
+                "put": [MockFunction],
+                "removeAllInterceptors": [MockFunction],
+                "stop": [MockFunction],
+              }
+            }
             inputRef={[Function]}
             isLoading={false}
             onChange={[Function]}
@@ -1040,6 +1216,28 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       autoFocus={true}
                       className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
                       data-test-subj="queryInput"
+                      http={
+                        Object {
+                          "addLoadingCount": [MockFunction],
+                          "basePath": Object {
+                            "get": [MockFunction],
+                            "prepend": [MockFunction],
+                            "remove": [MockFunction],
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                          "removeAllInterceptors": [MockFunction],
+                          "stop": [MockFunction],
+                        }
+                      }
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
