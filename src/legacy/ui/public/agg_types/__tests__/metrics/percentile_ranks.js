@@ -22,6 +22,7 @@ import ngMock from 'ng_mock';
 import { percentileRanksMetricAgg } from '../../metrics/percentile_ranks';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
@@ -32,6 +33,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
   }));
 
   it('uses the custom label if it is set', function () {

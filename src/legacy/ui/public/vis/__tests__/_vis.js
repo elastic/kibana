@@ -23,6 +23,7 @@ import expect from '@kbn/expect';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
+import { registerVisTypes } from '../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('Vis Class', function () {
   let indexPattern;
@@ -45,6 +46,7 @@ describe('Vis Class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
     visTypes = VisTypesRegistryProvider;
   }));
 

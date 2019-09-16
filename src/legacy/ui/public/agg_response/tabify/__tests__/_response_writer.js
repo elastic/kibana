@@ -22,6 +22,7 @@ import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('TabbedAggResponseWriter class', function () {
   let Vis;
@@ -34,6 +35,7 @@ describe('TabbedAggResponseWriter class', function () {
 
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
   }));
 
   const splitAggConfig = [ {
