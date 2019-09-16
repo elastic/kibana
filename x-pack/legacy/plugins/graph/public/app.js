@@ -44,7 +44,6 @@ import { VennDiagram } from './components/venn_diagram';
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
 
-import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
