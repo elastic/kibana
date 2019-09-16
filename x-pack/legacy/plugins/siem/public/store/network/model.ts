@@ -51,7 +51,7 @@ export interface DnsQuery extends BasicQueryPaginated {
   isPtrIncluded: boolean;
 }
 
-interface NetworkQueries {
+export interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
   [NetworkTableType.topNFlowSource]: TopNFlowQuery;
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
@@ -77,7 +77,7 @@ export interface UsersQuery extends BasicQueryPaginated {
   usersSortField: UsersSortField;
 }
 
-interface IpOverviewQueries {
+export interface IpOverviewQueries {
   [IpDetailsTableType.domains]: DomainsQuery;
   [IpDetailsTableType.tls]: TlsQuery;
   [IpDetailsTableType.users]: UsersQuery;

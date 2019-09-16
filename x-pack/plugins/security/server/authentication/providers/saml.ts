@@ -18,6 +18,11 @@ import { canRedirectRequest } from '..';
  */
 interface ProviderState extends Partial<TokenPair> {
   /**
+   * Username of the SAML authenticated user.
+   */
+  username?: string;
+
+  /**
    * Unique identifier of the SAML request initiated the handshake.
    */
   requestId?: string;
@@ -255,19 +260,21 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
       const {
+        username,
         access_token: accessToken,
         refresh_token: refreshToken,
       } = await this.options.client.callAsInternalUser('shield.samlAuthenticate', {
         body: {
           ids: stateRequestId ? [stateRequestId] : [],
           content: samlResponse,
+          ...(this.realm ? { realm: this.realm } : {}),
         },
       });
 
       this.logger.debug('Login has been performed with SAML response.');
       return AuthenticationResult.redirectTo(
         stateRedirectURL || `${this.options.basePath.get(request)}/`,
-        { state: { accessToken, refreshToken } }
+        { state: { username, accessToken, refreshToken } }
       );
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
@@ -310,19 +317,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     const newState = payloadAuthenticationResult.state as ProviderState;
+    let differentUser = newState.username !== user.username;
 
-    // Then use received tokens to retrieve user information. We need just username and authentication
-    // realm, once ES starts returning this info from `saml/authenticate` we can get rid of this call.
-    const newUserAuthenticationResult = await this.authenticateViaState(request, newState);
-    if (newUserAuthenticationResult.failed()) {
-      return newUserAuthenticationResult;
-    }
+    // If realm name is not configured we can't be sure that user is authenticated by the same realm
+    // even though user name is the same.
+    if (!differentUser && !this.realm) {
+      // Then use received tokens to retrieve user information. We need just username and authentication
+      // realm, once ES starts returning this info from `saml/authenticate` we can get rid of this call.
+      const newUserAuthenticationResult = await this.authenticateViaState(request, newState);
+      if (newUserAuthenticationResult.failed()) {
+        return newUserAuthenticationResult;
+      }
 
-    if (newUserAuthenticationResult.user === undefined) {
-      // Should never happen, but if it does - it's a bug.
-      return AuthenticationResult.failed(
-        new Error('Could not retrieve user information using tokens produced for the SAML payload.')
-      );
+      if (newUserAuthenticationResult.user === undefined) {
+        // Should never happen, but if it does - it's a bug.
+        return AuthenticationResult.failed(
+          new Error(
+            'Could not retrieve user information using tokens produced for the SAML payload.'
+          )
+        );
+      }
+
+      differentUser =
+        newUserAuthenticationResult.user.authentication_realm.name !==
+        user.authentication_realm.name;
     }
 
     // Now let's invalidate tokens from the existing session.
@@ -337,10 +355,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    if (
-      newUserAuthenticationResult.user.username !== user.username ||
-      newUserAuthenticationResult.user.authentication_realm.name !== user.authentication_realm.name
-    ) {
+    if (differentUser) {
       this.logger.debug(
         'Login initiated by Identity Provider is for a different user than currently authenticated.'
       );
@@ -389,7 +404,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private async authenticateViaRefreshToken(
     request: KibanaRequest,
-    { refreshToken }: ProviderState
+    { username, refreshToken }: ProviderState
   ) {
     this.logger.debug('Trying to refresh access token.');
 
@@ -428,7 +443,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
+      return AuthenticationResult.succeeded(user, {
+        authHeaders,
+        state: { username, ...refreshedTokenPair },
+      });
     } catch (err) {
       this.logger.debug(
         `Failed to authenticate user using newly refreshed access token: ${err.message}`
