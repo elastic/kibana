@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 export function SourcelessOverlay() {
   return (
     <div className="gphWorkspaceOverlay">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" className="gphWorkspaceOverlay__content">
         <EuiFlexItem>
           <EuiText>
             <h1>
@@ -23,7 +23,7 @@ export function SourcelessOverlay() {
             </h1>
             <p>
               {i18n.translate('xpack.graph.sourcelessOverlay.description', {
-                defaultMessage: 'Choose an index pattern above',
+                defaultMessage: 'Choose an index pattern above to get started',
               })}
             </p>
           </EuiText>

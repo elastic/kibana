@@ -447,7 +447,7 @@ app.controller('graphuiPlugin', function (
       nodes: topTermNodes,
       edges: []
     });
-    $scope.workspace.fillInGraph(20);
+    $scope.workspace.fillInGraph(fields.length * 10);
   };
 
   $scope.submit = function (searchTerm) {

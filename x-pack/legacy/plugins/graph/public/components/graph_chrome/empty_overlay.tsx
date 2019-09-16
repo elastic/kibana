@@ -6,7 +6,14 @@
 
 import React from 'react';
 
-import { EuiText, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiText,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,28 +24,32 @@ export interface EmptyOverlayProps {
 export function EmptyOverlay({ onFillWorkspace }: EmptyOverlayProps) {
   return (
     <div className="gphWorkspaceOverlay">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" className="gphWorkspaceOverlay__content">
         <EuiFlexItem>
           <EuiText>
             <h1>
+              <EuiIcon type="search" size="xl" />{' '}
               {i18n.translate('xpack.graph.emptyOverlay.title', {
-                defaultMessage: 'No data',
+                defaultMessage: 'What are you interested in?',
               })}
             </h1>
             <p>
               {i18n.translate('xpack.graph.emptyOverlay.description', {
-                defaultMessage:
-                  'Search for something you are interested in the search bar above or',
+                defaultMessage: 'Search for something you are interested in the search bar above.',
               })}
             </p>
+            <p>
+              {i18n.translate('xpack.graph.emptyOverlay.callToActionDescriotion', {
+                defaultMessage: 'Alternatively you can also ',
+              })}
+              <br />
+              <EuiButtonEmpty onClick={onFillWorkspace}>
+                {i18n.translate('xpack.graph.emptyOverlay.callToActionLabel', {
+                  defaultMessage: 'show top terms and correlations among them',
+                })}
+              </EuiButtonEmpty>
+            </p>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton fill onClick={onFillWorkspace}>
-            {i18n.translate('xpack.graph.emptyOverlay.callToActionLabel', {
-              defaultMessage: 'Show top terms and correlations between them',
-            })}
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

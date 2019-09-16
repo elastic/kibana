@@ -17,7 +17,7 @@ export interface UnconfiguredOverlayProps {
 export function UnconfiguredOverlay({ onSelectFieldsClicked }: UnconfiguredOverlayProps) {
   return (
     <div className="gphWorkspaceOverlay">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" className="gphWorkspaceOverlay__content">
         <EuiFlexItem>
           <EuiText>
             <h1>

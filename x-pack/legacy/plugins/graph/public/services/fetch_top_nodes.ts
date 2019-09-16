@@ -27,7 +27,7 @@ function createTopTermsAggName(fieldName: string) {
   return `top_values_${fieldName}`;
 }
 
-function createTopTermsSubAgg(field: string, size: number = 5) {
+function createTopTermsSubAgg(field: string, size: number = 10) {
   return {
     [createTopTermsAggName(field)]: {
       terms: {
