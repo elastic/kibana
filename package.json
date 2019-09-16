@@ -413,6 +413,7 @@
     "listr": "^0.14.1",
     "load-grunt-config": "0.19.2",
     "mocha": "3.5.3",
+    "mock-http-server": "1.3.0",
     "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
