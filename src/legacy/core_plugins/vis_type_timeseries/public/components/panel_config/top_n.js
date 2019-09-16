@@ -90,7 +90,10 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.topN.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.topN.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -159,7 +162,7 @@ export class TopNPanelConfig extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"
@@ -174,14 +177,17 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.topN.optionsTab.styleLabel" defaultMessage="Style" />
+                <FormattedMessage
+                  id="visTypeTimeseries.topN.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.topN.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
@@ -224,7 +230,10 @@ export class TopNPanelConfig extends Component {
       <div>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="visTypeTimeseries.topN.dataTab.dataButtonLabel" defaultMessage="Data" />
+            <FormattedMessage
+              id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage

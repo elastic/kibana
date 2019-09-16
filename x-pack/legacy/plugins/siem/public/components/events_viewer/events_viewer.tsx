@@ -23,11 +23,11 @@ import { DataProvider } from '../timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../timeline/events';
 import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
-import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
-import { TimelineContext, TimelineWidthContext } from '../timeline/timeline_context';
+import { ManageTimelineContext } from '../timeline/timeline_context';
 
 import { EventsViewerHeader } from './events_viewer_header';
+import { TimelineRefetch } from '../timeline/refetch_timeline';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -115,7 +115,6 @@ export const EventsViewer = React.memo<Props>(
                   style={{ height: '0px', width: '100%' }}
                 />
               </WrappedByAutoSizer>
-
               {combinedQueries != null ? (
                 <TimelineQuery
                   fields={columnsHeader.map(c => c.id)}
@@ -138,7 +137,7 @@ export const EventsViewer = React.memo<Props>(
                     refetch,
                     totalCount = 0,
                   }) => (
-                    <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
+                    <>
                       <EventsViewerHeader
                         id={id}
                         showInspect={showInspect}
@@ -146,38 +145,43 @@ export const EventsViewer = React.memo<Props>(
                       />
 
                       <div data-test-subj="events-container" style={{ width: `${width}px` }}>
-                        <TimelineContext.Provider value={loading}>
-                          <TimelineWidthContext.Provider value={width}>
-                            <StatefulBody
-                              browserFields={browserFields}
-                              data={events}
-                              id={id}
-                              isEventViewer={true}
-                              height={height}
-                              sort={sort}
-                              toggleColumn={toggleColumn}
-                            />
-                            <Footer
-                              compact={isCompactFooter(width)}
-                              getUpdatedAt={getUpdatedAt}
-                              hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                              height={footerHeight}
-                              isEventViewer={true}
-                              isLive={isLive}
-                              isLoading={loading}
-                              itemsCount={events.length}
-                              itemsPerPage={itemsPerPage}
-                              itemsPerPageOptions={itemsPerPageOptions}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              onLoadMore={loadMore}
-                              nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                              serverSideEventCount={totalCount}
-                              tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                            />
-                          </TimelineWidthContext.Provider>
-                        </TimelineContext.Provider>
+                        <ManageTimelineContext loading={loading} width={width}>
+                          <TimelineRefetch
+                            id={id}
+                            inputId="global"
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                          />
+                          <StatefulBody
+                            browserFields={browserFields}
+                            data={events}
+                            id={id}
+                            isEventViewer={true}
+                            height={height}
+                            sort={sort}
+                            toggleColumn={toggleColumn}
+                          />
+                          <Footer
+                            compact={isCompactFooter(width)}
+                            getUpdatedAt={getUpdatedAt}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            height={footerHeight}
+                            isEventViewer={true}
+                            isLive={isLive}
+                            isLoading={loading}
+                            itemsCount={events.length}
+                            itemsPerPage={itemsPerPage}
+                            itemsPerPageOptions={itemsPerPageOptions}
+                            onChangeItemsPerPage={onChangeItemsPerPage}
+                            onLoadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            serverSideEventCount={totalCount}
+                            tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                          />
+                        </ManageTimelineContext>
                       </div>
-                    </TimelineRefetch>
+                    </>
                   )}
                 </TimelineQuery>
               ) : null}
