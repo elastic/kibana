@@ -18,6 +18,7 @@
  */
 
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { Alignments, GaugeTypes } from './utils/collections';
 
 export interface GaugeVisParams {
   readonly type: 'gauge';
@@ -29,12 +30,12 @@ export interface GaugeVisParams {
     readonly gaugeStyle: 'Full';
     readonly orientation: 'vertical';
     readonly type: 'meter';
-    alignment: 'automatic' | 'horizontal' | 'vertical';
+    alignment: Alignments;
     colorsRange: Array<{ from?: number; to?: number }>;
     colorSchema: ColorSchemas;
     extendRange: boolean;
     invertColors: boolean;
-    gaugeType: 'Arc' | 'Circle';
+    gaugeType: GaugeTypes;
     labels: {
       show: boolean;
     };

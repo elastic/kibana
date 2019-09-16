@@ -20,8 +20,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/colormaps';
-import { getLegendPositions } from './utils/legend_positions';
+import { getHeatmapCollections } from './utils/collections';
 import { HeatmapOptions } from './components/options';
 
 export default function HeatmapVisType(Private) {
@@ -64,30 +63,7 @@ export default function HeatmapVisType(Private) {
       },
     },
     editorConfig: {
-      collections: {
-        legendPositions: getLegendPositions(),
-        scales: [
-          {
-            text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
-              defaultMessage: 'Linear',
-            }),
-            value: 'linear',
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.scaleTypes.logText', {
-              defaultMessage: 'Log',
-            }),
-            value: 'log',
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.scaleTypes.squareRootText', {
-              defaultMessage: 'Square root',
-            }),
-            value: 'square root',
-          },
-        ],
-        colorSchemas,
-      },
+      collections: getHeatmapCollections(),
       optionsTemplate: HeatmapOptions,
       schemas: new Schemas([
         {

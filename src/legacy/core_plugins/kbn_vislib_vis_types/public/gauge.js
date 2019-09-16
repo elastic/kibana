@@ -20,8 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
+import { getGaugeCollections } from './utils/collections';
 
 export default function GaugeVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -83,36 +83,7 @@ export default function GaugeVisType(Private) {
       brush: { disabled: true },
     },
     editorConfig: {
-      collections: {
-        gaugeTypes: [
-          {
-            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
-              defaultMessage: 'Arc',
-            }),
-            value: 'Arc',
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
-              defaultMessage: 'Circle',
-            }),
-            value: 'Circle',
-          },
-        ],
-        alignments: [
-          {
-            value: 'automatic',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
-          },
-          {
-            value: 'horizontal',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
-          },
-          {
-            value: 'vertical',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
-        ],
-        colorSchemas,
-      },
+      collections: getGaugeCollections(),
       optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {

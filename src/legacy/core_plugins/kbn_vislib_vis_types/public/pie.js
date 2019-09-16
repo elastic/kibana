@@ -21,6 +21,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PieOptions } from './components/options';
+import { getPositions } from './utils/collections';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -50,32 +51,7 @@ export default function HistogramVisType(Private) {
     },
     editorConfig: {
       collections: {
-        legendPositions: [
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.leftText', {
-              defaultMessage: 'Left'
-            }),
-            value: 'left'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.rightText', {
-              defaultMessage: 'Right'
-            }),
-            value: 'right'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.topText', {
-              defaultMessage: 'Top'
-            }),
-            value: 'top'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.bottomText', {
-              defaultMessage: 'Bottom'
-            }),
-            value: 'bottom'
-          },
-        ],
+        legendPositions: getPositions()
       },
       optionsTemplate: PieOptions,
       schemas: new Schemas([

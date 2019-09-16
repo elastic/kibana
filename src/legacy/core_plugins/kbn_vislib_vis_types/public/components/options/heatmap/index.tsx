@@ -164,7 +164,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
             <EuiSpacer size="s" />
 
             <NumberInputOption
-              dataTestSubj="heatmapColorsNumber"
+              data-test-subj="heatmapColorsNumber"
               isInvalid={isColorsNumberInvalid}
               label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorsNumberLabel', {
                 defaultMessage: 'Number of colors',

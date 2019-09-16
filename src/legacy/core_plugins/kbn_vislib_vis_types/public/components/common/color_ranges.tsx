@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { RangesParamEditor } from 'ui/agg_types/controls/ranges';
+import { RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
 
 interface ColorRangesProps {
   dataTestSubj?: string;

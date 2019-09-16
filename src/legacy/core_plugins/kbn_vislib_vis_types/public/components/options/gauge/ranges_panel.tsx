@@ -22,7 +22,6 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
 import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 
