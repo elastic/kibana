@@ -47,7 +47,8 @@ export const OptimizeBuildTask = {
     await exec(log, kibanaScript, kibanaArgs, {
       cwd: build.resolvePath('.'),
       env: {
-        FORCE_DLL_CREATION: 'true'
+        FORCE_DLL_CREATION: 'true',
+        NODE_OPTIONS: '--max-old-space-size=3072',
       },
     });
 
