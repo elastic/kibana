@@ -200,7 +200,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           if (options.isOnUnsavedMap === true) {
-            await testSubjects.click('breadcrumb&first');
+            await testSubjects.click('~breadcrumb & ~first');
             const alert = await browser.getAlert();
             await alert.accept();
           } else {
