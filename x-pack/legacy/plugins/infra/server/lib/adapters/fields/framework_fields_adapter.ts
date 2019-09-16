@@ -9,17 +9,17 @@ import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framewor
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 import { getAllowedListForPrefix } from '../../../../common/ecs_allowed_list';
 
-interface Buckets {
+interface Bucket {
   key: string;
   doc_count: number;
 }
 
 interface DataSetResponse {
   modules: {
-    buckets: Buckets[];
+    buckets: Bucket[];
   };
   dataSets: {
-    buckets: Buckets[];
+    buckets: Bucket[];
   };
 }
 
