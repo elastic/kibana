@@ -22,10 +22,11 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker', 'settings']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
@@ -33,8 +34,15 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('makelogs');
-      await browser.refresh();
-      await PageObjects.header.awaitKibanaChrome();
+      if (browser.browserType === 'ie') {
+        await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': false });
+      }
+    });
+
+    after(async () => {
+      if (browser.browserType === 'ie') {
+        await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': true });
+      }
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/33468

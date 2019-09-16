@@ -30,7 +30,6 @@ import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore types not available
 import ie from 'selenium-webdriver/ie';
-import { Options } from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed

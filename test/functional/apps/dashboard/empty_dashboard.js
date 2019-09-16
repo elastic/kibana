@@ -41,10 +41,14 @@ export default function ({ getService, getPageObjects }) {
 
     it('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
+      // have to move the mouse to get the help flyout to appear on IE11
+      // see https://github.com/elastic/kibana/issues/45333
+      console.log('------------------------------------------------------------------ 3');
+      const logo = await testSubjects.find('logo');
+      await logo.moveMouseTo();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });
 
   });
 }
-
