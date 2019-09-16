@@ -66,7 +66,7 @@ export function NoData(props) {
             <CheckerErrors errors={props.errors} />
             <EuiHorizontalRule size="half" />
             <EuiButtonEmpty>
-              <EuiTextColor color="primary" onClick={() => setUseInternalCollection(false)}>
+              <EuiTextColor color="default" onClick={() => setUseInternalCollection(false)}>
                 <FormattedMessage
                   id="xpack.monitoring.noData.setupMetricbeatInstead"
                   defaultMessage="Or, set up with Metricbeat (recommended)"
@@ -129,8 +129,8 @@ export function NoData(props) {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule size="half" />
-          <EuiButtonEmpty>
-            <EuiTextColor color="subdued" onClick={() => setUseInternalCollection(true)}>
+          <EuiButtonEmpty onClick={() => setUseInternalCollection(true)} data-test-subj="useInternalCollection">
+            <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
                 defaultMessage="Or, set up with internal collection (deprecated)"
