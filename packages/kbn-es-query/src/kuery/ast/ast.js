@@ -65,7 +65,8 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
  */
 export function toElasticsearchQuery(node, indexPattern, config = {}) {
   if (!node || !node.type || !nodeTypes[node.type]) {
-    return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
+    const result = toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
+    return result;
   }
 
   return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, config);

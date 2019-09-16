@@ -18,34 +18,37 @@
  */
 import { buildEsQuery } from '../es_query';
 
-// Creates a filter from a saved query.
-// The saved query's time filter needs to be converted to an ES query object before being passed in here because the filter conversion methods are in the data plugin
-// params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
-// indexPattern has to be passed in too
-
-
-// The entire saved query is passed in as params.savedQuery
-// We also need the esQueryConfig that we have to pass in too as follows.
-/*
-import chrome from 'ui/chrome';
-const config = chrome.getUiSettingsClient();
-const esQueryConfigs = getEsQueryConfig(uiSettings);
+/* Creates a filter from a saved query.
+  The saved query's time filter is already parsed
+  params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
+  esQueryConfig obtained from chrome:
+    ```
+    import chrome from 'ui/chrome';
+    const config = chrome.getUiSettingsClient();
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    ```
+  indexPattern has to be passed in too
 */
 
+
 export function buildSavedQueryFilter(params, indexPattern) {
-  const index = indexPattern.id;
-  const type = 'savedQuery';
-  const key = params.savedQuery.id; // the key is used for displaying on the filter pill,
-  const value = params.savedQuery.attributes.title; // in this case, we'll end up with the same thing as the key and value
+  // console.log('params:', params);
+  // console.log('indexPattern:', indexPattern);
   const filter = {
-    meta: { index, type, key, value, params }
+    meta: {
+      index: indexPattern.id,
+      type: 'savedQuery',
+      key: params.savedQuery.id,
+      value: params.savedQuery.attributes.title,
+      params,
+    }
   };
+
   const query = params.savedQuery.attributes.query;
   const filters = params.savedQuery.attributes.filters;
   const convertedTimeFilter = params.savedQuery.attributes.timefilter ? params.savedQuery.attributes.timefilter : null; // should already be an EsQuery
-
   const esQueryConfig = params.esQueryConfig;
-  const convertedQuery = buildEsQuery(index, query, filters, esQueryConfig);
+  const convertedQuery = buildEsQuery(indexPattern, query, filters, esQueryConfig);
   filter.query = { convertedQuery, convertedTimeFilter };
   return filter;
 }
