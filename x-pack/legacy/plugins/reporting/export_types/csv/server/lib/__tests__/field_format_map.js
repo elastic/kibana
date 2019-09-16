@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FieldFormat } from '../../../../../../../../../src/legacy/ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../../../src/plugins/data/common/field_formats';
 import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
 import { createBytesFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes';
 import { createNumberFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number';

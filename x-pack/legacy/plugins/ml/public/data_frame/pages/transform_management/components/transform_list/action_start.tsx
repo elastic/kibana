@@ -25,7 +25,7 @@ import {
   DataFrameTransformListRow,
   isCompletedBatchTransform,
   DATA_FRAME_TRANSFORM_STATE,
-} from './common';
+} from '../../../../common';
 
 interface StartActionProps {
   items: DataFrameTransformListRow[];
