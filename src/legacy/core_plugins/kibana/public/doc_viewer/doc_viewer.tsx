@@ -45,7 +45,9 @@ export function DocViewer(renderProps: DocViewRenderProps) {
   });
 
   if (!tabs.length) {
-    return <div>No Tabs registered</div>;
+    // There there's a minimum of 2 tabs active in Discover.
+    // This condition takes care of unit tests with 0 tabs.
+    return null;
   }
 
   return (
