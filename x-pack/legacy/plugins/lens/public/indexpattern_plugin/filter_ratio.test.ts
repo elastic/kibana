@@ -5,7 +5,7 @@
  */
 
 import { calculateFilterRatio } from './filter_ratio';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/public';
+import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/common';
 
 describe('calculate_filter_ratio', () => {
   it('should collapse two rows and columns into a single row and column', () => {
