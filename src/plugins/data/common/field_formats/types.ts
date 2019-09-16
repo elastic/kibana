@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { Field } from '../../core_plugins/data/public/index_patterns';
-
 /** @public **/
 export type ContentType = 'html' | 'text';
 
@@ -28,7 +26,7 @@ export { IFieldFormat } from './field_format';
 /** @internal **/
 export type HtmlConventTypeConvert = (
   value: any,
-  field?: Field,
+  field?: any,
   hit?: Record<string, any>,
   meta?: any
 ) => string;
