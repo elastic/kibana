@@ -19,7 +19,7 @@ export default function manageRepositoriesFunctionalTests({
 
   describe('Manage Repositories', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('Manage Repositories', () => {
       before(async () => {
@@ -27,7 +27,6 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
-      // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
         await PageObjects.security.logout();

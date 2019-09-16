@@ -47,12 +47,6 @@ Here, you can set the scale to use for the minimap timeline, choose whether to w
 === Stream or pause logs
 Click *Stream live* to start streaming live log data, or click *Stop streaming* to focus on historical data.
 
-[role="screenshot"]
-image::logs/images/logs-usage-start-streaming.png[Logs start streaming]
-
-[role="screenshot"]
-image::logs/images/logs-usage-stop-streaming.png[Logs stop streaming]
-
 When you are viewing historical data, you can scroll back through the entries as far as there is data available.
 
 When you are streaming live data, the most recent log appears at the bottom of the page.
@@ -75,12 +69,11 @@ To highlight a word or phrase in the logs stream, click *Highlights* and enter y
 To inspect a log event, hover over it, then click the *View details* icon image:logs/images/logs-view-event.png[View event icon] beside the event.
 This opens the *Log event document details* fly-out that shows the fields associated with the log event.
 
-To quickly filter the logs stream by one of the field values shown here, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
+To quickly filter the logs stream by one of the field values, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
 
 In the log event details, click *Actions* to see the other actions related to the event.
 Depending on the event and the features you have installed and configured, you may also be able to:
 
-* Select *View monitor status* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
-// ++ Is "monitor" the best choice of word here?
+* Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
 * Select *View in APM* to <<traces, view related APM traces>> in the *APM* app.

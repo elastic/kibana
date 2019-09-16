@@ -530,6 +530,21 @@ describe('default_date_settings', () => {
   });
 
   describe('#parseDateWithDefault', () => {
+    beforeEach(() => {
+      // Disable momentJS deprecation warning and it looks like it is not typed either so
+      // we have to disable the type as well and cannot extend it easily.
+      ((moment as unknown) as {
+        suppressDeprecationWarnings: boolean;
+      }).suppressDeprecationWarnings = true;
+    });
+
+    afterEach(() => {
+      // Re-enable momentJS deprecation warning and it looks like it is not typed either so
+      // we have to disable the type as well and cannot extend it easily.
+      ((moment as unknown) as {
+        suppressDeprecationWarnings: boolean;
+      }).suppressDeprecationWarnings = false;
+    });
     test('should return the first value if it is ok', () => {
       const value = parseDateWithDefault(
         '1930-05-31T13:03:54.234Z',

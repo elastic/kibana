@@ -46,9 +46,6 @@ const TOOLTIP_TYPE = {
   LOCKED: 'LOCKED'
 };
 
-// eslint-disable-next-line max-len,camelcase
-const TRANSPARENT_1x1_BASE64_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
-
 export class MBMapContainer extends React.Component {
 
   state = {
@@ -62,7 +59,7 @@ export class MBMapContainer extends React.Component {
       return {
         prevLayerList: nextLayerList,
         hasSyncedLayerList: false,
-        maxWidth: '260px', // width of table columns max-widths plus all padding
+
       };
     }
 
@@ -76,6 +73,7 @@ export class MBMapContainer extends React.Component {
     this._mbPopup = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false,
+      maxWidth: '260px', // width of table columns max-widths plus all padding
     });
     this._mbDrawControl = new MapboxDraw({
       displayControlsDefault: false,
@@ -396,10 +394,11 @@ export class MBMapContainer extends React.Component {
         }
       });
       mbMap.on('load', () => {
-        mbMap.loadImage(TRANSPARENT_1x1_BASE64_URI, (error, data) => {
-          emptyImage = data;
-          resolve(mbMap);
-        });
+        emptyImage = new Image();
+        // eslint-disable-next-line max-len
+        emptyImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
+        emptyImage.crossOrigin = 'anonymous';
+        resolve(mbMap);
       });
     });
   }

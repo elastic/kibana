@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import { CUSTOM_LEGEND_VIS_TYPES } from './vislib_vis_legend';
 import { BaseVisType } from './base_vis_type';
 import VislibProvider from '../../vislib';

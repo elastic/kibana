@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import * as React from 'react';
@@ -54,26 +55,19 @@ const HoverActionsContainer = styled(EuiPanel)`
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
-const FieldTypeIcon = styled(EuiIcon)`
-  position: relative;
-  top: -2px;
-`;
-
-FieldTypeIcon.displayName = 'FieldTypeIcon';
-
 export const getColumns = ({
   browserFields,
   columnHeaders,
   eventId,
   onUpdateColumns,
-  timelineId,
+  contextId,
   toggleColumn,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
-  timelineId: string;
+  contextId: string;
   toggleColumn: (column: ColumnHeader) => void;
 }) => [
   {
@@ -108,22 +102,24 @@ export const getColumns = ({
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiToolTip content={data.type}>
-            <FieldTypeIcon data-test-subj="field-type-icon" type={getIconFromType(data.type)} />
+            <EuiIcon data-test-subj="field-type-icon" type={getIconFromType(data.type)} />
           </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <DroppableWrapper
             droppableId={getDroppableId(
-              `event-details-${eventId}-${data.category}-${field}-${timelineId}`
+              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
             )}
-            key={`${data.category}-${field}-${timelineId}`}
+            key={getDroppableId(
+              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+            )}
             isDropDisabled={true}
             type={DRAG_TYPE_FIELD}
           >
             <Draggable
               draggableId={getDraggableFieldId({
-                contextId: `field-browser-category-${eventId}-${data.category}-field-${field}-${timelineId}`,
+                contextId: `event-details-field-draggable-${contextId}-${eventId}-${data.category}-${field}`,
                 fieldId: field,
               })}
               index={0}
@@ -171,7 +167,7 @@ export const getColumns = ({
             <EuiFlexItem
               grow={false}
               component="span"
-              key={`${eventId}-${data.field}-${i}-${value}`}
+              key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
             >
               <WithHoverActions
                 hoverContent={
@@ -188,7 +184,7 @@ export const getColumns = ({
                     <DefaultDraggable
                       data-test-subj="ip"
                       field={data.field}
-                      id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
+                      id={`event-details-value-default-draggable-${contextId}-${eventId}-${data.field}-${i}-${value}`}
                       tooltipContent={
                         data.type === DATE_FIELD_TYPE || data.field === EVENT_DURATION_FIELD_NAME
                           ? null
@@ -196,14 +192,16 @@ export const getColumns = ({
                       }
                       value={value}
                     >
-                      <FormattedFieldValue
-                        contextId={'event-details-field-value'}
-                        eventId={eventId}
-                        fieldFormat={data.format}
-                        fieldName={data.field}
-                        fieldType={data.type}
-                        value={value}
-                      />
+                      <EuiText size="xs">
+                        <FormattedFieldValue
+                          contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                          eventId={eventId}
+                          fieldFormat={data.format}
+                          fieldName={data.field}
+                          fieldType={data.type}
+                          value={value}
+                        />
+                      </EuiText>
                     </DefaultDraggable>
                   )
                 }
@@ -217,7 +215,9 @@ export const getColumns = ({
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string | null | undefined, data: EventFieldsData) => (
-      <SelectableText>{`${description || ''} ${getExampleText(data.example)}`}</SelectableText>
+      <SelectableText>
+        <EuiText size="xs">{`${description || ''} ${getExampleText(data.example)}`}</EuiText>
+      </SelectableText>
     ),
     sortable: true,
     truncateText: true,

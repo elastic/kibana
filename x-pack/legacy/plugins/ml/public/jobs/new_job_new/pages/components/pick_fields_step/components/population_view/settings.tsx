@@ -12,11 +12,10 @@ import { BucketSpan } from '../bucket_span';
 import { Influencers } from '../influencers';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (proceed: boolean) => void;
 }
 
-export const PopulationSettings: FC<Props> = ({ isActive, setIsValid }) => {
+export const PopulationSettings: FC<Props> = ({ setIsValid }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
 
@@ -32,18 +31,14 @@ export const PopulationSettings: FC<Props> = ({ isActive, setIsValid }) => {
 
   return (
     <Fragment>
-      {isActive && (
-        <Fragment>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <BucketSpan setIsValid={setIsValid} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Influencers />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      )}
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <BucketSpan setIsValid={setIsValid} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Influencers />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 };

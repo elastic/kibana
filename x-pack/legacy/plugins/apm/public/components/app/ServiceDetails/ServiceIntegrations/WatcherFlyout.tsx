@@ -31,7 +31,7 @@ import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { toastNotifications } from 'ui/notify';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
@@ -40,7 +40,7 @@ import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = memoize((core: InternalCoreStart): string => {
+const getUserTimezone = memoize((core: LegacyCoreStart): string => {
   return core.uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
     : core.uiSettings.get('dateFormat:tz');

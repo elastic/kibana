@@ -159,6 +159,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
                   : browserFieldsWithDefaultCategory
               }
               height={height}
+              isEventViewer={isEventViewer}
               isSearching={isSearching}
               onCategorySelected={this.updateSelectedCategoryId}
               onFieldSelected={onFieldSelected}

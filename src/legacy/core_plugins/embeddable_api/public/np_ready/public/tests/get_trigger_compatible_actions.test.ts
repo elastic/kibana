@@ -22,7 +22,7 @@ import { HelloWorldAction } from '../lib/test_samples/actions/hello_world_action
 import { SayHelloAction } from '../lib/test_samples/actions/say_hello_action';
 import { RestrictedAction } from '../lib/test_samples/actions/restricted_action';
 import { EmptyEmbeddable } from '../lib/test_samples/embeddables/empty_embeddable';
-import { ActionContext, CONTEXT_MENU_TRIGGER } from '../lib';
+import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../lib';
 import { of } from './helpers';
 
 let action: SayHelloAction;
@@ -73,7 +73,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
 test('filters out actions not applicable based on the context', async () => {
   const { setup, doStart } = embeddables;
-  const restrictedAction = new RestrictedAction((context: ActionContext) => {
+  const restrictedAction = new RestrictedAction<{ embeddable: IEmbeddable }>(context => {
     return context.embeddable.id === 'accept';
   });
 

@@ -57,12 +57,8 @@ exports[`EmptyState should render normally 1`] = `
     <EuiButton
       color="warning"
       data-test-subj="refreshIndicesButton"
-      fill={false}
-      iconSide="left"
       iconType="refresh"
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Check for new data"
