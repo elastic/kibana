@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { npStart } from 'ui/new_platform';
 import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
@@ -66,6 +65,7 @@ export function IndexPatternDataPanel({
   setState,
   state,
   dragDropContext,
+  core,
   query,
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
@@ -121,6 +121,7 @@ export function IndexPatternDataPanel({
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
+      core={core}
       // only pass in the state change callback if it's actually needed to avoid re-renders
       onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
       updateFieldsWithCounts={
@@ -157,11 +158,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   updateFieldsWithCounts,
   showEmptyFields,
   onToggleEmptyFields,
+  core,
 }: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
   dateRange: DatasourceDataPanelProps['dateRange'];
   query: Query;
+  core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showIndexPatternSwitcher: boolean;
   setShowIndexPatternSwitcher: (show: boolean) => void;
@@ -275,11 +278,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
     setLocalState(s => ({ ...s, isLoading: true }));
 
-    npStart.core.http
+    core.http
       .post(`/api/lens/index_stats/${currentIndexPattern.title}`, {
         body: JSON.stringify({
-          earliest: dateRange.fromDate,
-          latest: dateRange.toDate,
+          fromDate: dateRange.fromDate,
+          toDate: dateRange.toDate,
           size: 500,
           timeFieldName: currentIndexPattern.timeFieldName,
           fields: allFields

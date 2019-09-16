@@ -5,6 +5,7 @@
  */
 
 import { EditorFramePlugin } from './plugin';
+import { coreMock } from 'src/core/public/mocks';
 import {
   MockedSetupDependencies,
   MockedStartDependencies,
@@ -12,6 +13,7 @@ import {
   createMockStartDependencies,
 } from './mocks';
 
+jest.mock('ui/new_platform');
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
 }));
@@ -49,8 +51,8 @@ describe('editor_frame plugin', () => {
 
   it('should create an editor frame instance which mounts and unmounts', () => {
     expect(() => {
-      pluginInstance.setup(null, pluginSetupDependencies);
-      const publicAPI = pluginInstance.start(null, pluginStartDependencies);
+      pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+      const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
       const instance = publicAPI.createInstance({});
       instance.mount(mountpoint, {
         onError: jest.fn(),
@@ -63,8 +65,8 @@ describe('editor_frame plugin', () => {
   });
 
   it('should not have child nodes after unmount', () => {
-    pluginInstance.setup(null, pluginSetupDependencies);
-    const publicAPI = pluginInstance.start(null, pluginStartDependencies);
+    pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+    const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint, {
       onError: jest.fn(),

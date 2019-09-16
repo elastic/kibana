@@ -9,7 +9,11 @@ import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import {
   IndexPatternColumn,
@@ -32,6 +36,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
+  http: HttpServiceBase;
 };
 
 export interface OperationFieldSupportMatrix {

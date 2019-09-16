@@ -8,7 +8,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
@@ -313,6 +317,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -360,6 +365,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -380,6 +386,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -427,6 +434,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -450,6 +458,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -494,6 +503,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -512,6 +522,7 @@ describe('terms', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 

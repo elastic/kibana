@@ -14,7 +14,11 @@ import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './d
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { Storage } from 'ui/storage';
 
 jest.mock('ui/new_platform');
@@ -122,6 +126,7 @@ describe('IndexPatternDimensionPanel', () => {
       storage: {} as Storage,
       uiSettings: {} as UiSettingsClientContract,
       savedObjectsClient: {} as SavedObjectsClientContract,
+      http: {} as HttpServiceBase,
     };
 
     jest.clearAllMocks();

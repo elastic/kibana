@@ -9,6 +9,8 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -27,7 +29,7 @@ export class AppPlugin {
 
   constructor() {}
 
-  setup() {
+  setup(core: CoreSetup) {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
@@ -43,7 +45,7 @@ export class AppPlugin {
     editorFrameSetupInterface.registerVisualization(metricVisualization);
   }
 
-  start() {
+  start(core: CoreStart) {
     if (this.store === null) {
       throw new Error('Start lifecycle called before setup lifecycle');
     }
@@ -57,8 +59,8 @@ export class AppPlugin {
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
       return (
         <App
+          core={core}
           editorFrame={this.instance!}
-          chrome={chrome}
           store={new Storage(localStorage)}
           savedObjectsClient={chrome.getSavedObjectsClient()}
           docId={routeProps.match.params.id}
@@ -107,6 +109,6 @@ export class AppPlugin {
 
 const app = new AppPlugin();
 
-export const appSetup = () => app.setup();
-export const appStart = () => app.start();
+export const appSetup = () => app.setup(npSetup.core);
+export const appStart = () => app.start(npStart.core);
 export const appStop = () => app.stop();
