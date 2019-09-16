@@ -19,23 +19,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-const canStack = (function() {
-  const err = new Error();
-  return !!err.stack;
-})();
-
 // abstract error class
 export class KbnError extends Error {
-  constructor(msg: string, constructor?: Function) {
-    super();
-    this.message = msg;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, constructor || KbnError);
-    } else if (canStack) {
-      this.stack = new Error().stack;
-    } else {
-      this.stack = '';
-    }
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -45,7 +33,7 @@ export class KbnError extends Error {
  */
 export class DuplicateField extends KbnError {
   constructor(name: string) {
-    super(`The field "${name}" already exists in this mapping`, DuplicateField);
+    super(`The field "${name}" already exists in this mapping`);
   }
 }
 
@@ -63,7 +51,7 @@ export class SavedObjectNotFound extends KbnError {
       message += `, [click here to re-create it](${link})`;
     }
 
-    super(message, SavedObjectNotFound);
+    super(message);
 
     this.savedObjectType = type;
     this.savedObjectId = id;
