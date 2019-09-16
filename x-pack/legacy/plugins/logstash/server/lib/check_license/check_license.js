@@ -30,7 +30,7 @@ export function checkLicense(xpackLicenseInfo) {
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
   const licenseType = xpackLicenseInfo.license.getType();
-  const isSecurityEnabled = true;//xpackLicenseInfo.feature('security').isEnabled();
+  const isSecurityEnabled = xpackLicenseInfo.feature('security').isEnabled();
 
   // Security is not enabled in ES
   if (!isSecurityEnabled) {
@@ -73,6 +73,12 @@ export function checkLicense(xpackLicenseInfo) {
   }
 
   // License is valid and active
+  console.log('valid and active', {
+    isLicenseActive,
+    isLicenseModeValid,
+    licenseType,
+    isSecurityEnabled
+  });
   return {
     isAvailable: true,
     enableLinks: true,
