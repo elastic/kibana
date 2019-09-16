@@ -50,7 +50,7 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
   }, []);
 
   return (
-    <EuiFormRow fullWidth={true} label={label}>
+    <EuiFormRow fullWidth={true} label={label} compressed>
       <EuiRange
         compressed
         fullWidth={true}
