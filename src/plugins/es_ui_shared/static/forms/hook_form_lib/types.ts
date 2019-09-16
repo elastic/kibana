@@ -57,11 +57,11 @@ export interface FormConfig<T extends object = FormData> {
 }
 
 export interface FormOptions {
-  errorDisplayDelay: number;
+  errorDisplayDelay?: number;
   /**
    * Remove empty string field ("") from form data
    */
-  stripEmptyFields: boolean;
+  stripEmptyFields?: boolean;
 }
 
 export interface FieldHook {

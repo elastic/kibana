@@ -14,11 +14,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { serializers } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import { Template } from '../../../common/types';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps, DataGetterFunc } from './types';
 import { SectionError } from '../section_error';
+
+const { stripEmptyFields } = serializers;
 
 interface Props {
   onSave: (template: Template) => void;
@@ -212,7 +215,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     fill
                     color="secondary"
                     iconType="check"
-                    onClick={onSave.bind(null, template.current as Template)}
+                    onClick={onSave.bind(null, stripEmptyFields(template.current) as Template)}
                     data-test-subj="submitButton"
                     isLoading={isSaving}
                   >

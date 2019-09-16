@@ -81,7 +81,11 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const { form } = useForm({ schema: schemas.logistics, defaultValue: template });
+  const { form } = useForm({
+    schema: schemas.logistics,
+    defaultValue: template,
+    options: { stripEmptyFields: false },
+  });
 
   useEffect(() => {
     onStepValidityChange(form.isValid);

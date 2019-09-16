@@ -38,6 +38,8 @@ export const useJsonStep = ({
           defaultMessage: 'Invalid JSON format.',
         })
       );
+    } else {
+      setError(null);
     }
     return isValid;
   };
