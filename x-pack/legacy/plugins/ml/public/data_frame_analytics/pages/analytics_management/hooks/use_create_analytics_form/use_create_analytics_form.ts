@@ -235,17 +235,19 @@ export const useCreateAnalyticsForm = () => {
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds(true);
       const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      ids.forEach(async id => {
-        const indexPattern = await kibanaContext.indexPatterns.get(id);
-        if (
-          indexPattern.fields
-            .filter(f => !OMIT_FIELDS.includes(f.name))
-            .map(f => f.type)
-            .includes('number')
-        ) {
-          indexPatternsWithNumericFields.push(indexPattern.title);
-        }
-      });
+      ids
+        .filter(f => !!f)
+        .forEach(async id => {
+          const indexPattern = await kibanaContext.indexPatterns.get(id!);
+          if (
+            indexPattern.fields
+              .filter(f => !OMIT_FIELDS.includes(f.name))
+              .map(f => f.type)
+              .includes('number')
+          ) {
+            indexPatternsWithNumericFields.push(indexPattern.title);
+          }
+        });
       setIndexPatternTitles({ indexPatternTitles, indexPatternsWithNumericFields });
     } catch (e) {
       addRequestMessage({
