@@ -38,15 +38,15 @@ export class IndexPatternListManager {
     }, []);
   }
 
-  getFieldInfo = (indexPattern: any, field: any): string[] => {
+  public getFieldInfo(indexPattern: any, field: any): string[] {
     return this.configs.reduce((info: string[], config) => {
       return config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info;
     }, []);
-  };
+  }
 
-  areScriptedFieldsEnabled = (indexPattern: any): boolean => {
+  public areScriptedFieldsEnabled(indexPattern: any): boolean {
     return this.configs.every(config => {
       return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
     });
-  };
+  }
 }
