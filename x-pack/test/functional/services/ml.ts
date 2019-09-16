@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
+  MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataFramesProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
@@ -24,6 +25,7 @@ import {
 export function MachineLearningProvider(context: FtrProviderContext) {
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
+  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
   const dataFrames = MachineLearningDataFramesProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context);
@@ -38,6 +40,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   return {
     anomalyExplorer,
     api,
+    dataFrameAnalytics,
     dataFrames,
     dataVisualizer,
     jobManagement,
