@@ -112,9 +112,7 @@ export class IndexPatterns {
     return null;
   };
 
-  get = (id?: string | null) => {
-    if (!id) return this.make();
-
+  get = (id: string) => {
     const cache = indexPatternCache.get(id);
     return cache || indexPatternCache.set(id, this.make(id));
   };

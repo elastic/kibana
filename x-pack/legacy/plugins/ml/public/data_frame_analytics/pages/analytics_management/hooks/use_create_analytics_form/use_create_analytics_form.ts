@@ -134,7 +134,7 @@ export const useCreateAnalyticsForm = () => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.get();
+      const newIndexPattern = await kibanaContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',

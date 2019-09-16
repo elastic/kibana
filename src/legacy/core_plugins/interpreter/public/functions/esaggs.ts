@@ -51,7 +51,7 @@ const name = 'esaggs';
 type Context = KibanaContext | null;
 
 interface Arguments {
-  index: string | null;
+  index: string;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   includeFormatHints: boolean;
@@ -221,8 +221,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   }),
   args: {
     index: {
-      types: ['string', 'null'],
-      default: null,
+      types: ['string'],
       help: '',
     },
     metricsAtAllLevels: {

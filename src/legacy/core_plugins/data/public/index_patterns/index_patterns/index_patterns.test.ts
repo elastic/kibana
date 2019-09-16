@@ -74,10 +74,6 @@ describe('IndexPatterns', () => {
     indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
-  test('does not cache gets without an id', () => {
-    expect(indexPatterns.get()).not.toBe(indexPatterns.get());
-  });
-
   test('does cache gets for the same id', () => {
     const id = '1';
 
