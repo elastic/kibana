@@ -13,32 +13,33 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const log = getService('log');
 
-  const jobId = `fq_population_1_${Date.now()}`;
+  const jobId = `ec_population_1_${Date.now()}`;
   const jobDescription =
-    'Create population job based on the farequote dataset with 1h bucketspan over airline';
-  const jobGroups = ['automated', 'farequote', 'population'];
-  const populationField = 'airline';
+    'Create population job based on the ecommerce sample dataset with 2h bucketspan over customer_id' +
+    ' - detectors: (Mean(products.base_price) by customer_gender), (Mean(products.quantity) by category.leyword)';
+  const jobGroups = ['automated', 'ecommerce', 'population'];
+  const populationField = 'customer_id';
   const detectors = [
     {
-      identifier: 'Min(responsetime)',
-      splitField: 'host.keyword',
-      frontCardTitle: 'Sophies-MacBook-Pro.local',
-      numberOfBackCards: 0,
+      identifier: 'Mean(products.base_price)',
+      splitField: 'customer_gender',
+      frontCardTitle: 'FEMALE',
+      numberOfBackCards: 1,
     },
     {
-      identifier: 'Max(responsetime)',
-      splitField: 'path.keyword',
-      frontCardTitle: '/Users/sophie/data/logstash/farequote.csv',
-      numberOfBackCards: 0,
+      identifier: 'Mean(products.quantity)',
+      splitField: 'category.keyword',
+      frontCardTitle: "Men's Clothing",
+      numberOfBackCards: 5,
     },
   ];
-  const bucketSpan = '1h';
-  const memoryLimit = '64MB';
+  const bucketSpan = '2h';
+  const memoryLimit = '8MB';
 
   describe('population job creation', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
     });
 
     after(async () => {
@@ -57,7 +58,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
+      await ml.jobSourceSelection.selectSourceIndexPattern('ecommerce');
     });
 
     it('loads the single metric job wizard page', async () => {
@@ -199,43 +200,42 @@ export default function({ getService }: FtrProviderContext) {
         id: jobId,
         description: jobDescription,
         jobGroups,
-        recordCount: '86,274',
+        recordCount: '4,675',
         memoryStatus: 'ok',
         jobState: 'closed',
         datafeedState: 'stopped',
-        latestTimestamp: '2016-02-11 23:59:54',
+        latestTimestamp: '2019-07-12 23:45:36',
       };
       await ml.jobTable.assertJobRowFields(jobId, expectedRow);
 
       const expectedCounts = {
         job_id: jobId,
-        processed_record_count: '86,274',
-        processed_field_count: '172,548',
-        input_bytes: '6.4 MB',
-        input_field_count: '172,548',
+        processed_record_count: '4,675',
+        processed_field_count: '23,375',
+        input_bytes: '867.7 KB',
+        input_field_count: '23,375',
         invalid_date_count: '0',
         missing_field_count: '0',
         out_of_order_timestamp_count: '0',
         empty_bucket_count: '0',
         sparse_bucket_count: '0',
-        bucket_count: '479',
-        earliest_record_timestamp: '2016-02-07 00:00:00',
-        latest_record_timestamp: '2016-02-11 23:59:54',
-        input_record_count: '86,274',
-        latest_bucket_timestamp: '2016-02-11 23:45:00',
+        bucket_count: '371',
+        earliest_record_timestamp: '2019-06-12 00:04:19',
+        latest_record_timestamp: '2019-07-12 23:45:36',
+        input_record_count: '4,675',
+        latest_bucket_timestamp: '2019-07-12 22:00:00',
       };
       const expectedModelSizeStats = {
         job_id: jobId,
         result_type: 'model_size_stats',
-        model_bytes: '1.8 MB',
         model_bytes_exceeded: '0',
-        model_bytes_memory_limit: '20971520',
-        total_by_field_count: '59',
-        total_over_field_count: '0',
-        total_partition_field_count: '58',
+        model_bytes_memory_limit: '8388608',
+        total_by_field_count: '25',
+        total_over_field_count: '92',
+        total_partition_field_count: '3',
         bucket_allocation_failures_count: '0',
         memory_status: 'ok',
-        timestamp: '2016-02-11 23:30:00',
+        timestamp: '2019-07-12 20:00:00',
       };
       await ml.jobTable.assertJobRowDetailsCounts(jobId, expectedCounts, expectedModelSizeStats);
     });
