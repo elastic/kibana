@@ -48,11 +48,11 @@ jest.mock('../../../../../../../../public/quarantined/src/input.js', () => {
 import * as sendRequestModule from '../send_current_request_to_es';
 
 describe('Legacy (Ace) Console Editor', () => {
-  let mockedAppContextValuer: any;
+  let mockedAppContextValue: any;
 
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
-    mockedAppContextValuer = {
+    mockedAppContextValue = {
       services: {
         history: {
           getSavedEditorState: () => null,
@@ -70,7 +70,7 @@ describe('Legacy (Ace) Console Editor', () => {
   it('can send requests when prompted via the UI', () => {
     const stub = sinon.stub(sendRequestModule, 'sendCurrentRequestToES');
     const wrapped = mount(
-      <AppContextProvider value={mockedAppContextValuer}>
+      <AppContextProvider value={mockedAppContextValue}>
         <EditorContextProvider settings={{} as any}>
           <Editor />
         </EditorContextProvider>
