@@ -92,7 +92,8 @@ export const metricSets = {
     {
       keys: ['node_query_latency', 'node_index_latency'],
       name: 'node_latency'
-    }
+    },
+    'node_total_io',
   ],
   overview: [
     {
@@ -116,6 +117,6 @@ export const metricSets = {
       name: 'node_cpu_metric'
     },
     'node_load_average',
-    'node_segment_count'
+    'node_segment_count',
   ]
 };

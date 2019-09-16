@@ -40,6 +40,9 @@ const indexRequestTimeTitle = i18n.translate('xpack.monitoring.metrics.esIndex.r
 const indexIndexingRateTitle = i18n.translate('xpack.monitoring.metrics.esIndex.indexingRateTitle', {
   defaultMessage: 'Indexing Rate'
 });
+const nodeIoRateTitle = i18n.translate('xpack.monitoring.metrics.esNode.ioRateTitle', {
+  defaultMessage: 'I/O Rate'
+});
 const indexSegmentCountTitle = i18n.translate('xpack.monitoring.metrics.esIndex.segmentCountTitle', {
   defaultMessage: 'Segment Count'
 });
@@ -423,6 +426,20 @@ export const metrics = {
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.indexWriterDescription', {
       defaultMessage: 'Heap memory used by the Index Writer. This is NOT a part of Lucene Total.'
+    })
+  }),
+  node_total_io: new RequestRateMetric({
+    field: 'node_stats.fs.io_stats',
+    title: nodeIoRateTitle,
+    format: LARGE_FLOAT,
+    units: '',
+    type: 'index',
+    derivative: true,
+    label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoLabel', {
+      defaultMessage: 'Total I/O'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoDescription', {
+      defaultMessage: 'Total I/O'
     })
   }),
   index_request_rate_primary: new ElasticsearchMetric({
