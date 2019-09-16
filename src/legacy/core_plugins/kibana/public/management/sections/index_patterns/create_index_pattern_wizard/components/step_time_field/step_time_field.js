@@ -45,15 +45,12 @@ export class StepTimeFieldComponent extends Component {
     goToPreviousStep: PropTypes.func.isRequired,
     createIndexPattern: PropTypes.func.isRequired,
     indexPatternCreationType: PropTypes.object.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
 
-    const {
-      getIndexPatternType,
-      getIndexPatternName,
-    } = props.indexPatternCreationType;
+    const { getIndexPatternType, getIndexPatternName } = props.indexPatternCreationType;
 
     this.state = {
       error: '',
@@ -94,9 +91,9 @@ export class StepTimeFieldComponent extends Component {
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });
-  }
+  };
 
-  onTimeFieldChanged = (e) => {
+  onTimeFieldChanged = e => {
     const value = e.target.value;
 
     // Find the time field based on the selected value
@@ -109,17 +106,17 @@ export class StepTimeFieldComponent extends Component {
       selectedTimeField: timeField ? timeField.fieldName : undefined,
       timeFieldSet: validSelection,
     });
-  }
+  };
 
-  onChangeIndexPatternId = (e) => {
+  onChangeIndexPatternId = e => {
     this.setState({ indexPatternId: e.target.value });
-  }
+  };
 
   toggleAdvancedOptions = () => {
     this.setState(state => ({
-      isAdvancedOptionsVisible: !state.isAdvancedOptionsVisible
+      isAdvancedOptionsVisible: !state.isAdvancedOptionsVisible,
     }));
-  }
+  };
 
   createIndexPattern = async () => {
     const { createIndexPattern } = this.props;
@@ -134,18 +131,18 @@ export class StepTimeFieldComponent extends Component {
         isCreating: false,
       });
     }
-  }
+  };
 
   formatErrorMessage(message) {
     // `createIndexPattern` throws "Conflict" when index pattern ID already exists.
-    return message === 'Conflict'
-      ? (
-        <FormattedMessage
-          id="kbn.management.createIndexPattern.stepTime.patterAlreadyExists"
-          defaultMessage="Custom index pattern ID already exists."
-        />
-      )
-      : message;
+    return message === 'Conflict' ? (
+      <FormattedMessage
+        id="kbn.management.createIndexPattern.stepTime.patterAlreadyExists"
+        defaultMessage="Custom index pattern ID already exists."
+      />
+    ) : (
+      message
+    );
   }
 
   render() {
@@ -165,7 +162,7 @@ export class StepTimeFieldComponent extends Component {
         <EuiPanel>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner/>
+              <EuiLoadingSpinner />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>
@@ -180,53 +177,43 @@ export class StepTimeFieldComponent extends Component {
       );
     }
 
-    const {
-      indexPattern,
-      goToPreviousStep,
-    } = this.props;
+    const { indexPattern, goToPreviousStep } = this.props;
 
-    const timeFieldOptions = timeFields ?
-      [
+    const timeFieldOptions = timeFields
+      ? [
         { text: '', value: '' },
         ...timeFields.map(timeField => ({
           text: timeField.display,
           value: timeField.fieldName,
           disabled: timeFields.isDisabled,
-        }))
+        })),
       ]
       : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;
     const submittable = !showTimeField || timeFieldSet;
-    const error = this.state.error
-      ? (
-        <>
-          <EuiCallOut
-            title={(
-              <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.error"
-                defaultMessage="Error"
-              />
-            )}
-            color="danger"
-            iconType="cross"
-          >
-            <p>
-              {this.formatErrorMessage(this.state.error)}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </>
-      )
-      : null;
+    const error = this.state.error ? (
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.error"
+              defaultMessage="Error"
+            />
+          }
+          color="danger"
+          iconType="cross"
+        >
+          <p>{this.formatErrorMessage(this.state.error)}</p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
 
     return (
       <EuiPanel paddingSize="l">
-        <Header
-          indexPattern={indexPattern}
-          indexPatternName={indexPatternName}
-        />
-        <EuiSpacer size="m"/>
+        <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
+        <EuiSpacer size="m" />
         <TimeField
           isVisible={showTimeField}
           fetchTimeFields={this.fetchTimeFields}
@@ -235,14 +222,14 @@ export class StepTimeFieldComponent extends Component {
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}
           toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeIndexPatternId={this.onChangeIndexPatternId}
         />
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {error}
         <ActionButtons
           goToPreviousStep={goToPreviousStep}
