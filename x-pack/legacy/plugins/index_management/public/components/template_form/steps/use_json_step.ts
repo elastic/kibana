@@ -11,7 +11,7 @@ import { isJSON } from '../../../../../../../../src/plugins/es_ui_shared/static/
 import { StepProps } from '../types';
 
 interface Parameters {
-  prop: string;
+  prop: 'settings' | 'mappings' | 'aliases';
   setDataGetter: StepProps['setDataGetter'];
   onStepValidityChange: StepProps['onStepValidityChange'];
   defaultValue?: object;
