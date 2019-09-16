@@ -10,7 +10,6 @@ import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
-import { LegacyAPI } from '../new_platform/plugin';
 
 type CallCluster = <T = unknown>(
   endpoint: string,
@@ -114,7 +113,7 @@ export interface UsageStats {
 }
 
 interface CollectorDeps {
-  config: LegacyAPI['legacyConfig'];
+  kibanaIndex: string;
   usage: { collectorSet: any };
   xpackMain: XPackMainPlugin;
 }
@@ -131,19 +130,17 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
     fetch: async (callCluster: CallCluster) => {
       const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
-      const enabled = deps.config.spacesEnabled;
-      const spacesAvailableAndEnabled = Boolean(available && enabled);
 
       const usageStats = await getSpacesUsage(
         callCluster,
-        deps.config.kibanaIndex,
+        deps.kibanaIndex,
         deps.xpackMain,
-        spacesAvailableAndEnabled
+        available
       );
 
       return {
         available,
-        enabled: spacesAvailableAndEnabled, // similar behavior as _xpack API in ES
+        enabled: available,
         ...usageStats,
       } as UsageStats;
     },

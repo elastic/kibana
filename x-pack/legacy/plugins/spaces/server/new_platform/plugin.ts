@@ -52,7 +52,6 @@ export interface LegacyAPI {
     create: (pluginId: string) => AuditLogger;
   };
   legacyConfig: {
-    spacesEnabled: boolean;
     kibanaIndex: string;
     serverBasePath: string;
     serverDefaultRoute: string;
@@ -175,7 +174,7 @@ export class Plugin {
     // Register a function with server to manage the collection of usage stats
     legacyAPI.usage.collectorSet.register(
       getSpacesUsageCollector({
-        config: legacyAPI.legacyConfig,
+        kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
         usage: legacyAPI.usage,
         xpackMain: xpackMainPlugin,
       })

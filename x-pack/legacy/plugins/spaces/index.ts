@@ -172,7 +172,6 @@ export const spaces = (kibana: Record<string, any>) =>
           serverBasePath: config.get('server.basePath'),
           serverDefaultRoute: config.get('server.defaultRoute'),
           kibanaIndex: config.get('kibana.index'),
-          spacesEnabled: config.get('xpack.spaces.enabled'),
         },
         savedObjects: server.savedObjects,
         usage: server.usage,

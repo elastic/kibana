@@ -5,7 +5,6 @@
  */
 
 import { getSpacesUsageCollector, UsageStats } from './get_spaces_usage_collector';
-import { LegacyAPI } from '../new_platform/plugin';
 
 function getServerMock(customization?: any) {
   class MockUsageCollector {
@@ -73,26 +72,6 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-const legacyConfig = {
-  spacesEnabled: true,
-  kibanaIndex: '.kibana',
-} as LegacyAPI['legacyConfig'];
-
-test('sets enabled to false when spaces is turned off', async () => {
-  const config = {
-    ...legacyConfig,
-    spacesEnabled: false,
-  };
-  const serverMock = getServerMock();
-  const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-    config,
-    usage: serverMock.usage,
-    xpackMain: serverMock.plugins.xpack_main,
-  });
-  const usageStats: UsageStats = await getSpacesUsage(defaultCallClusterMock);
-  expect(usageStats.enabled).toBe(false);
-});
-
 describe('with a basic license', () => {
   let serverWithBasicLicenseMock: any;
   let usageStats: UsageStats;
@@ -102,7 +81,7 @@ describe('with a basic license', () => {
       .fn()
       .mockReturnValue('basic');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: legacyConfig,
+      kibanaIndex: '.kibana',
       usage: serverWithBasicLicenseMock.usage,
       xpackMain: serverWithBasicLicenseMock.plugins.xpack_main,
     });
@@ -138,7 +117,7 @@ describe('with no license', () => {
     serverWithNoLicenseMock.plugins.xpack_main.info.isAvailable = jest.fn().mockReturnValue(false);
 
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: legacyConfig,
+      kibanaIndex: '.kibana',
       usage: serverWithNoLicenseMock.usage,
       xpackMain: serverWithNoLicenseMock.plugins.xpack_main,
     });
@@ -171,7 +150,7 @@ describe('with platinum license', () => {
       .fn()
       .mockReturnValue('platinum');
     const { fetch: getSpacesUsage } = getSpacesUsageCollector({
-      config: legacyConfig,
+      kibanaIndex: '.kibana',
       usage: serverWithPlatinumLicenseMock.usage,
       xpackMain: serverWithPlatinumLicenseMock.plugins.xpack_main,
     });
