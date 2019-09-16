@@ -18,6 +18,8 @@
  */
 
 // @ts-ignore
+import { AggType } from './agg_type';
+// @ts-ignore
 import { countMetricAgg } from './metrics/count';
 // @ts-ignore
 import { avgMetricAgg } from './metrics/avg';
@@ -52,7 +54,7 @@ import { movingAvgMetricAgg } from './metrics/moving_avg';
 // @ts-ignore
 import { serialDiffMetricAgg } from './metrics/serial_diff';
 // @ts-ignore
-import { dateHistogramBucketAgg } from './buckets/date_histogram';
+import { dateHistogramBucketAgg, setBounds } from './buckets/date_histogram';
 // @ts-ignore
 import { histogramBucketAgg } from './buckets/histogram';
 // @ts-ignore
@@ -127,3 +129,5 @@ aggTypes.buckets.forEach(aggType => (aggType.type = 'buckets'));
 export { AggParam } from './agg_params';
 export { AggType } from './agg_type';
 export { FieldParamType } from './param_types';
+export { BucketAggType } from './buckets/_bucket_agg_type';
+export { setBounds };

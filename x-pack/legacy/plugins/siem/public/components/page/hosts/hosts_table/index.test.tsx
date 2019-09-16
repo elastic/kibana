@@ -40,6 +40,7 @@ describe('Hosts Table', () => {
           <HostsTable
             data={mockData.Hosts.edges}
             id="hostsQuery"
+            isInspect={false}
             indexPattern={mockIndexPattern}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
             loading={false}
@@ -60,6 +61,7 @@ describe('Hosts Table', () => {
           <TestProviders store={store}>
             <HostsTable
               id="hostsQuery"
+              isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -84,6 +86,7 @@ describe('Hosts Table', () => {
               <HostsTable
                 id="hostsQuery"
                 indexPattern={mockIndexPattern}
+                isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
