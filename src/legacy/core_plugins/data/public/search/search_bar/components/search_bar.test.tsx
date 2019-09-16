@@ -28,7 +28,13 @@ const startMock = coreMock.createStart();
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-    QueryBar: () => <div className="queryBar"></div>,
+    QueryBarInput: () => <div className="queryBar"></div>,
+  };
+});
+
+jest.mock('../../../query/query_bar', () => {
+  return {
+    QueryBarTopRow: () => <div className="queryBar"></div>,
   };
 });
 
@@ -95,6 +101,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
       />
     );
 
@@ -111,6 +118,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -128,6 +136,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -147,6 +156,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -167,6 +177,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -187,6 +198,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -208,6 +220,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
