@@ -7,9 +7,9 @@
 }
 
 .codeFilter__group-icon {
-  width: 2rem;
+  width: $codeSideBarIndent;
 }
 
-.codeFilter__facet-indent {
-  width: 1.5rem;
+.codeFilter__item {
+  margin-left: $codeSideBarIndent;
 }

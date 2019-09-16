@@ -39,7 +39,6 @@ export class SideBar extends React.PureComponent<Props> {
         <EuiFacetButton
           className="codeFilter__item"
           key={`langstats${index}`}
-          icon={<div className="codeFilter__facet-indent" />}
           onClick={this.props.onLanguageFilterToggled(item.name)}
           quantity={item.value}
           isSelected={isSelected}
@@ -59,7 +58,6 @@ export class SideBar extends React.PureComponent<Props> {
         <EuiFacetButton
           className="codeFilter__item"
           key={`repostats${index}`}
-          icon={<div className="codeFilter__facet-indent" />}
           onClick={this.props.onRepositoryFilterToggled(item.name)}
           quantity={item.value}
           isSelected={isSelected}
