@@ -39,7 +39,7 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IIndexPatternsApiClient } from './index_patterns_api_client';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -113,7 +113,7 @@ export class IndexPattern implements StaticIndexPattern {
     id: string | undefined,
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IndexPatternsApiClient,
+    apiClient: IIndexPatternsApiClient,
     patternCache: any
   ) {
     this.id = id;
