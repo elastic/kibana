@@ -140,6 +140,7 @@ def legacyJobRunner(name) {
       "${name}": {
         withEnv([
           "JOB=${name}",
+          "IS_PIPELINE_JOB=1",
         ]) {
           jobRunner('linux && immutable') {
             try {
