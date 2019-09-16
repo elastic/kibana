@@ -20,8 +20,7 @@
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from '../../vis';
-// @ts-ignore
-import { SavedObjectNotFound } from '../../errors';
+import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
