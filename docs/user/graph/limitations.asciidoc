@@ -6,8 +6,8 @@
 ++++
 
 [float]
-=== Limited Support for Multiple Indices
-The Graph API can explore multiple indices, types, or aliases in a
+=== Limited support for multiple indices
+The graph API can explore multiple indices, types, or aliases in a
 single API request, but the assumption is that each "hop" it performs
 is querying the same set of indices. Currently, it is not possible to
 take a term found in a field from one index and use that value to explore
