@@ -32,7 +32,7 @@ import { Sort } from './sort';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 
-interface Props {
+export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -80,7 +80,7 @@ const VerticalScrollContainer = styled.div<{
 `;
 
 /** Renders the timeline body */
-export const Body = pure<Props>(
+export const Body = pure<BodyProps>(
   ({
     addNoteToEvent,
     browserFields,

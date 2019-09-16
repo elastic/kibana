@@ -164,7 +164,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async clickSaveEditRole() {
       const saveButton = await retry.try(() => testSubjects.find('roleFormSaveButton'));
-      await browser.moveMouseTo(saveButton);
+      await saveButton.moveMouseTo();
       await saveButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

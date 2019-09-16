@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis OpenID Connect', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup2');
     loadTestFile(require.resolve('./security'));
   });
 }

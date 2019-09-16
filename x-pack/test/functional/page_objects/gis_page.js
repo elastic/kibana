@@ -500,7 +500,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openInspectorMapView() {
-      await inspector.openInspectorView('inspectorViewChooserMap');
+      await inspector.openInspectorView('~inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected
@@ -562,8 +562,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async lockTooltipAtPosition(xOffset, yOffset) {
       await retry.try(async () => {
         const mapContainerElement = await testSubjects.find('mapContainer');
-        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
-        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        await mapContainerElement.moveMouseTo({ xOffset, yOffset });
+        await mapContainerElement.clickMouseButton({ xOffset, yOffset });
         // Close button is only displayed with tooltip is locked
         const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
         if (!hasCloseButton) {

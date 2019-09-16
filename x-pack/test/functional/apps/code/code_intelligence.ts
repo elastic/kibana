@@ -25,7 +25,7 @@ export default function codeIntelligenceFunctionalTests({
   // FAILING: https://github.com/elastic/kibana/issues/36480
   describe.skip('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
@@ -37,7 +37,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await browser.moveMouseTo(userModelSpan);
+          await userModelSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
 
@@ -184,7 +184,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
-          await browser.moveMouseTo(userModelSpan);
+          await userModelSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeFindReferenceButton')).to.be(true);
 
@@ -239,7 +239,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(spans.length).to.greaterThan(1);
           const asyncSpan = spans[1];
           expect(await asyncSpan.getVisibleText()).to.equal('async');
-          await browser.moveMouseTo(asyncSpan);
+          await asyncSpan.moveMouseTo();
           // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
 

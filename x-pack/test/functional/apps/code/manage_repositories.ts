@@ -19,7 +19,7 @@ export default function manageRepositoriesFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
   describe('Manage Repositories', () => {
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('Manage Repositories', () => {
       before(async () => {
