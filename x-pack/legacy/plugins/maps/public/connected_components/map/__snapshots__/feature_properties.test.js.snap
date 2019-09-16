@@ -81,13 +81,10 @@ exports[`FeatureProperties should show only filter button for filterable propert
         <EuiButtonIcon
           aria-label="Filter on property"
           className="mapFeatureTooltip__filterButton"
-          color="primary"
           data-test-subj="mapTooltipCreateFilterButton"
-          iconSize="m"
           iconType="plusInCircle"
           onClick={[Function]}
           title="Filter on property"
-          type="button"
         />
       </td>
     </tr>

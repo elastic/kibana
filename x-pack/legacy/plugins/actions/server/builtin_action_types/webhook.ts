@@ -7,6 +7,8 @@ import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
@@ -124,9 +126,11 @@ export async function executor(
 
       // special handling for rate limiting
       if (status === 429) {
-        return getRetryAfterIntervalFromHeaders(responseHeaders)
-          .map(retry => retryResultSeconds(id, message, retry))
-          .getOrElse(retryResult(id, message));
+        return pipe(
+          getRetryAfterIntervalFromHeaders(responseHeaders),
+          map(retry => retryResultSeconds(id, message, retry)),
+          getOrElse(() => retryResult(id, message))
+        );
       }
       return errorResultInvalid(id, message);
     }

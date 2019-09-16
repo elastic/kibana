@@ -17,6 +17,7 @@ describe('add_entities_to_kql', () => {
   afterAll(() => {
     console.log = originalError;
   });
+
   describe('#entityToKql', () => {
     test('returns empty string with no entity names defined and an empty entity string', () => {
       const entity = entityToKql([], '');
@@ -164,6 +165,11 @@ describe('add_entities_to_kql', () => {
       expect(entity).toEqual(
         '(filterQuery:(expression:\'(host.name: "host-name-1" or host.name: "host-name-2") and (process.name : "")\',kind:kuery))'
       );
+    });
+
+    test('returns kql expression with a null filterQuery', () => {
+      const entity = addEntitiesToKql(['host.name'], ['host-1'], '(filterQuery:!n)');
+      expect(entity).toEqual('(filterQuery:(expression:\'(host.name: "host-1")\'))');
     });
   });
 });

@@ -24,10 +24,7 @@ exports[`rendering render matches snapshot 1`] = `
               color="primary"
               data-test-subj="clearSession"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -36,11 +33,8 @@ exports[`rendering render matches snapshot 1`] = `
               />
             </EuiButton>,
             <EuiButtonEmpty
-              color="primary"
               data-test-subj="goBack"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Go back"

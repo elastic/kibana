@@ -74,6 +74,11 @@ export function getChartSettings(jobCreator: JobCreatorType, chartInterval: MlTi
     cs.intervalMs = interval.getInterval().asMilliseconds();
   }
 
+  if (cs.intervalMs < jobCreator.bucketSpanMs) {
+    // don't allow the chart interval to be smaller than the bucket span
+    cs.intervalMs = jobCreator.bucketSpanMs;
+  }
+
   if (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {
     if (jobCreator.aggFieldPairs.length > 2 && isMultiMetricJobCreator(jobCreator)) {
       cs.cols = 3;

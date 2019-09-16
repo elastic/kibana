@@ -3,8 +3,8 @@
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav>
 
-  <div class="gphGraph__menus" ng-show="menus.showSettings">
-    <graph-settings ng-show="menus.showSettings"></graph-settings>
+  <div class="gphGraph__menus" ng-show="menus.showInspect">
+    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
   </div>
     
   <div class="gphGraph__bar">
@@ -326,7 +326,7 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
-          ng-click="setDetail(null);workspace.deleteSelection();">
+          ng-click="setDetail(null);workspace.deleteSelection();" data-test-subj="graphRemoveSelection">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
@@ -350,13 +350,13 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
-          ng-click="workspace.runLayout()">
+          ng-click="workspace.runLayout()" data-test-subj="graphResumeLayout">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
-          ng-click="workspace.stopLayout()">
+          ng-click="workspace.stopLayout()" data-test-subj="graphPauseLayout">
           <span class="kuiIcon fa-pause"></span>
         </button>
       </div>
@@ -373,7 +373,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()"
             i18n-id="xpack.graph.sidebar.selections.selectAllButtonLabel"
-            i18n-default-message="all"
+            i18n-default-message="all" data-test-subj="graphSelectAll"
           ></button>
 
           <button
@@ -389,7 +389,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectInvert()"
             i18n-id="xpack.graph.sidebar.selections.invertSelectionButtonLabel"
-            i18n-default-message="invert"
+            i18n-default-message="invert" data-test-subj="graphInvertSelection"
           ></button>
 
           <button
@@ -397,7 +397,7 @@
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.selectedNodes.length === 0" ng-click="setDetail(null);workspace.selectNeighbours()"
             i18n-id="xpack.graph.sidebar.selections.selectNeighboursButtonLabel"
-            i18n-default-message="linked"
+            i18n-default-message="linked" data-test-subj="graphLinkedSelection"
           ></button>
         </div>
 

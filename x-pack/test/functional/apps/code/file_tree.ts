@@ -21,9 +21,10 @@ export default function exploreRepositoryFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
   const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
 
-  describe('File Tree', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/45079
+  describe.skip('File Tree', function() {
     this.tags('smoke');
-    const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+    const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     before(async () => {
       await repoLoad(
