@@ -139,6 +139,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     return () => {
       unsubscribeResizer();
       unsubscribeAutoSave();
+      mappings.clearSubscriptions();
     };
   }, []);
 
