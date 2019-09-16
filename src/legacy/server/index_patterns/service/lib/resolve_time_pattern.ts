@@ -23,7 +23,7 @@ import moment from 'moment';
 import { APICaller } from 'src/core/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
-import { callIndexAliasApi } from './es_api';
+import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
 
 /**
  *  Convert a time pattern into a list of indexes it could
@@ -39,7 +39,7 @@ import { callIndexAliasApi } from './es_api';
 export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
-  const allIndexDetails = chain<string[]>(aliases as string[])
+  const allIndexDetails = chain<IndicesAliasResponse>(aliases)
     .reduce(
       (acc: string[], index: any, indexName: string) =>
         acc.concat(indexName, Object.keys(index.aliases || {})),

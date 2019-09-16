@@ -36,7 +36,7 @@ export function registerRoutes(core: InternalCoreSetup) {
   };
 
   const parseMetaFields = (metaFields: string | string[]) => {
-    let parsedFields = [];
+    let parsedFields: string[] = [];
     if (typeof metaFields === 'string') {
       parsedFields = JSON.parse(metaFields);
     } else {
@@ -62,7 +62,7 @@ export function registerRoutes(core: InternalCoreSetup) {
       const indexPatterns = await getIndexPatternsService(request);
       const { pattern, meta_fields: metaFields } = request.query;
 
-      let parsedFields = [];
+      let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
       } catch (error) {
@@ -105,7 +105,7 @@ export function registerRoutes(core: InternalCoreSetup) {
       const indexPatterns = await getIndexPatternsService(request);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
-      let parsedFields = [];
+      let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
       } catch (error) {
