@@ -71,7 +71,7 @@ _Note: Run the following commands from `kibana/`._
 #### Prettier
 
 ```
-yarn prettier "./x-pack/legacy/plugins/apm/\*_/_.{tsx,ts,js}" --write
+yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
 #### ESLint
