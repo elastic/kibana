@@ -23,7 +23,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
     describe('Code Search', () => {
       before(async () => {
-        await esArchiver.load('code');
+        await esArchiver.load('code/repositories/typescript_node_starter');
 
         // Navigate to the search page of the code app.
         await PageObjects.common.navigateToApp('codeSearch');
@@ -32,7 +32,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
       after(async () => {
         await PageObjects.security.logout();
-        await esArchiver.unload('code');
+        await esArchiver.unload('code/repositories/typescript_node_starter');
       });
 
       it('Trigger symbols in typeahead', async () => {
@@ -41,10 +41,10 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
         await retry.tryForTime(5000, async () => {
           const symbols = await testSubjects.findAll(symbolTypeaheadListSelector);
-          expect(symbols).to.have.length(2);
+          expect(symbols).to.have.length(5);
 
-          expect(await symbols[0].getVisibleText()).to.equal('user');
-          expect(await symbols[1].getVisibleText()).to.equal('passport.User');
+          expect(await symbols[0].getVisibleText()).to.equal('User.findOne() callback.user');
+          expect(await symbols[1].getVisibleText()).to.equal('postSignup.user');
         });
       });
 
@@ -77,14 +77,14 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
         await retry.tryForTime(5000, async () => {
           const results = await testSubjects.findAll(searchResultListSelector);
-          expect(results).to.have.length(3);
+          expect(results).to.have.length(20);
 
           // The third file has the most matches of the query, but is still ranked as
           // the thrid because the the query matches the qname of the first 2 files. This
           // is because qname got boosted more from search.
           expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
           expect(await results[1].getVisibleText()).to.equal('src/models/User.ts');
-          expect(await results[2].getVisibleText()).to.equal('src/config/passport.js');
+          expect(await results[2].getVisibleText()).to.equal('src/config/passport.ts');
         });
       });
 
@@ -97,8 +97,9 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
         await retry.tryForTime(5000, async () => {
           const results = await testSubjects.findAll(searchResultListSelector);
-          expect(results).to.have.length(1);
-          expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
+          expect(results).to.have.length(2);
+          expect(await results[0].getVisibleText()).to.equal('src/app.ts');
+          expect(await results[1].getVisibleText()).to.equal('src/controllers/user.ts');
         });
       });
 
@@ -110,10 +111,12 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
         await retry.tryForTime(5000, async () => {
           const langFilters = await testSubjects.findAll(languageFilterListSelector);
-          expect(langFilters).to.have.length(2);
+          expect(langFilters).to.have.length(4);
 
-          expect(await langFilters[0].getVisibleText()).to.equal('typescript\n2');
-          expect(await langFilters[1].getVisibleText()).to.equal('javascript\n1');
+          expect(await langFilters[0].getVisibleText()).to.equal('scss\n9');
+          expect(await langFilters[1].getVisibleText()).to.equal('typescript\n7');
+          expect(await langFilters[2].getVisibleText()).to.equal('pug\n5');
+          expect(await langFilters[3].getVisibleText()).to.equal('markdown\n1');
         });
 
         await retry.tryForTime(5000, async () => {
@@ -121,10 +124,14 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
           await testSubjects.click(languageFilterListSelector);
 
           const results = await testSubjects.findAll(searchResultListSelector);
-          expect(results).to.have.length(2);
+          expect(results).to.have.length(9);
 
-          expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
-          expect(await results[1].getVisibleText()).to.equal('src/models/User.ts');
+          expect(await results[0].getVisibleText()).to.equal(
+            'src/public/css/lib/bootstrap/mixins/_vendor-prefixes.scss'
+          );
+          expect(await results[1].getVisibleText()).to.equal(
+            'src/public/css/themes/gsdk/gsdk/mixins/_vendor-prefixes.scss'
+          );
         });
       });
     });

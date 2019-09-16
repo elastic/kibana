@@ -38,6 +38,8 @@ export const getShowCallOutUnauthorizedMsg = () =>
     showCallOutUnauthorizedMsg => showCallOutUnauthorizedMsg
   );
 
+export const getTimelines = () => timelineByIdSelector;
+
 export const getTimelineByIdSelector = () =>
   createSelector(
     selectTimeline,
@@ -60,6 +62,18 @@ export const getKqlFilterQueryDraftSelector = () =>
   createSelector(
     selectTimeline,
     timeline => (timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null)
+  );
+
+export const getKqlFilterKuerySelector = () =>
+  createSelector(
+    selectTimeline,
+    timeline =>
+      timeline &&
+      timeline.kqlQuery &&
+      timeline.kqlQuery.filterQuery &&
+      timeline.kqlQuery.filterQuery.kuery
+        ? timeline.kqlQuery.filterQuery.kuery
+        : null
   );
 
 export const isFilterQueryDraftValidSelector = () =>

@@ -25,8 +25,8 @@ const { useRef } = React;
 const shortcut = (ref, cmd, callback) => (
   <Shortcuts
     name="EXPRESSION"
-    handler={(command, event) => {
-      const isInputActive = ref.current && ref.current.ref === event.target;
+    handler={command => {
+      const isInputActive = ref.current && ref.current.editor && ref.current.editor.hasTextFocus();
       if (isInputActive && command === cmd) {
         callback();
       }

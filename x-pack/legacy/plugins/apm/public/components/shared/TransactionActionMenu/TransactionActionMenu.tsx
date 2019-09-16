@@ -24,7 +24,7 @@ import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransact
 import { InfraLink } from '../Links/InfraLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery } from '../Links/url_helpers';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -66,7 +66,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
 ) => {
   const { transaction } = props;
 
-  const core = useCore();
+  const core = useKibanaCore();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -210,18 +210,16 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
     }
   ]
     .filter(({ condition }) => condition)
-    .map(({ icon, key, child, condition }) =>
-      condition ? (
-        <EuiContextMenuItem icon={icon} key={key}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>{child}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="popout" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>
-      ) : null
-    );
+    .map(({ icon, key, child }) => (
+      <EuiContextMenuItem icon={icon} key={key}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>{child}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    ));
 
   return (
     <EuiPopover

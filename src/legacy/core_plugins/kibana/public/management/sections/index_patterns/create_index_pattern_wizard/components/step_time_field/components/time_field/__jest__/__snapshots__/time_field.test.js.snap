@@ -25,7 +25,7 @@ exports[`TimeField should render a loading state 1`] = `
       </div>
     }
     label={
-      <EuiFlexGroup
+      <ForwardRef
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -48,7 +48,7 @@ exports[`TimeField should render a loading state 1`] = `
             size="s"
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ForwardRef>
     }
     labelType="label"
   >
@@ -98,7 +98,7 @@ exports[`TimeField should render a selected time field 1`] = `
       </div>
     }
     label={
-      <EuiFlexGroup
+      <ForwardRef
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -130,7 +130,7 @@ exports[`TimeField should render a selected time field 1`] = `
             />
           </EuiLink>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ForwardRef>
     }
     labelType="label"
   >
@@ -182,7 +182,7 @@ exports[`TimeField should render normally 1`] = `
       </div>
     }
     label={
-      <EuiFlexGroup
+      <ForwardRef
         alignItems="center"
         gutterSize="xs"
         justifyContent="spaceBetween"
@@ -214,7 +214,7 @@ exports[`TimeField should render normally 1`] = `
             />
           </EuiLink>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ForwardRef>
     }
     labelType="label"
   >

@@ -21,12 +21,19 @@ import { UpgradeContents } from './upgrade_contents';
 import { FilterGroup } from './jobs_table/filter_group';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
-import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from './helpers';
-import { configTemplates, siemJobPrefix } from './config_templates';
+import {
+  getConfigTemplatesToInstall,
+  getIndexPatternTitles,
+  getJobsToDisplay,
+  getJobsToInstall,
+  getStablePatternTitles,
+} from './helpers';
+import { configTemplates } from './config_templates';
 import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
 
 const PopoverContentsDiv = styled.div`
   max-width: 550px;
@@ -100,8 +107,12 @@ export const MlPopover = React.memo(() => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const headers = { 'kbn-version': kbnVersion };
 
+  const configuredIndexPatternTitles = getIndexPatternTitles(configuredIndexPatterns);
+
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
+    submitTelemetry(jobName, enable, embeddedJobIds);
+
     // Max start time for job is no more than two weeks ago to ensure job performance
     const maxStartTime = moment
       .utc()
@@ -113,12 +124,14 @@ export const MlPopover = React.memo(() => {
       try {
         await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
       } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
         await stopDatafeeds([`datafeed-${jobName}`], headers);
       } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
       }
     }
@@ -136,7 +149,7 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    configuredIndexPatterns || []
+    configuredIndexPatternTitles || []
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
@@ -152,7 +165,7 @@ export const MlPopover = React.memo(() => {
   useEffect(() => {
     if (
       jobSummaryData != null &&
-      configuredIndexPatterns.length > 0 &&
+      configuredIndexPatternTitles.length > 0 &&
       configTemplatesToInstall.length > 0
     ) {
       const setupJobs = async () => {
@@ -164,7 +177,6 @@ export const MlPopover = React.memo(() => {
                 configTemplate: configTemplate.name,
                 indexPatternName: configTemplate.defaultIndexPattern,
                 groups: ['siem'],
-                prefix: siemJobPrefix,
                 headers,
               });
             })
@@ -178,7 +190,7 @@ export const MlPopover = React.memo(() => {
       };
       setupJobs();
     }
-  }, [jobSummaryData, configuredIndexPatterns]);
+  }, [jobSummaryData, getStablePatternTitles(configuredIndexPatternTitles)]);
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI
@@ -255,5 +267,19 @@ export const MlPopover = React.memo(() => {
     return null;
   }
 });
+
+const submitTelemetry = (jobName: string, enabled: boolean, embeddedJobIds: string[]) => {
+  // Report type of job enabled/disabled
+  track(
+    METRIC_TYPE.COUNT,
+    embeddedJobIds.includes(jobName)
+      ? enabled
+        ? TELEMETRY_EVENT.SIEM_JOB_ENABLED
+        : TELEMETRY_EVENT.SIEM_JOB_DISABLED
+      : enabled
+      ? TELEMETRY_EVENT.CUSTOM_JOB_ENABLED
+      : TELEMETRY_EVENT.CUSTOM_JOB_DISABLED
+  );
+};
 
 MlPopover.displayName = 'MlPopover';

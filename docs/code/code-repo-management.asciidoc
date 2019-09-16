@@ -23,10 +23,11 @@ In some cases you might need to manually refresh the index besides automatic ind
 ==== Clone URL management
 For security reasons, *Code* only allows the following hostnames in the git clone URL by default:
 
-[source,yaml]
-----
-['github.com', 'gitlab.com', 'bitbucket.org', 'gitbox.apache.org', 'eclipse.org']
-----
+- `github.com`
+- `gitlab.com`
+- `bitbucket.org`
+- `gitbox.apache.org`
+- `eclipse.org`
 
 You can add your own hostname (for example, acme.com) to the whitelist by adding the following line to your `config/kibana.yaml` file:
 

@@ -8,14 +8,17 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
-
 import {
   DataFrameTransformListRow,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
+
+import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
-// @ts-ignore no declaration file
+
 import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
@@ -33,7 +36,7 @@ export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) =>
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.stopTransformSuccessMessage', {
-            defaultMessage: 'Data frame transform {transformId} stopped successfully.',
+            defaultMessage: 'Request to stop data frame transform {transformId} acknowledged.',
             values: { transformId },
           })
         );

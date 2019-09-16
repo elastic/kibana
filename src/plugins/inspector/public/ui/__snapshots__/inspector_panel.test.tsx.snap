@@ -206,13 +206,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                   anchorPosition="downRight"
                   button={
                     <EuiButtonEmpty
-                      color="primary"
                       data-test-subj="inspectorViewChooser"
                       iconSide="right"
                       iconType="arrowDown"
                       onClick={[Function]}
                       size="s"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="View: {viewName}"
@@ -251,13 +249,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                         className="euiPopover__anchor"
                       >
                         <EuiButtonEmpty
-                          color="primary"
                           data-test-subj="inspectorViewChooser"
                           iconSide="right"
                           iconType="arrowDown"
                           onClick={[Function]}
                           size="s"
-                          type="button"
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"

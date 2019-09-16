@@ -8,6 +8,9 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryUri } from '../../../model';
 
 export const CommitSchema = {
+  repoUri: {
+    type: 'keyword',
+  },
   id: {
     type: 'keyword',
   },
@@ -48,4 +51,7 @@ export const CommitSchema = {
 export const CommitIndexNamePrefix = `.code-commit`;
 export const CommitIndexName = (repoUri: RepositoryUri) => {
   return `${CommitIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+};
+export const CommitSearchIndexWithScope = (repoScope: RepositoryUri[]) => {
+  return repoScope.map((repoUri: RepositoryUri) => `${CommitIndexName(repoUri)}*`).join(',');
 };

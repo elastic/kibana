@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -73,7 +74,7 @@ export function Header(props: HeaderProps) {
 function NavButtonBack() {
   const { toListView } = useLinks();
   const { theme } = useCore();
-  const ButtonEmpty = styled(EuiButtonEmpty).attrs<typeof EuiButtonEmpty>({
+  const ButtonEmpty = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
     href: toListView(),
   })`
     margin-right: ${theme.eui.spacerSizes.xl};

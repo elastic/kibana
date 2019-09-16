@@ -4,7 +4,6 @@
   "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",
-    "summary_count_field_name": "doc_count_per_minute",
     "detectors": [
       {
         "detector_description": "count",
@@ -25,6 +24,7 @@
     "enabled": true
   },
   "custom_settings": {
-    "created_by": "ml-module-logs-ui-analysis"
+    "created_by": "ml-module-logs-ui-analysis",
+    "job_revision": 1
   }
 }

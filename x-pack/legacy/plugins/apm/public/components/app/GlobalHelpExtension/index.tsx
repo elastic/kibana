@@ -10,14 +10,14 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import url from 'url';
 import { px, units } from '../../../style/variables';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 
 const Container = styled.div`
   margin: ${px(units.minus)} 0;
 `;
 
 export const GlobalHelpExtension: React.SFC = () => {
-  const core = useCore();
+  const core = useKibanaCore();
 
   return (
     <Fragment>

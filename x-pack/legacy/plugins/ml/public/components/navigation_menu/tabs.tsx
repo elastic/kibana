@@ -46,7 +46,7 @@ function getTabs(disableLinks: boolean): Tab[] {
     {
       id: 'data_frames',
       name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
-        defaultMessage: 'Data Frames',
+        defaultMessage: 'Transforms',
       }),
       disabled: false,
     },

@@ -12,5 +12,6 @@ export default function visualize({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./feature_controls/visualize_security'));
     loadTestFile(require.resolve('./feature_controls/visualize_spaces'));
+    loadTestFile(require.resolve('./hybrid_visualization'));
   });
 }

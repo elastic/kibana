@@ -87,15 +87,10 @@ export interface JobParams {
 }
 
 export interface JobDocPayload {
-  basePath?: string;
-  forceNow?: string;
   headers?: Record<string, string>;
   jobParams: JobParams;
-  relativeUrl?: string;
-  timeRange?: any;
   title: string;
   type: string | null;
-  urls?: string[];
 }
 
 export interface JobDocOutput {
@@ -144,8 +139,11 @@ export type ESQueueCreateJobFn = (
   request: Request
 ) => Promise<JobParams>;
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
+
+export type JobIDForImmediate = null;
 export type ImmediateExecuteFn = (
+  jobId: JobIDForImmediate,
   jobDocPayload: JobDocPayload,
   request: Request
 ) => Promise<JobDocOutputExecuted>;
@@ -179,6 +177,7 @@ export interface ExportTypeDefinition {
   validLicenses: string[];
 }
 
+// Note: this seems to be nearly a duplicate of ExportTypeDefinition
 export interface ExportType {
   jobType: string;
   createJobFactory: any;
@@ -189,4 +188,5 @@ export interface ExportTypesRegistry {
   register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
+// Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';

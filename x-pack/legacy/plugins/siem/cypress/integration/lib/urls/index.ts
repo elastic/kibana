@@ -5,7 +5,7 @@
  */
 
 /** The SIEM app's Hosts page */
-export const HOSTS_PAGE = '/app/siem#/hosts';
+export const HOSTS_PAGE = '/app/siem#/hosts/allHosts';
 
 /** Kibana's login page */
 export const LOGIN_PAGE = '/login';

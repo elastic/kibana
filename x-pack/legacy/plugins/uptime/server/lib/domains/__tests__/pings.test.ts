@@ -15,18 +15,21 @@ describe('Pings domain lib', () => {
     beforeEach(async () => {
       pingsDB = [
         {
+          id: '1',
           timestamp: new Date(2018, 0, 1, 14, 14, 0, 0).toUTCString(),
           monitor: {
             id: 'foo',
           },
         },
         {
+          id: '2',
           timestamp: new Date(2018, 5, 1, 14, 14, 0, 0).toUTCString(),
           monitor: {
             id: 'bar',
           },
         },
         {
+          id: '3',
           timestamp: new Date(2018, 2, 2, 14, 14, 0, 0).toUTCString(),
           monitor: {
             id: 'baz',

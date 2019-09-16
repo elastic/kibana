@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { Layout } from '../../layouts/layout';
 
@@ -15,7 +15,7 @@ const fsp = { readFile: promisify(fs.readFile) };
 export const injectCustomCss = async (
   browser: HeadlessBrowser,
   layout: Layout,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<void> => {
   logger.debug('injecting custom css');
 

@@ -15,7 +15,6 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, TimelineModel } from './model';
-import { TimelineResult } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -77,7 +76,7 @@ export const updateTimeline = actionCreator<{
 
 export const addTimeline = actionCreator<{
   id: string;
-  timeline: TimelineResult;
+  timeline: TimelineModel;
 }>('ADD_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{

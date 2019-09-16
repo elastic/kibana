@@ -41,7 +41,7 @@ export const MESSAGE = i18n.translate('xpack.siem.eventsTable.messageTitle', {
 });
 
 export const EVENT_MODULE_DATASET = i18n.translate('xpack.siem.eventsTable.moduleDatasetTitle', {
-  defaultMessage: 'Module/dataset',
+  defaultMessage: 'Module / dataset',
 });
 
 export const USER = i18n.translate('xpack.siem.eventsTable.userTitle', {

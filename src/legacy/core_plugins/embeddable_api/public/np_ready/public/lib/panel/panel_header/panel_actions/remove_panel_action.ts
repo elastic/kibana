@@ -19,13 +19,18 @@
 import { i18n } from '@kbn/i18n';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
-import { Action, ActionContext } from '../../../actions';
+import { Action } from '../../../actions';
 import { IncompatibleActionError } from '../../../errors';
+import { IEmbeddable } from '../../../embeddables';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 
 interface ExpandedPanelInput extends ContainerInput {
   expandedPanelId: string;
+}
+
+interface ActionContext {
+  embeddable: IEmbeddable;
 }
 
 function hasExpandedPanelInput(
@@ -34,7 +39,7 @@ function hasExpandedPanelInput(
   return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
 }
 
-export class RemovePanelAction extends Action {
+export class RemovePanelAction extends Action<ActionContext> {
   public readonly type = REMOVE_PANEL_ACTION;
   constructor() {
     super(REMOVE_PANEL_ACTION);
@@ -63,8 +68,8 @@ export class RemovePanelAction extends Action {
     );
   }
 
-  public execute({ embeddable }: ActionContext) {
-    if (!embeddable.parent || !this.isCompatible({ embeddable })) {
+  public async execute({ embeddable }: ActionContext) {
+    if (!embeddable.parent || !(await this.isCompatible({ embeddable }))) {
       throw new IncompatibleActionError();
     }
     embeddable.parent.removeEmbeddable(embeddable.id);

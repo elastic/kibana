@@ -77,6 +77,7 @@ export const Badge = (props: EuiBadgeProps) => (
       borderRadius: '5px',
       minWidth: '25px',
       padding: '0px',
+      textAlign: 'center',
       transform: 'translateY(10px)',
       zIndex: 10,
     }}

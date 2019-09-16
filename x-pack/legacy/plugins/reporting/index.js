@@ -130,11 +130,16 @@ export const reporting = (kibana) => {
               }).default(),
               maxScreenshotDimension: Joi.number().integer().default(1950)
             }).default()
+          }).default(),
+          maxAttempts: Joi.number().integer().greater(0).when('$dist', {
+            is: true,
+            then: Joi.default(3),
+            otherwise: Joi.default(1),
           }).default()
         }).default(),
         csv: Joi.object({
           checkForFormulas: Joi.boolean().default(true),
-          enablePanelActionDownload: Joi.boolean().default(false),
+          enablePanelActionDownload: Joi.boolean().default(true),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
             duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),

@@ -325,6 +325,7 @@ describe.skip('<TemplateCreate />', () => {
             settings: JSON.stringify(SETTINGS),
             mappings: JSON.stringify(MAPPINGS),
             aliases: JSON.stringify(ALIASES),
+            isManaged: false,
           })
         );
       });

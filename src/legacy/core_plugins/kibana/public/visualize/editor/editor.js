@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
@@ -78,6 +79,13 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
+            return savedVis;
+          })
           .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
@@ -95,6 +103,13 @@ uiRoutes
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
+            return savedVis;
+          })
+          .then(savedVis => {
+            if (savedVis.vis.type.setup) {
+              return savedVis.vis.type.setup(savedVis)
+                .catch(() => savedVis);
+            }
             return savedVis;
           })
           .catch(redirectWhenMissing({
@@ -404,12 +419,16 @@ function VisEditor(
       }
     };
 
-    const updateRefreshInterval = () => {
-      $scope.refreshInterval = timefilter.getRefreshInterval();
-    };
+    const subscriptions = new Subscription();
 
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
+    subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+      next: () => {
+        $scope.refreshInterval = timefilter.getRefreshInterval();
+      }
+    }));
+    subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+      next: updateTimeRange
+    }));
 
     // update the searchSource when query updates
     $scope.fetch = function () {
@@ -420,15 +439,15 @@ function VisEditor(
     };
 
     // update the searchSource when filters update
-    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+    subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
         $scope.filters = queryFilter.getFilters();
         $scope.globalFilters = queryFilter.getGlobalFilters();
       }
-    });
-    const filterFetchSubscription = subscribeWithScope($scope, queryFilter.getFetches$(), {
+    }));
+    subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
-    });
+    }));
 
     $scope.$on('$destroy', function () {
       if ($scope._handler) {
@@ -436,8 +455,7 @@ function VisEditor(
       }
       savedVis.destroy();
       stateMonitor.destroy();
-      filterUpdateSubscription.unsubscribe();
-      filterFetchSubscription.unsubscribe();
+      subscriptions.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
@@ -477,7 +495,7 @@ function VisEditor(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {
@@ -509,14 +527,12 @@ function VisEditor(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -524,13 +540,14 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   /**

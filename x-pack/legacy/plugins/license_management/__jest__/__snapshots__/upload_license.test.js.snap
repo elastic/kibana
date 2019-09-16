@@ -140,8 +140,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       >
         <EuiPanel
           className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
@@ -327,11 +325,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         maxWidth={true}
                         onClose={[Function]}
                       >
-                        <EuiFocusTrap
-                          clickOutsideDisables={false}
-                          disabled={false}
-                          returnFocus={true}
-                        >
+                        <EuiFocusTrap>
                           <FocusLock
                             as="div"
                             autoFocus={true}
@@ -612,10 +606,8 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     aria-label="Closes this modal window"
                                     className="euiModal__closeIcon"
                                     color="text"
-                                    iconSize="m"
                                     iconType="cross"
                                     onClick={[Function]}
-                                    type="button"
                                   >
                                     <button
                                       aria-label="Closes this modal window"
@@ -722,11 +714,8 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     >
                                       <EuiButtonEmpty
                                         buttonRef={[Function]}
-                                        color="primary"
                                         data-test-subj="confirmModalCancelButton"
-                                        iconSide="left"
                                         onClick={[Function]}
-                                        type="button"
                                       >
                                         <button
                                           className="euiButtonEmpty euiButtonEmpty--primary"
@@ -756,10 +745,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         color="primary"
                                         data-test-subj="confirmModalConfirmButton"
                                         fill={true}
-                                        iconSide="left"
                                         onClick={[Function]}
-                                        size="m"
-                                        type="button"
                                       >
                                         <button
                                           className="euiButton euiButton--primary euiButton--fill"
@@ -975,10 +961,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButtonEmpty
-                              color="primary"
                               href="#/management/elasticsearch/license_management/home"
-                              iconSide="left"
-                              type="button"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
@@ -1011,14 +994,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButton
-                              color="primary"
                               data-test-subj="uploadLicenseButton"
                               fill={true}
-                              iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
-                              type="button"
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"
@@ -1191,8 +1170,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       >
         <EuiPanel
           className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
@@ -1436,10 +1413,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButtonEmpty
-                              color="primary"
                               href="#/management/elasticsearch/license_management/home"
-                              iconSide="left"
-                              type="button"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
@@ -1472,14 +1446,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButton
-                              color="primary"
                               data-test-subj="uploadLicenseButton"
                               fill={true}
-                              iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
-                              type="button"
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"
@@ -1652,8 +1622,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       >
         <EuiPanel
           className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
@@ -1897,10 +1865,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButtonEmpty
-                              color="primary"
                               href="#/management/elasticsearch/license_management/home"
-                              iconSide="left"
-                              type="button"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
@@ -1933,14 +1898,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButton
-                              color="primary"
                               data-test-subj="uploadLicenseButton"
                               fill={true}
-                              iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
-                              type="button"
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"
@@ -2113,8 +2074,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       >
         <EuiPanel
           className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
@@ -2354,10 +2313,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButtonEmpty
-                              color="primary"
                               href="#/management/elasticsearch/license_management/home"
-                              iconSide="left"
-                              type="button"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
@@ -2390,14 +2346,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButton
-                              color="primary"
                               data-test-subj="uploadLicenseButton"
                               fill={true}
-                              iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
-                              type="button"
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"
@@ -2570,8 +2522,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       >
         <EuiPanel
           className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-          grow={true}
-          hasShadow={false}
           paddingSize="l"
         >
           <div
@@ -2815,10 +2765,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButtonEmpty
-                              color="primary"
                               href="#/management/elasticsearch/license_management/home"
-                              iconSide="left"
-                              type="button"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary"
@@ -2851,14 +2798,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiButton
-                              color="primary"
                               data-test-subj="uploadLicenseButton"
                               fill={true}
-                              iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
-                              type="button"
                             >
                               <button
                                 className="euiButton euiButton--primary euiButton--fill"

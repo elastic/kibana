@@ -13,7 +13,7 @@ import {
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
   page = 'page',
@@ -22,8 +22,13 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   dns = 'dns',
-  topNFlow = 'topNFlow',
+  topNFlowSource = 'topNFlowSource',
+  topNFlowDestination = 'topNFlowDestination',
 }
+
+export type TopNTableType =
+  | networkModel.NetworkTableType.topNFlowDestination
+  | networkModel.NetworkTableType.topNFlowSource;
 
 export enum IpDetailsTableType {
   domains = 'domains',
@@ -38,9 +43,7 @@ export interface BasicQueryPaginated {
 
 // Network Page Models
 export interface TopNFlowQuery extends BasicQueryPaginated {
-  flowTarget: FlowTarget;
   topNFlowSort: NetworkTopNFlowSortField;
-  flowDirection: FlowDirection;
 }
 
 export interface DnsQuery extends BasicQueryPaginated {
@@ -50,7 +53,8 @@ export interface DnsQuery extends BasicQueryPaginated {
 
 interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
-  [NetworkTableType.topNFlow]: TopNFlowQuery;
+  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
+  [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
 }
 
 export interface NetworkPageModel {

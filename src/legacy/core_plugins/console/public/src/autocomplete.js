@@ -345,7 +345,14 @@ export default function (editor) {
     let valueToInsert = termAsString;
     let templateInserted = false;
     if (context.addTemplate && !_.isUndefined(term.template) && !_.isNull(term.template)) {
-      const indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
+      let indentedTemplateLines;
+      // In order to allow triple quoted strings in template completion we check the `__raw_`
+      // attribute to determine whether this template should go through JSON formatting.
+      if (term.template.__raw && term.template.value) {
+        indentedTemplateLines = term.template.value.split('\n');
+      } else {
+        indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
+      }
       let currentIndentation = session.getLine(context.rangeToReplace.start.row);
       currentIndentation = currentIndentation.match(/^\s*/)[0];
       for (let i = 1; i < indentedTemplateLines.length; i++) // skip first line
