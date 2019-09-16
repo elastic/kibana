@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 import { FieldFormatsService } from './field_formats_service';
 
 // @ts-ignore
