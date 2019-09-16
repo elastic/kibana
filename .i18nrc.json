@@ -28,6 +28,7 @@
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector",
     "kibana-react": "src/plugins/kibana_react",
+    "telemetry": "src/legacy/core_plugins/telemetry",
     "esUi": "src/plugins/es_ui_shared"
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
