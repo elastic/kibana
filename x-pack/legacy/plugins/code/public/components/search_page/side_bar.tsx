@@ -9,7 +9,6 @@ import {
   EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
@@ -40,6 +39,7 @@ export class SideBar extends React.PureComponent<Props> {
         <EuiFacetButton
           className="codeFilter__item"
           key={`langstats${index}`}
+          icon={<div className="codeFilter__facet-indent" />}
           onClick={this.props.onLanguageFilterToggled(item.name)}
           quantity={item.value}
           isSelected={isSelected}
@@ -59,6 +59,7 @@ export class SideBar extends React.PureComponent<Props> {
         <EuiFacetButton
           className="codeFilter__item"
           key={`repostats${index}`}
+          icon={<div className="codeFilter__facet-indent" />}
           onClick={this.props.onRepositoryFilterToggled(item.name)}
           quantity={item.value}
           isSelected={isSelected}
@@ -73,14 +74,9 @@ export class SideBar extends React.PureComponent<Props> {
   public render() {
     return (
       <div className="codeSidebar__container">
-        <div className="codeFilter__group">
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+        <div className="codeFilter__groups">
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -94,15 +90,9 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup>{this.renderRepoFacets()}</EuiFacetGroup>
-          <EuiSpacer />
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+          <EuiFacetGroup className="codeFilter__group">{this.renderRepoFacets()}</EuiFacetGroup>
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken
                 iconType="tokenElement"
                 displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
@@ -119,7 +109,10 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
+          <EuiFacetGroup
+            className="codeFilter__group"
+            data-test-subj="codeSearchLanguageFilterList"
+          >
             {this.renderLangFacets()}
           </EuiFacetGroup>
         </div>
