@@ -22,6 +22,7 @@ import ngMock from 'ng_mock';
 import { stdDeviationMetricAgg } from '../../metrics/std_deviation';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { registerVisTypes } from '../../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {
 
@@ -32,6 +33,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    registerVisTypes(Private);
   }));
 
   it('uses the custom label if it is set', function () {
