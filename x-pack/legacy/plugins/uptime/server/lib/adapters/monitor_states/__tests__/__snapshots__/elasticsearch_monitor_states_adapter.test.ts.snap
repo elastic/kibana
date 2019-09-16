@@ -103,6 +103,12 @@ Array [
         "up": 0,
       },
       "timestamp": "2019-06-26T13:42:21.536Z",
+      "tls": Array [
+        Object {
+          "certificate_not_valid_after": "2019-11-09T18:04:06.000Z",
+          "certificate_not_valid_before": "2019-11-08T17:03:23.000Z",
+        },
+      ],
       "url": Object {
         "domain": "35.245.22.113",
         "full": "http://35.245.22.113:12349/",
