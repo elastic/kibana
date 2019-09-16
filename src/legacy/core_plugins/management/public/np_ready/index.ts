@@ -38,3 +38,10 @@ export type ManagementStart = ManagementStart;
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ManagementPlugin(initializerContext);
 }
+
+export {
+  IndexPatternCreationConfig,
+  IndexPatternListConfig,
+} from './services/index_pattern_management';
+
+export { SavedObjectsManagementAction } from './services/saved_objects_management';
