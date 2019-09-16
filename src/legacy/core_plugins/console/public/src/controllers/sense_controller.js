@@ -24,6 +24,7 @@ import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import init from '../app';
 import { getEndpointFromPosition } from '../autocomplete';
+import mappings from '../mappings';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 // welcome message
@@ -134,4 +135,8 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
     event.preventDefault();
     input.focus();
   };
+
+  $scope.$on('$destroy', () => {
+    mappings.clearSubscriptions();
+  });
 });
