@@ -30,14 +30,14 @@ export function UnconfiguredOverlay({ onSelectFieldsClicked }: UnconfiguredOverl
                 defaultMessage: 'Start exploring your data by adding fields',
               })}
             </p>
+            <p>
+              <EuiButton fill onClick={onSelectFieldsClicked}>
+                {i18n.translate('xpack.graph.unconfiguredOverlay.callToActionLabel', {
+                  defaultMessage: 'Select fields',
+                })}
+              </EuiButton>
+            </p>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton fill onClick={onSelectFieldsClicked}>
-            {i18n.translate('xpack.graph.unconfiguredOverlay.callToActionLabel', {
-              defaultMessage: 'Select fields',
-            })}
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

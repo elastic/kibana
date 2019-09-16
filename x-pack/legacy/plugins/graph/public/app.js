@@ -380,6 +380,7 @@ app.controller('graphuiPlugin', function (
         if ($scope.allFields.length > 0) {
           $scope.selectedField = $scope.allFields[0];
         }
+        $scope.$digest();
       }, handleError);
   };
 

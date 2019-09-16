@@ -27,7 +27,7 @@ export interface FieldPickerProps {
 }
 
 export function FieldPicker(props: FieldPickerProps) {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = props;
 
   const unselectedFields = props.allFields.filter(field => !field.selected);
   const hasSelectedFields = unselectedFields.length < props.allFields.length;
