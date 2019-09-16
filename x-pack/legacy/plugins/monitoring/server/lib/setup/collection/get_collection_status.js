@@ -145,7 +145,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   return await callWithRequest(req, 'search', params);
 };
 
-async function detectProducts(req) {
+async function detectProducts(req, isLiveCluster) {
   const result = {
     [KIBANA_SYSTEM_ID]: {
       doesExist: true,
@@ -187,11 +187,13 @@ async function detectProducts(req) {
     }
   ];
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  for (const { id, indices } of detectionSearch) {
-    const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
-    if (response.length) {
-      result[id].mightExist = true;
+  if (isLiveCluster) {
+    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+    for (const { id, indices } of detectionSearch) {
+      const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
+      if (response.length) {
+        result[id].mightExist = true;
+      }
     }
   }
 
@@ -314,6 +316,8 @@ async function getLiveElasticsearchCollectionEnabled(req) {
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
+  const isLiveCluster = clusterUuid && liveClusterUuid === clusterUuid;
 
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
@@ -328,12 +332,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     detectedProducts
   ] = await Promise.all([
     await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
-    await detectProducts(req)
+    await detectProducts(req, isLiveCluster)
   ]);
 
-  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? {} : await getLiveKibanaInstance(req);
+
+  const liveEsNodes = skipLiveData || !isLiveCluster ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
