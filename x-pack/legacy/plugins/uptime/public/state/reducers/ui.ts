@@ -19,7 +19,7 @@ export function uiReducer(state = initialState, action: UiActionTypes): UiState 
     case TOGGLE_INTEGRATION_POPUP:
       return {
         ...state,
-        integrationsPopupOpen: action.payload,
+        integrationsPopupOpen: !state.integrationsPopupOpen,
       };
     default:
       return state;

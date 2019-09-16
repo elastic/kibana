@@ -11,5 +11,3 @@ import { uiReducer } from './ui';
 export const rootReducer = combineReducers({
   ui: uiReducer,
 });
-
-export type AppState = ReturnType<typeof rootReducer>;

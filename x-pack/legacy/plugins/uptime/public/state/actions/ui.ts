@@ -8,13 +8,11 @@ export const TOGGLE_INTEGRATION_POPUP = 'TOGGLE_INTEGRATION_POPUP';
 
 interface ToggleIntegrationPopupAction {
   type: typeof TOGGLE_INTEGRATION_POPUP;
-  payload: boolean;
 }
 
-export function sendMessage(open: boolean): ToggleIntegrationPopupAction {
+export function toggleIntegrationsPopUp(): ToggleIntegrationPopupAction {
   return {
     type: TOGGLE_INTEGRATION_POPUP,
-    payload: open,
   };
 }
 

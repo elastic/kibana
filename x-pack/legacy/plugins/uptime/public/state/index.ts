@@ -16,3 +16,5 @@ const sagaMW = createSagaMiddleware();
 export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootSaga);
+
+export type AppState = ReturnType<typeof rootReducer>;

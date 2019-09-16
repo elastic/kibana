@@ -5,20 +5,29 @@
  */
 
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { connect } from 'react-redux';
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { IntegrationGroup } from '../integration_group';
 import { UptimeSettingsContext } from '../../../contexts';
+import { isIntegrationsPopupOpen } from '../../../state/selectors';
+import { AppState } from '../../../state';
+import { toggleIntegrationsPopUp } from '../../../state/actions';
 
 interface MonitorListActionsPopoverProps {
   summary: MonitorSummary;
+  popoverIsVisible: boolean;
+  togglePopoverIsVisible: typeof toggleIntegrationsPopUp;
 }
 
-export const MonitorListActionsPopover = ({ summary }: MonitorListActionsPopoverProps) => {
+const MonitorListActionsPopoverComponent = ({
+  summary,
+  popoverIsVisible,
+  togglePopoverIsVisible,
+}: MonitorListActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
-  const [popoverIsVisible, setPopoverIsVisible] = useState<boolean>(false);
   const {
     basePath,
     dateRangeStart,
@@ -28,7 +37,7 @@ export const MonitorListActionsPopover = ({ summary }: MonitorListActionsPopover
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const monitorUrl = get(summary, 'state.url.full', undefined);
+  const monitorUrl: string = get(summary, 'state.url.full', undefined);
 
   return (
     <EuiPopover
@@ -45,10 +54,10 @@ export const MonitorListActionsPopover = ({ summary }: MonitorListActionsPopover
           )}
           color="subdued"
           iconType="boxesHorizontal"
-          onClick={() => setPopoverIsVisible(true)}
+          onClick={() => togglePopoverIsVisible()}
         />
       }
-      closePopover={() => setPopoverIsVisible(false)}
+      closePopover={() => togglePopoverIsVisible()}
       id={popoverId}
       isOpen={popoverIsVisible}
     >
@@ -64,3 +73,18 @@ export const MonitorListActionsPopover = ({ summary }: MonitorListActionsPopover
     </EuiPopover>
   );
 };
+
+const mapStateToProps = (state: AppState) => ({
+  popoverIsVisible: isIntegrationsPopupOpen(state),
+});
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    togglePopoverIsVisible: () => dispatch(toggleIntegrationsPopUp()),
+  };
+};
+
+export const MonitorListActionsPopover = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MonitorListActionsPopoverComponent);
