@@ -19,7 +19,8 @@
 
 import { isFunction } from 'lodash';
 import { IFieldFormat, FieldFormatConvert, TextContextTypeConvert } from '../types';
-import { asPrettyString } from '../../../../plugins/data/common/utils/as_pretty_string';
+
+import { asPrettyString } from '../utils';
 
 const CONTEXT_TYPE = 'text';
 
