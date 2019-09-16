@@ -18,7 +18,7 @@ The following asset types have support planned:
 - Saved Searches
 - Index Patterns
 
-* Might not be supported in inital release
+(*) Indicates somehting might not be supported in inital release
 
 ## API
 
