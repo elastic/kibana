@@ -18,7 +18,6 @@
  */
 
 const $ = require('jquery');
-const mappings = require('./mappings');
 
 const DEFAULT_INPUT_VALUE = `GET _search
 {
@@ -92,5 +91,4 @@ export default function init(input, output, history, sourceLocation = 'stored') 
 
   setupAutosave();
   loadSavedState();
-  mappings.retrieveAutoCompleteInfo();
 }
