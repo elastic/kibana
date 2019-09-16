@@ -370,7 +370,7 @@ export const ComponentStrings = {
         },
       }),
     getZoomResetText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomResetText', {
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomPrecentageValue', {
         defaultMessage: 'Reset',
       }),
   },
