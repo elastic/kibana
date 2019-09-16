@@ -17,6 +17,10 @@ import {
   start as dataStart,
 } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import {
+  setup as expressionsSetup,
+  start as expressionsStart,
+} from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
+import {
   Datasource,
   Visualization,
   EditorFrameSetup,
@@ -30,10 +34,12 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
+  expressions: typeof expressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
+  expressions: typeof expressionsStart;
   embeddables: ReturnType<EmbeddablePlugin['start']>;
   chrome: Chrome;
 }
@@ -45,7 +51,7 @@ export class EditorFramePlugin {
   private readonly visualizations: Record<string, Visualization> = {};
 
   public setup(core: CoreSetup, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
-    plugins.data.expressions.registerFunction(() => mergeTables);
+    plugins.expressions.registerFunction(() => mergeTables);
 
     return {
       registerDatasource: (name, datasource) => {
@@ -62,7 +68,7 @@ export class EditorFramePlugin {
       'lens',
       new EmbeddableFactory(
         plugins.chrome,
-        plugins.data.expressions.ExpressionRenderer,
+        plugins.expressions.ExpressionRenderer,
         plugins.data.indexPatterns.indexPatterns
       )
     );
@@ -86,8 +92,8 @@ export class EditorFramePlugin {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
-                ExpressionRenderer={plugins.data.expressions.ExpressionRenderer}
                 core={core}
+                ExpressionRenderer={plugins.expressions.ExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
@@ -120,11 +126,13 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(npSetup.core, {
     data: dataSetup,
+    expressions: expressionsSetup,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(npStart.core, {
     data: dataStart,
+    expressions: expressionsStart,
     chrome,
     embeddables: embeddablePlugin,
   });

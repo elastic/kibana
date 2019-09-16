@@ -8,7 +8,7 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';

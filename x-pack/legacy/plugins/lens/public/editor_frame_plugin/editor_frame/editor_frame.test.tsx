@@ -17,7 +17,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 

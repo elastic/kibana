@@ -14,7 +14,7 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { fromExpression } from '@kbn/interpreter/target/common';

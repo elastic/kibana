@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 

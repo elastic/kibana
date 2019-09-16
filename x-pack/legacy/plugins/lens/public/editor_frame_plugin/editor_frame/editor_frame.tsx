@@ -6,10 +6,8 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import {
-  ExpressionRenderer,
-  Query,
-} from '../../../../../../../src/legacy/core_plugins/data/public';
+import { Query } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
