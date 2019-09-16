@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
@@ -94,7 +95,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return await this.loginWithNewSAMLResponse(
         request,
         samlResponse,
-        (authenticationResult.state || state) as ProviderState
+        (authenticationResult.state || state) as ProviderState,
+        authenticationResult.user as AuthenticatedUser
       );
     }
 
@@ -265,7 +267,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         body: {
           ids: stateRequestId ? [stateRequestId] : [],
           content: samlResponse,
-          realm: this.realm,
+          ...(this.realm ? { realm: this.realm } : {}),
         },
       });
 
@@ -291,11 +293,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param samlResponse SAMLResponse payload string.
    * @param existingState State existing user session is based on.
+   * @param user User returned for the existing session.
    */
   private async loginWithNewSAMLResponse(
     request: KibanaRequest,
     samlResponse: string,
-    existingState: ProviderState
+    existingState: ProviderState,
+    user: AuthenticatedUser
   ) {
     this.logger.debug('Trying to log in with SAML response payload and existing valid session.');
 
@@ -313,6 +317,31 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     const newState = payloadAuthenticationResult.state as ProviderState;
+    let differentUser = newState.username !== user.username;
+
+    // If realm name is not configured we can't be sure that user is authenticated by the same realm
+    // even though user name is the same.
+    if (!differentUser && !this.realm) {
+      // Then use received tokens to retrieve user information. We need just username and authentication
+      // realm, once ES starts returning this info from `saml/authenticate` we can get rid of this call.
+      const newUserAuthenticationResult = await this.authenticateViaState(request, newState);
+      if (newUserAuthenticationResult.failed()) {
+        return newUserAuthenticationResult;
+      }
+
+      if (newUserAuthenticationResult.user === undefined) {
+        // Should never happen, but if it does - it's a bug.
+        return AuthenticationResult.failed(
+          new Error(
+            'Could not retrieve user information using tokens produced for the SAML payload.'
+          )
+        );
+      }
+
+      differentUser =
+        newUserAuthenticationResult.user.authentication_realm.name !==
+        user.authentication_realm.name;
+    }
 
     // Now let's invalidate tokens from the existing session.
     try {
@@ -326,7 +355,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    if (newState.username !== existingState.username) {
+    if (differentUser) {
       this.logger.debug(
         'Login initiated by Identity Provider is for a different user than currently authenticated.'
       );
