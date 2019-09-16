@@ -81,6 +81,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runbldJunit()
+        }
+
+        catchError {
           publishJunit()
         }
 
@@ -142,7 +146,7 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable') {
             try {
-              runbld '.ci/run.sh'
+              runbld('.ci/run.sh', false)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
@@ -253,8 +257,14 @@ def sendKibanaMail() {
   }
 }
 
-def runbld(script) {
-  sh '#!/usr/local/bin/runbld\n' + script
+def runbld(script, noJunit = true) {
+  def extraConfig = noJunit ? "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml" : ""
+
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}"
+}
+
+def runbldJunit() {
+  sh "/usr/local/bin/runbld ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
 }
 
 def bash(script) {
