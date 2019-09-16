@@ -65,29 +65,28 @@ export const Events = React.memo<Props>(
     <EventsContainer data-test-subj="events" minWidth={minWidth}>
       <div data-test-subj="events-flex-group">
         {data.map((event, i) => (
-          <div data-test-subj="event-flex-item" key={event._id}>
-            <StatefulEvent
-              actionsColumnWidth={actionsColumnWidth}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              event={event}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              isEventViewer={isEventViewer}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              rowRenderers={rowRenderers}
-              timelineId={id}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-              maxDelay={maxDelay(i)}
-            />
-          </div>
+          <StatefulEvent
+            actionsColumnWidth={actionsColumnWidth}
+            addNoteToEvent={addNoteToEvent}
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            columnRenderers={columnRenderers}
+            event={event}
+            eventIdToNoteIds={eventIdToNoteIds}
+            getNotesByIds={getNotesByIds}
+            isEventViewer={isEventViewer}
+            key={event._id}
+            maxDelay={maxDelay(i)}
+            onColumnResized={onColumnResized}
+            onPinEvent={onPinEvent}
+            onUnPinEvent={onUnPinEvent}
+            onUpdateColumns={onUpdateColumns}
+            pinnedEventIds={pinnedEventIds}
+            rowRenderers={rowRenderers}
+            timelineId={id}
+            toggleColumn={toggleColumn}
+            updateNote={updateNote}
+          />
         ))}
       </div>
     </EventsContainer>

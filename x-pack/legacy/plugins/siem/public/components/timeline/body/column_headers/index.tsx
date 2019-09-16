@@ -61,14 +61,20 @@ interface Props {
 
 const COLUMN_HEADERS_HEIGHT = '39px';
 
-const ColumnHeadersContainer = styled.div<{
-  minWidth: number;
-}>`
-  border-bottom: 1px solid ${({ theme }) => `${theme.eui.euiColorLightShade};`}
-  display: block;
-  height: ${COLUMN_HEADERS_HEIGHT};
-  overflow: hidden;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
+const ColumnHeadersContainer = styled.div<{ minWidth: number }>`
+  ${({ theme }) => css`
+    background-color: ${theme.eui.euiColorEmptyShade}
+
+    border-bottom: 2px solid ${theme.eui.euiColorLightShade};
+    // display: block;
+    // height: ${COLUMN_HEADERS_HEIGHT};
+    // overflow: hidden;
+    min-width: ${({ minWidth }) => `${minWidth}px`};
+
+    position: sticky;
+    top: 0;
+    z-index: ${theme.eui.euiZLevel1};
+  `}
 `;
 
 ColumnHeadersContainer.displayName = 'ColumnHeadersContainer';

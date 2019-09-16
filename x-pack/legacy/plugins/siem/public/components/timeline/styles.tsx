@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
 import { footerHeight } from './footer';
 
-export const HorizontalScroll = styled.div<{ height: number }>`
-  height: ${({ height }) => height + 'px'};
-  min-height: 0;
-  overflow: hidden;
-  overflow-x: auto;
-`;
-HorizontalScroll.displayName = 'HorizontalScroll';
+export const TimelineScroll = styled.div<{ height: number }>`
+  ${({ height, theme }) => css`
+    height: ${height + 'px'};
+    overflow: auto;
+    scrollbar-width: thin;
 
-export const VerticalScrollContainer = styled.div<{ height: number; minWidth: number }>`
-  height: ${({ height }) => height - footerHeight - 12 + 'px'};
-  min-width: ${({ minWidth }) => minWidth + 'px'};
-  overflow: hidden;
-  overflow-y: auto;
+    &::-webkit-scrollbar {
+      height: ${theme.eui.euiScrollBar};
+      width: ${theme.eui.euiScrollBar};
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-clip: content-box;
+      background-color: ${rgba(theme.eui.euiColorDarkShade, 0.5)};
+      border: ${theme.eui.euiScrollBarCorner} solid transparent;
+    }
+
+    &::-webkit-scrollbar-corner,
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+  `}
 `;
-VerticalScrollContainer.displayName = 'VerticalScrollContainer';
+TimelineScroll.displayName = 'TimelineScroll';
 
 export const EventsContainer = styled.div<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
@@ -30,11 +40,13 @@ export const EventsContainer = styled.div<{ minWidth: number }>`
 EventsContainer.displayName = 'EventsContainer';
 
 export const TimelineEvent = styled.div`
-  ${props => css`
-    border-top: ${props.theme.eui.euiBorderWidthThin} solid ${props.theme.eui.euiColorLightShade};
+  ${({ theme }) => css`
+    & + & {
+      border-top: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
+    }
 
     &:hover {
-      background-color: ${props.theme.eui.euiTableHoverColor};
+      background-color: ${theme.eui.euiTableHoverColor};
     }
   `}
 `;
@@ -70,13 +82,13 @@ export const TimelineCell = styled.div<{ width?: string }>`
 TimelineCell.displayName = 'TimelineCell';
 
 export const TimelineCellContent = styled.div<{ textAlign?: string }>`
-  ${props => css`
+  ${({ theme }) => css`
     flex: 1;
-    font-size: ${props.theme.eui.euiFontSizeXS};
-    line-height: ${props.theme.eui.euiLineHeight};
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
     max-width: 100%;
     min-width: 0;
-    padding: ${props.theme.eui.paddingSizes.xs};
+    padding: ${theme.eui.paddingSizes.xs};
     text-align: ${({ textAlign }) => textAlign};
   `}
 `;

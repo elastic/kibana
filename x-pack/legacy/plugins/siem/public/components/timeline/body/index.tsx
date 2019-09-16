@@ -19,7 +19,7 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { HorizontalScroll, VerticalScrollContainer } from '../styles';
+import { TimelineScroll } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
@@ -86,7 +86,7 @@ export const Body = React.memo<BodyProps>(
     );
 
     return (
-      <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
+      <TimelineScroll height={height}>
         <ColumnHeaders
           actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
           browserFields={browserFields}
@@ -104,34 +104,28 @@ export const Body = React.memo<BodyProps>(
           minWidth={columnWidths}
         />
 
-        <VerticalScrollContainer
-          data-test-subj="vertical-scroll-container"
-          height={height}
+        <Events
+          actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+          addNoteToEvent={addNoteToEvent}
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          columnRenderers={columnRenderers}
+          data={data}
+          eventIdToNoteIds={eventIdToNoteIds}
+          getNotesByIds={getNotesByIds}
+          id={id}
+          isEventViewer={isEventViewer}
+          onColumnResized={onColumnResized}
+          onPinEvent={onPinEvent}
+          onUpdateColumns={onUpdateColumns}
+          onUnPinEvent={onUnPinEvent}
+          pinnedEventIds={pinnedEventIds}
+          rowRenderers={rowRenderers}
+          toggleColumn={toggleColumn}
+          updateNote={updateNote}
           minWidth={columnWidths}
-        >
-          <Events
-            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
-            addNoteToEvent={addNoteToEvent}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            columnRenderers={columnRenderers}
-            data={data}
-            eventIdToNoteIds={eventIdToNoteIds}
-            getNotesByIds={getNotesByIds}
-            id={id}
-            isEventViewer={isEventViewer}
-            onColumnResized={onColumnResized}
-            onPinEvent={onPinEvent}
-            onUpdateColumns={onUpdateColumns}
-            onUnPinEvent={onUnPinEvent}
-            pinnedEventIds={pinnedEventIds}
-            rowRenderers={rowRenderers}
-            toggleColumn={toggleColumn}
-            updateNote={updateNote}
-            minWidth={columnWidths}
-          />
-        </VerticalScrollContainer>
-      </HorizontalScroll>
+        />
+      </TimelineScroll>
     );
   }
 );
