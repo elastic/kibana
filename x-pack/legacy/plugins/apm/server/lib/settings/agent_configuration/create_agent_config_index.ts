@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { InternalCoreSetup } from 'src/core/server';
 import Boom from 'boom';
 
-export async function createApmAgentConfigurationIndex(server: Server) {
+export async function createApmAgentConfigurationIndex(
+  core: InternalCoreSetup
+) {
+  const { server } = core.http;
   const index = server
     .config()
     .get<string>('apm_oss.apmAgentConfigurationIndex');

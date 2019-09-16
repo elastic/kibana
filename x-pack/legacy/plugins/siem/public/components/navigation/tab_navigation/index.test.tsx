@@ -95,13 +95,14 @@ describe('Tab Navigation', () => {
   });
 
   describe('Table Navigation', () => {
+    const mockHasMlUserPermissions = true;
     const mockProps: TabNavigationProps & RouteSpyState = {
       pageName: 'hosts',
       pathName: '/hosts',
       detailName: undefined,
       search: '',
       tabName: HostsTableType.authentications,
-      navTabs: navTabsHostDetails(hostName),
+      navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions),
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: {

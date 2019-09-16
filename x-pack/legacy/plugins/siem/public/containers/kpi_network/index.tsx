@@ -14,7 +14,7 @@ import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiNetworkQuery } from './index.gql_query';
@@ -41,7 +41,7 @@ const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
   ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
       variables={{

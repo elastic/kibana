@@ -85,10 +85,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
-        hash: `${appName}/${subUrl}`,
+        hash: `/${appName}/${subUrl}`,
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+
       await retry.try(async () => {
         await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
@@ -370,7 +371,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           throw new Error('Toast is not visible yet');
         }
       });
-      await browser.moveMouseTo(toast);
+      await toast.moveMouseTo();
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
       log.debug(title);
       await find.clickByCssSelector('.euiToast__closeButton');
@@ -381,7 +382,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
         try {
-          await browser.moveMouseTo(toastElement);
+          await toastElement.moveMouseTo();
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {

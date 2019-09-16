@@ -2,14 +2,16 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <Row>
+  <Row
+    className="euiTableRow"
+  >
     <span>
       some children
     </span>
     <RowRendererContainer>
       <Details>
         <Netflow
-          contextId="network_flow"
+          contextId="netflow-row-renderer-render-row-test-abcd"
           destinationBytes={
             Array [
               40,

@@ -108,11 +108,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
-            iconSize="m"
             iconType="popout"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>
@@ -140,11 +138,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
-            iconSize="m"
             iconType="trash"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>
@@ -256,11 +252,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
-            iconSize="m"
             iconType="popout"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>
@@ -288,11 +282,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
-            iconSize="m"
             iconType="trash"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>
@@ -404,11 +396,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Test custom URL"
             color="primary"
-            iconSize="m"
             iconType="popout"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>
@@ -436,11 +426,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           <EuiButtonIcon
             aria-label="Delete custom URL"
             color="danger"
-            iconSize="m"
             iconType="trash"
             onClick={[Function]}
             size="s"
-            type="button"
           />
         </EuiToolTip>
       </EuiFormRow>

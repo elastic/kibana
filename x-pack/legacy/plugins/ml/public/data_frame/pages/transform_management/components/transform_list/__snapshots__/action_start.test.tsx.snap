@@ -11,11 +11,9 @@ exports[`Data Frame: Transform List Actions <StartAction /> Minimal initializati
       aria-label="Start"
       color="text"
       disabled={true}
-      iconSide="left"
       iconType="play"
       onClick={[Function]}
       size="xs"
-      type="button"
     >
       Start
     </EuiButtonEmpty>

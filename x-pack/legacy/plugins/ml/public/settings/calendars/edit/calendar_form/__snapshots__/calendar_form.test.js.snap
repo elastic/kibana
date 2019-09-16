@@ -171,14 +171,10 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-testid="ml_save_calendar_button"
         fill={true}
-        iconSide="left"
         isDisabled={true}
         onClick={[MockFunction]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Save"
@@ -191,13 +187,8 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
-        fill={false}
         href="undefined/app/ml#/settings/calendars_list"
-        iconSide="left"
         isDisabled={false}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel"

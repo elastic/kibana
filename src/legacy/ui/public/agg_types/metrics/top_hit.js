@@ -19,14 +19,14 @@
 
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
-import { TopSortFieldParamEditor } from '../controls/top_sort_field';
-import { OrderParamEditor } from '../controls/order';
+import { TopSortFieldParamEditor } from '../../vis/editors/default/controls/top_sort_field';
+import { OrderParamEditor } from '../../vis/editors/default/controls/order';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
 import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
-import { TopFieldParamEditor } from '../controls/top_field';
-import { TopSizeParamEditor } from '../controls/top_size';
-import { TopAggregateParamEditor } from '../controls/top_aggregate';
+import { TopFieldParamEditor } from '../../vis/editors/default/controls/top_field';
+import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size';
+import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
 
 const isNumericFieldSelected = function (agg) {
   const fieldType = agg.params.field && agg.params.field.type;

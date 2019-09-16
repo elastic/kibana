@@ -52,6 +52,10 @@ export const addEntitiesToKql = (
         }
         return encode(value);
       }
+    } else if (value.filterQuery == null) {
+      const entitiesKql = entitiesToKql(entityNames, entities);
+      value.filterQuery = { expression: `(${entitiesKql})` };
+      return encode(value);
     }
   }
   return kqlQuery;

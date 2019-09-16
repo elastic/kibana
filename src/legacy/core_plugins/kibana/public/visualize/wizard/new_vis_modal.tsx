@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
-import { VisTypeAlias } from '../../../../visualizations/public/np_ready/public';
+import { VisTypeAlias } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 
 import { SearchSelection } from './search_selection';

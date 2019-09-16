@@ -28,6 +28,7 @@ describe('zeek_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonZeek,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -47,6 +48,7 @@ describe('zeek_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonZeek,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -61,6 +63,7 @@ describe('zeek_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: zeek,
       children: <span>{'some children '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

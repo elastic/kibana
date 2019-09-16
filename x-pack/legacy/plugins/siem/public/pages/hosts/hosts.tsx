@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -35,6 +35,8 @@ import {
   AnomaliesQueryTabBodyProps,
   HostsComponentsQueryProps,
 } from './hosts_navigations';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -61,6 +63,7 @@ export type HostsComponentProps = HostsComponentReduxProps &
 
 const HostsComponent = React.memo<HostsComponentProps>(
   ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
+    const capabilities = React.useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">
@@ -68,7 +71,11 @@ const HostsComponent = React.memo<HostsComponentProps>(
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+                  <HostsKql
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    type={hostsModel.HostsType.page}
+                  />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -107,7 +114,11 @@ const HostsComponent = React.memo<HostsComponentProps>(
                     )}
                   </KpiHostsQuery>
                   <EuiSpacer />
-                  <SiemNavigation navTabs={navTabsHosts} display="default" showBorder={true} />
+                  <SiemNavigation
+                    navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+                    display="default"
+                    showBorder={true}
+                  />
                   <EuiSpacer />
                 </>
               </StickyContainer>
