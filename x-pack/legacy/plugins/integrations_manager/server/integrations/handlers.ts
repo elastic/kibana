@@ -8,6 +8,7 @@ import { AssetType, Request, ResponseToolkit } from '../../common/types';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
+  getCategories,
   getClusterAccessor,
   getIntegrationInfo,
   getIntegrations,
@@ -36,6 +37,10 @@ interface DeleteAssetRequest extends Request {
 type AssetRequestParams = PackageRequest['params'] & {
   asset?: AssetType;
 };
+
+export async function handleGetCategories(req: Request, extra: Extra) {
+  return getCategories();
+}
 
 export async function handleGetList(req: Request, extra: Extra) {
   const savedObjectsClient = getClient(req);

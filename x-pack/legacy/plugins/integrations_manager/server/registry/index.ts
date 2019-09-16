@@ -7,6 +7,7 @@
 import {
   AssetsGroupedByServiceByType,
   AssetParts,
+  CategorySummaryList,
   RegistryList,
   RegistryPackage,
 } from '../../common/types';
@@ -25,6 +26,10 @@ export async function fetchList(): Promise<RegistryList> {
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
   return fetchUrl(`${REGISTRY}/package/${key}`).then(JSON.parse);
+}
+
+export async function fetchCategories(): Promise<CategorySummaryList> {
+  return fetchUrl(`${REGISTRY}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(

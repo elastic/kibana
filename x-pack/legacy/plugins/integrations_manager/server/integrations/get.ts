@@ -14,6 +14,10 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
+export async function getCategories() {
+  return Registry.fetchCategories();
+}
+
 export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
   const { savedObjectsClient } = options;
   const registryItems = await Registry.fetchList().then(items =>
