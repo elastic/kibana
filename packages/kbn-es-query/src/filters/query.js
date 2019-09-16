@@ -25,7 +25,6 @@ export function buildQueryFilter(query, index, alias) {
       index,
     }
   };
-  console.log('filter.meta', filter.meta);
 
   if (alias) {
     filter.meta.alias = alias;

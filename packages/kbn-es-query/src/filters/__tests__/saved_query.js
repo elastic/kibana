@@ -24,33 +24,6 @@ import { buildSavedQueryFilter } from '../saved_query';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
 
-const savedQueryTestItem = {
-  id: 'foo',
-  attributes: {
-    title: 'foo',
-    description: 'bar',
-    query: {
-      language: 'kuery',
-      query: 'response:200',
-    },
-    filters: [
-      {
-        query: { match_all: {} },
-        $state: { store: FilterStateStore.APP_STATE },
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-      },
-    ],
-    timefilter: {
-      gte: '1940-02-01T00:00:00.000Z',
-      lte: '2000-02-01T00:00:00.000Z',
-      format: 'strict_date_optional_time',
-    },
-  }
-};
 let expected;
 describe('Filter Manager', function () {
   describe('Saved query filter builder', function () {
@@ -63,6 +36,50 @@ describe('Filter Manager', function () {
     });
 
     it('should return a query filter, filters and time filter when passed a saved query', function () {
+      const savedQueryTestItem = {
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'response:200',
+          },
+          filters: [
+            {
+              query: {
+                match_phrase: {
+                  'extension.keyword': {
+                    'query': 'css'
+                  }
+                }
+              },
+              $state: { store: FilterStateStore.APP_STATE },
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+              },
+            },
+          ],
+          timefilter: {
+            range: {
+              timestamp: {
+                gte: '1940-02-01T00:00:00.000Z',
+                lte: '2000-02-01T00:00:00.000Z',
+                format: 'strict_date_optional_time',
+              }
+            },
+          }
+        }
+      };
+      const testArgs = {
+        params: {
+          savedQuery: savedQueryTestItem,
+          esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
+        },
+        indexPattern: indexPattern
+      };
       expected = {
         meta: {
           index: 'logstash-*',
@@ -79,34 +96,95 @@ describe('Filter Manager', function () {
           }
         },
         query: {
-          convertedQuery: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          'response': 200
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'response': 200
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                match_phrase: {
+                  'extension.keyword': {
+                    'query': 'css'
+                  }
+                }
+              },
+              {
+                range: {
+                  timestamp: {
+                    gte: '1940-02-01T00:00:00.000Z',
+                    lte: '2000-02-01T00:00:00.000Z',
+                    format: 'strict_date_optional_time'
+                  }
+                }
+              }
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          }
+        }
+      };
+      const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
+      expect(actual).to.eql(expected);
+    });
+    xit('should return a query filter when passed a saved query containing only a query', () => {
+      const item = {
+        'query': {
+          'bool': {
+            'must': [],
+            'filter': [
+              {
+                'bool': {
+                  'should': [
+                    {
+                      'range': {
+                        'bytes': {
+                          'gte': 2000
                         }
                       }
-                    ]
-                  }
-                },
-                {
-                  match_all: {}
+                    }
+                  ],
+                  'minimum_should_match': 1
                 }
-              ],
-              must: [],
-              must_not: [],
-              should: [],
-            }
-          },
-          convertedTimeFilter: {
-            gte: '1940-02-01T00:00:00.000Z',
-            lte: '2000-02-01T00:00:00.000Z',
-            format: 'strict_date_optional_time'
+              },
+              {
+                'match_phrase': {
+                  'extension.keyword': {
+                    'query': 'css'
+                  }
+                }
+              },
+              {
+                'range': {
+                  'timestamp': {
+                    'format': 'strict_date_optional_time',
+                    'gte': '2019-09-16T21:18:44.624Z',
+                    'lte': '2019-09-16T22:18:44.624Z'
+                  }
+                }
+              }
+            ],
+            'should': [],
+            'must_not': []
+          }
+        },  };
+      const savedQueryTestItem = {
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'response:200'
           }
         }
       };
@@ -116,6 +194,43 @@ describe('Filter Manager', function () {
           esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
         },
         indexPattern: indexPattern
+      };
+      expected = {
+        meta: {
+          index: 'logstash-*',
+          type: 'savedQuery',
+          key: 'foo',
+          value: 'foo',
+          params: {
+            esQueryConfig: {
+              allowLeadingWildcards: true,
+              dateFormatTZ: null,
+              queryStringOptions: {},
+            },
+            savedQuery: savedQueryTestItem,
+          }
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'response': 200
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          }
+        }
       };
       const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
       expect(actual).to.eql(expected);

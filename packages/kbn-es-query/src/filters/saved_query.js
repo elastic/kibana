@@ -17,7 +17,7 @@
  * under the License.
  */
 import { buildEsQuery } from '../es_query';
-
+import { get, set } from 'lodash';
 /* Creates a filter from a saved query.
   The saved query's time filter is already parsed
   params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
@@ -32,8 +32,6 @@ import { buildEsQuery } from '../es_query';
 
 
 export function buildSavedQueryFilter(params, indexPattern) {
-  // console.log('params:', params);
-  // console.log('indexPattern:', indexPattern);
   const filter = {
     meta: {
       index: indexPattern.id,
@@ -44,11 +42,16 @@ export function buildSavedQueryFilter(params, indexPattern) {
     }
   };
 
-  const query = params.savedQuery.attributes.query;
-  const filters = params.savedQuery.attributes.filters;
-  const convertedTimeFilter = params.savedQuery.attributes.timefilter ? params.savedQuery.attributes.timefilter : null; // should already be an EsQuery
-  const esQueryConfig = params.esQueryConfig;
+  const query = get(params, 'savedQuery.attributes.query');
+  const filters = get(params, 'savedQuery.attributes.filters', []);
+  const esQueryConfig = get(params, 'esQueryConfig', { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null });
   const convertedQuery = buildEsQuery(indexPattern, query, filters, esQueryConfig);
-  filter.query = { convertedQuery, convertedTimeFilter };
+  filter.query = { ...convertedQuery };
+  // timefilter addition
+  const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
+  if (convertedTimeFilter) {
+    const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];
+    filter.query.bool.filter = [...filtersWithTimefilter];
+  }
   return filter;
 }
