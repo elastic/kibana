@@ -19,6 +19,11 @@
 import { buildEsQuery } from '../es_query';
 
 // Creates a filter from a saved query.
+// The saved query's time filter needs to be converted to an ES query object before being passed in here because the filter conversion methods are in the data plugin
+// params = { savedQueryWithTimefilterAsEsQuery, esQueryConfig }
+// indexPattern has to be passed in too
+
+
 // The entire saved query is passed in as params.savedQuery
 // We also need the esQueryConfig that we have to pass in too as follows.
 /*
@@ -37,37 +42,8 @@ export function buildSavedQueryFilter(params, indexPattern) {
   };
   const query = params.savedQuery.attributes.query;
   const filters = params.savedQuery.attributes.filters;
-  const timeFilter = params.savedQuery.attributes.timefilter;
-  /* convert the timefilter to an object of the form:
-    I need to correct serializer function here
-  {
-    "range": {
-      "timestamp": {
-        "format": "strict_date_optional_time",
-        "gte": timeFilter.from,
-        "lte": timeFilter.to
-      }
-    }
-  }
-  The timeFilter has the following shape:
-  {
-    from: "now-7d"
-    refreshInterval:
-      pause: true
-      value: 0
-    to: "now"
-  }
-  That needs to be parsed!
-  */
-  const convertedTimeFilter = {
-    range: {
-      timestamp: {
-        format: 'strict_date_optional_time',
-        gte: timeFilter.from,
-        lte: timeFilter.to
-      }
-    }
-  };
+  const convertedTimeFilter = params.savedQuery.attributes.timefilter ? params.savedQuery.attributes.timefilter : null; // should already be an EsQuery
+
   const esQueryConfig = params.esQueryConfig;
   const convertedQuery = buildEsQuery(index, query, filters, esQueryConfig);
   filter.query = { convertedQuery, convertedTimeFilter };
