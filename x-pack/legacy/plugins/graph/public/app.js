@@ -64,7 +64,7 @@ import {
   asAngularSyncedObservable,
 } from './services/as_observable';
 import {
-  store,
+  createGraphStore,
   loadFields,
   fieldsSelector,
   selectedFieldsSelector,
@@ -246,6 +246,8 @@ app.controller('graphuiPlugin', function (
       }
     });
   }
+
+  const store = createGraphStore();
 
   $scope.title = 'Graph';
   $scope.spymode = 'request';

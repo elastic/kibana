@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { ICON_TYPES, palettes, EuiIcon } from '@elastic/eui';
-import classNames from 'classnames';
 
 function stringToNum(s: string) {
   return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
@@ -16,8 +15,10 @@ function getIconForDataType(dataType: string) {
   const icons: Partial<Record<string, UnwrapArray<typeof ICON_TYPES>>> = {
     boolean: 'invert',
     date: 'calendar',
+    geo_point: 'globe',
+    ip: 'link',
   };
-  return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'empty';
+  return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'document';
 }
 
 export function getColorForDataType(type: string) {
@@ -32,9 +33,5 @@ export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 export function FieldIcon({ type }: { type: string }) {
   const iconType = getIconForDataType(type);
 
-  const classes = classNames();
-  // 'lnsFieldListPanel__fieldIcon',
-  // `lnsFieldListPanel__fieldIcon--${type}`
-
-  return <EuiIcon type={iconType} color={getColorForDataType(type)} className={classes} />;
+  return <EuiIcon type={iconType} color={getColorForDataType(type)} />;
 }

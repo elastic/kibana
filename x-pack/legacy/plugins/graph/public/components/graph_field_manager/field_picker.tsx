@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import {
   EuiPopover,
   EuiButtonEmpty,
@@ -27,11 +27,12 @@ export interface FieldPickerProps {
 }
 
 export function FieldPicker(props: FieldPickerProps) {
-  const { open, setOpen } = props;
-  const [fieldOptions, setFieldOptions] = useState(toOptions(props.allFields));
+  const [open, setOpen] = useState(false);
 
   const unselectedFields = props.allFields.filter(field => !field.selected);
   const hasSelectedFields = unselectedFields.length < props.allFields.length;
+
+  const [fieldOptions, setFieldOptions] = useState(toOptions(unselectedFields));
 
   useEffect(() => {
     setFieldOptions(toOptions(unselectedFields));
@@ -55,42 +56,40 @@ export function FieldPicker(props: FieldPickerProps) {
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
+      panelClassName="gphFieldPickerList"
     >
-      <EuiSelectable
-        searchable
-        options={fieldOptions}
-        onChange={setFieldOptions}
-        className="gphFieldPickerList"
-      >
+      <EuiText size="xs">
+        {i18n.translate('xpack.graph.fieldManager.updateFieldsDescription', {
+          defaultMessage:
+            'Select the fields you want to explore. Each field will be a separate vertex type',
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiSelectable searchable options={fieldOptions} onChange={setFieldOptions}>
         {(list, search) => (
-          <Fragment>
-            <EuiText size="xs">
-              {i18n.translate('xpack.graph.fieldManager.updateFieldsDescription', {
-                defaultMessage:
-                  'Select the fields you want to explore. Each field will be a separate vertex type',
-              })}
-            </EuiText>
-            <EuiSpacer size="s" />
+          <>
             {search}
             {list}
-            <EuiButton
-              fill
-              onClick={() => {
-                setOpen(false);
-                fieldOptions.forEach((option, index) => {
-                  if (option.checked === 'on') {
-                    props.selectField(unselectedFields[index].name);
-                  }
-                });
-              }}
-            >
-              {i18n.translate('xpack.graph.fieldManager.addFieldsLabel', {
-                defaultMessage: 'Add fields',
-              })}
-            </EuiButton>
-          </Fragment>
+          </>
         )}
       </EuiSelectable>
+      <EuiButton
+        data-test-subj="graphFieldPickerAdd"
+        fill
+        fullWidth
+        onClick={() => {
+          setOpen(false);
+          fieldOptions.forEach((option, index) => {
+            if (option.checked === 'on') {
+              props.selectField(unselectedFields[index].name);
+            }
+          });
+        }}
+      >
+        {i18n.translate('xpack.graph.fieldManager.addFieldsLabel', {
+          defaultMessage: 'Add fields',
+        })}
+      </EuiButton>
     </EuiPopover>
   );
 }

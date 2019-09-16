@@ -19,12 +19,16 @@ import {
   hexToRgb,
   EuiHorizontalRule,
   EuiSpacer,
+  // @ts-ignore
+  EuiHighlight,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../services/style_choices';
 import { LegacyIcon } from '../legacy_icon';
+import { FieldIcon } from './field_icon';
 
 type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 export interface FieldPickerProps {
@@ -72,6 +76,16 @@ export function FieldEditor({
     });
   }
 
+  const badgeDescription = isDisabled
+    ? i18n.translate('xpack.graph.fieldManager.disabledFieldBadgeDescription', {
+        defaultMessage: 'Disabled field {field}: Click to configure. Shift+click to enable',
+        values: { field: fieldName },
+      })
+    : i18n.translate('xpack.graph.fieldManager.fieldBadgeDescription', {
+        defaultMessage: 'Field {field}: Click to configure. Shift+click to disable',
+        values: { field: fieldName },
+      });
+
   return (
     <EuiPopover
       id="graphFieldEditor"
@@ -80,42 +94,35 @@ export function FieldEditor({
       initialFocus=".gphFieldEditor"
       panelClassName="gphFieldEditor"
       button={
-        <EuiBadge
-          className={classNames('gphFieldEditorBadge', {
-            'gphFieldEditorBadge--disabled': isDisabled,
-          })}
-          iconOnClick={() => {}}
-          iconOnClickAriaLabel=""
-          onClickAriaLabel={
-            isDisabled
-              ? i18n.translate('xpack.graph.fieldManager.disabledFieldBadgeDescription', {
-                  defaultMessage: 'Disabled field {field}: Click to configure the field',
-                  values: { field: fieldName },
-                })
-              : i18n.translate('xpack.graph.fieldManager.fieldBadgeDescription', {
-                  defaultMessage: 'Field {field}: Click to configure the field',
-                  values: { field: fieldName },
-                })
-          }
-          onClick={e => {
-            if (e.shiftKey) {
-              toggleDisabledState();
-            } else {
-              setOpen(true);
-            }
-          }}
-        >
-          <div className="gphFieldEditorBadge__color" style={{ backgroundColor: color }}>
-            <LegacyIcon
-              className={classNames({
-                'gphFieldEditorBadge__icon--dark': darkColor,
-                'gphFieldEditorBadge__icon--light': !darkColor,
-              })}
-              icon={icon}
-            />
-          </div>
-          {field.name}
-        </EuiBadge>
+        <EuiToolTip content={badgeDescription}>
+          <EuiBadge
+            className={classNames('gphFieldEditorBadge', {
+              'gphFieldEditorBadge--disabled': isDisabled,
+            })}
+            iconOnClick={() => {}}
+            iconOnClickAriaLabel=""
+            onClickAriaLabel={badgeDescription}
+            title=""
+            onClick={e => {
+              if (e.shiftKey) {
+                toggleDisabledState();
+              } else {
+                setOpen(true);
+              }
+            }}
+          >
+            <div className="gphFieldEditorBadge__color" style={{ backgroundColor: color }}>
+              <LegacyIcon
+                className={classNames({
+                  'gphFieldEditorBadge__icon--dark': darkColor,
+                  'gphFieldEditorBadge__icon--light': !darkColor,
+                })}
+                icon={icon}
+              />
+            </div>
+            {field.name}
+          </EuiBadge>
+        </EuiToolTip>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
@@ -136,7 +143,15 @@ export function FieldEditor({
           singleSelection={{ asPlainText: true }}
           isClearable={false}
           options={toOptions(allFields, field)}
-          selectedOptions={[{ value: field.name, label: field.name }]}
+          selectedOptions={[{ value: field.name, label: field.name, type: field.type }]}
+          renderOption={(option, searchValue, contentClassName) => {
+            const { type, label } = option;
+            return (
+              <span className={contentClassName}>
+                <FieldIcon type={type!} /> <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+              </span>
+            );
+          }}
         />
       </EuiFormRow>
 
@@ -150,6 +165,7 @@ export function FieldEditor({
           label={i18n.translate('xpack.graph.fieldManager.disabledLabel', {
             defaultMessage: 'Disable field temporarily',
           })}
+          data-test-subj="graphFieldEditorDisable"
           checked={isDisabled}
           onChange={toggleDisabledState}
         />
@@ -200,6 +216,7 @@ export function FieldEditor({
       </EuiAccordion>
       <EuiHorizontalRule />
       <EuiButtonEmpty
+        data-test-subj="graphFieldEditorRemove"
         color="danger"
         onClick={() => {
           deselectField(fieldName);
@@ -216,11 +233,12 @@ export function FieldEditor({
 function toOptions(
   fields: WorkspaceField[],
   currentField: WorkspaceField
-): Array<{ label: string; value: string }> {
+): Array<{ label: string; value: string; type: string }> {
   return fields
     .filter(field => !field.selected || field === currentField)
-    .map(field => ({
-      label: field.name,
-      value: field.name,
+    .map(({ name, type }) => ({
+      label: name,
+      value: name,
+      type,
     }));
 }

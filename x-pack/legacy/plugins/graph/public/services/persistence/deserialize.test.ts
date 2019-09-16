@@ -116,7 +116,11 @@ describe('deserialize', () => {
     return savedWorkspaceToAppState(
       savedWorkspace,
       {
-        getNonScriptedFields: () => [{ name: 'field1' }, { name: 'field2' }, { name: 'field3' }],
+        getNonScriptedFields: () => [
+          { name: 'field1', type: 'string' },
+          { name: 'field2', type: 'string' },
+          { name: 'field3', type: 'string' },
+        ],
       } as IndexPattern,
       createWorkspace({})
     );
@@ -140,6 +144,7 @@ describe('deserialize', () => {
           "lastValidHopSize": undefined,
           "name": "field1",
           "selected": true,
+          "type": "string",
         },
         Object {
           "color": "black",
@@ -148,6 +153,7 @@ describe('deserialize', () => {
           "lastValidHopSize": undefined,
           "name": "field2",
           "selected": true,
+          "type": "string",
         },
         Object {
           "color": "#8ee684",
@@ -165,6 +171,7 @@ describe('deserialize', () => {
           "lastValidHopSize": 5,
           "name": "field3",
           "selected": false,
+          "type": "string",
         },
       ]
     `);
