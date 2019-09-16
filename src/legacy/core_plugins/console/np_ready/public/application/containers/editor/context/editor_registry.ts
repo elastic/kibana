@@ -17,25 +17,26 @@
  * under the License.
  */
 
-import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
+export class EditorRegistry {
+  inputEditor: any;
+  outputEditor: any;
 
-let input;
-export function initializeInput($el, $actionsEl) {
-  input = new SenseEditor($el);
+  setInputEditor(inputEditor: any) {
+    this.inputEditor = inputEditor;
+  }
 
-  input.autocomplete = new Autocomplete(input);
-  input.$actions = $actionsEl;
+  setOutputEditor(outputEditor: any) {
+    this.outputEditor = outputEditor;
+  }
 
-  /**
-   * Init the editor
-   */
-  input.focus();
-  input.highlightCurrentRequestsAndUpdateActionBar();
+  getInputEditor() {
+    return this.inputEditor;
+  }
 
-  return input;
+  getOutputEditor() {
+    return this.outputEditor;
+  }
 }
 
-export default function getInput() {
-  return input;
-}
+// Create a single instance of this and use as private state.
+export const instance = new EditorRegistry();
