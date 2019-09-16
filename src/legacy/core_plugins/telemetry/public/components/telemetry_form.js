@@ -98,7 +98,7 @@ export class TelemetryForm extends Component {
                 <EuiFlexItem grow={false}>
                   <h2>
                     <FormattedMessage
-                      id="xpack.telemetry.usageDataTitle"
+                      id="telemetry.usageDataTitle"
                       defaultMessage="Usage Data"
                     />
                   </h2>
@@ -136,13 +136,13 @@ export class TelemetryForm extends Component {
         title={
           <p>
             <FormattedMessage
-              id="xpack.telemetry.callout.appliesSettingTitle"
+              id="telemetry.callout.appliesSettingTitle"
               defaultMessage="This setting applies to {allOfKibanaText}"
               values={{
                 allOfKibanaText: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
                       defaultMessage="all of Kibana."
                     />
                   </strong>
@@ -161,7 +161,7 @@ export class TelemetryForm extends Component {
       <p>
         <EuiLink onClick={this.toggleExample}>
           <FormattedMessage
-            id="xpack.telemetry.seeExampleOfWhatWeCollectLinkText"
+            id="telemetry.seeExampleOfWhatWeCollectLinkText"
             defaultMessage="See an example of what we collect"
           />
         </EuiLink>
@@ -169,7 +169,7 @@ export class TelemetryForm extends Component {
       <p>
         <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
           <FormattedMessage
-            id="xpack.telemetry.readOurUsageDataPrivacyStatementLinkText"
+            id="telemetry.readOurUsageDataPrivacyStatementLinkText"
             defaultMessage="Read our usage data privacy statement"
           />
         </EuiLink>

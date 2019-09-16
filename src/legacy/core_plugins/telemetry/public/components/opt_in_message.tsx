@@ -52,7 +52,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
       <EuiText size="s">
         <p tab-index="0">
           <FormattedMessage
-            id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription"
+            id="telemetry.welcomeBanner.telemetryConfigDetailsDescription"
             defaultMessage="No information about the data you process or store will be sent. This feature
               will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
               You can disable this feature at any time."
@@ -60,7 +60,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
               exampleLink: (
                 <EuiLink onClick={this.toggleShowExample}>
                   <FormattedMessage
-                    id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
+                    id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
                     defaultMessage="example"
                   />
                 </EuiLink>
@@ -68,7 +68,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
               telemetryPrivacyStatementLink: (
                 <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
                   <FormattedMessage
-                    id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
+                    id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
                     defaultMessage="telemetry privacy statement"
                   />
                 </EuiLink>
@@ -89,7 +89,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
     const getReadMore = () => (
       <EuiLink onClick={() => this.setState({ showDetails: true })}>
         <FormattedMessage
-          id="xpack.telemetry.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
+          id="telemetry.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
           defaultMessage="Read more"
         />
       </EuiLink>

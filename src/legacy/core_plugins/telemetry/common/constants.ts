@@ -29,7 +29,7 @@ export const CONFIG_TELEMETRY = 'telemetry:optIn';
  * @type {string}
  */
 export const getConfigTelemetryDesc = () => {
-  return i18n.translate('xpack.telemetry.telemetryConfigDescription', {
+  return i18n.translate('telemetry.telemetryConfigDescription', {
     defaultMessage:
       'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
   });

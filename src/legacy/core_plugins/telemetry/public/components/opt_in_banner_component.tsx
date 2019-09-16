@@ -34,7 +34,7 @@ export class OptInBanner extends React.PureComponent<Props> {
   render() {
     const title = (
       <FormattedMessage
-        id="xpack.telemetry.welcomeBanner.title"
+        id="telemetry.welcomeBanner.title"
         defaultMessage="Help us improve the Elastic Stack!"
       />
     );
@@ -45,18 +45,12 @@ export class OptInBanner extends React.PureComponent<Props> {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton size="s" onClick={() => this.props.optInClick(true)}>
-              <FormattedMessage
-                id="xpack.telemetry.welcomeBanner.yesButtonLabel"
-                defaultMessage="Yes"
-              />
+              <FormattedMessage id="telemetry.welcomeBanner.yesButtonLabel" defaultMessage="Yes" />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton size="s" onClick={() => this.props.optInClick(false)}>
-              <FormattedMessage
-                id="xpack.telemetry.welcomeBanner.noButtonLabel"
-                defaultMessage="No"
-              />
+              <FormattedMessage id="telemetry.welcomeBanner.noButtonLabel" defaultMessage="No" />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

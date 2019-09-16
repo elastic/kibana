@@ -63,7 +63,7 @@ const telemetry = (kibana: any) => {
       managementSections: ['plugins/telemetry/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
-          name: i18n.translate('xpack.telemetry.telemetryConfigTitle', {
+          name: i18n.translate('telemetry.telemetryConfigTitle', {
             defaultMessage: 'Telemetry opt-in',
           }),
           description: getConfigTelemetryDesc(),
