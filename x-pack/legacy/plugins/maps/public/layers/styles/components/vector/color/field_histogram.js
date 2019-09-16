@@ -11,6 +11,8 @@ import {
   Chart,
   HistogramBarSeries,
   ScaleType,
+  Settings,
+  TooltipType,
 } from '@elastic/charts';
 
 export function FieldHistogram({ data }) {
@@ -21,6 +23,9 @@ export function FieldHistogram({ data }) {
   return (
     <div style={{ height: '150px' }}>
       <Chart size="100%">
+        <Settings
+          tooltip={{ type: TooltipType.None }}
+        />
         <Axis
           id="countAxis"
           position="left"

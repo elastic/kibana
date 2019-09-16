@@ -11,6 +11,8 @@ import {
   EuiFieldNumber,
   EuiText,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -115,20 +117,35 @@ export class FieldRangeInput extends Component {
   render() {
     return (
       <Fragment>
-        <EuiFieldNumber
-          placeholder={i18n.translate('xpack.maps.style.fieldRange.minLabel', {
-            defaultMessage: 'min'
-          })}
-          value={this.props.min}
-          onChange={this._onMinChange}
-        />
-        <EuiFieldNumber
-          placeholder={i18n.translate('xpack.maps.style.fieldRange.maxLabel', {
-            defaultMessage: 'max'
-          })}
-          value={this.props.max}
-          onChange={this._onMaxChange}
-        />
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            <EuiFieldNumber
+              placeholder={i18n.translate('xpack.maps.style.fieldRange.minLabel', {
+                defaultMessage: 'min'
+              })}
+              value={this.props.min}
+              onChange={this._onMinChange}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText
+              style={{ lineHeight: 2.5 }}
+              size="s"
+              color="subdued"
+            >
+              →
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              placeholder={i18n.translate('xpack.maps.style.fieldRange.maxLabel', {
+                defaultMessage: 'max'
+              })}
+              value={this.props.max}
+              onChange={this._onMaxChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <FieldHistogram
           data={this.state.histogramData}
         />
