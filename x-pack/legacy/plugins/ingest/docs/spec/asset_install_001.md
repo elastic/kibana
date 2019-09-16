@@ -4,7 +4,6 @@ Asset instilation APIS will be JS/TS only as they are intended for use only by p
 
 ## Asset types
 
-Ingest plugin will at initial release understand 2 classes of assets, Kibana Assets, and Elasticsearch Assets.
 The following asset types have support planned:
 
 **ES Assets**
@@ -15,13 +14,6 @@ The following asset types have support planned:
 - Rollup Jobs -- Expect user edits
 - ML Jobs\*
 - Data Frame Transforms\*
-
-**Kibana Assets**
-
-- Visualizations
-- Dashboards
-- Saved Searches
-- Index Patterns
 
 \* Indicates somehting might not be supported in inital release
 
@@ -73,10 +65,11 @@ The Ingest asset APIs will:
 - prevent issues of removing a co-dependent asset
 - ensure user edited assets are not overwritten
 - install the assets, including re-try logic where needed
-- Throw an error on asset install that is known to be out of order (e.g. dashboards before visualizations would throw)
+- Throw an error on asset install that is known to be out of order (e.g. Rollup jobs before templates are installed would throw)
 - When passed a newer version of an asset, correctly upgrade the previos asset
 
 The Ingest asset APIs will **NOT**:
 
 - self-trigger upgrade or install of any assets, assets must be passed to Ingest plugin by Fleet or solutions.
 - store a collection of assets installed or un-installed
+- Install Visualizations, Dashboards, Saved Searches or Index Patterns as these are not needed by solutions.
