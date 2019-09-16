@@ -2,8 +2,6 @@
 
 exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -113,7 +111,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   }
   isCollectionIntervalUpdated={true}
   isCollectionIntervalUpdating={false}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <EuiTitle
     size="l"
@@ -169,8 +173,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 
 exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -280,7 +282,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={true}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
@@ -484,8 +492,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 
 exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -595,7 +601,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={false}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
