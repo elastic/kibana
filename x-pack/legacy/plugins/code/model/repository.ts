@@ -171,6 +171,7 @@ export interface IndexWorkerProgress extends WorkerProgress {
 
 export enum RepoState {
   CLONING,
+  UPDATING,
   DELETING,
   INDEXING,
   READY,

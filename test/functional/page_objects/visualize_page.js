@@ -578,12 +578,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} > sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} toggleDisableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -593,11 +593,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} otherBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} missingBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -693,8 +693,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectYAxisMode(mode) {
-      const selectElement = await testSubjects.find('valueAxisMode0');
-      const selector = await selectElement.findByCssSelector(`option[value="${mode}"]`);
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 
@@ -1257,7 +1256,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async removeDimension(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > removeDimensionBtn`);
     }
 
     async setFilterParams({ aggNth = 0, indexPattern, field }) {

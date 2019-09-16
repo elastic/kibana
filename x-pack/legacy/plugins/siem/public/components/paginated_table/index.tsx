@@ -23,7 +23,6 @@ import styled, { css } from 'styled-components';
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { DomainsColumns } from '../page/network/domains_table/columns';
-import { EventsTableColumns } from '../page/hosts/events_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
 import { NetworkTopNFlowColumns } from '../page/network/network_top_n_flow_table/columns';
@@ -66,7 +65,6 @@ declare type BasicTableColumns =
   | AuthTableColumns
   | DomainsColumns
   | DomainsColumns
-  | EventsTableColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -79,6 +77,7 @@ declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {
+  activePage: number;
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
@@ -88,6 +87,7 @@ export interface BasicTableProps<T> {
   headerUnit: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
+  isInspect?: boolean;
   limit: number;
   loading: boolean;
   loadPage: (activePage: number) => void;
@@ -99,8 +99,6 @@ export interface BasicTableProps<T> {
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateProps?: { [key: string]: any };
 }
 
 export interface Columns<T> {
@@ -116,6 +114,7 @@ export interface Columns<T> {
 
 export const PaginatedTable = memo<SiemTables>(
   ({
+    activePage,
     columns,
     dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
     headerCount,
@@ -124,6 +123,7 @@ export const PaginatedTable = memo<SiemTables>(
     headerTooltip,
     headerUnit,
     id,
+    isInspect,
     itemsPerRow,
     limit,
     loading,
@@ -135,25 +135,29 @@ export const PaginatedTable = memo<SiemTables>(
     totalCount,
     updateActivePage,
     updateLimitPagination,
-    updateProps,
   }) => {
-    const [activePage, setActivePage] = useState(0);
+    const [myLoading, setMyLoading] = useState(loading);
+    const [myActivePage, setActivePage] = useState(activePage);
     const [showInspect, setShowInspect] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
+
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
-    const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
-    useEffect(() => {
-      if (activePage !== 0) {
-        setActivePage(0);
-        updateActivePage(0);
-      }
 
+    useEffect(() => {
+      setActivePage(activePage);
+    }, [activePage]);
+
+    useEffect(() => {
       if (headerCount >= 0 && loadingInitial) {
         setLoadingInitial(false);
       }
-    }, effectDeps);
+    }, [loadingInitial, headerCount]);
+
+    useEffect(() => {
+      setMyLoading(loading);
+    }, [loading]);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
@@ -214,7 +218,7 @@ export const PaginatedTable = memo<SiemTables>(
 
     return (
       <Panel
-        data-test-subj={dataTestSubj}
+        data-test-subj={`${dataTestSubj}-${loading}`}
         loading={{ loading }}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
@@ -252,7 +256,6 @@ export const PaginatedTable = memo<SiemTables>(
                   : null
               }
             />
-
             <FooterAction>
               <EuiFlexItem>
                 {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
@@ -273,13 +276,14 @@ export const PaginatedTable = memo<SiemTables>(
                 <EuiPagination
                   data-test-subj="numberedPagination"
                   pageCount={pageCount}
-                  activePage={activePage}
+                  activePage={myActivePage}
                   onPageClick={goToPage}
                 />
               </PaginationWrapper>
             </FooterAction>
-
-            {loading && <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />}
+            {(isInspect || myLoading) && (
+              <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
+            )}
           </>
         )}
       </Panel>

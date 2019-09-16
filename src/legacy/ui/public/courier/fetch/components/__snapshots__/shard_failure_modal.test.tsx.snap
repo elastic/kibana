@@ -174,13 +174,9 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
       <Component />
     </EuiCopy>
     <EuiButton
-      color="primary"
       data-test-sub="closeShardFailureModal"
       fill={true}
-      iconSide="left"
       onClick={[Function]}
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Close"
