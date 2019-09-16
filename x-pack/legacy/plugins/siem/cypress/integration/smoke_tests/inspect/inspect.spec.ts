@@ -5,50 +5,30 @@
  */
 
 import { logout } from '../../lib/logout';
-import { HOSTS_PAGE, HOSTS_PAGE_INSPECTABLE_TABLE_URLS, NETWORK_PAGE } from '../../lib/urls';
+import { HOSTS_PAGE } from '../../lib/urls';
 import {
-  HOST_STATS,
-  HOST_TABLE_WRAPPER,
   INSPECT_BUTTON_ICON,
   INSPECT_MODAL,
-  NETWORK_INSPECT_TABLES,
+  INSPECT_BUTTONS_IN_SIEM,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
 } from '../../lib/inspect/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 describe('Inspect', () => {
-  describe('Hosts Tables', () => {
+  describe('Hosts and network stats and tables', () => {
     afterEach(() => {
       return logout();
     });
-    Object.entries(HOSTS_PAGE_INSPECTABLE_TABLE_URLS).map(([key, value]) =>
-      it(`inspects the ${key} table`, () => {
-        loginAndWaitForPage(value);
-        waitForTableLoad();
-        cy.get(`${HOST_TABLE_WRAPPER} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
-
-        cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
-      })
-    );
-    HOST_STATS.map(stat =>
-      it(`inspects the ${stat.title} stat`, () => {
-        loginAndWaitForPage(HOSTS_PAGE);
-        waitForTableLoad();
-        cy.get(`${stat.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
-        cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
-      })
-    );
-  });
-  describe('Network Tables', () => {
-    afterEach(() => {
-      return logout();
-    });
-    NETWORK_INSPECT_TABLES.map(table =>
-      it(`inspects the ${table.title} table`, () => {
-        loginAndWaitForPage(NETWORK_PAGE);
-        waitForTableLoad();
-        cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+    INSPECT_BUTTONS_IN_SIEM.map(table =>
+      it(`inspects the ${table.title}`, () => {
+        loginAndWaitForPage(table.url);
+        waitForTableLoad(table.id);
+        if (table.altInspectId) {
+          cy.get(table.altInspectId).trigger('click', { force: true });
+        } else {
+          cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+        }
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
       })
     );

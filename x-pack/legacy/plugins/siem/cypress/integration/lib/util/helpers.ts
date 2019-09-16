@@ -23,5 +23,4 @@ export const loginAndWaitForPage = (url: string) => {
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
 
-export const waitForTableLoad = () =>
-  cy.get('[data-test-subj="paginated-table-false"]', { timeout: DEFAULT_TIMEOUT });
+export const waitForTableLoad = (tableId: string) => cy.get(tableId, { timeout: DEFAULT_TIMEOUT });

@@ -52,7 +52,6 @@ interface StatItem {
   icon?: IconType;
   key: string;
   name?: string;
-  statKey: string;
   value: number | undefined | null;
 }
 
@@ -66,6 +65,7 @@ export interface StatItems {
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
   index: number;
   key: string;
+  statKey?: string;
 }
 
 export interface StatItemsProps extends StatItems {
@@ -81,8 +81,8 @@ export const numberFormatter = (value: string | number): string => value.toLocal
 const statItemBarchartRotation: Rotation = 90;
 
 export const areachartConfigs = (config?: {
-  onBrushEnd?: BrushEndListener;
   xTickFormatter: (value: number) => string;
+  onBrushEnd?: BrushEndListener;
 }) => ({
   series: {
     xScaleType: ScaleType.Time,
@@ -157,12 +157,12 @@ export const addValueToBarChart = (
 };
 
 export const useKpiMatrixStatus = (
-  data: KpiHostsData | KpiNetworkData,
-  from: number,
-  id: string,
   mappings: Readonly<StatItems[]>,
-  narrowDateRange: UpdateDateRange,
-  to: number
+  data: KpiHostsData | KpiNetworkData,
+  id: string,
+  from: number,
+  to: number,
+  narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
@@ -174,12 +174,12 @@ export const useKpiMatrixStatus = (
           areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
           barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
           fields: addValueToFields(stat.fields, data),
-          from,
           id,
           key: `kpi-summary-${stat.key}`,
-          narrowDateRange,
           statKey: `${stat.key}`,
+          from,
           to,
+          narrowDateRange,
         };
       })
     );
@@ -214,7 +214,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem grow={grow} data-test-subj={statKey}>
+      <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
@@ -224,10 +224,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <InspectButton
-                inspectIndex={index}
                 queryId={id}
-                show={isHover}
                 title={`KPI ${description}`}
+                inspectIndex={index}
+                show={isHover}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -239,10 +239,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
-                        color={field.color}
-                        data-test-subj="stat-icon"
-                        size="l"
                         type={field.icon}
+                        color={field.color}
+                        size="l"
+                        data-test-subj="stat-icon"
                       />
                     </FlexItem>
                   )}
