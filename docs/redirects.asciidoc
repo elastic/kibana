@@ -35,3 +35,8 @@ This page has moved. Please see <<infra-configure-source>>.
 
 This page has moved. Please see <<xpack-logs-configuring>>.
 
+[role="exclude",id="creating-df-kib"]
+== Creating {transforms}
+
+This page is deleted. Please see
+{stack-ov}/ecommerce-dataframes.html[Transforming the eCommerce sample data].
