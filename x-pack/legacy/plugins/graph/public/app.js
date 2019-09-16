@@ -40,6 +40,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VennDiagram } from './components/venn_diagram';
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
 
@@ -86,6 +87,10 @@ app.directive('focusOn', function () {
       elem[0].focus();
     });
   };
+});
+
+app.directive('vennDiagram', function (reactDirective) {
+  return reactDirective(VennDiagram);
 });
 
 app.directive('graphListing', function (reactDirective) {
@@ -676,9 +681,8 @@ app.controller('graphuiPlugin', function (
         'term2': ti.term2,
         'v1': ti.v1,
         'v2': ti.v2,
-        'overlap': ti.overlap,
-        width: 100,
-        height: 60 });
+        'overlap': ti.overlap
+      });
 
     }
     $scope.detail = { mergeCandidates };
