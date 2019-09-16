@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { SummarizedCopyToSpaceResult } from 'plugins/spaces/lib/copy_saved_objects_to_space';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsManagementRecord } from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';

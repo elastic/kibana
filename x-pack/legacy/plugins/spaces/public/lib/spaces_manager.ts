@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
 import { kfetch } from 'ui/kfetch';
-import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
+import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/types';
