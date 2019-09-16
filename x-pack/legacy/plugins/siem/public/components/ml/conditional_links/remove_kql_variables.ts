@@ -18,13 +18,10 @@ export const replacement = (match: string, ...parts: string[]): string => {
   if (parts == null) {
     return '';
   }
-  const operatorsMatched = parts.reduce<string[]>((accum, part) => {
-    if (part != null && operators.includes(part)) {
-      return [...accum, part];
-    } else {
-      return accum;
-    }
-  }, []);
+  const operatorsMatched = parts.reduce<string[]>(
+    (accum, part) => (part != null && operators.includes(part) ? [...accum, part] : accum),
+    []
+  );
   if (operatorsMatched.length > 1) {
     return ` ${operatorsMatched[operatorsMatched.length - 1].trim()} `;
   } else {

@@ -68,31 +68,31 @@ export const tryParseResponse = (response: string): string => {
 };
 
 export const throwIfErrorAttachedToSetup = (setupResponse: SetupMlResponse): void => {
-  const jobErrors = setupResponse.jobs.reduce<string[]>((accum, job) => {
-    if (job.error != null) {
-      return [
-        ...accum,
-        job.error.msg,
-        tryParseResponse(job.error.response),
-        `${i18n.STATUS_CODE} ${job.error.statusCode}`,
-      ];
-    } else {
-      return accum;
-    }
-  }, []);
+  const jobErrors = setupResponse.jobs.reduce<string[]>(
+    (accum, job) =>
+      job.error != null
+        ? [
+            ...accum,
+            job.error.msg,
+            tryParseResponse(job.error.response),
+            `${i18n.STATUS_CODE} ${job.error.statusCode}`,
+          ]
+        : accum,
+    []
+  );
 
-  const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>((accum, dataFeed) => {
-    if (dataFeed.error != null) {
-      return [
-        ...accum,
-        dataFeed.error.msg,
-        tryParseResponse(dataFeed.error.response),
-        `${i18n.STATUS_CODE} ${dataFeed.error.statusCode}`,
-      ];
-    } else {
-      return accum;
-    }
-  }, []);
+  const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>(
+    (accum, dataFeed) =>
+      dataFeed.error != null
+        ? [
+            ...accum,
+            dataFeed.error.msg,
+            tryParseResponse(dataFeed.error.response),
+            `${i18n.STATUS_CODE} ${dataFeed.error.statusCode}`,
+          ]
+        : accum,
+    []
+  );
 
   const errors = [...jobErrors, ...dataFeedErrors];
   if (errors.length > 0) {

@@ -45,9 +45,10 @@ export const getBreadcrumbsForRoute = (
       ...siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
         object,
-        urlStateKeys.reduce((acc: string[], item: SearchNavTab) => {
-          return [...acc, getSearch(item, object)];
-        }, [])
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
       ),
     ];
   }
@@ -58,9 +59,7 @@ export const getBreadcrumbsForRoute = (
       ...siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
         object.detailName,
-        urlStateKeys.reduce((acc: string[], item) => {
-          return [...acc, getSearch(item, object)];
-        }, [])
+        urlStateKeys.reduce((acc: string[], item) => [...acc, getSearch(item, object)], [])
       ),
     ];
   }
