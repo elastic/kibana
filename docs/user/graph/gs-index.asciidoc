@@ -5,12 +5,12 @@
 --
 The {kib} {graph-features} enable you to discover how items in an
 Elasticsearch index are related. You can explore the connections between
-indexed terms and see which connections are the most meaningful. This can be
+indexed terms and see which connections are the most meaningful. This is
 useful in a variety of applications, from fraud detection to recommendation
 engines. 
 
-For example, graph exploration could help you uncover website vulnerabilities
-that hackers are targeting so you can harden your website. Or, you might
+For example, graph exploration can help you uncover website vulnerabilities
+that hackers are targeting, so you can harden your website. Or, you might
 provide graph-based personalized recommendations to your e-commerce customers.
 
 The {graph-features} provide a simple, yet powerful graph exploration API, and an
@@ -20,8 +20,8 @@ additional data to use these features.
 
 [[how-graph-works]]
 [float]
-=== How Graphs Work
-The Graph API provides an alternative way to extract and summarize information
+=== How Graph works
+The graph API provides an alternative way to extract and summarize information
 about the documents and terms in your Elasticsearch index. A _graph_ is really
 just a network of related items. In our case, this means a network of related
 terms in the index. 
@@ -40,9 +40,9 @@ cluster.
 
 The graph vertices are simply the terms that you've already indexed. The
 connections are derived on the fly using Elasticsearch aggregations. To
-identify the most _meaningful_ connections, the Graph API leverages
+identify the most _meaningful_ connections, the graph API leverages
 Elasticsearch relevance scoring. The same data structures and relevance ranking
-tools built into Elasticsearch to support text searches enable the Graph API to
+tools built into Elasticsearch to support text searches enable the graph API to
 separate useful signals from the noise that is typical of most connected data. 
 
 This foundation lets you easily answer questions like:
@@ -53,11 +53,13 @@ be interested in?
 * Which people on Stack Overflow have expertise in both Hadoop-related
 technologies and Python-related tech?
 
-But what about performance, you ask? The Elasticsearch aggregation framework
-enables the Graph API to quickly summarize millions of documents as a single
+But what about performance? The Elasticsearch aggregation framework
+enables the graph API to quickly summarize millions of documents as a single
 super-connection. Instead of retrieving every banking transaction between
 accounts A and B, it derives a single connection that represents that
-relationship. And, of course, this summarization process works across
+relationship. 
+
+This summarization process works across
 multi-node clusters and scales with your Elasticsearch deployment.
 Advanced options let you control how your data is sampled and summarized.
 You can also set timeouts to prevent graph queries from adversely
