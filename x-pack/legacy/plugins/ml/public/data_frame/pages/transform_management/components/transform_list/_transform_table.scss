@@ -42,3 +42,7 @@
 .mlTaskStateBadge, .mlTaskModeBadge {
   max-width: 100px;
 }
+
+.mlTransformTable__messagesPaneTable .euiTableCellContent__text {
+  text-align: left;
+}

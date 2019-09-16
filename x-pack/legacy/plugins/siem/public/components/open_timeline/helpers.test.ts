@@ -5,8 +5,14 @@
  */
 import { cloneDeep, omit } from 'lodash/fp';
 
-import { getNotesCount, getPinnedEventCount, isUntitled } from './helpers';
 import { mockTimelineResults } from '../../mock/timeline_results';
+import { timelineDefaults } from '../../store/timeline/model';
+import {
+  defaultTimelineToTimelineModel,
+  getNotesCount,
+  getPinnedEventCount,
+  isUntitled,
+} from './helpers';
 import { OpenTimelineResult } from './types';
 
 describe('helpers', () => {
@@ -167,6 +173,262 @@ describe('helpers', () => {
       };
 
       expect(isUntitled(titleIsWitespace)).toEqual(false);
+    });
+  });
+
+  describe('#defaultTimelineToTimelineModel', () => {
+    test('if title is null, we should get the default title', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: null,
+        version: '1',
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false);
+      expect(newTimeline).toEqual({
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.action',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        dataProviders: [],
+        dateRange: {
+          end: 0,
+          start: 0,
+        },
+        description: '',
+        eventIdToNoteIds: {},
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        id: 'savedObject-1',
+        isFavorite: false,
+        isLive: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        savedObjectId: 'savedObject-1',
+        show: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        title: '',
+        version: '1',
+        width: 1100,
+      });
+    });
+    test('if columns are null, we should get the default columns', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        columns: null,
+        version: '1',
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false);
+      expect(newTimeline).toEqual({
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.action',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        dataProviders: [],
+        dateRange: {
+          end: 0,
+          start: 0,
+        },
+        description: '',
+        eventIdToNoteIds: {},
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        id: 'savedObject-1',
+        isFavorite: false,
+        isLive: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        savedObjectId: 'savedObject-1',
+        show: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        title: '',
+        version: '1',
+        width: 1100,
+      });
+    });
+    test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        version: '1',
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false);
+      expect(newTimeline).toEqual({
+        savedObjectId: 'savedObject-1',
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        version: '1',
+        dataProviders: [],
+        description: '',
+        eventIdToNoteIds: {},
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        isFavorite: false,
+        isLive: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        title: '',
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        dateRange: {
+          start: 0,
+          end: 0,
+        },
+        show: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        width: 1100,
+        id: 'savedObject-1',
+      });
     });
   });
 });

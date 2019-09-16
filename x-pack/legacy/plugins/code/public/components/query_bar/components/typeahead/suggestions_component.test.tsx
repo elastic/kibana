@@ -12,8 +12,6 @@ import { MemoryRouter } from 'react-router-dom';
 import props from '../__fixtures__/props.json';
 import { SuggestionsComponent } from './suggestions_component';
 
-jest.mock('ui/kfetch');
-
 test('render empty suggestions component', () => {
   const emptyFn = () => {
     return;

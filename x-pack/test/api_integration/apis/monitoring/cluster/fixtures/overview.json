@@ -63,7 +63,7 @@
     "logs": {
       "enabled": false,
       "reason": {
-        "clusterExists": null,
+        "clusterExists": false,
         "indexPatternExists": false,
         "indexPatternInTimeRangeExists": false,
         "nodeExists": null,

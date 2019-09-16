@@ -31,6 +31,8 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
+  root: true,
+
   extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
@@ -160,6 +162,8 @@ module.exports = {
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
+                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
+                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
                   'src/legacy/core_plugins/**/public/np_ready/**/*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
                   'x-pack/legacy/plugins/**/public/np_ready/**/*',
@@ -533,8 +537,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'no-duplicate-imports': 'warn',
+        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',

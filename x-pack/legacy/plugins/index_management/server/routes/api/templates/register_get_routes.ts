@@ -6,26 +6,34 @@
 
 import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
 import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
+
+let callWithInternalUser: any;
 
 const allHandler: RouterRouteHandler = async (_req, callWithRequest) => {
+  const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
+
   const indexTemplatesByName = await callWithRequest('indices.getTemplate');
 
-  return deserializeTemplateList(indexTemplatesByName);
+  return deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
 };
 
 const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { name } = req.params;
+  const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
   const indexTemplateByName = await callWithRequest('indices.getTemplate', { name });
 
   if (indexTemplateByName[name]) {
-    return deserializeTemplate({ ...indexTemplateByName[name], name });
+    return deserializeTemplate({ ...indexTemplateByName[name], name }, managedTemplatePrefix);
   }
 };
 
-export function registerGetAllRoute(router: Router) {
+export function registerGetAllRoute(router: Router, server: any) {
+  callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('templates', allHandler);
 }
 
-export function registerGetOneRoute(router: Router) {
+export function registerGetOneRoute(router: Router, server: any) {
+  callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('templates/{name}', oneHandler);
 }

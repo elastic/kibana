@@ -48,7 +48,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/single_metric', {
+  .when('/jobs/new_job_old/single_metric', {
     template,
     k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
@@ -148,7 +148,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
-      aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
+      aggTypeOptions: filterAggTypes(aggTypes[METRIC_AGG_TYPE]),
       fields: [],
       timeFields: [],
       intervals: [{

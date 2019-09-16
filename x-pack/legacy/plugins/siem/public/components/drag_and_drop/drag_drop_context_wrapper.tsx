@@ -6,7 +6,7 @@
 
 import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult, ResponderProvided, DragStart } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
@@ -19,8 +19,10 @@ import {
   addFieldToTimelineColumns,
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
+  IS_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
+  draggableIsField,
 } from './helpers';
 
 interface Props {
@@ -65,7 +67,7 @@ export class DragDropContextWrapperComponent extends React.Component<Props> {
     const { children } = this.props;
 
     return (
-      <DragDropContext onDragEnd={this.onDragEnd} onDragStart={disableScrolling}>
+      <DragDropContext onDragEnd={this.onDragEnd} onDragStart={onDragStart}>
         {children}
       </DragDropContext>
     );
@@ -86,6 +88,10 @@ export class DragDropContextWrapperComponent extends React.Component<Props> {
         dispatch,
       });
     }
+
+    if (!draggableIsField(result)) {
+      document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+    }
   };
 }
 
@@ -102,7 +108,7 @@ const mapStateToProps = (state: State) => {
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
 
-const disableScrolling = () => {
+const onDragStart = (initial: DragStart) => {
   const x =
     window.pageXOffset !== undefined
       ? window.pageXOffset
@@ -114,6 +120,10 @@ const disableScrolling = () => {
       : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
   window.onscroll = () => window.scrollTo(x, y);
+
+  if (!draggableIsField(initial)) {
+    document.body.classList.add(IS_DRAGGING_CLASS_NAME);
+  }
 };
 
 const enableScrolling = () => (window.onscroll = () => noop);

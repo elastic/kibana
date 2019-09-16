@@ -54,7 +54,6 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -196,8 +195,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const visualizeLoader = Private(VisualizeLoaderProvider);
-  let visualizeHandler;
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -214,6 +211,13 @@ function discoverController(
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -621,7 +625,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
           if (!$scope.opts.timefield) return;
 
-          const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
+          const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
 
           if (buckets && buckets.length === 1) {
             $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -761,6 +765,9 @@ function discoverController(
       })
       .then(onResults)
       .catch((error) => {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
@@ -791,15 +798,7 @@ function discoverController(
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
-          visualizeHandler.render({
-            as: 'visualization',
-            value: {
-              visType: $scope.vis.type.name,
-              visData: resp,
-              visConfig: $scope.vis.params,
-              params: {},
-            }
-          });
+          $scope.histogramData = resp;
         });
     }
 
@@ -932,7 +931,7 @@ function discoverController(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {
@@ -964,15 +963,14 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+  $scope.$watch('savedQuery', (newSavedQuery) => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
+    updateStateFromSavedQuery(newSavedQuery);
+
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -981,12 +979,14 @@ function discoverController(
       return;
     }
 
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
       });
-    });
+    }
   });
 
   async function setupVisualization() {
@@ -1043,13 +1043,6 @@ function discoverController(
 
     $scope.searchSource.setField('aggs', function () {
       return $scope.vis.getAggConfig().toDsl();
-    });
-
-    $timeout(async () => {
-      const visEl = $element.find('#discoverHistogram')[0];
-      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
-        autoFetch: false,
-      });
     });
   }
 

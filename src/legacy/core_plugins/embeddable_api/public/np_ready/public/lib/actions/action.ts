@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { IEmbeddable } from '../embeddables';
-
-export interface ActionContext<
-  TEmbeddable extends IEmbeddable = IEmbeddable,
-  TTriggerContext extends {} = {}
-> {
-  embeddable: TEmbeddable;
-  triggerContext?: TTriggerContext;
-}
-
-export abstract class Action<
-  TEmbeddable extends IEmbeddable = IEmbeddable,
-  TTriggerContext extends {} = {}
-> {
+export abstract class Action<ActionContext extends {} = {}> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -43,7 +30,7 @@ export abstract class Action<
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  public getIconType(context: ActionContext<TEmbeddable, TTriggerContext>): string | undefined {
+  public getIconType(context: ActionContext): string | undefined {
     return undefined;
   }
 
@@ -51,27 +38,25 @@ export abstract class Action<
    * Returns a title to be displayed to the user.
    * @param context
    */
-  public abstract getDisplayName(context: ActionContext<TEmbeddable, TTriggerContext>): string;
+  public abstract getDisplayName(context: ActionContext): string;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  public async isCompatible(
-    context: ActionContext<TEmbeddable, TTriggerContext>
-  ): Promise<boolean> {
+  public async isCompatible(context: ActionContext): Promise<boolean> {
     return true;
   }
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  public getHref(context: ActionContext<TEmbeddable, TTriggerContext>): string | undefined {
+  public getHref(context: ActionContext): string | undefined {
     return undefined;
   }
 
   /**
    * Executes the action.
    */
-  public abstract execute(context: ActionContext<TEmbeddable, TTriggerContext>): void;
+  public abstract async execute(context: ActionContext): Promise<void>;
 }

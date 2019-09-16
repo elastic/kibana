@@ -99,4 +99,5 @@ export const httpServiceMock = {
   createSetupContract: createSetupContractMock,
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
+  createRouter: createRouterMock,
 };

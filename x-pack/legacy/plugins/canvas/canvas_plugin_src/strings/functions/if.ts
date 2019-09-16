@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ifFn } from '../../functions/common/if';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { BOOLEAN_TRUE, BOOLEAN_FALSE, CONTEXT } from '../constants';
+import { BOOLEAN_TRUE, BOOLEAN_FALSE, CONTEXT } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
   help: i18n.translate('xpack.canvas.functions.ifHelpText', {

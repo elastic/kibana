@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
@@ -28,6 +29,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventViewer?: boolean;
   loading: boolean;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
@@ -35,6 +37,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
+  timelineId: string;
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
@@ -42,6 +45,10 @@ interface Props {
 export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
+
+const EventColumnViewFlexGroup = styled(EuiFlexGroup)`
+  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+`;
 
 export const EventColumnView = React.memo<Props>(
   ({
@@ -54,6 +61,7 @@ export const EventColumnView = React.memo<Props>(
     eventIdToNoteIds,
     expanded,
     getNotesByIds,
+    isEventViewer = false,
     loading,
     onColumnResized,
     onEventToggled,
@@ -61,10 +69,15 @@ export const EventColumnView = React.memo<Props>(
     onUnPinEvent,
     pinnedEventIds,
     showNotes,
+    timelineId,
     toggleShowNotes,
     updateNote,
   }) => (
-    <EuiFlexGroup data-test-subj="event-column-view" gutterSize="none">
+    <EventColumnViewFlexGroup
+      alignItems="center"
+      data-test-subj="event-column-view"
+      gutterSize="none"
+    >
       <EuiFlexItem data-test-subj="actions-column-item" grow={false}>
         <Actions
           actionsColumnWidth={actionsColumnWidth}
@@ -78,6 +91,7 @@ export const EventColumnView = React.memo<Props>(
             pinnedEventIds,
           })}
           getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
           loading={loading}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}
@@ -102,9 +116,10 @@ export const EventColumnView = React.memo<Props>(
           columnRenderers={columnRenderers}
           data={data}
           onColumnResized={onColumnResized}
+          timelineId={timelineId}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EventColumnViewFlexGroup>
   ),
   (prevProps, nextProps) => {
     return (
@@ -117,7 +132,8 @@ export const EventColumnView = React.memo<Props>(
       prevProps.expanded === nextProps.expanded &&
       prevProps.loading === nextProps.loading &&
       prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-      prevProps.showNotes === nextProps.showNotes
+      prevProps.showNotes === nextProps.showNotes &&
+      prevProps.timelineId === nextProps.timelineId
     );
   }
 );

@@ -120,7 +120,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       Array [
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
+            <ForwardRef
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -135,19 +135,14 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 grow={false}
               >
                 <EuiButton
-                  color="primary"
                   data-test-subj="loadSavedObjects"
-                  fill={false}
-                  iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
-                  type="button"
                 >
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ForwardRef>
             <EuiSpacer
               size="s"
             />
@@ -246,14 +241,9 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <EuiButton
-                      color="primary"
                       data-test-subj="loadSavedObjects"
-                      fill={false}
-                      iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
-                      type="button"
                     >
                       <button
                         className="euiButton euiButton--primary"
@@ -432,7 +422,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       Array [
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
+            <ForwardRef
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -447,19 +437,14 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 grow={false}
               >
                 <EuiButton
-                  color="primary"
                   data-test-subj="loadSavedObjects"
-                  fill={false}
-                  iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
-                  type="button"
                 >
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ForwardRef>
             <EuiSpacer
               size="s"
             />
@@ -592,14 +577,9 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <EuiButton
-                      color="primary"
                       data-test-subj="loadSavedObjects"
-                      fill={false}
-                      iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
-                      type="button"
                     >
                       <button
                         className="euiButton euiButton--primary"
@@ -664,7 +644,7 @@ exports[`renders 1`] = `
     Array [
       Object {
         "children": <React.Fragment>
-          <EuiFlexGroup
+          <ForwardRef
             alignItems="center"
             justifyContent="spaceBetween"
           >
@@ -679,19 +659,14 @@ exports[`renders 1`] = `
               grow={false}
             >
               <EuiButton
-                color="primary"
                 data-test-subj="loadSavedObjects"
-                fill={false}
-                iconSide="left"
                 isLoading={false}
                 onClick={[Function]}
-                size="m"
-                type="button"
               >
                 Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </ForwardRef>
           <EuiSpacer
             size="s"
           />

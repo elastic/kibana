@@ -7,8 +7,11 @@
 import * as rt from 'io-ts';
 import { kfetch } from 'ui/kfetch';
 
-import { getJobIdPrefix } from '../../../../../common/log_analysis';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { getJobIdPrefix } from '../../../../../common/log_analysis';
 
 const MODULE_ID = 'logs_ui_analysis';
 
@@ -51,40 +54,15 @@ export const callSetupMlModuleAPI = async (
             },
           },
         ],
-        datafeedOverrides: [
-          {
-            job_id: 'log-entry-rate',
-            aggregations: {
-              buckets: {
-                date_histogram: {
-                  field: timeField,
-                  fixed_interval: `${bucketSpan}ms`,
-                },
-                aggregations: {
-                  [timeField]: {
-                    max: {
-                      field: `${timeField}`,
-                    },
-                  },
-                  doc_count_per_minute: {
-                    bucket_script: {
-                      script: {
-                        params: {
-                          bucket_span_in_ms: bucketSpan,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
+        datafeedOverrides: [],
       })
     ),
   });
 
-  return setupMlModuleResponsePayloadRT.decode(response).getOrElseL(throwErrors(createPlainError));
+  return pipe(
+    setupMlModuleResponsePayloadRT.decode(response),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({

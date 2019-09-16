@@ -7,7 +7,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@elastic/eui": "13.3.0",
+    "@elastic/eui": "13.8.1",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   }

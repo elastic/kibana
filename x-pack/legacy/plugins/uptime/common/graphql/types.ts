@@ -51,10 +51,10 @@ export interface PingResults {
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
+  /** unique ID for this ping */
+  id: string;
   /** The timestamp of the ping's creation */
   timestamp: string;
-  /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -90,7 +90,7 @@ export interface Ping {
 
   tcp?: Tcp | null;
 
-  tls?: Tls | null;
+  tls?: PingTls | null;
 
   url?: Url | null;
 }
@@ -172,15 +172,28 @@ export interface Os {
 }
 
 export interface Http {
-  response?: StatusCode | null;
+  response?: HttpResponse | null;
 
   rtt?: HttpRtt | null;
 
   url?: string | null;
 }
 
-export interface StatusCode {
-  status_code?: number | null;
+export interface HttpResponse {
+  status_code?: UnsignedInteger | null;
+
+  body?: HttpBody | null;
+}
+
+export interface HttpBody {
+  /** Size of HTTP response body in bytes */
+  bytes?: UnsignedInteger | null;
+  /** Hash of the HTTP response body */
+  hash?: string | null;
+  /** Response body of the HTTP Response. May be truncated based on client settings. */
+  content?: string | null;
+  /** Byte length of the content string, taking into account multibyte chars. */
+  content_bytes?: UnsignedInteger | null;
 }
 
 export interface HttpRtt {
@@ -342,8 +355,9 @@ export interface Tcp {
 
   rtt?: Rtt | null;
 }
-
-export interface Tls {
+/** Contains monitor transmission encryption information. */
+export interface PingTls {
+  /** The date and time after which the certificate is invalid. */
   certificate_not_valid_after?: string | null;
 
   certificate_not_valid_before?: string | null;
@@ -534,6 +548,8 @@ export interface State {
   summary: Summary;
 
   timestamp: UnsignedInteger;
+  /** Transport encryption information. */
+  tls?: (StateTls | null)[] | null;
 
   url?: StateUrl | null;
 }
@@ -598,6 +614,17 @@ export interface MonitorState {
   id?: string | null;
 
   type?: string | null;
+}
+/** Contains monitor transmission encryption information. */
+export interface StateTls {
+  /** The date and time after which the certificate is invalid. */
+  certificate_not_valid_after?: string | null;
+
+  certificate_not_valid_before?: string | null;
+
+  certificates?: string | null;
+
+  rtt?: Rtt | null;
 }
 
 export interface StateUrl {
