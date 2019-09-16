@@ -21,12 +21,22 @@ import d3 from 'd3';
 import _ from 'lodash';
 import { getHeatmapColors } from '../../components/color/heatmap_color';
 
-
-const defaultConfig = {
-  showTooltip: true,
-  percentageMode: true,
+const arcAngles = {
+  angleFactor: 0.75,
   maxAngle: 2 * Math.PI * 1.3,
   minAngle: 2 * Math.PI * 0.7,
+};
+
+const circleAngles = {
+  angleFactor: 1,
+  maxAngle: 2 * Math.PI,
+  minAngle: 0,
+};
+
+const defaultConfig = {
+  ...arcAngles,
+  showTooltip: true,
+  percentageMode: true,
   innerSpace: 5,
   extents: [0, 10000],
   scale: {
@@ -163,15 +173,11 @@ export class MeterGauge {
   }
 
   drawGauge(svg, data, width, height) {
-    const self = this;
     const marginFactor = 0.95;
     const tooltip = this.gaugeChart.tooltip;
     const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
     const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', false);
-    const { maxAngle, minAngle } = this.gaugeConfig.gaugeType === 'Circle' ?
-      { maxAngle: 2 * Math.PI, minAngle: 0 } :
-      this.gaugeConfig;
-    const angleFactor = this.gaugeConfig.gaugeType === 'Arc' ? 0.75 : 1;
+    const { angleFactor, maxAngle, minAngle } = this.gaugeConfig.gaugeType === 'Circle' ? circleAngles : arcAngles;
     const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
     const extendRange = this.gaugeConfig.extendRange;
@@ -248,9 +254,7 @@ export class MeterGauge {
     const series = gauges
       .append('path')
       .attr('d', arc)
-      .style('fill', function (d) {
-        return self.getColorBucket(Math.max(min, d.y));
-      });
+      .style('fill', (d) => this.getColorBucket(Math.max(min, d.y)));
 
     const smallContainer = svg.node().getBBox().height < 70;
     let hiddenLabels = smallContainer;
