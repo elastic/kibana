@@ -17,12 +17,17 @@
  * under the License.
  */
 
-export async function mapQueryString(filter) {
-  if (filter.query && filter.query.query_string) {
-    const type = 'query_string';
-    const key = 'query';
-    const value = filter.query.query_string.query;
-    return { type, key, value };
+import { ExistsFilter } from '@kbn/es-query';
+
+const TYPE = 'exists';
+
+export const mapExists = async (filter: ExistsFilter) => {
+  if (filter.exists) {
+    return {
+      type: TYPE,
+      value: TYPE,
+      key: filter.exists.field,
+    };
   }
   throw filter;
-}
+};

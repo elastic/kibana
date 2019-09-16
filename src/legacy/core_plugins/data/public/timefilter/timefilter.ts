@@ -32,12 +32,15 @@ export interface TimefilterConfig {
   refreshIntervalDefaults: RefreshInterval;
 }
 
+export type InputTimeRangeMode = 'absolute' | 'relative';
+
 // Timefilter accepts moment input but always returns string output
 export type InputTimeRange =
   | TimeRange
   | {
       from: Moment;
       to: Moment;
+      mode?: InputTimeRangeMode;
     };
 
 export class Timefilter {

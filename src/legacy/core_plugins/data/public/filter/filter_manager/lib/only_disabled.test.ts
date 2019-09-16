@@ -18,83 +18,89 @@
  */
 
 import { Filter } from '@kbn/es-query';
-
 import { onlyDisabledFiltersChanged } from './only_disabled';
-import expect from '@kbn/expect';
 
-describe('Filter Bar Directive', function() {
-  describe('onlyDisabledFiltersChanged()', function() {
-    it('should return true if all filters are disabled', function() {
+describe('Filter Bar Directive', () => {
+  describe('onlyDisabledFiltersChanged()', () => {
+    test('should return true if all filters are disabled', () => {
       const filters = [
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
       ] as Filter[];
       const newFilters = [{ meta: { disabled: true } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(true);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
 
-    it('should return false if there are no old filters', function() {
+    test('should return false if there are no old filters', () => {
       const newFilters = [{ meta: { disabled: false } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, undefined)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, undefined)).toBe(false);
     });
 
-    it('should return false if there are no new filters', function() {
+    test('should return false if there are no new filters', () => {
       const filters = [{ meta: { disabled: false } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(undefined, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(undefined, filters)).toBe(false);
     });
 
-    it('should return false if all filters are not disabled', function() {
+    test('should return false if all filters are not disabled', () => {
       const filters = [
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
       ] as Filter[];
       const newFilters = [{ meta: { disabled: false } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should return false if only old filters are disabled', function() {
+    test('should return false if only old filters are disabled', () => {
       const filters = [
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
       ] as Filter[];
       const newFilters = [{ meta: { disabled: false } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should return false if new filters are not disabled', function() {
+    test('should return false if new filters are not disabled', () => {
       const filters = [
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
       ] as Filter[];
       const newFilters = [{ meta: { disabled: true } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should return true when all removed filters were disabled', function() {
+    test('should return true when all removed filters were disabled', () => {
       const filters = [
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
       ] as Filter[];
       const newFilters = [] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(true);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
 
-    it('should return false when all removed filters were not disabled', function() {
+    test('should return false when all removed filters were not disabled', () => {
       const filters = [
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
       ] as Filter[];
       const newFilters = [] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should return true if all changed filters are disabled', function() {
+    test('should return true if all changed filters are disabled', () => {
       const filters = [
         { meta: { disabled: true, negate: false } },
         { meta: { disabled: true, negate: false } },
@@ -103,35 +109,39 @@ describe('Filter Bar Directive', function() {
         { meta: { disabled: true, negate: true } },
         { meta: { disabled: true, negate: true } },
       ] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(true);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
 
-    it('should return false if all filters remove were not disabled', function() {
+    test('should return false if all filters remove were not disabled', () => {
       const filters = [
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: true } },
       ] as Filter[];
       const newFilters = [{ meta: { disabled: false } }] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should return false when all removed filters are not disabled', function() {
+    test('should return false when all removed filters are not disabled', () => {
       const filters = [
         { meta: { disabled: true } },
         { meta: { disabled: false } },
         { meta: { disabled: true } },
       ] as Filter[];
       const newFilters = [] as Filter[];
-      expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(false);
+
+      expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
-    it('should not throw with null filters', function() {
+    test('should not throw with null filters', () => {
       const filters = [null, { meta: { disabled: true } }] as Filter[];
       const newFilters = [] as Filter[];
+
       expect(function() {
         onlyDisabledFiltersChanged(newFilters, filters);
-      }).to.not.throwError();
+      }).not.toThrowError();
     });
   });
 });

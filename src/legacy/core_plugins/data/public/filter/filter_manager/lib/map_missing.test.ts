@@ -16,29 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { MissingFilter, buildEmptyFilter, ExistsFilter } from '@kbn/es-query';
+import { mapMissing } from './map_missing';
 
-import expect from '@kbn/expect';
-import { mapMissing } from '../map_missing';
+describe('Filter Bar Directive', () => {
+  describe('mapMissing()', () => {
+    test('should return the key and value for matching filters', async () => {
+      const filter: MissingFilter = {
+        missing: { field: '_type' },
+        ...buildEmptyFilter(true),
+      };
+      const result = await mapMissing(filter);
 
-describe('Filter Bar Directive', function () {
-  describe('mapMissing()', function () {
-
-    it('should return the key and value for matching filters', function (done) {
-      const filter = { missing: { field: '_type' } };
-      mapMissing(filter).then(function (result) {
-        expect(result).to.have.property('key', '_type');
-        expect(result).to.have.property('value', 'missing');
-        done();
-      });
+      expect(result).toHaveProperty('key', '_type');
+      expect(result).toHaveProperty('value', 'missing');
     });
 
-    it('should return undefined for none matching', function (done) {
-      const filter = { query: { match: { query: 'foo' } } };
-      mapMissing(filter).catch(function (result) {
-        expect(result).to.be(filter);
-        done();
-      });
-    });
+    test('should return undefined for none matching', async done => {
+      const filter = buildEmptyFilter(true) as ExistsFilter;
 
+      try {
+        await mapMissing(filter);
+      } catch (e) {
+        expect(e).toBe(filter);
+        done();
+      }
+    });
   });
 });

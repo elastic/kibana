@@ -17,31 +17,12 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { chromeServiceMock } from '../../../../../../../core/public/mocks';
 
-interface FilterRange {
-  from?: number | string;
-  to?: number | string;
-}
-
-interface FilterRangeGt {
-  gt?: number | string;
-  lt?: number | string;
-}
-
-interface FilterRangeGte {
-  gte?: number | string;
-  lte?: number | string;
-}
-
-export type RangeFilterParams = FilterRange & FilterRangeGt & FilterRangeGte;
-
-export type RangeFilterMeta = FilterMeta & {
-  params: RangeFilterParams;
-  field?: any;
-};
-
-export type RangeFilter = Filter & {
-  meta: RangeFilterMeta;
-  range?: { [key: string]: RangeFilterParams };
-};
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));

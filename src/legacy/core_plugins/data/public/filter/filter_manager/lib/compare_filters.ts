@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
-let excludedAttributes;
-let comparators;
+import { Filter, FilterMeta } from '@kbn/es-query';
+import { defaults, isEqual, omit } from 'lodash';
 
 /**
  * Compare two filters to see if they match
@@ -28,9 +27,19 @@ let comparators;
  * @param {object} comparatorOptions Parameters to use for comparison
  * @returns {bool} Filters are the same
  */
-export function compareFilters(first, second, comparatorOptions) {
-  excludedAttributes = ['$$hashKey', 'meta'];
-  comparators = _.defaults(comparatorOptions || {}, {
+export function compareFilters(first: Filter, second: Filter, comparatorOptions: any = {}) {
+  let comparators: any = {};
+  const mapFilter = (filter: Filter) => {
+    const cleaned: FilterMeta = omit(filter, excludedAttributes);
+
+    if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
+    if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
+
+    return cleaned;
+  };
+  const excludedAttributes: string[] = ['$$hashKey', 'meta'];
+
+  comparators = defaults(comparatorOptions || {}, {
     state: false,
     negate: false,
     disabled: false,
@@ -38,12 +47,5 @@ export function compareFilters(first, second, comparatorOptions) {
 
   if (!comparators.state) excludedAttributes.push('$state');
 
-  return _.isEqual(mapFilter(first), mapFilter(second));
-}
-
-function mapFilter(filter) {
-  const cleaned = _.omit(filter, excludedAttributes);
-  if (comparators.negate) cleaned.negate = filter.meta && !!filter.meta.negate;
-  if (comparators.disabled) cleaned.disabled = filter.meta && !!filter.meta.disabled;
-  return cleaned;
+  return isEqual(mapFilter(first), mapFilter(second));
 }

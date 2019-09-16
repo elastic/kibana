@@ -17,18 +17,33 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { dedupFilters } from './dedup_filters';
+import { Filter } from '@kbn/es-query';
+import { filter, find } from 'lodash';
+import { compareFilters } from './compare_filters';
 
 /**
- * Remove duplicate filters from an array of filters
- * @param {array} filters The filters to remove duplicates from
- * @returns {object} The original filters array with duplicates removed
+ * Combine 2 filter collections, removing duplicates
+ *
+ * @param {object} existingFilters - The filters to compare to
+ * @param {object} filters - The filters being added
+ * @param {object} comparatorOptions - Parameters to use for comparison
+ *
+ * @returns {object} An array of filters that were not in existing
  */
-export function uniqFilters(filters, comparatorOptions) {
-  let results = [];
-  _.each(filters, function (filter) {
-    results = _.union(results, dedupFilters(results, [filter], comparatorOptions));
-  });
-  return results;
+export function dedupFilters(
+  existingFilters: Filter[],
+  filters: Filter[],
+  comparatorOptions: any = {}
+) {
+  if (!Array.isArray(filters)) {
+    filters = [filters];
+  }
+
+  return filter(
+    filters,
+    (f: Filter) =>
+      !find(existingFilters, (existingFilter: Filter) =>
+        compareFilters(existingFilter, f, comparatorOptions)
+      )
+  );
 }

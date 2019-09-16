@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export async function mapMatchAll(filter) {
-  if (filter.match_all) {
-    const type = 'match_all';
-    const key = filter.meta.field;
-    const value = filter.meta.formattedValue || 'all';
-    return { type, key, value };
-  }
-  throw filter;
-}
+import { Filter, FilterMeta } from './meta_filter';
+
+export type MissingFilterMeta = FilterMeta;
+
+export type MissingFilter = Filter & {
+  meta: MissingFilterMeta;
+  missing?: any;
+};

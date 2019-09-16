@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter } from '@kbn/es-query';
 
-export async function mapExists(filter) {
-  if (filter.exists) {
-    const type = 'exists';
-    const key = filter.exists.field;
-    const value = type;
-    return { type, key, value };
-  }
-  throw filter;
-}
+const noop = () => {
+  throw new Error('No mappings have been found for filter.');
+};
+
+export const generateMappingChain = (fn: Function, next: Function = noop) => {
+  return async (filter: Filter) => {
+    return await fn(filter).catch((result: any) => {
+      if (result === filter) {
+        return next(filter);
+      }
+      throw result;
+    });
+  };
+};

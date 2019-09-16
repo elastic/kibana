@@ -17,31 +17,31 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { mapExists } from '../map_exists';
+import { QueryStringFilter, buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
+import { mapQueryString } from './map_query_string';
 
-describe('Filter Bar Directive', function () {
-  describe('mapExists()', function () {
+describe('Filter Bar Directive', () => {
+  describe('mapQueryString()', () => {
+    test('should return the key and value for matching filters', async () => {
+      const filter: QueryStringFilter = buildQueryFilter(
+        { query_string: { query: 'foo:bar' } },
+        'index'
+      );
+      const result = await mapQueryString(filter);
 
-    beforeEach(ngMock.module('kibana'));
-
-    it('should return the key and value for matching filters', function (done) {
-      const filter = { exists: { field: '_type' } };
-      mapExists(filter).then(function (result) {
-        expect(result).to.have.property('key', '_type');
-        expect(result).to.have.property('value', 'exists');
-        done();
-      });
+      expect(result).toHaveProperty('key', 'query');
+      expect(result).toHaveProperty('value', 'foo:bar');
     });
 
-    it('should return undefined for none matching', function (done) {
-      const filter = { query: { match: { query: 'foo' } } };
-      mapExists(filter).catch(function (result) {
-        expect(result).to.be(filter);
-        done();
-      });
-    });
+    test('should return undefined for none matching', async done => {
+      const filter = buildEmptyFilter(true) as QueryStringFilter;
 
+      try {
+        await mapQueryString(filter);
+      } catch (e) {
+        expect(e).toBe(filter);
+        done();
+      }
+    });
   });
 });

@@ -17,12 +17,21 @@
  * under the License.
  */
 
-export async function mapMissing(filter) {
-  if (filter.missing) {
-    const type = 'missing';
-    const key = filter.missing.field;
-    const value = type;
+import { CustomFilter } from '@kbn/es-query';
+import { find, keys, get } from 'lodash';
+
+const TYPE = 'custom';
+
+export async function mapDefault(filter: CustomFilter) {
+  const metaProperty = /(^\$|meta)/;
+  const key = find(keys(filter), item => !item.match(metaProperty));
+
+  if (key) {
+    const type = TYPE;
+    const value = JSON.stringify(get(filter, key, {}));
+
     return { type, key, value };
   }
+
   throw filter;
 }

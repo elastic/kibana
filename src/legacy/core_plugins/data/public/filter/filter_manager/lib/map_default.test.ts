@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CustomFilter, buildEmptyFilter, buildQueryFilter } from '@kbn/es-query';
+import { mapDefault } from './map_default';
 
-import angular from 'angular';
-import _ from 'lodash';
+describe('Filter Bar Directive', () => {
+  describe('mapDefault()', () => {
+    test('should return the key and value for matching filters', async () => {
+      const filter: CustomFilter = buildQueryFilter({ match_all: {} }, 'index');
+      const result = await mapDefault(filter);
 
-export async function mapDefault(filter) {
-  const metaProperty = /(^\$|meta)/;
+      expect(result).toHaveProperty('key', 'query');
+      expect(result).toHaveProperty('value', '{"match_all":{}}');
+    });
 
-  const key = _.find(_.keys(filter), function (key) {
-    return !key.match(metaProperty);
+    test('should return undefined if there is no valid key', async () => {
+      const filter = buildEmptyFilter(true) as CustomFilter;
+
+      try {
+        await mapDefault(filter);
+      } catch (e) {
+        expect(e).toBe(filter);
+      }
+    });
   });
-
-  if (key) {
-    const type = 'custom';
-    const value = angular.toJson(filter[key]);
-    return { type, key, value };
-  }
-
-  throw filter;
-}
+});

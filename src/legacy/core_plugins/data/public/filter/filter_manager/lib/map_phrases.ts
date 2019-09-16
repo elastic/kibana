@@ -17,18 +17,16 @@
  * under the License.
  */
 
-export function generateMappingChain(fn, next) {
-  const noop = function () {
-    throw new Error('No mappings have been found for filter.');
-  };
+import { PhrasesFilter } from '@kbn/es-query';
 
-  next = next || noop;
-  return async function (filter) {
-    return await fn(filter).catch(function (result) {
-      if (result === filter) {
-        return next(filter);
-      }
-      throw result;
-    });
-  };
-}
+const TYPE = 'phrases';
+
+export const mapPhrases = async (filter: PhrasesFilter) => {
+  const { type, key, value, params } = filter.meta;
+
+  if (type !== TYPE) {
+    throw filter;
+  } else {
+    return { type, key, value, params };
+  }
+};

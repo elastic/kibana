@@ -23,4 +23,9 @@ export type QueryStringFilterMeta = FilterMeta;
 
 export type QueryStringFilter = Filter & {
   meta: QueryStringFilterMeta;
+  query?: {
+    query_string: {
+      query: string;
+    };
+  };
 };

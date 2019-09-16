@@ -16,12 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { MatchAllFilter } from '@kbn/es-query';
 
-export async function mapPhrases(filter) {
-  const { type, key, value, params } = filter.meta;
-  if (type !== 'phrases') {
-    throw filter;
-  } else {
-    return { type, key, value, params };
+const TYPE = 'match_all';
+
+export const mapMatchAll = async (filter: MatchAllFilter) => {
+  if (filter.match_all) {
+    return {
+      type: TYPE,
+      key: filter.meta.field,
+      value: filter.meta.formattedValue || 'all',
+    };
   }
-}
+  throw filter;
+};

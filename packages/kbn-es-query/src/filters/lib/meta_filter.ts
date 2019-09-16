@@ -40,7 +40,7 @@ export interface FilterMeta {
 export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
-  query?: object;
+  query?: any;
 }
 
 export interface LatLon {

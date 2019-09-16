@@ -16,13 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter } from '@kbn/es-query';
+import { each, union } from 'lodash';
+import { dedupFilters } from './dedup_filters';
 
-import { chromeServiceMock } from '../../../../../../../../core/public/mocks';
+/**
+ * Remove duplicate filters from an array of filters
+ *
+ * @param {array} filters The filters to remove duplicates from
+ * @returns {object} The original filters array with duplicates removed
+ */
+export function uniqFilters(filters: Filter[]) {
+  let results: Filter[] = [];
 
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+  each(filters, (filter: Filter) => {
+    results = union(results, dedupFilters(results, [filter]));
+  });
+
+  return results;
+}

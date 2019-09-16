@@ -23,18 +23,16 @@ import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { UiSettingsClientContract } from 'src/core/public';
-// @ts-ignore
+
 import { compareFilters } from './lib/compare_filters';
-// @ts-ignore
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-// @ts-ignore
+import { changeTimeFilter } from './lib/change_time_filter';
+import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { uniqFilters } from './lib/uniq_filters';
+
 // @ts-ignore
 import { extractTimeFilter } from './lib/extract_time_filter';
 // @ts-ignore
-import { changeTimeFilter } from './lib/change_time_filter';
-
-import { onlyDisabledFiltersChanged } from './lib/only_disabled';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 
 import { PartitionedFilters } from './partitioned_filters';
 

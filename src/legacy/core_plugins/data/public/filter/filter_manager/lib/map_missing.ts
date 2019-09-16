@@ -16,32 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { MissingFilter } from '@kbn/es-query';
 
-import { Filter, FilterMeta } from './meta_filter';
+const TYPE = 'missing';
 
-interface FilterRange {
-  from?: number | string;
-  to?: number | string;
-}
+export const mapMissing = async (filter: MissingFilter) => {
+  if (filter.missing) {
+    return {
+      type: TYPE,
+      value: TYPE,
+      key: filter.missing.field,
+    };
+  }
 
-interface FilterRangeGt {
-  gt?: number | string;
-  lt?: number | string;
-}
-
-interface FilterRangeGte {
-  gte?: number | string;
-  lte?: number | string;
-}
-
-export type RangeFilterParams = FilterRange & FilterRangeGt & FilterRangeGte;
-
-export type RangeFilterMeta = FilterMeta & {
-  params: RangeFilterParams;
-  field?: any;
-};
-
-export type RangeFilter = Filter & {
-  meta: RangeFilterMeta;
-  range?: { [key: string]: RangeFilterParams };
+  throw filter;
 };

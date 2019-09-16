@@ -29,6 +29,9 @@ import { PhraseFilter } from './phrase_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { QueryStringFilter } from './query_string_filter';
 import { RangeFilter } from './range_filter';
+import { MatchAllFilter } from './match_all_filter';
+import { MissingFilter } from './missing_filter';
+
 export {
   CustomFilter,
   ExistsFilter,
@@ -38,6 +41,8 @@ export {
   PhrasesFilter,
   QueryStringFilter,
   RangeFilter,
+  MatchAllFilter,
+  MissingFilter,
 };
 
 // Any filter associated with a field (used in the filter bar/editor)
@@ -47,4 +52,6 @@ export type FieldFilter =
   | GeoPolygonFilter
   | PhraseFilter
   | PhrasesFilter
-  | RangeFilter;
+  | RangeFilter
+  | MatchAllFilter
+  | MissingFilter;

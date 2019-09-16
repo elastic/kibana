@@ -16,29 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ExistsFilter, buildEmptyFilter, buildExistsFilter } from '@kbn/es-query';
+import { mapExists } from './map_exists';
+import { mapQueryString } from './map_query_string';
 
-import expect from '@kbn/expect';
-import { mapQueryString } from '../map_query_string';
+describe('Filter Bar Directive', () => {
+  describe('mapExists()', () => {
+    test('should return the key and value for matching filters', async () => {
+      const filter: ExistsFilter = buildExistsFilter({ name: '_type' }, 'index');
+      const result = await mapExists(filter);
 
-describe('Filter Bar Directive', function () {
-  describe('mapQueryString()', function () {
-
-    it('should return the key and value for matching filters', function (done) {
-      const filter = { query: { query_string: { query: 'foo:bar' } } };
-      mapQueryString(filter).then(function (result) {
-        expect(result).to.have.property('key', 'query');
-        expect(result).to.have.property('value', 'foo:bar');
-        done();
-      });
+      expect(result).toHaveProperty('key', '_type');
+      expect(result).toHaveProperty('value', 'exists');
     });
 
-    it('should return undefined for none matching', function (done) {
-      const filter = { query: { match: { query: 'foo' } } };
-      mapQueryString(filter).catch(function (result) {
-        expect(result).to.be(filter);
-        done();
-      });
-    });
+    test('should return undefined for none matching', async done => {
+      const filter = buildEmptyFilter(true) as ExistsFilter;
 
+      try {
+        await mapQueryString(filter);
+      } catch (e) {
+        expect(e).toBe(filter);
+        done();
+      }
+    });
   });
 });

@@ -17,20 +17,31 @@
  * under the License.
  */
 
+import { RangeFilter } from '@kbn/es-query';
 import { has, get } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
+import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
+const TYPE = 'range';
 
-function isScriptedRange(filter) {
-  const params = get(filter, ['script', 'script', 'params']);
-  return params && Object.keys(params).find(key => ['gte', 'gt', 'lte', 'lt'].includes(key));
+function isScriptedRange(filter: RangeFilter) {
+  const params = get(filter, ['script', 'script', 'params'], {});
+
+  return (
+    params && Object.keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt'].includes(key))
+  );
 }
 
-function getParams(filter, indexPattern) {
+const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
+const getRangeByKey = (filter: RangeFilter, key: string) =>
+  get(filter, `filter.range.${key}`, null);
+
+function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   const isScriptedRangeFilter = isScriptedRange(filter);
-  const type = 'range';
-  const key = isScriptedRangeFilter ? filter.meta.field : Object.keys(filter.range)[0];
-  const params = isScriptedRangeFilter ? filter.script.script.params : filter.range[key];
+  const key: string = (isScriptedRangeFilter ? filter.meta.field : getFirstRangeKey(filter)) || '';
+  const params: any = isScriptedRangeFilter
+    ? get(filter, 'script.script.params')
+    : getRangeByKey(filter, key);
 
   let left = has(params, 'gte') ? params.gte : params.gt;
   if (left == null) left = -Infinity;
@@ -43,23 +54,23 @@ function getParams(filter, indexPattern) {
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index is invalid.
   let value = `${left} to ${right}`;
-  if (indexPattern && indexPattern.fields.byName[key]) {
+  if (key && indexPattern && indexPattern.fields.byName[key]) {
     const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
     value = `${convert(left)} to ${convert(right)}`;
   }
 
-  return { type, key, value, params };
+  return { type: TYPE, key, value, params };
 }
 
-export function mapRange(indexPatterns) {
-  return async function (filter) {
+export function mapRange(indexPatterns: IndexPatterns) {
+  return async function(filter: RangeFilter) {
     const isScriptedRangeFilter = isScriptedRange(filter);
     if (!filter.range && !isScriptedRangeFilter) {
       throw filter;
     }
 
     try {
-      const indexPattern = await indexPatterns.get(filter.meta.index);
+      const indexPattern = await indexPatterns.get(filter.meta.index || '');
       return getParams(filter, indexPattern);
     } catch (error) {
       if (error instanceof SavedObjectNotFound) {
