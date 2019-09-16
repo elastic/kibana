@@ -25,21 +25,30 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    try {
-      const mlCapabilities = await getMlCapabilities({ 'kbn-version': kbnVersion });
-      setCapabilities(mlCapabilities);
-    } catch (error) {
-      errorToToaster({
-        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-        error,
-        dispatchToaster,
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchFunc();
+    let isSubscribed = true;
+
+    async function fetchMlCapabilities() {
+      try {
+        const mlCapabilities = await getMlCapabilities({ 'kbn-version': kbnVersion });
+        if (isSubscribed) {
+          setCapabilities(mlCapabilities);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          errorToToaster({
+            title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+            error,
+            dispatchToaster,
+          });
+        }
+      }
+    }
+
+    fetchMlCapabilities();
+    return () => {
+      isSubscribed = false;
+    };
   }, []);
 
   return (
