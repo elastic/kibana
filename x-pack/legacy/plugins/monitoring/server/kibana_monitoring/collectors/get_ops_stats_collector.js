@@ -16,11 +16,11 @@ import { cloneDeep } from 'lodash';
 let bufferHadEvents = false;
 
 class OpsMonitor {
-  constructor(server, buffer, interval) {
+  constructor(hapiServer, buffer, interval) {
     this._buffer = buffer;
     this._interval = interval;
-    this._oppsy = new Oppsy(server._hapi);
-    this._server = server;
+    this._oppsy = new Oppsy(hapiServer);
+    this._server = hapiServer;
   }
 
   start = () => {
@@ -29,7 +29,7 @@ class OpsMonitor {
       // we ship it off to the buffer. Let's create our copy first.
       event = cloneDeep(event);
       // Oppsy used to provide this, but doesn't anymore. Grab it ourselves.
-      this._server._hapi.listener.getConnections((_, count) => {
+      this._server.listener.getConnections((_, count) => {
         event.concurrent_connections = count;
         this._buffer.push(event);
       });
@@ -49,35 +49,42 @@ class OpsMonitor {
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector(server, kbnServer) {
-  const buffer = opsBuffer(server);
-  const interval = kbnServer.config.get('ops.interval');
-  const opsMonitor = new OpsMonitor(server, buffer, interval);
+export function getOpsStatsCollector({
+  elasticsearchPlugin,
+  kbnServerConfig,
+  log,
+  config,
+  getOSInfo,
+  hapiServer,
+  collectorSet
+}) {
+  const buffer = opsBuffer({ log, config, getOSInfo });
+  const interval = kbnServerConfig.get('ops.interval');
+  const opsMonitor = new OpsMonitor(hapiServer, buffer, interval);
 
   /* Handle stopping / restarting the event listener if Elasticsearch stops and restarts
    * NOTE it is possible for the plugin status to go from red to red and
    * trigger handlers twice
    */
-  server.plugins.elasticsearch.status.on('red', opsMonitor.stop);
-  server.plugins.elasticsearch.status.on('green', opsMonitor.start);
+  elasticsearchPlugin.status.on('red', opsMonitor.stop);
+  elasticsearchPlugin.status.on('green', opsMonitor.start);
 
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    server.log(
+    log(
       ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
       'Re-initializing Kibana Monitoring due to SIGHUP'
     );
     setTimeout(() => {
       opsMonitor.stop();
       opsMonitor.start();
-      server.log(
+      log(
         ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
         'Re-initializing Kibana Monitoring due to SIGHUP'
       );
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  const { collectorSet } = server.usage;
   return collectorSet.makeStatsCollector({
     type: KIBANA_STATS_TYPE_MONITORING,
     init: opsMonitor.start,

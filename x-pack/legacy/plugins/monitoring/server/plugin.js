@@ -16,64 +16,33 @@ import {
   getOpsStatsCollector,
   getSettingsCollector,
 } from './kibana_monitoring/collectors';
-// import { initInfraSource } from './lib/logs/init_infra_source';
-// import {
-//   ClusterClient,
-//   CoreSetup,
-//   KibanaRequest,
-//   Logger,
-//   PluginInitializerContext,
-//   RecursiveReadonly,
-// } from '../../../../../src/core/server';
-
-// interface CoreSetup {
-//   _kbnServer: Record<string, any>;
-//   config: Function;
-//   usage: {
-//     collectorSet: {
-//       register: Function;
-//     };
-//   };
-//   plugins: {
-//     elasticsearch: ElasticsearchPlugin;
-//     xpack_main: {
-//       status: {
-//         once: Function;
-//       };
-//       registerFeature: Function;
-//       info: {
-//         onLicenseInfoChange: Function;
-//         feature: Function;
-//       };
-//     };
-//   };
-//   log: Function;
-//   injectUiAppVars: Function;
-// }
-
-// interface PluginsSetup {
-//   foo: string;
-// }
-
-// export type DemoPluginSetup = ReturnType<Plugin['setup']>;
+import { initInfraSource } from './lib/logs/init_infra_source';
 
 export class Plugin {
-  setup(core, _plugins) {
+  setup(core, plugins) {
     const kbnServer = core._kbnServer;
     const config = core.config();
     const { collectorSet } = core.usage;
     /*
     * Register collector objects for stats to show up in the APIs
     */
-    collectorSet.register(getOpsStatsCollector(core, kbnServer));
-    collectorSet.register(getKibanaUsageCollector(core));
-    collectorSet.register(getSettingsCollector(core, kbnServer));
+    collectorSet.register(getOpsStatsCollector({
+      elasticsearchPlugin: plugins.elasticsearch,
+      kbnServerConfig: kbnServer.config,
+      log: core.log,
+      config,
+      getOSInfo: core.getOSInfo,
+      hapiServer: core._hapi,
+      collectorSet: core.usage.collectorSet,
+    }));
+    collectorSet.register(getKibanaUsageCollector({ collectorSet, config }));
+    collectorSet.register(getSettingsCollector({ collectorSet, config }));
 
     /*
     * Instantiate and start the internal background task that calls collector
     * fetch methods and uploads to the ES monitoring bulk endpoint
     */
-    const xpackMainPlugin = core.plugins.xpack_main;
+    const xpackMainPlugin = plugins.xpack_main;
     xpackMainPlugin.status.once('green', async () => { // first time xpack_main turns green
       /*
       * End-user-facing services
@@ -81,8 +50,18 @@ export class Plugin {
       const uiEnabled = config.get('xpack.monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient(core); // Instantiate the dedicated ES client
-        await initMonitoringXpackInfo(core); // Route handlers depend on this for xpackInfo
+        await instantiateClient({
+          log: core.log,
+          events: core.events,
+          config,
+          elasticsearchPlugin: plugins.elasticsearch
+        }); // Instantiate the dedicated ES client
+        await initMonitoringXpackInfo({
+          config,
+          log: core.log,
+          xpackMainPlugin: plugins.xpack_main,
+          expose: core.expose
+        }); // Route handlers depend on this for xpackInfo
         await requireUIRoutes(core);
       }
     });
@@ -111,7 +90,14 @@ export class Plugin {
       }
     });
 
-    const bulkUploader = initBulkUploader(kbnServer, core);
+    const bulkUploader = initBulkUploader({
+      elasticsearchPlugin: plugins.elasticsearch,
+      xpackMainPlugin: plugins.xpack_main,
+      config,
+      log: core.log,
+      kbnServerStatus: kbnServer.status,
+      kbnServerVersion: kbnServer.version
+    });
     const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
     const { info: xpackMainInfo } = xpackMainPlugin;
 
@@ -147,5 +133,10 @@ export class Plugin {
         showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
+
+    // TODO
+    // This is not quite working but I don't know if we want to add a dependency
+    // on infra from the start....
+    initInfraSource(config, plugins.infra);
   }
 }

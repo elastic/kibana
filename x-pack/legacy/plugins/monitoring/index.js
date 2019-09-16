@@ -59,10 +59,6 @@ export const monitoring = (kibana) => new kibana.Plugin({
       usage: {
         collectorSet: server.usage.collectorSet
       },
-      plugins: {
-        xpack_main: server.plugins.xpack_main,
-        elasticsearch: server.plugins.elasticsearch
-      },
       injectUiAppVars: server.injectUiAppVars,
       log: (...args) => server.log(...args),
       getOSInfo: server.getOSInfo,
@@ -75,7 +71,13 @@ export const monitoring = (kibana) => new kibana.Plugin({
       _kbnServer: this.kbnServer
     };
 
-    new Plugin().setup(serverFacade, {});
+    const plugins = {
+      xpack_main: server.plugins.xpack_main,
+      elasticsearch: server.plugins.elasticsearch,
+      infra: server.plugins.infra,
+    };
+
+    new Plugin().setup(serverFacade, plugins);
     // init(serverFacade);
   },
   config,
