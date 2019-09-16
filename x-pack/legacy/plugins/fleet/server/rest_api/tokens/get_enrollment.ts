@@ -9,9 +9,9 @@ import Boom from 'boom';
 
 import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeGet } from '../../../common/return_types';
-import { FleetServerLibRequestFactory } from '../../libs/compose/types';
+import { FleetServerLib } from '../../libs/types';
 
-export const createGetEnrollmentTokenRoute = (libsFactory: FleetServerLibRequestFactory) => ({
+export const createGetEnrollmentTokenRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/policy/{policyId}/enrollment-tokens',
   config: {
@@ -25,9 +25,12 @@ export const createGetEnrollmentTokenRoute = (libsFactory: FleetServerLibRequest
   handler: async (
     request: FrameworkRequest<{ params: { policyId: string }; query: { regenerate: string } }>
   ): Promise<ReturnTypeGet<any>> => {
-    const { tokens } = libsFactory(request);
     const { policyId } = request.params;
-    const token = await tokens.getEnrollmentTokenForPolicy(policyId, Boolean(request.query));
+    const token = await libs.tokens.getEnrollmentTokenForPolicy(
+      request,
+      policyId,
+      Boolean(request.query)
+    );
 
     if (!token) {
       throw Boom.notFound(`token not found for policy ${policyId}`);

@@ -10,9 +10,9 @@ import { createDeleteAgentsRoute } from './agents/delete';
 import { createEnrollAgentsRoute } from './agents/enroll';
 import { createCheckinAgentsRoute } from './agents/checkin';
 import { createGetEnrollmentTokenRoute } from './tokens/get_enrollment';
-import { FleetServerLibRequestFactory } from '../libs/compose/types';
+import { FleetServerLib } from '../libs/types';
 
-export function initRestApi(server: Server, libs: FleetServerLibRequestFactory) {
+export function initRestApi(server: Server, libs: FleetServerLib) {
   server.route(createListAgentsRoute(libs));
   server.route(createDeleteAgentsRoute(libs));
   server.route(createEnrollAgentsRoute(libs));

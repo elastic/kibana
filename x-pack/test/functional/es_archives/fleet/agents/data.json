@@ -95,20 +95,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "tokens:cc9afbf7-52b6-408f-8c28-5375dd53e475",
+    "id": "tokens:f2e6bcd8-e68c-4da8-826e-ae6f5c1def4e",
     "index": ".fleet",
     "source": {
       "tokens" : {
-        "created_at" : "2019-09-12T21:08:22.237Z",
+        "created_at" : "2019-09-16T19:31:48.500Z",
         "type" : "ENROLMENT_TOKEN",
-        "token" : "sl1w3okaxwBnXollQ0sv5cMjmy0ZPvGa7csrEVmnMZvwzy7oel9zuwmSsLNyiJo/yiQKgmoS4X7ERAhNik/4zeYou+QCDV/MSOApUvr8GrPyALb2ob+ixvq6yTwvMx8/z23Fhkw74BFUK43fmWPfTtrvJjHRGo7vc1JbsK4tyn/9qYxbQcsncWwZci9LKk5bcCIN4lkhwlRLsrXANfBEF4DxF+1dWnTF5Aa0wmz6JqfdItNnklUfrU6AqPOlL4xkdJ/2fH5uBLoNTDpHJj1BJrANuVYR2S8wJOOQyYlnf38xH2k8/+Gl0X60QwcXHB6zvMRDL020eUlqdT5pUYJpc5lmmiollsOqubetguH69aPhSByesIPDTKbXwBhIrbGOYs7ippr/7zq9ZcjL2hieOqeRLjLI1EdcmcUeQiyawJkb",
-        "tokenHash" : "9a99776ee3ff1e2f080b598cf7233500523392b2cb7492aaf8cdcc4a93a1f5ee0fe81822d12737d9a3a7d454abdfb3e2186086f8d345ba494f11dab21f91974d",
+        "token" : "CAxY1fEepPxyJ5oASPWpi/w/49nwO0qhPeEMtUkqm01CAnpOkxf5KM9pXJ+NmYGAJmIw+QnfneOG1+f4xCyWgGf/wEtYuwRO9yd23X0YBZZApxTrgTR0WoWFKyXRI0KzhmD5BKj3eut9AwTySEfU8cNJzSQ+3SVbsYKIxbn0QcEOgiV+L+aIko6m7o6pvWUPnkxirdXxXjrOLLdeSe0/Wh0Yp05aUG4OYsyYnQqFOeGw37WpG8n1uTtqkHVs/r8o4Gh0eQgLI9+zQWW73rvPnQ7dabZ1Mh4VScOkn+/hGCfSfP0ULRXR8QPsmnh3ppY3OHMeHnUHP1SRsXraUoSRRTypzwXrkwwBL74jeY/Dh+YaZF+elusF3sQ1pE8y52QS7sWMFLIxUfb9vg==",
+        "tokenHash" : "b0e83363575be247419c69d0f9e1379e362e2d9928f7d80e65d0c3e4470c6082892d6f63855044bc101584e6e299090945911da23b27de8ebcd3761e23787e61",
         "policy_id" : "policy:1",
         "policy_shared_id" : "policy:1",
         "active" : true
       },
       "type" : "tokens",
-      "updated_at" : "2019-09-12T21:08:22.251Z"
+      "updated_at" : "2019-09-16T19:31:48.518Z"
     }
   }
 }

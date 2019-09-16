@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkRequest } from '../framework/adapter_types';
+
 export interface EnrollmentTokenData {
   policy: { id: string; sharedId: string };
 }
@@ -42,36 +44,39 @@ export interface Token {
 }
 
 export interface TokenAdapter {
-  create(data: {
-    type: TokenType;
-    token: string;
-    tokenHash: string;
-    active: boolean;
-    policy: { id: string; sharedId: string };
-    expire_at?: string;
-  }): Promise<Token>;
+  create(
+    request: FrameworkRequest,
+    data: {
+      type: TokenType;
+      token: string;
+      tokenHash: string;
+      active: boolean;
+      policy: { id: string; sharedId: string };
+      expire_at?: string;
+    }
+  ): Promise<Token>;
 
   /**
    * Get a token by token.
    * @param token
    */
-  getByTokenHash(tokenHash: string): Promise<Token | null>;
+  getByTokenHash(request: FrameworkRequest, tokenHash: string): Promise<Token | null>;
 
   /**
    * Get a token by token.
    * @param token
    */
-  getByPolicyId(policyId: string): Promise<Token | null>;
+  getByPolicyId(request: FrameworkRequest, policyId: string): Promise<Token | null>;
 
   /**
    * Update a token
    * @param token
    */
-  update(id: string, newData: Partial<Token>): Promise<void>;
+  update(request: FrameworkRequest, id: string, newData: Partial<Token>): Promise<void>;
 
   /**
    * Delete a token
    * @param token
    */
-  delete(id: string): Promise<void>;
+  delete(request: FrameworkRequest, id: string): Promise<void>;
 }

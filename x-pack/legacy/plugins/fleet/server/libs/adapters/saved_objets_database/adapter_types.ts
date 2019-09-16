@@ -17,37 +17,49 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 export interface SODatabaseAdapter {
   create<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     data: T,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<T>>;
 
   bulkCreate<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObjectsBulkResponse<T>>;
 
-  delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+  delete(
+    request: FrameworkRequest,
+    type: string,
+    id: string,
+    options?: SavedObjectsBaseOptions
+  ): Promise<{}>;
 
   find<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>>;
 
   bulkGet<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     objects: SavedObjectsBulkGetObject[],
     options?: SavedObjectsBaseOptions
   ): Promise<SavedObjectsBulkResponse<T>>;
 
   get<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     id: string,
     options?: SavedObjectsBaseOptions
   ): Promise<SavedObject<T> | null>;
 
   update<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     id: string,
     attributes: Partial<T>,

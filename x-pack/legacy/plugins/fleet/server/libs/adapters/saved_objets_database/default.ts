@@ -5,7 +5,6 @@
  */
 
 import {
-  SavedObjectsClient as SavedObjectsClientType,
   SavedObjectAttributes,
   SavedObjectsBulkCreateObject,
   SavedObjectsBaseOptions,
@@ -17,12 +16,17 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsService,
 } from 'src/core/server';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 export class SODatabaseAdapter implements SODatabaseAdapterType {
-  constructor(private readonly client: SavedObjectsClientType) {}
+  constructor(private readonly savedObject: SavedObjectsService) {}
 
+  private getClient(request: FrameworkRequest) {
+    return this.savedObject.getScopedSavedObjectsClient(request);
+  }
   /**
    * Persists a SavedObject
    *
@@ -31,11 +35,12 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async create<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     data: T,
     options?: SavedObjectsCreateOptions
   ) {
-    return await this.client.create(type, data, options);
+    return await this.getClient(request).create(type, data, options);
   }
 
   /**
@@ -45,10 +50,11 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async bulkCreate<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
-    return await this.client.bulkCreate(objects, options);
+    return await this.getClient(request).bulkCreate(objects, options);
   }
 
   /**
@@ -58,8 +64,13 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    return await this.client.delete(type, id, options);
+  async delete(
+    request: FrameworkRequest,
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    return await this.getClient(request).delete(type, id, options);
   }
 
   /**
@@ -68,9 +79,10 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async find<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> {
-    return await this.client.find(options);
+    return await this.getClient(request).find(options);
   }
 
   /**
@@ -85,10 +97,11 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * ])
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    return await this.client.bulkGet(objects, options);
+    return await this.getClient(request).bulkGet(objects, options);
   }
 
   /**
@@ -99,12 +112,13 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async get<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T> | null> {
     try {
-      const savedObject = await this.client.get(type, id, options);
+      const savedObject = await this.getClient(request).get(type, id, options);
 
       return savedObject;
     } catch (err) {
@@ -124,11 +138,12 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async update<T extends SavedObjectAttributes = any>(
+    request: FrameworkRequest,
     type: string,
     id: string,
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    return await this.client.update(type, id, attributes, options);
+    return await this.getClient(request).update(type, id, attributes, options);
   }
 }

@@ -17,6 +17,7 @@ import {
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
 import { Policy } from './adapters/policy/adapter_type';
+import { FrameworkRequest } from './adapters/framework/adapter_types';
 
 export class AgentLib {
   constructor(
@@ -29,19 +30,20 @@ export class AgentLib {
    * Enroll a new token into elastic fleet
    */
   public async enroll(
+    request: FrameworkRequest,
     token: any,
     type: AgentType,
     metadata?: { local: any; userProvided: any },
     sharedId?: string
   ): Promise<Agent> {
-    const verifyResponse = await this.tokens.verify(token);
+    const verifyResponse = await this.tokens.verify(request, token);
 
     if (!verifyResponse.valid) {
       throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
     const policy = verifyResponse.token.policy;
 
-    const existingAgent = sharedId ? await this.agentAdater.getBySharedId(sharedId) : null;
+    const existingAgent = sharedId ? await this.agentAdater.getBySharedId(request, sharedId) : null;
 
     if (existingAgent && existingAgent.active === true) {
       throw new Error('Impossible to enroll an already active agent');
@@ -51,7 +53,7 @@ export class AgentLib {
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
-        ? (await this._createParentForEphemeral(policy.id, policy.sharedId)).id
+        ? (await this._createParentForEphemeral(request, policy.id, policy.sharedId)).id
         : undefined;
 
     const agentData: NewAgent = {
@@ -68,18 +70,18 @@ export class AgentLib {
 
     let agent;
     if (existingAgent) {
-      await this.agentAdater.update(existingAgent.id, agentData);
+      await this.agentAdater.update(request, existingAgent.id, agentData);
 
       agent = {
         ...existingAgent,
         ...agentData,
       };
     } else {
-      agent = await this.agentAdater.create(agentData);
+      agent = await this.agentAdater.create(request, agentData);
     }
 
     const accessToken = await this.tokens.generateAccessToken(agent.id, policy);
-    await this.agentAdater.update(agent.id, {
+    await this.agentAdater.update(request, agent.id, {
       access_token: accessToken,
     });
 
@@ -89,19 +91,19 @@ export class AgentLib {
   /**
    * Delete an agent
    */
-  public async delete(agent: Agent) {
+  public async delete(request: FrameworkRequest, agent: Agent) {
     if (agent.type === 'EPHEMERAL_INSTANCE') {
-      return this.agentAdater.delete(agent);
+      return this.agentAdater.delete(request, agent);
     }
 
-    return this.agentAdater.update(agent.id, { active: false });
+    return this.agentAdater.update(request, agent.id, { active: false });
   }
 
   /**
    * Get an agent by id
    */
-  public async getById(id: string): Promise<Agent | null> {
-    return await this.agentAdater.getById(id);
+  public async getById(request: FrameworkRequest, id: string): Promise<Agent | null> {
+    return await this.agentAdater.getById(request, id);
   }
 
   /**
@@ -111,11 +113,12 @@ export class AgentLib {
    * @param metadata
    */
   public async checkin(
+    request: FrameworkRequest,
     agentId: string,
     events: AgentEvent[],
     localMetadata?: any
   ): Promise<{ actions: AgentAction[]; policy: Policy }> {
-    const agent = await this.agentAdater.getById(agentId);
+    const agent = await this.agentAdater.getById(request, agentId);
 
     if (!agent || !agent.active) {
       throw Boom.notFound('Agent not found or inactive');
@@ -139,7 +142,7 @@ export class AgentLib {
     }
 
     const policy = await this.policy.getFullPolicy(agent.policy_id);
-    await this.agentAdater.update(agent.id, updateData);
+    await this.agentAdater.update(request, agent.id, updateData);
 
     return { actions, policy };
   }
@@ -152,11 +155,12 @@ export class AgentLib {
    * @param perPage
    */
   public async list(
+    request: FrameworkRequest,
     sortOptions: SortOptions = SortOptions.EnrolledAtDESC,
     page?: number,
     perPage?: number
   ): Promise<{ agents: Agent[]; total: number }> {
-    return this.agentAdater.list(sortOptions, page, perPage);
+    return this.agentAdater.list(request, sortOptions, page, perPage);
   }
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {
@@ -164,17 +168,19 @@ export class AgentLib {
   }
 
   private async _createParentForEphemeral(
+    request: FrameworkRequest,
     policyId: string,
     policySharedId: string
   ): Promise<Agent> {
     const ephemeralParentId = `agents:ephemeral:${policySharedId}`;
-    const parentAgent = await this.agentAdater.getById('ephemeralParentId');
+    const parentAgent = await this.agentAdater.getById(request, 'ephemeralParentId');
 
     if (parentAgent) {
       return parentAgent;
     }
 
     return await this.agentAdater.create(
+      request,
       {
         type: 'EPHEMERAL',
         policy_id: policyId,

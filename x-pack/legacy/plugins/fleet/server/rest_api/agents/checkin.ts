@@ -13,7 +13,6 @@ import { FrameworkRequest } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
 import { TokenType } from '../../libs/adapters/tokens/adapter_types';
 import { RuntimeAgentEvent, AgentEvent } from '../../libs/adapters/agent/adapter_type';
-import { FleetServerLibRequestFactory } from '../../libs/compose/types';
 import { FleetServerLib } from '../../libs/types';
 
 type CheckinRequest = FrameworkRequest<{
@@ -30,7 +29,7 @@ type CheckinRequest = FrameworkRequest<{
   };
 }>;
 
-export const createCheckinAgentsRoute = (libsFactory: FleetServerLibRequestFactory) => ({
+export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
   method: 'POST',
   path: '/api/fleet/agents/{agentId}/checkin',
   config: {
@@ -51,10 +50,10 @@ export const createCheckinAgentsRoute = (libsFactory: FleetServerLibRequestFacto
     },
   },
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
-    const libs = libsFactory(request);
     await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
     const { actions, policy } = await libs.agents.checkin(
+      request,
       request.params.agentId,
       events,
       request.payload.local_metadata
@@ -73,7 +72,7 @@ export const createCheckinAgentsRoute = (libsFactory: FleetServerLibRequestFacto
 
 async function validateToken(request: CheckinRequest, libs: FleetServerLib) {
   const jsonToken = request.headers['kbn-fleet-access-token'];
-  const token = await libs.tokens.verify(jsonToken);
+  const token = await libs.tokens.verify(request, jsonToken);
   if (!token.valid || token.type !== TokenType.ACCESS_TOKEN) {
     throw Boom.unauthorized('Invalid token');
   }

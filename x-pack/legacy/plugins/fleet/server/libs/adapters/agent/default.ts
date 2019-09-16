@@ -14,6 +14,7 @@ import {
   SavedObjectAgentAttributes,
 } from './adapter_type';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 export class AgentAdapter implements AgentAdapterType {
   constructor(private readonly soAdapter: SODatabaseAdapter) {}
@@ -23,10 +24,12 @@ export class AgentAdapter implements AgentAdapterType {
    * @param agent
    */
   public async create(
+    request: FrameworkRequest,
     agent: NewAgent,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<Agent> {
     const so = await this.soAdapter.create(
+      request,
       'agents',
       {
         ...agent,
@@ -51,16 +54,16 @@ export class AgentAdapter implements AgentAdapterType {
    * Delete an agent saved object
    * @param agent
    */
-  public async delete(agent: Agent) {
-    await this.soAdapter.delete('agents', agent.id);
+  public async delete(request: FrameworkRequest, agent: Agent) {
+    await this.soAdapter.delete(request, 'agents', agent.id);
   }
 
   /**
    * Get an agent by ES id
    * @param agent
    */
-  public async getById(id: string): Promise<Agent | null> {
-    const response = await this.soAdapter.get<SavedObjectAgentAttributes>('agents', id);
+  public async getById(request: FrameworkRequest, id: string): Promise<Agent | null> {
+    const response = await this.soAdapter.get<SavedObjectAgentAttributes>(request, 'agents', id);
     if (!response) {
       return null;
     }
@@ -72,8 +75,8 @@ export class AgentAdapter implements AgentAdapterType {
    * Get an agent by ES shared_id
    * @param agent
    */
-  public async getBySharedId(sharedId: string): Promise<Agent | null> {
-    const response = await this.soAdapter.find<SavedObjectAgentAttributes>({
+  public async getBySharedId(request: FrameworkRequest, sharedId: string): Promise<Agent | null> {
+    const response = await this.soAdapter.find<SavedObjectAgentAttributes>(request, {
       type: 'agents',
       searchFields: ['shared_id'],
       search: sharedId,
@@ -94,7 +97,7 @@ export class AgentAdapter implements AgentAdapterType {
    * @param id
    * @param newData
    */
-  public async update(id: string, newData: Partial<Agent>) {
+  public async update(request: FrameworkRequest, id: string, newData: Partial<Agent>) {
     const updateData: Partial<SavedObjectAgentAttributes> = ({ ...newData } as unknown) as Partial<
       SavedObjectAgentAttributes
     >;
@@ -105,7 +108,7 @@ export class AgentAdapter implements AgentAdapterType {
       updateData.user_provided_metadata = JSON.stringify(newData.user_provided_metadata);
     }
 
-    const { error } = await this.soAdapter.update('agents', id, updateData);
+    const { error } = await this.soAdapter.update(request, 'agents', id, updateData);
 
     if (error) {
       throw new Error(error.message);
@@ -117,13 +120,16 @@ export class AgentAdapter implements AgentAdapterType {
    * @param metadata
    * @param providedMetadata
    */
-  public async findByMetadata(metadata: { local?: any; userProvided?: any }): Promise<Agent[]> {
+  public async findByMetadata(
+    request: FrameworkRequest,
+    metadata: { local?: any; userProvided?: any }
+  ): Promise<Agent[]> {
     const search = []
       .concat(Object.values(metadata.local || {}), Object.values(metadata.userProvided || {}))
       .join(' ');
 
     // neet to play with saved object to know what it's possible to do here
-    const res = await this.soAdapter.find<SavedObjectAgentAttributes>({
+    const res = await this.soAdapter.find<SavedObjectAgentAttributes>(request, {
       type: 'agents',
       search,
     });
@@ -141,16 +147,20 @@ export class AgentAdapter implements AgentAdapterType {
    * List agents
    */
   public async list(
+    request: FrameworkRequest,
     sortOptions?: SortOptions,
     page?: number,
     perPage: number = 20
   ): Promise<{ agents: Agent[]; total: number }> {
-    const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>({
-      type: 'agents',
-      page,
-      perPage,
-      ...this._getSortFields(sortOptions),
-    });
+    const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>(
+      request,
+      {
+        type: 'agents',
+        page,
+        perPage,
+        ...this._getSortFields(sortOptions),
+      }
+    );
 
     const agents: Agent[] = saved_objects
       .map(this._savedObjectToAgent)
@@ -162,8 +172,11 @@ export class AgentAdapter implements AgentAdapterType {
     };
   }
 
-  public async findEphemeralByPolicySharedId(policySharedId: string): Promise<Agent | null> {
-    const res = await this.soAdapter.find<SavedObjectAgentAttributes>({
+  public async findEphemeralByPolicySharedId(
+    request: FrameworkRequest,
+    policySharedId: string
+  ): Promise<Agent | null> {
+    const res = await this.soAdapter.find<SavedObjectAgentAttributes>(request, {
       type: 'agents',
       search: policySharedId,
       searchFields: ['policy_shared_id'],
@@ -179,8 +192,11 @@ export class AgentAdapter implements AgentAdapterType {
    * Get an agent by ephemeral access token
    * @param token
    */
-  public async getByEphemeralAccessToken(token: any): Promise<Agent | null> {
-    const res = await this.soAdapter.find<SavedObjectAgentAttributes>({
+  public async getByEphemeralAccessToken(
+    request: FrameworkRequest,
+    token: any
+  ): Promise<Agent | null> {
+    const res = await this.soAdapter.find<SavedObjectAgentAttributes>(request, {
       type: 'agents',
       search: token,
       searchFields: ['access_token'],

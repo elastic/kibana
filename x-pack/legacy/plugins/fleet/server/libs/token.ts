@@ -9,6 +9,7 @@ import { createHmac } from 'crypto';
 import { TokenVerificationResponse, TokenType, Token } from './adapters/tokens/adapter_types';
 import { TokenAdapter } from './adapters/tokens/adapter_types';
 import { FrameworkLib } from './framework';
+import { FrameworkRequest } from './adapters/framework/adapter_types';
 
 interface JWTToken {
   policy: { id: string; sharedId: string };
@@ -25,12 +26,15 @@ export class TokenLib {
    * Verify if a token is valid
    * @param token
    */
-  public async verify(token: string): Promise<TokenVerificationResponse> {
+  public async verify(
+    request: FrameworkRequest,
+    token: string
+  ): Promise<TokenVerificationResponse> {
     try {
       const decodedToken = this._verifyJWTToken(token);
 
       if (decodedToken.type === TokenType.ENROLMENT_TOKEN) {
-        await this._verifyPersistedToken(token);
+        await this._verifyPersistedToken(request, token);
       }
 
       return {
@@ -71,23 +75,27 @@ export class TokenLib {
    * @param expire
    */
   public async generateEnrolmentToken(
+    request: FrameworkRequest,
     policy: { id: string; sharedId: string },
-    expire: string = '24h'
+    expire?: string
   ): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
+
     const token = signToken(
       {
         type: TokenType.ENROLMENT_TOKEN,
         policy,
       },
       encryptionKey,
-      {
-        expiresIn: expire,
-      }
+      expire
+        ? {
+            expiresIn: expire,
+          }
+        : undefined
     );
     const tokenHash = await this.hashToken(token);
 
-    await this.adapter.create({
+    await this.adapter.create(request, {
       active: true,
       type: TokenType.ENROLMENT_TOKEN,
       tokenHash,
@@ -99,19 +107,20 @@ export class TokenLib {
   }
 
   public async getEnrollmentTokenForPolicy(
+    request: FrameworkRequest,
     policyId: string,
     regenerate?: boolean
   ): Promise<Token | null> {
-    let token = await this.adapter.getByPolicyId(policyId);
+    let token = await this.adapter.getByPolicyId(request, policyId);
 
     if (regenerate && token) {
       const policy = {
         id: token.policy_id,
         sharedId: token.policy_shared_id,
       };
-      await this.adapter.delete(token.id);
-      await this.generateEnrolmentToken(policy);
-      token = await this.adapter.getByPolicyId(policyId);
+      await this.adapter.delete(request, token.id);
+      await this.generateEnrolmentToken(request, policy);
+      token = await this.adapter.getByPolicyId(request, policyId);
     }
 
     return token;
@@ -132,9 +141,9 @@ export class TokenLib {
     return decodedToken;
   }
 
-  private async _verifyPersistedToken(token: string) {
+  private async _verifyPersistedToken(request: FrameworkRequest, token: string) {
     const tokenHash = await this.hashToken(token);
-    const persistedToken = await this.adapter.getByTokenHash(tokenHash);
+    const persistedToken = await this.adapter.getByTokenHash(request, tokenHash);
     if (!persistedToken) {
       throw new Error('Token not found');
     }

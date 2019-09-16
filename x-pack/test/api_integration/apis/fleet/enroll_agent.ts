@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
         .set(
           'kbn-fleet-enrollment-token',
           // Token without expiration for test purpose
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xNRU5UX1RPS0VOIiwicG9saWN5Ijp7ImlkIjoicG9saWN5OjEiLCJzaGFyZWRJZCI6InBvbGljeToxIn0sImlhdCI6MTU2ODMyMjc3MSwiZXhwIjoxNTY4NDA5MTcxfQ.M2Kox12ECkmj5D6p86mQfrmT8OQvv8QSUpYrnf5o9HE'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xNRU5UX1RPS0VOIiwicG9saWN5Ijp7ImlkIjoicG9saWN5OjEiLCJzaGFyZWRJZCI6InBvbGljeToxIn0sImlhdCI6MTU2ODY2MjMwOH0.KZ-LswnY7YXThEo9NRXP4QmJw-txg-dBXFhRKtwbs4s'
         )
         .send({
           type: 'PERMANENT',

@@ -9,6 +9,7 @@ import { SavedObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
 import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
+import { FrameworkRequest } from '../framework/adapter_types';
 
 const SAVED_OBJECT_TYPE = 'tokens';
 
@@ -25,22 +26,25 @@ export class TokenAdapter implements TokenAdapterType {
     private readonly encryptedSavedObject: EncryptedSavedObjects
   ) {}
 
-  public async create({
-    type,
-    token,
-    tokenHash,
-    active,
-    policy,
-    expire_at,
-  }: {
-    type: TokenType;
-    token: string;
-    tokenHash: string;
-    active: boolean;
-    expire_at?: string;
-    policy: { id: string; sharedId: string };
-  }): Promise<Token> {
-    const so = await this.soAdapter.create(SAVED_OBJECT_TYPE, {
+  public async create(
+    request: FrameworkRequest,
+    {
+      type,
+      token,
+      tokenHash,
+      active,
+      policy,
+      expire_at,
+    }: {
+      type: TokenType;
+      token: string;
+      tokenHash: string;
+      active: boolean;
+      expire_at?: string;
+      policy: { id: string; sharedId: string };
+    }
+  ): Promise<Token> {
+    const so = await this.soAdapter.create(request, SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       type,
       token,
@@ -57,8 +61,8 @@ export class TokenAdapter implements TokenAdapterType {
     };
   }
 
-  public async getByTokenHash(tokenHash: string): Promise<Token | null> {
-    const res = await this.soAdapter.find({
+  public async getByTokenHash(request: FrameworkRequest, tokenHash: string): Promise<Token | null> {
+    const res = await this.soAdapter.find(request, {
       type: SAVED_OBJECT_TYPE,
       searchFields: ['tokenHash'],
       search: tokenHash,
@@ -69,8 +73,8 @@ export class TokenAdapter implements TokenAdapterType {
     return token ? await this._getDecrypted(token.id) : null;
   }
 
-  public async getByPolicyId(policyId: string): Promise<Token | null> {
-    const res = await this.soAdapter.find({
+  public async getByPolicyId(request: FrameworkRequest, policyId: string): Promise<Token | null> {
+    const res = await this.soAdapter.find(request, {
       type: SAVED_OBJECT_TYPE,
       searchFields: ['policy_id'],
       search: policyId,
@@ -81,16 +85,20 @@ export class TokenAdapter implements TokenAdapterType {
     return token ? await this._getDecrypted(token.id) : null;
   }
 
-  public async update(id: string, newData: Partial<Token>): Promise<void> {
-    const { error } = await this.soAdapter.update(SAVED_OBJECT_TYPE, id, newData);
+  public async update(
+    request: FrameworkRequest,
+    id: string,
+    newData: Partial<Token>
+  ): Promise<void> {
+    const { error } = await this.soAdapter.update(request, SAVED_OBJECT_TYPE, id, newData);
 
     if (error) {
       throw new Error(error.message);
     }
   }
 
-  public async delete(id: string): Promise<void> {
-    await this.soAdapter.delete(SAVED_OBJECT_TYPE, id);
+  public async delete(request: FrameworkRequest, id: string): Promise<void> {
+    await this.soAdapter.delete(request, SAVED_OBJECT_TYPE, id);
   }
 
   private async _getDecrypted(tokenId: string) {

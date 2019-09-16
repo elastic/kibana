@@ -10,9 +10,9 @@ import {
   FrameworkResponseObject,
 } from '../../libs/adapters/framework/adapter_types';
 import { ReturnTypeDelete, BaseReturnType } from '../../../common/return_types';
-import { FleetServerLibRequestFactory } from '../../libs/compose/types';
+import { FleetServerLib } from '../../libs/types';
 
-export const createDeleteAgentsRoute = (libsFactory: FleetServerLibRequestFactory) => ({
+export const createDeleteAgentsRoute = (libs: FleetServerLib) => ({
   method: 'DELETE',
   config: {},
   path: '/api/fleet/agents/{id}',
@@ -21,13 +21,14 @@ export const createDeleteAgentsRoute = (libsFactory: FleetServerLibRequestFactor
     h: FrameworkResponseToolkit
   ): Promise<ReturnTypeDelete | BaseReturnType | FrameworkResponseObject> => {
     const { id } = request.params;
-    const { agents } = libsFactory(request);
-    const agent = await agents.getById(id);
+    const agent = await libs.agents.getById(request, id);
     if (!agent) {
       return h
         .response({ error: { message: 'Agent not found', code: 404 }, success: false })
         .code(404);
     }
+
+    await libs.agents.delete(request, agent);
 
     return { success: true, action: 'deleted' };
   },
