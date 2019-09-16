@@ -16,6 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsManagementAction } from './saved_objects_management_action';
 
-export * from './index_pattern_management';
-export * from './saved_objects_management';
+const actions: Map<string, SavedObjectsManagementAction> = new Map();
+
+export const SavedObjectsManagementActionRegistry = {
+  register: (action: SavedObjectsManagementAction) => {
+    if (!action.id) {
+      throw new TypeError('Saved Objects Management Actions must have an id');
+    }
+    if (actions.has(action.id)) {
+      throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
+    }
+    actions.set(action.id, action);
+  },
+
+  has: (actionId: string) => actions.has(actionId),
+
+  get: () => Array.from(actions.values()),
+};

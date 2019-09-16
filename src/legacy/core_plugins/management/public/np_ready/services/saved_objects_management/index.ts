@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export * from './index_pattern_management';
-export * from './saved_objects_management';
+export * from './saved_objects_management_action_registry';
+export * from './saved_objects_management_action';
+export * from './saved_objects_management_service';

@@ -18,6 +18,10 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IndexPatternManagementService, IndexPatternManagementSetup } from './services';
+import {
+  SavedObjectsManagementService,
+  SavedObjectsManagementServiceSetup,
+} from './services/saved_objects_management';
 
 interface ManagementPluginSetupDependencies {
   __LEGACY: {
@@ -30,6 +34,7 @@ interface ManagementPluginStartDependencies {}
 
 export interface ManagementSetup {
   indexPattern: IndexPatternManagementSetup;
+  savedObjects: SavedObjectsManagementServiceSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -44,12 +49,14 @@ export class ManagementPlugin
       ManagementPluginStartDependencies
     > {
   private readonly indexPattern = new IndexPatternManagementService();
+  private readonly savedObjects = new SavedObjectsManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { __LEGACY }: ManagementPluginSetupDependencies) {
     return {
       indexPattern: this.indexPattern.setup({ httpClient: __LEGACY.$http }),
+      savedObjects: this.savedObjects.setup(),
     };
   }
 

@@ -16,6 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
 
-export * from './index_pattern_management';
-export * from './saved_objects_management';
+export class SavedObjectsManagementService {
+  public setup() {
+    return {
+      registry: SavedObjectsManagementActionRegistry,
+    };
+  }
+
+  public stop() {}
+}
+
+/** @internal */
+export type SavedObjectsManagementServiceSetup = ReturnType<SavedObjectsManagementService['setup']>;
