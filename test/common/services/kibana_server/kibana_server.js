@@ -22,6 +22,7 @@ import { format as formatUrl } from 'url';
 import { KibanaServerStatus } from './status';
 import { KibanaServerUiSettings } from './ui_settings';
 import { KibanaServerVersion } from './version';
+import { KibanaServerSavedObjects }  from './saved_objects';
 
 export function KibanaServerProvider({ getService }) {
   const log = getService('log');
@@ -33,6 +34,7 @@ export function KibanaServerProvider({ getService }) {
       const url = formatUrl(config.get('servers.kibana'));
       this.status = new KibanaServerStatus(url);
       this.version = new KibanaServerVersion(this.status);
+      this.savedObjects = new KibanaServerSavedObjects(url, log);
       this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'), lifecycle);
     }
   };
