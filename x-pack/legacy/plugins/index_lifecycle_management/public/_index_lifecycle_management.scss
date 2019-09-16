@@ -2,10 +2,16 @@
   overflow-x: auto;
   max-width: 100%;
 }
+
 .policyTable__horizontalScroll {
   min-width: 800px;
   width: 100%;
 }
+
+.policyTable__link {
+  font-weight: 400;
+}
+
 .ilmEditPolicyPageContent {
   max-width: 1200px !important;
 }

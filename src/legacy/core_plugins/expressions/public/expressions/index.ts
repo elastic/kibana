@@ -19,3 +19,4 @@
 
 export { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions_service';
 export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
+export { IInterpreterRenderFunction } from './lib/_types';
