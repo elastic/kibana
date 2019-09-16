@@ -114,9 +114,12 @@
                   }
                 }
               ],
-              "tls": {
-                "certificate_not_valid_after": ["2019-11-09T18:04:06.000Z"]
-              },
+              "tls": [
+                {
+                  "certificate_not_valid_after": "2019-11-09T18:04:06.000Z",
+                  "certificate_not_valid_before": "2019-11-08T17:03:23.000Z"
+                }
+              ],
               "@timestamp": "2019-06-26T13:42:21.536Z",
               "url": {
                 "path": "/",
