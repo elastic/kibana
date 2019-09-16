@@ -17,35 +17,18 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { ContainerTooSmall } from '../errors';
-
+import { KbnError } from '../../../../../plugins/kibana_utils/public';
 /**
- * Common errors shared between constructors
- *
- * @class ErrorHandler
- * @constructor
+ * Request Failure - When an entire multi request fails
+ * @param {Error} err - the Error that came back
+ * @param {Object} resp - optional HTTP response
  */
-export class ErrorHandler {
-  constructor() {
+export class RequestFailure extends KbnError {
+  public resp: any;
+  constructor(err: any, resp?: any) {
+    err = err || false;
+    super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err.message)}`);
 
-  }
-
-  /**
-   * Validates the height and width are > 0
-   * min size must be at least 1 px
-   *
-   * @method validateWidthandHeight
-   * @param width {Number} HTMLElement width
-   * @param height {Number} HTMLElement height
-   * @returns {HTMLElement} HTML div with an error message
-   */
-  validateWidthandHeight(width, height) {
-    const badWidth = _.isNaN(width) || width <= 0;
-    const badHeight = _.isNaN(height) || height <= 0;
-
-    if (badWidth || badHeight) {
-      throw new ContainerTooSmall();
-    }
+    this.resp = resp;
   }
 }
