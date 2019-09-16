@@ -115,7 +115,7 @@ describe('onPostAuthInterceptor', () => {
       .asLoggerFactory()
       .get('xpack', 'spaces');
 
-    const xpackMainPlugin: XPackMainPlugin = {
+    const xpackMainPlugin = {
       getFeatures: () =>
         [
           {
@@ -163,7 +163,7 @@ describe('onPostAuthInterceptor', () => {
       }),
     };
 
-    const legacyAPI: LegacyAPI = {
+    const legacyAPI = {
       legacyConfig: {
         serverDefaultRoute: defaultRoute,
         serverBasePath: '',
@@ -408,7 +408,7 @@ describe('onPostAuthInterceptor', () => {
           type: 'space',
           attributes: {
             name: 'a space',
-            disabledFeatures: [] as any,
+            disabledFeatures: [],
           },
         },
       ];
@@ -433,7 +433,7 @@ describe('onPostAuthInterceptor', () => {
           type: 'space',
           attributes: {
             name: 'a space',
-            disabledFeatures: ['feature-1'] as any,
+            disabledFeatures: ['feature-1'],
           },
         },
       ];

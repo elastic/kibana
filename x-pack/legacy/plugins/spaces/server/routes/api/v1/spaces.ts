@@ -25,8 +25,8 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
       const id = request.params.id;
 
-      const basePath: string = legacyConfig.serverBasePath;
-      const defaultRoute: string = legacyConfig.serverDefaultRoute;
+      const basePath = legacyConfig.serverBasePath;
+      const defaultRoute = legacyConfig.serverDefaultRoute;
       try {
         const existingSpace: Space | null = await getSpaceById(
           spacesClient,

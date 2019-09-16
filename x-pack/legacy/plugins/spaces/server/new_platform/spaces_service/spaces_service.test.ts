@@ -24,7 +24,7 @@ const mockLogger = {
 };
 
 const createService = async (serverBasePath: string = '') => {
-  const legacyAPI: LegacyAPI = {
+  const legacyAPI = {
     legacyConfig: {
       serverBasePath,
     },

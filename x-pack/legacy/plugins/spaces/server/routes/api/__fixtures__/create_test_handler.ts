@@ -216,7 +216,7 @@ export function createTestHandler(
 
     const coreSetupMock = coreMock.createSetup();
 
-    const legacyAPI: LegacyAPI = {
+    const legacyAPI = {
       legacyConfig: {
         serverBasePath: mockConfig.get('server.basePath'),
         serverDefaultRoute: mockConfig.get('server.defaultRoute'),
