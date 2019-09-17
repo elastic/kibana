@@ -5,9 +5,6 @@
  */
 
 import uiRoutes from 'ui/routes';
-// import React from 'react';
-// import { render, unmountComponentAtNode } from 'react-dom';
-// @ts-ignore no declaration module
 // @ts-ignore no declaration module
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';

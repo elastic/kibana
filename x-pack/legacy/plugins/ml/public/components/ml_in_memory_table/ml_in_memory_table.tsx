@@ -71,7 +71,6 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-// import { MlInMemoryTable as InMemoryTable } from '../../../common/types/eui/in_memory_table';
 import { MlInMemoryTable as InMemoryTable } from './types';
 
 export class MlInMemoryTable extends InMemoryTable {
