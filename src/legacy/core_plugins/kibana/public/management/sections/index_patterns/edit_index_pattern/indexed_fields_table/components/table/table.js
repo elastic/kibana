@@ -20,11 +20,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiInMemoryTable, EuiIconTip } from '@elastic/eui';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -32,11 +28,11 @@ export class TableComponent extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
-    editField: PropTypes.func.isRequired
-  }
+    editField: PropTypes.func.isRequired,
+  };
 
   renderBooleanTemplate(value, label) {
-    return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
+    return value ? <EuiIcon type="dot" color="secondary" aria-label={label} /> : <span />;
   }
 
   renderFieldName(name, field) {
@@ -45,15 +41,15 @@ export class TableComponent extends PureComponent {
 
     const infoLabel = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.additionalInfoAriaLabel',
-      defaultMessage: 'Additional field information'
+      defaultMessage: 'Additional field information',
     });
     const timeLabel = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAriaLabel',
-      defaultMessage: 'Primary time field'
+      defaultMessage: 'Primary time field',
     });
     const timeContent = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.primaryTimeTooltip',
-      defaultMessage: 'This field represents the time that events occurred.'
+      defaultMessage: 'This field represents the time that events occurred.',
     });
 
     return (
@@ -66,19 +62,16 @@ export class TableComponent extends PureComponent {
               type="questionInCircle"
               color="primary"
               aria-label={infoLabel}
-              content={field.info.map((info, i) => <div key={i}>{info}</div>)}
+              content={field.info.map((info, i) => (
+                <div key={i}>{info}</div>
+              ))}
             />
           </span>
         ) : null}
         {indexPattern.timeFieldName === name ? (
           <span>
             &nbsp;
-            <EuiIconTip
-              type="clock"
-              color="primary"
-              aria-label={timeLabel}
-              content={timeContent}
-            />
+            <EuiIconTip type="clock" color="primary" aria-label={timeLabel} content={timeContent} />
           </span>
         ) : null}
       </span>
@@ -89,11 +82,12 @@ export class TableComponent extends PureComponent {
     const { intl } = this.props;
     const label = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.multiTypeAria',
-      defaultMessage: 'Multiple type field'
+      defaultMessage: 'Multiple type field',
     });
     const content = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.multiTypeTooltip',
-      defaultMessage: 'The type of this field changes across indices. It is unavailable for many analysis functions.'
+      defaultMessage:
+        'The type of this field changes across indices. It is unavailable for many analysis functions.',
     });
 
     return (
@@ -102,14 +96,11 @@ export class TableComponent extends PureComponent {
         {isConflict ? (
           <span>
             &nbsp;
-            <EuiIconTip
-              type="alert"
-              color="warning"
-              aria-label={label}
-              content={content}
-            />
+            <EuiIconTip type="alert" color="warning" aria-label={label} content={content} />
           </span>
-        ) : ''}
+        ) : (
+          ''
+        )}
       </span>
     );
   }
@@ -119,13 +110,16 @@ export class TableComponent extends PureComponent {
 
     const pagination = {
       initialPageSize: 10,
-      pageSizeOptions: [5, 10, 25, 50]
+      pageSizeOptions: [5, 10, 25, 50],
     };
 
     const columns = [
       {
         field: 'displayName',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.fields.table.nameHeader',
+          defaultMessage: 'Name',
+        }),
         dataType: 'string',
         sortable: true,
         render: (value, field) => {
@@ -136,77 +130,112 @@ export class TableComponent extends PureComponent {
       },
       {
         field: 'type',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.typeHeader', defaultMessage: 'Type' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.fields.table.typeHeader',
+          defaultMessage: 'Type',
+        }),
         dataType: 'string',
         sortable: true,
-        render: (value) => {
+        render: value => {
           return this.renderFieldType(value, value === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },
       {
         field: 'format',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.formatHeader', defaultMessage: 'Format' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.fields.table.formatHeader',
+          defaultMessage: 'Format',
+        }),
         dataType: 'string',
         sortable: true,
       },
       {
         field: 'searchable',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.searchableHeader', defaultMessage: 'Searchable' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.fields.table.searchableHeader',
+          defaultMessage: 'Searchable',
+        }),
         description: intl.formatMessage({
           id: 'kbn.management.editIndexPattern.fields.table.searchableDescription',
-          defaultMessage: 'These fields can be used in the filter bar' }),
+          defaultMessage: 'These fields can be used in the filter bar',
+        }),
         dataType: 'boolean',
         sortable: true,
-        render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isSearchableAria', defaultMessage: 'Is searchable' })),
+        render: value =>
+          this.renderBooleanTemplate(
+            value,
+            intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.fields.table.isSearchableAria',
+              defaultMessage: 'Is searchable',
+            })
+          ),
       },
       {
         field: 'aggregatable',
         name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.aggregatableLabel', defaultMessage: 'Aggregatable' }),
+          id: 'kbn.management.editIndexPattern.fields.table.aggregatableLabel',
+          defaultMessage: 'Aggregatable',
+        }),
         description: intl.formatMessage({
           id: 'kbn.management.editIndexPattern.fields.table.aggregatableDescription',
-          defaultMessage: 'These fields can be used in visualization aggregations' }),
+          defaultMessage: 'These fields can be used in visualization aggregations',
+        }),
         dataType: 'boolean',
         sortable: true,
-        render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isAggregatableAria', defaultMessage: 'Is aggregatable' })),
+        render: value =>
+          this.renderBooleanTemplate(
+            value,
+            intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.fields.table.isAggregatableAria',
+              defaultMessage: 'Is aggregatable',
+            })
+          ),
       },
       {
         field: 'excluded',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.excludedLabel', defaultMessage: 'Excluded' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.fields.table.excludedLabel',
+          defaultMessage: 'Excluded',
+        }),
         description: intl.formatMessage({
           id: 'kbn.management.editIndexPattern.fields.table.excludedDescription',
-          defaultMessage: 'Fields that are excluded from _source when it is fetched' }),
+          defaultMessage: 'Fields that are excluded from _source when it is fetched',
+        }),
         dataType: 'boolean',
         sortable: true,
-        render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isExcludedAria', defaultMessage: 'Is excluded' })),
+        render: value =>
+          this.renderBooleanTemplate(
+            value,
+            intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.fields.table.isExcludedAria',
+              defaultMessage: 'Is excluded',
+            })
+          ),
       },
       {
         name: '',
         actions: [
           {
-            name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.editLabel', defaultMessage: 'Edit' }),
+            name: intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.fields.table.editLabel',
+              defaultMessage: 'Edit',
+            }),
             description: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.fields.table.editDescription', defaultMessage: 'Edit' }),
+              id: 'kbn.management.editIndexPattern.fields.table.editDescription',
+              defaultMessage: 'Edit',
+            }),
             icon: 'pencil',
             onClick: editField,
             type: 'icon',
           },
         ],
         width: '40px',
-      }
+      },
     ];
 
     return (
-      <EuiInMemoryTable
-        items={items}
-        columns={columns}
-        pagination={pagination}
-        sorting={true}
-      />
+      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
     );
   }
 }

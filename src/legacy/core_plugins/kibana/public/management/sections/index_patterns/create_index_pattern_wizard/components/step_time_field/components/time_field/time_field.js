@@ -44,7 +44,7 @@ export const TimeFieldComponent = ({
   intl,
 }) => (
   <EuiForm>
-    { isVisible ?
+    {isVisible ? (
       <EuiFormRow
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
@@ -57,21 +57,16 @@ export const TimeFieldComponent = ({
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              { isLoading ? (
-                <EuiLoadingSpinner size="s"/>
-              )
-                : (
-                  <EuiLink
-                    className="timeFieldRefreshButton"
-                    onClick={fetchTimeFields}
-                  >
-                    <FormattedMessage
-                      id="kbn.management.createIndexPattern.stepTime.refreshButton"
-                      defaultMessage="Refresh"
-                    />
-                  </EuiLink>
-                )
-              }
+              {isLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiLink className="timeFieldRefreshButton" onClick={fetchTimeFields}>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.stepTime.refreshButton"
+                    defaultMessage="Refresh"
+                  />
+                </EuiLink>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -92,7 +87,7 @@ export const TimeFieldComponent = ({
           </div>
         }
       >
-        { isLoading ? (
+        {isLoading ? (
           <EuiSelect
             name="timeField"
             data-test-subj="createIndexPatternTimeFieldSelect"
@@ -100,10 +95,10 @@ export const TimeFieldComponent = ({
               {
                 text: intl.formatMessage({
                   id: 'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
-                  defaultMessage: 'Loading…'
+                  defaultMessage: 'Loading…',
                 }),
-                value: ''
-              }
+                value: '',
+              },
             ]}
             disabled={true}
           />
@@ -119,7 +114,7 @@ export const TimeFieldComponent = ({
           />
         )}
       </EuiFormRow>
-      :
+    ) : (
       <EuiText>
         <p>
           <FormattedMessage
@@ -128,7 +123,7 @@ export const TimeFieldComponent = ({
           />
         </p>
       </EuiText>
-    }
+    )}
   </EuiForm>
 );
 

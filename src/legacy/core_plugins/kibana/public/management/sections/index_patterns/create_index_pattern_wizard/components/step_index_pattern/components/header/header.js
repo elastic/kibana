@@ -52,17 +52,17 @@ export const HeaderComponent = ({
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer size="m"/>
+    <EuiSpacer size="m" />
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiForm
-          isInvalid={isInputInvalid}
-        >
+        <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
-            label={<FormattedMessage
-              id="kbn.management.createIndexPattern.step.indexPatternLabel"
-              defaultMessage="Index pattern"
-            />}
+            label={
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.step.indexPatternLabel"
+                defaultMessage="Index pattern"
+              />
+            }
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
@@ -88,7 +88,7 @@ export const HeaderComponent = ({
               name="indexPattern"
               placeholder={intl.formatMessage({
                 id: 'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
-                defaultMessage: 'index-name-*'
+                defaultMessage: 'index-name-*',
               })}
               value={query}
               isInvalid={isInputInvalid}

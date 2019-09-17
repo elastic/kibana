@@ -89,9 +89,12 @@ class RelationshipsUI extends Component {
 
     return (
       <EuiCallOut
-        title={(
-          <FormattedMessage id="kbn.management.objects.objectsTable.relationships.renderErrorMessage" defaultMessage="Error"/>
-        )}
+        title={
+          <FormattedMessage
+            id="kbn.management.objects.objectsTable.relationships.renderErrorMessage"
+            defaultMessage="Error"
+          />
+        }
         color="danger"
       >
         {error}
@@ -120,18 +123,14 @@ class RelationshipsUI extends Component {
         }),
         width: '50px',
         align: 'center',
-        description:
-          intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
-            defaultMessage: 'Type of the saved object',
-          }),
+        description: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
+          defaultMessage: 'Type of the saved object',
+        }),
         sortable: false,
         render: (type, object) => {
           return (
-            <EuiToolTip
-              position="top"
-              content={getSavedObjectLabel(type)}
-            >
+            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
                 type={object.meta.icon || 'apps'}
@@ -179,8 +178,7 @@ class RelationshipsUI extends Component {
           id: 'kbn.management.objects.objectsTable.relationships.columnTitleName',
           defaultMessage: 'Title',
         }),
-        description:
-        intl.formatMessage({
+        description: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.relationships.columnTitleDescription',
           defaultMessage: 'Title of the saved object',
         }),
@@ -190,9 +188,7 @@ class RelationshipsUI extends Component {
           const { path } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
-            return (
-              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
-            );
+            return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
           return (
             <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
@@ -207,14 +203,15 @@ class RelationshipsUI extends Component {
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
+              id:
+                'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
               defaultMessage: 'Inspect',
             }),
-            description:
-              intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
-                defaultMessage: 'Inspect this saved object',
-              }),
+            description: intl.formatMessage({
+              id:
+                'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
+              defaultMessage: 'Inspect this saved object',
+            }),
             type: 'icon',
             icon: 'inspect',
             onClick: object => goInspectObject(object),
@@ -241,7 +238,8 @@ class RelationshipsUI extends Component {
           type: 'field_value_selection',
           field: 'relationship',
           name: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
+            id:
+              'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
             defaultMessage: 'Direct relationship',
           }),
           multiSelect: 'or',
@@ -250,7 +248,8 @@ class RelationshipsUI extends Component {
               value: 'parent',
               name: 'parent',
               view: intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
+                id:
+                  'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
                 defaultMessage: 'Parent',
               }),
             },
@@ -258,7 +257,8 @@ class RelationshipsUI extends Component {
               value: 'child',
               name: 'child',
               view: intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
+                id:
+                  'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
                 defaultMessage: 'Child',
               }),
             },
@@ -281,14 +281,18 @@ class RelationshipsUI extends Component {
       <div>
         <EuiCallOut>
           <p>
-            {intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
-              defaultMessage: 'Here are the saved objects related to {title}. ' +
-                'Deleting this {type} affects its parent objects, but not its children.',
-            }, {
-              type: savedObject.type,
-              title: savedObject.meta.title || getDefaultTitle(savedObject)
-            })}
+            {intl.formatMessage(
+              {
+                id: 'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
+                defaultMessage:
+                  'Here are the saved objects related to {title}. ' +
+                  'Deleting this {type} affects its parent objects, but not its children.',
+              },
+              {
+                type: savedObject.type,
+                title: savedObject.meta.title || getDefaultTitle(savedObject),
+              }
+            )}
           </p>
         </EuiCallOut>
         <EuiSpacer />

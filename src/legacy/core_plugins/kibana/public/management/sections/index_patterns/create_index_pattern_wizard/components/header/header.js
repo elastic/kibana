@@ -39,7 +39,7 @@ const HeaderUi = ({
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
   isBeta,
-  intl
+  intl,
 }) => (
   <div>
     <EuiTitle>
@@ -48,20 +48,20 @@ const HeaderUi = ({
           id="kbn.management.createIndexPatternHeader"
           defaultMessage="Create {indexPatternName}"
           values={{
-            indexPatternName
+            indexPatternName,
           }}
         />
-        { isBeta ? (
+        {isBeta ? (
           <Fragment>
             {' '}
             <EuiBetaBadge
               label={intl.formatMessage({
                 id: 'kbn.management.createIndexPattern.betaLabel',
-                defaultMessage: 'Beta'
+                defaultMessage: 'Beta',
               })}
             />
           </Fragment>
-        ) : null }
+        ) : null}
       </h1>
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -77,31 +77,29 @@ const HeaderUi = ({
           </p>
         </EuiText>
       </EuiFlexItem>
-      {
-        showSystemIndices ? (
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={<FormattedMessage
+      {showSystemIndices ? (
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
                 id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
                 defaultMessage="Include system indices"
-              />}
-              id="checkboxShowSystemIndices"
-              checked={isIncludingSystemIndices}
-              onChange={onChangeIncludingSystemIndices}
-            />
-          </EuiFlexItem>
-        ) : null
-      }
+              />
+            }
+            id="checkboxShowSystemIndices"
+            checked={isIncludingSystemIndices}
+            onChange={onChangeIncludingSystemIndices}
+          />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
-    {
-      prompt ? (
-        <Fragment>
-          <EuiSpacer size="s" />
-          {prompt}
-        </Fragment>
-      ) : null
-    }
-    <EuiSpacer size="m"/>
+    {prompt ? (
+      <Fragment>
+        <EuiSpacer size="s" />
+        {prompt}
+      </Fragment>
+    ) : null}
+    <EuiSpacer size="m" />
   </div>
 );
 

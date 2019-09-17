@@ -19,13 +19,7 @@
 
 import React from 'react';
 
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -41,35 +35,35 @@ export const AdvancedOptionsComponent = ({
       iconType={isVisible ? 'arrowDown' : 'arrowRight'}
       onClick={toggleAdvancedOptions}
     >
-      { isVisible
-        ? (
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.options.hideButton"
-            defaultMessage="Hide advanced options"
-          />
-        )
-        : (
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.options.showButton"
-            defaultMessage="Show advanced options"
-          />
-        )
-      }
-
+      {isVisible ? (
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepTime.options.hideButton"
+          defaultMessage="Hide advanced options"
+        />
+      ) : (
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepTime.options.showButton"
+          defaultMessage="Show advanced options"
+        />
+      )}
     </EuiButtonEmpty>
-    <EuiSpacer size="xs"/>
-    { isVisible ?
+    <EuiSpacer size="xs" />
+    {isVisible ? (
       <EuiForm>
         <EuiFormRow
-          label={<FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.options.patternHeader"
-            defaultMessage="Custom index pattern ID"
-          />}
-          helpText={<FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.options.patternLabel"
-            defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
+          label={
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.options.patternHeader"
+              defaultMessage="Custom index pattern ID"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.options.patternLabel"
+              defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
             enter a custom one."
-          />}
+            />
+          }
         >
           <EuiFieldText
             name="indexPatternId"
@@ -78,13 +72,12 @@ export const AdvancedOptionsComponent = ({
             onChange={onChangeIndexPatternId}
             placeholder={intl.formatMessage({
               id: 'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
-              defaultMessage: 'custom-index-pattern-id'
+              defaultMessage: 'custom-index-pattern-id',
             })}
           />
         </EuiFormRow>
       </EuiForm>
-      : null
-    }
+    ) : null}
   </div>
 );
 

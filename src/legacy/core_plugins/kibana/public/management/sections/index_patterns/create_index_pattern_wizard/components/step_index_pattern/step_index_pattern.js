@@ -26,18 +26,14 @@ import {
   containsIllegalCharacters,
   getMatchedIndices,
   canAppendWildcard,
-  ensureMinimumTime
+  ensureMinimumTime,
 } from '../../lib';
 import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
@@ -53,11 +49,11 @@ export class StepIndexPatternComponent extends Component {
     indexPatternCreationType: PropTypes.object.isRequired,
     goToNextStep: PropTypes.func.isRequired,
     initialQuery: PropTypes.string,
-  }
+  };
 
   static defaultProps = {
     initialQuery: uiSettings.get('indexPattern:placeholder'),
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -90,13 +86,15 @@ export class StepIndexPatternComponent extends Component {
     const { savedObjects } = await this.props.savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title'],
-      perPage: 10000
+      perPage: 10000,
     });
-    const existingIndexPatterns = savedObjects.map(obj => obj && obj.attributes ? obj.attributes.title : '');
+    const existingIndexPatterns = savedObjects.map(obj =>
+      obj && obj.attributes ? obj.attributes.title : ''
+    );
     this.setState({ existingIndexPatterns });
-  }
+  };
 
-  fetchIndices = async (query) => {
+  fetchIndices = async query => {
     const { esService, indexPatternCreationType } = this.props;
     const { existingIndexPatterns } = this.state;
 
@@ -108,7 +106,9 @@ export class StepIndexPatternComponent extends Component {
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
 
     if (query.endsWith('*')) {
-      const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE));
+      const exactMatchedIndices = await ensureMinimumTime(
+        getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE)
+      );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
         return;
@@ -117,10 +117,7 @@ export class StepIndexPatternComponent extends Component {
       return;
     }
 
-    const [
-      partialMatchedIndices,
-      exactMatchedIndices,
-    ] = await ensureMinimumTime([
+    const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
       getIndices(esService, indexPatternCreationType, `${query}*`, MAX_SEARCH_SIZE),
       getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE),
     ]);
@@ -133,9 +130,9 @@ export class StepIndexPatternComponent extends Component {
     this.setState({
       partialMatchedIndices,
       exactMatchedIndices,
-      isLoadingIndices: false
+      isLoadingIndices: false,
     });
-  }
+  };
 
   onQueryChanged = e => {
     const { appendedWildcard } = this.state;
@@ -156,7 +153,7 @@ export class StepIndexPatternComponent extends Component {
     this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
-  }
+  };
 
   renderLoadingState() {
     const { isLoadingIndices } = this.state;
@@ -165,9 +162,7 @@ export class StepIndexPatternComponent extends Component {
       return null;
     }
 
-    return (
-      <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
-    );
+    return <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />;
   }
 
   renderStatusMessage(matchedIndices) {
@@ -195,9 +190,7 @@ export class StepIndexPatternComponent extends Component {
       return null;
     }
 
-    const indicesToList = query.length
-      ? visibleIndices
-      : allIndices;
+    const indicesToList = query.length ? visibleIndices : allIndices;
 
     return (
       <IndicesList
@@ -217,11 +210,13 @@ export class StepIndexPatternComponent extends Component {
 
     return (
       <EuiCallOut
-        title={<FormattedMessage
-          id="kbn.management.createIndexPattern.step.warningHeader"
-          defaultMessage="There's already an index pattern called {query}"
-          values={{ query }}
-        />}
+        title={
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.step.warningHeader"
+            defaultMessage="There's already an index pattern called {query}"
+            values={{ query }}
+          />
+        }
         iconType="help"
         color="warning"
       />
@@ -230,11 +225,18 @@ export class StepIndexPatternComponent extends Component {
 
   renderHeader({ exactMatchedIndices: indices }) {
     const { goToNextStep, indexPatternCreationType, intl } = this.props;
-    const { query, showingIndexPatternQueryErrors, indexPatternExists, indexPatternName } = this.state;
+    const {
+      query,
+      showingIndexPatternQueryErrors,
+      indexPatternExists,
+      indexPatternName,
+    } = this.state;
 
     let containsErrors = false;
     const errors = [];
-    const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(', ');
+    const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(
+      ', '
+    );
     const checkIndices = indexPatternCreationType.checkIndicesForErrors(indices);
 
     if (!query || !query.length || query === '.' || query === '..') {
@@ -244,7 +246,8 @@ export class StepIndexPatternComponent extends Component {
       const errorMessage = intl.formatMessage(
         {
           id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
-          defaultMessage: 'A {indexPatternName} cannot contain spaces or the characters: {characterList}'
+          defaultMessage:
+            'A {indexPatternName} cannot contain spaces or the characters: {characterList}',
         },
         { characterList, indexPatternName }
       );
@@ -288,11 +291,11 @@ export class StepIndexPatternComponent extends Component {
     return (
       <EuiPanel paddingSize="l">
         {this.renderHeader(matchedIndices)}
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         {this.renderLoadingState(matchedIndices)}
         {this.renderIndexPatternExists()}
         {this.renderStatusMessage(matchedIndices)}
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         {this.renderList(matchedIndices)}
       </EuiPanel>
     );

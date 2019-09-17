@@ -97,10 +97,7 @@ class FlyoutUI extends Component {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = await this.props.indexPatterns.getFields([
-      'id',
-      'title',
-    ]);
+    const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
     this.setState({ indexPatterns });
   };
 
@@ -153,7 +150,7 @@ class FlyoutUI extends Component {
         this.resolveImportErrors();
       }
     });
-  }
+  };
 
   /**
    * Get Conflict Resolutions
@@ -163,10 +160,10 @@ class FlyoutUI extends Component {
    * @param {array} objects List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  getConflictResolutions = async (objects) => {
+  getConflictResolutions = async objects => {
     const resolutions = {};
     for (const { type, id, title } of objects) {
-      const overwrite = await new Promise((resolve) => {
+      const overwrite = await new Promise(resolve => {
         this.setState({
           conflictingRecord: {
             id,
@@ -180,7 +177,7 @@ class FlyoutUI extends Component {
       this.setState({ conflictingRecord: undefined });
     }
     return resolutions;
-  }
+  };
 
   /**
    * Resolve Import Errors
@@ -211,7 +208,7 @@ class FlyoutUI extends Component {
         }),
       });
     }
-  }
+  };
 
   legacyImport = async () => {
     const { services, indexPatterns, intl, confirmModalPromise } = this.props;
@@ -247,17 +244,17 @@ class FlyoutUI extends Component {
       return;
     }
 
-    contents = contents.filter(content =>
-      POSSIBLE_TYPES.includes(content._type)
-    ).map(doc => ({
-      ...doc,
-      // The server assumes that documents with no migrationVersion are up to date.
-      // That assumption enables Kibana and other API consumers to not have to build
-      // up migrationVersion prior to creating new objects. But it means that imports
-      // need to set migrationVersion to something other than undefined, so that imported
-      // docs are not seen as automatically up-to-date.
-      _migrationVersion: doc._migrationVersion || {},
-    }));
+    contents = contents
+      .filter(content => POSSIBLE_TYPES.includes(content._type))
+      .map(doc => ({
+        ...doc,
+        // The server assumes that documents with no migrationVersion are up to date.
+        // That assumption enables Kibana and other API consumers to not have to build
+        // up migrationVersion prior to creating new objects. But it means that imports
+        // need to set migrationVersion to something other than undefined, so that imported
+        // docs are not seen as automatically up-to-date.
+        _migrationVersion: doc._migrationVersion || {},
+      }));
 
     const {
       conflictedIndexPatterns,
@@ -277,7 +274,8 @@ class FlyoutUI extends Component {
     conflictedIndexPatterns
       .map(({ doc, obj }) => {
         return { doc, obj: obj._serialize() };
-      }).forEach(({ doc, obj }) =>
+      })
+      .forEach(({ doc, obj }) =>
         obj.references.forEach(ref => {
           byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
         })
@@ -334,7 +332,7 @@ class FlyoutUI extends Component {
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
-      failedImports
+      failedImports,
     } = this.state;
 
     const { services, indexPatterns, intl } = this.props;
@@ -354,7 +352,8 @@ class FlyoutUI extends Component {
         // Do not Promise.all these calls as the order matters
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
+            id:
+              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
             defaultMessage: 'Resolving conflicts…',
           }),
         });
@@ -367,7 +366,8 @@ class FlyoutUI extends Component {
         }
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
+            id:
+              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
             defaultMessage: 'Saving conflicts…',
           }),
         });
@@ -377,7 +377,8 @@ class FlyoutUI extends Component {
         );
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
+            id:
+              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
             defaultMessage: 'Ensure saved searches are linked properly…',
           }),
         });
@@ -389,7 +390,8 @@ class FlyoutUI extends Component {
         );
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
+            id:
+              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
             defaultMessage: 'Retrying failed objects…',
           }),
         });
@@ -471,17 +473,21 @@ class FlyoutUI extends Component {
       {
         field: 'list',
         name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
+          id:
+            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
           defaultMessage: 'Sample of affected objects',
         }),
         description: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
+          id:
+            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
           defaultMessage: 'Sample of affected objects',
         }),
         render: list => {
           return (
             <ul style={{ listStyle: 'none' }}>
-              {take(list, 3).map((obj, key) => <li key={key}>{obj.title}</li>)}
+              {take(list, 3).map((obj, key) => (
+                <li key={key}>{obj.title}</li>
+              ))}
             </ul>
           );
         },
@@ -489,7 +495,8 @@ class FlyoutUI extends Component {
       {
         field: 'existingIndexPatternId',
         name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
+          id:
+            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
           defaultMessage: 'New index pattern',
         }),
         render: id => {
@@ -520,11 +527,7 @@ class FlyoutUI extends Component {
     };
 
     return (
-      <EuiInMemoryTable
-        items={unmatchedReferences}
-        columns={columns}
-        pagination={pagination}
-      />
+      <EuiInMemoryTable items={unmatchedReferences} columns={columns} pagination={pagination} />
     );
   }
 
@@ -538,9 +541,12 @@ class FlyoutUI extends Component {
     return (
       <Fragment>
         <EuiCallOut
-          title={(
-            <FormattedMessage id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle" defaultMessage="Sorry, there was an error"/>
-          )}
+          title={
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle"
+              defaultMessage="Sorry, there was an error"
+            />
+          }
           color="danger"
         >
           <p>{error}</p>
@@ -576,12 +582,18 @@ class FlyoutUI extends Component {
     }
 
     // Kept backwards compatible logic
-    if (failedImports.length && (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))) {
+    if (
+      failedImports.length &&
+      (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))
+    ) {
       return (
         <EuiCallOut
-          title={(
-            <FormattedMessage id="kbn.management.objects.objectsTable.flyout.importFailedTitle" defaultMessage="Import failed"/>
-          )}
+          title={
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+              defaultMessage="Import failed"
+            />
+          }
           color="warning"
           iconType="help"
         >
@@ -589,40 +601,46 @@ class FlyoutUI extends Component {
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
               defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-              values={{ failedImportCount: failedImports.length, totalImportCount: importCount + failedImports.length, }}
+              values={{
+                failedImportCount: failedImports.length,
+                totalImportCount: importCount + failedImports.length,
+              }}
             />
           </p>
           <p>
-            {failedImports.map(({ error, obj }) => {
-              if (error.type === 'missing_references') {
-                return error.references.map((reference) => {
+            {failedImports
+              .map(({ error, obj }) => {
+                if (error.type === 'missing_references') {
+                  return error.references.map(reference => {
+                    return intl.formatMessage(
+                      {
+                        id:
+                          'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
+                        defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
+                      },
+                      {
+                        id: obj.id,
+                        type: obj.type,
+                        refId: reference.id,
+                        refType: reference.type,
+                      }
+                    );
+                  });
+                } else if (error.type === 'unsupported_type') {
                   return intl.formatMessage(
                     {
-                      id: 'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
-                      defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
+                      id: 'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
+                      defaultMessage: '{type} [id={id}] unsupported type',
                     },
                     {
                       id: obj.id,
                       type: obj.type,
-                      refId: reference.id,
-                      refType: reference.type,
                     }
                   );
-                });
-              } else if (error.type === 'unsupported_type') {
-                return intl.formatMessage(
-                  {
-                    id: 'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
-                    defaultMessage: '{type} [id={id}] unsupported type',
-                  },
-                  {
-                    id: obj.id,
-                    type: obj.type,
-                  },
-                );
-              }
-              return getField(error, 'body.message', error.message || '');
-            }).join(' ')}
+                }
+                return getField(error, 'body.message', error.message || '');
+              })
+              .join(' ')}
           </p>
         </EuiCallOut>
       );
@@ -633,12 +651,12 @@ class FlyoutUI extends Component {
         return (
           <EuiCallOut
             data-test-subj="importSavedObjectsSuccessNoneImported"
-            title={(
+            title={
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.importSuccessfulCallout.noObjectsImportedTitle"
                 defaultMessage="No objects imported"
               />
-            )}
+            }
             color="primary"
           />
         );
@@ -647,12 +665,12 @@ class FlyoutUI extends Component {
       return (
         <EuiCallOut
           data-test-subj="importSavedObjectsSuccess"
-          title={(
+          title={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.importSuccessfulTitle"
               defaultMessage="Import successful"
             />
-          )}
+          }
           color="success"
           iconType="check"
         >
@@ -674,32 +692,32 @@ class FlyoutUI extends Component {
     return (
       <EuiForm>
         <EuiFormRow
-          label={(
+          label={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
               defaultMessage="Please select a file to import"
             />
-          )}
+          }
         >
           <EuiFilePicker
-            initialPromptText={(
+            initialPromptText={
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.importPromptText"
                 defaultMessage="Import"
               />
-            )}
+            }
             onChange={this.setImportFile}
           />
         </EuiFormRow>
         <EuiFormRow>
           <EuiSwitch
             name="overwriteAll"
-            label={(
+            label={
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.overwriteSavedObjectsLabel"
                 defaultMessage="Automatically overwrite all saved objects?"
               />
-            )}
+            }
             data-test-subj="importSavedObjectsOverwriteToggle"
             checked={isOverwriteAllChecked}
             onChange={this.changeOverwriteAll}
@@ -717,12 +735,7 @@ class FlyoutUI extends Component {
 
     if (status === 'success') {
       confirmButton = (
-        <EuiButton
-          onClick={done}
-          size="s"
-          fill
-          data-test-subj="importSavedObjectsDoneBtn"
-        >
+        <EuiButton onClick={done} size="s" fill data-test-subj="importSavedObjectsDoneBtn">
           <FormattedMessage
             id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmButtonLabel"
             defaultMessage="Done"
@@ -777,10 +790,7 @@ class FlyoutUI extends Component {
   }
 
   renderSubheader() {
-    if (
-      this.state.status === 'loading' ||
-      this.state.status === 'success'
-    ) {
+    if (this.state.status === 'loading' || this.state.status === 'success') {
       return null;
     }
 
@@ -788,12 +798,12 @@ class FlyoutUI extends Component {
     if (this.state.isLegacyFile) {
       legacyFileWarning = (
         <EuiCallOut
-          title={(
+          title={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
               defaultMessage="Support for JSON files is going away"
             />
-          )}
+          }
           color="warning"
           iconType="help"
         >
@@ -811,12 +821,12 @@ class FlyoutUI extends Component {
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
-          title={(
+          title={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
               defaultMessage="Index Pattern Conflicts"
             />
-          )}
+          }
           color="warning"
           iconType="help"
         >
@@ -824,7 +834,7 @@ class FlyoutUI extends Component {
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
               defaultMessage="The following saved objects use index patterns that do not exist.
-              Please select the index patterns you&apos;d like re-associated with
+              Please select the index patterns you'd like re-associated with
               them. You can {indexPatternLink} if necessary."
               values={{
                 indexPatternLink: (
@@ -834,11 +844,12 @@ class FlyoutUI extends Component {
                       defaultMessage="create a new index pattern"
                     />
                   </EuiLink>
-                )
+                ),
               }}
             />
           </p>
-        </EuiCallOut>);
+        </EuiCallOut>
+      );
     }
 
     if (!legacyFileWarning && !indexPatternConflictsWarning) {
@@ -847,18 +858,18 @@ class FlyoutUI extends Component {
 
     return (
       <Fragment>
-        {legacyFileWarning &&
+        {legacyFileWarning && (
           <span>
             <EuiSpacer size="s" />
             {legacyFileWarning}
           </span>
-        }
-        {indexPatternConflictsWarning &&
+        )}
+        {indexPatternConflictsWarning && (
           <span>
             <EuiSpacer size="s" />
             {indexPatternConflictsWarning}
           </span>
-        }
+        )}
       </Fragment>
     );
   }
@@ -882,22 +893,18 @@ class FlyoutUI extends Component {
             title={intl.formatMessage(
               {
                 id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteTitle',
-                defaultMessage: 'Overwrite {type}?'
+                defaultMessage: 'Overwrite {type}?',
               },
               { type: this.state.conflictingRecord.type }
             )}
-            cancelButtonText={intl.formatMessage(
-              {
-                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
-                defaultMessage: 'Cancel',
-              },
-            )}
-            confirmButtonText={intl.formatMessage(
-              {
-                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
-                defaultMessage: 'Overwrite',
-              },
-            )}
+            cancelButtonText={intl.formatMessage({
+              id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={intl.formatMessage({
+              id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
+              defaultMessage: 'Overwrite',
+            })}
             buttonColor="danger"
             onCancel={this.overwriteSkipped.bind(this)}
             onConfirm={this.overwriteConfirmed.bind(this)}
@@ -908,12 +915,15 @@ class FlyoutUI extends Component {
                 id="kbn.management.objects.objectsTable.flyout.confirmOverwriteBody"
                 defaultMessage="Are you sure you want to overwrite {title}?"
                 values={{
-                  title: this.state.conflictingRecord.title || getDefaultTitle(this.state.conflictingRecord)
+                  title:
+                    this.state.conflictingRecord.title ||
+                    getDefaultTitle(this.state.conflictingRecord),
                 }}
               />
             </p>
           </EuiConfirmModal>
-        </EuiOverlayMask>);
+        </EuiOverlayMask>
+      );
     }
 
     return (

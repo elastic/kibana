@@ -20,9 +20,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -32,77 +30,109 @@ export class TableComponent extends PureComponent {
     items: PropTypes.array.isRequired,
     editField: PropTypes.func.isRequired,
     deleteField: PropTypes.func.isRequired,
-  }
+  };
 
-  renderFormatCell = (value) => {
+  renderFormatCell = value => {
     const { indexPattern } = this.props;
 
-    const title = indexPattern.fieldFormatMap[value] && indexPattern.fieldFormatMap[value].type
-      ? indexPattern.fieldFormatMap[value].type.title
-      : '';
+    const title =
+      indexPattern.fieldFormatMap[value] && indexPattern.fieldFormatMap[value].type
+        ? indexPattern.fieldFormatMap[value].type.title
+        : '';
 
-    return (
-      <span>{title}</span>
-    );
-  }
+    return <span>{title}</span>;
+  };
 
   render() {
-    const {
-      items,
-      editField,
-      deleteField,
-      intl,
-    } = this.props;
+    const { items, editField, deleteField, intl } = this.props;
 
-    const columns = [{
-      field: 'displayName',
-      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.nameHeader', defaultMessage: 'Name' }),
-      description: intl.formatMessage({
-        id: 'kbn.management.editIndexPattern.scripted.table.nameDescription', defaultMessage: 'Name of the field' }),
-      dataType: 'string',
-      sortable: true,
-      width: '38%',
-    }, {
-      field: 'lang',
-      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.langHeader', defaultMessage: 'Lang' }),
-      description: intl.formatMessage({
-        id: 'kbn.management.editIndexPattern.scripted.table.langDescription',
-        defaultMessage: 'Language used for the field' }),
-      dataType: 'string',
-      sortable: true,
-      'data-test-subj': 'scriptedFieldLang',
-    }, {
-      field: 'script',
-      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.scriptHeader', defaultMessage: 'Script' }),
-      description: intl.formatMessage({
-        id: 'kbn.management.editIndexPattern.scripted.table.scriptDescription', defaultMessage: 'Script for the field' }),
-      dataType: 'string',
-      sortable: true,
-    }, {
-      field: 'name',
-      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.formatHeader', defaultMessage: 'Format' }),
-      description: intl.formatMessage({
-        id: 'kbn.management.editIndexPattern.scripted.table.formatDescription', defaultMessage: 'Format used for the field' }),
-      render: this.renderFormatCell,
-      sortable: false,
-    }, {
-      name: '',
-      actions: [{
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.editHeader', defaultMessage: 'Edit' }),
+    const columns = [
+      {
+        field: 'displayName',
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.nameHeader',
+          defaultMessage: 'Name',
+        }),
         description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.editDescription', defaultMessage: 'Edit this field' }),
-        icon: 'pencil',
-        onClick: editField,
-      }, {
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.deleteHeader', defaultMessage: 'Delete' }),
+          id: 'kbn.management.editIndexPattern.scripted.table.nameDescription',
+          defaultMessage: 'Name of the field',
+        }),
+        dataType: 'string',
+        sortable: true,
+        width: '38%',
+      },
+      {
+        field: 'lang',
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.langHeader',
+          defaultMessage: 'Lang',
+        }),
         description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.deleteDescription', defaultMessage: 'Delete this field' }),
-        icon: 'trash',
-        color: 'danger',
-        onClick: deleteField,
-      }],
-      width: '40px',
-    }];
+          id: 'kbn.management.editIndexPattern.scripted.table.langDescription',
+          defaultMessage: 'Language used for the field',
+        }),
+        dataType: 'string',
+        sortable: true,
+        'data-test-subj': 'scriptedFieldLang',
+      },
+      {
+        field: 'script',
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.scriptHeader',
+          defaultMessage: 'Script',
+        }),
+        description: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.scriptDescription',
+          defaultMessage: 'Script for the field',
+        }),
+        dataType: 'string',
+        sortable: true,
+      },
+      {
+        field: 'name',
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.formatHeader',
+          defaultMessage: 'Format',
+        }),
+        description: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.scripted.table.formatDescription',
+          defaultMessage: 'Format used for the field',
+        }),
+        render: this.renderFormatCell,
+        sortable: false,
+      },
+      {
+        name: '',
+        actions: [
+          {
+            name: intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.scripted.table.editHeader',
+              defaultMessage: 'Edit',
+            }),
+            description: intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.scripted.table.editDescription',
+              defaultMessage: 'Edit this field',
+            }),
+            icon: 'pencil',
+            onClick: editField,
+          },
+          {
+            name: intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.scripted.table.deleteHeader',
+              defaultMessage: 'Delete',
+            }),
+            description: intl.formatMessage({
+              id: 'kbn.management.editIndexPattern.scripted.table.deleteDescription',
+              defaultMessage: 'Delete this field',
+            }),
+            icon: 'trash',
+            color: 'danger',
+            onClick: deleteField,
+          },
+        ],
+        width: '40px',
+      },
+    ];
 
     const pagination = {
       initialPageSize: 10,
@@ -110,12 +140,7 @@ export class TableComponent extends PureComponent {
     };
 
     return (
-      <EuiInMemoryTable
-        items={items}
-        columns={columns}
-        pagination={pagination}
-        sorting={true}
-      />
+      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
     );
   }
 }

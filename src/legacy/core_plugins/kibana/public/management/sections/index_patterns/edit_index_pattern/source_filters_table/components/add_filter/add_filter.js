@@ -20,19 +20,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class AddFilterComponent extends Component {
   static propTypes = {
     onAddFilter: PropTypes.func.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -44,14 +39,15 @@ export class AddFilterComponent extends Component {
   onAddFilter = () => {
     this.props.onAddFilter(this.state.filter);
     this.setState({ filter: '' });
-  }
+  };
 
   render() {
     const { filter } = this.state;
     const { intl } = this.props;
     const placeholder = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.sourcePlaceholder',
-      defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+      defaultMessage:
+        'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')',
     });
 
     return (
@@ -65,11 +61,11 @@ export class AddFilterComponent extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
-            isDisabled={filter.length === 0}
-            onClick={this.onAddFilter}
-          >
-            <FormattedMessage id="kbn.management.editIndexPattern.source.addButtonLabel" defaultMessage="Add" />
+          <EuiButton isDisabled={filter.length === 0} onClick={this.onAddFilter}>
+            <FormattedMessage
+              id="kbn.management.editIndexPattern.source.addButtonLabel"
+              defaultMessage="Add"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

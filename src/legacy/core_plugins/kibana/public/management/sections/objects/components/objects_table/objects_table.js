@@ -50,7 +50,7 @@ import {
   EuiModalHeaderTitle,
   EuiFormRow,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
 import {
   parseQuery,
@@ -165,10 +165,13 @@ class ObjectsTableUI extends Component {
   };
 
   fetchSavedObjects = () => {
-    this.setState({
-      isSearching: true,
-    }, this.debouncedFetch);
-  }
+    this.setState(
+      {
+        isSearching: true,
+      },
+      this.debouncedFetch
+    );
+  };
 
   debouncedFetch = debounce(async () => {
     const { intl } = this.props;
@@ -181,9 +184,7 @@ class ObjectsTableUI extends Component {
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: this.savedObjectTypes.filter(
-        type => !visibleTypes || visibleTypes.includes(type)
-      ),
+      type: this.savedObjectTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -201,7 +202,7 @@ class ObjectsTableUI extends Component {
       toastNotifications.addDanger({
         title: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
-          defaultMessage: 'Unable find saved objects'
+          defaultMessage: 'Unable find saved objects',
         }),
         text: `${error}`,
       });
@@ -253,14 +254,17 @@ class ObjectsTableUI extends Component {
   onTableChange = async table => {
     const { index: page, size: perPage } = table.page || {};
 
-    this.setState({
-      page,
-      perPage,
-      selectedSavedObjects: [],
-    }, this.fetchSavedObjects);
+    this.setState(
+      {
+        page,
+        perPage,
+        selectedSavedObjects: [],
+      },
+      this.fetchSavedObjects
+    );
   };
 
-  onShowRelationships = (object) => {
+  onShowRelationships = object => {
     this.setState({
       isShowingRelationships: true,
       relationshipObject: object,
@@ -274,7 +278,7 @@ class ObjectsTableUI extends Component {
     });
   };
 
-  onExport = async (includeReferencesDeep) => {
+  onExport = async includeReferencesDeep => {
     const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
@@ -304,15 +308,12 @@ class ObjectsTableUI extends Component {
   onExportAll = async () => {
     const { intl } = this.props;
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
-      (accum, [id, selected]) => {
-        if (selected) {
-          accum.push(id);
-        }
-        return accum;
-      },
-      []
-    );
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
+      if (selected) {
+        accum.push(id);
+      }
+      return accum;
+    }, []);
 
     let blob;
     try {
@@ -365,9 +366,7 @@ class ObjectsTableUI extends Component {
 
     this.setState({ isDeleting: true });
 
-    const indexPatterns = selectedSavedObjects.filter(
-      object => object.type === 'index-pattern'
-    );
+    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
     if (indexPatterns.length) {
       await this.props.indexPatterns.clearCache();
     }
@@ -440,11 +439,7 @@ class ObjectsTableUI extends Component {
   }
 
   renderDeleteConfirmModal() {
-    const {
-      isShowingDeleteConfirmModal,
-      isDeleting,
-      selectedSavedObjects,
-    } = this.state;
+    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
     const { intl } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
@@ -455,9 +450,7 @@ class ObjectsTableUI extends Component {
 
     if (isDeleting) {
       // Block the user from interacting with the table while its contents are being deleted.
-      modal = (
-        <EuiLoadingKibana size="xl"/>
-      );
+      modal = <EuiLoadingKibana size="xl" />;
     } else {
       const onCancel = () => {
         this.setState({ isShowingDeleteConfirmModal: false });
@@ -478,22 +471,24 @@ class ObjectsTableUI extends Component {
           onCancel={onCancel}
           onConfirm={onConfirm}
           buttonColor="danger"
-          cancelButtonText={(
+          cancelButtonText={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          )}
+          }
           confirmButtonText={
-            isDeleting
-              ? (<FormattedMessage
+            isDeleting ? (
+              <FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
                 defaultMessage="Deleting…"
-              />)
-              :  (<FormattedMessage
+              />
+            ) : (
+              <FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
                 defaultMessage="Delete"
-              />)
+              />
+            )
           }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
@@ -509,14 +504,13 @@ class ObjectsTableUI extends Component {
               {
                 field: 'type',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
+                  id:
+                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
+                  defaultMessage: 'Type',
                 }),
                 width: '50px',
                 render: (type, object) => (
-                  <EuiToolTip
-                    position="top"
-                    content={getSavedObjectLabel(type)}
-                  >
+                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
                     <EuiIcon type={object.meta.icon || 'apps'} />
                   </EuiToolTip>
                 ),
@@ -524,13 +518,16 @@ class ObjectsTableUI extends Component {
               {
                 field: 'id',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id'
+                  id:
+                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
+                  defaultMessage: 'Id',
                 }),
               },
               {
                 field: 'meta.title',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  id:
+                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   defaultMessage: 'Title',
                 }),
               },
@@ -542,22 +539,18 @@ class ObjectsTableUI extends Component {
       );
     }
 
-    return (
-      <EuiOverlayMask>
-        {modal}
-      </EuiOverlayMask>
-    );
+    return <EuiOverlayMask>{modal}</EuiOverlayMask>;
   }
 
   changeIncludeReferencesDeep = () => {
     this.setState(state => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
-  }
+  };
 
   closeExportAllModal = () => {
     this.setState({ isShowingExportAllOptionsModal: false });
-  }
+  };
 
   renderExportAllOptionsModal() {
     const {
@@ -574,26 +567,26 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiOverlayMask>
-        <EuiModal
-          onClose={this.closeExportAllModal}
-        >
+        <EuiModal onClose={this.closeExportAllModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
                 defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
                 values={{
-                  filteredItemCount
+                  filteredItemCount,
                 }}
               />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiFormRow
-              label={<FormattedMessage
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-                defaultMessage="Select which types to export"
-              />}
+              label={
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                  defaultMessage="Select which types to export"
+                />
+              }
               labelType="legend"
             >
               <EuiCheckboxGroup
@@ -616,12 +609,12 @@ class ObjectsTableUI extends Component {
             <EuiSpacer size="m" />
             <EuiSwitch
               name="includeReferencesDeep"
-              label={(
+              label={
                 <FormattedMessage
                   id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   defaultMessage="Include related objects"
                 />
-              )}
+              }
               checked={isIncludeReferencesDeepChecked}
               onChange={this.changeIncludeReferencesDeep}
             />
@@ -677,17 +670,13 @@ class ObjectsTableUI extends Component {
     }));
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-      >
+      <EuiPageContent horizontalPosition="center">
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         <Header
-          onExportAll={() =>
-            this.setState({ isShowingExportAllOptionsModal: true })
-          }
+          onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
           onRefresh={this.refreshData}
           filteredCount={filteredItemCount}

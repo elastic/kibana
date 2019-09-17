@@ -21,15 +21,11 @@ import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n } from '@kbn/i18n/react';
 
-import {
-  EuiSearchBar,
-  EuiFormErrorText,
-} from '@elastic/eui';
+import { EuiSearchBar, EuiFormErrorText } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
 
 class SearchUI extends PureComponent {
-
   static propTypes = {
     categories: PropTypes.array.isRequired,
     query: PropTypes.object.isRequired,
@@ -50,7 +46,7 @@ class SearchUI extends PureComponent {
   state = {
     isSearchTextValid: true,
     parseErrorMessage: null,
-  }
+  };
 
   onChange = ({ query, error }) => {
     if (error) {
@@ -66,7 +62,7 @@ class SearchUI extends PureComponent {
       parseErrorMessage: null,
     });
     this.props.onQueryChange({ query });
-  }
+  };
 
   render() {
     const { query, intl } = this.props;
@@ -78,7 +74,6 @@ class SearchUI extends PureComponent {
         id: 'kbn.management.settings.searchBarAriaLabel',
         defaultMessage: 'Search advanced settings',
       }), // hack until EuiSearchBar is fixed
-
     };
 
     const filters = [
@@ -91,7 +86,7 @@ class SearchUI extends PureComponent {
         }),
         multiSelect: 'or',
         options: this.categories,
-      }
+      },
     ];
 
     let queryParseError;
@@ -101,20 +96,13 @@ class SearchUI extends PureComponent {
         defaultMessage: 'Unable to parse query',
       });
       queryParseError = (
-        <EuiFormErrorText>
-          {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
-        </EuiFormErrorText>
+        <EuiFormErrorText>{`${parseErrorMsg}. ${this.state.parseErrorMessage}`}</EuiFormErrorText>
       );
     }
 
     return (
       <Fragment>
-        <EuiSearchBar
-          box={box}
-          filters={filters}
-          onChange={this.onChange}
-          query={query}
-        />
+        <EuiSearchBar box={box} filters={filters} onChange={this.onChange} query={query} />
         {queryParseError}
       </Fragment>
     );
