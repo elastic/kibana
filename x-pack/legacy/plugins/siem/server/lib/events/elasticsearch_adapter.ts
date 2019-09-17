@@ -21,7 +21,6 @@ import {
 import {
   DetailItem,
   EcsEdges,
-  EventsData,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
@@ -31,10 +30,10 @@ import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
-import { buildDetailsQuery, buildQuery, buildTimelineQuery } from './query.dsl';
+import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
 import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
 import {
   EventHit,
@@ -44,52 +43,9 @@ import {
   RequestDetailsOptions,
   TimelineRequestOptions,
 } from './types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
-
-  public async getEvents(
-    request: FrameworkRequest,
-    options: RequestOptionsPaginated
-  ): Promise<EventsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    const queryOptions = cloneDeep(options);
-    queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
-
-    const dsl = buildQuery(queryOptions);
-    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'hits.total.value', response);
-    const hits = response.hits.hits;
-    const eventsEdges: EcsEdges[] = hits.map(hit =>
-      formatEventsData(options.fields, hit, eventFieldsMap)
-    );
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = eventsEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-    return {
-      inspect,
-      edges,
-      pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-      totalCount,
-    };
-  }
 
   public async getTimelineData(
     request: FrameworkRequest,
@@ -281,7 +237,7 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
       let fieldCategory = field.split('.')[0];
-      if (isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
+      if (!isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
         fieldCategory = 'base';
       }
       return [

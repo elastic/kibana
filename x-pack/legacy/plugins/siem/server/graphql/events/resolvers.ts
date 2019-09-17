@@ -48,10 +48,6 @@ export const createEventsResolvers = (
   };
 } => ({
   Source: {
-    async Events(source, args, { req }, info) {
-      const options = createOptionsPaginated(source, args, info);
-      return libs.events.getEvents(req, options);
-    },
     async Timeline(source, args, { req }, info) {
       const options = createOptions(source, args, info, 'edges.node.ecs.');
       return libs.events.getTimelineData(req, {
