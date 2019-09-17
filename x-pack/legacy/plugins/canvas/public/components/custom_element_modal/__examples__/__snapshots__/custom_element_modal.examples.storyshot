@@ -95,116 +95,134 @@ Array [
                   className="euiFormRow euiFormRow--compressed"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Name
                     </label>
                   </div>
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFormControlLayout__childrenWrapper"
+                      className="euiFormControlLayout"
                     >
-                      <input
-                        aria-describedby="generated-id-help"
-                        className="euiFieldText canvasCustomElementForm__name euiFieldText--compressed"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        required={true}
-                        type="text"
-                        value=""
-                      />
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-describedby="generated-id-help"
+                          className="euiFieldText canvasCustomElementForm__name"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          required={true}
+                          type="text"
+                          value=""
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
-                  >
-                    40 characters remaining
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      40 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Description
                     </label>
                   </div>
-                  <textarea
-                    aria-describedby="generated-id-help"
-                    className="euiTextArea euiTextArea--resizeVertical"
-                    id="generated-id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    rows={2}
-                    value="best element ever"
-                  />
                   <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    83 characters remaining
+                    <textarea
+                      aria-describedby="generated-id-help"
+                      className="euiTextArea euiTextArea--resizeVertical"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      rows={2}
+                      value="best element ever"
+                    />
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      83 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Thumbnail image
                     </label>
                   </div>
                   <div
-                    className="euiFilePicker euiFilePicker--compressed canvasImageUpload"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFilePicker__wrap"
+                      className="euiFilePicker euiFilePicker--large canvasImageUpload"
                     >
-                      <input
-                        accept="image/*"
-                        className="euiFilePicker__input"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onDragLeave={[Function]}
-                        onDragOver={[Function]}
-                        onDrop={[Function]}
-                        onFocus={[Function]}
-                        type="file"
-                      />
                       <div
-                        className="euiFilePicker__prompt"
+                        className="euiFilePicker__wrap"
                       >
-                        <svg
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFilePicker__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <input
+                          accept="image/*"
+                          className="euiFilePicker__input"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onDragLeave={[Function]}
+                          onDragOver={[Function]}
+                          onDrop={[Function]}
+                          onFocus={[Function]}
+                          type="file"
                         />
                         <div
-                          className="euiFilePicker__promptText"
+                          className="euiFilePicker__prompt"
                         >
-                          Select or drag and drop an image
+                          <svg
+                            aria-hidden="true"
+                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                          <div
+                            className="euiFilePicker__promptText"
+                          >
+                            Select or drag and drop an image
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -433,116 +451,134 @@ Array [
                   className="euiFormRow euiFormRow--compressed"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Name
                     </label>
                   </div>
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFormControlLayout__childrenWrapper"
+                      className="euiFormControlLayout"
                     >
-                      <input
-                        aria-describedby="generated-id-help"
-                        className="euiFieldText canvasCustomElementForm__name euiFieldText--compressed"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        required={true}
-                        type="text"
-                        value=""
-                      />
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-describedby="generated-id-help"
+                          className="euiFieldText canvasCustomElementForm__name"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          required={true}
+                          type="text"
+                          value=""
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
-                  >
-                    40 characters remaining
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      40 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Description
                     </label>
                   </div>
-                  <textarea
-                    aria-describedby="generated-id-help"
-                    className="euiTextArea euiTextArea--resizeVertical"
-                    id="generated-id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    rows={2}
-                    value=""
-                  />
                   <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    100 characters remaining
+                    <textarea
+                      aria-describedby="generated-id-help"
+                      className="euiTextArea euiTextArea--resizeVertical"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      rows={2}
+                      value=""
+                    />
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      100 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Thumbnail image
                     </label>
                   </div>
                   <div
-                    className="euiFilePicker euiFilePicker--compressed canvasImageUpload"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFilePicker__wrap"
+                      className="euiFilePicker euiFilePicker--large canvasImageUpload"
                     >
-                      <input
-                        accept="image/*"
-                        className="euiFilePicker__input"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onDragLeave={[Function]}
-                        onDragOver={[Function]}
-                        onDrop={[Function]}
-                        onFocus={[Function]}
-                        type="file"
-                      />
                       <div
-                        className="euiFilePicker__prompt"
+                        className="euiFilePicker__wrap"
                       >
-                        <svg
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFilePicker__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <input
+                          accept="image/*"
+                          className="euiFilePicker__input"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onDragLeave={[Function]}
+                          onDragOver={[Function]}
+                          onDrop={[Function]}
+                          onFocus={[Function]}
+                          type="file"
                         />
                         <div
-                          className="euiFilePicker__promptText"
+                          className="euiFilePicker__prompt"
                         >
-                          Select or drag and drop an image
+                          <svg
+                            aria-hidden="true"
+                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                          <div
+                            className="euiFilePicker__promptText"
+                          >
+                            Select or drag and drop an image
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -768,116 +804,134 @@ Array [
                   className="euiFormRow euiFormRow--compressed"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Name
                     </label>
                   </div>
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFormControlLayout__childrenWrapper"
+                      className="euiFormControlLayout"
                     >
-                      <input
-                        aria-describedby="generated-id-help"
-                        className="euiFieldText canvasCustomElementForm__name euiFieldText--compressed"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        required={true}
-                        type="text"
-                        value="My Chart"
-                      />
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-describedby="generated-id-help"
+                          className="euiFieldText canvasCustomElementForm__name"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          required={true}
+                          type="text"
+                          value="My Chart"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
-                  >
-                    32 characters remaining
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      32 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Description
                     </label>
                   </div>
-                  <textarea
-                    aria-describedby="generated-id-help"
-                    className="euiTextArea euiTextArea--resizeVertical"
-                    id="generated-id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    rows={2}
-                    value=""
-                  />
                   <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    100 characters remaining
+                    <textarea
+                      aria-describedby="generated-id-help"
+                      className="euiTextArea euiTextArea--resizeVertical"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      rows={2}
+                      value=""
+                    />
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      100 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Thumbnail image
                     </label>
                   </div>
                   <div
-                    className="euiFilePicker euiFilePicker--compressed canvasImageUpload"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFilePicker__wrap"
+                      className="euiFilePicker euiFilePicker--large canvasImageUpload"
                     >
-                      <input
-                        accept="image/*"
-                        className="euiFilePicker__input"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onDragLeave={[Function]}
-                        onDragOver={[Function]}
-                        onDrop={[Function]}
-                        onFocus={[Function]}
-                        type="file"
-                      />
                       <div
-                        className="euiFilePicker__prompt"
+                        className="euiFilePicker__wrap"
                       >
-                        <svg
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFilePicker__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <input
+                          accept="image/*"
+                          className="euiFilePicker__input"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onDragLeave={[Function]}
+                          onDragOver={[Function]}
+                          onDrop={[Function]}
+                          onFocus={[Function]}
+                          type="file"
                         />
                         <div
-                          className="euiFilePicker__promptText"
+                          className="euiFilePicker__prompt"
                         >
-                          Select or drag and drop an image
+                          <svg
+                            aria-hidden="true"
+                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                          <div
+                            className="euiFilePicker__promptText"
+                          >
+                            Select or drag and drop an image
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1105,116 +1159,134 @@ Array [
                   className="euiFormRow euiFormRow--compressed"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Name
                     </label>
                   </div>
                   <div
-                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFormControlLayout__childrenWrapper"
+                      className="euiFormControlLayout"
                     >
-                      <input
-                        aria-describedby="generated-id-help"
-                        className="euiFieldText canvasCustomElementForm__name euiFieldText--compressed"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        required={true}
-                        type="text"
-                        value=""
-                      />
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-describedby="generated-id-help"
+                          className="euiFieldText canvasCustomElementForm__name"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          required={true}
+                          type="text"
+                          value=""
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
-                  >
-                    40 characters remaining
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      40 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Description
                     </label>
                   </div>
-                  <textarea
-                    aria-describedby="generated-id-help"
-                    className="euiTextArea euiTextArea--resizeVertical"
-                    id="generated-id"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    rows={2}
-                    value=""
-                  />
                   <div
-                    className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    100 characters remaining
+                    <textarea
+                      aria-describedby="generated-id-help"
+                      className="euiTextArea euiTextArea--resizeVertical"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      rows={2}
+                      value=""
+                    />
+                    <div
+                      className="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help"
+                    >
+                      100 characters remaining
+                    </div>
                   </div>
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
                   id="generated-id-row"
                 >
-                  <div>
+                  <div
+                    className="euiFormRow__labelWrapper"
+                  >
                     <label
-                      className="euiFormLabel"
+                      className="euiFormLabel euiFormRow__label"
                       htmlFor="generated-id"
                     >
                       Thumbnail image
                     </label>
                   </div>
                   <div
-                    className="euiFilePicker euiFilePicker--compressed canvasImageUpload"
+                    className="euiFormRow__fieldWrapper"
                   >
                     <div
-                      className="euiFilePicker__wrap"
+                      className="euiFilePicker euiFilePicker--large canvasImageUpload"
                     >
-                      <input
-                        accept="image/*"
-                        className="euiFilePicker__input"
-                        id="generated-id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onDragLeave={[Function]}
-                        onDragOver={[Function]}
-                        onDrop={[Function]}
-                        onFocus={[Function]}
-                        type="file"
-                      />
                       <div
-                        className="euiFilePicker__prompt"
+                        className="euiFilePicker__wrap"
                       >
-                        <svg
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFilePicker__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <input
+                          accept="image/*"
+                          className="euiFilePicker__input"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onDragLeave={[Function]}
+                          onDragOver={[Function]}
+                          onDrop={[Function]}
+                          onFocus={[Function]}
+                          type="file"
                         />
                         <div
-                          className="euiFilePicker__promptText"
+                          className="euiFilePicker__prompt"
                         >
-                          Select or drag and drop an image
+                          <svg
+                            aria-hidden="true"
+                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                          <div
+                            className="euiFilePicker__promptText"
+                          >
+                            Select or drag and drop an image
+                          </div>
                         </div>
                       </div>
                     </div>

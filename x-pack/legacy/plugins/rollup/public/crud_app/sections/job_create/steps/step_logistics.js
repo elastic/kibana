@@ -179,6 +179,8 @@ export class StepLogisticsUi extends Component {
             />
           </EuiFormRow>
 
+          <EuiSpacer size="m" />
+
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
               <FormattedMessage
