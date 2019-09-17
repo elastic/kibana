@@ -41,17 +41,8 @@ interface State {
   show: boolean;
 }
 
-const FieldsBrowserButtonContainer = styled.div<{ show: boolean }>`
-  ${({ show }) => (show ? 'position: absolute;' : '')}
-
-  // .${fieldsButtonClassName} {
-  //   border-color: ${({ theme }) => theme.eui.euiColorLightShade};
-  //   color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  //   font-size: 14px;
-  //   margin: 1px 5px 2px 0;
-  //   ${({ show }) => (show ? 'position: absolute;' : '')}
-  //   ${({ show }) => (show ? 'top: -15px;' : '')}
-  // }
+const FieldsBrowserButtonContainer = styled.div`
+  position: relative;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -124,7 +115,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
 
     return (
       <>
-        <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container" show={show}>
+        <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
           <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
             {isEventViewer ? (
               <EuiButtonIcon
