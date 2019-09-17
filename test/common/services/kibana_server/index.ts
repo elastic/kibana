@@ -18,4 +18,5 @@
  */
 
 export { KibanaServerProvider } from './kibana_server';
+// @ts-ignore
 export { extendEsArchiver } from './extend_es_archiver';
