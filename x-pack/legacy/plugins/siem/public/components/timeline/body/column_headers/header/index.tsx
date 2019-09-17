@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
-import { useContext } from 'react';
-import styled from 'styled-components';
+import React from 'react';
 
 import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
@@ -19,6 +17,7 @@ import {
 import { TruncatableText } from '../../../../truncatable_text';
 import { WithHoverActions } from '../../../../with_hover_actions';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
+import { EventsHeading, EventsHeadingItem } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { Actions, ACTIONS_WIDTH } from '../actions';
@@ -27,39 +26,6 @@ import { FullHeightFlexGroup, FullHeightFlexItem } from '../common/styles';
 import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getNewSortDirectionOnClick } from './helpers';
-
-const TITLE_PADDING = 10; // px
-const RESIZE_HANDLE_HEIGHT = 35; // px
-
-const HeaderContainer = styled(EuiFlexGroup)<{ width: string }>`
-  // display: flex;
-  // height: 100%;
-  // overflow: hidden;
-  // width: ${({ width }) => width};
-`;
-
-HeaderContainer.displayName = 'HeaderContainer';
-
-const HeaderFlexItem = styled(EuiFlexItem)<{ width: string }>`
-  // width: ${({ width }) => width};
-`;
-
-HeaderFlexItem.displayName = 'HeaderFlexItem';
-
-const HeaderDiv = styled.div<{ isLoading: boolean }>`
-  align-items: center;
-  display: flex;
-
-  // height: 100%;
-  // flex-direction: row;
-  // overflow: hidden;
-
-  &:hover {
-    cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'grab')};
-  }
-`;
-
-HeaderDiv.displayName = 'HeaderDiv';
 
 interface HeaderCompProps {
   children: React.ReactNode;
@@ -70,24 +36,17 @@ interface HeaderCompProps {
 const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
   const isLoading = useTimelineContext();
   return (
-    <HeaderDiv
+    <EventsHeading
       data-test-subj="header"
       onClick={!isResizing && !isLoading ? onClick : noop}
       isLoading={isLoading}
     >
       {children}
-    </HeaderDiv>
+    </EventsHeading>
   );
 });
 
 HeaderComp.displayName = 'HeaderComp';
-
-const TruncatableHeaderText = styled(TruncatableText)`
-  // font-weight: bold;
-  // padding: 5px;
-`;
-
-TruncatableHeaderText.displayName = 'TruncatableHeaderText';
 
 interface Props {
   header: ColumnHeader;
@@ -109,7 +68,6 @@ export class Header extends React.PureComponent<Props> {
       <Resizeable
         bottom={0}
         handle={<ColumnHeaderResizeHandle />}
-        // height={`${RESIZE_HANDLE_HEIGHT}px`}
         id={header.id}
         onResize={this.onResize}
         position="absolute"
@@ -128,16 +86,16 @@ export class Header extends React.PureComponent<Props> {
     return (
       <>
         <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
-          <TruncatableText data-test-subj={`header-text-${header.id}`}>
-            <EuiToolTip
-              data-test-subj="header-tooltip"
-              content={<HeaderToolTipContent header={header} />}
-            >
-              <>
-                <EuiIcon type="grabHorizontal" /> {header.id}
-              </>
-            </EuiToolTip>
-          </TruncatableText>
+          <EventsHeadingItem className="siemEventsHeading__item--title">
+            <TruncatableText data-test-subj={`header-text-${header.id}`}>
+              <EuiToolTip
+                data-test-subj="header-tooltip"
+                content={<HeaderToolTipContent header={header} />}
+              >
+                <>{header.id}</>
+              </EuiToolTip>
+            </TruncatableText>
+          </EventsHeadingItem>
 
           <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
         </HeaderComp>

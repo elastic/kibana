@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { EventsHeadingItem } from '../../../styles';
 import { OnColumnRemoved } from '../../../events';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
@@ -49,7 +50,7 @@ export const CloseButton = pure<{
   <WrappedCloseButton data-test-subj="wrapped-close-button">
     <EuiButtonIcon
       aria-label={i18n.REMOVE_COLUMN}
-      color="subdued"
+      color="text"
       data-test-subj="remove-column"
       iconType="cross"
       onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -68,21 +69,21 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
   const isLoading = useTimelineContext();
   return (
     <>
-      <div>
+      <EventsHeadingItem className="siemEventsHeading__item--sort">
         <SortIndicator
           data-test-subj="header-sort-indicator"
           sortDirection={getSortDirection({ header, sort })}
         />
-      </div>
+      </EventsHeadingItem>
 
       {sort.columnId === header.id && isLoading ? (
-        <div>
-          <EuiLoadingSpinner size="l" />
-        </div>
+        <EventsHeadingItem className="siemEventsHeading__item--loading">
+          <EuiLoadingSpinner />
+        </EventsHeadingItem>
       ) : (
-        <div>
+        <EventsHeadingItem className="siemEventsHeading__item--close">
           <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} />
-        </div>
+        </EventsHeadingItem>
       )}
     </>
   );

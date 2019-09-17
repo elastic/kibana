@@ -7,7 +7,9 @@
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
-export const EventsTable = styled.div<{ height: number }>`
+export const EventsTable = styled.div.attrs({
+  className: 'siemEventsTable',
+})<{ height: number }>`
   ${({ height, theme }) => css`
     height: ${height + 'px'};
     overflow: auto;
@@ -34,12 +36,10 @@ EventsTable.displayName = 'EventsTable';
 
 export const EventsThead = styled.div<{ minWidth: number }>`
   ${({ theme }) => css`
-    align-content: flex-end;
     background-color: ${theme.eui.euiColorEmptyShade}
     border-bottom: 2px solid ${theme.eui.euiColorLightShade};
     display: flex;
     min-width: ${({ minWidth }) => `${minWidth}px`};
-    overflow-x: hidden;
     position: sticky;
     top: 0;
     z-index: ${theme.eui.euiZLevel1};
@@ -60,11 +60,13 @@ export const EventsThGroupData = styled.div`
 `;
 EventsThGroupData.displayName = 'EventsThGroupData';
 
-export const EventsTh = styled.div<{ isDragging?: boolean; width?: string }>`
+export const EventsTh = styled.div.attrs({
+  className: 'siemEventsTable__th',
+})<{ isDragging?: boolean; position?: string; width?: string }>`
   align-items: center;
   display: flex;
   min-width: 0;
-  position: relative;
+  position: ${({ position }) => position};
 
   ${({ width }) =>
     width &&
@@ -90,7 +92,6 @@ EventsThContent.displayName = 'EventsThContent';
 
 export const EventsTbody = styled.div<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
-  overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
 
@@ -139,7 +140,6 @@ export const EventsTd = styled.div<{ width?: string }>`
   align-items: center;
   display: flex;
   min-width: 0;
-  position: relative;
 
   ${({ width }) =>
     width &&
@@ -161,3 +161,46 @@ export const EventsTdContent = styled.div<{ textAlign?: string }>`
   `}
 `;
 EventsTdContent.displayName = 'EventsTdContent';
+
+export const EventsHeading = styled.div.attrs({
+  className: 'siemEventsHeading',
+})<{ isLoading: boolean }>`
+  align-items: center;
+  display: flex;
+
+  &:hover {
+    cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'grab')};
+  }
+`;
+EventsHeading.displayName = 'EventsHeading';
+
+export const EventsHeadingItem = styled.div.attrs({
+  className: 'siemEventsHeading__item',
+})<{ className?: string }>`
+  ${({ theme }) => css`
+    & + & {
+      margin-left: 4px;
+    }
+
+    &.siemEventsHeading__item--title {
+      min-width: 0;
+    }
+
+    &.siemEventsHeading__item--loading,
+    &.siemEventsHeading__item--close {
+      margin-left: auto;
+    }
+
+    &.siemEventsHeading__item--close {
+      opacity: 0;
+      transition: all ${theme.eui.euiAnimSpeedNormal} ease;
+      visibility: hidden;
+
+      .siemEventsTable__th:hover & {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  `}
+`;
+EventsHeadingItem.displayName = 'EventsHeadingItem';

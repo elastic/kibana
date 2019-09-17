@@ -137,6 +137,7 @@ export const ColumnHeaders = React.memo<Props>(
                         innerRef={provided.innerRef}
                         isDragging={snapshot.isDragging}
                         key={header.id}
+                        position="relative"
                         width={header.width + 'px'}
                       >
                         <EventsThContent>
