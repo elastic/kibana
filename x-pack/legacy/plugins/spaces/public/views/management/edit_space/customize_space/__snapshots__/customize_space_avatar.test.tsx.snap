@@ -34,16 +34,8 @@ exports[`renders without crashing 1`] = `
     label="Color"
     labelType="label"
   >
-<<<<<<< HEAD
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-=======
     <EuiColorPicker
       color="#BFA180"
->>>>>>> master
       isInvalid={false}
       onChange={[Function]}
     />
