@@ -29,7 +29,7 @@ export TEST_BROWSER_HEADLESS=1
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "X-Pack visual regression tests" \
-  yarn run percy exec -t 200 \
+  yarn run percy exec -t 500 \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \

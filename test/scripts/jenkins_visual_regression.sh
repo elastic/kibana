@@ -26,7 +26,7 @@ fi
 export TEST_BROWSER_HEADLESS=1
 
 checks-reporter-with-killswitch "Kibana visual regression tests" \
-  yarn run percy exec -t 200 \
+  yarn run percy exec -t 500 \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$installDir" \
