@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { UserAtSpaceScenarios } from '../../scenarios';
+import { UserAtSpaceScenarios, Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -17,6 +17,11 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
   describe('delete', () => {
     const objectRemover = new ObjectRemover(supertest);
+    const OtherSpace = Spaces.find(space => space.id === 'other');
+
+    if (!OtherSpace) {
+      throw new Error('Space "other" not defined in scenarios');
+    }
 
     after(() => objectRemover.removeAll());
 
@@ -60,6 +65,52 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't delete action from another space`, async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action');
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(OtherSpace.id)}/api/action/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          expect(response.statusCode).to.eql(404);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: `Saved object [action/${createdAction.id}] not found`,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
