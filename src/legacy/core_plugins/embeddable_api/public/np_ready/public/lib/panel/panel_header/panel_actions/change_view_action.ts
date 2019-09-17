@@ -46,12 +46,12 @@ export class ChangeViewAction extends Action {
     private readonly SavedObjectFinder: React.ComponentType<any>
   ) {
     super(CHANGE_VIEW_ACTION);
-    this.order = 4;
+    this.order = 11;
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.panel.removePanel.displayName', {
-      defaultMessage: 'Substitute visualization',
+    return i18n.translate('embeddableApi.panel.removePanel.replaceView', {
+      defaultMessage: 'Replace visualization',
     });
   }
 
@@ -72,6 +72,7 @@ export class ChangeViewAction extends Action {
 
   public async execute({ embeddable }: ActionContext) {
     if (embeddable.parent) {
+      const view = embeddable;
       const dash = embeddable.parent;
 
       if (dash) {
@@ -87,7 +88,7 @@ export class ChangeViewAction extends Action {
             overlays: this.overlays,
             notifications: this.notifications,
             SavedObjectFinder: this.SavedObjectFinder,
-            viewToRemove: embeddable,
+            viewToRemove: view,
           });
         }
       }
