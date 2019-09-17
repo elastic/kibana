@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GraphSettingsProps } from './graph_settings';
+import { SettingsProps } from './settings';
 import { AdvancedSettings } from '../../types';
 
 // Helper type to get all keys of an interface
@@ -25,7 +25,7 @@ export function AdvancedSettingsForm({
   advancedSettings,
   updateAdvancedSettings,
   allFields,
-}: Pick<GraphSettingsProps, 'advancedSettings' | 'updateAdvancedSettings' | 'allFields'>) {
+}: Pick<SettingsProps, 'advancedSettings' | 'updateAdvancedSettings' | 'allFields'>) {
   function updateSetting<K extends keyof AdvancedSettings>(key: K, value: AdvancedSettings[K]) {
     updateAdvancedSettings({ ...advancedSettings, [key]: value });
   }

@@ -35,7 +35,7 @@ const tabs = [
   },
 ];
 
-export interface GraphSettingsProps {
+export interface SettingsProps {
   advancedSettings: AdvancedSettings;
   updateAdvancedSettings: (advancedSettings: AdvancedSettings) => void;
   blacklistedNodes?: WorkspaceNode[];
@@ -51,8 +51,8 @@ interface AsObservable<P> {
   observable: Readonly<Rx.Observable<P>>;
 }
 
-export function GraphSettings({ observable }: AsObservable<GraphSettingsProps>) {
-  const [currentProps, setCurrentProps] = useState<GraphSettingsProps | undefined>(undefined);
+export function Settings({ observable }: AsObservable<SettingsProps>) {
+  const [currentProps, setCurrentProps] = useState<SettingsProps | undefined>(undefined);
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
