@@ -31,7 +31,7 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
-    const duration: number = get(monitor, 'duration.us', undefined);
+    const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
 
