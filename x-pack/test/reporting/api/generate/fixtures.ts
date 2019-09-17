@@ -158,3 +158,27 @@ export const CSV_RESULT_NANOS = `date,message,"_id"
 "2015-01-01T12:10:30.123456789Z","Hello 2",
 "2015-01-01T12:10:30","Hello 1",
 `;
+
+export const JOB_PARAMS_IN_QUERYSTRING =
+  `(conflictedTypesFields:!(),fields:!(%27@timestamp%27,clientip,extens` +
+  `ion),indexPatternId:%27logstash-*%27,metaFields:!(_source,_id,_type,_index,_scor` +
+  `e),searchRequest:(body:(_source:(excludes:!(),includes:!(%27@timestamp%27,client` +
+  `ip,extension)),docvalue_fields:!(),query:(bool:(filter:!((match_all:()),(range:(` +
+  `%27@timestamp%27:(gte:%272015-09-20T10:19:40.307Z%27,lt:%272015-09-20T10:26:56.2` +
+  `21Z%27))),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272004` +
+  `-09-17T21:19:34.213Z%27,lte:%272019-09-17T21:19:34.213Z%27)))),must:!(),must_not` +
+  `:!(),should:!())),script_fields:(),sort:!((%27@timestamp%27:(order:desc,unmapped` +
+  `_type:boolean))),stored_fields:!(%27@timestamp%27,clientip,extension),version:!t` +
+  `),index:%27logstash-*%27),title:%27A%20Saved%20Search%20With%20a%20DATE%20FILTER` +
+  `%27,type:search)`;
+export const JOB_PARAMS_IN_POSTBODY =
+  `(conflictedTypesFields:!(),fields:!('@timestamp',clientip,extension),indexPatt` +
+  `ernId:'logstash-*',metaFields:!(_source,_id,_type,_index,_score),searchRequest:(` +
+  `body:(_source:(excludes:!(),includes:!('@timestamp',clientip,extension)),docvalu` +
+  `e_fields:!(),query:(bool:(filter:!((match_all:()),(range:('@timestamp':(gte:'201` +
+  `5-09-20T10:19:40.307Z',lt:'2015-09-20T10:26:56.221Z'))),(range:('@timestamp':(fo` +
+  `rmat:strict_date_optional_time,gte:'2004-09-17T21:19:34.213Z',lte:'2019-09-17T21` +
+  `:19:34.213Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!(('@t` +
+  `imestamp':(order:desc,unmapped_type:boolean))),stored_fields:!('@timestamp',clie` +
+  `ntip,extension),version:!t),index:'logstash-*'),title:'A Saved Search With a DAT` +
+  `E FILTER',type:search)`;
