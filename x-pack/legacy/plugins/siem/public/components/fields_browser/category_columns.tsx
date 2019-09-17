@@ -13,8 +13,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';

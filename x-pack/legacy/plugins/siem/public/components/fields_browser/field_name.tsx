@@ -15,8 +15,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import styled, { css } from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
