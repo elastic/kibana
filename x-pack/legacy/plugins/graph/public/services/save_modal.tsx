@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
@@ -14,6 +14,7 @@ export function openSaveModal({
   hasData,
   workspace,
   saveWorkspace,
+  showSaveModal,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
@@ -26,6 +27,7 @@ export function openSaveModal({
     },
     dataConsent: boolean
   ) => Promise<SaveResult>;
+  showSaveModal: (el: React.ReactNode) => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;

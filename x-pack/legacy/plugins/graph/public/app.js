@@ -32,6 +32,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -792,7 +793,8 @@ app.controller('graphuiPlugin', function (
           savePolicy: $scope.graphSavePolicy,
           hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
           workspace: $scope.savedWorkspace,
-          saveWorkspace: $scope.saveWorkspace
+          saveWorkspace: $scope.saveWorkspace,
+          showSaveModal
         });
       },
       testId: 'graphSaveButton',
