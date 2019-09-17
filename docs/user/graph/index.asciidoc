@@ -63,10 +63,10 @@ Advanced options let you control how your data is sampled and summarized.
 You can also set timeouts to prevent graph queries from adversely
 affecting the cluster.
 
-include::getting-started.asciidoc[leveloffset=+1]
+include::getting-started.asciidoc[]
 
-include::configuring-graph.asciidoc[leveloffset=+1]
+include::configuring-graph.asciidoc[]
 
-include::troubleshooting.asciidoc[leveloffset=+1]
+include::troubleshooting.asciidoc[]
 
-include::limitations.asciidoc[leveloffset=+1]
+include::limitations.asciidoc[]
