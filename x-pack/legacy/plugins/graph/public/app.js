@@ -41,7 +41,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { GraphFieldManager } from './components/field_manager';
+import { FieldManager } from './components/field_manager';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 
@@ -102,7 +102,7 @@ app.directive('graphListing', function (reactDirective) {
 });
 
 app.directive('graphFieldManager', function (reactDirective) {
-  return reactDirective(GraphFieldManager, [
+  return reactDirective(FieldManager, [
     ['state', { watchDepth: 'reference' }],
     ['dispatch', { watchDepth: 'reference' }],
   ]);
