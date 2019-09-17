@@ -767,49 +767,4 @@ export class WebElementWrapper {
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);
     return PNG.sync.write(dst);
   }
-
-  /**
-   * Toggle class on an element
-   *
-   * @param {string} className
-   * @return {Promise<void>}
-   */
-  public async toggleClass(className: string) {
-    await this.retryCall(async function focus(wrapper) {
-      await wrapper.driver.executeScript(
-        `arguments[0].classList.toggle('${className}')`,
-        wrapper._webElement
-      );
-    });
-  }
-
-  /**
-   * Remove class on an element
-   *
-   * @param {string} className
-   * @return {Promise<void>}
-   */
-  public async removeClass(className: string) {
-    await this.retryCall(async function focus(wrapper) {
-      await wrapper.driver.executeScript(
-        `arguments[0].classList.remove('${className}')`,
-        wrapper._webElement
-      );
-    });
-  }
-
-  /**
-   * Add class on an element
-   *
-   * @param {string} className
-   * @return {Promise<void>}
-   */
-  public async addClass(className: string) {
-    await this.retryCall(async function focus(wrapper) {
-      await wrapper.driver.executeScript(
-        `arguments[0].classList.add('${className}')`,
-        wrapper._webElement
-      );
-    });
-  }
 }
