@@ -18,7 +18,7 @@
     {
       "isOnline": true,
       "name": "whatever-01",
-      "nodeTypeClass": "fa-star",
+      "nodeTypeClass": "starFilled",
       "nodeTypeLabel": "Master Node",
       "node_cpu_utilization": {
         "metric": {
@@ -106,7 +106,7 @@
     {
       "isOnline": false,
       "name": "whatever-02",
-      "nodeTypeClass": "fa-server",
+      "nodeTypeClass": "storage",
       "nodeTypeLabel": "Node",
       "resolver": "1jxg5T33TWub-jJL4qP0Wg",
       "shardCount": 0,

@@ -21,7 +21,7 @@
       "type": "master",
       "isOnline": true,
       "nodeTypeLabel": "Master Node",
-      "nodeTypeClass": "fa-star",
+      "nodeTypeClass": "starFilled",
       "shardCount": 6,
       "node_cgroup_quota": {
         "metric": {
@@ -149,7 +149,7 @@
       "type": "node",
       "isOnline": true,
       "nodeTypeLabel": "Node",
-      "nodeTypeClass": "fa-server",
+      "nodeTypeClass": "storage",
       "shardCount": 6,
       "node_cgroup_throttled": {
         "metric": {

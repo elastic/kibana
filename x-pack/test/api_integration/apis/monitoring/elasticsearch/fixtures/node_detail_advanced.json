@@ -10,7 +10,7 @@
     "name": "whatever-01",
     "type": "master",
     "nodeTypeLabel": "Master Node",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "totalShards": 38,
     "indexCount": 20,
     "documents": 24830,

@@ -62,7 +62,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         totalSpace: undefined,
         usedHeap: undefined,
         nodeTypeLabel: 'Node',
-        nodeTypeClass: 'fa-server',
+        nodeTypeClass: 'storage',
         node_ids: [],
         status: 'Online',
         isOnline: true,
@@ -140,7 +140,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         totalSpace: 10000,
         usedHeap: 33,
         nodeTypeLabel: 'Master Node',
-        nodeTypeClass: 'fa-star',
+        nodeTypeClass: 'starFilled',
         node_ids: [
           'fooNode-Uuid'
         ],
