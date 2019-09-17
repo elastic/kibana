@@ -34,6 +34,10 @@ experimental[This functionality is *experimental* and may be changed or removed 
 `color`:: 
   (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
 
+`imageUrl`:: 
+  (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
+  For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
+
 [[spaces-api-put-response-codes]]
 ==== Response codes
 
@@ -52,7 +56,8 @@ PUT /api/spaces/space/marketing
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------
 // KIBANA
