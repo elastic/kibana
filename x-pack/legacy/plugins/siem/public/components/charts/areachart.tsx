@@ -133,6 +133,7 @@ export const AreaChart = React.memo<{
   configs?: ChartSeriesConfigs | undefined;
 }>(({ areaChart, configs }) => {
   const customHeight = get('customHeight', configs);
+  const customWidth = get('customWidth', configs);
 
   return (
     <AutoSizer detectAnyWindowResize={false} content>
@@ -141,7 +142,7 @@ export const AreaChart = React.memo<{
           <AreaChartWithCustomPrompt
             data={areaChart}
             height={getChartHeight(customHeight, height)}
-            width={getChartWidth(undefined, width)}
+            width={getChartWidth(customWidth, width)}
             configs={configs}
           />
         </WrappedByAutoSizer>

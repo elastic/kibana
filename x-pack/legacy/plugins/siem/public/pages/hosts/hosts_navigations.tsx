@@ -165,7 +165,7 @@ export type HostsComponentsQueryProps = OwnProps & {
     loading: boolean;
     refetch: Refetch;
   }) => void;
-  narrowDateRange?: UpdateDateRange;
+  updateDateRange?: UpdateDateRange;
   filterQueryExpression?: string;
   hostName?: string;
 };
@@ -350,7 +350,7 @@ export const EventsTabBody = ({
   filterQueryExpression,
   hostName,
   indexPattern,
-  narrowDateRange = () => {},
+  updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
   const filterQuery = filterQueryExpression
@@ -372,7 +372,7 @@ export const EventsTabBody = ({
             id={id}
             inspect={inspect}
             loading={loading}
-            narrowDateRange={narrowDateRange}
+            updateDateRange={updateDateRange}
             refetch={refetch}
             setQuery={setQuery}
             startDate={startDate}

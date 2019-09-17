@@ -26,7 +26,7 @@ export interface MatrixOverTimeBasicProps {
   loading: boolean;
   startDate: number;
   endDate: number;
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   totalCount: number;
 }
 
@@ -72,14 +72,13 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   customHeight: 324,
 });
 
-const Panel = styled(EuiPanel)<{ isLoading: boolean }>`
+const Panel = styled(EuiPanel)<{ isloading: number }>`
   position: relative;
 
-  ${({ isLoading }) =>
-    isLoading &&
+  ${({ isloading }) =>
+    isloading &&
     `
-    overflow: hidden;
-  `}
+    overflow: hidden;`}
 `;
 
 export const MatrixOverTimeHistogram = ({
@@ -88,7 +87,7 @@ export const MatrixOverTimeHistogram = ({
   data,
   dataKey,
   endDate,
-  narrowDateRange,
+  updateDateRange,
   startDate,
   title,
   subtitle,
@@ -96,7 +95,7 @@ export const MatrixOverTimeHistogram = ({
 }: MatrixOverTimeProps) => {
   const bucketStartDate = getOr(startDate, 'x', head(data));
   const bucketEndDate = getOr(endDate, 'x', last(data));
-  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, narrowDateRange);
+  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, updateDateRange);
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
@@ -117,7 +116,7 @@ export const MatrixOverTimeHistogram = ({
   return (
     <Panel
       data-test-subj={`${dataKey}Panel`}
-      isLoading={loading}
+      isloading={loading ? 1 : 0}
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >
@@ -129,7 +128,7 @@ export const MatrixOverTimeHistogram = ({
       />
 
       {loadingInitial ? (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+        <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
       ) : (
         <>
           <BarChart barChart={barChartData} configs={barchartConfigs} />

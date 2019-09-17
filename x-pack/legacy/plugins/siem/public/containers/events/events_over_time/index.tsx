@@ -76,7 +76,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
       >
         {({ data, loading, refetch }) => {
           const source = getOr({}, `source.EventsOverTime`, data);
-          const eventsOverTime = getOr({}, `eventsOverTime`, source);
+          const eventsOverTime = getOr([], `eventsOverTime`, source);
           const totalCount = getOr(-1, 'totalCount', source);
           return children!({
             endDate: endDate!,
