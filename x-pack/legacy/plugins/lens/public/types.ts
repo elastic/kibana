@@ -6,7 +6,9 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { Query, KibanaDatatable } from 'src/plugins/data/common';
+import { CoreSetup } from 'src/core/public';
+import { Query } from 'src/plugins/data/common';
+import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DataType, DateRange, IndexPattern } from '../common';
@@ -159,6 +161,7 @@ export type TableSpec = TableSpecColumn[];
 export interface DatasourceProps<T = unknown> {
   state: T;
   setState: StateSetter<T>;
+  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
 }

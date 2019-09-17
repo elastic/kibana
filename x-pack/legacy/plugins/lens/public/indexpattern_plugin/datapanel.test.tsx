@@ -12,10 +12,11 @@ import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
-import { npStart as npStartMock } from 'ui/new_platform';
+import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('ui/new_platform');
 jest.mock('./loader');
+jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -198,8 +199,10 @@ const initialState: IndexPatternPrivateState = {
 };
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
+  let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
+    core = coreMock.createSetup();
     defaultProps = {
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
@@ -207,6 +210,7 @@ describe('IndexPattern Data Panel', () => {
       showIndexPatternSwitcher: false,
       setShowIndexPatternSwitcher: jest.fn(),
       onChangeIndexPattern: jest.fn(),
+      core,
       dateRange: {
         fromDate: 'now-7d',
         toDate: 'now',
@@ -328,11 +332,11 @@ describe('IndexPattern Data Panel', () => {
 
   describe('loading existence data', () => {
     beforeEach(() => {
-      (npStartMock.core.http.post as jest.Mock).mockClear();
+      core.http.post.mockClear();
     });
 
     it('loads existence data and updates the index pattern', async () => {
-      (npStartMock.core.http.post as jest.Mock).mockResolvedValue({
+      core.http.post.mockResolvedValue({
         timestamp: {
           exists: true,
           cardinality: 500,
@@ -344,39 +348,36 @@ describe('IndexPattern Data Panel', () => {
 
       await waitForPromises();
 
-      expect(npStartMock.core.http.post as jest.Mock).toHaveBeenCalledWith(
-        `/api/lens/index_stats/my-fake-index-pattern`,
-        {
-          body: JSON.stringify({
-            earliest: 'now-7d',
-            latest: 'now',
-            size: 500,
-            timeFieldName: 'timestamp',
-            fields: [
-              {
-                name: 'timestamp',
-                type: 'date',
-              },
-              {
-                name: 'bytes',
-                type: 'number',
-              },
-              {
-                name: 'memory',
-                type: 'number',
-              },
-              {
-                name: 'unsupported',
-                type: 'geo',
-              },
-              {
-                name: 'source',
-                type: 'string',
-              },
-            ],
-          }),
-        }
-      );
+      expect(core.http.post).toHaveBeenCalledWith(`/api/lens/index_stats/my-fake-index-pattern`, {
+        body: JSON.stringify({
+          fromDate: 'now-7d',
+          toDate: 'now',
+          size: 500,
+          timeFieldName: 'timestamp',
+          fields: [
+            {
+              name: 'timestamp',
+              type: 'date',
+            },
+            {
+              name: 'bytes',
+              type: 'number',
+            },
+            {
+              name: 'memory',
+              type: 'number',
+            },
+            {
+              name: 'unsupported',
+              type: 'geo',
+            },
+            {
+              name: 'source',
+              type: 'string',
+            },
+          ],
+        }),
+      });
 
       expect(updateFields).toHaveBeenCalledWith('1', [
         {
@@ -410,7 +411,7 @@ describe('IndexPattern Data Panel', () => {
 
       await waitForPromises();
 
-      expect(npStartMock.core.http.post as jest.Mock).not.toHaveBeenCalled();
+      expect(core.http.post).not.toHaveBeenCalled();
     });
   });
 

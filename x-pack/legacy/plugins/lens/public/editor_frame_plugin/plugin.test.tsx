@@ -5,6 +5,7 @@
  */
 
 import { EditorFramePlugin } from './plugin';
+import { coreMock } from 'src/core/public/mocks';
 import {
   MockedSetupDependencies,
   MockedStartDependencies,
@@ -12,6 +13,7 @@ import {
   createMockStartDependencies,
 } from './mocks';
 
+jest.mock('ui/new_platform');
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
 }));
@@ -19,6 +21,10 @@ jest.mock('ui/chrome', () => ({
 // mock away actual dependencies to prevent all of it being loaded
 jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => ({
+  start: {},
+  setup: {},
+}));
+jest.mock('../../../../../../src/legacy/core_plugins/expressions/public/legacy', () => ({
   start: {},
   setup: {},
 }));
@@ -45,8 +51,8 @@ describe('editor_frame plugin', () => {
 
   it('should create an editor frame instance which mounts and unmounts', () => {
     expect(() => {
-      pluginInstance.setup(null, pluginSetupDependencies);
-      const publicAPI = pluginInstance.start(null, pluginStartDependencies);
+      pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+      const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
       const instance = publicAPI.createInstance({});
       instance.mount(mountpoint, {
         onError: jest.fn(),
@@ -59,8 +65,8 @@ describe('editor_frame plugin', () => {
   });
 
   it('should not have child nodes after unmount', () => {
-    pluginInstance.setup(null, pluginSetupDependencies);
-    const publicAPI = pluginInstance.start(null, pluginStartDependencies);
+    pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+    const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint, {
       onError: jest.fn(),

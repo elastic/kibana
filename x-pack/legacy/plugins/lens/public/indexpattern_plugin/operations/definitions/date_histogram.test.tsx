@@ -10,7 +10,11 @@ import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSwitch } from '@elastic/eui';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
 
@@ -324,6 +328,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -342,6 +347,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -359,6 +365,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
       expect(instance.find(EuiRange).exists()).toBe(false);
@@ -377,6 +384,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
       instance.find(EuiSwitch).prop('onChange')!({
@@ -399,6 +407,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -458,6 +467,7 @@ describe('date_histogram', () => {
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 

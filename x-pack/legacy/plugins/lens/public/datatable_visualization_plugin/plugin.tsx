@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { npSetup } from 'ui/new_platform';
 import { datatableVisualization } from './visualization';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
-import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
+import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
 
 export interface DatatableVisualizationPluginSetupPlugins {
@@ -41,8 +41,8 @@ class DatatableVisualizationPlugin {
 const plugin = new DatatableVisualizationPlugin();
 
 export const datatableVisualizationSetup = () =>
-  plugin.setup(null, {
-    expressions: dataSetup.expressions,
+  plugin.setup(npSetup.core, {
+    expressions: expressionsSetup,
     fieldFormat: {
       formatFactory: getFormat,
     },

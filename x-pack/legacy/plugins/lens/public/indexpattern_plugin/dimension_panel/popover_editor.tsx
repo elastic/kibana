@@ -352,6 +352,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     uiSettings={props.uiSettings}
                     savedObjectsClient={props.savedObjectsClient}
                     layerId={layerId}
+                    http={props.http}
                   />
                 )}
                 {!incompatibleSelectedOperationType && selectedColumn && (

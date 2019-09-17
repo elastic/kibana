@@ -8,6 +8,7 @@ import { getInitialState, reducer } from './state_management';
 import { EditorFrameProps } from '.';
 import { Datasource, Visualization } from '../../types';
 import { createExpressionRendererMock } from '../mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -22,6 +23,7 @@ describe('editor_frame state management', () => {
         initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
         onChange: jest.fn(),
+        core: coreMock.createSetup(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
       };

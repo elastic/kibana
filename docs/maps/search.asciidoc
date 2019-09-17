@@ -34,7 +34,7 @@ You can create two types of filters by interacting with your map:
 [[maps-spatial-filters]]
 ==== Spatial filters
 
-A spatial filter narrow searchs results to documents that either intersect with, are within, or do not intersect with the specified geometry.
+A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.
 
 You can create spatial filters in two ways:
 
@@ -48,7 +48,7 @@ Spatial filters have the following properties:
 
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
-* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations.html[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
 
 [float]
 [[maps-phrase-filter]]

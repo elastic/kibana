@@ -29,8 +29,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DatasourceProps, IndexPatternListItem, DatasourceDataPanelProps } from '../types';
-import { IndexPatternPrivateState } from './indexpattern';
+import { Query } from 'src/plugins/data/common';
+import { DatasourceDataPanelProps, DataType } from '../types';
+import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
@@ -63,6 +64,7 @@ export interface Props extends DatasourceDataPanelProps<IndexPatternPrivateState
 export function IndexPatternDataPanel({
   state,
   dragDropContext,
+  core,
   query,
   dateRange,
   actions,
@@ -89,6 +91,11 @@ export function IndexPatternDataPanel({
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={actions.toggleEmptyFields}
       onChangeIndexPattern={actions.setCurrentIndexPattern}
+      onToggleEmptyFields={onToggleEmptyFields}
+      core={core}
+      updateFieldsWithCounts={
+        !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
+      }
     />
   );
 }
@@ -108,10 +115,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern,
   showEmptyFields,
   onToggleEmptyFields,
-}: Partial<DatasourceProps> & {
+  core,
+  core,
+}: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
-  currentIndexPattern?: IndexPattern;
-  indexPatterns: Record<string, IndexPatternListItem>;
+  indexPatterns: Record<string, IndexPattern>;
+  dateRange: DatasourceDataPanelProps['dateRange'];
+  query: Query;
+  core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;

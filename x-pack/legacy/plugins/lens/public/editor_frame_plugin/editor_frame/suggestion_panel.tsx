@@ -12,11 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
+
+// TODO: Remove this <any> when upstream fix is merged https://github.com/elastic/eui/issues/2329
+// eslint-disable-next-line
+const EuiPanelFixed = EuiPanel as React.ComponentType<any>;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -55,15 +59,17 @@ const SuggestionPreview = ({
     setExpressionError(false);
   }, [previewExpression]);
 
+  const clickHandler = () => {
+    switchToSuggestion(frame, dispatch, suggestion);
+  };
+
   return (
     <EuiToolTip content={suggestion.title}>
-      <EuiPanel
+      <EuiPanelFixed
         className="lnsSuggestionPanel__button"
         paddingSize="none"
         data-test-subj="lnsSuggestion"
-        onClick={() => {
-          switchToSuggestion(frame, dispatch, suggestion);
-        }}
+        onClick={clickHandler}
       >
         {expressionError ? (
           <div className="lnsSidebar__suggestionIcon">
@@ -94,7 +100,7 @@ const SuggestionPreview = ({
             <EuiIcon size="xxl" type={suggestion.previewIcon} />
           </div>
         )}
-      </EuiPanel>
+      </EuiPanelFixed>
     </EuiToolTip>
   );
 };
