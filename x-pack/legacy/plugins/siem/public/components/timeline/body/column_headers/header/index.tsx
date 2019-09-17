@@ -23,22 +23,42 @@ import { getNewSortDirectionOnClick, getSortDirection } from './helpers';
 
 interface HeaderCompProps {
   children: React.ReactNode;
+  header: ColumnHeader;
   isResizing: boolean;
   onClick: () => void;
+  sort: Sort;
 }
 
-const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
-  const isLoading = useTimelineContext();
-  return (
-    <EventsHeading
-      data-test-subj="header"
-      onClick={!isResizing && !isLoading ? onClick : noop}
-      isLoading={isLoading}
-    >
-      {children}
-    </EventsHeading>
-  );
-});
+const HeaderComp = React.memo<HeaderCompProps>(
+  ({ children, header, isResizing, onClick, sort }) => {
+    const isLoading = useTimelineContext();
+
+    return (
+      <EventsHeading data-test-subj="header" isLoading={isLoading}>
+        <EventsHeadingItem
+          className="siemEventsHeading__item--title"
+          onClick={!isResizing && !isLoading ? onClick : noop}
+        >
+          <TruncatableText data-test-subj={`header-text-${header.id}`}>
+            <EuiToolTip
+              data-test-subj="header-tooltip"
+              content={<HeaderToolTipContent header={header} />}
+            >
+              <>{header.id}</>
+            </EuiToolTip>
+          </TruncatableText>
+
+          <SortIndicator
+            data-test-subj="header-sort-indicator"
+            sortDirection={getSortDirection({ header, sort })}
+          />
+        </EventsHeadingItem>
+
+        {children}
+      </EventsHeading>
+    );
+  }
+);
 
 HeaderComp.displayName = 'HeaderComp';
 
@@ -79,23 +99,7 @@ export class Header extends React.PureComponent<Props> {
 
     return (
       <>
-        <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
-          <EventsHeadingItem className="siemEventsHeading__item--title">
-            <TruncatableText data-test-subj={`header-text-${header.id}`}>
-              <EuiToolTip
-                data-test-subj="header-tooltip"
-                content={<HeaderToolTipContent header={header} />}
-              >
-                <>{header.id}</>
-              </EuiToolTip>
-            </TruncatableText>
-
-            <SortIndicator
-              data-test-subj="header-sort-indicator"
-              sortDirection={getSortDirection({ header, sort })}
-            />
-          </EventsHeadingItem>
-
+        <HeaderComp header={header} isResizing={isResizing} onClick={this.onClick} sort={sort}>
           <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
         </HeaderComp>
 
