@@ -92,6 +92,12 @@ export const ComponentStrings = {
         },
       }),
   },
+  AssetPicker: {
+    getAssetAltText: () =>
+      i18n.translate('xpack.canvas.assetpicker.assetAltText', {
+        defaultMessage: 'Asset thumbnail',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
