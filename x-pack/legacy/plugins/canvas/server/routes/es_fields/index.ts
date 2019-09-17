@@ -6,17 +6,29 @@
 
 import { partial } from 'lodash';
 import { API_ROUTE } from '../../../common/lib/constants';
+import { CoreSetup } from '../../shim';
+// @ts-ignore untyped local
 import { getESFieldTypes } from './get_es_field_types';
 
 // TODO: Error handling, note: esErrors
 
-export function esFields(server) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+interface ESFieldsRequest {
+  query: {
+    index: string;
+    fields: string[];
+  };
+}
 
-  server.route({
+export function esFields(
+  route: CoreSetup['http']['route'],
+  elasticsearch: CoreSetup['elasticsearch']
+) {
+  const { callWithRequest } = elasticsearch.getCluster('data');
+
+  route({
     method: 'GET',
     path: `${API_ROUTE}/es_fields`,
-    handler: function(request, h) {
+    handler(request: ESFieldsRequest, h: any) {
       const { index, fields } = request.query;
       if (!index) {
         return h.response({ error: '"index" query is required' }).code(400);

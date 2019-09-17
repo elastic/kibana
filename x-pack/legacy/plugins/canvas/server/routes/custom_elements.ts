@@ -6,16 +6,52 @@
 
 import boom from 'boom';
 import { omit } from 'lodash';
+import { SavedObjectsClientContract } from 'src/core/server';
+
 import { API_ROUTE_CUSTOM_ELEMENT, CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';
+// @ts-ignore Untyped Local
 import { formatResponse as formatRes } from '../lib/format_response';
+import { CustomElement } from '../../types';
 
-export function customElements(server) {
-  const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
+import { CoreSetup } from '../shim';
+
+// Exclude ID attribute for the type used for SavedObjectClient
+type CustomElementAttributes = Pick<CustomElement, Exclude<keyof CustomElement, 'id'>> & {
+  '@timestamp': string;
+  '@created': string;
+};
+
+interface CustomElementRequestFacade {
+  getSavedObjectsClient: () => SavedObjectsClientContract;
+}
+
+type CustomElementRequest = CustomElementRequestFacade & {
+  params: {
+    id: string;
+  };
+  payload: CustomElement;
+};
+
+type FindCustomElementRequest = CustomElementRequestFacade & {
+  query: {
+    name: string;
+    page: number;
+    perPage: number;
+  };
+};
+
+export function customElements(
+  route: CoreSetup['http']['route'],
+  elasticsearch: CoreSetup['elasticsearch']
+) {
+  // @ts-ignore: errors not on Cluster type
+  const { errors: esErrors } = elasticsearch.getCluster('data');
+
   const routePrefix = API_ROUTE_CUSTOM_ELEMENT;
   const formatResponse = formatRes(esErrors);
 
-  const createCustomElement = req => {
+  const createCustomElement = (req: CustomElementRequest) => {
     const savedObjectsClient = req.getSavedObjectsClient();
 
     if (!req.payload) {
@@ -24,7 +60,7 @@ export function customElements(server) {
 
     const now = new Date().toISOString();
     const { id, ...payload } = req.payload;
-    return savedObjectsClient.create(
+    return savedObjectsClient.create<CustomElementAttributes>(
       CUSTOM_ELEMENT_TYPE,
       {
         ...payload,
@@ -35,40 +71,42 @@ export function customElements(server) {
     );
   };
 
-  const updateCustomElement = (req, newPayload) => {
+  const updateCustomElement = (req: CustomElementRequest, newPayload?: CustomElement) => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
     const payload = newPayload ? newPayload : req.payload;
 
     const now = new Date().toISOString();
 
-    return savedObjectsClient.get(CUSTOM_ELEMENT_TYPE, id).then(element => {
-      // TODO: Using create with force over-write because of version conflict issues with update
-      return savedObjectsClient.create(
-        CUSTOM_ELEMENT_TYPE,
-        {
-          ...element.attributes,
-          ...omit(payload, 'id'), // never write the id property
-          '@timestamp': now, // always update the modified time
-          '@created': element.attributes['@created'], // ensure created is not modified
-        },
-        { overwrite: true, id }
-      );
-    });
+    return savedObjectsClient
+      .get<CustomElementAttributes>(CUSTOM_ELEMENT_TYPE, id)
+      .then(element => {
+        // TODO: Using create with force over-write because of version conflict issues with update
+        return savedObjectsClient.create<CustomElementAttributes>(
+          CUSTOM_ELEMENT_TYPE,
+          {
+            ...element.attributes,
+            ...omit(payload, 'id'), // never write the id property
+            '@timestamp': now, // always update the modified time
+            '@created': element.attributes['@created'], // ensure created is not modified
+          },
+          { overwrite: true, id }
+        );
+      });
   };
 
-  const deleteCustomElement = req => {
+  const deleteCustomElement = (req: CustomElementRequest) => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
 
     return savedObjectsClient.delete(CUSTOM_ELEMENT_TYPE, id);
   };
 
-  const findCustomElement = req => {
+  const findCustomElement = (req: FindCustomElementRequest) => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { name, page, perPage } = req.query;
 
-    return savedObjectsClient.find({
+    return savedObjectsClient.find<CustomElementAttributes>({
       type: CUSTOM_ELEMENT_TYPE,
       sortField: '@timestamp',
       sortOrder: 'desc',
@@ -80,17 +118,17 @@ export function customElements(server) {
     });
   };
 
-  const getCustomElementById = req => {
+  const getCustomElementById = (req: CustomElementRequest) => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
     return savedObjectsClient.get(CUSTOM_ELEMENT_TYPE, id);
   };
 
   // get custom element by id
-  server.route({
+  route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: req =>
+    handler: (req: CustomElementRequest) =>
       getCustomElementById(req)
         .then(obj => ({ id: obj.id, ...obj.attributes }))
         .then(formatResponse)
@@ -98,42 +136,44 @@ export function customElements(server) {
   });
 
   // create custom element
-  server.route({
+  route({
     method: 'POST',
     path: routePrefix,
+    // @ts-ignore config option missing on route method type
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: req =>
+    handler: (req: CustomElementRequest) =>
       createCustomElement(req)
         .then(() => ({ ok: true }))
         .catch(formatResponse),
   });
 
   // update custom element
-  server.route({
+  route({
     method: 'PUT',
     path: `${routePrefix}/{id}`,
+    // @ts-ignore config option missing on route method type
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: req =>
+    handler: (req: CustomElementRequest) =>
       updateCustomElement(req)
         .then(() => ({ ok: true }))
         .catch(formatResponse),
   });
 
   // delete custom element
-  server.route({
+  route({
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
-    handler: req =>
+    handler: (req: CustomElementRequest) =>
       deleteCustomElement(req)
         .then(() => ({ ok: true }))
         .catch(formatResponse),
   });
 
   // find custom elements
-  server.route({
+  route({
     method: 'GET',
     path: `${routePrefix}/find`,
-    handler: req =>
+    handler: (req: FindCustomElementRequest) =>
       findCustomElement(req)
         .then(formatResponse)
         .then(resp => {
