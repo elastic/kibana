@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import Url from 'url';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { KibanaServerStatus } from './status';
@@ -30,7 +30,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const lifecycle = getService('lifecycle');
 
-  const url = formatUrl(config.get('servers.kibana'));
+  const url = Url.format(config.get('servers.kibana'));
 
   return new (class KibanaServer {
     public readonly status = new KibanaServerStatus(url);
@@ -42,5 +42,9 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
       config.get('uiSettings.defaults'),
       lifecycle
     );
+
+    public resolveUrl(path = '/') {
+      return Url.resolve(url, path);
+    }
   })();
 }
