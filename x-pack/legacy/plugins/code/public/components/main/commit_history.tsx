@@ -72,8 +72,7 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
                   id="xpack.code.mainPage.history.commitsOnTitle"
                   defaultMessage="Commits on {date}"
                   values={{ date: props.date }}
-                />{' '}
-                {}
+                />
               </EuiTextColor>
             </h4>
           </EuiText>
