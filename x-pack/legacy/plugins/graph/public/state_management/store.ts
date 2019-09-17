@@ -8,20 +8,28 @@ import { combineReducers, createStore, Store, AnyAction, Dispatch } from 'redux'
 import { fieldsReducer, FieldsState } from './fields';
 import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
 import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
+import { DatasourceState, datasourceReducer } from './datasource';
 
 export interface GraphState {
   fields: FieldsState;
   urlTemplates: UrlTemplatesState;
   advancedSettings: AdvancedSettingsState;
+  datasource: DatasourceState;
 }
 
-const rootReducer = combineReducers({
-  fields: fieldsReducer,
-  urlTemplates: urlTemplatesReducer,
-  advancedSettings: advancedSettingsReducer,
-});
+export interface GraphStoreDependencies {
+  basePath: string;
+}
 
-export const createGraphStore = () => createStore(rootReducer);
+export const createGraphStore = ({ basePath }: GraphStoreDependencies) => {
+  const rootReducer = combineReducers({
+    fields: fieldsReducer,
+    urlTemplates: urlTemplatesReducer(basePath),
+    advancedSettings: advancedSettingsReducer,
+    datasource: datasourceReducer,
+  });
+  return createStore(rootReducer);
+};
 
 export type GraphStore = Store<GraphState, AnyAction>;
 export type GraphDispatch = Dispatch<AnyAction>;

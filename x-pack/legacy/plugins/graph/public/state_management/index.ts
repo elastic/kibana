@@ -7,5 +7,7 @@
 export * from './fields';
 export * from './url_templates';
 export * from './advanced_settings';
+export * from './datasource';
+
 export * from './global';
 export * from './store';

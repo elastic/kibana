@@ -10,6 +10,7 @@ import { createSelector } from 'reselect';
 import { WorkspaceField } from '../types';
 import { GraphState } from './store';
 import { reset } from './global';
+import { setDatasource } from './datasource';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -27,6 +28,7 @@ const initialFields: FieldsState = {};
 
 export const fieldsReducer = reducerWithInitialState(initialFields)
   .case(reset, () => initialFields)
+  .case(setDatasource, () => initialFields)
   .case(loadFields, (_currentFields, newFields) => {
     const newFieldMap: Record<string, WorkspaceField> = {};
     newFields.forEach(field => {
