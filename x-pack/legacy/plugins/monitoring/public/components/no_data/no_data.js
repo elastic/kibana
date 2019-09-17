@@ -65,8 +65,8 @@ export function NoData(props) {
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
             <EuiHorizontalRule size="half" />
-            <EuiButtonEmpty>
-              <EuiTextColor color="default" onClick={() => setUseInternalCollection(false)}>
+            <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
+              <EuiTextColor color="default">
                 <FormattedMessage
                   id="xpack.monitoring.noData.setupMetricbeatInstead"
                   defaultMessage="Or, set up with Metricbeat (recommended)"
