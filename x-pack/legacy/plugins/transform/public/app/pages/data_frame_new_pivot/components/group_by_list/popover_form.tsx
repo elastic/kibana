@@ -142,23 +142,17 @@ export const PopoverForm: React.SFC<Props> = ({
 
   let validAggName = isAggName(aggName);
   if (!validAggName) {
-    aggNameError = i18n.translate(
-      'xpack.ml.dataframe.groupBy.popoverForm.aggNameInvalidCharError',
-      {
-        defaultMessage:
-          'Invalid name. The characters "[", "]", and ">" are not allowed and the name must not start or end with a space character.',
-      }
-    );
+    aggNameError = i18n.translate('xpack.transform.groupBy.popoverForm.aggNameInvalidCharError', {
+      defaultMessage:
+        'Invalid name. The characters "[", "]", and ">" are not allowed and the name must not start or end with a space character.',
+    });
   }
 
   if (validAggName) {
     validAggName = !otherAggNames.includes(aggName);
-    aggNameError = i18n.translate(
-      'xpack.ml.dataframe.groupBy.popoverForm.aggNameAlreadyUsedError',
-      {
-        defaultMessage: 'Another group by configuration already uses that name.',
-      }
-    );
+    aggNameError = i18n.translate('xpack.transform.groupBy.popoverForm.aggNameAlreadyUsedError', {
+      defaultMessage: 'Another group by configuration already uses that name.',
+    });
   }
 
   const validInterval =
@@ -177,13 +171,13 @@ export const PopoverForm: React.SFC<Props> = ({
         isInvalid={!validAggName}
         helpText={
           isUnsupportedAgg
-            ? i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.unsupportedGroupByHelpText', {
+            ? i18n.translate('xpack.transform.groupBy.popoverForm.unsupportedGroupByHelpText', {
                 defaultMessage:
                   'Only the group_by name can be edited in this form. Please use the advanced editor to edit the other parts of the group_by configuration.',
               })
             : ''
         }
-        label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {
+        label={i18n.translate('xpack.transform.groupBy.popoverForm.nameLabel', {
           defaultMessage: 'Group by name',
         })}
       >
@@ -195,7 +189,7 @@ export const PopoverForm: React.SFC<Props> = ({
       </EuiFormRow>
       {availableAggs.length > 0 && (
         <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.groupby.popoverForm.aggLabel', {
+          label={i18n.translate('xpack.transform.groupby.popoverForm.aggLabel', {
             defaultMessage: 'Aggregation',
           })}
         >
@@ -208,7 +202,7 @@ export const PopoverForm: React.SFC<Props> = ({
       )}
       {availableFields.length > 0 && (
         <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.fieldLabel', {
+          label={i18n.translate('xpack.transform.groupBy.popoverForm.fieldLabel', {
             defaultMessage: 'Field',
           })}
         >
@@ -223,13 +217,13 @@ export const PopoverForm: React.SFC<Props> = ({
         <EuiFormRow
           error={
             !validInterval && [
-              i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalError', {
+              i18n.translate('xpack.transform.groupBy.popoverForm.intervalError', {
                 defaultMessage: 'Invalid interval.',
               }),
             ]
           }
           isInvalid={!validInterval}
-          label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalLabel', {
+          label={i18n.translate('xpack.transform.groupBy.popoverForm.intervalLabel', {
             defaultMessage: 'Interval',
           })}
         >
@@ -276,7 +270,7 @@ export const PopoverForm: React.SFC<Props> = ({
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
-          {i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.submitButtonLabel', {
+          {i18n.translate('xpack.transform.groupBy.popoverForm.submitButtonLabel', {
             defaultMessage: 'Apply',
           })}
         </EuiButton>

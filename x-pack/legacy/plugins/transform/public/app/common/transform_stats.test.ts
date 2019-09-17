@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockDataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
-import mockDataFrameTransformStats from './__mocks__/data_frame_transform_stats.json';
+import mockTransformListRow from './__mocks__/transform_list_row.json';
+import mockTransformStats from './__mocks__/transform_stats.json';
 
-import { DataFrameTransformListRow } from './transform_list';
+import { TransformListRow } from './transform_list';
 import { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 
 const getRow = (statsId: string) => {
   return {
-    ...(mockDataFrameTransformListRow as DataFrameTransformListRow),
+    ...(mockTransformListRow as TransformListRow),
     stats: {
-      ...mockDataFrameTransformStats.transforms.find(
-        (stats: DataFrameTransformListRow['stats']) => stats.id === statsId
+      ...mockTransformStats.transforms.find(
+        (stats: TransformListRow['stats']) => stats.id === statsId
       ),
     },
   };

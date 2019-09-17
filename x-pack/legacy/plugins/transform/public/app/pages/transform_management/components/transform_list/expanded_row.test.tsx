@@ -8,10 +8,10 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
 
-import { DataFrameTransformListRow } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
-import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
+import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
@@ -24,7 +24,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
   });
 
   test('Minimal initialization', () => {
-    const item: DataFrameTransformListRow = dataFrameTransformListRow;
+    const item: TransformListRow = transformListRow;
 
     const wrapper = shallow(<ExpandedRow item={item} />);
 

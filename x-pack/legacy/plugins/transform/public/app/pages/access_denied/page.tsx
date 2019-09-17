@@ -37,7 +37,7 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.dataframe.accessDeniedTitle"
+                  id="xpack.transform.accessDeniedTitle"
                   defaultMessage="Access denied"
                 />
               </h1>
@@ -47,7 +47,7 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
         <EuiPageContentBody>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title={i18n.translate('xpack.ml.dataframe.noPermissionToAccessMLLabel', {
+            title={i18n.translate('xpack.transform.noPermissionToAccessMLLabel', {
               defaultMessage: 'You need permission to access Transforms.',
             })}
             color="danger"
@@ -56,13 +56,11 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.ml.dataframe.noGrantedPrivilegesDescription"
-                  defaultMessage="You must have the privileges granted in the {kibanaUserParam} and {dataFrameUserParam} roles.{br}Your system admin can set these roles on the Management User page."
+                  id="xpack.transform.noGrantedPrivilegesDescription"
+                  defaultMessage="You must have the privileges granted in the {kibanaUserParam} and {UserParam} roles.{br}Your system admin can set these roles on the Management User page."
                   values={{
                     kibanaUserParam: <span className="text-monospace">kibana_user</span>,
-                    dataFrameUserParam: (
-                      <span className="text-monospace">data_frame_transforms_user</span>
-                    ),
+                    UserParam: <span className="text-monospace">data_frame_transforms_user</span>,
                     br: <br />,
                   }}
                 />
@@ -74,7 +72,7 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={goToKibana} size="s">
                 <FormattedMessage
-                  id="xpack.ml.dataframe.accessDenied.backToKibanaHomeButtonLabel"
+                  id="xpack.transform.accessDenied.backToKibanaHomeButtonLabel"
                   defaultMessage="Back to Kibana home"
                 />
               </EuiButton>
@@ -82,7 +80,7 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={retry} size="s">
                 <FormattedMessage
-                  id="xpack.ml.dataframe.accessDenied.retryButtonLabel"
+                  id="xpack.transform.accessDenied.retryButtonLabel"
                   defaultMessage="Retry"
                 />
               </EuiButton>

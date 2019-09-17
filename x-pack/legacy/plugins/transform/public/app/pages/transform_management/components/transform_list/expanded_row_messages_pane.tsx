@@ -11,7 +11,7 @@ import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 // @ts-ignore
 import { JobIcon } from '../../../../../../../ml/public/components/job_message_icon';
 import { TransformMessage } from '../../../../../../../ml/common/types/audit_message';
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -43,9 +43,9 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
         }
 
         setIsLoading(true);
-        const messagesResp = await ml.dataFrame.getTransformAuditMessages(transformId);
+        const messagesResp = await api.getTransformAuditMessages(transformId);
         setIsLoading(false);
-        setMessages(messagesResp);
+        setMessages(messagesResp as any[]);
 
         concurrentLoads--;
 

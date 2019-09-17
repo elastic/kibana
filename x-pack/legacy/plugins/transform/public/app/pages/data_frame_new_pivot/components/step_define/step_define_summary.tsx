@@ -57,7 +57,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
+                label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
               >
@@ -65,7 +65,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
               </EuiFormRow>
               {useCodeBlock === false && displaySearch !== emptySearch && (
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.queryLabel', {
+                  label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
                     defaultMessage: 'Query',
                   })}
                 >
@@ -74,12 +74,9 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
               )}
               {useCodeBlock === true && displaySearch !== emptySearch && (
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.ml.dataframe.stepDefineSummary.queryCodeBlockLabel',
-                    {
-                      defaultMessage: 'Query',
-                    }
-                  )}
+                  label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
+                    defaultMessage: 'Query',
+                  })}
                 >
                   <EuiCodeBlock
                     language="js"
@@ -98,7 +95,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
 
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.savedSearchLabel', {
+              label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
@@ -107,7 +104,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           )}
 
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.groupByLabel', {
+            label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
               defaultMessage: 'Group by',
             })}
           >
@@ -115,7 +112,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.aggregationsLabel', {
+            label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
               defaultMessage: 'Aggregations',
             })}
           >

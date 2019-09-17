@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
+import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -16,33 +16,33 @@ import {
 import { stopTransforms } from '../../services/transform_service';
 
 interface StopActionProps {
-  items: DataFrameTransformListRow[];
+  items: TransformListRow[];
   forceDisable?: boolean;
 }
 
 export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
-  const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
-  const buttonStopText = i18n.translate('xpack.ml.dataframe.transformList.stopActionName', {
+  const canStartStopTransform: boolean = checkPermission('canStartStopTransform');
+  const buttonStopText = i18n.translate('xpack.transform.transformList.stopActionName', {
     defaultMessage: 'Stop',
   });
 
   // Disable stop action if one of the transforms is stopped already
   const stoppedTransform = items.some(
-    (i: DataFrameTransformListRow) => i.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED
+    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STOPPED
   );
 
   let stoppedTransformMessage;
   if (isBulkAction === true) {
     stoppedTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.stoppedTransformBulkToolTip',
+      'xpack.transform.transformList.stoppedTransformBulkToolTip',
       {
         defaultMessage: 'One or more selected transforms is already stopped.',
       }
     );
   } else {
     stoppedTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.stoppedTransformToolTip',
+      'xpack.transform.transformList.stoppedTransformToolTip',
       {
         defaultMessage: '{transformId} is already stopped.',
         values: { transformId: items[0] && items[0].config.id },
@@ -58,7 +58,7 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={forceDisable === true || !canStartStopDataFrame || stoppedTransform === true}
+      disabled={forceDisable === true || !canStartStopTransform || stoppedTransform === true}
       iconType="stop"
       onClick={handleStop}
       aria-label={buttonStopText}
@@ -66,13 +66,13 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
       {buttonStopText}
     </EuiButtonEmpty>
   );
-  if (!canStartStopDataFrame || stoppedTransform) {
+  if (!canStartStopTransform || stoppedTransform) {
     return (
       <EuiToolTip
         position="top"
         content={
-          !canStartStopDataFrame
-            ? createPermissionFailureMessage('canStartStopDataFrame')
+          !canStartStopTransform
+            ? createPermissionFailureMessage('canStartStopTransform')
             : stoppedTransformMessage
         }
       >

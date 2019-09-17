@@ -101,7 +101,7 @@ export function isAggNameConflict(
 ) {
   if (aggList[aggName] !== undefined) {
     toastNotifications.addDanger(
-      i18n.translate('xpack.ml.dataframe.stepDefineForm.aggExistsErrorMessage', {
+      i18n.translate('xpack.transform.stepDefineForm.aggExistsErrorMessage', {
         defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
         values: { aggName },
       })
@@ -111,7 +111,7 @@ export function isAggNameConflict(
 
   if (groupByList[aggName] !== undefined) {
     toastNotifications.addDanger(
-      i18n.translate('xpack.ml.dataframe.stepDefineForm.groupByExistsErrorMessage', {
+      i18n.translate('xpack.transform.stepDefineForm.groupByExistsErrorMessage', {
         defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
         values: { aggName },
       })
@@ -128,7 +128,7 @@ export function isAggNameConflict(
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
       toastNotifications.addDanger(
-        i18n.translate('xpack.ml.dataframe.stepDefineForm.nestedConflictErrorMessage', {
+        i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
           defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
           values: { aggName, aggNameCheck },
         })
@@ -150,7 +150,7 @@ export function isAggNameConflict(
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepDefineForm.nestedAggListConflictErrorMessage', {
+          i18n.translate('xpack.transform.stepDefineForm.nestedAggListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
             values: { aggName, aggListName },
           })
@@ -176,13 +176,10 @@ export function isAggNameConflict(
           : `${groupByListNameCheck}.${groupByListNamePart}`;
       if (groupByListNameCheck === aggName) {
         toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.ml.dataframe.stepDefineForm.nestedGroupByListConflictErrorMessage',
-            {
-              defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
-              values: { aggName, groupByListName },
-            }
-          )
+          i18n.translate('xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage', {
+            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
+            values: { aggName, groupByListName },
+          })
         );
         return true;
       }
@@ -430,12 +427,12 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-pivot.html`;
   const advancedEditorHelpText = (
     <Fragment>
-      {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpText', {
+      {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the pivot configuration of the transform.',
       })}{' '}
       <EuiLink href={docsUrl} target="_blank">
-        {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
+        {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
       </EuiLink>
@@ -445,12 +442,12 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const sourceDocsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/query-dsl.html`;
   const advancedSourceEditorHelpText = (
     <Fragment>
-      {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedSourceEditorHelpText', {
+      {i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorHelpText', {
         defaultMessage:
           'The advanced editor allows you to edit the source query clause of the transform.',
       })}{' '}
       <EuiLink href={sourceDocsUrl} target="_blank">
-        {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
+        {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
           defaultMessage: 'Learn more about available options.',
         })}
       </EuiLink>
@@ -508,12 +505,12 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
+                label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
                 helpText={
                   disabledQuery
-                    ? i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternHelpText', {
+                    ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
                         defaultMessage:
                           'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
                         values: {
@@ -530,10 +527,10 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 <Fragment>
                   {!isAdvancedSourceEditorEnabled && (
                     <EuiFormRow
-                      label={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryLabel', {
+                      label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
                         defaultMessage: 'Query',
                       })}
-                      helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
+                      helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
                         defaultMessage: 'Use a query to filter the source data (optional).',
                       })}
                     >
@@ -542,7 +539,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                         onSubmit={searchHandler}
                         initialValue={searchString === defaultSearch ? emptySearch : searchString}
                         placeholder={i18n.translate(
-                          'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
+                          'xpack.transform.stepDefineForm.queryPlaceholder',
                           {
                             defaultMessage: 'e.g. {example}',
                             values: { example: 'method : "GET" or status : "404"' },
@@ -559,12 +556,9 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           {isAdvancedSourceEditorEnabled && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate(
-                  'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorLabel',
-                  {
-                    defaultMessage: 'Source query clause',
-                  }
-                )}
+                label={i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorLabel', {
+                  defaultMessage: 'Source query clause',
+                })}
                 helpText={advancedSourceEditorHelpText}
               >
                 <EuiPanel grow={false} paddingSize="none">
@@ -594,7 +588,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                       fontSize: '12px',
                     }}
                     aria-label={i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorAriaLabel',
+                      'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
                       {
                         defaultMessage: 'Advanced query editor',
                       }
@@ -610,7 +604,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 <EuiFlexItem>
                   <EuiSwitch
                     label={i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                      'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
                       {
                         defaultMessage: 'Advanced query editor',
                       }
@@ -644,7 +638,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     disabled={!isAdvancedSourceEditorApplyButtonEnabled}
                   >
                     {i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorApplyButtonText',
+                      'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
                       {
                         defaultMessage: 'Apply changes',
                       }
@@ -656,7 +650,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           )}
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.stepDefineForm.savedSearchLabel', {
+              label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
@@ -667,7 +661,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           {!isAdvancedPivotEditorEnabled && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.groupByLabel', {
+                label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
                   defaultMessage: 'Group by',
                 })}
               >
@@ -682,7 +676,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     changeHandler={addGroupBy}
                     options={groupByOptions}
                     placeholder={i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.groupByPlaceholder',
+                      'xpack.transform.stepDefineForm.groupByPlaceholder',
                       {
                         defaultMessage: 'Add a group by field ...',
                       }
@@ -692,7 +686,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFormRow>
 
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.aggregationsLabel', {
+                label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
                   defaultMessage: 'Aggregations',
                 })}
               >
@@ -707,7 +701,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     changeHandler={addAggregation}
                     options={aggOptions}
                     placeholder={i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.aggregationsPlaceholder',
+                      'xpack.transform.stepDefineForm.aggregationsPlaceholder',
                       {
                         defaultMessage: 'Add an aggregation ...',
                       }
@@ -721,7 +715,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           {isAdvancedPivotEditorEnabled && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorLabel', {
+                label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
                   defaultMessage: 'Pivot configuration object',
                 })}
                 helpText={advancedEditorHelpText}
@@ -753,7 +747,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                       fontSize: '12px',
                     }}
                     aria-label={i18n.translate(
-                      'xpack.ml.dataframe.stepDefineForm.advancedEditorAriaLabel',
+                      'xpack.transform.stepDefineForm.advancedEditorAriaLabel',
                       {
                         defaultMessage: 'Advanced pivot editor',
                       }
@@ -768,7 +762,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               <EuiFlexItem>
                 <EuiSwitch
                   label={i18n.translate(
-                    'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchLabel',
+                    'xpack.transform.stepDefineForm.advancedEditorSwitchLabel',
                     {
                       defaultMessage: 'Advanced pivot editor',
                     }
@@ -805,12 +799,9 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   onClick={applyAdvancedPivotEditorChanges}
                   disabled={!isAdvancedPivotEditorApplyButtonEnabled}
                 >
-                  {i18n.translate(
-                    'xpack.ml.dataframe.stepDefineForm.advancedEditorApplyButtonText',
-                    {
-                      defaultMessage: 'Apply changes',
-                    }
-                  )}
+                  {i18n.translate('xpack.transform.stepDefineForm.advancedEditorApplyButtonText', {
+                    defaultMessage: 'Apply changes',
+                  })}
                 </EuiButton>
               )}
             </EuiFlexGroup>
@@ -819,7 +810,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             <Fragment>
               <EuiSpacer size="m" />
               <EuiFormHelpText style={{ maxWidth: '320px' }}>
-                {i18n.translate('xpack.ml.dataframe.stepDefineForm.formHelp', {
+                {i18n.translate('xpack.transform.stepDefineForm.formHelp', {
                   defaultMessage:
                     'Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
                 })}

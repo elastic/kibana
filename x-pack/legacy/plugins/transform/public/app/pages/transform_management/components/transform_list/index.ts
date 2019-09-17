@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DataFrameTransformList } from './transform_list';
+export { TransformList } from './transform_list';

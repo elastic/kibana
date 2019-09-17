@@ -8,12 +8,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import './transform_list.test.mocks';
-import { DataFrameTransformList } from './transform_list';
+import { TransformList } from './transform_list';
 
-describe('Transform: Transform List <DataFrameTransformList />', () => {
+describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
-      <DataFrameTransformList
+      <TransformList
         isInitialized={true}
         transforms={[]}
         errorMessage={undefined}

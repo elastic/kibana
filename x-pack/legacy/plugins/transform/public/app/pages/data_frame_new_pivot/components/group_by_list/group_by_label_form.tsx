@@ -68,12 +68,9 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           ownFocus
           button={
             <EuiButtonIcon
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.groupByLabelForm.editIntervalAriaLabel',
-                {
-                  defaultMessage: 'Edit interval',
-                }
-              )}
+              aria-label={i18n.translate('xpack.transform.groupByLabelForm.editIntervalAriaLabel', {
+                defaultMessage: 'Edit interval',
+              })}
               size="s"
               iconType="pencil"
               onClick={() => setPopoverVisibility(!isPopoverVisible)}
@@ -92,7 +89,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="mlGroupByLabel--button">
         <EuiButtonIcon
-          aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
+          aria-label={i18n.translate('xpack.transform.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',
           })}
           size="s"

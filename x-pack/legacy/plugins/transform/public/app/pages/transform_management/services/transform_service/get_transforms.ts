@@ -4,31 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 import {
-  DataFrameTransformListRow,
-  DataFrameTransformStats,
-  DATA_FRAME_MODE,
-  isDataFrameTransformStats,
-  DataFrameTransformPivotConfig,
+  TransformListRow,
+  TransformStats,
+  TRANSFORM_MODE,
+  isTransformStats,
+  TransformPivotConfig,
   refreshTransformList$,
   REFRESH_TRANSFORM_LIST_STATE,
 } from '../../../../common';
 
-interface GetDataFrameTransformsResponse {
+interface GetTransformsResponse {
   count: number;
-  transforms: DataFrameTransformPivotConfig[];
+  transforms: TransformPivotConfig[];
 }
 
-interface GetDataFrameTransformsStatsResponseOk {
+interface GetTransformsStatsResponseOk {
   node_failures?: object;
   count: number;
-  transforms: DataFrameTransformStats[];
+  transforms: TransformStats[];
 }
 
-const isGetDataFrameTransformsStatsResponseOk = (
-  arg: any
-): arg is GetDataFrameTransformsStatsResponseOk => {
+const isGetTransformsStatsResponseOk = (arg: any): arg is GetTransformsStatsResponseOk => {
   return (
     {}.hasOwnProperty.call(arg, 'count') &&
     {}.hasOwnProperty.call(arg, 'transforms') &&
@@ -36,22 +34,20 @@ const isGetDataFrameTransformsStatsResponseOk = (
   );
 };
 
-interface GetDataFrameTransformsStatsResponseError {
+interface GetTransformsStatsResponseError {
   statusCode: number;
   error: string;
   message: string;
 }
 
-type GetDataFrameTransformsStatsResponse =
-  | GetDataFrameTransformsStatsResponseOk
-  | GetDataFrameTransformsStatsResponseError;
+type GetTransformsStatsResponse = GetTransformsStatsResponseOk | GetTransformsStatsResponseError;
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
 export const getTransformsFactory = (
-  setTransforms: React.Dispatch<React.SetStateAction<DataFrameTransformListRow[]>>,
+  setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
   setErrorMessage: React.Dispatch<
-    React.SetStateAction<GetDataFrameTransformsStatsResponseError | undefined>
+    React.SetStateAction<GetTransformsStatsResponseError | undefined>
   >,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
@@ -68,18 +64,18 @@ export const getTransformsFactory = (
       }
 
       try {
-        const transformConfigs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
-        const transformStats: GetDataFrameTransformsStatsResponse = await ml.dataFrame.getDataFrameTransformsStats();
+        const transformConfigs: GetTransformsResponse = await api.getTransforms();
+        const transformStats: GetTransformsStatsResponse = await api.getTransformsStats();
 
         const tableRows = transformConfigs.transforms.reduce(
           (reducedtableRows, config) => {
-            const stats = isGetDataFrameTransformsStatsResponseOk(transformStats)
+            const stats = isGetTransformsStatsResponseOk(transformStats)
               ? transformStats.transforms.find(d => config.id === d.id)
               : undefined;
 
             // A newly created transform might not have corresponding stats yet.
             // If that's the case we just skip the transform and don't add it to the transform list yet.
-            if (!isDataFrameTransformStats(stats)) {
+            if (!isTransformStats(stats)) {
               return reducedtableRows;
             }
 
@@ -89,13 +85,13 @@ export const getTransformsFactory = (
               config,
               mode:
                 typeof config.sync !== 'undefined'
-                  ? DATA_FRAME_MODE.CONTINUOUS
-                  : DATA_FRAME_MODE.BATCH,
+                  ? TRANSFORM_MODE.CONTINUOUS
+                  : TRANSFORM_MODE.BATCH,
               stats,
             });
             return reducedtableRows;
           },
-          [] as DataFrameTransformListRow[]
+          [] as TransformListRow[]
         );
 
         setTransforms(tableRows);

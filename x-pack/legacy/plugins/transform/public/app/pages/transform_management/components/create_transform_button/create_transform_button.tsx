@@ -15,25 +15,25 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../../../ml/public/privilege/check_privilege';
 
-import { moveToDataFrameWizard } from '../../../../common';
+import { moveToTransformWizard } from '../../../../common';
 
 export const CreateTransformButton: SFC = () => {
   const disabled =
-    !checkPermission('canCreateDataFrame') ||
-    !checkPermission('canPreviewDataFrame') ||
-    !checkPermission('canStartStopDataFrame');
+    !checkPermission('canCreateTransform') ||
+    !checkPermission('canPreviewTransform') ||
+    !checkPermission('canStartStopTransform');
 
   const button = (
     <EuiButton
       disabled={disabled}
       fill
-      onClick={moveToDataFrameWizard}
+      onClick={moveToTransformWizard}
       iconType="plusInCircle"
       size="s"
-      data-test-subj="mlDataFramesButtonCreate"
+      data-test-subj="transformButtonCreate"
     >
       <FormattedMessage
-        id="xpack.ml.dataframe.transformList.createDataFrameButton"
+        id="xpack.transform.transformList.createTransformButton"
         defaultMessage="Create transform"
       />
     </EuiButton>
@@ -41,7 +41,7 @@ export const CreateTransformButton: SFC = () => {
 
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={createPermissionFailureMessage('canCreateDataFrame')}>
+      <EuiToolTip position="top" content={createPermissionFailureMessage('canCreateTransform')}>
         {button}
       </EuiToolTip>
     );

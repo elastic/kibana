@@ -28,7 +28,7 @@ export const WizardNav: SFC<StepsNavProps> = ({
     {previous && (
       <EuiFlexItem grow={false}>
         <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
-          {i18n.translate('xpack.ml.dataframe.wizard.previousStepButton', {
+          {i18n.translate('xpack.transform.wizard.previousStepButton', {
             defaultMessage: 'Previous',
           })}
         </EuiButton>
@@ -37,7 +37,7 @@ export const WizardNav: SFC<StepsNavProps> = ({
     {next && (
       <EuiFlexItem grow={false}>
         <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
-          {i18n.translate('xpack.ml.dataframe.wizard.nextStepButton', {
+          {i18n.translate('xpack.transform.wizard.nextStepButton', {
             defaultMessage: 'Next',
           })}
         </EuiButton>

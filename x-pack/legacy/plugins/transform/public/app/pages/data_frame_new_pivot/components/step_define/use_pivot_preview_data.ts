@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 
 import { Dictionary } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
@@ -32,22 +32,22 @@ interface EsMappingType {
   type: ES_FIELD_TYPES;
 }
 
-type DataFramePreviewData = Array<Dictionary<any>>;
-interface DataFramePreviewMappings {
+type PreviewData = Array<Dictionary<any>>;
+interface PreviewMappings {
   properties: Dictionary<EsMappingType>;
 }
 
 export interface UsePivotPreviewDataReturnType {
   errorMessage: string;
   status: PIVOT_PREVIEW_STATUS;
-  dataFramePreviewData: DataFramePreviewData;
-  dataFramePreviewMappings: DataFramePreviewMappings;
+  previewData: PreviewData;
+  previewMappings: PreviewMappings;
   previewRequest: PreviewRequestBody;
 }
 
-export interface GetDataFrameTransformsResponse {
-  preview: DataFramePreviewData;
-  mappings: DataFramePreviewMappings;
+export interface GetTransformsResponse {
+  preview: PreviewData;
+  mappings: PreviewMappings;
 }
 
 export const usePivotPreviewData = (
@@ -58,19 +58,17 @@ export const usePivotPreviewData = (
 ): UsePivotPreviewDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
-  const [dataFramePreviewData, setDataFramePreviewData] = useState<DataFramePreviewData>([]);
-  const [dataFramePreviewMappings, setDataFramePreviewMappings] = useState<
-    DataFramePreviewMappings
-  >({ properties: {} });
+  const [previewData, setPreviewData] = useState<PreviewData>([]);
+  const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
 
   const aggsArr = dictionaryToArray(aggs);
   const groupByArr = dictionaryToArray(groupBy);
 
   const previewRequest = getPreviewRequestBody(indexPattern.title, query, groupByArr, aggsArr);
 
-  const getDataFramePreviewData = async () => {
+  const getPreviewData = async () => {
     if (aggsArr.length === 0 || groupByArr.length === 0) {
-      setDataFramePreviewData([]);
+      setPreviewData([]);
       return;
     }
 
@@ -78,27 +76,25 @@ export const usePivotPreviewData = (
     setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
     try {
-      const resp: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransformsPreview(
-        previewRequest
-      );
-      setDataFramePreviewData(resp.preview);
-      setDataFramePreviewMappings(resp.mappings);
+      const resp: GetTransformsResponse = await api.getTransformsPreview(previewRequest);
+      setPreviewData(resp.preview);
+      setPreviewMappings(resp.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
     } catch (e) {
       setErrorMessage(JSON.stringify(e));
-      setDataFramePreviewData([]);
-      setDataFramePreviewMappings({ properties: {} });
+      setPreviewData([]);
+      setPreviewMappings({ properties: {} });
       setStatus(PIVOT_PREVIEW_STATUS.ERROR);
     }
   };
 
   useEffect(() => {
-    getDataFramePreviewData();
+    getPreviewData();
   }, [
     indexPattern.title,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
   ]);
-  return { errorMessage, status, dataFramePreviewData, dataFramePreviewMappings, previewRequest };
+  return { errorMessage, status, previewData, previewMappings, previewRequest };
 };

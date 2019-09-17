@@ -5,12 +5,12 @@
  */
 
 import { callWithRequestType } from '../../../common/types/kibana';
-import { DATA_FRAME_TRANSFORM_STATE } from '../../../../transform/public/app/common';
+import { TRANSFORM_STATE } from '../../../../transform/public/app/common';
 import {
-  DataFrameTransformEndpointRequest,
-  DataFrameTransformEndpointResult,
+  TransformEndpointRequest,
+  TransformEndpointResult,
 } from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
-import { DataFrameTransformId } from '../../../../transform/public/app/common/transform';
+import { TransformId } from '../../../../transform/public/app/common/transform';
 import { isRequestTimeout, fillResultsWithTimeouts } from './error_utils';
 
 enum TRANSFORM_ACTIONS {
@@ -20,31 +20,31 @@ enum TRANSFORM_ACTIONS {
 }
 
 interface StartStopOptions {
-  transformId: DataFrameTransformId;
+  transformId: TransformId;
   force: boolean;
   waitForCompletion?: boolean;
 }
 
 export function transformServiceProvider(callWithRequest: callWithRequestType) {
-  async function deleteTransform(transformId: DataFrameTransformId) {
-    return callWithRequest('ml.deleteDataFrameTransform', { transformId });
+  async function deleteTransform(transformId: TransformId) {
+    return callWithRequest('ml.deleteTransform', { transformId });
   }
 
   async function stopTransform(options: StartStopOptions) {
-    return callWithRequest('ml.stopDataFrameTransform', options);
+    return callWithRequest('ml.stopTransform', options);
   }
 
   async function startTransform(options: StartStopOptions) {
-    return callWithRequest('ml.startDataFrameTransform', options);
+    return callWithRequest('ml.startTransform', options);
   }
 
-  async function deleteTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
-    const results: DataFrameTransformEndpointResult = {};
+  async function deleteTransforms(transformsInfo: TransformEndpointRequest[]) {
+    const results: TransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
       const transformId = transformInfo.id;
       try {
-        if (transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
+        if (transformInfo.state === TRANSFORM_STATE.FAILED) {
           try {
             await stopTransform({
               transformId,
@@ -80,8 +80,8 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
-  async function startTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
-    const results: DataFrameTransformEndpointResult = {};
+  async function startTransforms(transformsInfo: TransformEndpointRequest[]) {
+    const results: TransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
       const transformId = transformInfo.id;
@@ -90,7 +90,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
           transformId,
           force:
             transformInfo.state !== undefined
-              ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
+              ? transformInfo.state === TRANSFORM_STATE.FAILED
               : false,
         });
         results[transformId] = { success: true };
@@ -109,8 +109,8 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
-  async function stopTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
-    const results: DataFrameTransformEndpointResult = {};
+  async function stopTransforms(transformsInfo: TransformEndpointRequest[]) {
+    const results: TransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
       const transformId = transformInfo.id;
@@ -119,7 +119,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
           transformId,
           force:
             transformInfo.state !== undefined
-              ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
+              ? transformInfo.state === TRANSFORM_STATE.FAILED
               : false,
           waitForCompletion: true,
         });

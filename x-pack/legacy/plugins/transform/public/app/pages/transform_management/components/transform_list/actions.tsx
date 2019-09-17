@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
+import { TransformListRow, TRANSFORM_STATE } from '../../../../common';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
@@ -14,15 +14,15 @@ export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
   return [
     {
       isPrimary: true,
-      render: (item: DataFrameTransformListRow) => {
-        if (item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED) {
+      render: (item: TransformListRow) => {
+        if (item.stats.state === TRANSFORM_STATE.STOPPED) {
           return <StartAction items={[item]} forceDisable={forceDisable} />;
         }
         return <StopAction items={[item]} forceDisable={forceDisable} />;
       },
     },
     {
-      render: (item: DataFrameTransformListRow) => {
+      render: (item: TransformListRow) => {
         return <DeleteAction items={[item]} forceDisable={forceDisable} />;
       },
     },

@@ -47,7 +47,7 @@ export const AggLabelForm: React.SFC<Props> = ({
           ownFocus
           button={
             <EuiButtonIcon
-              aria-label={i18n.translate('xpack.ml.dataframe.aggLabelForm.editAggAriaLabel', {
+              aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {
                 defaultMessage: 'Edit aggregation',
               })}
               size="s"
@@ -68,7 +68,7 @@ export const AggLabelForm: React.SFC<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="mlGroupByLabel--button">
         <EuiButtonIcon
-          aria-label={i18n.translate('xpack.ml.dataframe.aggLabelForm.deleteItemAriaLabel', {
+          aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',
           })}
           size="s"

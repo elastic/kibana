@@ -31,16 +31,16 @@ export const Page: FC = () => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
+                  id="xpack.transform.transformsWizard.newTransformTitle"
                   defaultMessage="New transform"
                 />
                 <span>&nbsp;</span>
                 <EuiBetaBadge
-                  label={i18n.translate('xpack.ml.dataframe.transformsWizard.betaBadgeLabel', {
+                  label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
                     defaultMessage: `Beta`,
                   })}
                   tooltipContent={i18n.translate(
-                    'xpack.ml.dataframe.transformsWizard.betaBadgeTooltipContent',
+                    'xpack.transform.transformsWizard.betaBadgeTooltipContent',
                     {
                       defaultMessage: `Transform are a beta feature. We'd love to hear your feedback.`,
                     }

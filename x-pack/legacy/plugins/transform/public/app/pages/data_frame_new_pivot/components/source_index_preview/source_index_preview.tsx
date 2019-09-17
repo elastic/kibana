@@ -63,7 +63,7 @@ interface SourceIndexPreviewTitle {
 const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+      {i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternTitle', {
         defaultMessage: 'Source index {indexPatternTitle}',
         values: { indexPatternTitle },
       })}
@@ -136,7 +136,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       <EuiPanel grow={false}>
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternError', {
+          title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
             defaultMessage: 'An error occurred loading the source index data.',
           })}
           color="danger"
@@ -154,7 +154,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate(
-            'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutTitle',
+            'xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutTitle',
             {
               defaultMessage: 'Empty source index query result.',
             }
@@ -162,13 +162,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           color="primary"
         >
           <p>
-            {i18n.translate(
-              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutBody',
-              {
-                defaultMessage:
-                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-              }
-            )}
+            {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutBody', {
+              defaultMessage:
+                'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+            })}
           </p>
         </EuiCallOut>
       </EuiPanel>
@@ -213,7 +210,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         return (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexArrayToolTipContent',
+              'xpack.transform.sourceIndexPreview.SourceIndexArrayToolTipContent',
               {
                 defaultMessage:
                   'The full content of this array based column is available in the expanded row.',
@@ -221,12 +218,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             )}
           >
             <EuiBadge>
-              {i18n.translate(
-                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexArrayBadgeContent',
-                {
-                  defaultMessage: 'array',
-                }
-              )}
+              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexArrayBadgeContent', {
+                defaultMessage: 'array',
+              })}
             </EuiBadge>
           </EuiToolTip>
         );
@@ -236,7 +230,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         return (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexObjectToolTipContent',
+              'xpack.transform.sourceIndexPreview.SourceIndexObjectToolTipContent',
               {
                 defaultMessage:
                   'The full content of this object based column is available in the expanded row.',
@@ -244,12 +238,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             )}
           >
             <EuiBadge>
-              {i18n.translate(
-                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexObjectBadgeContent',
-                {
-                  defaultMessage: 'object',
-                }
-              )}
+              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexObjectBadgeContent', {
+                defaultMessage: 'object',
+              })}
             </EuiBadge>
           </EuiToolTip>
         );
@@ -309,10 +300,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         onClick={() => toggleDetails(item)}
         aria-label={
           itemIdToExpandedRowMap[item._id]
-            ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
+            ? i18n.translate('xpack.transform.sourceIndexPreview.rowCollapse', {
                 defaultMessage: 'Collapse',
               })
-            : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
+            : i18n.translate('xpack.transform.sourceIndexPreview.rowExpand', {
                 defaultMessage: 'Expand',
               })
         }
@@ -321,7 +312,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     ),
   });
 
-  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+  const euiCopyText = i18n.translate('xpack.transform.sourceIndexPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
 
@@ -336,7 +327,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
-                  {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
+                  {i18n.translate('xpack.transform.sourceIndexPreview.fieldSelection', {
                     defaultMessage:
                       '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
@@ -353,7 +344,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                       iconType="gear"
                       onClick={toggleColumnsPopover}
                       aria-label={i18n.translate(
-                        'xpack.ml.dataframe.sourceIndexPreview.selectColumnsAriaLabel',
+                        'xpack.transform.sourceIndexPreview.selectColumnsAriaLabel',
                         {
                           defaultMessage: 'Select columns',
                         }
@@ -365,12 +356,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                   ownFocus
                 >
                   <EuiPopoverTitle>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.sourceIndexPreview.selectFieldsPopoverTitle',
-                      {
-                        defaultMessage: 'Select fields',
-                      }
-                    )}
+                    {i18n.translate('xpack.transform.sourceIndexPreview.selectFieldsPopoverTitle', {
+                      defaultMessage: 'Select fields',
+                    })}
                   </EuiPopoverTitle>
                   <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
                     {docFields.map(d => (

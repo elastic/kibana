@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 
-import { DataFrameTransformListRow } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -32,7 +32,7 @@ interface Item {
 }
 
 interface Props {
-  item: DataFrameTransformListRow;
+  item: TransformListRow;
 }
 
 export const ExpandedRow: SFC<Props> = ({ item }) => {
@@ -123,7 +123,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     {
       id: 'transform-details',
       name: i18n.translate(
-        'xpack.ml.dataframe.transformList.transformDetails.tabs.transformSettingsLabel',
+        'xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel',
         {
           defaultMessage: 'Transform details',
         }
@@ -138,7 +138,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     {
       id: 'transform-messages',
       name: i18n.translate(
-        'xpack.ml.dataframe.transformList.transformDetails.tabs.transformMessagesLabel',
+        'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
         {
           defaultMessage: 'Messages',
         }
@@ -148,7 +148,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
     {
       id: 'transform-preview',
       name: i18n.translate(
-        'xpack.ml.dataframe.transformList.transformDetails.tabs.transformPreviewLabel',
+        'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',
         {
           defaultMessage: 'Preview',
         }

@@ -21,20 +21,16 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../../../ml/public/privilege/check_privilege';
 
-import {
-  DataFrameTransformListRow,
-  isCompletedBatchTransform,
-  DATA_FRAME_TRANSFORM_STATE,
-} from '../../../../common';
+import { TransformListRow, isCompletedBatchTransform, TRANSFORM_STATE } from '../../../../common';
 
 interface StartActionProps {
-  items: DataFrameTransformListRow[];
+  items: TransformListRow[];
   forceDisable?: boolean;
 }
 
 export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
-  const canStartStopDataFrameTransform: boolean = checkPermission('canStartStopDataFrame');
+  const canStartStopTransform: boolean = checkPermission('canStartStopTransform');
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -45,17 +41,15 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   };
   const openModal = () => setModalVisible(true);
 
-  const buttonStartText = i18n.translate('xpack.ml.dataframe.transformList.startActionName', {
+  const buttonStartText = i18n.translate('xpack.transform.transformList.startActionName', {
     defaultMessage: 'Start',
   });
 
   // Disable start for batch transforms which have completed.
-  const completedBatchTransform = items.some((i: DataFrameTransformListRow) =>
-    isCompletedBatchTransform(i)
-  );
+  const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
   // Disable start action if one of the transforms is already started or trying to restart will throw error
   const startedTransform = items.some(
-    (i: DataFrameTransformListRow) => i.stats.state === DATA_FRAME_TRANSFORM_STATE.STARTED
+    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
   );
 
   let startedTransformMessage;
@@ -63,13 +57,13 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
 
   if (isBulkAction === true) {
     startedTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.startedTransformBulkToolTip',
+      'xpack.transform.transformList.startedTransformBulkToolTip',
       {
         defaultMessage: 'One or more selected transforms is already started.',
       }
     );
     completedBatchTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.completeBatchTransformBulkActionToolTip',
+      'xpack.transform.transformList.completeBatchTransformBulkActionToolTip',
       {
         defaultMessage:
           'One or more selected transforms is a completed batch transform and cannot be restarted.',
@@ -77,14 +71,14 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     );
   } else {
     startedTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.startedTransformToolTip',
+      'xpack.transform.transformList.startedTransformToolTip',
       {
         defaultMessage: '{transformId} is already started.',
         values: { transformId: items[0] && items[0].config.id },
       }
     );
     completedBatchTransformMessage = i18n.translate(
-      'xpack.ml.dataframe.transformList.completeBatchTransformToolTip',
+      'xpack.transform.transformList.completeBatchTransformToolTip',
       {
         defaultMessage: '{transformId} is a completed batch transform and cannot be restarted.',
         values: { transformId: items[0] && items[0].config.id },
@@ -92,8 +86,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     );
   }
 
-  const actionIsDisabled =
-    !canStartStopDataFrameTransform || completedBatchTransform || startedTransform;
+  const actionIsDisabled = !canStartStopTransform || completedBatchTransform || startedTransform;
 
   let startButton = (
     <EuiButtonEmpty
@@ -110,8 +103,8 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
 
   if (actionIsDisabled) {
     let content;
-    if (!canStartStopDataFrameTransform) {
-      content = createPermissionFailureMessage('canStartStopDataFrame');
+    if (!canStartStopTransform) {
+      content = createPermissionFailureMessage('canStartStopTransform');
     } else if (completedBatchTransform) {
       content = completedBatchTransformMessage;
     } else if (startedTransform) {
@@ -125,14 +118,11 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     );
   }
 
-  const bulkStartModalTitle = i18n.translate(
-    'xpack.ml.dataframe.transformList.bulkStartModalTitle',
-    {
-      defaultMessage: 'Start {count} {count, plural, one {transform} other {transforms}}?',
-      values: { count: items && items.length },
-    }
-  );
-  const startModalTitle = i18n.translate('xpack.ml.dataframe.transformList.startModalTitle', {
+  const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {
+    defaultMessage: 'Start {count} {count, plural, one {transform} other {transforms}}?',
+    values: { count: items && items.length },
+  });
+  const startModalTitle = i18n.translate('xpack.transform.transformList.startModalTitle', {
     defaultMessage: 'Start {transformId}',
     values: { transformId: items[0] && items[0].config.id },
   });
@@ -147,13 +137,13 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
             onCancel={closeModal}
             onConfirm={startAndCloseModal}
             cancelButtonText={i18n.translate(
-              'xpack.ml.dataframe.transformList.startModalCancelButton',
+              'xpack.transform.transformList.startModalCancelButton',
               {
                 defaultMessage: 'Cancel',
               }
             )}
             confirmButtonText={i18n.translate(
-              'xpack.ml.dataframe.transformList.startModalStartButton',
+              'xpack.transform.transformList.startModalStartButton',
               {
                 defaultMessage: 'Start',
               }
@@ -162,7 +152,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
             buttonColor="primary"
           >
             <p>
-              {i18n.translate('xpack.ml.dataframe.transformList.startModalBody', {
+              {i18n.translate('xpack.transform.transformList.startModalBody', {
                 defaultMessage:
                   'A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
                 values: { count: items.length },

@@ -27,7 +27,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
     }
 
     const destinationIndexHelpText = createIndexPattern
-      ? i18n.translate('xpack.ml.dataframe.stepDetailsSummary.createIndexPatternMessage', {
+      ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
           defaultMessage: 'A Kibana index pattern will be created for this transform.',
         })
       : '';
@@ -35,14 +35,14 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
     return (
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.stepDetailsSummary.transformIdLabel', {
+          label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
             defaultMessage: 'Transform id',
           })}
         >
           <EuiFieldText defaultValue={transformId} disabled={true} />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.ml.dataframe.stepDetailsSummary.transformDescriptionLabel', {
+          label={i18n.translate('xpack.transform.stepDetailsSummary.transformDescriptionLabel', {
             defaultMessage: 'Transform description',
           })}
         >
@@ -50,7 +50,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
         </EuiFormRow>
         <EuiFormRow
           helpText={destinationIndexHelpText}
-          label={i18n.translate('xpack.ml.dataframe.stepDetailsSummary.destinationIndexLabel', {
+          label={i18n.translate('xpack.transform.stepDetailsSummary.destinationIndexLabel', {
             defaultMessage: 'Destination index',
           })}
         >
@@ -59,7 +59,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
         {isContinuousModeEnabled && (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.ml.dataframe.stepDetailsSummary.continuousModeDateFieldLabel',
+              'xpack.transform.stepDetailsSummary.continuousModeDateFieldLabel',
               {
                 defaultMessage: 'Continuous mode date field',
               }

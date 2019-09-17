@@ -6,7 +6,7 @@ exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
     transformsList={Array []}
   />
   <EuiPage
-    data-test-subj="mlPageDataFrame"
+    data-test-subj="mlPageTransform"
     restrictWidth={false}
   >
     <EuiPageBody
@@ -20,7 +20,7 @@ exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
             <h1>
               <FormattedMessage
                 defaultMessage="Transforms"
-                id="xpack.ml.dataframe.transformList.dataFrameTitle"
+                id="xpack.transform.transformList.transformTitle"
                 values={Object {}}
               />
               <span>
@@ -58,7 +58,7 @@ exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
           size="l"
         />
         <EuiPanel>
-          <DataFrameTransformList
+          <TransformList
             isInitialized={false}
             transforms={Array []}
             transformsLoading={false}

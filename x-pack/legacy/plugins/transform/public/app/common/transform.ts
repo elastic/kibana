@@ -19,7 +19,7 @@ export const isTransformIdValid = isJobIdValid;
 
 export type IndexName = string;
 export type IndexPattern = string;
-export type DataFrameTransformId = string;
+export type TransformId = string;
 
 export interface PreviewRequestBody {
   pivot: {
@@ -45,8 +45,8 @@ export interface CreateRequestBody extends PreviewRequestBody {
   };
 }
 
-export interface DataFrameTransformPivotConfig extends CreateRequestBody {
-  id: DataFrameTransformId;
+export interface TransformPivotConfig extends CreateRequestBody {
+  id: TransformId;
 }
 
 export enum REFRESH_TRANSFORM_LIST_STATE {

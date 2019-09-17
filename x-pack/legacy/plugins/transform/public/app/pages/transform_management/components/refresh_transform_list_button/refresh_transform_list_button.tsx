@@ -23,7 +23,7 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
     isLoading={isLoading}
   >
     <FormattedMessage
-      id="xpack.ml.dataframe.transformList.refreshButtonLabel"
+      id="xpack.transform.transformList.refreshButtonLabel"
       defaultMessage="Refresh"
     />
   </EuiButtonEmpty>

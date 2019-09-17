@@ -7,18 +7,18 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { DataFrameTransformListRow } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 import { StartAction } from './action_start';
 
-import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
+import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 describe('Transform: Transform List Actions <StartAction />', () => {
   test('Minimal initialization', () => {
-    const item: DataFrameTransformListRow = dataFrameTransformListRow;
+    const item: TransformListRow = transformListRow;
     const props = {
       disabled: false,
       items: [item],
-      startTransform(d: DataFrameTransformListRow) {},
+      startTransform(d: TransformListRow) {},
     };
 
     const wrapper = shallow(<StartAction {...props} />);

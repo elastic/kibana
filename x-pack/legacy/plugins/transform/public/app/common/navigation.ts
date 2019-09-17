@@ -6,7 +6,7 @@
 
 import rison from 'rison-node';
 
-export function moveToDataFrameWizard() {
+export function moveToTransformWizard() {
   window.location.href = '#/data_frames/new_transform';
 }
 

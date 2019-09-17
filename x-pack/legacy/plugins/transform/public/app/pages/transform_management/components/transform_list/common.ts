@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameTransformId, DATA_FRAME_TRANSFORM_STATE } from '../../../../common';
+import { TransformId, TRANSFORM_STATE } from '../../../../common';
 
 export interface Clause {
   type: string;
@@ -20,9 +20,9 @@ export interface Query {
   syntax: any;
 }
 
-export interface DataFrameTransformEndpointRequest {
-  id: DataFrameTransformId;
-  state?: DATA_FRAME_TRANSFORM_STATE;
+export interface TransformEndpointRequest {
+  id: TransformId;
+  state?: TRANSFORM_STATE;
 }
 
 export interface ResultData {
@@ -30,7 +30,7 @@ export interface ResultData {
   error?: any;
 }
 
-export interface DataFrameTransformEndpointResult {
+export interface TransformEndpointResult {
   [key: string]: ResultData;
 }
 

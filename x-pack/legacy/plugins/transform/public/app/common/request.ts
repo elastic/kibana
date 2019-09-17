@@ -9,7 +9,7 @@ import { DefaultOperator } from 'elasticsearch';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
-import { SavedSearchQuery } from '../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../ml/public/contexts/kibana';
 
 import { StepDefineExposedState } from '../pages/data_frame_new_pivot/components/step_define/step_define_form';
 import { StepDetailsExposedState } from '../pages/data_frame_new_pivot/components/step_details/step_details_form';

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Transform: Transform List <DataFrameTransformList /> Minimal initialization 1`] = `
+exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] = `
 <Fragment>
   <ProgressBar
     isLoading={false}
@@ -16,7 +16,7 @@ exports[`Transform: Transform List <DataFrameTransformList /> Minimal initializa
         </EuiButtonEmpty>,
       ]
     }
-    data-test-subj="mlNoDataFrameTransformsFound"
+    data-test-subj="mlNoTransformsFound"
     iconColor="subdued"
     title={
       <h2>

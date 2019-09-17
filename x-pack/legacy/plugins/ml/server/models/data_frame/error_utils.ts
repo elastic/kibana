@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore no declaration file for module
 export { isRequestTimeout } from '../job_service/error_utils';
 import {
-  DataFrameTransformEndpointRequest,
-  DataFrameTransformEndpointResult,
+  TransformEndpointRequest,
+  TransformEndpointResult,
 } from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
 
 interface Params {
-  results: DataFrameTransformEndpointResult;
+  results: TransformEndpointResult;
   id: string;
-  items: DataFrameTransformEndpointRequest[];
+  items: TransformEndpointRequest[];
   action: string;
 }
 
@@ -50,7 +50,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     },
   };
 
-  const newResults: DataFrameTransformEndpointResult = {};
+  const newResults: TransformEndpointResult = {};
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {

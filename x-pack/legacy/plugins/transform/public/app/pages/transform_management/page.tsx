@@ -23,9 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { useRefreshTransformList, DataFrameTransformListRow } from '../../common';
+import { useRefreshTransformList, TransformListRow } from '../../common';
 import { CreateTransformButton } from './components/create_transform_button';
-import { DataFrameTransformList } from './components/transform_list';
+import { TransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 import { TransformStatsBar } from '../transform_management/components/transform_list/transforms_stats_bar';
 import { getTransformsFactory } from './services/transform_service';
@@ -36,7 +36,7 @@ export const Page: FC = () => {
   const [transformsLoading, setTransformsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
-  const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
+  const [transforms, setTransforms] = useState<TransformListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
@@ -58,23 +58,23 @@ export const Page: FC = () => {
   return (
     <Fragment>
       <TransformStatsBar transformsList={transforms} />
-      <EuiPage data-test-subj="mlPageDataFrame">
+      <EuiPage data-test-subj="mlPageTransform">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
                 <h1>
                   <FormattedMessage
-                    id="xpack.ml.dataframe.transformList.dataFrameTitle"
+                    id="xpack.transform.transformList.transformTitle"
                     defaultMessage="Transforms"
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
-                    label={i18n.translate('xpack.ml.dataframe.transformList.betaBadgeLabel', {
+                    label={i18n.translate('xpack.transform.transformList.betaBadgeLabel', {
                       defaultMessage: `Beta`,
                     })}
                     tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.transformList.betaBadgeTooltipContent',
+                      'xpack.transform.transformList.betaBadgeTooltipContent',
                       {
                         defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
                       }
@@ -99,7 +99,7 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameTransformList
+              <TransformList
                 transforms={transforms}
                 isInitialized={isInitialized}
                 errorMessage={errorMessage}

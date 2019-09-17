@@ -73,7 +73,7 @@ interface PreviewTitleProps {
 }
 
 const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
-  const euiCopyText = i18n.translate('xpack.ml.dataframe.pivotPreview.copyClipboardTooltip', {
+  const euiCopyText = i18n.translate('xpack.transform.pivotPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
   });
 
@@ -82,7 +82,7 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
       <EuiFlexItem>
         <EuiTitle size="xs">
           <span>
-            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+            {i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
               defaultMessage: 'Transform pivot preview',
             })}
           </span>
@@ -109,7 +109,7 @@ interface ErrorMessageProps {
 const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => {
   const error = JSON.parse(message);
 
-  const statusCodeLabel = i18n.translate('xpack.ml.dataframe.pivotPreview.statusCodeLabel', {
+  const statusCodeLabel = i18n.translate('xpack.transform.pivotPreview.statusCodeLabel', {
     defaultMessage: 'Status code',
   });
 
@@ -137,8 +137,8 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const indexPattern = useCurrentIndexPattern();
 
   const {
-    dataFramePreviewData,
-    dataFramePreviewMappings,
+    previewData,
+    previewMappings,
     errorMessage,
     previewRequest,
     status,
@@ -155,8 +155,8 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   // - After that the table gets re-enabled. To make sure React
   //   doesn't consolidate the state updates, setTimeout is used.
   const firstColumnName =
-    dataFramePreviewData.length > 0
-      ? Object.keys(dataFramePreviewData[0]).sort(sortColumns(groupByArr))[0]
+    previewData.length > 0
+      ? Object.keys(previewData[0]).sort(sortColumns(groupByArr))[0]
       : undefined;
 
   const firstColumnNameChanged = usePrevious(firstColumnName) !== firstColumnName;
@@ -178,7 +178,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       <EuiPanel grow={false}>
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewError', {
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
             defaultMessage: 'An error occurred loading the pivot preview.',
           })}
           color="danger"
@@ -190,9 +190,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     );
   }
 
-  if (dataFramePreviewData.length === 0) {
+  if (previewData.length === 0) {
     let noDataMessage = i18n.translate(
-      'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutBody',
+      'xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody',
       {
         defaultMessage:
           'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
@@ -202,7 +202,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     const aggsArr = dictionaryToArray(aggs);
     if (aggsArr.length === 0 || groupByArr.length === 0) {
       noDataMessage = i18n.translate(
-        'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewIncompleteConfigCalloutBody',
+        'xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody',
         {
           defaultMessage: 'Please choose at least one group-by field and aggregation.',
         }
@@ -212,12 +212,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       <EuiPanel grow={false}>
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutTitle',
-            {
-              defaultMessage: 'Pivot preview not available',
-            }
-          )}
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
+            defaultMessage: 'Pivot preview not available',
+          })}
           color="primary"
         >
           <p>{noDataMessage}</p>
@@ -226,7 +223,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     );
   }
 
-  const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
+  const columnKeys = getFlattenedFields(previewData[0]);
   columnKeys.sort(sortColumns(groupByArr));
 
   const columns = columnKeys.map(k => {
@@ -236,8 +233,8 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       sortable: true,
       truncateText: true,
     };
-    if (typeof dataFramePreviewMappings.properties[k] !== 'undefined') {
-      const esFieldType = dataFramePreviewMappings.properties[k].type;
+    if (typeof previewMappings.properties[k] !== 'undefined') {
+      const esFieldType = previewMappings.properties[k].type;
       switch (esFieldType) {
         case ES_FIELD_TYPES.BOOLEAN:
           column.dataType = 'boolean';
@@ -283,11 +280,11 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {dataFramePreviewData.length > 0 && clearTable === false && columns.length > 0 && (
+      {previewData.length > 0 && clearTable === false && columns.length > 0 && (
         <MlInMemoryTableBasic
           allowNeutralSort={false}
           compressed
-          items={dataFramePreviewData}
+          items={previewData}
           columns={columns}
           pagination={{
             initialPageSize: 5,

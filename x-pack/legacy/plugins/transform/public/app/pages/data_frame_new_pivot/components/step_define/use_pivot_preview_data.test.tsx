@@ -7,7 +7,7 @@
 import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   PIVOT_PREVIEW_STATUS,
@@ -17,7 +17,7 @@ import {
 
 import { IndexPattern } from 'ui/index_patterns';
 
-jest.mock('../../../../../../../ml/public/services/ml_api_service');
+jest.mock('../../../../services/api_service');
 
 type Callback = () => void;
 interface TestHookProps {
@@ -57,8 +57,8 @@ describe('usePivotPreviewData', () => {
 
     expect(pivotPreviewObj.errorMessage).toBe('');
     expect(pivotPreviewObj.status).toBe(PIVOT_PREVIEW_STATUS.UNUSED);
-    expect(pivotPreviewObj.dataFramePreviewData).toEqual([]);
-    expect(ml.dataFrame.getDataFrameTransformsPreview).not.toHaveBeenCalled();
+    expect(pivotPreviewObj.previewData).toEqual([]);
+    expect(api.getTransformsPreview).not.toHaveBeenCalled();
   });
 
   test('indexPattern set triggers loading', () => {
@@ -75,10 +75,10 @@ describe('usePivotPreviewData', () => {
     // ideally this should be LOADING instead of UNUSED but jest/enzyme/hooks doesn't
     // trigger that state upate yet.
     expect(pivotPreviewObj.status).toBe(PIVOT_PREVIEW_STATUS.UNUSED);
-    expect(pivotPreviewObj.dataFramePreviewData).toEqual([]);
+    expect(pivotPreviewObj.previewData).toEqual([]);
     // ideally this should be 1 instead of 0 but jest/enzyme/hooks doesn't
     // trigger that state upate yet.
-    expect(ml.dataFrame.getDataFrameTransformsPreview).toHaveBeenCalledTimes(0);
+    expect(api.getTransformsPreview).toHaveBeenCalledTimes(0);
   });
 
   // TODO add more tests to check data retrieved via `ml.esSearch()`.

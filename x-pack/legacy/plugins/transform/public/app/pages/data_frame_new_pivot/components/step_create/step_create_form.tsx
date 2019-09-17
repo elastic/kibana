@@ -29,7 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana/use_kibana_context';
 import { useUiChromeContext } from '../../../../../../../ml/public/contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../../ml/common/constants/jobs_list';
@@ -76,13 +76,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
       onChange({ created, started, indexPatternId });
     }, [created, started, indexPatternId]);
 
-    async function createDataFrame() {
+    async function createTransform() {
       setCreated(true);
 
       try {
-        await ml.dataFrame.createDataFrameTransform(transformId, transformConfig);
+        await api.createTransform(transformId, transformConfig);
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformSuccessMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
             defaultMessage: 'Request to create transform {transformId} acknowledged.',
             values: { transformId },
           })
@@ -90,7 +90,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       } catch (e) {
         setCreated(false);
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformErrorMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
             defaultMessage: 'An error occurred creating the transform {transformId}: {error}',
             values: { transformId, error: JSON.stringify(e) },
           })
@@ -105,13 +105,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
       return true;
     }
 
-    async function startDataFrame() {
+    async function startTransform() {
       setStarted(true);
 
       try {
-        await ml.dataFrame.startDataFrameTransforms([{ id: transformId }]);
+        await api.startTransforms([{ id: transformId }]);
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformSuccessMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
             defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
           })
@@ -119,7 +119,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       } catch (e) {
         setStarted(false);
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformErrorMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
             defaultMessage: 'An error occurred starting the transform {transformId}: {error}',
             values: { transformId, error: JSON.stringify(e) },
           })
@@ -127,10 +127,10 @@ export const StepCreateForm: SFC<Props> = React.memo(
       }
     }
 
-    async function createAndStartDataFrame() {
-      const success = await createDataFrame();
+    async function createAndStartTransform() {
+      const success = await createTransform();
       if (success) {
-        await startDataFrame();
+        await startTransform();
       }
     }
 
@@ -150,7 +150,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         // id returns false if there's a duplicate index pattern.
         if (id === false) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.ml.dataframe.stepCreateForm.duplicateIndexPatternErrorMessage', {
+            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
               defaultMessage:
                 'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
               values: { indexPatternName },
@@ -166,7 +166,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         }
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
             defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
             values: { indexPatternName },
           })
@@ -176,7 +176,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         return true;
       } catch (e) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.createIndexPatternErrorMessage', {
+          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
             defaultMessage:
               'An error occurred creating the Kibana index pattern {indexPatternName}: {error}',
             values: { indexPatternName, error: JSON.stringify(e) },
@@ -193,7 +193,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       function startProgressBar() {
         const interval = setInterval(async () => {
           try {
-            const stats = await ml.dataFrame.getDataFrameTransformsStats(transformId);
+            const stats = await api.getTransformsStats(transformId);
             if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
               const percent =
                 getTransformProgress({
@@ -208,7 +208,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             }
           } catch (e) {
             toastNotifications.addDanger(
-              i18n.translate('xpack.ml.dataframe.stepCreateForm.progressErrorMessage', {
+              i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage: {error}',
                 values: { error: JSON.stringify(e) },
               })
@@ -240,8 +240,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
         {!created && (
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
-                {i18n.translate('xpack.ml.dataframe.stepCreateForm.createAndStartDataFrameButton', {
+              <EuiButton fill isDisabled={created && started} onClick={createAndStartTransform}>
+                {i18n.translate('xpack.transform.stepCreateForm.createAndStartTransformButton', {
                   defaultMessage: 'Create and start',
                 })}
               </EuiButton>
@@ -249,7 +249,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             <EuiFlexItem>
               <EuiText color="subdued" size="s">
                 {i18n.translate(
-                  'xpack.ml.dataframe.stepCreateForm.createAndStartDataFrameDescription',
+                  'xpack.transform.stepCreateForm.createAndStartTransformDescription',
                   {
                     defaultMessage:
                       'Creates and starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
@@ -262,15 +262,15 @@ export const StepCreateForm: SFC<Props> = React.memo(
         {created && (
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton fill isDisabled={created && started} onClick={startDataFrame}>
-                {i18n.translate('xpack.ml.dataframe.stepCreateForm.startDataFrameButton', {
+              <EuiButton fill isDisabled={created && started} onClick={startTransform}>
+                {i18n.translate('xpack.transform.stepCreateForm.startTransformButton', {
                   defaultMessage: 'Start',
                 })}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.ml.dataframe.stepCreateForm.startDataFrameDescription', {
+                {i18n.translate('xpack.transform.stepCreateForm.startTransformDescription', {
                   defaultMessage:
                     'Starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
                 })}
@@ -280,15 +280,15 @@ export const StepCreateForm: SFC<Props> = React.memo(
         )}
         <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
           <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-            <EuiButton isDisabled={created} onClick={createDataFrame}>
-              {i18n.translate('xpack.ml.dataframe.stepCreateForm.createDataFrameButton', {
+            <EuiButton isDisabled={created} onClick={createTransform}>
+              {i18n.translate('xpack.transform.stepCreateForm.createTransformButton', {
                 defaultMessage: 'Create',
               })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.ml.dataframe.stepCreateForm.createDataFrameDescription', {
+              {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
                 defaultMessage:
                   'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
               })}
@@ -301,7 +301,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
               {(copy: () => void) => (
                 <EuiButton onClick={copy} style={{ width: '100%' }}>
                   {i18n.translate(
-                    'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipboardButton',
+                    'xpack.transform.stepCreateForm.copyTransformConfigToClipboardButton',
                     {
                       defaultMessage: 'Copy to clipboard',
                     }
@@ -313,7 +313,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
               {i18n.translate(
-                'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipboardDescription',
+                'xpack.transform.stepCreateForm.copyTransformConfigToClipboardDescription',
                 {
                   defaultMessage:
                     'Copies to the clipboard the Kibana Dev Console command for creating the transform.',
@@ -327,7 +327,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             <EuiSpacer size="m" />
             <EuiText size="xs">
               <strong>
-                {i18n.translate('xpack.ml.dataframe.stepCreateForm.progressTitle', {
+                {i18n.translate('xpack.transform.stepCreateForm.progressTitle', {
                   defaultMessage: 'Progress',
                 })}
               </strong>
@@ -349,14 +349,11 @@ export const StepCreateForm: SFC<Props> = React.memo(
               <EuiFlexItem style={PANEL_ITEM_STYLE}>
                 <EuiCard
                   icon={<EuiIcon size="xxl" type="list" />}
-                  title={i18n.translate(
-                    'xpack.ml.dataframe.stepCreateForm.transformListCardTitle',
-                    {
-                      defaultMessage: 'Transforms',
-                    }
-                  )}
+                  title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
+                    defaultMessage: 'Transforms',
+                  })}
                   description={i18n.translate(
-                    'xpack.ml.dataframe.stepCreateForm.transformListCardDescription',
+                    'xpack.transform.stepCreateForm.transformListCardDescription',
                     {
                       defaultMessage: 'Return to the transform management page.',
                     }
@@ -371,7 +368,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                     <EuiText color="subdued" size="s">
                       <p>
                         {i18n.translate(
-                          'xpack.ml.dataframe.stepCreateForm.creatingIndexPatternMessage',
+                          'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
                           {
                             defaultMessage: 'Creating Kibana index pattern ...',
                           }
@@ -385,11 +382,11 @@ export const StepCreateForm: SFC<Props> = React.memo(
                 <EuiFlexItem style={PANEL_ITEM_STYLE}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
-                    title={i18n.translate('xpack.ml.dataframe.stepCreateForm.discoverCardTitle', {
+                    title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
                       defaultMessage: 'Discover',
                     })}
                     description={i18n.translate(
-                      'xpack.ml.dataframe.stepCreateForm.discoverCardDescription',
+                      'xpack.transform.stepCreateForm.discoverCardDescription',
                       {
                         defaultMessage: 'Use Discover to explore the transform.',
                       }

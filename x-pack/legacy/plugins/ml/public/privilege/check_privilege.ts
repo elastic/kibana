@@ -88,13 +88,13 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
   });
 }
 
-export function checkGetDataFrameTransformsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkGetTransformsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the data frames.
       // all other functionality is controlled by the return privileges object
-      if (privileges.canGetDataFrame) {
+      if (privileges.canGetTransform) {
         return resolve(privileges);
       } else {
         kbnUrl.redirect('/data_frames/access-denied');
@@ -104,14 +104,14 @@ export function checkGetDataFrameTransformsPrivilege(kbnUrl: any): Promise<Privi
   });
 }
 
-export function checkCreateDataFrameTransformPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkCreateTransformPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
       if (
-        privileges.canCreateDataFrame &&
-        privileges.canPreviewDataFrame &&
-        privileges.canStartStopDataFrame
+        privileges.canCreateTransform &&
+        privileges.canPreviewTransform &&
+        privileges.canStartStopTransform
       ) {
         return resolve(privileges);
       } else {
@@ -168,20 +168,17 @@ export function createPermissionFailureMessage(privilegeType: keyof Privileges) 
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.',
     });
-  } else if (privilegeType === 'canCreateDataFrame') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameTransformTooltip', {
-      defaultMessage: 'You do not have permission to create data frame transforms.',
+  } else if (privilegeType === 'canCreateTransform') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.createTransformTooltip', {
+      defaultMessage: 'You do not have permission to create transforms.',
     });
-  } else if (privilegeType === 'canStartStopDataFrame') {
-    message = i18n.translate(
-      'xpack.ml.privilege.noPermission.startOrStopDataFrameTransformTooltip',
-      {
-        defaultMessage: 'You do not have permission to start or stop data frame transforms.',
-      }
-    );
-  } else if (privilegeType === 'canDeleteDataFrame') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteDataFrameTransformTooltip', {
-      defaultMessage: 'You do not have permission to delete data frame transforms.',
+  } else if (privilegeType === 'canStartStopTransform') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopTransformTooltip', {
+      defaultMessage: 'You do not have permission to start or stop transforms.',
+    });
+  } else if (privilegeType === 'canDeleteTransform') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteTransformTooltip', {
+      defaultMessage: 'You do not have permission to delete transforms.',
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {

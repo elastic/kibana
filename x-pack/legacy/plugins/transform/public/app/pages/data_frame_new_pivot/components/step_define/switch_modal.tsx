@@ -14,43 +14,43 @@ interface Props {
 }
 
 const pivotModalTitle = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalTitle',
+  'xpack.transform.stepDefineForm.advancedEditorSwitchModalTitle',
   {
     defaultMessage: 'Unapplied changes',
   }
 );
 const sourceModalTitle = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorSwitchModalTitle',
+  'xpack.transform.stepDefineForm.advancedSourceEditorSwitchModalTitle',
   {
     defaultMessage: 'Edits will be lost',
   }
 );
 const pivotModalMessage = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalBodyText',
+  'xpack.transform.stepDefineForm.advancedEditorSwitchModalBodyText',
   {
     defaultMessage: `The changes in the advanced editor haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
   }
 );
 const sourceModalMessage = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorSwitchModalBodyText',
+  'xpack.transform.stepDefineForm.advancedSourceEditorSwitchModalBodyText',
   {
     defaultMessage: `By switching back to KQL query bar you will lose your edits.`,
   }
 );
 const pivotModalConfirmButtonText = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalConfirmButtonText',
+  'xpack.transform.stepDefineForm.advancedEditorSwitchModalConfirmButtonText',
   {
     defaultMessage: 'Disable advanced editor',
   }
 );
 const sourceModalConfirmButtonText = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorSwitchModalConfirmButtonText',
+  'xpack.transform.stepDefineForm.advancedSourceEditorSwitchModalConfirmButtonText',
   {
     defaultMessage: 'Switch to KQL',
   }
 );
 const cancelButtonText = i18n.translate(
-  'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalCancelButtonText',
+  'xpack.transform.stepDefineForm.advancedEditorSwitchModalCancelButtonText',
   {
     defaultMessage: 'Cancel',
   }

@@ -13,20 +13,20 @@ import {
   FieldDataColumnType,
 } from '../../../../../../../ml/public/components/ml_in_memory_table';
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 
 import {
   getFlattenedFields,
   useRefreshTransformList,
   PreviewRequestBody,
-  DataFrameTransformPivotConfig,
+  TransformPivotConfig,
 } from '../../../../common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { TransformTable } from './transform_table';
 
 interface Props {
-  transformConfig: DataFrameTransformPivotConfig;
+  transformConfig: TransformPivotConfig;
 }
 
 export function sortColumns(groupByArr: string[]) {
@@ -46,7 +46,7 @@ export function sortColumns(groupByArr: string[]) {
 }
 
 function getDataFromTransform(
-  transformConfig: DataFrameTransformPivotConfig
+  transformConfig: TransformPivotConfig
 ): { previewRequest: PreviewRequestBody; groupByArr: string[] | [] } {
   const index = transformConfig.source.index;
   const pivot = transformConfig.pivot;
@@ -71,7 +71,7 @@ function getDataFromTransform(
 }
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
-  const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
+  const [previewData, setPreviewData] = useState([]);
   const [columns, setColumns] = useState<FieldDataColumnType[] | []>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -93,7 +93,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
         const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
         setIsLoading(true);
-        const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+        const resp: any = await api.getTransformsPreview(previewRequest);
         setIsLoading(false);
 
         if (resp.preview.length > 0) {
@@ -139,7 +139,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
             return column;
           });
 
-          setDataFramePreviewData(resp.preview);
+          setPreviewData(resp.preview);
           setColumns(tableColumns);
           setSortField(sortField);
           setSortDirection(sortDirection);
@@ -166,7 +166,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const pagination = {
     initialPageIndex: pageIndex,
     initialPageSize: pageSize,
-    totalItemCount: dataFramePreviewData.length,
+    totalItemCount: previewData.length,
     pageSizeOptions: [10, 20],
     hidePerPageOptions: false,
   };
@@ -197,9 +197,9 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   return (
     <TransformTable
       allowNeutralSort={false}
-      loading={dataFramePreviewData.length === 0 && isLoading === true}
+      loading={previewData.length === 0 && isLoading === true}
       compressed
-      items={dataFramePreviewData}
+      items={previewData}
       columns={columns}
       onTableChange={onTableChange}
       pagination={pagination}

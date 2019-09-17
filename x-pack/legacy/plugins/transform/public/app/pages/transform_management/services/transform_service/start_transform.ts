@@ -6,43 +6,41 @@
 
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 
 import {
-  DataFrameTransformListRow,
+  TransformListRow,
   refreshTransformList$,
   REFRESH_TRANSFORM_LIST_STATE,
 } from '../../../../common';
 
 import {
-  DataFrameTransformEndpointRequest,
-  DataFrameTransformEndpointResult,
+  TransformEndpointRequest,
+  TransformEndpointResult,
 } from '../../components/transform_list/common';
 
 import { mlMessageBarService } from '../../../../../../../ml/public/components/messagebar/messagebar_service';
 
-export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
-  const dataFramesInfo: DataFrameTransformEndpointRequest[] = dataFrames.map(df => ({
-    id: df.config.id,
-    state: df.stats.state,
+export const startTransforms = async (transforms: TransformListRow[]) => {
+  const transformsInfo: TransformEndpointRequest[] = transforms.map(tf => ({
+    id: tf.config.id,
+    state: tf.stats.state,
   }));
-  const results: DataFrameTransformEndpointResult = await ml.dataFrame.startDataFrameTransforms(
-    dataFramesInfo
-  );
+  const results: TransformEndpointResult = await api.startTransforms(transformsInfo);
 
   for (const transformId in results) {
     // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
     if (results.hasOwnProperty(transformId)) {
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {
+          i18n.translate('xpack.transform.transformList.startTransformSuccessMessage', {
             defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
       } else {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.transformList.startTransformErrorMessage', {
+          i18n.translate('xpack.transform.transformList.startTransformErrorMessage', {
             defaultMessage: 'An error occurred starting the transform {transformId}',
             values: { transformId },
           })

@@ -6,11 +6,11 @@
 
 import { idx } from '@kbn/elastic-idx';
 
-import { DataFrameTransformId } from './transform';
-import { DataFrameTransformListRow } from './transform_list';
+import { TransformId } from './transform';
+import { TransformListRow } from './transform_list';
 
 // reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
-export enum DATA_FRAME_TRANSFORM_STATE {
+export enum TRANSFORM_STATE {
   ABORTING = 'aborting',
   FAILED = 'failed',
   INDEXING = 'indexing',
@@ -19,13 +19,13 @@ export enum DATA_FRAME_TRANSFORM_STATE {
   STOPPING = 'stopping',
 }
 
-export enum DATA_FRAME_MODE {
+export enum TRANSFORM_MODE {
   BATCH = 'batch',
   CONTINUOUS = 'continuous',
 }
 
-export interface DataFrameTransformStats {
-  id: DataFrameTransformId;
+export interface TransformStats {
+  id: TransformId;
   checkpointing: {
     last: {
       checkpoint: number;
@@ -61,19 +61,19 @@ export interface DataFrameTransformStats {
     trigger_count: number;
   };
   reason?: string;
-  state: DATA_FRAME_TRANSFORM_STATE;
+  state: TRANSFORM_STATE;
 }
 
-export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformStats {
+export function isTransformStats(arg: any): arg is TransformStats {
   return (
     typeof arg === 'object' &&
     arg !== null &&
     {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(DATA_FRAME_TRANSFORM_STATE).includes(arg.state)
+    Object.values(TRANSFORM_STATE).includes(arg.state)
   );
 }
 
-export function getTransformProgress(item: DataFrameTransformListRow) {
+export function getTransformProgress(item: TransformListRow) {
   if (isCompletedBatchTransform(item)) {
     return 100;
   }
@@ -83,12 +83,12 @@ export function getTransformProgress(item: DataFrameTransformListRow) {
   return progress !== undefined ? Math.round(progress) : undefined;
 }
 
-export function isCompletedBatchTransform(item: DataFrameTransformListRow) {
+export function isCompletedBatchTransform(item: TransformListRow) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (
     item.stats.checkpointing.last.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED
+    item.stats.state === TRANSFORM_STATE.STOPPED
   );
 }

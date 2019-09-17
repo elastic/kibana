@@ -7,7 +7,7 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
   position="top"
 >
   <EuiButton
-    data-test-subj="mlDataFramesButtonCreate"
+    data-test-subj="transformButtonCreate"
     disabled={true}
     fill={true}
     iconType="plusInCircle"
@@ -16,7 +16,7 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
   >
     <FormattedMessage
       defaultMessage="Create transform"
-      id="xpack.ml.dataframe.transformList.createDataFrameButton"
+      id="xpack.transform.transformList.createTransformButton"
       values={Object {}}
     />
   </EuiButton>

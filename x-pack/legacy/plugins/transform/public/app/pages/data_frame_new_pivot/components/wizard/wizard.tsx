@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
 
 import { getCreateRequestBody } from '../../../../common';
 
@@ -119,7 +119,7 @@ export const Wizard: SFC = React.memo(() => {
 
   const stepsConfig = [
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepDefineTitle', {
+      title: i18n.translate('xpack.transform.transformsWizard.stepDefineTitle', {
         defaultMessage: 'Define pivot',
       }),
       children: (
@@ -132,7 +132,7 @@ export const Wizard: SFC = React.memo(() => {
       ),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepDetailsTitle', {
+      title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
         defaultMessage: 'Transform details',
       }),
       children: (
@@ -153,7 +153,7 @@ export const Wizard: SFC = React.memo(() => {
       status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepCreateTitle', {
+      title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
         defaultMessage: 'Create',
       }),
       children: (

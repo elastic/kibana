@@ -15,13 +15,10 @@ import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from
 import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
 import { isValidIndexName } from '../../../../../../../ml/common/util/es_utils';
 
+import { api } from '../../../../services/api_service';
 import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 
-import {
-  isTransformIdValid,
-  DataFrameTransformId,
-  DataFrameTransformPivotConfig,
-} from '../../../../common';
+import { isTransformIdValid, TransformId, TransformPivotConfig } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
 
@@ -32,7 +29,7 @@ export interface StepDetailsExposedState {
   destinationIndex: EsIndexName;
   isContinuousModeEnabled: boolean;
   touched: boolean;
-  transformId: DataFrameTransformId;
+  transformId: TransformId;
   transformDescription: string;
   valid: boolean;
 }
@@ -61,12 +58,12 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 
-  const [transformId, setTransformId] = useState<DataFrameTransformId>(defaults.transformId);
+  const [transformId, setTransformId] = useState<TransformId>(defaults.transformId);
   const [transformDescription, setTransformDescription] = useState<string>(
     defaults.transformDescription
   );
   const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(defaults.destinationIndex);
-  const [transformIds, setTransformIds] = useState<DataFrameTransformId[]>([]);
+  const [transformIds, setTransformIds] = useState<TransformId[]>([]);
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
   const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
   const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
@@ -92,13 +89,13 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     (async function() {
       try {
         setTransformIds(
-          (await ml.dataFrame.getDataFrameTransforms()).transforms.map(
-            (transform: DataFrameTransformPivotConfig) => transform.id
+          (await api.getTransforms()).transforms.map(
+            (transform: TransformPivotConfig) => transform.id
           )
         );
       } catch (e) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingDataFrameTransformList', {
+          i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
             defaultMessage: 'An error occurred getting the existing transform Ids: {error}',
             values: { error: JSON.stringify(e) },
           })
@@ -109,7 +106,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         setIndexNames((await ml.getIndices()).map(index => index.name));
       } catch (e) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingDataFrameIndexNames', {
+          i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
             defaultMessage: 'An error occurred getting the existing index names: {error}',
             values: { error: JSON.stringify(e) },
           })
@@ -120,7 +117,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
       } catch (e) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingIndexPatternTitles', {
+          i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles', {
             defaultMessage: 'An error occurred getting the existing index pattern titles: {error}',
             values: { error: JSON.stringify(e) },
           })
@@ -174,14 +171,14 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   return (
     <EuiForm>
       <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.stepDetailsForm.transformIdLabel', {
+        label={i18n.translate('xpack.transform.stepDetailsForm.transformIdLabel', {
           defaultMessage: 'Transform id',
         })}
         isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
         error={[
           ...(!transformIdEmpty && !transformIdValid
             ? [
-                i18n.translate('xpack.ml.dataframe.stepDetailsForm.transformIdInvalidError', {
+                i18n.translate('xpack.transform.stepDetailsForm.transformIdInvalidError', {
                   defaultMessage:
                     'Must contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores only and must start and end with alphanumeric characters.',
                 }),
@@ -189,7 +186,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             : []),
           ...(transformIdExists
             ? [
-                i18n.translate('xpack.ml.dataframe.stepDetailsForm.transformIdExistsError', {
+                i18n.translate('xpack.transform.stepDetailsForm.transformIdExistsError', {
                   defaultMessage: 'A transform with this id already exists.',
                 }),
               ]
@@ -200,32 +197,26 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
           placeholder="transform id"
           value={transformId}
           onChange={e => setTransformId(e.target.value)}
-          aria-label={i18n.translate(
-            'xpack.ml.dataframe.stepDetailsForm.transformIdInputAriaLabel',
-            {
-              defaultMessage: 'Choose a unique transform id.',
-            }
-          )}
+          aria-label={i18n.translate('xpack.transform.stepDetailsForm.transformIdInputAriaLabel', {
+            defaultMessage: 'Choose a unique transform id.',
+          })}
           isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.stepDetailsForm.transformDescriptionLabel', {
+        label={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionLabel', {
           defaultMessage: 'Transform description',
         })}
-        helpText={i18n.translate(
-          'xpack.ml.dataframe.stepDetailsForm.transformDescriptionHelpText',
-          {
-            defaultMessage: 'Optional descriptive text.',
-          }
-        )}
+        helpText={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionHelpText', {
+          defaultMessage: 'Optional descriptive text.',
+        })}
       >
         <EuiFieldText
           placeholder="transform description"
           value={transformDescription}
           onChange={e => setTransformDescription(e.target.value)}
           aria-label={i18n.translate(
-            'xpack.ml.dataframe.stepDetailsForm.transformDescriptionInputAriaLabel',
+            'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
             {
               defaultMessage: 'Choose an optional transform description.',
             }
@@ -233,13 +224,13 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.stepDetailsForm.destinationIndexLabel', {
+        label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
           defaultMessage: 'Destination index',
         })}
         isInvalid={!indexNameEmpty && !indexNameValid}
         helpText={
           indexNameExists &&
-          i18n.translate('xpack.ml.dataframe.stepDetailsForm.destinationIndexHelpText', {
+          i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
             defaultMessage:
               'An index with this name already exists. Be aware that running this transform will modify this destination index.',
           })
@@ -248,7 +239,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
           !indexNameEmpty &&
           !indexNameValid && [
             <Fragment>
-              {i18n.translate('xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidError', {
+              {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
                 defaultMessage: 'Invalid destination index name.',
               })}
               <br />
@@ -257,7 +248,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
+                  'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
                   {
                     defaultMessage: 'Learn more about index name limitations.',
                   }
@@ -272,7 +263,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
           value={destinationIndex}
           onChange={e => setDestinationIndex(e.target.value)}
           aria-label={i18n.translate(
-            'xpack.ml.dataframe.stepDetailsForm.destinationIndexInputAriaLabel',
+            'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
             {
               defaultMessage: 'Choose a unique destination index name.',
             }
@@ -285,15 +276,15 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         error={
           createIndexPattern &&
           indexPatternTitleExists && [
-            i18n.translate('xpack.ml.dataframe.stepDetailsForm.indexPatternTitleError', {
+            i18n.translate('xpack.transform.stepDetailsForm.indexPatternTitleError', {
               defaultMessage: 'An index pattern with this title already exists.',
             }),
           ]
         }
       >
         <EuiSwitch
-          name="mlDataFrameCreateIndexPattern"
-          label={i18n.translate('xpack.ml.dataframe.stepCreateForm.createIndexPatternLabel', {
+          name="transformCreateIndexPattern"
+          label={i18n.translate('xpack.transform.stepCreateForm.createIndexPatternLabel', {
             defaultMessage: 'Create index pattern',
           })}
           checked={createIndexPattern === true}
@@ -303,15 +294,15 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       <EuiFormRow
         helpText={
           isContinuousModeAvailable === false
-            ? i18n.translate('xpack.ml.dataframe.stepDetailsForm.continuousModeError', {
+            ? i18n.translate('xpack.transform.stepDetailsForm.continuousModeError', {
                 defaultMessage: 'Continuous mode is not available for indices without date fields.',
               })
             : ''
         }
       >
         <EuiSwitch
-          name="mlDataFrameContinuousMode"
-          label={i18n.translate('xpack.ml.dataframe.stepCreateForm.continuousModeLabel', {
+          name="transformContinuousMode"
+          label={i18n.translate('xpack.transform.stepCreateForm.continuousModeLabel', {
             defaultMessage: 'Continuous mode',
           })}
           checked={isContinuousModeEnabled === true}
@@ -322,14 +313,11 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       {isContinuousModeEnabled && (
         <Fragment>
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.ml.dataframe.stepDetailsForm.continuousModeDateFieldLabel',
-              {
-                defaultMessage: 'Date field',
-              }
-            )}
+            label={i18n.translate('xpack.transform.stepDetailsForm.continuousModeDateFieldLabel', {
+              defaultMessage: 'Date field',
+            })}
             helpText={i18n.translate(
-              'xpack.ml.dataframe.stepDetailsForm.continuousModeDateFieldHelpText',
+              'xpack.transform.stepDetailsForm.continuousModeDateFieldHelpText',
               {
                 defaultMessage: 'Select the date field that can be used to identify new documents.',
               }
@@ -342,19 +330,19 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.stepDetailsForm.continuousModeDelayLabel', {
+            label={i18n.translate('xpack.transform.stepDetailsForm.continuousModeDelayLabel', {
               defaultMessage: 'Delay',
             })}
             isInvalid={!isContinuousModeDelayValid}
             error={
               !isContinuousModeDelayValid && [
-                i18n.translate('xpack.ml.dataframe.stepDetailsForm.continuousModeDelayError', {
+                i18n.translate('xpack.transform.stepDetailsForm.continuousModeDelayError', {
                   defaultMessage: 'Invalid delay format',
                 }),
               ]
             }
             helpText={i18n.translate(
-              'xpack.ml.dataframe.stepDetailsForm.continuousModeDelayHelpText',
+              'xpack.transform.stepDetailsForm.continuousModeDelayHelpText',
               {
                 defaultMessage: 'Time delay between current time and latest input data time.',
               }
@@ -365,7 +353,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
               value={continuousModeDelay}
               onChange={e => setContinuousModeDelay(e.target.value)}
               aria-label={i18n.translate(
-                'xpack.ml.dataframe.stepDetailsForm.continuousModeAriaLabel',
+                'xpack.transform.stepDetailsForm.continuousModeAriaLabel',
                 {
                   defaultMessage: 'Choose a delay.',
                 }

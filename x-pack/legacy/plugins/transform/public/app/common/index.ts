@@ -22,22 +22,22 @@ export {
   useRefreshTransformList,
   CreateRequestBody,
   PreviewRequestBody,
-  DataFrameTransformId,
-  DataFrameTransformPivotConfig,
+  TransformId,
+  TransformPivotConfig,
   IndexName,
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
-export { DATA_FRAME_TRANSFORM_LIST_COLUMN, DataFrameTransformListRow } from './transform_list';
+export { TRANSFORM_LIST_COLUMN, TransformListRow } from './transform_list';
 export {
   getTransformProgress,
   isCompletedBatchTransform,
-  isDataFrameTransformStats,
-  DataFrameTransformStats,
-  DATA_FRAME_MODE,
-  DATA_FRAME_TRANSFORM_STATE,
+  isTransformStats,
+  TransformStats,
+  TRANSFORM_MODE,
+  TRANSFORM_STATE,
 } from './transform_stats';
-export { moveToDataFrameWizard, getDiscoverUrl } from './navigation';
+export { moveToTransformWizard, getDiscoverUrl } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,

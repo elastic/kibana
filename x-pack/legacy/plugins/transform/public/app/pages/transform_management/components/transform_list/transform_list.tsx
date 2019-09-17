@@ -25,12 +25,12 @@ import {
 } from '../../../../../../../ml/public/components/ml_in_memory_table';
 
 import {
-  DataFrameTransformId,
-  DataFrameTransformListRow,
-  moveToDataFrameWizard,
-  DATA_FRAME_MODE,
-  DATA_FRAME_TRANSFORM_LIST_COLUMN,
-  DATA_FRAME_TRANSFORM_STATE,
+  TransformId,
+  TransformListRow,
+  moveToTransformWizard,
+  TRANSFORM_MODE,
+  TRANSFORM_LIST_COLUMN,
+  TRANSFORM_STATE,
 } from '../../../../common';
 import { checkPermission } from '../../../../../../../ml/public/privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
@@ -44,12 +44,12 @@ import { ExpandedRow } from './expanded_row';
 import { ProgressBar, TransformTable } from './transform_table';
 
 function getItemIdToExpandedRowMap(
-  itemIds: DataFrameTransformId[],
-  dataFrameTransforms: DataFrameTransformListRow[]
+  itemIds: TransformId[],
+  transforms: TransformListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce(
-    (m: ItemIdToExpandedRowMap, transformId: DataFrameTransformId) => {
-      const item = dataFrameTransforms.find(transform => transform.config.id === transformId);
+    (m: ItemIdToExpandedRowMap, transformId: TransformId) => {
+      const item = transforms.find(transform => transform.config.id === transformId);
       if (item !== undefined) {
         m[transformId] = <ExpandedRow item={item} />;
       }
@@ -69,12 +69,12 @@ function stringMatch(str: string | undefined, substr: string) {
 
 interface Props {
   isInitialized: boolean;
-  transforms: DataFrameTransformListRow[];
+  transforms: TransformListRow[];
   errorMessage: any;
   transformsLoading: boolean;
 }
 
-export const DataFrameTransformList: SFC<Props> = ({
+export const TransformList: SFC<Props> = ({
   isInitialized,
   transforms,
   errorMessage,
@@ -83,10 +83,10 @@ export const DataFrameTransformList: SFC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
-  const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
-  const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
+  const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
+  const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
 
-  const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
+  const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -94,13 +94,13 @@ export const DataFrameTransformList: SFC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const [sortField, setSortField] = useState<string>(DATA_FRAME_TRANSFORM_LIST_COLUMN.ID);
+  const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   const disabled =
-    !checkPermission('canCreateDataFrame') ||
-    !checkPermission('canPreviewDataFrame') ||
-    !checkPermission('canStartStopDataFrame');
+    !checkPermission('canCreateTransform') ||
+    !checkPermission('canPreviewTransform') ||
+    !checkPermission('canStartStopTransform');
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
@@ -188,7 +188,7 @@ export const DataFrameTransformList: SFC<Props> = ({
       <Fragment>
         <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataFrame.list.errorPromptTitle', {
+          title={i18n.translate('xpack.transform.list.errorPromptTitle', {
             defaultMessage: 'An error occurred getting the transform list.',
           })}
           color="danger"
@@ -207,19 +207,19 @@ export const DataFrameTransformList: SFC<Props> = ({
         <EuiEmptyPrompt
           title={
             <h2>
-              {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
+              {i18n.translate('xpack.transform.list.emptyPromptTitle', {
                 defaultMessage: 'No transforms found',
               })}
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
-              {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
+            <EuiButtonEmpty onClick={moveToTransformWizard} isDisabled={disabled}>
+              {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
                 defaultMessage: 'Create your first transform',
               })}
             </EuiButtonEmpty>,
           ]}
-          data-test-subj="mlNoDataFrameTransformsFound"
+          data-test-subj="mlNoTransformsFound"
         />
       </Fragment>
     );
@@ -266,7 +266,7 @@ export const DataFrameTransformList: SFC<Props> = ({
           setIsActionsMenuOpen(true);
         }}
         aria-label={i18n.translate(
-          'xpack.ml.dataframe.multiTransformActionsMenu.managementActionsAriaLabel',
+          'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
           {
             defaultMessage: 'Management actions',
           }
@@ -291,7 +291,7 @@ export const DataFrameTransformList: SFC<Props> = ({
     return [
       <EuiTitle key="selectedText" size="s">
         <h3>
-          {i18n.translate('xpack.ml.dataframe.multiTransformActionsMenu.transformsCount', {
+          {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
             defaultMessage: '{count} {count, plural, one {transform} other {transforms}} selected',
             values: { count: transformSelection.length },
           })}
@@ -312,9 +312,9 @@ export const DataFrameTransformList: SFC<Props> = ({
       {
         type: 'field_value_selection',
         field: 'state.state',
-        name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
+        name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TRANSFORM_STATE).map(val => ({
+        options: Object.values(TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -323,9 +323,9 @@ export const DataFrameTransformList: SFC<Props> = ({
       {
         type: 'field_value_selection',
         field: 'mode',
-        name: i18n.translate('xpack.ml.dataframe.modeFilter', { defaultMessage: 'Mode' }),
+        name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,
-        options: Object.values(DATA_FRAME_MODE).map(val => ({
+        options: Object.values(TRANSFORM_MODE).map(val => ({
           value: val,
           name: val,
           view: (
@@ -340,7 +340,7 @@ export const DataFrameTransformList: SFC<Props> = ({
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: DATA_FRAME_TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
+    sort = { field: TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
   }: OnTableChangeArg) => {
     const { index, size } = page;
     setPageIndex(index);
@@ -352,7 +352,7 @@ export const DataFrameTransformList: SFC<Props> = ({
   };
 
   const selection = {
-    onSelectionChange: (selected: DataFrameTransformListRow[]) => setTransformSelection(selected),
+    onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
 
   return (
@@ -367,14 +367,14 @@ export const DataFrameTransformList: SFC<Props> = ({
         isExpandable={true}
         isSelectable={false}
         items={filterActive ? filteredTransforms : transforms}
-        itemId={DATA_FRAME_TRANSFORM_LIST_COLUMN.ID}
+        itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onTableChange={onTableChange}
         pagination={pagination}
         selection={selection}
         sorting={sorting}
         search={search}
-        data-test-subj="mlDataFramesTableTransforms"
+        data-test-subj="transformTableTransforms"
       />
     </Fragment>
   );
