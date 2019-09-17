@@ -10,7 +10,7 @@ export { isRequestTimeout } from '../job_service/error_utils';
 import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
-} from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
+} from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
 
 interface Params {
   results: DataFrameTransformEndpointResult;

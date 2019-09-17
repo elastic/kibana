@@ -5,12 +5,12 @@
  */
 
 import { callWithRequestType } from '../../../common/types/kibana';
-import { DATA_FRAME_TRANSFORM_STATE } from '../../../public/data_frame/common';
+import { DATA_FRAME_TRANSFORM_STATE } from '../../../../transform/public/app/common';
 import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
-} from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
-import { DataFrameTransformId } from '../../../public/data_frame/common/transform';
+} from '../../../../transform/public/app/pages/transform_management/components/transform_list/common';
+import { DataFrameTransformId } from '../../../../transform/public/app/common/transform';
 import { isRequestTimeout, fillResultsWithTimeouts } from './error_utils';
 
 enum TRANSFORM_ACTIONS {
