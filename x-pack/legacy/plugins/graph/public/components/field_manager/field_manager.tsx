@@ -20,12 +20,12 @@ import {
   GraphState,
 } from '../../state_management';
 
-export interface GraphFieldManagerProps {
+export interface FieldManagerProps {
   state: GraphState;
   dispatch: GraphDispatch;
 }
 
-export function GraphFieldManager({ state, dispatch }: GraphFieldManagerProps) {
+export function FieldManager({ state, dispatch }: FieldManagerProps) {
   const allFields = fieldsSelector(state);
   const selectedFields = selectedFieldsSelector(state);
 

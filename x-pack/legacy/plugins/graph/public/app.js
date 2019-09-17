@@ -41,7 +41,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { GraphFieldManager } from './components/graph_field_manager';
+import { GraphFieldManager } from './components/field_manager';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 

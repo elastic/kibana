@@ -9,12 +9,12 @@ import { EuiColorPicker, EuiSelectable } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
 import { GraphStore, createGraphStore, loadFields } from '../../state_management';
-import { getSuitableIcon } from '../../services/style_choices';
+import { getSuitableIcon } from '../../helpers/style_choices';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { GraphFieldManager } from './graph_field_manager';
+import { FieldManager } from './field_manager';
 
-describe('graph_field_manager', () => {
+describe('field_manager', () => {
   let store: GraphStore;
   let instance: ShallowWrapper;
   let dispatchSpy: jest.Mock;
@@ -53,7 +53,7 @@ describe('graph_field_manager', () => {
 
     dispatchSpy = jest.fn(store.dispatch);
 
-    instance = shallow(<GraphFieldManager state={store.getState()} dispatch={dispatchSpy} />);
+    instance = shallow(<FieldManager state={store.getState()} dispatch={dispatchSpy} />);
   });
 
   function update() {

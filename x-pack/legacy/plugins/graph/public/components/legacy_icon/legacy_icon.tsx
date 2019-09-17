@@ -7,7 +7,7 @@
 import classNames from 'classnames';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FontawesomeIcon } from '../../services/style_choices';
+import { FontawesomeIcon } from '../../helpers/style_choices';
 
 export interface LegacyIconProps {
   icon: FontawesomeIcon;
