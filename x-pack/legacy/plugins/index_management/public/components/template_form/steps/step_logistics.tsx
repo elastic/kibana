@@ -131,6 +131,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         component={FormRow}
         componentProps={{
           title: i18n.name.title,
+          titleTag: 'h3',
           description: i18n.name.description,
           idAria: 'stepLogisticsNameDescription',
           euiFieldProps: { disabled: isEditing },
@@ -143,6 +144,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         component={FormRow}
         componentProps={{
           title: i18n.indexPatterns.title,
+          titleTag: 'h3',
           description: i18n.indexPatterns.description,
           idAria: 'stepLogisticsIndexPatternsDescription',
           ['data-test-subj']: 'indexPatternsField',
@@ -154,6 +156,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         component={FormRow}
         componentProps={{
           title: i18n.order.title,
+          titleTag: 'h3',
           description: i18n.order.description,
           idAria: 'stepLogisticsOrderDescription',
           ['data-test-subj']: 'orderField',
@@ -165,6 +168,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         component={FormRow}
         componentProps={{
           title: i18n.version.title,
+          titleTag: 'h3',
           description: i18n.version.description,
           idAria: 'stepLogisticsVersionDescription',
           euiFieldProps: { ['data-test-subj']: 'versionField' },

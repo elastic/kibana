@@ -29,27 +29,36 @@ interface Props {
   field?: FieldHook;
   euiFieldProps?: Record<string, any>;
   idAria?: string;
+  titleTag?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   children?: React.ReactNode;
   [key: string]: any;
 }
 
-export const FormRow = ({ title, idAria, description, field, children, ...rest }: Props) => {
+export const FormRow = ({
+  title,
+  idAria,
+  description,
+  field,
+  children,
+  titleTag = 'h4',
+  ...rest
+}: Props) => {
+  let titleWrapped = title;
+
   // If a string is provided, create a default Euititle of size "m"
-  const _title =
-    typeof title === 'string' || title.type.name === 'FormattedMessage' ? (
-      <EuiTitle size="s">
-        <h4>{title}</h4>
-      </EuiTitle>
-    ) : (
-      title
-    );
+  const isTitleString = typeof title === 'string' || title.type.name === 'FormattedMessage';
+  if (isTitleString) {
+    // Create the correct title tag
+    const titleWithHTag = React.createElement(titleTag, undefined, title);
+    titleWrapped = <EuiTitle size="s">{titleWithHTag}</EuiTitle>;
+  }
 
   if (!children && !field) {
     throw new Error('You need to provide either children or a field to the FormRow');
   }
 
   return (
-    <EuiDescribedFormGroup title={_title} description={description} idAria={idAria} fullWidth>
+    <EuiDescribedFormGroup title={titleWrapped} description={description} idAria={idAria} fullWidth>
       {children ? children : <Field field={field!} idAria={idAria} {...rest} />}
     </EuiDescribedFormGroup>
   );
