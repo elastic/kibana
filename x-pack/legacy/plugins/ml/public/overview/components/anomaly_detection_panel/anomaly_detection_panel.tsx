@@ -7,6 +7,7 @@
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -142,6 +143,10 @@ export const AnomalyDetectionPanel: FC = () => {
     loadJobs();
   }, []);
 
+  const onRefresh = () => {
+    loadJobs();
+  };
+
   const errorDisplay = (
     <Fragment>
       <EuiCallOut
@@ -185,11 +190,18 @@ export const AnomalyDetectionPanel: FC = () => {
         <Fragment>
           <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
           <EuiSpacer size="m" />
-          <EuiButton size="s" href="#/jobs?">
-            {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
-              defaultMessage: 'Manage jobs',
-            })}
-          </EuiButton>
+          <div style={{ float: 'right' }}>
+            <EuiButtonEmpty size="s" onClick={onRefresh}>
+              {i18n.translate('xpack.ml.overview.anomalyDetection.refreshJobsButtonText', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton size="s" fill href="#/jobs?">
+              {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
+                defaultMessage: 'Manage jobs',
+              })}
+            </EuiButton>
+          </div>
         </Fragment>
       )}
     </EuiPanel>

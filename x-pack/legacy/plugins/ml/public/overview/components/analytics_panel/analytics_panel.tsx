@@ -7,6 +7,7 @@
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -28,6 +29,10 @@ export const AnalyticsPanel: FC = () => {
   useEffect(() => {
     getAnalytics(true);
   }, []);
+
+  const onRefresh = () => {
+    getAnalytics(true);
+  };
 
   const errorDisplay = (
     <Fragment>
@@ -71,11 +76,18 @@ export const AnalyticsPanel: FC = () => {
         <Fragment>
           <AnalyticsTable items={analytics} />
           <EuiSpacer size="m" />
-          <EuiButton size="s" href="#/data_frame_analytics?">
-            {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
-              defaultMessage: 'Manage jobs',
-            })}
-          </EuiButton>
+          <div style={{ float: 'right' }}>
+            <EuiButtonEmpty size="s" onClick={onRefresh}>
+              {i18n.translate('xpack.ml.overview.analyticsList.refreshJobsButtonText', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton size="s" fill href="#/data_frame_analytics?">
+              {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
+                defaultMessage: 'Manage jobs',
+              })}
+            </EuiButton>
+          </div>
         </Fragment>
       )}
     </EuiPanel>

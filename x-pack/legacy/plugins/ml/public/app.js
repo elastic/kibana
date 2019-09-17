@@ -44,5 +44,5 @@ if (typeof uiRoutes.enable === 'function') {
 
 uiRoutes
   .otherwise({
-    redirectTo: '/jobs' // TODO change to overview once we can always see it
+    redirectTo: '/overview'
   });
