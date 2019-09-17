@@ -9,7 +9,27 @@ import { removeKqlVariables, removeKqlVariablesUsingRegex, replacer } from './re
 describe('remove_kql_variables', () => {
   describe('replacer function', () => {
     test("should return empty string when passed `undefined` for 'parts'", () => {
-      const replacedResult = replacer(' and user.name: "$user.name$"');
+      const replacedResult = replacer(' and user.name: "$user.name$"', undefined);
+      expect(replacedResult).toEqual('');
+    });
+
+    test("should return empty string when passed null for 'parts' parameter", () => {
+      const replacedResult = replacer(' and user.name: "$user.name$"', null);
+      expect(replacedResult).toEqual('');
+    });
+
+    test('should return empty string when passed an array that contains all null values', () => {
+      const replacedResult = replacer(' and user.name: "$user.name$"', null, null, null);
+      expect(replacedResult).toEqual('');
+    });
+
+    test('should return operator string when matched with multiple and or and', () => {
+      const replacedResult = replacer(' and user.name: "$user.name$"', 'and', 'or', 'and');
+      expect(replacedResult).toEqual(' and ');
+    });
+
+    test('should return empty string with just one operator', () => {
+      const replacedResult = replacer(' and user.name: "$user.name$"', 'and');
       expect(replacedResult).toEqual('');
     });
   });
