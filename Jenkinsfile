@@ -146,7 +146,7 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable') {
             try {
-              runbld('.ci/run.sh', false)
+              runbld('.ci/run.sh', true)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
@@ -257,8 +257,8 @@ def sendKibanaMail() {
   }
 }
 
-def runbld(script, noJunit = true) {
-  def extraConfig = noJunit ? "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml" : ""
+def runbld(script, enableJunitProcessing = false) {
+  def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
 
   sh "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}"
 }
