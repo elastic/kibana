@@ -60,7 +60,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
 
     fetchSiemJobIdsFromGroupsData();
     return () => {
-      isSubscribed = true;
+      isSubscribed = false;
     };
   }, [refetchData, userPermissions]);
 

@@ -49,7 +49,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
 
     fetchIndexPatterns();
     return () => {
-      isSubscribed = true;
+      isSubscribed = false;
     };
   }, [refreshToggle]);
 

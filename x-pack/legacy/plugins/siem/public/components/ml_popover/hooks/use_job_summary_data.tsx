@@ -61,7 +61,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
 
     fetchSiemJobsFromJobsSummary();
     return () => {
-      isSubscribed = true;
+      isSubscribed = false;
     };
   }, [refreshToggle, userPermissions]);
 
