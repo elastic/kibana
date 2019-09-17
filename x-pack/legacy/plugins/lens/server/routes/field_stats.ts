@@ -87,12 +87,22 @@ export async function initFieldsRoute(setup: CoreSetup) {
           return res.ok({
             body: await getDateHistogram(search, field, { fromDate, toDate }),
           });
+        } else if (field.type === 'boolean') {
+          return res.ok({
+            body: await getStringSamples(search, field),
+          });
         }
 
         return res.ok({});
       } catch (e) {
+        if (e.status === 404) {
+          return res.notFound();
+        }
         if (e.isBoom) {
-          return res.internalError(e);
+          if (e.output.statusCode === 404) {
+            return res.notFound();
+          }
+          return res.internalError(e.output.message);
         } else {
           return res.internalError({
             body: Boom.internal(e.message || e.name),

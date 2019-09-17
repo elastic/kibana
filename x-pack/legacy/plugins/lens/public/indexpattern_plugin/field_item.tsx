@@ -27,6 +27,7 @@ import {
   ScaleType,
   Settings,
   DataSeriesColorsValues,
+  TooltipType,
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -116,7 +117,10 @@ export function FieldItem({
   function fetchData() {
     if (
       state.isLoading ||
-      (field.type !== 'number' && field.type !== 'string' && field.type !== 'date')
+      (field.type !== 'number' &&
+        field.type !== 'string' &&
+        field.type !== 'date' &&
+        field.type !== 'boolean')
     ) {
       return;
     }
@@ -214,12 +218,10 @@ export function FieldItem({
               className="lnsFieldListPanel__fieldInfo"
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
-                if (exists) {
-                  togglePopover();
-                }
+                togglePopover();
               }}
               onKeyPress={event => {
-                if (exists && event.key === 'ENTER') {
+                if (event.key === 'ENTER') {
                   togglePopover();
                 }
               }}
@@ -249,43 +251,49 @@ export function FieldItem({
       <div>
         {state.isLoading && <EuiLoadingSpinner />}
 
-        {state.histogram && state.topValues && (
-          <>
-            <EuiButtonGroup
-              buttonSize="s"
-              legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
-                defaultMessage: 'Toggle either the',
-              })}
-              options={[
-                {
-                  label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-                    defaultMessage: 'Top Values',
-                  }),
-                  id: 'topValues',
-                },
-                {
-                  label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
-                    defaultMessage: 'Histogram',
-                  }),
-                  id: 'histogram',
-                },
-              ]}
-              onChange={optionId => {
-                setShowingHistogram(optionId === 'histogram');
-              }}
-              idSelected={showingHistogram ? 'histogram' : 'topValues'}
-            />
-            <EuiSpacer />
-          </>
-        )}
+        {state.histogram &&
+          state.histogram.buckets.length &&
+          state.topValues &&
+          state.topValues.buckets.length && (
+            <>
+              <EuiButtonGroup
+                buttonSize="s"
+                legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
+                  defaultMessage: 'Toggle either the',
+                })}
+                options={[
+                  {
+                    label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+                      defaultMessage: 'Top Values',
+                    }),
+                    id: 'topValues',
+                  },
+                  {
+                    label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
+                      defaultMessage: 'Histogram',
+                    }),
+                    id: 'histogram',
+                  },
+                ]}
+                onChange={optionId => {
+                  setShowingHistogram(optionId === 'histogram');
+                }}
+                idSelected={showingHistogram ? 'histogram' : 'topValues'}
+              />
+              <EuiSpacer />
+            </>
+          )}
 
         {state.histogram && (!state.topValues || showingHistogram) && (
           <Chart className="lnsDistributionChart" data-test-subj="lnsFieldListPanel-histogram">
-            <Settings rotation={90} />
+            <Settings
+              rotation={field.type === 'date' ? 0 : 90}
+              tooltip={{ type: TooltipType.None }}
+            />
 
             <Axis
               id={getAxisId('key')}
-              position={Position.Left}
+              position={field.type === 'date' ? Position.Bottom : Position.Left}
               tickFormat={
                 field.type === 'date'
                   ? niceTimeFormatter([

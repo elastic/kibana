@@ -118,7 +118,6 @@ export function IndexPatternDataPanel({
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
-      core={core}
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}

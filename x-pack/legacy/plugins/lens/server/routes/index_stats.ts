@@ -86,8 +86,14 @@ export async function initStatsRoute(setup: CoreSetup) {
         }
         return res.ok({ body: {} });
       } catch (e) {
+        if (e.status === 404) {
+          return res.notFound();
+        }
         if (e.isBoom) {
-          return res.internalError(e);
+          if (e.output.statusCode === 404) {
+            return res.notFound();
+          }
+          return res.internalError(e.output.message);
         } else {
           return res.internalError({
             body: Boom.internal(e.message || e.name),
