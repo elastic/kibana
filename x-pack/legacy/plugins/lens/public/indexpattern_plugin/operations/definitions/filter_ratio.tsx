@@ -85,6 +85,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     storage,
     layerId,
     savedObjectsClient,
+    http,
   }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
@@ -103,6 +104,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             store={storage}
             uiSettings={uiSettings}
             savedObjectsClient={savedObjectsClient}
+            http={http}
             onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam({
@@ -131,6 +133,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               store={storage}
               uiSettings={uiSettings}
               savedObjectsClient={savedObjectsClient}
+              http={http}
               onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam({

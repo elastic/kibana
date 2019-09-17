@@ -122,6 +122,7 @@ export function IndexPatternDataPanel({
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
+      core={core}
       // only pass in the state change callback if it's actually needed to avoid re-renders
       onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
       updateFieldsWithCounts={

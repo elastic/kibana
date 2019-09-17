@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome, { Chrome } from 'ui/chrome';
+import { npSetup, npStart } from 'ui/new_platform';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {

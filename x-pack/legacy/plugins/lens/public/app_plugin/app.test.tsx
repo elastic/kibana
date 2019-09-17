@@ -37,8 +37,8 @@ describe('Lens App', () => {
 
   function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
-    store: Storage;
     core: typeof core;
+    store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
@@ -54,13 +54,13 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      QueryBar: jest.fn(() => <div />),
+      QueryBarTopRow: jest.fn(() => <div />),
       redirectTo: jest.fn(id => {}),
       savedObjectsClient: jest.fn(),
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
-      store: Storage;
       core: typeof core;
+      store: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
@@ -120,7 +120,6 @@ describe('Lens App', () => {
 
   it('sets breadcrumbs when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
-
     const instance = mount(<App {...defaultArgs} />);
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([

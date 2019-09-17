@@ -135,10 +135,10 @@ describe('IndexPattern Data Source', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
-      core: coreMock.createSetup(),
       chrome: chromeMock,
       storage: {} as Storage,
       interpreter: { functionsRegistry },
+      core: coreMock.createSetup(),
       data: dataMock,
       savedObjectsClient: {} as SavedObjectsClientContract,
     });

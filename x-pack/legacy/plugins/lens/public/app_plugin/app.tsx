@@ -231,6 +231,7 @@ export function App({
             }
             uiSettings={core.uiSettings}
             savedObjectsClient={savedObjectsClient}
+            http={core.http}
           />
         </div>
 

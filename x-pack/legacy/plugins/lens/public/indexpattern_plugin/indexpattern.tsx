@@ -275,6 +275,7 @@ export function getIndexPatternDatasource({
                 storage={storage}
                 savedObjectsClient={savedObjectsClient}
                 layerId={props.layerId}
+                http={core.http}
                 {...props}
               />
             </I18nProvider>,

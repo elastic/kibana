@@ -44,7 +44,6 @@ class IndexPatternDatasourcePlugin {
       core,
       chrome,
       interpreter,
-      // toastNotifications: core.notifications.toasts,
       data,
       storage: new Storage(localStorage),
       savedObjectsClient: chrome.getSavedObjectsClient(),
@@ -63,6 +62,5 @@ export const indexPatternDatasourceSetup = () =>
       functionsRegistry,
     },
     data: dataSetup,
-    // toastNotifications,
   });
 export const indexPatternDatasourceStop = () => plugin.stop();
