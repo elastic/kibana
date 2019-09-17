@@ -19,8 +19,7 @@
 
 /* eslint-disable */
 
-// @ts-ignore
-import { KbnError } from 'ui/errors';
+import { KbnError } from '../../../../../plugins/kibana_utils/public';
 
 /**
  * when a mapping already exists for a field the user is attempting to add
@@ -28,7 +27,7 @@ import { KbnError } from 'ui/errors';
  */
 export class IndexPatternAlreadyExists extends KbnError {
   constructor(name: string) {
-    super(`An index pattern of "${name}" already exists`, IndexPatternAlreadyExists);
+    super(`An index pattern of "${name}" already exists`);
   }
 }
 
@@ -40,8 +39,7 @@ export class IndexPatternMissingIndices extends KbnError {
     const defaultMessage = "IndexPattern's configured pattern does not match any indices";
 
     super(
-      message && message.length ? `No matching indices found: ${message}` : defaultMessage,
-      IndexPatternMissingIndices
+      message && message.length ? `No matching indices found: ${message}` : defaultMessage
     );
   }
 }
@@ -51,7 +49,7 @@ export class IndexPatternMissingIndices extends KbnError {
  */
 export class NoDefinedIndexPatterns extends KbnError {
   constructor() {
-    super('Define at least one index pattern to continue', NoDefinedIndexPatterns);
+    super('Define at least one index pattern to continue');
   }
 }
 
@@ -60,6 +58,6 @@ export class NoDefinedIndexPatterns extends KbnError {
  */
 export class NoDefaultIndexPattern extends KbnError {
   constructor() {
-    super('Please specify a default index pattern', NoDefaultIndexPattern);
+    super('Please specify a default index pattern');
   }
 }
