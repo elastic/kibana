@@ -7,8 +7,6 @@
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
-import { footerHeight } from './footer';
-
 export const EventsTable = styled.div<{ height: number }>`
   ${({ height, theme }) => css`
     height: ${height + 'px'};
@@ -36,10 +34,12 @@ EventsTable.displayName = 'EventsTable';
 
 export const EventsThead = styled.div<{ minWidth: number }>`
   ${({ theme }) => css`
+    align-content: flex-end;
     background-color: ${theme.eui.euiColorEmptyShade}
     border-bottom: 2px solid ${theme.eui.euiColorLightShade};
     display: flex;
     min-width: ${({ minWidth }) => `${minWidth}px`};
+    overflow-x: hidden;
     position: sticky;
     top: 0;
     z-index: ${theme.eui.euiZLevel1};
@@ -47,22 +47,30 @@ export const EventsThead = styled.div<{ minWidth: number }>`
 `;
 EventsThead.displayName = 'EventsThead';
 
-export const EventsTheadActions = styled.div<{ actionsColumnWidth: number }>`
+export const EventsThGroupActions = styled.div<{ actionsColumnWidth: number }>`
   display: flex;
+  flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
   justify-content: space-between;
-  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
+  min-width: 0;
 `;
-EventsTheadActions.displayName = 'EventsTheadActions';
+EventsThGroupActions.displayName = 'EventsThGroupActions';
 
-export const EventsTheadData = styled.div`
+export const EventsThGroupData = styled.div`
   display: flex;
 `;
-EventsTheadData.displayName = 'EventsTheadData';
+EventsThGroupData.displayName = 'EventsThGroupData';
 
 export const EventsTh = styled.div<{ isDragging?: boolean; width?: string }>`
   align-items: center;
   display: flex;
-  width: ${({ width }) => width};
+  min-width: 0;
+  position: relative;
+
+  ${({ width }) =>
+    width &&
+    css`
+      flex: 0 0 ${width};
+    `}
 `;
 EventsTh.displayName = 'EventsTh';
 
@@ -82,6 +90,7 @@ EventsThContent.displayName = 'EventsThContent';
 
 export const EventsTbody = styled.div<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
+  overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
 
@@ -116,7 +125,8 @@ EventsTrAttributes.displayName = 'EventsTrAttributes';
 export const EventsTdGroupActions = styled.div<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
-  width: ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
+  flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
+  min-width: 0;
 `;
 EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
@@ -128,7 +138,14 @@ EventsTdGroupData.displayName = 'EventsTdGroupData';
 export const EventsTd = styled.div<{ width?: string }>`
   align-items: center;
   display: flex;
-  width: ${({ width }) => width};
+  min-width: 0;
+  position: relative;
+
+  ${({ width }) =>
+    width &&
+    css`
+      flex: 0 0 ${width};
+    `}
 `;
 EventsTd.displayName = 'EventsTd';
 

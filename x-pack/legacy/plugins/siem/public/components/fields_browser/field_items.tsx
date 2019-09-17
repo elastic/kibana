@@ -22,7 +22,7 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { OnUpdateColumns } from '../timeline/events';
-import { TruncatableText, TruncatableTooltip } from '../truncatable_text';
+import { TruncatableText } from '../truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
 
@@ -178,9 +178,9 @@ export const getFieldColumns = () => [
     name: i18n.DESCRIPTION,
     render: (description: string) => (
       <TruncatableText>
-        <TruncatableTooltip position="top" content={description}>
-          {description}
-        </TruncatableTooltip>
+        <EuiToolTip position="top" content={description}>
+          <>{description}</>
+        </EuiToolTip>
       </TruncatableText>
     ),
     sortable: true,

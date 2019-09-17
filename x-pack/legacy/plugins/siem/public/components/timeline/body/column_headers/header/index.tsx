@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { useContext } from 'react';
@@ -32,26 +32,31 @@ const TITLE_PADDING = 10; // px
 const RESIZE_HANDLE_HEIGHT = 35; // px
 
 const HeaderContainer = styled(EuiFlexGroup)<{ width: string }>`
-  display: flex;
-  height: 100%;
-  overflow: hidden;
-  width: ${({ width }) => width};
+  // display: flex;
+  // height: 100%;
+  // overflow: hidden;
+  // width: ${({ width }) => width};
 `;
 
 HeaderContainer.displayName = 'HeaderContainer';
 
 const HeaderFlexItem = styled(EuiFlexItem)<{ width: string }>`
-  width: ${({ width }) => width};
+  // width: ${({ width }) => width};
 `;
 
 HeaderFlexItem.displayName = 'HeaderFlexItem';
 
 const HeaderDiv = styled.div<{ isLoading: boolean }>`
-  cursor: ${({ isLoading }) => (isLoading ? 'default' : 'grab')};
+  align-items: center;
   display: flex;
-  height: 100%;
-  flex-direction: row;
-  overflow: hidden;
+
+  // height: 100%;
+  // flex-direction: row;
+  // overflow: hidden;
+
+  &:hover {
+    cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'grab')};
+  }
 `;
 
 HeaderDiv.displayName = 'HeaderDiv';
@@ -78,8 +83,8 @@ const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing 
 HeaderComp.displayName = 'HeaderComp';
 
 const TruncatableHeaderText = styled(TruncatableText)`
-  font-weight: bold;
-  padding: 5px;
+  // font-weight: bold;
+  // padding: 5px;
 `;
 
 TruncatableHeaderText.displayName = 'TruncatableHeaderText';
@@ -101,24 +106,17 @@ export class Header extends React.PureComponent<Props> {
     const { header } = this.props;
 
     return (
-      <HeaderContainer
-        data-test-subj="header-container"
-        gutterSize="none"
-        key={header.id}
-        width={`${header.width}px`}
-      >
-        <Resizeable
-          handle={
-            <FullHeightFlexItem grow={false}>
-              <ColumnHeaderResizeHandle />
-            </FullHeightFlexItem>
-          }
-          height={`${RESIZE_HANDLE_HEIGHT}px`}
-          id={header.id}
-          render={this.renderActions}
-          onResize={this.onResize}
-        />
-      </HeaderContainer>
+      <Resizeable
+        bottom={0}
+        handle={<ColumnHeaderResizeHandle />}
+        // height={`${RESIZE_HANDLE_HEIGHT}px`}
+        id={header.id}
+        onResize={this.onResize}
+        position="absolute"
+        render={this.renderActions}
+        right={0}
+        top={0}
+      />
     );
   }
 
@@ -128,48 +126,24 @@ export class Header extends React.PureComponent<Props> {
     setIsResizing(isResizing);
 
     return (
-      <HeaderFlexItem grow={false} width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}>
-        <WithHoverActions
-          render={showHoverContent => (
-            <>
-              <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
-                <EuiToolTip
-                  data-test-subj="header-tooltip"
-                  content={<HeaderToolTipContent header={header} />}
-                >
-                  <FullHeightFlexGroup
-                    data-test-subj="header-items"
-                    alignItems="center"
-                    gutterSize="none"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <FieldNameContainer>
-                        <TruncatableHeaderText
-                          data-test-subj={`header-text-${header.id}`}
-                          // size="xs"
-                          // width={`${header.width -
-                          //   (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
-                        >
-                          {header.id}
-                        </TruncatableHeaderText>
-                      </FieldNameContainer>
-                    </EuiFlexItem>
-                    <FullHeightFlexItem>
-                      <Actions
-                        header={header}
-                        onColumnRemoved={onColumnRemoved}
-                        show={header.id !== '@timestamp' ? showHoverContent : false}
-                        sort={sort}
-                      />
-                    </FullHeightFlexItem>
-                  </FullHeightFlexGroup>
-                </EuiToolTip>
-              </HeaderComp>
-              <Filter header={header} onFilterChange={onFilterChange} />
-            </>
-          )}
-        />
-      </HeaderFlexItem>
+      <>
+        <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
+          <TruncatableText data-test-subj={`header-text-${header.id}`}>
+            <EuiToolTip
+              data-test-subj="header-tooltip"
+              content={<HeaderToolTipContent header={header} />}
+            >
+              <>
+                <EuiIcon type="grabHorizontal" /> {header.id}
+              </>
+            </EuiToolTip>
+          </TruncatableText>
+
+          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+        </HeaderComp>
+
+        <Filter header={header} onFilterChange={onFilterChange} />
+      </>
     );
   };
 

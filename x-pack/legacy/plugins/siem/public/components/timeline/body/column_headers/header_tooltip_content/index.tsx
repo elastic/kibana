@@ -42,7 +42,7 @@ ToolTipTableValue.displayName = 'ToolTipTableValue';
 
 export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) => (
   <>
-    {!isEmpty(header.category) ? (
+    {!isEmpty(header.category) && (
       <P>
         <ToolTipTableMetadata data-test-subj="category">
           {i18n.CATEGORY}
@@ -50,7 +50,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
         </ToolTipTableMetadata>
         <ToolTipTableValue data-test-subj="category-value">{header.category}</ToolTipTableValue>
       </P>
-    ) : null}
+    )}
     <P>
       <ToolTipTableMetadata data-test-subj="field">
         {i18n.FIELD}
@@ -68,7 +68,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>
-    {!isEmpty(header.description) ? (
+    {!isEmpty(header.description) && (
       <P>
         <ToolTipTableMetadata data-test-subj="description">
           {i18n.DESCRIPTION}
@@ -78,7 +78,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
           {header.description}
         </ToolTipTableValue>
       </P>
-    ) : null}
+    )}
   </>
 ));
 

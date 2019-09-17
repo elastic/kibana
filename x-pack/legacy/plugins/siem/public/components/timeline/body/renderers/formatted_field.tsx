@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -16,7 +16,7 @@ import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
-import { TruncatableText, TruncatableTooltip } from '../../../truncatable_text';
+import { TruncatableText } from '../../../truncatable_text';
 import {
   DATE_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,
@@ -56,11 +56,11 @@ export const FormattedFieldValue = pure<{
     const hostname = `${value}`;
 
     return isString(value) && hostname.length > 0 ? (
-      <TruncatableTooltip content={value}>
+      <EuiToolTip content={value}>
         <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
           {value}
         </HostDetailsLink>
-      </TruncatableTooltip>
+      </EuiToolTip>
     ) : (
       getEmptyTagValue()
     );
@@ -73,7 +73,7 @@ export const FormattedFieldValue = pure<{
       <>
         {truncate ? (
           <TruncatableText data-test-subj="truncatable-message">
-            <TruncatableTooltip
+            <EuiToolTip
               data-test-subj="message-tool-tip"
               content={
                 <EuiFlexGroup direction="column" gutterSize="none">
@@ -87,7 +87,7 @@ export const FormattedFieldValue = pure<{
               }
             >
               <>{value}</>
-            </TruncatableTooltip>
+            </EuiToolTip>
           </TruncatableText>
         ) : (
           <>{value}</>

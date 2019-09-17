@@ -22,14 +22,14 @@ const SORT_INDICATOR_SIZE = 25; // px
 export const ACTIONS_WIDTH = SORT_INDICATOR_SIZE + CLOSE_BUTTON_SIZE; // px
 
 const ActionsContainer = styled(EuiFlexGroup)`
-  height: 100%;
-  width: ${ACTIONS_WIDTH}px;
+  // height: 100%;
+  // width: ${ACTIONS_WIDTH}px;
 `;
 
 ActionsContainer.displayName = 'ActionsContainer';
 
-const WrappedCloseButton = styled.div<{ show: boolean }>`
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
+const WrappedCloseButton = styled.div<{ show?: boolean }>`
+  // visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
 
 WrappedCloseButton.displayName = 'WrappedCloseButton';
@@ -37,7 +37,6 @@ WrappedCloseButton.displayName = 'WrappedCloseButton';
 interface Props {
   header: ColumnHeader;
   onColumnRemoved: OnColumnRemoved;
-  show: boolean;
   sort: Sort;
 }
 
@@ -46,9 +45,8 @@ interface Props {
 export const CloseButton = pure<{
   columnId: string;
   onColumnRemoved: OnColumnRemoved;
-  show: boolean;
-}>(({ columnId, onColumnRemoved, show }) => (
-  <WrappedCloseButton data-test-subj="wrapped-close-button" show={show}>
+}>(({ columnId, onColumnRemoved }) => (
+  <WrappedCloseButton data-test-subj="wrapped-close-button">
     <EuiButtonIcon
       aria-label={i18n.REMOVE_COLUMN}
       color="subdued"
@@ -66,32 +64,27 @@ export const CloseButton = pure<{
 
 CloseButton.displayName = 'CloseButton';
 
-export const Actions = React.memo<Props>(({ header, onColumnRemoved, show, sort }) => {
+export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
   const isLoading = useTimelineContext();
   return (
-    <ActionsContainer
-      alignItems="center"
-      data-test-subj="header-actions"
-      justifyContent="center"
-      gutterSize="none"
-    >
-      <EuiFlexItem grow={false}>
+    <>
+      <div>
         <SortIndicator
           data-test-subj="header-sort-indicator"
           sortDirection={getSortDirection({ header, sort })}
         />
-      </EuiFlexItem>
+      </div>
 
       {sort.columnId === header.id && isLoading ? (
-        <EuiFlexItem grow={false}>
+        <div>
           <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
+        </div>
       ) : (
-        <EuiFlexItem grow={false}>
-          <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} show={show} />
-        </EuiFlexItem>
+        <div>
+          <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} />
+        </div>
       )}
-    </ActionsContainer>
+    </>
   );
 });
 

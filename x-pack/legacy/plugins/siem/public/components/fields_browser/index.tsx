@@ -6,7 +6,7 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -44,14 +44,14 @@ interface State {
 const FieldsBrowserButtonContainer = styled.div<{ show: boolean }>`
   ${({ show }) => (show ? 'position: absolute;' : '')}
 
-  .${fieldsButtonClassName} {
-    border-color: ${({ theme }) => theme.eui.euiColorLightShade};
-    color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-    font-size: 14px;
-    margin: 1px 5px 2px 0;
-    ${({ show }) => (show ? 'position: absolute;' : '')}
-    ${({ show }) => (show ? 'top: -15px;' : '')}
-  }
+  // .${fieldsButtonClassName} {
+  //   border-color: ${({ theme }) => theme.eui.euiColorLightShade};
+  //   color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+  //   font-size: 14px;
+  //   margin: 1px 5px 2px 0;
+  //   ${({ show }) => (show ? 'position: absolute;' : '')}
+  //   ${({ show }) => (show ? 'top: -15px;' : '')}
+  // }
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
@@ -131,21 +131,19 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
                 aria-label={i18n.CUSTOMIZE_COLUMNS}
                 className={fieldsButtonClassName}
                 data-test-subj="show-field-browser-gear"
-                iconType="gear"
+                iconType="list"
                 onClick={this.toggleShow}
               />
             ) : (
-              <EuiButton
+              <EuiButtonEmpty
                 className={fieldsButtonClassName}
-                color="primary"
                 data-test-subj="show-field-browser"
-                iconSide="right"
-                iconType="arrowDown"
+                iconType="list"
                 onClick={this.toggleShow}
-                size="s"
+                size="xs"
               >
                 {i18n.FIELDS}
-              </EuiButton>
+              </EuiButtonEmpty>
             )}
           </EuiToolTip>
 

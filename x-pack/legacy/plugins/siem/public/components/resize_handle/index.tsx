@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 
@@ -21,25 +21,45 @@ export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: nu
 const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
 
 interface Props {
-  /** the `onResize` callback will be invoked with this id */
-  id: string;
-  /** The resizeable content to render */
-  render: (isResizing: boolean) => React.ReactNode;
+  bottom?: string | number;
   /** a (styled) resize handle */
   handle: React.ReactNode;
   /** optionally provide a height style ResizeHandleContainer */
   height?: string;
+  /** the `onResize` callback will be invoked with this id */
+  id: string;
+  left?: string | number;
   /** invoked when the handle is resized */
   onResize: OnResize;
+  /** The resizeable content to render */
+  position?: string;
+  render: (isResizing: boolean) => React.ReactNode;
+  right?: string | number;
+  top?: string | number;
 }
 
 interface State {
   isResizing: boolean;
 }
 
-const ResizeHandleContainer = styled.div<{ height?: string }>`
-  cursor: ${resizeCursorStyle};
-  ${({ height }) => (height != null ? `height: ${height}` : '')}
+const ResizeHandleContainer = styled.div<{
+  bottom?: string | number;
+  height?: string;
+  left?: string | number;
+  position?: string;
+  right?: string | number;
+  top?: string | number;
+}>`
+  ${({ bottom, height, left, position, right, top }) => css`
+    cursor: ${resizeCursorStyle};
+
+    bottom: ${bottom};
+    height: ${height};
+    left: ${left};
+    position: ${position};
+    right: ${right};
+    top: ${top};
+  `}
 `;
 
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
@@ -124,15 +144,20 @@ export class Resizeable extends React.PureComponent<Props, State> {
   }
 
   public render() {
-    const { handle, height, render } = this.props;
+    const { bottom, handle, height, left, position, render, right, top } = this.props;
 
     return (
       <>
         {render(this.state.isResizing)}
         <ResizeHandleContainer
+          bottom={bottom}
           data-test-subj="resize-handle-container"
           height={height}
           innerRef={this.ref}
+          left={left}
+          position={position}
+          right={right}
+          top={top}
         >
           {handle}
         </ResizeHandleContainer>

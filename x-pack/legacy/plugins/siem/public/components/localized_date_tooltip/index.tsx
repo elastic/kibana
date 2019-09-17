@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
-
-import { TruncatableTooltip } from '../truncatable_text';
 
 export const LocalizedDateTooltip = pure<{
   children: React.ReactNode;
   date: Date;
   fieldName?: string;
 }>(({ children, date, fieldName }) => (
-  <TruncatableTooltip
+  <EuiToolTip
     data-test-subj="localized-date-tool-tip"
     content={
       <EuiFlexGroup data-test-subj="dates-container" direction="column" gutterSize="none">
@@ -45,7 +43,7 @@ export const LocalizedDateTooltip = pure<{
     }
   >
     <>{children}</>
-  </TruncatableTooltip>
+  </EuiToolTip>
 ));
 
 LocalizedDateTooltip.displayName = 'LocalizedDateTooltip';
