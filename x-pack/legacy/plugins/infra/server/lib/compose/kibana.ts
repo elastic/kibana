@@ -18,12 +18,13 @@ import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
 import { InfraConfig } from '../../new_platform_config.schema';
 import { InternalCoreSetup } from '../../../../../../../src/core/server';
+import { Legacy } from '../../../../../../../kibana';
 
-export function compose(core: InternalCoreSetup, config: InfraConfig) {
-  const framework = new InfraKibanaBackendFrameworkAdapter(core);
+export function compose(core: InternalCoreSetup, config: InfraConfig, legacyServer: Legacy.Server) {
+  const framework = new InfraKibanaBackendFrameworkAdapter(core, config, legacyServer);
   const sources = new InfraSources({
     config,
-    savedObjects: framework.getSavedObjectsService(),
+    savedObjects: legacyServer.savedObjects,
   });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,

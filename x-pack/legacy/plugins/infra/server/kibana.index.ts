@@ -14,15 +14,21 @@ import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { InternalCoreSetup } from '../../../../../src/core/server';
 import { InfraConfig } from './new_platform_config.schema';
+import { Legacy } from '../../../../../kibana';
 
 export interface KbnServer extends Server {
   usage: any;
 }
 
-export const initServerWithKibana = (core: InternalCoreSetup, config: InfraConfig) => {
+export const initServerWithKibana = (
+  core: InternalCoreSetup,
+  config: InfraConfig,
+  kbnServer: Legacy.Server // NP_TODO: REMOVE ... temporary while shimming only
+) => {
   const libs = compose(
     core,
-    config
+    config,
+    kbnServer // NP_TODO: REMOVE ... temporary while shimming only
   );
   initInfraServer(libs);
 
@@ -104,6 +110,7 @@ export const initServerWithKibana = (core: InternalCoreSetup, config: InfraConfi
   });
 };
 
+// NP_TODO: this is only used in the root index file AFAICT, can remove after migrating to NP
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
   const InfraDefaultSourceConfigSchema = Joi.object({
     metricAlias: Joi.string(),

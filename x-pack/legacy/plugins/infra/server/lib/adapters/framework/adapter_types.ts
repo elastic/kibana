@@ -8,8 +8,6 @@ import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
-
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { JsonObject } from '../../../../common/typed_json';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
@@ -17,8 +15,6 @@ export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkReque
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
 export interface InfraBackendFrameworkAdapter {
-  version: string;
-  exposeStaticDir(urlPath: string, dir: string): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
     route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
@@ -59,7 +55,6 @@ export interface InfraBackendFrameworkAdapter {
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
-  getSavedObjectsService(): Legacy.SavedObjectsService;
   getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
@@ -67,7 +62,6 @@ export interface InfraBackendFrameworkAdapter {
     timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
-  config(req: InfraFrameworkRequest): KibanaConfig;
 }
 /* eslint-enable  @typescript-eslint/unified-signatures */
 
