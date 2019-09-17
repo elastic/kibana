@@ -4,6 +4,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -36,6 +37,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -118,6 +120,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -150,6 +153,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -185,6 +189,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
