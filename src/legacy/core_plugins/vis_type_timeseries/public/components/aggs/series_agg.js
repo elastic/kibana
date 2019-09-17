@@ -31,6 +31,7 @@ import {
   EuiComboBox,
   EuiTitle,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -145,8 +146,12 @@ function SeriesAggUi(props) {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.seriesAgg.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.seriesAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={panel.type}
@@ -158,7 +163,12 @@ function SeriesAggUi(props) {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('function')}
-            label={<FormattedMessage id="visTypeTimeseries.seriesAgg.functionLabel" defaultMessage="Function" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.seriesAgg.functionLabel"
+                defaultMessage="Function"
+              />
+            }
           >
             <EuiComboBox
               options={functionOptions}
