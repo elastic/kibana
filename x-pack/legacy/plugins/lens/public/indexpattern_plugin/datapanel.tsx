@@ -63,7 +63,6 @@ export interface Props extends DatasourceDataPanelProps<IndexPatternPrivateState
 export function IndexPatternDataPanel({
   state,
   dragDropContext,
-  core,
   query,
   dateRange,
   actions,
