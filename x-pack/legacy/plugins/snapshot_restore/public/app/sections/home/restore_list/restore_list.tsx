@@ -135,7 +135,6 @@ export const RestoreList: React.FunctionComponent = () => {
                 button={
                   <EuiButtonEmpty
                     size="xs"
-                    type="text"
                     iconType="arrowDown"
                     iconSide="right"
                     onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}

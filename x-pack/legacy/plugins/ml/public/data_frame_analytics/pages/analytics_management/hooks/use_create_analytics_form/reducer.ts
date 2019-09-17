@@ -16,15 +16,45 @@ import { isAnalyticsIdValid } from '../../../../common';
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 
-const validateAdvancedEditor = (state: State): State => {
+const getSourceIndexString = (state: State) => {
+  const { jobConfig } = state;
+
+  const sourceIndex = idx(jobConfig, _ => _.source.index);
+
+  if (typeof sourceIndex === 'string') {
+    return sourceIndex;
+  }
+
+  if (Array.isArray(sourceIndex)) {
+    return sourceIndex.join(',');
+  }
+
+  return '';
+};
+
+export const validateAdvancedEditor = (state: State): State => {
   const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
 
-  const sourceIndexName = idx(jobConfig, _ => _.source.index) || '';
+  const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
-  const sourceIndexNameValid = validateIndexPattern(sourceIndexName);
+  // general check against Kibana index pattern names, but since this is about the advanced editor
+  // with support for arrays in the job config, we also need to check that each individual name
+  // doesn't include a comma if index names are supplied as an array.
+  // `validateIndexPattern()` returns a map of messages, we're only interested here if it's valid or not.
+  // If there are no messages, it means the index pattern is valid.
+  let sourceIndexNameValid = Object.keys(validateIndexPattern(sourceIndexName)).length === 0;
+  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  if (sourceIndexNameValid) {
+    if (typeof sourceIndex === 'string') {
+      sourceIndexNameValid = !sourceIndex.includes(',');
+    }
+    if (Array.isArray(sourceIndex)) {
+      sourceIndexNameValid = !sourceIndex.some(d => d.includes(','));
+    }
+  }
 
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';

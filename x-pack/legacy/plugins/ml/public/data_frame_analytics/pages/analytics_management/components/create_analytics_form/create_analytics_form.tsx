@@ -7,7 +7,6 @@
 import React, { Fragment, FC } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiForm,
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
@@ -76,8 +76,35 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       {!isJobCreated && (
         <Fragment>
           <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
+              defaultMessage: 'Job type',
+            })}
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
+                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
+                values={{
+                  advancedEditorButton: (
+                    <EuiLink onClick={actions.switchToAdvancedEditor}>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
+                        defaultMessage="advanced editor"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          >
+            <EuiText>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
+                defaultMessage: 'Outlier detection',
+              })}
+            </EuiText>
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
-              defaultMessage: 'Analytics job ID',
+              defaultMessage: 'Job ID',
             })}
             isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             error={[
@@ -100,7 +127,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="analytics job ID"
+              placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
+                defaultMessage: 'Job ID',
+              })}
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
@@ -119,7 +148,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             helpText={
               !sourceIndexNameEmpty &&
               !indexPatternsWithNumericFields.includes(sourceIndex) &&
-              i18n.translate('xpack.ml.dataframe.stepDetailsForm.sourceIndexHelpText', {
+              i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
@@ -243,17 +272,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
             />
           </EuiFormRow>
-          <EuiButtonEmpty onClick={actions.switchToAdvancedEditor} size="s" flush="left">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton', {
-              defaultMessage: 'Switch to advanced editor',
-            })}
-          </EuiButtonEmpty>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorHelpText', {
-              defaultMessage:
-                'Note you cannot switch back to this form once the advanced editor is enabled.',
-            })}
-          </EuiText>
         </Fragment>
       )}
     </EuiForm>

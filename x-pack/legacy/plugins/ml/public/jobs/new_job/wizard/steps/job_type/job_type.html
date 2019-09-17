@@ -231,11 +231,10 @@
       <div class="euiSpacer euiSpacer--m"></div>
 
       <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
-        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+        <div class="euiFlexItem">
           <a
             ng-href="{{getUrl('#jobs/new_job/datavisualizer')}}"
             ng-click="addSelectionToRecentlyAccessed()"
-            ng-class='{disabled: isTimeBasedIndex===false}'
             class="euiLink synopsis">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">

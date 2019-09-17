@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('reporting app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./reporting'));
   });
 }

@@ -10,15 +10,12 @@ import { ILanguageServerHandler } from './proxy';
 
 export interface ILanguageServerLauncher {
   running: boolean;
-  launch(
-    builtinWorkspace: boolean,
-    maxWorkspace: number,
-    installationPath?: string
-  ): Promise<ILanguageServerHandler>;
+  launch(builtinWorkspace: boolean, maxWorkspace: number): Promise<ILanguageServerHandler>;
 }
 
 export type LauncherConstructor = new (
   targetHost: string,
   options: ServerOptions,
-  loggerFactory: LoggerFactory
+  loggerFactory: LoggerFactory,
+  installationPath: string
 ) => ILanguageServerLauncher;

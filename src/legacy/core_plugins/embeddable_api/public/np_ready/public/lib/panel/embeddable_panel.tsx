@@ -37,7 +37,7 @@ import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction, Action, ActionContext } from '../actions';
+import { EditPanelAction, Action } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 import { ChangeViewAction } from './panel_header/panel_actions';
@@ -193,7 +193,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
 
     const createGetUserData = (overlays: CoreStart['overlays']) =>
-      async function getUserData(context: ActionContext) {
+      async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined }>(resolve => {
           const session = overlays.openModal(
             <CustomizePanelModal

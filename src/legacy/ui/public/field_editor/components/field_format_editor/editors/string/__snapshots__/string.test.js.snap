@@ -4,6 +4,7 @@ exports[`StringFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -57,6 +58,10 @@ exports[`StringFormatEditor should render normally 1`] = `
         Object {
           "input": "SGVsbG8gd29ybGQ=",
           "output": "SGVSBG8GD29YBGQ=",
+        },
+        Object {
+          "input": "%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98",
+          "output": "%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98",
         },
       ]
     }

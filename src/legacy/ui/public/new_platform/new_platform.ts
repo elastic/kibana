@@ -18,6 +18,7 @@
  */
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -25,11 +26,13 @@ import {
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
   inspector: InspectorSetup;
 }
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
+  expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
 }
 
