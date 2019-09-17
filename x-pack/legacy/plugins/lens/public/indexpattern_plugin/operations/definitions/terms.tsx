@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
-import { DataType } from '../../../types';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { DataType } from '../../../../common';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 

@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import { DimensionPriority, OperationMetadata } from '../../types';
-import { IndexPatternField, IndexPattern } from '../indexpattern';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -14,6 +13,7 @@ import {
   OperationType,
   IndexPatternColumn,
 } from './definitions';
+import { IndexPattern, IndexPatternField } from '../../../common';
 
 /**
  * Returns all available operation types as a list at runtime.
