@@ -124,8 +124,9 @@ export const ColumnHeaders = React.memo<Props>(
                     fieldId: header.id,
                   })}
                   index={i}
-                  type={DRAG_TYPE_FIELD}
                   isDragDisabled={isResizing}
+                  key={header.id}
+                  type={DRAG_TYPE_FIELD}
                 >
                   {(provided, snapshot) => (
                     <>
@@ -136,7 +137,6 @@ export const ColumnHeaders = React.memo<Props>(
                           data-test-subj="draggable-header"
                           innerRef={provided.innerRef}
                           isDragging={snapshot.isDragging}
-                          key={header.id}
                           position="relative"
                           width={header.width + 'px'}
                         >
