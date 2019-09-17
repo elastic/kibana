@@ -37,5 +37,5 @@ export const AnalysisSetupStatusUnknownContent: React.FunctionComponent<Props> =
 );
 
 const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
-  max-width: 50vw;
+  align-self: center;
 `;
