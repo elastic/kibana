@@ -27,7 +27,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
   const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
     (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
   const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-  const mightExist = get(setupModeData, 'detected.mightExist');
+  const mightExist = get(setupModeData, 'detected.mightExist') || get(setupModeData, 'detected.doesExist');
 
   let tooltip = null;
 
