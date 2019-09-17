@@ -35,6 +35,12 @@ Whitelist of protocols for git clone address. Defaults to `[ 'https', 'git', 'ss
 `xpack.code.security.enableGitCertCheck`::
 Whether enable HTTPS certificate check when clone from HTTPS URL.
 
+`xpack.code.security.enableJavaSecurityManager`::
+Whether enable Java security manager for Java langserver. Defaults to `true`.
+
+`xpack.code.security.extraJavaRepositoryWitelist`::
+Whitelist of extra repository to download dependencies for Java language. Defaults to `[]`.
+
 `xpack.code.maxWorkspace`::
 Maximal number of workspaces each language server allows to span. Defaults to `5`.
 

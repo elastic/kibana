@@ -36,6 +36,7 @@ const TEST_OPTIONS = {
     installNodeDependency: true,
     enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
+    enableJavaSecurityManager: true,
   },
   disk: {
     thresholdEnabled: true,

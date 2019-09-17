@@ -167,6 +167,13 @@ export class JavaLauncher extends AbstractLauncher {
       this.options.jdtWorkspacePath,
     ];
 
+    if (this.options.security.enableJavaSecurityManager) {
+      params.unshift(
+        '-Dorg.osgi.framework.security=osgi',
+        `-Djava.security.policy=${path.resolve(this.installationPath, 'all.policy')}`
+      );
+    }
+
     if (this.needModuleArguments) {
       params.push(
         '--add-modules=ALL-SYSTEM',
@@ -186,6 +193,7 @@ export class JavaLauncher extends AbstractLauncher {
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         JAVA_HOME: javaHomePath,
+        EXTRA_WHITE_HOST: this.options.security.extraJavaRepositoryWitelist.join(','),
       },
     });
     p.stdout.on('data', data => {

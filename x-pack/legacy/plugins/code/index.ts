@@ -103,6 +103,10 @@ export const code = (kibana: any) =>
             .items(Joi.string())
             .default(['https', 'git', 'ssh']),
           enableGitCertCheck: Joi.boolean().default(true),
+          enableJavaSecurityManager: Joi.boolean().default(true),
+          extraJavaRepositoryWitelist: Joi.array()
+            .items(Joi.string())
+            .default(['']),
         }).default(),
         disk: Joi.object({
           thresholdEnabled: Joi.bool().default(true),
