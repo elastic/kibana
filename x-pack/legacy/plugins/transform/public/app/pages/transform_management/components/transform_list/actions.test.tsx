@@ -6,7 +6,7 @@
 
 import { getActions } from './actions';
 
-describe('Data Frame: Transform List Actions', () => {
+describe('Transform: Transform List Actions', () => {
   test('getActions()', () => {
     const actions = getActions({ forceDisable: false });
 

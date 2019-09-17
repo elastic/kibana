@@ -11,7 +11,7 @@ import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../c
 
 import { GroupByListSummary } from './list_summary';
 
-describe('Data Frame: <GroupByListSummary />', () => {
+describe('Transform: <GroupByListSummary />', () => {
   test('Minimal initialization', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

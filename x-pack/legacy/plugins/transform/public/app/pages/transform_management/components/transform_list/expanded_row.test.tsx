@@ -13,7 +13,7 @@ import { ExpandedRow } from './expanded_row';
 
 import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
-describe('Data Frame: Transform List <ExpandedRow />', () => {
+describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {
     moment.tz.setDefault('US/Eastern');

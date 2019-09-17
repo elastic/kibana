@@ -20,7 +20,7 @@ const section: SectionConfig = {
   ],
 };
 
-describe('Data Frame: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
+describe('Transform: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<ExpandedRowDetailsPane sections={[section]} />);
 
@@ -28,7 +28,7 @@ describe('Data Frame: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
   });
 });
 
-describe('Data Frame: Job List Expanded Row <Section />', () => {
+describe('Transform: Job List Expanded Row <Section />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<Section section={section} />);
 

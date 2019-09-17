@@ -11,7 +11,7 @@ import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_t
 
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 
-describe('Data Frame: Transform List Expanded Row <ExpandedRowJsonPane />', () => {
+describe('Transform: Transform List Expanded Row <ExpandedRowJsonPane />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<ExpandedRowJsonPane json={dataFrameTransformListRow.config} />);
 

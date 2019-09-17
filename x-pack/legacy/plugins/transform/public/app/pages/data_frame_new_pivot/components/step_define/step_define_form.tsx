@@ -41,7 +41,7 @@ import {
   useKibanaContext,
   KibanaContextValue,
   SavedSearchQuery,
-} from '../../../../../contexts/kibana';
+} from '../../../../../../../ml/public/contexts/kibana';
 
 import {
   AggName,
@@ -432,7 +432,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <Fragment>
       {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpText', {
         defaultMessage:
-          'The advanced editor allows you to edit the pivot configuration of the data frame transform.',
+          'The advanced editor allows you to edit the pivot configuration of the transform.',
       })}{' '}
       <EuiLink href={docsUrl} target="_blank">
         {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
@@ -447,7 +447,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <Fragment>
       {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedSourceEditorHelpText', {
         defaultMessage:
-          'The advanced editor allows you to edit the source query clause of the data frame transform.',
+          'The advanced editor allows you to edit the source query clause of the transform.',
       })}{' '}
       <EuiLink href={sourceDocsUrl} target="_blank">
         {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
@@ -821,7 +821,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               <EuiFormHelpText style={{ maxWidth: '320px' }}>
                 {i18n.translate('xpack.ml.dataframe.stepDefineForm.formHelp', {
                   defaultMessage:
-                    'Data frame transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
+                    'Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
                 })}
               </EuiFormHelpText>
             </Fragment>

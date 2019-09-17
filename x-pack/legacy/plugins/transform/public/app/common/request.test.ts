@@ -24,7 +24,7 @@ const defaultQuery: PivotQuery = { query_string: { query: '*' } };
 const matchAllQuery: PivotQuery = { match_all: {} };
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
-describe('Data Frame: Common', () => {
+describe('Transform: Common', () => {
   test('isSimpleQuery()', () => {
     expect(isSimpleQuery(defaultQuery)).toBe(true);
     expect(isSimpleQuery(matchAllQuery)).toBe(false);

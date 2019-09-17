@@ -52,14 +52,13 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
   const bulkDeleteButtonDisabledText = i18n.translate(
     'xpack.ml.dataframe.transformList.deleteBulkActionDisabledToolTipContent',
     {
-      defaultMessage:
-        'One or more selected data frame transforms must be stopped in order to be deleted.',
+      defaultMessage: 'One or more selected transforms must be stopped in order to be deleted.',
     }
   );
   const deleteButtonDisabledText = i18n.translate(
     'xpack.ml.dataframe.transformList.deleteActionDisabledToolTipContent',
     {
-      defaultMessage: 'Stop the data frame transform in order to delete it.',
+      defaultMessage: 'Stop the transform in order to delete it.',
     }
   );
   const bulkDeleteModalTitle = i18n.translate(

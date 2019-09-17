@@ -11,7 +11,7 @@ import { AggName, PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from '../../../../comm
 
 import { AggLabelForm } from './agg_label_form';
 
-describe('Data Frame: <AggLabelForm />', () => {
+describe('Transform: <AggLabelForm />', () => {
   test('Date histogram aggregation', () => {
     const item: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.CARDINALITY,

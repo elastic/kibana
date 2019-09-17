@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
+exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
 <Fragment>
   <NavigationMenu
     tabId="data_frames"
@@ -22,7 +22,7 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
           <EuiTitle>
             <h1>
               <FormattedMessage
-                defaultMessage="Data frame transforms"
+                defaultMessage="Transforms"
                 id="xpack.ml.dataframe.transformList.dataFrameTitle"
                 values={Object {}}
               />
@@ -31,7 +31,7 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
               </span>
               <EuiBetaBadge
                 label="Beta"
-                tooltipContent="Data frames are a beta feature. We'd love to hear your feedback."
+                tooltipContent="Transforms are a beta feature. We'd love to hear your feedback."
               />
             </h1>
           </EuiTitle>

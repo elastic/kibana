@@ -11,7 +11,7 @@ import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../c
 
 import { GroupByLabelForm } from './group_by_label_form';
 
-describe('Data Frame: <GroupByLabelForm />', () => {
+describe('Transform: <GroupByLabelForm />', () => {
   test('Date histogram aggregation', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,

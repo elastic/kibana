@@ -21,7 +21,7 @@ const getRow = (statsId: string) => {
   };
 };
 
-describe('Data Frame: Transform stats.', () => {
+describe('Transform: Transform stats.', () => {
   test('getTransformProgress()', () => {
     // At the moment, any kind of stopped jobs don't include progress information.
     // We cannot infer progress for now from an unfinished job that has been stopped for now.

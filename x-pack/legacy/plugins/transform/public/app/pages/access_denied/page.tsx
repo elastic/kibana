@@ -24,15 +24,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-
 interface PageProps {
   goToKibana: () => void;
   retry: () => void;
 }
 export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
   <Fragment>
-    <NavigationMenu tabId="access-denied" />
     <EuiPage>
       <EuiPageBody>
         <EuiPageContentHeader>
@@ -51,7 +48,7 @@ export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate('xpack.ml.dataframe.noPermissionToAccessMLLabel', {
-              defaultMessage: 'You need permission to access Data Frames',
+              defaultMessage: 'You need permission to access Transforms.',
             })}
             color="danger"
             iconType="cross"

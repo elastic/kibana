@@ -7,12 +7,12 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getNestedProperty } from '../../../../../util/object_utils';
+import { getNestedProperty } from '../../../../../../../ml/public/util/object_utils';
 import { getFlattenedFields } from '../../../../common';
 
 import { ExpandedRow } from './expanded_row';
 
-describe('Data Frame: <ExpandedRow />', () => {
+describe('Transform: <ExpandedRow />', () => {
   test('Test against strings, objects and arrays.', () => {
     const source = {
       name: 'the-name',

@@ -8,7 +8,7 @@ import { SimpleQuery } from '../../../../common';
 
 import { getSourceIndexDevConsoleStatement } from './common';
 
-describe('Data Frame: Source Index Preview Common', () => {
+describe('Transform: Source Index Preview Common', () => {
   test('getSourceIndexDevConsoleStatement()', () => {
     const query: SimpleQuery = {
       query_string: {

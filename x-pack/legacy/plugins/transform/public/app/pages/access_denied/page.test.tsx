@@ -18,7 +18,7 @@ jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
 
 afterEach(cleanup);
 
-describe('Data Frame: Access denied <Page />', () => {
+describe('Transform: Access denied <Page />', () => {
   test('Minimal initialization', () => {
     const props = {
       goToKibana: jest.fn(),

@@ -12,7 +12,7 @@ import { StopAction } from './action_stop';
 
 import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
-describe('Data Frame: Transform List Actions <StopAction />', () => {
+describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
     const item: DataFrameTransformListRow = dataFrameTransformListRow;
     const props = {

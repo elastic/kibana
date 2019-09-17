@@ -16,7 +16,7 @@ import {
 import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './common';
 import { IndexPattern } from 'ui/index_patterns';
 
-describe('Data Frame: Define Pivot Common', () => {
+describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
     // The field name includes the characters []> as well as a leading and ending space charcter
     // which cannot be used for aggregation names. The test results verifies that the characters

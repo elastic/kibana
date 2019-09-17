@@ -12,7 +12,7 @@ import {
   DATA_FRAME_TRANSFORM_STATE,
 } from '../../../../common';
 
-describe('Data Frame: isCompletedBatchTransform()', () => {
+describe('Transform: isCompletedBatchTransform()', () => {
   test('isCompletedBatchTransform()', () => {
     // check the transform config/state against the conditions
     // that will be used by isCompletedBatchTransform()

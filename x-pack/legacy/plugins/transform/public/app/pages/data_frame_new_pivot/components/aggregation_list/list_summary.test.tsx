@@ -11,7 +11,7 @@ import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from '../../../../common';
 
 import { AggListSummary, AggListSummaryProps } from './list_summary';
 
-describe('Data Frame: <AggListSummary />', () => {
+describe('Transform: <AggListSummary />', () => {
   test('Minimal initialization', () => {
     const item: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,

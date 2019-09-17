@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
+exports[`Transform: <GroupByListForm /> Minimal initialization 1`] = `
 <Fragment>
   <EuiPanel
     paddingSize="s"

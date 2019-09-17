@@ -73,7 +73,7 @@ describe('isIntervalValid()', () => {
   });
 });
 
-describe('Data Frame: Group By <PopoverForm />', () => {
+describe('Transform: Group By <PopoverForm />', () => {
   test('Minimal initialization', () => {
     const defaultData: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,

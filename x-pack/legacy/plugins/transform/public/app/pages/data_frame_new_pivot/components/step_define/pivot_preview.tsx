@@ -25,12 +25,12 @@ import {
   ColumnType,
   MlInMemoryTableBasic,
   SORT_DIRECTION,
-} from '../../../../../components/ml_in_memory_table';
-import { dictionaryToArray } from '../../../../../../common/types/common';
+} from '../../../../../../../ml/public/components/ml_in_memory_table';
+import { dictionaryToArray } from '../../../../../../../ml/common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 
-import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
+import { useCurrentIndexPattern } from '../../../../../../../ml/public/contexts/kibana';
 
 import {
   getFlattenedFields,
@@ -83,7 +83,7 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
         <EuiTitle size="xs">
           <span>
             {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-              defaultMessage: 'Data frame pivot preview',
+              defaultMessage: 'Transform pivot preview',
             })}
           </span>
         </EuiTitle>

@@ -7,8 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../../contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+import { KibanaContext } from '../../../../../../../ml/public/contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../../../ml/public/contexts/kibana/__mocks__/kibana_context_value';
 
 import {
   PivotAggsConfigDict,
@@ -24,7 +24,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Data Frame: <DefinePivotForm />', () => {
+describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.
@@ -40,7 +40,7 @@ describe('Data Frame: <DefinePivotForm />', () => {
   });
 });
 
-describe('Data Frame: isAggNameConflict()', () => {
+describe('Transform: isAggNameConflict()', () => {
   test('detect aggregation name conflicts', () => {
     const aggList: PivotAggsConfigDict = {
       'the-agg-name': {

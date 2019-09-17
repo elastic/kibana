@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1`] = `
+exports[`Transform: <ExpandedRow /> Test against strings, objects and arrays. 1`] = `
 <EuiText>
   <span
     key="name"
@@ -10,7 +10,7 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
       :
     </EuiBadge>
     <small>
-       
+
       the-name
         
     </small>
@@ -23,7 +23,7 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
       :
     </EuiBadge>
     <small>
-       
+
       the-inner-1
         
     </small>
@@ -36,7 +36,7 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
       :
     </EuiBadge>
     <small>
-       
+
       the-inner-2
         
     </small>
@@ -49,7 +49,7 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
       :
     </EuiBadge>
     <small>
-       
+
       ["the-array-string-1","the-array-string-2"]
         
     </small>
@@ -62,7 +62,7 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
       :
     </EuiBadge>
     <small>
-       
+
       [{"object1":"the-object-1"},{"object2":"the-objects-2"}]
         
     </small>

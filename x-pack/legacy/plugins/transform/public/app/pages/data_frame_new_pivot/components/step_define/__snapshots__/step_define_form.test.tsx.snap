@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
+exports[`Transform: <DefinePivotForm /> Minimal initialization 1`] = `
 <div>
   <ContextProvider
     value={

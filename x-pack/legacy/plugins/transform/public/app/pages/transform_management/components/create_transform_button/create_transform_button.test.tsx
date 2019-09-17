@@ -9,7 +9,7 @@ import React from 'react';
 
 import { CreateTransformButton } from './create_transform_button';
 
-describe('Data Frame: Transform List <CreateTransformButton />', () => {
+describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<CreateTransformButton />);
 

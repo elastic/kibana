@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
+exports[`Transform: Group By <PopoverForm /> Minimal initialization 1`] = `
 <EuiForm
   style={
     Object {

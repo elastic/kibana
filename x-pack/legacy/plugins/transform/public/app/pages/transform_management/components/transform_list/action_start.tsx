@@ -65,14 +65,14 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     startedTransformMessage = i18n.translate(
       'xpack.ml.dataframe.transformList.startedTransformBulkToolTip',
       {
-        defaultMessage: 'One or more selected data frame transforms is already started.',
+        defaultMessage: 'One or more selected transforms is already started.',
       }
     );
     completedBatchTransformMessage = i18n.translate(
       'xpack.ml.dataframe.transformList.completeBatchTransformBulkActionToolTip',
       {
         defaultMessage:
-          'One or more selected data frame transforms is a completed batch transform and cannot be restarted.',
+          'One or more selected transforms is a completed batch transform and cannot be restarted.',
       }
     );
   } else {
@@ -164,7 +164,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
             <p>
               {i18n.translate('xpack.ml.dataframe.transformList.startModalBody', {
                 defaultMessage:
-                  'A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
+                  'A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
                 values: { count: items.length },
               })}
             </p>

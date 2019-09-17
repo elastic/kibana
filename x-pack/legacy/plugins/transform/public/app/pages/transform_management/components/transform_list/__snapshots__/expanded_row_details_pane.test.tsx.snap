@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal initialization 1`] = `
+exports[`Transform: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal initialization 1`] = `
 <EuiFlexGroup>
   <EuiFlexItem
     style={
@@ -37,7 +37,7 @@ exports[`Data Frame: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal in
 </EuiFlexGroup>
 `;
 
-exports[`Data Frame: Job List Expanded Row <Section /> Minimal initialization 1`] = `
+exports[`Transform: Job List Expanded Row <Section /> Minimal initialization 1`] = `
 <EuiPanel>
   <EuiTitle
     size="xs"

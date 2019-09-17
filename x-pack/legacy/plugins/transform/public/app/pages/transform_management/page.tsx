@@ -66,7 +66,7 @@ export const Page: FC = () => {
                 <h1>
                   <FormattedMessage
                     id="xpack.ml.dataframe.transformList.dataFrameTitle"
-                    defaultMessage="Data frame transforms"
+                    defaultMessage="Transforms"
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
@@ -76,7 +76,7 @@ export const Page: FC = () => {
                     tooltipContent={i18n.translate(
                       'xpack.ml.dataframe.transformList.betaBadgeTooltipContent',
                       {
-                        defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
+                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
                       }
                     )}
                   />

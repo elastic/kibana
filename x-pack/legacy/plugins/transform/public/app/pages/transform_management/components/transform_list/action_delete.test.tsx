@@ -12,7 +12,7 @@ import { DeleteAction } from './action_delete';
 
 import dataFrameTransformListRow from '../../../../common/__mocks__/data_frame_transform_list_row.json';
 
-describe('Data Frame: Transform List Actions <DeleteAction />', () => {
+describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const item: DataFrameTransformListRow = dataFrameTransformListRow;
     const props = {

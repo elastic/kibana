@@ -29,10 +29,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ml } from '../../../../../services/ml_api_service';
-import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_context';
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
-import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana/use_kibana_context';
+import { useUiChromeContext } from '../../../../../../../ml/public/contexts/ui/use_ui_chrome_context';
+import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../../ml/common/constants/jobs_list';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 
@@ -83,7 +83,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.createDataFrameTransform(transformId, transformConfig);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Request to create data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Request to create transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
@@ -91,8 +91,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         setCreated(false);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.createTransformErrorMessage', {
-            defaultMessage:
-              'An error occurred creating the data frame transform {transformId}: {error}',
+            defaultMessage: 'An error occurred creating the transform {transformId}: {error}',
             values: { transformId, error: JSON.stringify(e) },
           })
         );
@@ -113,7 +112,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         await ml.dataFrame.startDataFrameTransforms([{ id: transformId }]);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformSuccessMessage', {
-            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
@@ -121,8 +120,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         setStarted(false);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformErrorMessage', {
-            defaultMessage:
-              'An error occurred starting the data frame transform {transformId}: {error}',
+            defaultMessage: 'An error occurred starting the transform {transformId}: {error}',
             values: { transformId, error: JSON.stringify(e) },
           })
         );
@@ -254,7 +252,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                   'xpack.ml.dataframe.stepCreateForm.createAndStartDataFrameDescription',
                   {
                     defaultMessage:
-                      'Creates and starts the data frame transform. A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the data frame transform.',
+                      'Creates and starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
                   }
                 )}
               </EuiText>
@@ -274,7 +272,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.ml.dataframe.stepCreateForm.startDataFrameDescription', {
                   defaultMessage:
-                    'Starts the data frame transform. A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the data frame transform.',
+                    'Starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -292,7 +290,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             <EuiText color="subdued" size="s">
               {i18n.translate('xpack.ml.dataframe.stepCreateForm.createDataFrameDescription', {
                 defaultMessage:
-                  'Create the data frame transform without starting it. You will be able to start the transform later by returning to the data frame transforms list.',
+                  'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -354,13 +352,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
                   title={i18n.translate(
                     'xpack.ml.dataframe.stepCreateForm.transformListCardTitle',
                     {
-                      defaultMessage: 'Data frame transforms',
+                      defaultMessage: 'Transforms',
                     }
                   )}
                   description={i18n.translate(
                     'xpack.ml.dataframe.stepCreateForm.transformListCardDescription',
                     {
-                      defaultMessage: 'Return to the data frame transform management page.',
+                      defaultMessage: 'Return to the transform management page.',
                     }
                   )}
                   href="#/data_frames"
@@ -393,7 +391,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                     description={i18n.translate(
                       'xpack.ml.dataframe.stepCreateForm.discoverCardDescription',
                       {
-                        defaultMessage: 'Use Discover to explore the data frame pivot.',
+                        defaultMessage: 'Use Discover to explore the transform.',
                       }
                     )}
                     href={getDiscoverUrl(indexPatternId, baseUrl)}

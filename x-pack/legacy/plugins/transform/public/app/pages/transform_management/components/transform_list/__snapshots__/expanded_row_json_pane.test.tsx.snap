@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal initialization 1`] = `
+exports[`Transform: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal initialization 1`] = `
 <EuiFlexGroup>
   <EuiFlexItem>
     <EuiSpacer

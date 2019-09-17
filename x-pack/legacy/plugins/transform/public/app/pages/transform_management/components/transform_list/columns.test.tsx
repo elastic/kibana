@@ -6,7 +6,7 @@
 
 import { getColumns } from './columns';
 
-describe('Data Frame: Job List Columns', () => {
+describe('Transform: Job List Columns', () => {
   test('getColumns()', () => {
     const columns = getColumns([], () => {}, []);
 

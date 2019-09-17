@@ -20,12 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
 import { Wizard } from './components/wizard';
 
 export const Page: FC = () => (
   <Fragment>
-    <NavigationMenu tabId="new_data_frame" />
     <EuiPage>
       <EuiPageBody>
         <EuiPageContentHeader>
@@ -34,7 +32,7 @@ export const Page: FC = () => (
               <h1>
                 <FormattedMessage
                   id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
-                  defaultMessage="New data frame"
+                  defaultMessage="New transform"
                 />
                 <span>&nbsp;</span>
                 <EuiBetaBadge
@@ -44,7 +42,7 @@ export const Page: FC = () => (
                   tooltipContent={i18n.translate(
                     'xpack.ml.dataframe.transformsWizard.betaBadgeTooltipContent',
                     {
-                      defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
+                      defaultMessage: `Transform are a beta feature. We'd love to hear your feedback.`,
                     }
                   )}
                 />

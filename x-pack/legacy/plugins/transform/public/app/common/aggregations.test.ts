@@ -6,7 +6,7 @@
 
 import { isAggName } from './aggregations';
 
-describe('Data Frame: Aggregations', () => {
+describe('Transform: Aggregations', () => {
   test('isAggName()', () => {
     expect(isAggName('avg(responsetime)')).toEqual(true);
     expect(isAggName('avg_responsetime')).toEqual(true);

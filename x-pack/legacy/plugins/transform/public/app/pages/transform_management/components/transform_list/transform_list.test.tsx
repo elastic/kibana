@@ -10,7 +10,7 @@ import React from 'react';
 import './transform_list.test.mocks';
 import { DataFrameTransformList } from './transform_list';
 
-describe('Data Frame: Transform List <DataFrameTransformList />', () => {
+describe('Transform: Transform List <DataFrameTransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
       <DataFrameTransformList

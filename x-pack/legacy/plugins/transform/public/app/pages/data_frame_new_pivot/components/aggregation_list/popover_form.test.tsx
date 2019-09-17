@@ -11,7 +11,7 @@ import { AggName, PIVOT_SUPPORTED_AGGS, PivotAggsConfig } from '../../../../comm
 
 import { PopoverForm } from './popover_form';
 
-describe('Data Frame: Aggregation <PopoverForm />', () => {
+describe('Transform: Aggregation <PopoverForm />', () => {
   test('Minimal initialization', () => {
     const defaultData: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.CARDINALITY,

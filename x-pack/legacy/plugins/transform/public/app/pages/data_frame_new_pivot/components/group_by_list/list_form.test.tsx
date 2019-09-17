@@ -11,7 +11,7 @@ import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../c
 
 import { GroupByListForm } from './list_form';
 
-describe('Data Frame: <GroupByListForm />', () => {
+describe('Transform: <GroupByListForm />', () => {
   test('Minimal initialization', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
+exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
@@ -78,7 +78,7 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
 </EuiFlexGroup>
 `;
 
-exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
+exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
@@ -156,7 +156,7 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
 </EuiFlexGroup>
 `;
 
-exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
+exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"

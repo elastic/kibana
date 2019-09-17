@@ -36,14 +36,14 @@ export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) =
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {
-            defaultMessage: 'Request to start data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
       } else {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.transformList.startTransformErrorMessage', {
-            defaultMessage: 'An error occurred starting the data frame transform {transformId}',
+            defaultMessage: 'An error occurred starting the transform {transformId}',
             values: { transformId },
           })
         );

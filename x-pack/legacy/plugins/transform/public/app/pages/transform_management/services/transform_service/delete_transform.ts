@@ -34,14 +34,14 @@ export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) 
       if (results[transformId].success === true) {
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
-            defaultMessage: 'Request to delete data frame transform {transformId} acknowledged.',
+            defaultMessage: 'Request to delete transform {transformId} acknowledged.',
             values: { transformId },
           })
         );
       } else {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.transformList.deleteTransformErrorMessage', {
-            defaultMessage: 'An error occurred deleting the data frame transform {transformId}',
+            defaultMessage: 'An error occurred deleting the transform {transformId}',
             values: { transformId },
           })
         );

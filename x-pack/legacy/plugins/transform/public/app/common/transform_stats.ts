@@ -85,7 +85,7 @@ export function getTransformProgress(item: DataFrameTransformListRow) {
 
 export function isCompletedBatchTransform(item: DataFrameTransformListRow) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
-  // then this is a completed batch data frame transform.
+  // then this is a completed batch transform.
   return (
     item.stats.checkpointing.last.checkpoint === 1 &&
     item.config.sync === undefined &&

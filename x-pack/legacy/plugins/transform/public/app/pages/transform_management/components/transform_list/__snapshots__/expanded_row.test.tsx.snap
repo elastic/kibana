@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] = `
+exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = `
 <EuiTabbedContent
   autoFocus="initial"
   expand={false}

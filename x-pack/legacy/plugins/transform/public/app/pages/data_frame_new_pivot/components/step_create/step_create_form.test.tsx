@@ -7,8 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../../contexts/kibana';
-import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+import { KibanaContext } from '../../../../../../../ml/public/contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../../../ml/public/contexts/kibana/__mocks__/kibana_context_value';
 
 import { StepCreateForm } from './step_create_form';
 
@@ -20,7 +20,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Data Frame: <StepCreateForm />', () => {
+describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     const props = {
       createIndexPattern: false,

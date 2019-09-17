@@ -178,7 +178,7 @@ export const DataFrameTransformList: SFC<Props> = ({
   };
 
   // Before the transforms have been loaded for the first time, display the loading indicator only.
-  // Otherwise a user would see 'No data frame transforms found' during the initial loading.
+  // Otherwise a user would see 'No transforms found' during the initial loading.
   if (!isInitialized) {
     return <ProgressBar isLoading={isLoading || transformsLoading} />;
   }
@@ -189,7 +189,7 @@ export const DataFrameTransformList: SFC<Props> = ({
         <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataFrame.list.errorPromptTitle', {
-            defaultMessage: 'An error occurred getting the data frame transform list.',
+            defaultMessage: 'An error occurred getting the transform list.',
           })}
           color="danger"
           iconType="alert"
@@ -208,14 +208,14 @@ export const DataFrameTransformList: SFC<Props> = ({
           title={
             <h2>
               {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
-                defaultMessage: 'No data frame transforms found',
+                defaultMessage: 'No transforms found',
               })}
             </h2>
           }
           actions={[
             <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
               {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
-                defaultMessage: 'Create your first data frame transform',
+                defaultMessage: 'Create your first transform',
               })}
             </EuiButtonEmpty>,
           ]}

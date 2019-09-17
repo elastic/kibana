@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <AggLabelForm /> Date histogram aggregation 1`] = `
+exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"

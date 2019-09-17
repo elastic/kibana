@@ -12,10 +12,10 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../../contexts/kibana';
-import { isValidIndexName } from '../../../../../../common/util/es_utils';
+import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
+import { isValidIndexName } from '../../../../../../../ml/public/common/util/es_utils';
 
-import { ml } from '../../../../../services/ml_api_service';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 
 import {
   isTransformIdValid,
@@ -99,8 +99,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingDataFrameTransformList', {
-            defaultMessage:
-              'An error occurred getting the existing data frame transform Ids: {error}',
+            defaultMessage: 'An error occurred getting the existing transform Ids: {error}',
             values: { error: JSON.stringify(e) },
           })
         );
