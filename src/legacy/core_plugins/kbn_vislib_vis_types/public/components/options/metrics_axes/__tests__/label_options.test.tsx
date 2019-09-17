@@ -28,16 +28,19 @@ import { TruncateLabelsOption } from '../../../common';
 describe('LabelOptions component', () => {
   let setValue: jest.Mock;
   let defaultProps: LabelOptionsProps;
-  const axis = {
-    labels: {
-      show: true,
-      filter: false,
-      truncate: 0,
-    },
-  } as Axis;
+  let axis: Axis;
+  const filterParamName = 'filter';
+  const rotateParamName = 'rotate';
 
   beforeEach(() => {
     setValue = jest.fn();
+    axis = {
+      labels: {
+        show: true,
+        filter: false,
+        truncate: 0,
+      },
+    } as Axis;
 
     defaultProps = {
       axis,
@@ -60,8 +63,8 @@ describe('LabelOptions component', () => {
   it('should show other fields when axis.labels.show is true', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
 
-    expect(comp.find({ paramName: 'filter' }).prop('disabled')).toBeFalsy();
-    expect(comp.find({ paramName: 'rotate' }).prop('disabled')).toBeFalsy();
+    expect(comp.find({ paramName: filterParamName }).prop('disabled')).toBeFalsy();
+    expect(comp.find({ paramName: rotateParamName }).prop('disabled')).toBeFalsy();
     expect(comp.find(TruncateLabelsOption).prop('disabled')).toBeFalsy();
   });
 
@@ -69,15 +72,15 @@ describe('LabelOptions component', () => {
     defaultProps.axis.labels.show = false;
     const comp = shallow(<LabelOptions {...defaultProps} />);
 
-    expect(comp.find({ paramName: 'filter' }).prop('disabled')).toBeTruthy();
-    expect(comp.find({ paramName: 'rotate' }).prop('disabled')).toBeTruthy();
+    expect(comp.find({ paramName: filterParamName }).prop('disabled')).toBeTruthy();
+    expect(comp.find({ paramName: rotateParamName }).prop('disabled')).toBeTruthy();
     expect(comp.find(TruncateLabelsOption).prop('disabled')).toBeTruthy();
   });
 
   it('should set rotate as number', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
     act(() => {
-      comp.find({ paramName: 'rotate' }).prop('setValue')('rotate', '5');
+      comp.find({ paramName: rotateParamName }).prop('setValue')(rotateParamName, '5');
     });
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, rotate: 5 } }];
@@ -88,7 +91,7 @@ describe('LabelOptions component', () => {
     const comp = mountWithIntl(<LabelOptions {...defaultProps} />);
     expect(defaultProps.stateParams.categoryAxes[0].labels.filter).toBeFalsy();
     act(() => {
-      comp.find({ paramName: 'filter' }).prop('setValue')('filter', true);
+      comp.find({ paramName: filterParamName }).prop('setValue')(filterParamName, true);
     });
 
     const newAxes = [{ ...axis, labels: { ...axis.labels, filter: true } }];

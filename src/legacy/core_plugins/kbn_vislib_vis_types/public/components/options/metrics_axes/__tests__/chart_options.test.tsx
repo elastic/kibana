@@ -37,19 +37,7 @@ describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;
   let changeValueAxis: jest.Mock;
   let defaultProps: ChartOptionsParams;
-  const chart = {
-    show: true,
-    mode: ChartModes.STACKED,
-    data: {
-      label: 'Count',
-      id: '1',
-    },
-    drawLinesBetweenPoints: true,
-    lineWidth: 2,
-    showCircles: true,
-    interpolate: InterpolationModes.LINEAR,
-    valueAxis: 'ValueAxis-1',
-  } as SeriesParam;
+  let chart: SeriesParam;
   const axis = {
     id: 'ValueAxis-1',
     name: 'ValueAxis-1',
@@ -69,7 +57,20 @@ describe('ChartOptions component', () => {
   beforeEach(() => {
     setParamByIndex = jest.fn();
     changeValueAxis = jest.fn();
-    chart.type = ChartTypes.HISTOGRAM;
+    chart = {
+      show: true,
+      type: ChartTypes.HISTOGRAM,
+      mode: ChartModes.STACKED,
+      data: {
+        label: 'Count',
+        id: '1',
+      },
+      drawLinesBetweenPoints: true,
+      lineWidth: 2,
+      showCircles: true,
+      interpolate: InterpolationModes.LINEAR,
+      valueAxis: 'ValueAxis-1',
+    } as SeriesParam;
 
     defaultProps = {
       index: 0,
@@ -111,19 +112,21 @@ describe('ChartOptions component', () => {
 
   it('should call changeValueAxis when valueAxis is changed', () => {
     const comp = mount(<ChartOptions {...defaultProps} />);
+    const paramName = 'valueAxis';
     act(() => {
-      comp.find({ paramName: 'valueAxis' }).prop('setValue')('valueAxis', 'new');
+      comp.find({ paramName }).prop('setValue')(paramName, 'new');
     });
 
-    expect(changeValueAxis).toBeCalledWith(0, 'valueAxis', 'new');
+    expect(changeValueAxis).toBeCalledWith(0, paramName, 'new');
   });
 
   it('should call setParamByIndex when mode is changed', () => {
     const comp = mount(<ChartOptions {...defaultProps} />);
+    const paramName = 'mode';
     act(() => {
-      comp.find({ paramName: 'mode' }).prop('setValue')('mode', ChartModes.NORMAL);
+      comp.find({ paramName }).prop('setValue')(paramName, ChartModes.NORMAL);
     });
 
-    expect(setParamByIndex).toBeCalledWith('seriesParams', 0, 'mode', ChartModes.NORMAL);
+    expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartModes.NORMAL);
   });
 });

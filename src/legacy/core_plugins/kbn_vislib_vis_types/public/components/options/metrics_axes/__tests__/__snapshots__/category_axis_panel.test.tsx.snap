@@ -2,8 +2,6 @@
 
 exports[`CategoryAxisPanel component should init with the default set of props 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="s"
 >
   <EuiTitle

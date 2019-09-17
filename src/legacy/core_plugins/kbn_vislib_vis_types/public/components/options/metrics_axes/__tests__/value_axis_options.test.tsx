@@ -33,24 +33,31 @@ import {
   positions,
 } from '../../../../utils/collections';
 
+interface PositionOption {
+  text: string;
+  value: Positions;
+  disabled: boolean;
+}
+
 describe('ValueAxisOptions component', () => {
   let setParamByIndex: jest.Mock;
   let onValueAxisPositionChanged: jest.Mock;
   let defaultProps: ValueAxisOptionsParams;
-  const axis = {
-    id: 'ValueAxis-1',
-    position: Positions.LEFT,
-    scale: {
-      mode: AxisModes.NORMAL,
-      type: ScaleTypes.LINEAR,
-    },
-    title: {},
-    show: true,
-  } as Axis;
+  let axis: Axis;
 
   beforeEach(() => {
     setParamByIndex = jest.fn();
     onValueAxisPositionChanged = jest.fn();
+    axis = {
+      id: 'ValueAxis-1',
+      position: Positions.LEFT,
+      scale: {
+        mode: AxisModes.NORMAL,
+        type: ScaleTypes.LINEAR,
+      },
+      title: {},
+      show: true,
+    } as Axis;
 
     defaultProps = {
       axis,
@@ -58,7 +65,7 @@ describe('ValueAxisOptions component', () => {
       stateParams: {
         categoryAxes: [axis],
         valueAxes: [axis],
-      } as any,
+      },
       vis: {
         type: {
           editorConfig: {
@@ -95,24 +102,24 @@ describe('ValueAxisOptions component', () => {
     defaultProps.isCategoryAxisHorizontal = true;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
-    const options = comp.find({ paramName: 'position' }).prop('options');
+    const options: PositionOption[] = comp.find({ paramName: 'position' }).prop('options');
 
-    expect(options.find((opt: any) => opt.value === Positions.LEFT).disabled).toBeFalsy();
-    expect(options.find((opt: any) => opt.value === Positions.RIGHT).disabled).toBeFalsy();
-    expect(options.find((opt: any) => opt.value === Positions.TOP).disabled).toBeTruthy();
-    expect(options.find((opt: any) => opt.value === Positions.BOTTOM).disabled).toBeTruthy();
+    expect(options.find(opt => opt.value === Positions.LEFT)!.disabled).toBeFalsy();
+    expect(options.find(opt => opt.value === Positions.RIGHT)!.disabled).toBeFalsy();
+    expect(options.find(opt => opt.value === Positions.TOP)!.disabled).toBeTruthy();
+    expect(options.find(opt => opt.value === Positions.BOTTOM)!.disabled).toBeTruthy();
   });
 
   it('should only allow top and bottom value axis position when category axis is vertical', () => {
     defaultProps.isCategoryAxisHorizontal = false;
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
 
-    const options = comp.find({ paramName: 'position' }).prop('options');
+    const options: PositionOption[] = comp.find({ paramName: 'position' }).prop('options');
 
-    expect(options.find((opt: any) => opt.value === Positions.TOP).disabled).toBeFalsy();
-    expect(options.find((opt: any) => opt.value === Positions.BOTTOM).disabled).toBeFalsy();
-    expect(options.find((opt: any) => opt.value === Positions.LEFT).disabled).toBeTruthy();
-    expect(options.find((opt: any) => opt.value === Positions.RIGHT).disabled).toBeTruthy();
+    expect(options.find(opt => opt.value === Positions.TOP)!.disabled).toBeFalsy();
+    expect(options.find(opt => opt.value === Positions.BOTTOM)!.disabled).toBeFalsy();
+    expect(options.find(opt => opt.value === Positions.LEFT)!.disabled).toBeTruthy();
+    expect(options.find(opt => opt.value === Positions.RIGHT)!.disabled).toBeTruthy();
   });
 
   it('should call onValueAxisPositionChanged when position is changed', () => {

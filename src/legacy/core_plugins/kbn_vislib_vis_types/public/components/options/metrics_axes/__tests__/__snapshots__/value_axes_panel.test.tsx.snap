@@ -2,8 +2,6 @@
 
 exports[`ValueAxesPanel component should init with the default set of props 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="s"
 >
   <EuiFlexGroup
@@ -36,12 +34,9 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       >
         <EuiButtonIcon
           aria-label="Add Y-axis"
-          color="primary"
           data-test-subj="visualizeAddYAxisButton"
-          iconSize="m"
           iconType="plusInCircleFilled"
           onClick={[MockFunction]}
-          type="button"
         />
       </EuiToolTip>
     </EuiFlexItem>
@@ -79,10 +74,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
           aria-label="Remove Y-axis"
           color="danger"
           data-test-subj="removeValueAxisBtn"
-          iconSize="m"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         />
       </EuiToolTip>
     }
@@ -159,7 +152,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
                 "show": true,
                 "truncate": 0,
               },
-              "position": "left",
+              "position": "right",
               "scale": Object {
                 "mode": "normal",
                 "type": "linear",
@@ -262,10 +255,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
           aria-label="Remove Y-axis"
           color="danger"
           data-test-subj="removeValueAxisBtn"
-          iconSize="m"
           iconType="cross"
           onClick={[Function]}
-          type="button"
         />
       </EuiToolTip>
     }
@@ -287,7 +278,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
             "show": true,
             "truncate": 0,
           },
-          "position": "left",
+          "position": "right",
           "scale": Object {
             "mode": "normal",
             "type": "linear",
@@ -296,7 +287,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
           "title": Object {},
         }
       }
-      index={0}
+      index={1}
       isCategoryAxisHorizontal={false}
       onValueAxisPositionChanged={[MockFunction]}
       removeValueAxis={[MockFunction]}
@@ -342,7 +333,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
                 "show": true,
                 "truncate": 0,
               },
-              "position": "left",
+              "position": "right",
               "scale": Object {
                 "mode": "normal",
                 "type": "linear",

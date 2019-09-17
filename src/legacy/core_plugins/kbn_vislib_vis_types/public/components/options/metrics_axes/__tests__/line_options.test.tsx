@@ -34,23 +34,25 @@ import {
 describe('LineOptions component', () => {
   let setChart: jest.Mock;
   let defaultProps: LineOptionsParams;
-  const chart = {
-    show: true,
-    type: ChartTypes.AREA,
-    mode: ChartModes.STACKED,
-    data: {
-      label: 'Count',
-      id: '1',
-    },
-    drawLinesBetweenPoints: true,
-    lineWidth: 2,
-    showCircles: true,
-    interpolate: InterpolationModes.LINEAR,
-    valueAxis: 'ValueAxis-1',
-  } as SeriesParam;
+  const lineWidthParamName = 'lineWidth';
+  let chart: SeriesParam;
 
   beforeEach(() => {
     setChart = jest.fn();
+    chart = {
+      show: true,
+      type: ChartTypes.AREA,
+      mode: ChartModes.STACKED,
+      data: {
+        label: 'Count',
+        id: '1',
+      },
+      drawLinesBetweenPoints: true,
+      lineWidth: 2,
+      showCircles: true,
+      interpolate: InterpolationModes.LINEAR,
+      valueAxis: 'ValueAxis-1',
+    } as SeriesParam;
 
     defaultProps = {
       chart,
@@ -74,19 +76,19 @@ describe('LineOptions component', () => {
   it('should set lineWidth as undefined when empty value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
     act(() => {
-      comp.find(NumberInputOption).prop('setValue')('lineWidth', '');
+      comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, '');
     });
 
-    expect(setChart).toBeCalledWith('lineWidth', undefined);
+    expect(setChart).toBeCalledWith(lineWidthParamName, undefined);
   });
 
   it('should set lineWidth value', () => {
     const comp = mountWithIntl(<LineOptions {...defaultProps} />);
     act(() => {
-      comp.find(NumberInputOption).prop('setValue')('lineWidth', 5);
+      comp.find(NumberInputOption).prop('setValue')(lineWidthParamName, 5);
     });
 
-    expect(setChart).toBeCalledWith('lineWidth', 5);
+    expect(setChart).toBeCalledWith(lineWidthParamName, 5);
   });
 
   it('should set drawLinesBetweenPoints', () => {

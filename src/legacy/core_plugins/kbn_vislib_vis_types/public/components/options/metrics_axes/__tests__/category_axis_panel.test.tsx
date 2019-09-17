@@ -29,26 +29,27 @@ describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;
   let onPositionChanged: jest.Mock;
   let defaultProps: CategoryAxisPanelProps;
-  const axis = {
-    id: 'CategoryAxis-1',
-    type: AxisTypes.CATEGORY,
-    position: Positions.BOTTOM,
-    show: true,
-    style: {},
-    scale: {
-      type: ScaleTypes.LINEAR,
-    },
-    labels: {
-      show: true,
-      filter: true,
-      truncate: 100,
-    },
-    title: {},
-  } as Axis;
+  let axis: Axis;
 
   beforeEach(() => {
     setCategoryAxis = jest.fn();
     onPositionChanged = jest.fn();
+    axis = {
+      id: 'CategoryAxis-1',
+      type: AxisTypes.CATEGORY,
+      position: Positions.BOTTOM,
+      show: true,
+      style: {},
+      scale: {
+        type: ScaleTypes.LINEAR,
+      },
+      labels: {
+        show: true,
+        filter: true,
+        truncate: 100,
+      },
+      title: {},
+    } as Axis;
 
     defaultProps = {
       axis,

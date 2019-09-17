@@ -37,62 +37,66 @@ describe('ValueAxesPanel component', () => {
   let addValueAxis: jest.Mock;
   let removeValueAxis: jest.Mock;
   let defaultProps: ValueAxesPanelProps;
-  const axis1 = {
-    id: 'ValueAxis-1',
-    position: Positions.LEFT,
-    scale: {
-      mode: AxisModes.NORMAL,
-      type: ScaleTypes.LINEAR,
-    },
-    title: {},
-    show: true,
-    labels: {
-      show: true,
-      filter: false,
-      truncate: 0,
-    },
-  } as ValueAxis;
-  const axis2 = {
-    id: 'ValueAxis-2',
-    position: Positions.LEFT,
-    scale: {
-      mode: AxisModes.NORMAL,
-      type: ScaleTypes.LINEAR,
-    },
-    title: {},
-    show: true,
-    labels: {
-      show: true,
-      filter: false,
-      truncate: 0,
-    },
-  } as ValueAxis;
-  const seriesParam1 = {
-    data: {
-      label: 'Count',
-      id: '1',
-    },
-  } as SeriesParam;
-  const seriesParam2 = {
-    data: {
-      label: 'Average',
-      id: '1',
-    },
-  } as SeriesParam;
+  let axisLeft: ValueAxis;
+  let axisRight: ValueAxis;
+  let seriesParamCount: SeriesParam;
+  let seriesParamAverage: SeriesParam;
 
   beforeEach(() => {
-    seriesParam1.valueAxis = 'ValueAxis-1';
-    seriesParam2.valueAxis = 'ValueAxis-2';
     setParamByIndex = jest.fn();
     onValueAxisPositionChanged = jest.fn();
     addValueAxis = jest.fn();
     removeValueAxis = jest.fn();
+    axisLeft = {
+      id: 'ValueAxis-1',
+      position: Positions.LEFT,
+      scale: {
+        mode: AxisModes.NORMAL,
+        type: ScaleTypes.LINEAR,
+      },
+      title: {},
+      show: true,
+      labels: {
+        show: true,
+        filter: false,
+        truncate: 0,
+      },
+    } as ValueAxis;
+    axisRight = {
+      id: 'ValueAxis-2',
+      position: Positions.RIGHT,
+      scale: {
+        mode: AxisModes.NORMAL,
+        type: ScaleTypes.LINEAR,
+      },
+      title: {},
+      show: true,
+      labels: {
+        show: true,
+        filter: false,
+        truncate: 0,
+      },
+    } as ValueAxis;
+    seriesParamCount = {
+      valueAxis: 'ValueAxis-1',
+      data: {
+        label: 'Count',
+        id: '1',
+      },
+    } as SeriesParam;
+    seriesParamAverage = {
+      valueAxis: 'ValueAxis-2',
+      data: {
+        label: 'Average',
+        id: '1',
+      },
+    } as SeriesParam;
 
     defaultProps = {
       stateParams: {
-        seriesParams: [seriesParam1, seriesParam2],
-        valueAxes: [axis1, axis2],
-      } as any,
+        seriesParams: [seriesParamCount, seriesParamAverage],
+        valueAxes: [axisLeft, axisRight],
+      },
       vis: {
         type: {
           editorConfig: {
@@ -122,7 +126,7 @@ describe('ValueAxesPanel component', () => {
   });
 
   it('should not allow to remove the last value axis', () => {
-    defaultProps.stateParams.valueAxes = [axis1];
+    defaultProps.stateParams.valueAxes = [axisLeft];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     expect(comp.find('[data-test-subj="removeValueAxisBtn"] button').exists()).toBeFalsy();
   });
@@ -140,7 +144,7 @@ describe('ValueAxesPanel component', () => {
       .first()
       .simulate('click');
 
-    expect(removeValueAxis).toBeCalledWith(axis1);
+    expect(removeValueAxis).toBeCalledWith(axisLeft);
   });
 
   it('should call addValueAxis', () => {
