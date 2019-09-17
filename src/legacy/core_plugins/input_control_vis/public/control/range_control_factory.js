@@ -56,7 +56,6 @@ class RangeControl extends Control {
       this.abortController.abort();
     }
     this.abortController = new AbortController();
-
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -75,7 +74,6 @@ class RangeControl extends Control {
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
-
       this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
         values: { errorMessage: error.message }

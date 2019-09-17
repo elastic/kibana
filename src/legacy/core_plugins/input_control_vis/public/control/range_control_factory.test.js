@@ -28,6 +28,32 @@ class MockSearchSource {
   }
 }
 
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  setup: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { byName: { myNumberField: { name: 'myNumberField' } } }
+        }),
+      }
+    },
+    filter: {
+      filterManager: {
+        fieldName: 'myNumberField',
+        getIndexPattern: () => ({
+          fields: { byName: { myNumberField: { name: 'myNumberField' } } }
+        }),
+        getAppFilters: jest.fn().mockImplementation(() => ([])),
+        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+      }
+    }
+  }
+}));
+
 const mockKbnApi = {
   SearchSource: MockSearchSource,
 };

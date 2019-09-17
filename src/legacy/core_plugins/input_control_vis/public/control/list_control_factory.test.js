@@ -20,6 +20,32 @@
 import chrome from 'ui/chrome';
 import { listControlFactory } from './list_control_factory';
 
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  setup: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { byName: { myField: { name: 'myField' } } }
+        }),
+      }
+    },
+    filter: {
+      filterManager: {
+        fieldName: 'myNumberField',
+        getIndexPattern: () => ({
+          fields: { byName: { myField: { name: 'myField' } } }
+        }),
+        getAppFilters: jest.fn().mockImplementation(() => ([])),
+        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+      }
+    }
+  }
+}));
+
 chrome.getInjected.mockImplementation((key) => {
   switch(key) {
     case 'autocompleteTimeout': return 1000;
