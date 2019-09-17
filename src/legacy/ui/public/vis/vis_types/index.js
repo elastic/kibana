@@ -21,3 +21,4 @@ import { BaseVisType } from './base_vis_type';
 import { ReactVisType } from './react_vis_type';
 
 export { BaseVisType, ReactVisType };
+

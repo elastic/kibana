@@ -38,7 +38,6 @@ import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { vislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'line',
     title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),

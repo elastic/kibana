@@ -38,7 +38,6 @@ import { palettes } from '@elastic/eui/lib/services';
 import { vislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'area',
     title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),

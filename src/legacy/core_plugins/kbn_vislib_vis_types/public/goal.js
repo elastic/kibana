@@ -25,7 +25,6 @@ import { vislibVisController } from './controller';
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 
 export default function GoalVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'goal',
     title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),

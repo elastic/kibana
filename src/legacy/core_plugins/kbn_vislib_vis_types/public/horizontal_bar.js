@@ -37,7 +37,6 @@ import { palettes } from '@elastic/eui/lib/services';
 import { vislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'horizontal_bar',
     title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),

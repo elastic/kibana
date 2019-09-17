@@ -24,7 +24,6 @@ import { PieOptions } from './components/options';
 import { vislibVisController } from './controller';
 
 export default function HistogramVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'pie',
     title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),

@@ -26,7 +26,6 @@ import { vislibVisController } from './controller';
 import './controls/heatmap_options';
 
 export default function HeatmapVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'heatmap',
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
