@@ -9,6 +9,9 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "1",
             "makeLabel": [Function],
+            "type": Object {
+              "name": "count",
+            },
           },
         ],
         "bySchemaName": [Function],
@@ -16,7 +19,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     aggsLabels=""
     changeValueAxis={[Function]}
-    setMultipleValidity={[MockFunction]}
     setParamByIndex={[Function]}
     setValue={[MockFunction]}
     setVisType={[MockFunction]}
@@ -25,20 +27,16 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "categoryAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
+        "grid": Object {
+          "valueAxis": "ValueAxis-1",
+        },
         "seriesParams": Array [
           Object {
             "data": Object {
@@ -52,18 +50,11 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
       }
@@ -94,6 +85,9 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "1",
             "makeLabel": [Function],
+            "type": Object {
+              "name": "count",
+            },
           },
         ],
         "bySchemaName": [Function],
@@ -103,7 +97,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     isCategoryAxisHorizontal={true}
     onValueAxisPositionChanged={[Function]}
     removeValueAxis={[Function]}
-    setMultipleValidity={[MockFunction]}
     setParamByIndex={[Function]}
     setValue={[MockFunction]}
     setVisType={[MockFunction]}
@@ -112,20 +105,16 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "categoryAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
+        "grid": Object {
+          "valueAxis": "ValueAxis-1",
+        },
         "seriesParams": Array [
           Object {
             "data": Object {
@@ -139,18 +128,11 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
       }
@@ -180,6 +162,9 @@ exports[`MetricsAxisOptions component should init with the default set of props 
           Object {
             "id": "1",
             "makeLabel": [Function],
+            "type": Object {
+              "name": "count",
+            },
           },
         ],
         "bySchemaName": [Function],
@@ -189,23 +174,15 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     axis={
       Object {
         "id": "ValueAxis-1",
-        "labels": Object {
-          "filter": false,
-          "show": true,
-          "truncate": 0,
-        },
-        "name": "ValueAxis-1",
+        "name": "LeftAxis-1",
         "position": "left",
-        "scale": Object {
-          "type": "linear",
+        "title": Object {
+          "text": "",
         },
-        "show": true,
-        "title": Object {},
       }
     }
     onPositionChanged={[Function]}
     setCategoryAxis={[Function]}
-    setMultipleValidity={[MockFunction]}
     setValue={[MockFunction]}
     setVisType={[MockFunction]}
     stateParams={
@@ -213,20 +190,16 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "categoryAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
+        "grid": Object {
+          "valueAxis": "ValueAxis-1",
+        },
         "seriesParams": Array [
           Object {
             "data": Object {
@@ -240,18 +213,11 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "valueAxes": Array [
           Object {
             "id": "ValueAxis-1",
-            "labels": Object {
-              "filter": false,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
+            "name": "LeftAxis-1",
             "position": "left",
-            "scale": Object {
-              "type": "linear",
+            "title": Object {
+              "text": "",
             },
-            "show": true,
-            "title": Object {},
           },
         ],
       }

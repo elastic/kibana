@@ -121,7 +121,7 @@ describe('ValueAxesPanel component', () => {
     expect(comp).toMatchSnapshot();
   });
 
-  it('should not display remove button when the only axis', () => {
+  it('should not allow to remove the last value axis', () => {
     defaultProps.stateParams.valueAxes = [axis1];
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     expect(comp.find('[data-test-subj="removeValueAxisBtn"] button').exists()).toBeFalsy();
