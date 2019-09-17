@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -21,18 +21,42 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { timeDurationString } from '../../../lib/time_duration';
+import { timeDuration } from '../../../lib/time_duration';
 import { RefreshControl } from '../refresh_control';
 import { CustomInterval } from './custom_interval';
 
-const ListGroup = ({ children }) => <ul style={{ listStyle: 'none', margin: 0 }}>{[children]}</ul>;
+import { ComponentStrings, UnitStrings } from '../../../../i18n';
+const { WorkpadHeaderAutoRefreshControls: strings } = ComponentStrings;
+const { time: timeStrings } = UnitStrings;
+const { getSecondsText, getMinutesText, getHoursText } = timeStrings;
 
-export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterval }) => {
-  const RefreshItem = ({ duration, label }) => (
+interface Props {
+  refreshInterval: number;
+  setRefresh: (interval: number | undefined) => void;
+  disableInterval: () => void;
+}
+
+interface ListGroupProps {
+  children: ReactNode;
+}
+
+interface RefreshItemProps {
+  duration: number;
+  label: string;
+}
+
+const ListGroup = ({ children }: ListGroupProps) => (
+  <ul style={{ listStyle: 'none', margin: 0 }}>{[children]}</ul>
+);
+
+export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterval }: Props) => {
+  const RefreshItem = ({ duration, label }: RefreshItemProps) => (
     <li>
       <EuiLink onClick={() => setRefresh(duration)}>{label}</EuiLink>
     </li>
   );
+
+  const interval = timeDuration(refreshInterval);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
@@ -40,14 +64,14 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
-              <EuiDescriptionListTitle>Refresh elements</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>{strings.getRefreshListTitle()}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 {refreshInterval > 0 ? (
                   <Fragment>
-                    <span>Every {timeDurationString(refreshInterval)}</span>
+                    <span>{timeStrings.getCycleTimeText(interval.length, interval.format)}</span>
                   </Fragment>
                 ) : (
-                  <span>Manually</span>
+                  <span>{strings.getRefreshListDurationManualText()}</span>
                 )}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -56,11 +80,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {refreshInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content="Disable auto-refresh">
+                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableInterval}
-                      aria-label="Disable auto-refresh"
+                      aria-label={strings.getDisableTooltip()}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -74,28 +98,28 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
 
         <EuiHorizontalRule margin="m" />
 
-        <EuiFormLabel>Change auto-refresh interval</EuiFormLabel>
+        <EuiFormLabel>{strings.getIntervalFormLabelText()}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiText size="s">
           <EuiFlexGrid gutterSize="s" columns={2}>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration="5000" label="5 seconds" />
-                <RefreshItem duration="15000" label="15 seconds" />
-                <RefreshItem duration="30000" label="30 seconds" />
-                <RefreshItem duration="60000" label="1 minute" />
-                <RefreshItem duration="300000" label="5 minutes" />
-                <RefreshItem duration="900000" label="15 minute" />
+                <RefreshItem duration={5000} label={getSecondsText(5)} />
+                <RefreshItem duration={15000} label={getSecondsText(15)} />
+                <RefreshItem duration={30000} label={getSecondsText(30)} />
+                <RefreshItem duration={60000} label={getMinutesText(1)} />
+                <RefreshItem duration={300000} label={getMinutesText(5)} />
+                <RefreshItem duration={900000} label={getMinutesText(15)} />
               </ListGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <ListGroup>
-                <RefreshItem duration="1800000" label="30 Minutes" />
-                <RefreshItem duration="3600000" label="1 Hour" />
-                <RefreshItem duration="7200000" label="2 Hours" />
-                <RefreshItem duration="21600000" label="6 Hours" />
-                <RefreshItem duration="43200000" label="12 Hours" />
-                <RefreshItem duration="86400000" label="24 Hours" />
+                <RefreshItem duration={1800000} label={getMinutesText(30)} />
+                <RefreshItem duration={3600000} label={getHoursText(1)} />
+                <RefreshItem duration={7200000} label={getHoursText(2)} />
+                <RefreshItem duration={21600000} label={getHoursText(6)} />
+                <RefreshItem duration={43200000} label={getHoursText(12)} />
+                <RefreshItem duration={86400000} label={getHoursText(24)} />
               </ListGroup>
             </EuiFlexItem>
           </EuiFlexGrid>

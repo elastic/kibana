@@ -4,30 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
+import { ButtonSize } from '@elastic/eui/src/components/button/button';
+import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
 import { getTimeInterval } from '../../../lib/time_interval';
 
-export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue }) => {
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderCustomInterval: strings } = ComponentStrings;
+
+interface Props {
+  gutterSize: FlexGroupGutterSize;
+  buttonSize: ButtonSize;
+  onSubmit: (interval: number | undefined) => void;
+  defaultValue: any;
+}
+
+export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue }: Props) => {
   const [customInterval, setCustomInterval] = useState(defaultValue);
   const refreshInterval = getTimeInterval(customInterval);
   const isInvalid = Boolean(customInterval.length && !refreshInterval);
 
-  const handleChange = ev => setCustomInterval(ev.target.value);
+  const handleChange = (ev: ChangeEvent<HTMLInputElement>) => setCustomInterval(ev.target.value);
 
   return (
     <form
       onSubmit={ev => {
         ev.preventDefault();
+
         onSubmit(refreshInterval);
       }}
     >
       <EuiFlexGroup gutterSize={gutterSize}>
         <EuiFlexItem>
           <EuiFormRow
-            label="Set a custom interval"
-            helpText="Use shorthand notation, like 30s, 10m, or 1h"
+            label={strings.getFormLabel()}
+            helpText={strings.getFormDescription()}
             compressed
           >
             <EuiFieldText
@@ -47,7 +60,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
               type="submit"
               style={{ minWidth: 'auto' }}
             >
-              Set
+              {strings.getButtonLabel()}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
