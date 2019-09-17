@@ -1,0 +1,661 @@
+{
+  "monitorStates": {
+    "prevPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0060-intermittent\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"BEFORE\"}",
+    "nextPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0069-up\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"AFTER\"}",
+    "totalSummaryCount": {
+      "count": 2000
+    },
+    "summaries": [
+      {
+        "monitor_id": "0060-intermittent",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 17,
+              "down": 3
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234372"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x5,500x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234372
+        }
+      },
+      {
+        "monitor_id": "0061-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234373"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234373
+        }
+      },
+      {
+        "monitor_id": "0062-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234373"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234373
+        }
+      },
+      {
+        "monitor_id": "0063-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234373"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234373
+        }
+      },
+      {
+        "monitor_id": "0064-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234373"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234373
+        }
+      },
+      {
+        "monitor_id": "0065-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234373"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234373
+        }
+      },
+      {
+        "monitor_id": "0066-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234374"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234374
+        }
+      },
+      {
+        "monitor_id": "0067-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234374"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234374
+        }
+      },
+      {
+        "monitor_id": "0068-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234374"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234374
+        }
+      },
+      {
+        "monitor_id": "0069-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1560603329920,
+              "up": 20,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234375"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234375
+        }
+      }
+    ]
+  }
+}

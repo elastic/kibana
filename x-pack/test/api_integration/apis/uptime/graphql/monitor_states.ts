@@ -12,13 +12,14 @@ export default function({ getService }: FtrProviderContext) {
   describe('monitorStates', () => {
     const supertest = getService('supertest');
 
-    it('will fetch monitor state data for the given date range', async () => {
-      const getMonitorStatesQuery = {
+    const getMonitorStates = async (variables: { [key: string]: any } = {}) => {
+      const query = {
         operationName: 'MonitorStates',
         query: monitorStatesQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          ...variables,
         },
       };
 
@@ -27,31 +28,41 @@ export default function({ getService }: FtrProviderContext) {
       } = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
-        .send({ ...getMonitorStatesQuery });
+        .send({ ...query });
 
-      expectFixtureEql(data, 'monitor_states');
+      return data;
+    };
+
+    it('will fetch monitor state data for the given date range', async () => {
+      expectFixtureEql(await getMonitorStates(), 'monitor_states');
     });
 
     it('will fetch monitor state data for the given filters and range', async () => {
-      const getMonitorStatesQuery = {
-        operationName: 'MonitorStates',
-        query: monitorStatesQueryString,
-        variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2025-01-28T19:00:16.078Z',
-          filters:
-            '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"match":{"monitor.id":{"query":"0030-up","operator":"and"}}}]}}',
-        },
-      };
-
-      const {
-        body: { data },
-      } = await supertest
-        .post('/api/uptime/graphql')
-        .set('kbn-xsrf', 'foo')
-        .send({ ...getMonitorStatesQuery });
-
+      const data: any = await getMonitorStates({
+        filters:
+          '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"match":{"monitor.id":{"query":"0030-up","operator":"and"}}}]}}',
+      });
       expectFixtureEql(data, 'monitor_states_id_filtered');
+    });
+
+    it('can navigate forward and backward using pagination', async () => {
+      const expectedResultsCount = 100;
+      const expectedPageCount = expectedResultsCount / 10;
+
+      let pagination: string | null = null;
+      for (let page = 1; page <= expectedPageCount; page++) {
+        const data: any = await getMonitorStates({ pagination });
+        pagination = data.monitorStates.nextPagePagination;
+        expectFixtureEql(data, `monitor_states_page_${page}`);
+
+        // Test to see if the previous page pagination works on every page (other than the first)
+        if (page > 1) {
+          const prevData = await getMonitorStates({
+            pagination: data.monitorStates.prevPagePagination,
+          });
+          expectFixtureEql(prevData, `monitor_states_page_${page}_previous`);
+        }
+      }
     });
   });
 }
