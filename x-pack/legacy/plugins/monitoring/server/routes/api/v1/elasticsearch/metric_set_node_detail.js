@@ -93,9 +93,12 @@ export const metricSets = {
       keys: ['node_query_latency', 'node_index_latency'],
       name: 'node_latency'
     },
-    'node_total_io',
   ],
   overview: [
+    {
+      keys: ['node_total_cumul_io', 'node_total_read_io', 'node_total_write_io'],
+      name: 'node_total_io',
+    },
     {
       keys: ['node_query_latency', 'node_index_latency'],
       name: 'node_latency'
