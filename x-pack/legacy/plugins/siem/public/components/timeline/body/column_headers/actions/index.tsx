@@ -69,13 +69,6 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
   const isLoading = useTimelineContext();
   return (
     <>
-      <EventsHeadingItem className="siemEventsHeading__item--sort">
-        <SortIndicator
-          data-test-subj="header-sort-indicator"
-          sortDirection={getSortDirection({ header, sort })}
-        />
-      </EventsHeadingItem>
-
       {sort.columnId === header.id && isLoading ? (
         <EventsHeadingItem className="siemEventsHeading__item--loading">
           <EuiLoadingSpinner />

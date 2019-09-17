@@ -37,7 +37,7 @@ EventsTable.displayName = 'EventsTable';
 export const EventsThead = styled.div<{ minWidth: number }>`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade}
-    border-bottom: 2px solid ${theme.eui.euiColorLightShade};
+    border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
     display: flex;
     min-width: ${({ minWidth }) => `${minWidth}px`};
     position: sticky;
@@ -178,12 +178,20 @@ export const EventsHeadingItem = styled.div.attrs({
   className: 'siemEventsHeading__item',
 })<{ className?: string }>`
   ${({ theme }) => css`
-    & + & {
-      margin-left: 4px;
-    }
-
     &.siemEventsHeading__item--title {
+      align-items: center;
+      display: flex;
       min-width: 0;
+
+      &:hover {
+        color: ${theme.eui.euiColorPrimary};
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      & > * + * {
+        margin-left: ${theme.eui.euiSizeXS};
+      }
     }
 
     &.siemEventsHeading__item--loading,

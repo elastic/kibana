@@ -20,12 +20,13 @@ import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from
 import { EventsHeading, EventsHeadingItem } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
+import { SortIndicator } from '../../sort/sort_indicator';
 import { Actions, ACTIONS_WIDTH } from '../actions';
 import { ColumnHeader } from '../column_header';
 import { FullHeightFlexGroup, FullHeightFlexItem } from '../common/styles';
 import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
-import { getNewSortDirectionOnClick } from './helpers';
+import { getNewSortDirectionOnClick, getSortDirection } from './helpers';
 
 interface HeaderCompProps {
   children: React.ReactNode;
@@ -95,6 +96,11 @@ export class Header extends React.PureComponent<Props> {
                 <>{header.id}</>
               </EuiToolTip>
             </TruncatableText>
+
+            <SortIndicator
+              data-test-subj="header-sort-indicator"
+              sortDirection={getSortDirection({ header, sort })}
+            />
           </EventsHeadingItem>
 
           <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
