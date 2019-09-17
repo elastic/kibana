@@ -32,10 +32,9 @@ export class IndexPatternListConfig {
       ? [
           {
             key: 'default',
-            name: i18n.translate(
-              'common.ui.management.editIndexPattern.list.defaultIndexPatternListName',
-              { defaultMessage: 'Default' }
-            ),
+            name: i18n.translate('management.editIndexPattern.list.defaultIndexPatternListName', {
+              defaultMessage: 'Default',
+            }),
           },
         ]
       : [];

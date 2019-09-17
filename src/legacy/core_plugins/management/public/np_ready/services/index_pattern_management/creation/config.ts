@@ -20,17 +20,17 @@
 import { i18n } from '@kbn/i18n';
 
 const indexPatternTypeName = i18n.translate(
-  'common.ui.management.editIndexPattern.createIndex.defaultTypeName',
+  'management.editIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'index pattern' }
 );
 
 const indexPatternButtonText = i18n.translate(
-  'common.ui.management.editIndexPattern.createIndex.defaultButtonText',
+  'management.editIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Standard index pattern' }
 );
 
 const indexPatternButtonDescription = i18n.translate(
-  'common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
+  'management.editIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform full aggregations against any data' }
 );
 
