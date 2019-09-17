@@ -115,3 +115,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
 });
+
+test(`FORCE_FAILURE`, () => {
+  expect(false).toBe(true);
+});

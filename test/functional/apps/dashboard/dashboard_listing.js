@@ -31,9 +31,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('create prompt', () => {
-      it('appears when there are no dashboards', async function () {
+      it('FORCE_FAILURE appears when there are no dashboards', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
-        expect(promptExists).to.be(true);
+        expect(promptExists).to.be(false);
+        expect(true).to.be(false);
       });
 
       it('creates a new dashboard', async function () {
