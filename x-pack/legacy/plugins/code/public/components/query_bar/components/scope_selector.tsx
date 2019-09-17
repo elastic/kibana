@@ -9,7 +9,6 @@ import React, { Component } from 'react';
 
 import { SearchScope } from '../../../../model';
 import { SearchScopeText } from '../../../common/types';
-import { pxToRem } from '../../../style/variables';
 
 interface Props {
   scope: SearchScope;
