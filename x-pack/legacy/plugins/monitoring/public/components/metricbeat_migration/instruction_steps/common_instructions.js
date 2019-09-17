@@ -34,7 +34,7 @@ export function getSecurityStep(url) {
           <EuiText>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.securitySetup"
-              defaultMessage="If security is enabled, you might require {link}."
+              defaultMessage="If security is enabled, {link} might be required."
               values={{
                 link: (
                   <Fragment>
@@ -137,7 +137,7 @@ export function getDisableStatusStep(product, meta) {
         >
           <p>
             {i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusDescription', {
-              defaultMessage: `It can take up to {secondsAgo} seconds to detect data, and we’ll continue checking.`,
+              defaultMessage: `It can take up to {secondsAgo} seconds to detect data.`,
               values: {
                 secondsAgo: meta.secondsAgo
               }

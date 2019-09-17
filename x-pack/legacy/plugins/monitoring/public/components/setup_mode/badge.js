@@ -54,7 +54,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
           &nbsp;
           <EuiTextColor color="warning" size="xs">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
-              defaultMessage: 'Monitor all nodes with Metricbeat'
+              defaultMessage: 'Some nodes only use internal collection'
             })}
           </EuiTextColor>
         </Fragment>

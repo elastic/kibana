@@ -311,15 +311,14 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               <Fragment>
                 <EuiCallOut
                   title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle', {
-                    defaultMessage: 'Disable internal collection',
+                    defaultMessage: 'Metricbeat is now monitoring your Elasticsearch nodes',
                   })}
                   color="warning"
                   iconType="flag"
                 >
                   <p>
                     {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription', {
-                      defaultMessage: `Metricbeat is now monitoring your Elasticsearch servers.
-                      Disable internal collection to finish the migration.`
+                      defaultMessage: `Disable internal collection to finish the migration.`
                     })}
                   </p>
                   <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
