@@ -4,30 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Axis,
-  Chart,
-  CurveType,
-  getAxisId,
-  getSpecId,
-  LineSeries,
-  Position,
-  ScaleType,
-  timeFormatter,
-  Settings,
-} from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { Axis, Chart, getAxisId, Position, timeFormatter, Settings } from '@elastic/charts';
+import { EuiPanel, EuiTitle, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  convertMicrosecondsToMilliseconds as microsToMillis,
-  getChartDateLabel,
-} from '../../../lib/helper';
+import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { getColorsMap } from './get_colors_map';
 import { ChartWrapper } from './chart_wrapper';
+import { DurationLineSeriesList } from './duration_line_series_list';
 
 interface DurationChartProps {
   /**
@@ -62,27 +48,6 @@ export const DurationChart = ({
   loading,
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
-  // this id is used for the line chart representing the average duration length
-  const averageSpecId = getSpecId('average-');
-
-  const lineSeries = locationDurationLines.map(durationLine => {
-    const locationSpecId = getSpecId('loc-avg' + durationLine.name);
-    return (
-      <LineSeries
-        curve={CurveType.CURVE_MONOTONE_X}
-        customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-        data={durationLine.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-        id={locationSpecId}
-        key={`locline-${durationLine.name}`}
-        name={durationLine.name}
-        xAccessor={0}
-        xScaleType={ScaleType.Time}
-        yAccessors={[1]}
-        yScaleToDataExtent={false}
-        yScaleType={ScaleType.Linear}
-      />
-    );
-  });
 
   return (
     <React.Fragment>
@@ -121,7 +86,32 @@ export const DurationChart = ({
                 defaultMessage: 'Duration ms',
               })}
             />
-            {lineSeries}
+            {locationDurationLines.length > 0 && (
+              <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+            )}
+            {locationDurationLines.length === 0 && (
+              <EuiEmptyPrompt
+                title={
+                  <EuiTitle>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.uptime.durationChart.emptyPrompt.title"
+                        defaultMessage="No duration data available"
+                      />
+                    </h5>
+                  </EuiTitle>
+                }
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.uptime.durationChart.emptyPrompt.description"
+                      defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
+                      values={{ emphasizedText: <strong>up</strong> }}
+                    />
+                  </p>
+                }
+              />
+            )}
           </Chart>
         </ChartWrapper>
       </EuiPanel>

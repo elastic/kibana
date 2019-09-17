@@ -103,7 +103,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
   });
 
-  it('has fun times', async () => {
+  it('inserts empty buckets for missing data', async () => {
     const searchMock = jest.fn();
     searchMock.mockReturnValue(mockChartsData);
     const database = {
@@ -112,7 +112,6 @@ describe('ElasticsearchMonitorsAdapter', () => {
       head: jest.fn(),
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
-    const res = await adapter.getMonitorChartsData({}, 'fooid', 'now-15m', 'now');
-    expect(res).toMatchSnapshot();
+    expect(await adapter.getMonitorChartsData({}, 'id', 'now-15m', 'now')).toMatchSnapshot();
   });
 });

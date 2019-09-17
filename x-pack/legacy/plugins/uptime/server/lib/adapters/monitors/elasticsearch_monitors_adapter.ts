@@ -101,7 +101,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const dateBuckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
+    const dateHistogramBuckets = dropLatestBucket(
+      get(result, 'aggregations.timeseries.buckets', [])
+    );
 
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
@@ -122,33 +124,29 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const resultLocations = new Set<string>();
-
     const linesByLocation: { [key: string]: LocationDurationLine } = {};
-    dateBuckets.forEach(dateBucket => {
-      const x = get(dateBucket, 'key');
-      const docCount = get(dateBucket, 'doc_count', 0);
+    dateHistogramBuckets.forEach(dateHistogramBucket => {
+      const x = get(dateHistogramBucket, 'key');
+      const docCount = get(dateHistogramBucket, 'doc_count', 0);
       const bucketLocations = new Set<string>();
 
-      dateBucket.location.buckets.forEach(
+      dateHistogramBucket.location.buckets.forEach(
         (locationBucket: { key: string; duration: { avg: number } }) => {
           const locationName = locationBucket.key;
-          if (!bucketLocations.has(locationName)) {
-            bucketLocations.add(locationName);
+          bucketLocations.add(locationName);
+          resultLocations.add(locationName);
+
+          let currentLine: LocationDurationLine = get(linesByLocation, locationName);
+          if (!currentLine) {
+            currentLine = { name: locationName, line: [] };
+            linesByLocation[locationName] = currentLine;
+            monitorChartsData.locationDurationLines.push(currentLine);
           }
-          if (!resultLocations.has(locationName)) {
-            resultLocations.add(locationName);
-          }
-          let ldl: LocationDurationLine = get(linesByLocation, locationName);
-          if (!ldl) {
-            ldl = { name: locationName, line: [] };
-            linesByLocation[locationName] = ldl;
-            monitorChartsData.locationDurationLines.push(ldl);
-          }
-          ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
+          currentLine.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
       );
 
-      if (dateBucket.location.buckets.length < resultLocations.size) {
+      if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
         resultLocations.forEach(resultLocation => {
           if (location && location !== resultLocation) return;
           if (!bucketLocations.has(resultLocation)) {
@@ -156,17 +154,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               ({ name }) => name === resultLocation
             );
             if (locationLine) {
-              locationLine.line.push({
-                x,
-                y: null,
-              });
+              locationLine.line.push({ x, y: null });
             }
           }
         });
       }
 
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, get(dateHistogramBucket, 'status.buckets', []), docCount)
       );
     });
 
