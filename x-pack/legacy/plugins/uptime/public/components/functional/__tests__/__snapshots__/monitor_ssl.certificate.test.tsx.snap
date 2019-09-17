@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  <div
+    class="sc-bdVaJa bYKQkq"
+  >
+    <div
+      aria-label="SSL certificate expires"
+      class="euiText euiText--small euiText--constrainedWidth"
+    >
+      <div
+        class="euiTextColor euiTextColor--subdued"
+      >
+        SSL certificate expires in 2 months
+      </div>
+    </div>
+  </div>,
+]
+`;

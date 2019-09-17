@@ -8,7 +8,7 @@ import moment from 'moment';
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { Ping } from '../../../../common/graphql/types';
-import { MonitorStatusBarComponent } from '../monitor_status_bar';
+import { MonitorStatusBarComponent } from '../monitor_status_bar/monitor_status_bar';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping[];

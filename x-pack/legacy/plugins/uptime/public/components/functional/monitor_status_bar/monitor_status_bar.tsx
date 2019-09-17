@@ -4,25 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { Ping } from '../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorStatusBarQuery } from '../../queries';
-import { EmptyStatusBar } from './empty_status_bar';
-import { convertMicrosecondsToMilliseconds } from '../../lib/helper';
+
+import { Ping } from '../../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
+import { monitorStatusBarQuery } from '../../../queries';
+import { EmptyStatusBar } from '../empty_status_bar';
+import { convertMicrosecondsToMilliseconds } from '../../../lib/helper';
+import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 
 interface MonitorStatusBarQueryResult {
   monitorStatus?: Ping[];
@@ -37,10 +31,10 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
-    const duration = get(monitor, 'duration.us', undefined);
+    const duration: number = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
-    const certificateValidity: string | undefined = get(tls, 'certificate_not_valid_after', undefined);
+
     return (
       <EuiPanel>
         <EuiFlexGroup gutterSize="l" wrap>
@@ -107,24 +101,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
             {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {certificateValidity && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText
-              color="subdued"
-              grow={false}
-              size="s"
-              aria-label={i18n.translate('xpack.uptime.monitorStatusBar.sslCertificateExpiry', {
-                defaultMessage: 'SSL certificate expires',
-              })}
-            >
-              {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificateExpiry', {
-                defaultMessage: 'SSL certificate expires ',
-              })}
-              {moment(new Date(certificateValidity).valueOf()).fromNow()}
-            </EuiText>
-          </>
-        )}
+        <MonitorSSLCertificate tls={tls} />
       </EuiPanel>
     );
   }
