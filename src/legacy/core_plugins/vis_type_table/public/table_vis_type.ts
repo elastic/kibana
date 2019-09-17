@@ -24,6 +24,7 @@ import { visFactory } from 'ui/vis/vis_factory';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
+// @ts-ignore
 import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
