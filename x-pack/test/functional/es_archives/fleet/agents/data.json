@@ -95,17 +95,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "tokens:token1",
+    "id": "tokens:f2e6bcd8-e68c-4da8-826e-ae6f5c1def4e",
     "index": ".fleet",
     "source": {
-      "type": "tokens",
-      "tokens": {
-        "type": "ENROLMENT_TOKEN",
-        "tokenHash": "7015c04a6e0bb7a3a7f55165772d5abf0a8ae4b393721f2a11d5c15dcdcafc837d5fe1daea833eca303eb72e424d27418a63af5bc0d46bfa63620e9e0fcfdf94",
-        "policy_id": "policy:1",
-        "policy_shared_id": "policy:1",
-        "active": true
-      }
+      "tokens" : {
+        "created_at" : "2019-09-16T19:31:48.500Z",
+        "type" : "ENROLMENT_TOKEN",
+        "token" : "CAxY1fEepPxyJ5oASPWpi/w/49nwO0qhPeEMtUkqm01CAnpOkxf5KM9pXJ+NmYGAJmIw+QnfneOG1+f4xCyWgGf/wEtYuwRO9yd23X0YBZZApxTrgTR0WoWFKyXRI0KzhmD5BKj3eut9AwTySEfU8cNJzSQ+3SVbsYKIxbn0QcEOgiV+L+aIko6m7o6pvWUPnkxirdXxXjrOLLdeSe0/Wh0Yp05aUG4OYsyYnQqFOeGw37WpG8n1uTtqkHVs/r8o4Gh0eQgLI9+zQWW73rvPnQ7dabZ1Mh4VScOkn+/hGCfSfP0ULRXR8QPsmnh3ppY3OHMeHnUHP1SRsXraUoSRRTypzwXrkwwBL74jeY/Dh+YaZF+elusF3sQ1pE8y52QS7sWMFLIxUfb9vg==",
+        "tokenHash" : "b0e83363575be247419c69d0f9e1379e362e2d9928f7d80e65d0c3e4470c6082892d6f63855044bc101584e6e299090945911da23b27de8ebcd3761e23787e61",
+        "policy_id" : "policy:1",
+        "policy_shared_id" : "policy:1",
+        "active" : true
+      },
+      "type" : "tokens",
+      "updated_at" : "2019-09-16T19:31:48.518Z"
     }
   }
 }

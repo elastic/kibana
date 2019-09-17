@@ -22,6 +22,34 @@
             }
           }
         },
+        "tokens": {
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "policy_id": {
+              "type": "keyword"
+            },
+            "policy_shared_id": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "expire_at": {
+              "type": "date"
+            },
+            "tokenHash": {
+              "type": "keyword"
+            },
+            "token": {
+              "type": "binary"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
         "agents": {
           "properties": {
             "access_token": {
@@ -83,52 +111,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "settings": {
-      "index": {
-        "number_of_replicas": "0",
-        "number_of_shards": "1"
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "index": ".fleet-tokens",
-    "mappings": {
-      "dynamic": "strict",
-      "properties": {
-        "updated_at": {
-          "type": "date"
-        },
-        "tokens": {
-          "properties": {
-            "active": {
-              "type": "boolean"
-            },
-            "policy_id": {
-              "type": "keyword"
-            },
-            "policy_shared_id": {
-              "type": "keyword"
-            },
-            "created_at": {
-              "type": "date"
-            },
-            "expire_at": {
-              "type": "date"
-            },
-            "tokenHash": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
             }
           }
         }

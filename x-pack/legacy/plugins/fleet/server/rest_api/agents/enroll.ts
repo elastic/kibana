@@ -49,7 +49,15 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   ): Promise<ReturnTypeCreate<any>> => {
     const enrollmentToken = request.headers['kbn-fleet-enrollment-token'];
     const { sharedId, type, metadata } = request.payload;
-    const agent = await libs.agents.enroll(enrollmentToken, type, metadata, sharedId);
+    const agent = await libs.agents.enroll(
+      {
+        kind: 'internal',
+      },
+      enrollmentToken,
+      type,
+      metadata,
+      sharedId
+    );
 
     return {
       action: 'created',
