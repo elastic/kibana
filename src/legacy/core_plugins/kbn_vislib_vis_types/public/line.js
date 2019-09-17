@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
@@ -35,16 +35,18 @@ import {
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
 import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
+import { vislibVisControllerProvider } from './controller';
 
-export default function PointSeriesVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function PointSeriesVisType($compile, $rootScope, Private) {
+  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
   const countLabel = getCountLabel();
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'line',
     title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
     icon: 'visLine',
     description: i18n.translate('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
+    visualization: controller,
     visConfig: {
       defaults: {
         type: 'line',
@@ -122,6 +124,9 @@ export default function PointSeriesVisType(Private) {
           color: palettes.euiPaletteColorBlind.colors[9]
         }
       },
+    },
+    events: {
+      brush: { disabled: false },
     },
     editorConfig: {
       collections: getConfigCollections(),

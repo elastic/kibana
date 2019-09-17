@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
@@ -35,17 +35,19 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
 import { palettes } from '@elastic/eui/lib/services';
+import { vislibVisControllerProvider } from './controller';
 
-export default function PointSeriesVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function PointSeriesVisType($compile, $rootScope, Private) {
+  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
   const countLabel = getCountLabel();
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'area',
     title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
     icon: 'visArea',
     description: i18n.translate(
       'kbnVislibVisTypes.area.areaDescription', { defaultMessage: 'Emphasize the quantity beneath a line chart' }),
+    visualization: controller,
     visConfig: {
       defaults: {
         type: 'area',
@@ -123,6 +125,9 @@ export default function PointSeriesVisType(Private) {
         },
         labels: {}
       },
+    },
+    events: {
+      brush: { disabled: false },
     },
     editorConfig: {
       collections: getConfigCollections(),

@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
+import { vislibVisControllerProvider } from './controller';
+import { visFactory } from '../../../ui/public/vis/vis_factory';
 
-export default function GoalVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+export default function GoalVisType($compile, $rootScope, Private) {
+  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
 
-  return VisFactory.createVislibVisualization({
+  return visFactory.createBaseVisualization({
     name: 'goal',
     title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
     icon: 'visGoal',
     description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
+    visualization: controller,
     visConfig: {
       defaults: {
         addTooltip: true,
@@ -74,9 +76,6 @@ export default function GoalVisType(Private) {
           }
         }
       },
-    },
-    events: {
-      brush: { disabled: true },
     },
     editorConfig: {
       collections: {

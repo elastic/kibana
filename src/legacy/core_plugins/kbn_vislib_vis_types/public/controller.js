@@ -17,27 +17,21 @@
  * under the License.
  */
 
-import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
-import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
-import { CUSTOM_LEGEND_VIS_TYPES } from './vislib_vis_legend';
-import { BaseVisType } from './base_vis_type';
-import VislibProvider from '../../vislib';
-import { VisFiltersProvider } from '../vis_filters';
+
 import $ from 'jquery';
-import { defaultsDeep } from 'lodash';
+import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+import VislibProvider from '../../../ui/public/vislib';
 
-export function VislibVisTypeProvider(Private, $rootScope, $compile) {
+const legendClassName = {
+  top: 'visLib--legend-top',
+  bottom: 'visLib--legend-bottom',
+  left: 'visLib--legend-left',
+  right: 'visLib--legend-right',
+};
+
+export const vislibVisControllerProvider = ($compile, $rootScope, Private) => {
   const vislib = Private(VislibProvider);
-  const visFilters = Private(VisFiltersProvider);
-
-  const legendClassName = {
-    top: 'visLib--legend-top',
-    bottom: 'visLib--legend-bottom',
-    left: 'visLib--legend-left',
-    right: 'visLib--legend-right',
-  };
-
-  class VislibVisController {
+  return class VislibVisController {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
@@ -113,24 +107,5 @@ export function VislibVisTypeProvider(Private, $rootScope, $compile) {
         this.$scope = null;
       }
     }
-  }
-
-  class VislibVisType extends BaseVisType {
-    constructor(opts) {
-      if (!opts.responseHandler) {
-        opts.responseHandler = 'vislib_series';
-        opts.responseHandlerConfig = { asAggConfigResults: true };
-      }
-      opts.events = defaultsDeep({}, opts.events, {
-        brush: {
-          defaultAction: visFilters.brush,
-        }
-      });
-      opts.visualization = VislibVisController;
-      super(opts);
-      this.refreshLegend = 0;
-    }
-  }
-
-  return VislibVisType;
-}
+  };
+};
