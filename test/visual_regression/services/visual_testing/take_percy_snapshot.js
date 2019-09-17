@@ -20,7 +20,7 @@
 import { readFileSync } from 'fs';
 import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
 
-export function takePercySnapshot() {
+export function takePercySnapshot(selectors, isWhitelist) {
   if (!window.PercyAgent) {
     return false;
   }
@@ -32,6 +32,20 @@ export function takePercySnapshot() {
   const queryAll = selector => [
     ...document.querySelectorAll(selector)
   ];
+
+  if (isWhitelist) {
+    document.body.classList.add('percyWhitelist');
+  } else {
+    document.body.classList.remove('percyWhitelist');
+  }
+
+  // set Percy visibility on elements
+  const className = isWhitelist ? 'showInPercy' : 'hideInPercy';
+  for (const selector of selectors) {
+    for (const element of queryAll(selector)) {
+      element.classList.add(className);
+    }
+  }
 
   // array of canvas/image replacements
   const replacements = [];
@@ -53,6 +67,14 @@ export function takePercySnapshot() {
   // restore replaced canvases
   for (const { image, canvas } of replacements) {
     image.parentElement.replaceChild(canvas, image);
+  }
+
+  // restore element visibility
+  document.body.classList.remove('percyWhitelist');
+  for (const selector of selectors) {
+    for (const element of queryAll(selector)) {
+      element.classList.remove(className);
+    }
   }
 
   return snapshot;

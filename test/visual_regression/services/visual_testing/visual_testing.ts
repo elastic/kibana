@@ -18,8 +18,10 @@
  */
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
-
 import { Test } from 'mocha';
+import _ from 'lodash';
+
+import testSubjSelector from '@kbn/test-subj-selector';
 
 import { pkg } from '../../../../src/legacy/utils/package_json';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -34,7 +36,6 @@ export const DEFAULT_OPTIONS = {
 export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const find = getService('find');
   const lifecycle = getService('lifecycle');
 
   let currentTest: Test | undefined;
@@ -53,19 +54,28 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
     return statsCache.get(test)!;
   }
 
+  interface SnapshotOptions {
+    name?: string;
+    selectors?: string[];
+    isWhitelist?: boolean;
+  }
+
   return new (class VisualTesting {
-    public async snapshot(name?: string) {
+    public async snapshot(options: SnapshotOptions = {}) {
       log.debug('Capturing percy snapshot');
 
       if (!currentTest) {
         throw new Error('unable to determine current test');
       }
 
-      const [domSnapshot, url] = await Promise.all([this.getSnapshot(), browser.getCurrentUrl()]);
-
+      const [domSnapshot, url] = await Promise.all([
+        this.getSnapshot(options.selectors, options.isWhitelist),
+        browser.getCurrentUrl(),
+      ]);
       const stats = getStats(currentTest);
       stats.snapshotCount += 1;
 
+      const { name } = options;
       const success = await postSnapshot({
         name: `${currentTest.fullTitle()} [${name ? name : stats.snapshotCount}]`,
         url,
@@ -79,16 +89,20 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
       }
     }
 
-    private async getSnapshot() {
-      const snapshot = await browser.execute<[], string | false>(takePercySnapshot);
+    private async getSnapshot(selectors: string[] = [], isWhitelist = false) {
+      const testSubjSelectors = selectors.map(testSubjSelector);
+      const snapshot = await browser.execute<[string[], boolean], string | false>(
+        takePercySnapshot,
+        testSubjSelectors,
+        isWhitelist
+      );
       return snapshot !== false
         ? snapshot
-        : await browser.execute<[], string>(takePercySnapshotWithAgent);
-    }
-
-    public async showElementInPercy(selector: string) {
-      const el = await find.byCssSelector(selector);
-      await el.addClass('showInPercy');
+        : await browser.execute<[string[], boolean], string>(
+            takePercySnapshotWithAgent,
+            testSubjSelectors,
+            isWhitelist
+          );
     }
   })();
 }

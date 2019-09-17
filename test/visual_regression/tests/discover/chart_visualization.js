@@ -52,32 +52,40 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
 
       it('should show correct data for chart interval Hourly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Hourly');
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
 
       it('should show correct data for chart interval Daily', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Daily');
-        await visualTesting.showElementInPercy('.echChart');
         await retry.try(async () => {
-          await visualTesting.snapshot();
+          await visualTesting.snapshot({
+            selectors: ['discoverChart'],
+            isWhitelist: true,
+          });
         });
       });
 
       it('should show correct data for chart interval Weekly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Weekly');
-        await visualTesting.showElementInPercy('.echChart');
         await retry.try(async () => {
-          await visualTesting.snapshot();
+          await visualTesting.snapshot({
+            selectors: ['discoverChart'],
+            isWhitelist: true,
+          });
         });
       });
 
@@ -88,29 +96,37 @@ export default function ({ getService, getPageObjects }) {
           expect(actualInterval).to.be('Daily');
         });
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
 
       it('should show correct data for chart interval Monthly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Monthly');
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
 
       it('should show correct data for chart interval Yearly', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Yearly');
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
 
       it('should show correct data for chart interval Auto', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Auto');
-        await visualTesting.showElementInPercy('.echChart');
-        await visualTesting.snapshot();
+        await visualTesting.snapshot({
+          selectors: ['discoverChart'],
+          isWhitelist: true,
+        });
       });
     });
 
@@ -121,12 +137,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await visualTesting.showElementInPercy('.echChart');
         await retry.try(async function () {
-          await visualTesting.snapshot();
+          await visualTesting.snapshot({
+            selectors: ['discoverChart'],
+            isWhitelist: true,
+          });
         });
       });
-
     });
   });
 }
