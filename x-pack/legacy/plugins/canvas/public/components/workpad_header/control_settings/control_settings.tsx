@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+// @ts-ignore untyped local
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
+
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderControlSettings: strings } = ComponentStrings;
+
+interface Props {
+  refreshInterval: number;
+  setRefreshInterval: (interval: number | undefined) => void;
+  autoplayEnabled: boolean;
+  autoplayInterval: number;
+  enableAutoplay: (enable: boolean) => void;
+  setAutoplayInterval: (interval: number | undefined) => void;
+}
 
 export const ControlSettings = ({
   setRefreshInterval,
@@ -18,16 +31,16 @@ export const ControlSettings = ({
   autoplayInterval,
   enableAutoplay,
   setAutoplayInterval,
-}) => {
-  const setRefresh = val => setRefreshInterval(val);
+}: Props) => {
+  const setRefresh = (val: number | undefined) => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
   };
 
-  const popoverButton = handleClick => (
-    <EuiToolTip position="bottom" content="Control settings">
-      <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
+  const popoverButton = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
+    <EuiToolTip position="bottom" content={strings.getTooltip()}>
+      <EuiButtonIcon iconType="gear" aria-label={strings.getTooltip()} onClick={handleClick} />
     </EuiToolTip>
   );
 

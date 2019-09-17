@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
 
-export const RefreshControl = ({ doRefresh, inFlight }) => (
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderRefreshControlSettings: strings } = ComponentStrings;
+
+interface Props {
+  doRefresh: MouseEventHandler<HTMLButtonElement>;
+  inFlight: boolean;
+}
+
+export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
   <EuiToolTip
     position="bottom"
     content={
       <span>
-        Refresh data
+        {strings.getRefreshTooltip()}
         <ToolTipShortcut namespace="EDITOR" action="REFRESH" />
       </span>
     }
@@ -22,7 +30,7 @@ export const RefreshControl = ({ doRefresh, inFlight }) => (
     <EuiButtonIcon
       disabled={inFlight}
       iconType="refresh"
-      aria-label="Refresh Elements"
+      aria-label={strings.getRefreshAriaLabel()}
       onClick={doRefresh}
     />
   </EuiToolTip>
