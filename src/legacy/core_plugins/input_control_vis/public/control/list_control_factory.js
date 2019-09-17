@@ -172,7 +172,7 @@ class ListControl extends Control {
 export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   let indexPattern;
   try {
-    indexPattern = await data.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
 
     // dynamic options are only allowed on String fields but the setting defaults to true so it could
     // be enabled for non-string fields (since UI input is hidden for non-string fields).

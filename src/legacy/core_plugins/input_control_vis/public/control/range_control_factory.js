@@ -104,7 +104,7 @@ class RangeControl extends Control {
 export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
   let indexPattern;
   try {
-    indexPattern = await data.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
