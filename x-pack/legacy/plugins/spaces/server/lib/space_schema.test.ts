@@ -137,7 +137,6 @@ describe('#color', () => {
   });
 });
 
-/* avatar image tests */
 describe('#imageUrl', () => {
   test('is optional', () => {
     const result = spaceSchema.validate({
