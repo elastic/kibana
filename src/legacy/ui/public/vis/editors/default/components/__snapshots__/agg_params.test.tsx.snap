@@ -48,6 +48,7 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
