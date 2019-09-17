@@ -29,7 +29,7 @@ monitoring-shard-allocation {
     align-self: center;
     background-color: $euiColorLightestShade;
     margin: $euiSizeS;
-    border: 1px solid $euiColorLightShade;
+    border: 1px solid $euiColorMediumShade;
     border-radius: $euiSizeXS;
 
     &.index {
@@ -85,5 +85,4 @@ monitoring-shard-allocation {
     position: relative;
     display: inline-block;
   }
-
 }
