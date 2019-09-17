@@ -5,3 +5,5 @@
  */
 
 export * from './constants';
+export * from './types';
+export * from './index_pattern';

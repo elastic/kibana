@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LensServer } from './plugin';
-import { LensServerOptions } from './server_options';
+import { SavedObjectsClientContract } from 'src/core/server';
 
-export * from './plugin';
-
-export const lensServerPlugin = (opts: LensServerOptions) => new LensServer(opts);
+export interface LensServerOptions {
+  getScopedSavedObjectsClient: (request: unknown) => SavedObjectsClientContract;
+}

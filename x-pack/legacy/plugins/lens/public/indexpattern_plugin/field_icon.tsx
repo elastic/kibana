@@ -7,7 +7,7 @@
 import React from 'react';
 import { ICON_TYPES, palettes, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import { DataType } from '../types';
+import { DataType } from '../../common';
 
 function stringToNum(s: string) {
   return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);

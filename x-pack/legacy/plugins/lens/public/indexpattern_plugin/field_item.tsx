@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
-import { DataType } from '..';
+import { IndexPatternField, IndexPattern, DataType } from '../../common';
 
 export interface FieldItemProps {
   field: IndexPatternField;

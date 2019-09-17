@@ -11,18 +11,14 @@ import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
-import {
-  IndexPatternColumn,
-  IndexPatternPrivateState,
-  IndexPatternField,
-  OperationType,
-} from '../indexpattern';
+import { IndexPatternColumn, IndexPatternPrivateState, OperationType } from '../indexpattern';
 
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
+import { IndexPattern, IndexPatternField } from '../../../common';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -32,6 +28,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
+  indexPattern: IndexPattern;
 };
 
 export interface OperationFieldSupportMatrix {
@@ -44,11 +41,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   props: IndexPatternDimensionPanelProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
-
   const operationFieldSupportMatrix = useMemo(() => {
     const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
-      currentIndexPattern
+      props.indexPattern
     ).filter(operation => props.filterOperations(operation.operationMetaData));
 
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
@@ -78,7 +73,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
       fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
       operationByDocument: _.uniq(supportedOperationsByDocument),
     };
-  }, [currentIndexPattern, props.filterOperations]);
+  }, [props.indexPattern, props.filterOperations]);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
@@ -126,10 +121,10 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           // If only the field has changed use the onFieldChange method on the operation to get the
           // new column, otherwise use the regular buildColumn to get a new column.
           const newColumn = hasFieldChanged
-            ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
+            ? changeField(selectedColumn, props.indexPattern, droppedItem.field)
             : buildColumn({
                 columns: props.state.layers[props.layerId].columns,
-                indexPattern: currentIndexPattern,
+                indexPattern: props.indexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
@@ -150,7 +145,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
       >
         <PopoverEditor
           {...props}
-          currentIndexPattern={currentIndexPattern}
+          currentIndexPattern={props.indexPattern}
           selectedColumn={selectedColumn}
           operationFieldSupportMatrix={operationFieldSupportMatrix}
         />

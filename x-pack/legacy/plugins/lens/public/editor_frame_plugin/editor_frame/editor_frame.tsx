@@ -75,22 +75,24 @@ export function EditorFrame(props: EditorFrameProps) {
     .forEach(id => {
       const datasourceState = state.datasourceStates[id].state;
       const datasource = props.datasourceMap[id];
+      const setState = (newState: unknown) => {
+        dispatch({
+          type: 'UPDATE_DATASOURCE_STATE',
+          datasourceId: id,
+          updater: newState,
+        });
+      };
 
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach(layer => {
-        const publicAPI = props.datasourceMap[id].getPublicAPI(
-          datasourceState,
-          (newState: unknown) => {
-            dispatch({
-              type: 'UPDATE_DATASOURCE_STATE',
-              datasourceId: id,
-              updater: newState,
-            });
-          },
-          layer
-        );
+      datasource.getLayers(datasourceState).forEach(layerId => {
+        const publicAPI = props.datasourceMap[id].getPublicAPI({
+          layerId,
+          setState,
+          dateRange: props.dateRange,
+          query: props.query,
+          state: datasourceState,
+        });
 
-        datasourceLayers[layer] = publicAPI;
+        datasourceLayers[layerId] = publicAPI;
       });
     });
 

@@ -5,12 +5,16 @@
  */
 
 import { DragContextState } from '../drag_drop';
-import { IndexPattern } from './indexpattern';
+import { IndexPattern } from '../../common';
 
 export const createMockedIndexPattern = (): IndexPattern => ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
+  fieldFormatMap: {},
+  typeMeta: {
+    aggs: {},
+  },
   fields: [
     {
       name: 'timestamp',
