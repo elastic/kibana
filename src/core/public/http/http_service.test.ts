@@ -25,6 +25,10 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
 
+function delay<T>(duration: number) {
+  return new Promise<T>(r => setTimeout(r, duration));
+}
+
 const setupFakeBasePath: SetupTap = injectedMetadata => {
   injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
 };
@@ -342,6 +346,7 @@ describe('interception', () => {
 
   it('should skip remaining interceptors when controller halts during request', async () => {
     const order: string[] = [];
+    let pending = true;
 
     http.intercept({
       request() {
@@ -369,13 +374,24 @@ describe('interception', () => {
       },
     });
 
-    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    http
+      .fetch('/my/path')
+      .then(() => {
+        pending = false;
+      })
+      .catch(() => {
+        pending = false;
+      });
+    await delay(1000);
+
+    expect(pending).toBe(true);
     expect(fetchMock.called()).toBe(false);
     expect(order).toEqual(['Request 3', 'Request 2']);
   });
 
   it('should skip remaining interceptors when controller halts during response', async () => {
     const order: string[] = [];
+    let pending = true;
 
     http.intercept({
       request() {
@@ -403,9 +419,47 @@ describe('interception', () => {
       },
     });
 
-    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    http
+      .fetch('/my/path')
+      .then(() => {
+        pending = false;
+      })
+      .catch(() => {
+        pending = false;
+      });
+    await delay(1000);
+
     expect(fetchMock.called()).toBe(true);
+    expect(pending).toBe(true);
     expect(order).toEqual(['Request 3', 'Request 2', 'Request 1', 'Response 1']);
+  });
+
+  it('should skip remaining interceptors when controller halts during responseError', async () => {
+    fetchMock.post('*', 401);
+
+    const order: string[] = [];
+    let pending = true;
+
+    http.intercept({
+      responseError(response, controller) {
+        controller.halt();
+        order.push('Response Error 1');
+      },
+    });
+
+    http
+      .post('/my/path')
+      .then(() => {
+        pending = false;
+      })
+      .catch(() => {
+        pending = false;
+      });
+    await delay(1000);
+
+    expect(fetchMock.called()).toBe(true);
+    expect(pending).toBe(true);
+    expect(order).toEqual(['Response Error 1']);
   });
 
   it('should not fetch if exception occurs during request interception', async () => {
@@ -449,7 +503,7 @@ describe('interception', () => {
       },
     });
 
-    await expect(http.fetch('/my/wat')).rejects.toThrow(/Interception Error/);
+    await expect(http.fetch('/my/path')).rejects.toThrow(/Interception Error/);
     expect(fetchMock.called()).toBe(false);
     expect(order).toEqual([
       'Request 3',
@@ -504,6 +558,112 @@ describe('interception', () => {
       'Response 2',
       'Response 3',
     ]);
+  });
+
+  it('should not have access to request via response error interceptor when request error', async () => {
+    expect.assertions(3);
+
+    http.intercept({
+      response() {
+        throw new Error('Internal Server Error');
+      },
+    });
+    http.intercept({
+      responseError({ request }) {
+        expect(request).toBeUndefined();
+      },
+    });
+
+    await expect(http.fetch('/my/path')).rejects.toThrow();
+    expect(fetchMock.called()).toBe(true);
+  });
+
+  it('should have access to request via response error interceptor when no request error', async () => {
+    expect.assertions(3);
+
+    http.intercept({
+      response() {
+        throw new Error('Internal Server Error');
+      },
+    });
+    http.intercept({
+      responseError({ request }) {
+        expect(request).toBeDefined();
+      },
+    });
+
+    await expect(http.fetch('/my/path')).rejects.toThrow();
+    expect(fetchMock.called()).toBe(true);
+  });
+
+  it('should have access to response via response error interceptor when available', async () => {
+    expect.assertions(2);
+    fetchMock.restore();
+    fetchMock.get('*', { status: 500 });
+
+    http.intercept({
+      responseError({ response }) {
+        expect(response).toBeDefined();
+      },
+    });
+
+    await expect(http.fetch('/my/path')).rejects.toThrow();
+  });
+
+  it('should not have access to response via response error interceptor when unavailable', async () => {
+    expect.assertions(2);
+
+    http.intercept({
+      request() {
+        throw new Error('Internal Server Error');
+      },
+      responseError({ response }) {
+        expect(response).toBeUndefined();
+      },
+    });
+
+    await expect(http.fetch('/my/path')).rejects.toThrow();
+  });
+
+  it('should actually halt request interceptors in reverse order', async () => {
+    let intercepted = false;
+
+    http.intercept({
+      request(request, controller) {
+        intercepted = true;
+      },
+    });
+
+    http.intercept({
+      request(request, controller) {
+        controller.halt();
+      },
+    });
+
+    http.fetch('/my/path');
+
+    await delay(500);
+    expect(intercepted).toBe(false);
+  });
+
+  it('should recover from failing request interception via request error interceptor', async () => {
+    let recovered = false;
+
+    http.intercept({
+      requestError(httpErrorRequest) {
+        recovered = true;
+        return httpErrorRequest.request;
+      },
+    });
+
+    http.intercept({
+      request(request, controller) {
+        throw new Error('Request Error');
+      },
+    });
+
+    await expect(http.fetch('/my/path')).resolves.toEqual({ foo: 'bar' });
+    expect(recovered).toBe(true);
   });
 });
 
