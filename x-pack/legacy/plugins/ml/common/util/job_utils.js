@@ -497,7 +497,7 @@ export function validateGroupNames(job) {
     ...groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group)) ? [{ id: 'job_group_id_invalid_max_length' }] : [],
   ];
   const valid = errorMessages.length === 0;
-  const messages = valid ? [{ id: 'job_group_id_valid' }] : errorMessages;
+  const messages = (valid && groups.length) ? [{ id: 'job_group_id_valid' }] : errorMessages;
 
   return {
     valid,
