@@ -9,6 +9,7 @@ import styled, { css } from 'styled-components';
 
 export const EventsTable = styled.div.attrs({
   className: 'siemEventsTable',
+  role: 'table',
 })<{ height: number }>`
   ${({ height, theme }) => css`
     height: ${height + 'px'};
@@ -36,11 +37,11 @@ EventsTable.displayName = 'EventsTable';
 
 export const EventsThead = styled.div.attrs({
   className: 'siemEventsTable__thead',
+  role: 'rowgroup',
 })<{ minWidth: number }>`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade}
     border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
-    display: flex;
     min-width: ${({ minWidth }) => `${minWidth}px`};
     position: sticky;
     top: 0;
@@ -49,7 +50,17 @@ export const EventsThead = styled.div.attrs({
 `;
 EventsThead.displayName = 'EventsThead';
 
-export const EventsThGroupActions = styled.div<{ actionsColumnWidth: number }>`
+export const EventsTrHeader = styled.div.attrs({
+  className: 'siemEventsTable__trHeader',
+  role: 'row',
+})`
+  display: flex;
+`;
+EventsTrHeader.displayName = 'EventsTrHeader';
+
+export const EventsThGroupActions = styled.div.attrs({
+  className: 'siemEventsTable__thGroupActions',
+})<{ actionsColumnWidth: number }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
   justify-content: space-between;
@@ -57,13 +68,16 @@ export const EventsThGroupActions = styled.div<{ actionsColumnWidth: number }>`
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';
 
-export const EventsThGroupData = styled.div`
+export const EventsThGroupData = styled.div.attrs({
+  className: 'siemEventsTable__thGroupData',
+})`
   display: flex;
 `;
 EventsThGroupData.displayName = 'EventsThGroupData';
 
 export const EventsTh = styled.div.attrs({
   className: 'siemEventsTable__th',
+  role: 'columnheader',
 })<{ isDragging?: boolean; position?: string; width?: string }>`
   align-items: center;
   display: flex;
@@ -78,7 +92,9 @@ export const EventsTh = styled.div.attrs({
 `;
 EventsTh.displayName = 'EventsTh';
 
-export const EventsThContent = styled.div<{ textAlign?: string }>`
+export const EventsThContent = styled.div.attrs({
+  className: 'siemEventsTable__thContent',
+})<{ textAlign?: string }>`
   ${({ theme }) => css`
     flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
@@ -92,12 +108,17 @@ export const EventsThContent = styled.div<{ textAlign?: string }>`
 `;
 EventsThContent.displayName = 'EventsThContent';
 
-export const EventsTbody = styled.div<{ minWidth: number }>`
+export const EventsTbody = styled.div.attrs({
+  className: 'siemEventsTable__tbody',
+  role: 'rowgroup',
+})<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
 `;
 EventsTbody.displayName = 'EventsTbody';
 
-export const EventsTrGroup = styled.div`
+export const EventsTrGroup = styled.div.attrs({
+  className: 'siemEventsTable__trGroup',
+})`
   ${({ theme }) => css`
     & + & {
       border-top: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
@@ -110,22 +131,31 @@ export const EventsTrGroup = styled.div`
 `;
 EventsTrGroup.displayName = 'EventsTrGroup';
 
-export const EventsTrData = styled.div`
+export const EventsTrData = styled.div.attrs({
+  className: 'siemEventsTable__trData',
+  role: 'row',
+})`
   display: flex;
 `;
 EventsTrData.displayName = 'EventsTrData';
 
-export const EventsTrNotes = styled.div`
+export const EventsTrNotes = styled.div.attrs({
+  className: 'siemEventsTable__trNotes',
+})`
   padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
 `;
 EventsTrNotes.displayName = 'EventsTrNotes';
 
-export const EventsTrAttributes = styled.div`
+export const EventsTrAttributes = styled.div.attrs({
+  className: 'siemEventsTable__trAttributes',
+})`
   padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
 `;
 EventsTrAttributes.displayName = 'EventsTrAttributes';
 
-export const EventsTdGroupActions = styled.div<{ actionsColumnWidth: number }>`
+export const EventsTdGroupActions = styled.div.attrs({
+  className: 'siemEventsTable__tdGroupActions',
+})<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
@@ -133,12 +163,17 @@ export const EventsTdGroupActions = styled.div<{ actionsColumnWidth: number }>`
 `;
 EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
-export const EventsTdGroupData = styled.div`
+export const EventsTdGroupData = styled.div.attrs({
+  className: 'siemEventsTable__tdGroupData',
+})`
   display: flex;
 `;
 EventsTdGroupData.displayName = 'EventsTdGroupData';
 
-export const EventsTd = styled.div<{ width?: string }>`
+export const EventsTd = styled.div.attrs({
+  className: 'siemEventsTable__td',
+  role: 'cell',
+})<{ width?: string }>`
   align-items: center;
   display: flex;
   min-width: 0;
@@ -151,7 +186,9 @@ export const EventsTd = styled.div<{ width?: string }>`
 `;
 EventsTd.displayName = 'EventsTd';
 
-export const EventsTdContent = styled.div<{ textAlign?: string }>`
+export const EventsTdContent = styled.div.attrs({
+  className: 'siemEventsTable__tdContent',
+})<{ textAlign?: string }>`
   ${({ theme }) => css`
     flex: 1;
     font-size: ${theme.eui.euiFontSizeXS};
@@ -215,7 +252,9 @@ export const EventsHeadingItem = styled.div.attrs({
 `;
 EventsHeadingItem.displayName = 'EventsHeadingItem';
 
-export const EventsHeadingHandle = styled.div`
+export const EventsHeadingHandle = styled.div.attrs({
+  className: 'siemEventsHeading__handle',
+})`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiBorderColor};
     height: 100%;
