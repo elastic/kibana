@@ -72,9 +72,7 @@ export class Actions {
       return indexPattern;
     }
 
-    return npStart.core.http.get(`/api/lens/index_patterns/${id}`, {
-      query: (this.dateRange as unknown) as Record<string, string>,
-    });
+    return fetchIndexPattern(id, this.dateRange);
   };
 
   public setContext(context: FullContext) {
@@ -115,7 +113,7 @@ export class Actions {
           ...acc,
           [indexPattern.id]: indexPattern,
         }),
-        {}
+        s.indexPatternMap
       ),
     }));
   };
