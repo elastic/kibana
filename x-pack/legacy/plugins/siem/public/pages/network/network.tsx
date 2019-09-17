@@ -126,9 +126,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           from={from}
                           to={to}
                           narrowDateRange={(min: number, max: number) => {
-                            setTimeout(() => {
-                              setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                            }, 500);
+                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                           }}
                         />
                       )}
@@ -150,6 +148,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           {({
                             id,
                             inspect,
+                            isInspected,
                             loading,
                             loadPage,
                             networkTopNFlow,
@@ -164,6 +163,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
+                              isInspect={isInspected}
                               loading={loading}
                               loadPage={loadPage}
                               refetch={refetch}
@@ -193,6 +193,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           {({
                             id,
                             inspect,
+                            isInspected,
                             loading,
                             loadPage,
                             networkTopNFlow,
@@ -207,6 +208,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
+                              isInspect={isInspected}
                               loading={loading}
                               loadPage={loadPage}
                               refetch={refetch}
@@ -242,6 +244,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                         loadPage,
                         id,
                         inspect,
+                        isInspected,
                         refetch,
                       }) => (
                         <NetworkDnsTableManage
@@ -249,6 +252,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}
+                          isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
                           refetch={refetch}
