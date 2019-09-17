@@ -37,7 +37,7 @@ const MonitorListActionsPopoverComponent = ({
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const monitorUrl: string = get(summary, 'state.url.full', undefined);
+  const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);
   const isPopoverOpen: boolean =
     !!popoverState && popoverState.open && popoverState.id === popoverId;
   return (
