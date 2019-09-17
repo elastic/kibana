@@ -79,6 +79,7 @@ export class KibanaServerSavedObjects {
    */
   public async get<Attributes extends Record<string, any>>(options: GetOptions) {
     this.log.debug('Gettings saved object: %j', options);
+
     return await this.request<SavedObjectResponse<Attributes>>('get saved object', {
       url: joinPath(options.type, options.id),
       method: 'GET',
