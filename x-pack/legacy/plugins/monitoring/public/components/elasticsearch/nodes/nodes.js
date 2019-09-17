@@ -279,7 +279,8 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             componentToRender: null
           };
 
-          if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+          const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+          if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
             const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
               ? setupMode.shortcutToFinishMigration
               : setupMode.openFlyout;
