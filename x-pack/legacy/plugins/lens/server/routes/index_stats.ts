@@ -28,8 +28,8 @@ export async function initStatsRoute(setup: CoreSetup) {
           indexPatternTitle: schema.string(),
         }),
         body: schema.object({
-          earliest: schema.string(),
-          latest: schema.string(),
+          fromDate: schema.string(),
+          toDate: schema.string(),
           timeZone: schema.maybe(schema.string()),
           timeFieldName: schema.string(),
           size: schema.number(),
@@ -47,7 +47,7 @@ export async function initStatsRoute(setup: CoreSetup) {
 
       const indexPatternsService = new IndexPatternsService(requestClient.callAsCurrentUser);
 
-      const { earliest, latest, timeZone, timeFieldName, fields, size } = req.body;
+      const { fromDate, toDate, timeZone, timeFieldName, fields, size } = req.body;
 
       try {
         const indexPattern = await indexPatternsService.getFieldsForWildcard({
@@ -65,8 +65,8 @@ export async function initStatsRoute(setup: CoreSetup) {
                   {
                     range: {
                       [timeFieldName]: {
-                        gte: earliest,
-                        lte: latest,
+                        gte: fromDate,
+                        lte: toDate,
                         time_zone: timeZone,
                       },
                     },
