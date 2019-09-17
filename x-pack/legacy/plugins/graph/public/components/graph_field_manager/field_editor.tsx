@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
-import { iconChoices } from '../../services/style_choices';
+import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
 import { FieldIcon } from './field_icon';
 
