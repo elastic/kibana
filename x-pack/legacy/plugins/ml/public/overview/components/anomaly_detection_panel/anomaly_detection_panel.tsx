@@ -128,7 +128,7 @@ export const AnomalyDetectionPanel: FC = () => {
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate(
-          'xpack.ml.overview.analytics.errorWithFetchingAnomalyScoreNotificationErrorMessage',
+          'xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage',
           {
             defaultMessage: 'An error occurred fetching anomaly scores: {error}',
             values: { error: JSON.stringify(e) },

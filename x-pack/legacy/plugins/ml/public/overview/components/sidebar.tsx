@@ -26,8 +26,7 @@ export const OverviewSideBar: FC = () => (
       <p>
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionText"
-          defaultMessage="Welcome to Machine Learning.
-          Get started by reviewing our {docs} or {createJob}.
+          defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}.
           For information about upcoming features and tutorials be sure to check out our solutions page."
           values={{
             docs: (
@@ -62,14 +61,6 @@ export const OverviewSideBar: FC = () => (
                 <FormattedMessage
                   id="xpack.ml.overview.feedbackSectionLink"
                   defaultMessage="submit feedback online"
-                />
-              </EuiLink>
-            ),
-            createJob: (
-              <EuiLink href={createJobLink} target="blank">
-                <FormattedMessage
-                  id="xpack.ml.overview.gettingStartedSectionCreateJob"
-                  defaultMessage="creating a new job"
                 />
               </EuiLink>
             ),

@@ -6,6 +6,8 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { I18nContext } from 'ui/i18n';
+import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -17,7 +19,15 @@ module.directive('mlOverview', function() {
     scope: {},
     restrict: 'E',
     link: async (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      ReactDOM.render(<OverviewPage />, element[0]);
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
+
+      ReactDOM.render(
+        <I18nContext>
+          <OverviewPage />
+        </I18nContext>,
+        element[0]
+      );
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

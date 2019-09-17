@@ -66,7 +66,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
     PROGRESS_COLUMN,
     {
       field: DataFrameAnalyticsListColumn.configCreateTime,
-      name: i18n.translate('xpack.ml.overview.createdTimeColumnName', {
+      name: i18n.translate('xpack.ml.overview.analyticsList.reatedTimeColumnName', {
         defaultMessage: 'Creation time',
       }),
       dataType: 'date',
@@ -118,7 +118,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
         <EuiFlexItem grow={false}>
           <EuiText size="m">
             <h3>
-              {i18n.translate('xpack.ml.overview.analyticsPanelTitle', {
+              {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
                 defaultMessage: 'Analytics',
               })}
             </h3>

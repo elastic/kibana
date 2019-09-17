@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore no module file
 import { getLink } from '../../../jobs/jobs_list/components/job_actions/results';
@@ -16,7 +16,7 @@ interface Props {
 
 export const ExplorerLink: FC<Props> = ({ jobsList }) => {
   const openJobsInAnomalyExplorerText = i18n.translate(
-    'xpack.ml.overviewAnomalyDetection.resultActions.openJobsInAnomalyExplorerText',
+    'xpack.ml.overview.anomalyDetection.resultActions.openJobsInAnomalyExplorerText',
     {
       defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer',
       values: { jobsCount: jobsList.length, jobId: jobsList[0] && jobsList[0].id },
@@ -25,13 +25,19 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
 
   return (
     <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-      <EuiButtonIcon
+      <EuiButtonEmpty
+        color="text"
+        size="xs"
         href={getLink('explorer', jobsList)}
         iconType="tableOfContents"
         aria-label={openJobsInAnomalyExplorerText}
         className="results-button"
         data-test-subj={`openOverviewJobsInAnomalyExplorer`}
-      />
+      >
+        {i18n.translate('xpack.ml.overview.anomalyDetection.exploreActionName', {
+          defaultMessage: 'Explore',
+        })}
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 };

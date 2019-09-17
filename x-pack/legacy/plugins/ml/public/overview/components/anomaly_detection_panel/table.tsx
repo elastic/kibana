@@ -5,7 +5,14 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   MlInMemoryTable,
@@ -23,6 +30,7 @@ import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 // @ts-ignore
 import { toLocaleString } from '../../../util/string_utils';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -51,7 +59,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const columns: any[] = [
     {
       field: AnomalyDetectionListColumns.id,
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.id', {
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableId', {
         defaultMessage: 'Group ID',
       }),
       render: (id: Group['id']) => <JobSelectorBadge id={id} isGroup={id !== 'ungrouped'} />,
@@ -60,15 +68,22 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       width: '20%',
     },
     {
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.maxScore', {
+      field: AnomalyDetectionListColumns.maxAnomalyScore,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
         defaultMessage: 'Max anomaly score',
       }),
       sortable: true,
-      render: (group: Group) => {
-        if (group.max_anomaly_score === null) {
+      render: (score: Group['max_anomaly_score']) => {
+        if (score === null) {
           return <EuiLoadingSpinner />;
         } else {
-          return group.max_anomaly_score;
+          const color: string = getSeverityColor(score);
+          return (
+            // @ts-ignore
+            <EuiHealth color={color} compressed="true">
+              {score >= 1 ? Math.floor(score) : '< 1'}
+            </EuiHealth>
+          );
         }
       },
       truncateText: true,
@@ -76,7 +91,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     },
     {
       field: AnomalyDetectionListColumns.jobIds,
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.numJobs', {
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableNumJobs', {
         defaultMessage: 'Jobs in group',
       }),
       render: (jobIds: Group['jobIds']) => jobIds.length,
@@ -86,7 +101,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     },
     {
       field: AnomalyDetectionListColumns.latestTimestamp,
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.latestTimestamp', {
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableLatestTimestamp', {
         defaultMessage: 'Latest timestamp',
       }),
       dataType: 'date',
@@ -97,7 +112,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     },
     {
       field: AnomalyDetectionListColumns.docsProcessed,
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.docsProcessed', {
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableDocsProcessed', {
         defaultMessage: 'Docs processed',
       }),
       render: (docs: number) => toLocaleString(docs),
@@ -106,7 +121,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       width: '20%',
     },
     {
-      name: i18n.translate('xpack.ml.overview.anomalyDetectionList.tableActionLabel', {
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
       render: (group: Group) => <ExplorerLink jobsList={getJobsFromGroup(group, jobsList)} />,
@@ -148,7 +163,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         <EuiFlexItem grow={false}>
           <EuiText size="m">
             <h3>
-              {i18n.translate('xpack.ml.overview.anomalyDetectionPanelTitle', {
+              {i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
                 defaultMessage: 'Anomaly Detection',
               })}
             </h3>
