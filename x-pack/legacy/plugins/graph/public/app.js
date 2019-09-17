@@ -16,7 +16,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-// TODO: remove ui imports completely (move to plugins)
+// TODO: remove ui imports completely (move tDelete o plugins)
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
@@ -26,7 +26,7 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
-import { IndexPatternsProvider } from 'ui/index_patterns';
+import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
@@ -147,7 +147,6 @@ uiRoutes
 
       },
       //Copied from example found in wizard.js ( Kibana TODO - can't
-      // IndexPatternsProvider abstract these implementation details better?)
       indexPatterns: function (Private) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -158,7 +157,7 @@ uiRoutes
         }).then(response => response.savedObjects);
       },
       GetIndexPatternProvider: function (Private) {
-        return Private(IndexPatternsProvider);
+        return data.indexPatterns.indexPatterns;
       },
       SavedWorkspacesProvider: function (Private) {
         return Private(SavedWorkspacesProvider);
