@@ -34,7 +34,6 @@ const circleAngles = {
 };
 
 const defaultConfig = {
-  ...arcAngles,
   showTooltip: true,
   percentageMode: true,
   innerSpace: 5,
