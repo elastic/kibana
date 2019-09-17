@@ -46,6 +46,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
         }
         data-test-subj={`visEditorMapPrecision${agg.id}`}
         showValue
+        compressed
       />
     </EuiFormRow>
   );
