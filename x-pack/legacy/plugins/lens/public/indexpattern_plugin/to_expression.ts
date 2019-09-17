@@ -5,17 +5,17 @@
  */
 
 import _ from 'lodash';
-
-import { IndexPatternPrivateState, IndexPatternColumn, IndexPattern } from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { buildColumn, operationDefinitionMap } from './operations';
+import { IndexPattern } from '../../common';
 
 function getExpressionForLayer(
-  indexPattern: IndexPattern,
   layerId: string,
   columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
+  columnOrder: string[],
+  indexPattern: IndexPattern
 ) {
-  if (columnOrder.length === 0) {
+  if (!indexPattern || columnOrder.length === 0) {
     return null;
   }
 
@@ -76,13 +76,10 @@ function getExpressionForLayer(
 }
 
 export function toExpression(state: IndexPatternPrivateState, layerId: string) {
-  if (state.layers[layerId]) {
-    return getExpressionForLayer(
-      state.indexPatterns[state.layers[layerId].indexPatternId],
-      layerId,
-      state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
-    );
+  const layer = state.layers[layerId];
+  const indexPattern = layer && state.indexPatternMap[layer.indexPatternId];
+  if (layer && indexPattern) {
+    return getExpressionForLayer(layerId, layer.columns, layer.columnOrder, indexPattern);
   }
 
   return null;

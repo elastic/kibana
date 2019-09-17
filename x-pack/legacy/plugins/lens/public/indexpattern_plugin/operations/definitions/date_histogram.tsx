@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
-import { IndexPattern } from '../../indexpattern';
-import { updateColumnParam } from '../../state_helpers';
+import { updateColumnParam, tryGetIndexPattern } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPattern } from '../../../../common';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -165,15 +165,18 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     },
   }),
   paramEditor: ({ state, setState, currentColumn: currentColumn, layerId }) => {
+    const currentIndexPattern = tryGetIndexPattern(
+      state.layers[layerId].indexPatternId,
+      state.indexPatternMap
+    );
     const field =
       currentColumn &&
-      state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
+      currentIndexPattern.fields.find(
         currentField => currentField.name === currentColumn.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
-    const fieldAllowsAutoInterval =
-      state.indexPatterns[state.layers[layerId].indexPatternId].timeFieldName === field!.name;
+    const fieldAllowsAutoInterval = currentIndexPattern.timeFieldName === field!.name;
 
     function intervalToNumeric(interval: string) {
       return supportedIntervals.indexOf(interval);

@@ -83,7 +83,10 @@ export const lens: LegacyPluginInitializer = kibana => {
       });
 
       // Set up with the new platform plugin lifecycle API.
-      const plugin = lensServerPlugin();
+      const plugin = lensServerPlugin({
+        getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
+      });
+
       plugin.setup(({
         http: {
           ...kbnServer.newPlatform.setup.core.http,

@@ -6,7 +6,14 @@
 
 import { CoreSetup } from 'src/core/server';
 import { initStatsRoute } from './index_stats';
+import { indexPatternsRoute } from './index_pattern';
+import { emptyFieldsRoute } from './empty_fields';
+import { LensServerOptions } from '../server_options';
 
-export function setupRoutes(setup: CoreSetup) {
-  initStatsRoute(setup);
+export function setupRoutes(opts: LensServerOptions, setup: CoreSetup) {
+  const router = setup.http.createRouter();
+
+  initStatsRoute(router);
+  indexPatternsRoute(opts, router);
+  emptyFieldsRoute(opts, router);
 }

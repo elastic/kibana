@@ -10,17 +10,21 @@ import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import {
   DatasourceDimensionPanelProps,
-  DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
+  Datasource,
+  IndexPatternListItem,
+  DatasourceDataPanelProps,
+  DatasourcePublicAPIProps,
 } from '../types';
-import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
-import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
@@ -29,52 +33,11 @@ import {
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
-import { Datasource, StateSetter } from '..';
+import { IndexPatternField, IndexPattern } from '../../common';
+import { IndexPatternDataPanel } from './datapanel';
+import { createActionsFactory } from './state_helpers';
 
 export { OperationType, IndexPatternColumn } from './operations';
-
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  title: string;
-  timeFieldName?: string | null;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-
-  // TODO: Load index patterns and existence data in one API call
-  hasExistence?: boolean;
-}
-
-export interface IndexPatternField {
-  name: string;
-  type: string;
-  esTypes?: string[];
-  aggregatable: boolean;
-  searchable: boolean;
-  aggregationRestrictions?: Partial<
-    Record<
-      string,
-      {
-        agg: string;
-        interval?: number;
-        fixed_interval?: string;
-        calendar_interval?: string;
-        delay?: string;
-        time_zone?: string;
-      }
-    >
-  >;
-
-  // TODO: This is loaded separately, but should be combined into one API
-  exists?: boolean;
-  cardinality?: number;
-  count?: number;
-}
 
 export interface DraggedField {
   field: IndexPatternField;
@@ -87,14 +50,16 @@ export interface IndexPatternLayer {
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
 }
+
 export interface IndexPatternPersistedState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
 }
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
-  indexPatterns: Record<string, IndexPattern>;
+  indexPatterns: Record<string, IndexPatternListItem>;
   showEmptyFields: boolean;
+  indexPatternMap: Record<string, IndexPattern | undefined>;
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
@@ -104,42 +69,6 @@ export function columnToOperation(column: IndexPatternColumn): Operation {
     dataType,
     isBucketed,
     scale,
-  };
-}
-
-type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
-type InferFromArray<T> = T extends Array<infer P> ? P : T;
-
-function addRestrictionsToFields(
-  indexPattern: InferFromArray<Exclude<UnwrapPromise<ReturnType<typeof getIndexPatterns>>, void>>
-): IndexPattern {
-  const { typeMeta } = indexPattern;
-  if (!typeMeta) {
-    return indexPattern;
-  }
-
-  const aggs = Object.keys(typeMeta.aggs);
-
-  const newFields = [...(indexPattern.fields as IndexPatternField[])];
-  newFields.forEach((field, index) => {
-    const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-    aggs.forEach(agg => {
-      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
-        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
-      }
-    });
-    if (Object.keys(restrictionsObj).length) {
-      newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
-    }
-  });
-
-  const { id, title, timeFieldName } = indexPattern;
-
-  return {
-    id,
-    title,
-    timeFieldName: timeFieldName || undefined,
-    fields: newFields,
   };
 }
 
@@ -160,33 +89,18 @@ export function getIndexPatternDatasource({
   savedObjectsClient: SavedObjectsClientContract;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
+  const actionsFactory = createActionsFactory({
+    onError(err) {
+      toastNotifications.addError(err, {
+        title: i18n.translate('xpack.lens.indexPattern', { defaultMessage: 'Lens Index Pattern' }),
+      });
+    },
+  });
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
-    async initialize(state?: IndexPatternPersistedState) {
-      // TODO: The initial request should only load index pattern names because each saved object is large
-      //       Followup requests should load a single index pattern + existence information
-      const indexPatternObjects = await getIndexPatterns(chrome, core.notifications);
-      const indexPatterns: Record<string, IndexPattern> = {};
-
-      if (indexPatternObjects) {
-        indexPatternObjects.forEach(obj => {
-          indexPatterns[obj.id] = addRestrictionsToFields(obj);
-        });
-      }
-
-      if (state) {
-        return {
-          ...state,
-          indexPatterns,
-          showEmptyFields: false,
-        };
-      }
-      return {
-        currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
-        indexPatterns,
-        layers: {},
-        showEmptyFields: false,
-      };
+    initialize(state?: IndexPatternPersistedState) {
+      return actionsFactory.getInitialState(savedObjectsClient, state);
     },
 
     getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
@@ -225,14 +139,7 @@ export function getIndexPatternDatasource({
 
     getMetaData(state: IndexPatternPrivateState) {
       return {
-        filterableIndexPatterns: _.uniq(
-          Object.values(state.layers)
-            .map(layer => layer.indexPatternId)
-            .map(indexPatternId => ({
-              id: indexPatternId,
-              title: state.indexPatterns[indexPatternId].title,
-            }))
-        ),
+        filterableIndexPatterns: Object.values(state.indexPatterns) as IndexPatternListItem[],
       };
     },
 
@@ -242,17 +149,16 @@ export function getIndexPatternDatasource({
     ) {
       render(
         <I18nProvider>
-          <IndexPatternDataPanel {...props} />
+          <IndexPatternDataPanel actions={actionsFactory.withContext(props)} {...props} />
         </I18nProvider>,
         domElement
       );
     },
 
-    getPublicAPI(
-      state: IndexPatternPrivateState,
-      setState: StateSetter<IndexPatternPrivateState>,
-      layerId: string
-    ) {
+    getPublicAPI(opts: DatasourcePublicAPIProps<IndexPatternPrivateState>) {
+      const { layerId, state, setState } = opts;
+      const actions = actionsFactory.withContext(opts);
+
       return {
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
@@ -266,25 +172,38 @@ export function getIndexPatternDatasource({
           return null;
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
-          render(
-            <I18nProvider>
-              <IndexPatternDimensionPanel
-                state={state}
-                setState={setState}
-                uiSettings={uiSettings}
-                storage={storage}
-                savedObjectsClient={savedObjectsClient}
-                layerId={props.layerId}
-                http={core.http}
-                {...props}
-              />
-            </I18nProvider>,
-            domElement
-          );
+          const indexPattern = state.indexPatternMap[state.layers[layerId].indexPatternId];
+
+          if (indexPattern) {
+            render(
+              <I18nProvider>
+                <IndexPatternDimensionPanel
+                  state={state}
+                  setState={setState}
+                  uiSettings={uiSettings}
+                  storage={storage}
+                  savedObjectsClient={savedObjectsClient}
+                  layerId={props.layerId}
+                  indexPattern={indexPattern!}
+                  {...props}
+                />
+              </I18nProvider>,
+              domElement
+            );
+          } else {
+            render(<EuiLoadingSpinner size="m" />, domElement);
+          }
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
+          render(
+            <LayerPanel
+              state={state}
+              layerId={props.layerId}
+              setLayerIndexPattern={actions.setLayerIndexPattern}
+            />,
+            domElement
+          );
         },
 
         removeColumnInTableSpec: (columnId: string) => {

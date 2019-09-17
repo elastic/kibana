@@ -11,19 +11,19 @@ import { Query } from 'src/plugins/data/common';
 import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
+import { DataType, DateRange, IndexPattern } from '../common';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
+export type IndexPatternListItem = Pick<IndexPattern, 'id' | 'title'>;
+
 export interface EditorFrameProps {
   onError: ErrorCallback;
   doc?: Document;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
+  dateRange: DateRange;
   query: Query;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -131,7 +131,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: StateSetter<T>, layerId: string) => DatasourcePublicAPI;
+  getPublicAPI: (props: DatasourcePublicAPIProps<T>) => DatasourcePublicAPI;
 }
 
 /**
@@ -158,14 +158,19 @@ export interface TableSpecColumn {
 // TableSpec is managed by visualizations
 export type TableSpec = TableSpecColumn[];
 
-export interface DatasourceDataPanelProps<T = unknown> {
+export interface DatasourceProps<T = unknown> {
   state: T;
-  dragDropContext: DragContextState;
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
-  dateRange: FramePublicAPI['dateRange'];
+  dateRange: DateRange;
 }
+
+export type DatasourceDataPanelProps<T> = DatasourceProps<T> & {
+  dragDropContext: DragContextState;
+};
+
+export type DatasourcePublicAPIProps<T> = DatasourceProps<T> & { layerId: string };
 
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
@@ -186,8 +191,6 @@ export interface DatasourceDimensionPanelProps {
 export interface DatasourceLayerPanelProps {
   layerId: string;
 }
-
-export type DataType = 'string' | 'number' | 'date' | 'boolean';
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.

@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
-import { CoreSetup } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import {
   IndexPatternsService,
   FieldDescriptor,
@@ -18,8 +18,7 @@ type Document = Record<string, unknown>;
 
 type Fields = Array<{ name: string; type: string; esTypes?: string[] }>;
 
-export async function initStatsRoute(setup: CoreSetup) {
-  const router = setup.http.createRouter();
+export async function initStatsRoute(router: IRouter) {
   router.post(
     {
       path: '/index_stats/{indexPatternTitle}',

@@ -6,12 +6,17 @@
 
 import { Plugin, CoreSetup } from 'src/core/server';
 import { setupRoutes } from './routes';
+import { LensServerOptions } from './server_options';
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
+  private opts: LensServerOptions;
+
+  constructor(opts: LensServerOptions) {
+    this.opts = opts;
+  }
 
   setup(core: CoreSetup) {
-    setupRoutes(core);
+    setupRoutes(this.opts, core);
 
     return {};
   }

@@ -13,17 +13,16 @@ import {
   // @ts-ignore
   EuiHighlight,
 } from '@elastic/eui';
-import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
+import { OperationType } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
-import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
+import { IndexPattern, DataType, IndexPatternField } from '../../../common';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }
   | { type: 'document' };
 
 export interface FieldSelectProps {
-  currentIndexPattern: IndexPattern;
   showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
@@ -35,7 +34,6 @@ export interface FieldSelectProps {
 }
 
 export function FieldSelect({
-  currentIndexPattern,
   showEmptyFields,
   fieldMap,
   incompatibleSelectedOperationType,
@@ -131,7 +129,6 @@ export function FieldSelect({
     selectedColumnOperationType,
     selectedColumnSourceField,
     operationFieldSupportMatrix,
-    currentIndexPattern,
     fieldMap,
     showEmptyFields,
   ]);

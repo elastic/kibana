@@ -11,20 +11,16 @@ import {
   // @ts-ignore
   EuiHighlight,
   EuiButtonEmpty,
-  EuiIcon,
-  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DatasourceLayerPanelProps, StateSetter } from '../types';
 import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
-import { isLayerTransferable, updateLayerIndexPattern } from './state_helpers';
 
-export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
+export interface IndexPatternLayerPanelProps {
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  layerId: string;
+  setLayerIndexPattern: (opts: { id: string; layerId: string }) => void;
 }
 
 function LayerPanelChooser({
@@ -39,12 +35,10 @@ function LayerPanelChooser({
   onExitChooser: () => void;
 }) {
   const currentIndexPatternId = layer.indexPatternId;
-  const indexPatternList = Object.values(indexPatterns)
-    .filter(indexPattern => indexPattern.id !== layer.indexPatternId)
-    .map(indexPattern => ({
-      ...indexPattern,
-      isTransferable: isLayerTransferable(layer, indexPattern),
-    }));
+  const currentIndexPattern = indexPatterns[currentIndexPatternId];
+  const indexPatternList = Object.values(indexPatterns).filter(
+    indexPattern => indexPattern.id !== layer.indexPatternId
+  );
   return (
     <EuiComboBox
       fullWidth
@@ -60,8 +54,8 @@ function LayerPanelChooser({
       }}
       selectedOptions={[
         {
-          label: indexPatterns[currentIndexPatternId].title,
-          value: indexPatterns[currentIndexPatternId].id,
+          label: currentIndexPattern.title,
+          value: currentIndexPattern.id,
         },
       ]}
       singleSelection={{ asPlainText: true }}
@@ -71,23 +65,9 @@ function LayerPanelChooser({
         onChangeIndexPattern(choices[0].value!.id);
       }}
       renderOption={(option, searchValue, contentClassName) => {
-        const { label, value } = option;
+        const { label } = option;
         return (
           <span className={contentClassName}>
-            {value && value.isTransferable ? (
-              <EuiIcon type="empty" />
-            ) : (
-              <EuiIconTip
-                type="minusInCircle"
-                content={i18n.translate(
-                  'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
-                  {
-                    defaultMessage:
-                      'Not all operations are compatible with this index pattern and will be removed on switching.',
-                  }
-                )}
-              />
-            )}
             <EuiHighlight search={searchValue}>{label}</EuiHighlight>
           </span>
         );
@@ -96,7 +76,7 @@ function LayerPanelChooser({
   );
 }
 
-export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
+export function LayerPanel({ state, setLayerIndexPattern, layerId }: IndexPatternLayerPanelProps) {
   const [isChooserOpen, setChooserOpen] = useState(false);
 
   return (
@@ -110,19 +90,8 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
               onExitChooser={() => {
                 setChooserOpen(false);
               }}
-              onChangeIndexPattern={newId => {
-                setState({
-                  ...state,
-                  currentIndexPatternId: newId,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: updateLayerIndexPattern(
-                      state.layers[layerId],
-                      state.indexPatterns[newId]
-                    ),
-                  },
-                });
-
+              onChangeIndexPattern={id => {
+                setLayerIndexPattern({ id, layerId });
                 setChooserOpen(false);
               }}
             />
@@ -134,7 +103,7 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
               onClick={() => setChooserOpen(true)}
               data-test-subj="lns_layerIndexPatternLabel"
             >
-              {state.indexPatterns[state.layers[layerId].indexPatternId].title}
+              {state.indexPatterns[state.layers[layerId].indexPatternId]!.title}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}

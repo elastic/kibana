@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LensServer } from './plugin';
-import { LensServerOptions } from './server_options';
-
-export * from './plugin';
-
-export const lensServerPlugin = (opts: LensServerOptions) => new LensServer(opts);
+export * from './state_helpers';
+export * from './actions';
+export * from './selectors';
