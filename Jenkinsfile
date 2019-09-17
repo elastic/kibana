@@ -264,7 +264,7 @@ def runbld(script, noJunit = true) {
 }
 
 def runbldJunit() {
-  sh "/usr/local/bin/runbld ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
 }
 
 def bash(script) {
