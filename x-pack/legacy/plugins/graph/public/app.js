@@ -311,17 +311,6 @@ app.controller('graphuiPlugin', function (
     $scope.closeMenus();
   };
 
-  $scope.setAllFieldStatesToDefault = function () {
-    $scope.selectedFields = [];
-    $scope.basicModeSelectedSingleField = null;
-    $scope.liveResponseFields = [];
-
-    // Default field state is not selected
-    $scope.allFields.forEach(function (fieldDef) {
-      fieldDef.selected = false;
-    });
-  };
-
   $scope.addFieldToSelection =  function () {
     $scope.selectedField.selected = true;
     if ($scope.selectedFields.indexOf($scope.selectedField) < 0) {
@@ -892,16 +881,15 @@ app.controller('graphuiPlugin', function (
       const {
         urlTemplates,
         advancedSettings,
-        workspace,
         allFields,
         selectedFields,
       } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
 
       // wire up stuff to angular
       $scope.allFields = allFields;
-      $scope.selectedFields = selectedFields;
-      $scope.workspace = workspace;
+      $scope.selectedFields.push(...selectedFields);
       $scope.exploreControls = advancedSettings;
+      $scope.workspace.options.exploreControls = advancedSettings;
       $scope.urlTemplates = urlTemplates;
       $scope.updateLiveResponseFields();
       $scope.workspace.runLayout();
