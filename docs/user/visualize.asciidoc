@@ -19,8 +19,8 @@ With *Visualize*, you can:
 
 --
 
-include::visualize/choose-your-visualization.asciidoc[]
-
 include::visualize/choose-your-data.asciidoc[]
+
+include::visualize/choose-your-visualization.asciidoc[]
 
 include::visualize/create-visualization.asciidoc[]
