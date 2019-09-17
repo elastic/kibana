@@ -136,7 +136,7 @@ you might make:
 
 When you've finished, again be sure to <<maps-save, save your work >>.
 
-Your final map should look like this:
+Your final map might look like this:
 
 [role="screenshot"]
 image::maps/images/fu_gs_final_map.png[]
