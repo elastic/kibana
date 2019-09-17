@@ -289,7 +289,7 @@ export const getMessages = () => {
     job_group_id_invalid_max_length: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorMessage', {
-        defaultMessage: 'Job group name must be more than {maxLength, plural, one {# character} other {# characters}} long.',
+        defaultMessage: 'Job group name must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
         values: {
           maxLength: JOB_ID_MAX_LENGTH,
         },
