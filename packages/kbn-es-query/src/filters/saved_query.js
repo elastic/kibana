@@ -49,6 +49,7 @@ export function buildSavedQueryFilter(params, indexPattern) {
   filter.query = { ...convertedQuery };
 
   // timefilter addition
+  // TODO: should we also handle the refresh interval part of the timefilter?
   const convertedTimeFilter = get(params, 'savedQuery.attributes.timefilter', null); // should already be an EsQuery
   if (convertedTimeFilter) {
     const filtersWithTimefilter = [...convertedQuery.bool.filter, convertedTimeFilter];

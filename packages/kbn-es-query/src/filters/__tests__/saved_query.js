@@ -269,6 +269,5 @@ describe('Filter Manager', function () {
       const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
       expect(actual).to.eql(expected);
     });
-
   });
 });

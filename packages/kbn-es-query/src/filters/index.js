@@ -22,4 +22,5 @@ export * from './phrase';
 export * from './phrases';
 export * from './query';
 export * from './range';
+export * from './saved_query';
 export * from './lib';

@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
+import {
+  CustomFilter,
+  ExistsFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  RangeFilter,
+  SavedQueryFilter,
+} from './lib';
 import { RangeFilterParams } from './lib/range_filter';
+import { SavedQueryFilterParams } from './lib/saved_query_filter';
 
 export * from './lib';
 
@@ -49,3 +57,8 @@ export function buildRangeFilter(
   indexPattern: IndexPattern,
   formattedValue?: string
 ): RangeFilter;
+
+export function buildSavedQueryFilter(
+  indexPattern: IndexPattern,
+  params: SavedQueryFilterParams
+): SavedQueryFilter;
