@@ -11,7 +11,7 @@ import React from 'react';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import { TruncatableText } from '../../../../truncatable_text';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
-import { EventsHeading, EventsHeadingHandle, EventsHeadingItem } from '../../../styles';
+import { EventsHeading, EventsHeadingHandle, EventsHeadingTitle } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
@@ -35,9 +35,9 @@ const HeaderComp = React.memo<HeaderCompProps>(
 
     return (
       <EventsHeading data-test-subj="header" isLoading={isLoading}>
-        <EventsHeadingItem
-          className="siemEventsHeading__item--title"
-          onClick={!isResizing && !isLoading ? onClick : noop}
+        <EventsHeadingTitle
+          disabled={!header.aggregatable}
+          onClick={header.aggregatable && !isResizing && !isLoading ? onClick : noop}
         >
           <TruncatableText data-test-subj={`header-text-${header.id}`}>
             <EuiToolTip
@@ -52,7 +52,7 @@ const HeaderComp = React.memo<HeaderCompProps>(
             data-test-subj="header-sort-indicator"
             sortDirection={getSortDirection({ header, sort })}
           />
-        </EventsHeadingItem>
+        </EventsHeadingTitle>
 
         {children}
       </EventsHeading>
@@ -111,15 +111,13 @@ export class Header extends React.PureComponent<Props> {
   private onClick = () => {
     const { header, onColumnSorted, sort } = this.props;
 
-    if (header.aggregatable) {
-      onColumnSorted!({
-        columnId: header.id,
-        sortDirection: getNewSortDirectionOnClick({
-          clickedHeader: header,
-          currentSort: sort,
-        }),
-      });
-    }
+    onColumnSorted!({
+      columnId: header.id,
+      sortDirection: getNewSortDirectionOnClick({
+        clickedHeader: header,
+        currentSort: sort,
+      }),
+    });
   };
 
   private onResize: OnResize = ({ delta, id }) => {

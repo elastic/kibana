@@ -214,32 +214,46 @@ export const EventsHeading = styled.div.attrs({
 `;
 EventsHeading.displayName = 'EventsHeading';
 
-export const EventsHeadingItem = styled.div.attrs({
-  className: 'siemEventsHeading__item',
-})<{ className?: string }>`
+export const EventsHeadingTitle = styled.button.attrs({
+  className: 'siemEventsHeading__title',
+  type: 'button',
+})<{ disabled?: boolean }>`
   ${({ theme }) => css`
-    &.siemEventsHeading__item--title {
-      align-items: center;
-      display: flex;
-      min-width: 0;
+    align-items: center;
+    display: flex;
+    font-weight: inherit;
+    min-width: 0;
 
-      &:hover {
+    &:not(:disabled) {
+      &:hover,
+      &:focus {
         color: ${theme.eui.euiColorPrimary};
-        cursor: pointer;
         text-decoration: underline;
       }
 
-      & > * + * {
-        margin-left: ${theme.eui.euiSizeXS};
+      &:hover {
+        cursor: pointer;
       }
     }
 
-    &.siemEventsHeading__item--loading,
-    &.siemEventsHeading__item--close {
-      margin-left: auto;
+    &:disabled:hover {
+      cursor: inherit;
     }
 
-    &.siemEventsHeading__item--close {
+    & > * + * {
+      margin-left: ${theme.eui.euiSizeXS};
+    }
+  `}
+`;
+EventsHeadingTitle.displayName = 'EventsHeadingTitle';
+
+export const EventsHeadingExtra = styled.div.attrs({
+  className: 'siemEventsHeading__extra',
+})<{ className?: string }>`
+  ${({ theme }) => css`
+    margin-left: auto;
+
+    &.siemEventsHeading__extra--close {
       opacity: 0;
       transition: all ${theme.eui.euiAnimSpeedNormal} ease;
       visibility: hidden;
@@ -251,7 +265,7 @@ export const EventsHeadingItem = styled.div.attrs({
     }
   `}
 `;
-EventsHeadingItem.displayName = 'EventsHeadingItem';
+EventsHeadingExtra.displayName = 'EventsHeadingExtra';
 
 export const EventsHeadingHandle = styled.div.attrs({
   className: 'siemEventsHeading__handle',

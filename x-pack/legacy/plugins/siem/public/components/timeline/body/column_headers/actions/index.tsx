@@ -9,7 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { OnColumnRemoved } from '../../../events';
-import { EventsHeadingItem } from '../../../styles';
+import { EventsHeadingExtra } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { ColumnHeader } from '../column_header';
@@ -47,13 +47,13 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
   return (
     <>
       {sort.columnId === header.id && isLoading ? (
-        <EventsHeadingItem className="siemEventsHeading__item--loading">
+        <EventsHeadingExtra className="siemEventsHeading__extra--loading">
           <EuiLoadingSpinner />
-        </EventsHeadingItem>
+        </EventsHeadingExtra>
       ) : (
-        <EventsHeadingItem className="siemEventsHeading__item--close">
+        <EventsHeadingExtra className="siemEventsHeading__extra--close">
           <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} />
-        </EventsHeadingItem>
+        </EventsHeadingExtra>
       )}
     </>
   );
