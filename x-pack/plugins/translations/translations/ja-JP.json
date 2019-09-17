@@ -4656,8 +4656,6 @@
     "xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel": "ワークスペースを保存",
     "xpack.graph.topNavMenu.saveWorkspace.enabledLabel": "保存",
     "xpack.graph.topNavMenu.saveWorkspace.enabledTooltip": "このワークスペースを保存します",
-    "xpack.graph.topNavMenu.searchButtonAriaLabel": "検索",
-    "xpack.graph.topNavMenu.selectIndexPatternOptionLabel": "インデックスパターンを選択してください…",
     "xpack.graph.topNavMenu.settingsAriaLabel": "設定",
     "xpack.graph.topNavMenu.settingsLabel": "設定",
     "xpack.graph.errorToastTitle": "Graph エラー",
