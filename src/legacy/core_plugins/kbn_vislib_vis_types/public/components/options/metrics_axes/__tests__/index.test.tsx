@@ -58,10 +58,6 @@ describe('MetricsAxisOptions component', () => {
     type: { name: 'average' },
     makeLabel: () => 'Average',
   } as AggConfig;
-  const chart = {
-    show: true,
-    type: ChartTypes.HISTOGRAM,
-  } as SeriesParam;
 
   beforeEach(() => {
     setValue = jest.fn();
