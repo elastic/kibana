@@ -19,9 +19,16 @@
 
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   getCurl: (cb: (text: string) => void) => void;
@@ -32,6 +39,8 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
   curlCode: string;
+  toasts: [];
+  toastId: number;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -41,6 +50,8 @@ export class ConsoleMenu extends Component<Props, State> {
     this.state = {
       curlCode: '',
       isPopoverOpen: false,
+      toasts: [],
+      toastId: 1,
     };
   }
 
@@ -62,6 +73,7 @@ export class ConsoleMenu extends Component<Props, State> {
     textField.select();
     document.execCommand('copy');
     textField.remove();
+    this.addCopyToast();
   }
 
   onButtonClick = () => {
@@ -89,6 +101,41 @@ export class ConsoleMenu extends Component<Props, State> {
   autoIndent: any = (event: React.MouseEvent) => {
     this.closePopover();
     this.props.autoIndent(event);
+  };
+
+  getCopyToast = () => {
+    const copyToast = [
+      {
+        title: i18n.translate('console.copyRequestAsCurl', {
+          defaultMessage: 'Request copied as cURL',
+        }),
+        color: 'success',
+      },
+    ];
+
+    const actualToastId = this.state.toastId;
+    this.setState({ toastId: this.state.toastId + 1 });
+
+    return {
+      id: actualToastId,
+      ...copyToast[0],
+    };
+  };
+
+  addCopyToast = () => {
+    const toast = this.getCopyToast();
+
+    this.setState({
+      // @ts-ignore
+      toasts: this.state.toasts.concat(toast),
+    });
+  };
+
+  removeCopyToast = (removedToast: any) => {
+    // @ts-ignore
+    const newToastsArray = this.state.toasts.filter(tst => tst.id !== removedToast.id);
+    // @ts-ignore
+    this.setState({ toasts: newToastsArray });
   };
 
   render() {
@@ -141,17 +188,26 @@ export class ConsoleMenu extends Component<Props, State> {
     ];
 
     return (
-      <span onMouseEnter={this.mouseEnter}>
-        <EuiPopover
-          id="contextMenu"
-          button={button}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
+      <span>
+        <span onMouseEnter={this.mouseEnter}>
+          <EuiPopover
+            id="contextMenu"
+            button={button}
+            isOpen={this.state.isPopoverOpen}
+            closePopover={this.closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </span>
+        <span>
+          <EuiGlobalToastList
+            toasts={this.state.toasts}
+            dismissToast={this.removeCopyToast}
+            toastLifeTimeMs={6000}
+          />
+        </span>
       </span>
     );
   }
