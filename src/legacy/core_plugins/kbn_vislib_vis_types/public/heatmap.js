@@ -22,17 +22,16 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { vislibVisControllerProvider } from './controller';
+import { vislibVisController } from './controller';
 
-export default function HeatmapVisType($compile, $rootScope, Private) {
-  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
+export default function HeatmapVisType() {
 
   return visFactory.createBaseVisualization({
     name: 'heatmap',
     title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
     icon: 'visHeatmap',
     description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
-    visualization: controller,
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'heatmap',

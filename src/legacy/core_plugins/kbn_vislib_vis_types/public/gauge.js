@@ -22,10 +22,9 @@ import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { vislibVisControllerProvider } from './controller';
+import { vislibVisController } from './controller';
 
-export default function GaugeVisType($compile, $rootScope, Private) {
-  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
+export default function GaugeVisType() {
   return visFactory.createBaseVisualization({
     name: 'gauge',
     title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
@@ -79,7 +78,7 @@ export default function GaugeVisType($compile, $rootScope, Private) {
         }
       },
     },
-    visualization: controller,
+    visualization: vislibVisController,
     editorConfig: {
       collections: {
         gaugeTypes: [

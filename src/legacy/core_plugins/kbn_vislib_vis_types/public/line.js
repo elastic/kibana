@@ -35,10 +35,9 @@ import {
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
 import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
-import { vislibVisControllerProvider } from './controller';
+import { vislibVisController } from './controller';
 
-export default function PointSeriesVisType($compile, $rootScope, Private) {
-  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
+export default function PointSeriesVisType() {
   const countLabel = getCountLabel();
 
   return visFactory.createBaseVisualization({
@@ -46,7 +45,7 @@ export default function PointSeriesVisType($compile, $rootScope, Private) {
     title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
     icon: 'visLine',
     description: i18n.translate('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
-    visualization: controller,
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'line',

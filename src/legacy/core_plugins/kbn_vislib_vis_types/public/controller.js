@@ -20,7 +20,8 @@
 
 import $ from 'jquery';
 import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
-import VislibProvider from '../../../ui/public/vislib';
+import { VislibVisProvider } from '../../../ui/public/vislib/vis';
+import chrome from '../../../ui/public/chrome';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -29,83 +30,88 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-export const vislibVisControllerProvider = ($compile, $rootScope, Private) => {
-  const vislib = Private(VislibProvider);
-  return class VislibVisController {
-    constructor(el, vis) {
-      this.el = el;
-      this.vis = vis;
-      this.$scope = null;
 
-      this.container = document.createElement('div');
-      this.container.className = 'visLib';
-      this.el.appendChild(this.container);
+export class vislibVisController {
+  constructor(el, vis) {
+    this.el = el;
+    this.vis = vis;
+    this.$scope = null;
 
-      this.chartEl = document.createElement('div');
-      this.chartEl.className = 'visLib__chart';
-      this.container.appendChild(this.chartEl);
+    this.container = document.createElement('div');
+    this.container.className = 'visLib';
+    this.el.appendChild(this.container);
 
+    this.chartEl = document.createElement('div');
+    this.chartEl.className = 'visLib__chart';
+    this.container.appendChild(this.chartEl);
+  }
+
+  render(esResponse, visParams) {
+    if (this.vis.vislibVis) {
+      this.destroy();
     }
 
-    render(esResponse, visParams) {
-      if (this.vis.vislibVis) {
-        this.destroy();
+    return new Promise(async (resolve) => {
+      if (!this.vislib) {
+        const $injector = await chrome.dangerouslyGetActiveInjector();
+        const Private = $injector.get('Private');
+        this.vislib = Private(VislibVisProvider);
+        this.$compile = $injector.get('$compile');
+        this.$rootScope = $injector.get('$rootScope');
       }
 
-      return new Promise(async (resolve) => {
-        if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-          return resolve();
-        }
+      if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
+        return resolve();
+      }
 
-        this.vis.vislibVis = new vislib.Vis(this.chartEl, visParams);
-        this.vis.vislibVis.on('brush', this.vis.API.events.brush);
-        this.vis.vislibVis.on('click', this.vis.API.events.filter);
-        this.vis.vislibVis.on('renderComplete', resolve);
+      this.vis.vislibVis = new this.vislib.Vis(this.chartEl, visParams);
+      this.vis.vislibVis.on('brush', this.vis.API.events.brush);
+      this.vis.vislibVis.on('click', this.vis.API.events.filter);
+      this.vis.vislibVis.on('renderComplete', resolve);
 
-        this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+      this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
 
-        if (visParams.addLegend) {
-          $(this.container).attr('class', (i, cls) => {
-            return cls.replace(/visLib--legend-\S+/g, '');
-          }).addClass(legendClassName[visParams.legendPosition]);
+      if (visParams.addLegend) {
+        $(this.container).attr('class', (i, cls) => {
+          return cls.replace(/visLib--legend-\S+/g, '');
+        }).addClass(legendClassName[visParams.legendPosition]);
 
-          this.$scope = $rootScope.$new();
-          this.$scope.refreshLegend = 0;
-          this.$scope.vis = this.vis;
-          this.$scope.visData = esResponse;
-          this.$scope.visParams = visParams;
-          this.$scope.uiState = this.$scope.vis.getUiState();
-          const legendHtml = $compile('<vislib-legend></vislib-legend>')(this.$scope);
-          this.container.appendChild(legendHtml[0]);
-          this.$scope.$digest();
-        }
+        this.$scope = this.$rootScope.$new();
+        this.$scope.refreshLegend = 0;
+        this.$scope.vis = this.vis;
+        this.$scope.visData = esResponse;
+        this.$scope.visParams = visParams;
+        this.$scope.uiState = this.$scope.vis.getUiState();
+        const legendHtml = this.$compile('<vislib-legend></vislib-legend>')(this.$scope);
+        this.container.appendChild(legendHtml[0]);
+        this.$scope.$digest();
+      }
+
+      this.vis.vislibVis.render(esResponse, this.vis.getUiState());
+
+      // refreshing the legend after the chart is rendered.
+      // this is necessary because some visualizations
+      // provide data necessary for the legend only after a render cycle.
+      if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
+        this.$scope.refreshLegend++;
+        this.$scope.$digest();
 
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
-
-        // refreshing the legend after the chart is rendered.
-        // this is necessary because some visualizations
-        // provide data necessary for the legend only after a render cycle.
-        if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
-          this.$scope.refreshLegend++;
-          this.$scope.$digest();
-
-          this.vis.vislibVis.render(esResponse, this.vis.getUiState());
-        }
-      });
-    }
-
-    destroy() {
-      if (this.vis.vislibVis) {
-        this.vis.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vis.vislibVis.off('click', this.vis.API.events.filter);
-        this.vis.vislibVis.destroy();
-        delete this.vis.vislibVis;
       }
-      $(this.container).find('vislib-legend').remove();
-      if (this.$scope) {
-        this.$scope.$destroy();
-        this.$scope = null;
-      }
+    });
+  }
+
+  destroy() {
+    if (this.vis.vislibVis) {
+      this.vis.vislibVis.off('brush', this.vis.API.events.brush);
+      this.vis.vislibVis.off('click', this.vis.API.events.filter);
+      this.vis.vislibVis.destroy();
+      delete this.vis.vislibVis;
     }
-  };
-};
+    $(this.container).find('vislib-legend').remove();
+    if (this.$scope) {
+      this.$scope.$destroy();
+      this.$scope = null;
+    }
+  }
+}

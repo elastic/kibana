@@ -34,10 +34,9 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
 import { palettes } from '@elastic/eui/lib/services';
-import { vislibVisControllerProvider } from './controller';
+import { vislibVisController } from './controller';
 
-export default function PointSeriesVisType($compile, $rootScope, Private) {
-  const controller = vislibVisControllerProvider($compile, $rootScope, Private);
+export default function PointSeriesVisType() {
   const countLabel = getCountLabel();
 
   return visFactory.createBaseVisualization({
@@ -47,7 +46,7 @@ export default function PointSeriesVisType($compile, $rootScope, Private) {
     description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription',
       { defaultMessage: 'Assign a continuous variable to each axis' }
     ),
-    visualization: controller,
+    visualization: vislibVisController,
     visConfig: {
       defaults: {
         type: 'histogram',
