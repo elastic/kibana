@@ -24,19 +24,6 @@ import { keyCodes } from '@elastic/eui/lib/services';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
