@@ -367,6 +367,7 @@ export class FieldEditorComponent extends PureComponent {
 
     return (
       <div>
+        <EuiSpacer size="m" />
         <EuiCallOut
           color="warning"
           iconType="alert"
