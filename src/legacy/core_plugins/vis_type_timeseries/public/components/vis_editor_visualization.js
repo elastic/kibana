@@ -75,9 +75,9 @@ class VisEditorVisualizationUI extends Component {
     this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(savedObj, {
       vis: {},
       timeRange: timeRange,
-      filters: appState.filters || [],
+      filters: appState ? appState.filters || [] : [],
     });
-    this._handler.render(this._visEl.current);
+    await this._handler.render(this._visEl.current);
 
     this._subscription = this._handler.handler.data$.subscribe(data => {
       this.setPanelInterval(data.visData);

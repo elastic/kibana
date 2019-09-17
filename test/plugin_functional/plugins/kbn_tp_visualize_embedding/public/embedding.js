@@ -22,7 +22,7 @@
  * to embed visualizations.
  */
 
-import { getVisualizeLoader } from 'ui/visualize';
+import { start as embeddables } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import chrome from 'ui/chrome';
 
 export const embeddingSamples = [
@@ -31,12 +31,11 @@ export const embeddingSamples = [
     id: 'none',
     title: 'No parameters',
     async run(domNode, id) {
-      // You always need to retrieve the visualize loader for embedding visualizations.
-      const loader = await getVisualizeLoader();
-      // Use the embedVisualizationWithId method to embed a visualization by its id. The id is the id of the
+      // Use the embeddables.getEmbeddableFactory('visualization').createFromSavedObject
+      // method to embed a visualization by its id. The id is the id of the
       // saved object in the .kibana index (you can find the id via Management -> Saved Objects).
       //
-      // Pass in a DOM node that you want to embed that visualization into. Note: the loader will
+      // Pass in a DOM node that you want to embed that visualization into the render function.. Note: the loader will
       // use the size of that DOM node.
       //
       // The call will return a handler for the visualization with methods to interact with it.
@@ -45,52 +44,54 @@ export const embeddingSamples = [
       //
       // Note: If the visualization you want to embed contains date histograms with an auto interval, you need
       // to specify the timeRange parameter (see below).
-      return loader.embedVisualizationWithId(domNode, id, {});
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(id);
+      await handler.render(domNode);
+      return handler;
     }
   }, {
     id: 'timerange',
     title: 'timeRange',
     async run(domNode, id) {
-      const loader = await getVisualizeLoader();
       // If you want to filter down the data to a specific time range, you can specify a
       // timeRange in the parameters to the embedding call.
       // You can either use an absolute time range as seen below. You can also specify
       // a datemath string, like "now-7d", "now-1w/w" for the from or to key.
       // You can also directly assign a moment JS or regular JavaScript Date object.
-      return loader.embedVisualizationWithId(domNode, id, {
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(id, {
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
         }
       });
-    }
+      await handler.render(domNode);
+      return handler;}
   }, {
     id: 'query',
     title: 'query',
     async run(domNode, id) {
-      const loader = await getVisualizeLoader();
       // You can specify a query that should filter down the data via the query parameter.
       // It must have a language key which must be one of the supported query languages of Kibana,
       // which are at the moment: 'lucene' or 'kquery'.
       // The query key must then hold the actual query in the specified language for filtering.
-      return loader.embedVisualizationWithId(domNode, id, {
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(id, {
         query: {
           language: 'lucene',
           query: 'extension.raw:jpg',
         }
       });
+      await handler.render(domNode);
+      return handler;
     }
   }, {
     id: 'filters',
     title: 'filters',
     async run(domNode, id) {
-      const loader = await getVisualizeLoader();
       // You can specify an array of filters that should apply to the query.
       // The format of a filter must match the format the filter bar is using internally.
       // This has a query key, which holds the query part of an Elasticsearch query
       // and a meta key allowing to set some meta values, most important for this API
       // the `negate` option to negate the filter.
-      return loader.embedVisualizationWithId(domNode, id, {
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(id, {
         filters: [
           {
             query: {
@@ -107,15 +108,16 @@ export const embeddingSamples = [
           }
         ]
       });
+      await handler.render(domNode);
+      return handler;
     }
   }, {
     id: 'filters_query_timerange',
     title: 'filters & query & timeRange',
     async run(domNode, id) {
-      const loader = await getVisualizeLoader();
       // You an of course combine timeRange, query and filters options all together
       // to filter the data in the embedded visualization.
-      return loader.embedVisualizationWithId(domNode, id, {
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(id, {
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
@@ -140,12 +142,13 @@ export const embeddingSamples = [
           }
         ]
       });
+      await handler.render(domNode);
+      return handler;
     }
   }, {
     id: 'savedobject_filter_query_timerange',
     title: 'filters & query & time (use saved object)',
     async run(domNode, id) {
-      const loader = await getVisualizeLoader();
       // Besides embedding via the id of the visualizataion, the API offers the possibility to
       // embed via the saved visualization object.
       //
@@ -157,7 +160,7 @@ export const embeddingSamples = [
       const $injector = await chrome.dangerouslyGetActiveInjector();
       const savedVisualizations = $injector.get('savedVisualizations');
       const savedVis = await savedVisualizations.get(id);
-      return loader.embedVisualizationWithSavedObject(domNode, savedVis, {
+      const handler = await embeddables.getEmbeddableFactory('visualization').createFromSavedObject(savedVis, {
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
@@ -182,6 +185,8 @@ export const embeddingSamples = [
           }
         ]
       });
+      await handler.render(domNode);
+      return handler;
     }
   }
 ];

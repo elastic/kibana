@@ -38,6 +38,7 @@ export class ExpressionLoader {
   private loadingSubject: Subject<void>;
   private data: Data;
   private params: IExpressionLoaderParams = {};
+  private ignoreNextResponse = false;
 
   constructor(
     element: HTMLElement,
@@ -117,6 +118,7 @@ export class ExpressionLoader {
   update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
+    this.loadingSubject.next();
     if (expression) {
       this.loadData(expression, this.params);
     } else {
@@ -128,18 +130,22 @@ export class ExpressionLoader {
     expression: string | ExpressionAST,
     params: IExpressionLoaderParams
   ): Promise<void> => {
-    this.loadingSubject.next();
-    if (this.dataHandler) {
+    if (this.dataHandler && this.dataHandler.isPending()) {
+      this.ignoreNextResponse = true;
       this.dataHandler.cancel();
     }
     this.setParams(params);
     this.dataHandler = new ExpressionDataHandler(expression, params);
+    if (!params.inspectorAdapters) params.inspectorAdapters = this.dataHandler.inspect();
     const data = await this.dataHandler.getData();
+    if (this.ignoreNextResponse) {
+      this.ignoreNextResponse = false;
+      return;
+    }
     this.dataSubject.next(data);
   };
 
   private render(data: Data): void {
-    this.loadingSubject.next();
     this.renderHandler.render(data, this.params.extraHandlers);
   }
 
@@ -148,22 +154,15 @@ export class ExpressionLoader {
       return;
     }
 
-    if (params.searchContext && this.params.searchContext) {
+    if (params.searchContext) {
       this.params.searchContext = _.defaults(
         {},
         params.searchContext,
-        this.params.searchContext
+        this.params.searchContext || {}
       ) as any;
     }
     if (params.extraHandlers && this.params) {
       this.params.extraHandlers = params.extraHandlers;
-    }
-
-    if (!Object.keys(this.params).length) {
-      this.params = {
-        ...params,
-        searchContext: { type: 'kibana_context', ...(params.searchContext || {}) },
-      };
     }
   }
 }

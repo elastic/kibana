@@ -63,9 +63,6 @@ class Main extends React.Component {
       this.setState({ loading: true });
       const sample = embeddingSamples.find(el => el.id === selectedParams);
       this.handler = await sample.run(this.chartDiv.current, selectedVis);
-      // handler.whenFirstRenderComplete() will return a promise that resolves once the first
-      // rendering after embedding has finished.
-      await this.handler.whenFirstRenderComplete();
       this.setState({ loading: false });
     }
   }

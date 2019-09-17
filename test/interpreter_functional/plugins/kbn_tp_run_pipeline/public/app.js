@@ -25,8 +25,6 @@ import chrome from 'ui/chrome';
 
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
-
 import { registries } from 'plugins/interpreter/registries';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
@@ -67,7 +65,6 @@ function RootController($scope, $element) {
     DataAdapter={DataAdapter}
     runPipeline={runPipeline}
     registries={registries}
-    visualizationLoader={visualizationLoader}
   />, domNode);
 
   // unmount react on controller destroy

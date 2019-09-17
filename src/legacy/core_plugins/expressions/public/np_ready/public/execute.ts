@@ -48,7 +48,7 @@ export class ExpressionDataHandler {
     }
 
     this.abortController = new AbortController();
-    this.inspectorAdapters = this.getActiveInspectorAdapters();
+    this.inspectorAdapters = params.inspectorAdapters || this.getActiveInspectorAdapters();
 
     const getInitialContext = () => ({
       type: 'kibana_context',
@@ -67,6 +67,11 @@ export class ExpressionDataHandler {
 
   cancel = () => {
     this.abortController.abort();
+  };
+
+  isPending = () => {
+    // @ts-ignore
+    return this.promise.isResolved;
   };
 
   getData = async () => {
