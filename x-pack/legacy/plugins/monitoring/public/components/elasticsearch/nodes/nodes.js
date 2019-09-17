@@ -280,7 +280,28 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
           };
 
           const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
-          if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+          if (!hasInstances) {
+            customRenderResponse.shouldRender = true;
+            customRenderResponse.componentToRender = (
+              <Fragment>
+                <EuiCallOut
+                  title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle', {
+                    defaultMessage: 'Elasticsearch node detected',
+                  })}
+                  color="warning"
+                  iconType="flag"
+                >
+                  <p>
+                    {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeDescription', {
+                      defaultMessage: `The following nodes are not monitored. Click 'Monitor with Metricbeat' below to start monitoring.`,
+                    })}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m"/>
+              </Fragment>
+            );
+          }
+          else if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
             const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
               ? setupMode.shortcutToFinishMigration
               : setupMode.openFlyout;
