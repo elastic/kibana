@@ -193,7 +193,7 @@ export class JavaLauncher extends AbstractLauncher {
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         JAVA_HOME: javaHomePath,
-        EXTRA_WHITE_HOST: this.options.security.extraJavaRepositoryWitelist.join(','),
+        EXTRA_WHITELIST_HOST: this.options.security.extraJavaRepositoryWhitelist.join(','),
       },
     });
     p.stdout.on('data', data => {

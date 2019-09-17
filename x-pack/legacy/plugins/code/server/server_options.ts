@@ -23,7 +23,7 @@ export interface SecurityOptions {
   gitProtocolWhitelist: string[];
   enableGitCertCheck: boolean;
   enableJavaSecurityManager: boolean;
-  extraJavaRepositoryWitelist: string[];
+  extraJavaRepositoryWhitelist: string[];
 }
 
 export interface DiskOptions {
