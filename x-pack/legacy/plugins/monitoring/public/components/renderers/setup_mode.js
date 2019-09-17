@@ -121,7 +121,7 @@ export class SetupModeRenderer extends React.Component {
 
     return (
       <Fragment>
-        <EuiSpacer size="l"/>
+        <EuiSpacer size="xxl"/>
         <EuiBottomBar>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
