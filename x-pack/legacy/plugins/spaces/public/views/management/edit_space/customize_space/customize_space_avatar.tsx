@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, isValidHex } from '@elastic/eui';
+import { EuiColorPicker, EuiFieldText, EuiSpacer, EuiFormRow, isValidHex } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
@@ -42,38 +42,35 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
 
     return (
       <form onSubmit={() => false}>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={intl.formatMessage({
-              id: 'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
-              defaultMessage: 'Initials (2 max)',
-            })}
-          >
-            <EuiFieldText
-              inputRef={this.initialsInputRef}
-              name="spaceInitials"
-              // allows input to be cleared or otherwise invalidated while user is editing the initials,
-              // without defaulting to the derived initials provided by `getSpaceInitials`
-              value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
-              onChange={this.onInitialsChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiFormRow
-            label={intl.formatMessage({
-              id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
-              defaultMessage: 'Color',
-            })}
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+            defaultMessage: 'Initials (2 max)',
+          })}
+        >
+          <EuiFieldText
+            inputRef={this.initialsInputRef}
+            name="spaceInitials"
+            // allows input to be cleared or otherwise invalidated while user is editing the initials,
+            // without defaulting to the derived initials provided by `getSpaceInitials`
+            value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
+            onChange={this.onInitialsChange}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
+            defaultMessage: 'Color',
+          })}
+          isInvalid={isInvalidSpaceColor}
+        >
+          <EuiColorPicker
+            color={spaceColor}
+            onChange={this.onColorChange}
             isInvalid={isInvalidSpaceColor}
-          >
-            <EuiColorPicker
-              color={spaceColor}
-              onChange={this.onColorChange}
-              isInvalid={isInvalidSpaceColor}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+          />
+        </EuiFormRow>
       </form>
     );
   }

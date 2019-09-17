@@ -12,11 +12,13 @@ export const snapshotHistogramQueryString = `
     $dateRangeEnd: String!
     $filters: String
     $monitorId: String
+    $statusFilter: String
   ) {
     histogram: getSnapshotHistogram(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
       filters: $filters
+      statusFilter: $statusFilter
       monitorId: $monitorId
     ) {
       upCount
