@@ -209,4 +209,3 @@ export class GeometryFilterForm extends Component {
     );
   }
 }
-
