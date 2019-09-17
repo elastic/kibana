@@ -429,7 +429,7 @@ export const metrics = {
     })
   }),
   node_total_io: new RequestRateMetric({
-    field: 'node_stats.fs.io_stats',
+    field: 'node_stats.fs.io_stats.total.operations',
     title: nodeIoRateTitle,
     format: LARGE_FLOAT,
     units: '',
