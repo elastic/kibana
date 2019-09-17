@@ -4,36 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-import { EventsHeadingItem } from '../../../styles';
 import { OnColumnRemoved } from '../../../events';
-import { Sort } from '../../sort';
-import { SortIndicator } from '../../sort/sort_indicator';
-import { ColumnHeader } from '../column_header';
-import { getSortDirection } from '../header/helpers';
-import * as i18n from '../translations';
+import { EventsHeadingItem } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
-
-const CLOSE_BUTTON_SIZE = 25; // px
-const SORT_INDICATOR_SIZE = 25; // px
-export const ACTIONS_WIDTH = SORT_INDICATOR_SIZE + CLOSE_BUTTON_SIZE; // px
-
-const ActionsContainer = styled(EuiFlexGroup)`
-  // height: 100%;
-  // width: ${ACTIONS_WIDTH}px;
-`;
-
-ActionsContainer.displayName = 'ActionsContainer';
-
-const WrappedCloseButton = styled.div<{ show?: boolean }>`
-  // visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-`;
-
-WrappedCloseButton.displayName = 'WrappedCloseButton';
+import { Sort } from '../../sort';
+import { ColumnHeader } from '../column_header';
+import * as i18n from '../translations';
 
 interface Props {
   header: ColumnHeader;
@@ -47,22 +27,19 @@ export const CloseButton = pure<{
   columnId: string;
   onColumnRemoved: OnColumnRemoved;
 }>(({ columnId, onColumnRemoved }) => (
-  <WrappedCloseButton data-test-subj="wrapped-close-button">
-    <EuiButtonIcon
-      aria-label={i18n.REMOVE_COLUMN}
-      color="text"
-      data-test-subj="remove-column"
-      iconType="cross"
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-        // To avoid a re-sorting when you delete a column
-        event.preventDefault();
-        event.stopPropagation();
-        onColumnRemoved(columnId);
-      }}
-    />
-  </WrappedCloseButton>
+  <EuiButtonIcon
+    aria-label={i18n.REMOVE_COLUMN}
+    color="text"
+    data-test-subj="remove-column"
+    iconType="cross"
+    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+      // To avoid a re-sorting when you delete a column
+      event.preventDefault();
+      event.stopPropagation();
+      onColumnRemoved(columnId);
+    }}
+  />
 ));
-
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {

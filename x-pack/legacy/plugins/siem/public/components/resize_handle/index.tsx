@@ -50,15 +50,15 @@ const ResizeHandleContainer = styled.div<{
   right?: string | number;
   top?: string | number;
 }>`
-  ${({ bottom, height, left, position, right, top }) => css`
-    cursor: ${resizeCursorStyle};
-
+  ${({ bottom, height, left, position, right, theme, top }) => css`
     bottom: ${bottom};
+    cursor: ${resizeCursorStyle};
     height: ${height};
     left: ${left};
     position: ${position};
     right: ${right};
     top: ${top};
+    z-index: ${(position === 'absolute' || position === 'relative') && theme.eui.euiZLevel1};
   `}
 `;
 

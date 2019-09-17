@@ -8,22 +8,15 @@ import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
-import {
-  CELL_RESIZE_HANDLE_WIDTH,
-  ColumnHeaderResizeHandle,
-} from '../../../../resize_handle/styled_handles';
 import { TruncatableText } from '../../../../truncatable_text';
-import { WithHoverActions } from '../../../../with_hover_actions';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
-import { EventsHeading, EventsHeadingItem } from '../../../styles';
+import { EventsHeading, EventsHeadingHandle, EventsHeadingItem } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
-import { Actions, ACTIONS_WIDTH } from '../actions';
+import { Actions } from '../actions';
 import { ColumnHeader } from '../column_header';
-import { FullHeightFlexGroup, FullHeightFlexItem } from '../common/styles';
 import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getNewSortDirectionOnClick, getSortDirection } from './helpers';
@@ -68,12 +61,12 @@ export class Header extends React.PureComponent<Props> {
     return (
       <Resizeable
         bottom={0}
-        handle={<ColumnHeaderResizeHandle />}
+        handle={<EventsHeadingHandle />}
         id={header.id}
         onResize={this.onResize}
         position="absolute"
         render={this.renderActions}
-        right={0}
+        right="-1px"
         top={0}
       />
     );

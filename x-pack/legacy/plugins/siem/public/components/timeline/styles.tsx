@@ -34,7 +34,9 @@ export const EventsTable = styled.div.attrs({
 `;
 EventsTable.displayName = 'EventsTable';
 
-export const EventsThead = styled.div<{ minWidth: number }>`
+export const EventsThead = styled.div.attrs({
+  className: 'siemEventsTable__thead',
+})<{ minWidth: number }>`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade}
     border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
@@ -212,3 +214,25 @@ export const EventsHeadingItem = styled.div.attrs({
   `}
 `;
 EventsHeadingItem.displayName = 'EventsHeadingItem';
+
+export const EventsHeadingHandle = styled.div`
+  ${({ theme }) => css`
+    background-color: ${theme.eui.euiBorderColor};
+    height: 100%;
+    opacity: 0;
+    transition: all ${theme.eui.euiAnimSpeedNormal} ease;
+    visibility: hidden;
+    width: ${theme.eui.euiBorderWidthThick};
+
+    .siemEventsTable__thead:hover & {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &:hover {
+      background-color: ${theme.eui.euiColorPrimary};
+      cursor: col-resize;
+    }
+  `}
+`;
+EventsHeadingHandle.displayName = 'EventsHeadingHandle';
