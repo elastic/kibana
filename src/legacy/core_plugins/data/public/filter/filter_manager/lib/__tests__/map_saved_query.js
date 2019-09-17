@@ -40,6 +40,30 @@ describe('Filter Bar Directive', function () {
       });
     });
 
+    it('should preserve the parameters added to the filter', function (done) {
+      const filter = {
+        meta: {
+          type: 'savedQuery',
+          key: 'foo',
+          value: 'foo',
+          params: {
+            savedQuery: {
+              id: 'foo',
+              attributes: {}
+            },
+            esQueryConfig: {},
+            indexPattern: {},
+          },
+        }
+      };
+      mapSavedQuery(filter).then(function (result) {
+        expect(result).to.have.property('type', 'savedQuery');
+        expect(result.params.savedQuery).to.have.property('id', 'foo');
+        // add expectation for the other two items in params.
+        done();
+      });
+    });
+
     it('should not act on filters that are not saved queries', function (done) {
       const filter = { query: { match: { query: 'foo' } } };
       mapSavedQuery(filter).catch(function (result) {
