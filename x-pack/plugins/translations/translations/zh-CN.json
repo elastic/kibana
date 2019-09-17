@@ -4331,8 +4331,6 @@
     "xpack.code.searchPage.emptyTitle": "对不起，我们并没有找到任何结果。",
     "xpack.code.searchPage.hitsCountText": " 个匹配在 ",
     "xpack.code.searchPage.modifySearchSettingButtonLabel": "修改搜索设置",
-    "xpack.code.searchPage.scopeTabs.codeTabLabel": "代码",
-    "xpack.code.searchPage.scopeTabs.repositoryTabLabel": "仓库",
     "xpack.code.searchPage.showingResultsTitle": "以下是从 {from} 到 {to} 个结果，总共找到 {total} 个结果",
     "xpack.code.searchPage.sideBar.languagesTitle": "语言",
     "xpack.code.searchPage.sideBar.repositoriesTitle": "代码仓库",
