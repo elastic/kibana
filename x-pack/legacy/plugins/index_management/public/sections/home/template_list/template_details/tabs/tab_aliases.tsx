@@ -19,7 +19,7 @@ export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) 
   if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTab">
-        <EuiCodeBlock lang="json">{JSON.stringify(aliases)}</EuiCodeBlock>
+        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
       </div>
     );
   }

@@ -19,7 +19,7 @@ export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails })
   if (settings && Object.keys(settings).length) {
     return (
       <div data-test-subj="settingsTab">
-        <EuiCodeBlock lang="json">{JSON.stringify(settings)}</EuiCodeBlock>
+        <EuiCodeBlock lang="json">{JSON.stringify(settings, null, 2)}</EuiCodeBlock>
       </div>
     );
   }
