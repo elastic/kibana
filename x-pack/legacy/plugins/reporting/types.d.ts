@@ -38,6 +38,19 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
+export interface BrowserConfig {
+  inspect: boolean;
+  userDataDir: string;
+  viewport: { width: number; height: number };
+  disableSandbox: boolean;
+  proxy: {
+    enabled: boolean;
+    server: string;
+    bypass?: string[];
+  };
+  verboseLogging?: boolean;
+}
+
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
@@ -79,23 +92,11 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-// params that come into a request
-export interface JobParams {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-}
-
 export interface JobDocPayload {
-  basePath?: string;
-  forceNow?: string;
   headers?: Record<string, string>;
-  jobParams: JobParams;
-  relativeUrl?: string;
-  timeRange?: any;
+  jobParams: object;
   title: string;
   type: string | null;
-  urls?: string[];
 }
 
 export interface JobDocOutput {
@@ -139,10 +140,10 @@ export interface ESQueueWorker {
 }
 
 export type ESQueueCreateJobFn = (
-  jobParams: JobParams,
+  jobParams: object,
   headers: ConditionalHeaders,
   request: Request
-) => Promise<JobParams>;
+) => Promise<object>;
 
 export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
 

@@ -291,6 +291,9 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
                   fullWidth
                 />
               </EuiFormRow>
+
+              <EuiSpacer size="m" />
+
               {this.renderRangedDatePicker()}
 
             </EuiForm>

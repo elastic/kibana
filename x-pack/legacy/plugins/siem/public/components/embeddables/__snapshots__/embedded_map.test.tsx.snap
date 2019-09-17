@@ -4,7 +4,7 @@ exports[`EmbeddedMap renders correctly against snapshot 1`] = `
 <Fragment>
   <Styled(EuiFlexGroup)>
     <Loader
-      data-test-subj="pewpew-loading-panel"
+      data-test-subj="loading-panel"
       overlay={true}
       size="xl"
     />

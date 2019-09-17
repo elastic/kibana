@@ -8,10 +8,10 @@ export function MonitoringBeatsSummaryStatusProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   const SUBJ_SUMMARY = 'beatsSummaryStatus';
-  const SUBJ_TYPES_COUNTS = `${SUBJ_SUMMARY} typeCount`;
+  const SUBJ_TYPES_COUNTS = `${SUBJ_SUMMARY} > typeCount`;
 
-  const SUBJ_TOTAL_EVENTS   = `${SUBJ_SUMMARY} totalEvents`;
-  const SUBJ_BYTES_SENT = `${SUBJ_SUMMARY} bytesSent`;
+  const SUBJ_TOTAL_EVENTS   = `${SUBJ_SUMMARY} > totalEvents`;
+  const SUBJ_BYTES_SENT = `${SUBJ_SUMMARY} > bytesSent`;
 
   return new class BeatsSummaryStatus {
 

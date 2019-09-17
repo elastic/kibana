@@ -46,7 +46,7 @@
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-copy": "^1.0.0",
-    "highlight.js": "9.15.8",
+    "highlight.js": "9.15.10",
     "html": "1.0.0",
     "html-loader": "^0.5.5",
     "imports-loader": "^0.8.0",
