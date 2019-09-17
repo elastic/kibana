@@ -51,14 +51,15 @@ function RangeOption<ParamName extends string>({
   });
 
   const onChangeHandler = (
-    { target: { valueAsNumber } }: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>,
     isValid: boolean
   ) => {
-    setStateValue(valueAsNumber);
+    const { target } = event as React.ChangeEvent<HTMLInputElement>;
+    setStateValue(target.valueAsNumber);
     setIsValidState(isValid);
 
     if (isValid) {
-      setValue(paramName, valueAsNumber);
+      setValue(paramName, target.valueAsNumber);
     }
   };
   return (
@@ -72,7 +73,6 @@ function RangeOption<ParamName extends string>({
         showInput={showInput}
         step={step}
         value={stateValue}
-        // @ts-ignore
         onChange={onChangeHandler}
       />
     </EuiFormRow>
