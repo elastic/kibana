@@ -38,7 +38,6 @@ export const AdvancedNode = ({
     metrics.node_cgroup_cpu,
     metrics.node_cgroup_stats,
     metrics.node_latency,
-    metrics.node_total_io,
   ];
 
   return (
