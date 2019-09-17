@@ -9,11 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, IndexPatternPrivateState, OperationType } from '../indexpattern';
 

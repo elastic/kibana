@@ -5,7 +5,7 @@
  */
 
 import { uniq, indexBy } from 'lodash';
-import React, { useState, useEffect, memo, useMemo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   EuiComboBox,
   EuiLoadingSpinner,
@@ -30,8 +30,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Query } from 'src/plugins/data/common';
-import { DatasourceDataPanelProps, DataType } from '../types';
-import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
+import { DatasourceDataPanelProps, IndexPatternListItem } from '../types';
+import { IndexPatternPrivateState } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
@@ -91,11 +91,7 @@ export function IndexPatternDataPanel({
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={actions.toggleEmptyFields}
       onChangeIndexPattern={actions.setCurrentIndexPattern}
-      onToggleEmptyFields={onToggleEmptyFields}
       core={core}
-      updateFieldsWithCounts={
-        !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
-      }
     />
   );
 }
@@ -109,20 +105,17 @@ interface DataPanelState {
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
-  indexPatterns,
   currentIndexPattern,
+  indexPatterns,
   dragDropContext,
   onChangeIndexPattern,
   showEmptyFields,
   onToggleEmptyFields,
-  core,
-  core,
-}: Partial<DatasourceDataPanelProps> & {
+}: Partial<DatasourceDataPanelProps<unknown>> & {
   currentIndexPatternId: string;
-  indexPatterns: Record<string, IndexPattern>;
-  dateRange: DatasourceDataPanelProps['dateRange'];
+  currentIndexPattern?: IndexPattern;
+  indexPatterns: Record<string, IndexPatternListItem>;
   query: Query;
-  core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;
