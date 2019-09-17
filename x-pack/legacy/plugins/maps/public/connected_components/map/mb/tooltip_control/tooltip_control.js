@@ -6,19 +6,19 @@
 
 import _ from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import {
   FEATURE_ID_PROPERTY_NAME,
   LON_INDEX,
 } from '../../../../../common/constants';
-import mapboxgl from 'mapbox-gl';
 import { FeatureTooltip } from '../../feature_tooltip';
+import { EuiPopover, EuiText } from '@elastic/eui';
 
 const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
   LOCKED: 'LOCKED'
 };
+
+const noop = () => {};
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -39,34 +39,48 @@ function justifyAnchorLocation(mbLngLat, targetFeature) {
 
 export class TooltipControl extends React.Component {
 
+  state = {
+    x: undefined,
+    y: undefined,
+  };
+
   constructor(props) {
     super(props);
-    this._tooltipContainer = document.createElement('div');
-    this._mbPopup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      maxWidth: '260px', // width of table columns max-widths plus all padding
-    });
+    this._popoverRef = React.createRef();
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.tooltipState) {
+      const nextPoint = nextProps.mbMap.project(nextProps.tooltipState.location);
+      if (nextPoint.x !== prevState.x || nextPoint.y !== prevState.y) {
+        return {
+          x: nextPoint.x,
+          y: nextPoint.y,
+        };
+      }
+    }
+
+    return null;
   }
 
   componentDidMount() {
-    this._isMounted = true;
-
     this.props.mbMap.on('mouseout', this._onMouseout);
     this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
+    this.props.mbMap.on('move', this._updatePopoverPosition);
     this.props.mbMap.on('click', this._lockTooltip);
   }
 
   componentDidUpdate() {
-    this._syncTooltipState();
+    if (this.props.tooltipState && this._popoverRef.current) {
+      this._popoverRef.current.positionPopoverFluid();
+    }
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
     this.props.mbMap.off('mouseout', this._onMouseout);
     this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
+    this.props.mbMap.off('move', this._updatePopoverPosition);
     this.props.mbMap.off('click', this._lockTooltip);
-    this._hideTooltip();
   }
 
   _onMouseout = () => {
@@ -74,6 +88,21 @@ export class TooltipControl extends React.Component {
     if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
       this.props.clearTooltipState();
     }
+  }
+
+  _updatePopoverPosition = () => {
+    if (!this.props.tooltipState || this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+      return;
+    }
+
+    const nextPoint = this.props.mbMap.project(this.props.tooltipState.location);
+
+    // TODO close tooltip if moved outside of map bounds
+
+    this.setState({
+      x: nextPoint.x,
+      y: nextPoint.y
+    });
   }
 
   _getLayerByMbLayerId(mbLayerId) {
@@ -113,7 +142,6 @@ export class TooltipControl extends React.Component {
   }
 
   _lockTooltip =  (e) => {
-
     if (this.props.isDrawingFilter) {
       //ignore click events when in draw mode
       return;
@@ -139,7 +167,6 @@ export class TooltipControl extends React.Component {
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
-
     if (this.props.isDrawingFilter) {
       //ignore hover events when in draw mode
       return;
@@ -175,7 +202,6 @@ export class TooltipControl extends React.Component {
   }, 100);
 
   _getMbLayerIdsForTooltips() {
-
     const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
       return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
     }, []);
@@ -191,7 +217,6 @@ export class TooltipControl extends React.Component {
   }
 
   _getFeaturesUnderPointer(mbLngLatPoint) {
-
     if (!this.props.mbMap) {
       return [];
     }
@@ -211,48 +236,7 @@ export class TooltipControl extends React.Component {
     return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
-  _reevaluateTooltipPosition = () => {
-    // Force mapbox to ensure tooltip does not clip map boundary and move anchor when clipping occurs
-    requestAnimationFrame(() => {
-      if (this._isMounted && this.props.tooltipState && this.props.tooltipState.location) {
-        this._mbPopup.setLngLat(this.props.tooltipState.location);
-      }
-    });
-  }
-
-  _hideTooltip() {
-    if (this._mbPopup.isOpen()) {
-      this._mbPopup.remove();
-      ReactDOM.unmountComponentAtNode(this._tooltipContainer);
-    }
-  }
-
-  _showTooltip() {
-    if (!this._isMounted) {
-      return;
-    }
-    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
-    ReactDOM.render((
-      <I18nProvider>
-        <FeatureTooltip
-          features={this.props.tooltipState.features}
-          anchorLocation={this.props.tooltipState.location}
-          loadFeatureProperties={this._loadFeatureProperties}
-          findLayerById={this._findLayerById}
-          closeTooltip={this.props.clearTooltipState}
-          showFilterButtons={!!this.props.addFilters && isLocked}
-          isLocked={isLocked}
-          addFilters={this.props.addFilters}
-          geoFields={this.props.geoFields}
-          reevaluateTooltipPosition={this._reevaluateTooltipPosition}
-        />
-      </I18nProvider>
-    ), this._tooltipContainer);
-
-    this._mbPopup.setLngLat(this.props.tooltipState.location)
-      .setDOMContent(this._tooltipContainer)
-      .addTo(this.props.mbMap);
-  }
+  _reevaluateTooltipPosition = () => {}
 
   _loadFeatureProperties = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
@@ -272,17 +256,38 @@ export class TooltipControl extends React.Component {
     });
   };
 
-  _syncTooltipState() {
-    if (this.props.tooltipState) {
-      this.props.mbMap.getCanvas().style.cursor = 'pointer';
-      this._showTooltip();
-    } else {
-      this.props.mbMap.getCanvas().style.cursor = '';
-      this._hideTooltip();
-    }
-  }
-
   render() {
-    return null;
+    if (!this.props.tooltipState) {
+      return null;
+    }
+
+    const tooltipAnchor = <div/>;
+    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
+
+    return (
+      <EuiPopover
+        id="mapTooltip"
+        button={tooltipAnchor}
+        isOpen
+        closePopover={noop}
+        ref={this._popoverRef}
+        style={{ zIndex: 1, transform: `translate(${this.state.x}px, ${this.state.y}px)` }}
+      >
+        <EuiText size="xs">
+          <FeatureTooltip
+            features={this.props.tooltipState.features}
+            anchorLocation={this.props.tooltipState.location}
+            loadFeatureProperties={this._loadFeatureProperties}
+            findLayerById={this._findLayerById}
+            closeTooltip={this.props.clearTooltipState}
+            showFilterButtons={!!this.props.addFilters && isLocked}
+            isLocked={isLocked}
+            addFilters={this.props.addFilters}
+            geoFields={this.props.geoFields}
+            reevaluateTooltipPosition={this._reevaluateTooltipPosition}
+          />
+        </EuiText>
+      </EuiPopover>
+    );
   }
 }
