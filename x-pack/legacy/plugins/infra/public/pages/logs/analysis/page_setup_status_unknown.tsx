@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface Props {
   retry: () => void;
@@ -17,7 +16,7 @@ interface Props {
 export const AnalysisSetupStatusUnknownContent: React.FunctionComponent<Props> = ({
   retry,
 }: Props) => (
-  <EmptyPrompt
+  <EuiEmptyPrompt
     title={
       <h2>
         <FormattedMessage
@@ -35,7 +34,3 @@ export const AnalysisSetupStatusUnknownContent: React.FunctionComponent<Props> =
     }
   />
 );
-
-const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
-  align-self: center;
-`;
