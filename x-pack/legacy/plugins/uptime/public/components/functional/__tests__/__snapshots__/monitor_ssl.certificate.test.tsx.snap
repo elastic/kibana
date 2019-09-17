@@ -21,3 +21,5 @@ Array [
   </div>,
 ]
 `;
+
+exports[`MonitorStatusBar component renders null if invalid date 1`] = `null`;
