@@ -89,7 +89,7 @@ export class KibanaServerSavedObjects {
    * Create a saved object
    */
   public async create<Attributes extends Record<string, any>>(options: IndexOptions<Attributes>) {
-    this.log.debug('Updating saved object: %j', options);
+    this.log.debug('Creating saved object: %j', options);
 
     return await this.request<SavedObjectResponse<Attributes>>('update saved object', {
       url: joinPath(options.type, options.id),
