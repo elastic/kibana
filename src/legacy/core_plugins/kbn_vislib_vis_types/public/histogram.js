@@ -32,12 +32,11 @@ import {
   ThresholdLineStyles,
   getConfigCollections,
 } from './utils/collections';
-import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
+import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { palettes } from '@elastic/eui/lib/services';
 import { vislibVisController } from './controller';
 
 export default function PointSeriesVisType() {
-  const countLabel = getCountLabel();
 
   return visFactory.createBaseVisualization({
     name: 'histogram',
