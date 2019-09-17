@@ -105,7 +105,7 @@ interface to copy objects from one space to another.
 .. Import your saved objects via the import/export interface.
 .. (Optional) Delete objects in the export space that you no longer need.
 
-{kib} also has experimental <<saved-objects-api-import, import>> and 
+{kib} also has beta <<saved-objects-api-import, import>> and 
 <<saved-objects-api-export, export>> APIs if you want to automate this process.
 
 
