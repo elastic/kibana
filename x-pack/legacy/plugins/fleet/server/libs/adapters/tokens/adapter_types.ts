@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkUser } from '../framework/adapter_types';
+
 export interface EnrollmentTokenData {
   policy: { id: string; sharedId: string };
 }
@@ -31,6 +33,7 @@ export enum TokenType {
 export interface Token {
   id: string;
   type: TokenType;
+  token: string;
   tokenHash: string;
   created_at: string;
   expire_at?: string;
@@ -41,29 +44,39 @@ export interface Token {
 }
 
 export interface TokenAdapter {
-  create(data: {
-    type: TokenType;
-    tokenHash: string;
-    active: boolean;
-    policy: { id: string; sharedId: string };
-    expire_at?: string;
-  }): Promise<Token>;
+  create(
+    user: FrameworkUser,
+    data: {
+      type: TokenType;
+      token: string;
+      tokenHash: string;
+      active: boolean;
+      policy: { id: string; sharedId: string };
+      expire_at?: string;
+    }
+  ): Promise<Token>;
 
   /**
    * Get a token by token.
    * @param token
    */
-  getByTokenHash(tokenHash: string): Promise<Token | null>;
+  getByTokenHash(user: FrameworkUser, tokenHash: string): Promise<Token | null>;
+
+  /**
+   * Get a token by token.
+   * @param token
+   */
+  getByPolicyId(user: FrameworkUser, policyId: string): Promise<Token | null>;
 
   /**
    * Update a token
    * @param token
    */
-  update(id: string, newData: Partial<Token>): Promise<void>;
+  update(user: FrameworkUser, id: string, newData: Partial<Token>): Promise<void>;
 
   /**
    * Delete a token
    * @param token
    */
-  delete(id: string): Promise<void>;
+  delete(user: FrameworkUser, id: string): Promise<void>;
 }

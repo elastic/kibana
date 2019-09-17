@@ -12,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('fleet_enroll_agent', () => {
+  describe('fleet_get_tokens', () => {
     before(async () => {
       await esArchiver.load('fleet/agents');
     });
@@ -20,28 +20,32 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should allow to enroll an agent', async () => {
+    it('should allow to get an enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/fleet/agents/enroll`)
-        .set('kbn-xsrf', 'xxx')
-        .set(
-          'kbn-fleet-enrollment-token',
-          // Token without expiration for test purpose
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xNRU5UX1RPS0VOIiwicG9saWN5Ijp7ImlkIjoicG9saWN5OjEiLCJzaGFyZWRJZCI6InBvbGljeToxIn0sImlhdCI6MTU2ODY2MjMwOH0.KZ-LswnY7YXThEo9NRXP4QmJw-txg-dBXFhRKtwbs4s'
-        )
-        .send({
-          type: 'PERMANENT',
-          metadata: {
-            local: {},
-            userProvided: {},
-          },
-        })
+        .get(`/api/policy/policy:1/enrollment-tokens?regenerate=false`)
         .expect(200);
+
       expect(apiResponse.success).to.eql(true);
       expect(apiResponse.item).to.have.keys(
         'id',
-        'active',
-        'access_token',
+        'type',
+        'token',
+        'type',
+        'policy_id',
+        'policy_shared_id'
+      );
+    });
+
+    it('should allow to regenerate an enrollment token', async () => {
+      const { body: apiResponse } = await supertest
+        .get(`/api/policy/policy:1/enrollment-tokens?regenerate=true`)
+        .expect(200);
+
+      expect(apiResponse.success).to.eql(true);
+      expect(apiResponse.item).to.have.keys(
+        'id',
+        'type',
+        'token',
         'type',
         'policy_id',
         'policy_shared_id'

@@ -19,8 +19,45 @@ export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Req
   params: KibanaServerRequestGenaric['params'];
   payload: KibanaServerRequestGenaric['payload'];
   headers: KibanaServerRequestGenaric['headers'];
+  user: FrameworkUser;
 }
 
 export type FrameworkResponseToolkit = ResponseToolkit;
 
 export type FrameworkResponseObject = ResponseObject;
+
+export const internalAuthData = Symbol('internalAuthData');
+export const internalUser: FrameworkInternalUser = {
+  kind: 'internal',
+};
+
+export interface FrameworkAuthenticatedUser<AuthDataType = any> {
+  kind: 'authenticated';
+  [internalAuthData]: AuthDataType;
+}
+
+export interface FrameworkUnAuthenticatedUser {
+  kind: 'unauthenticated';
+}
+
+export interface FrameworkInternalUser {
+  kind: 'internal';
+}
+
+export type FrameworkUser<AuthDataType = any> =
+  | FrameworkAuthenticatedUser<AuthDataType>
+  | FrameworkUnAuthenticatedUser
+  | FrameworkInternalUser;
+
+export interface FrameworkRoute<
+  RouteRequest extends FrameworkRequest = FrameworkRequest,
+  RouteResponse extends ResponseObject = any
+> {
+  path: string;
+  method: string | string[];
+  vhost?: string;
+  licenseRequired?: string[];
+  requiredRoles?: string[];
+  handler: (request: RouteRequest, h: FrameworkResponseToolkit) => RouteResponse;
+  config?: {};
+}

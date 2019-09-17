@@ -13,7 +13,6 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents',
   config: {
-    auth: false,
     validate: {
       query: {
         page: Joi.number().default(1),
@@ -25,7 +24,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   ): Promise<ReturnTypeList<any>> => {
     const page = parseInt(request.query.page, 10);
 
-    const { agents, total } = await libs.agents.list();
+    const { agents, total } = await libs.agents.list(request.user);
 
     return { list: agents, success: true, page, total };
   },
