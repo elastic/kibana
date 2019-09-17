@@ -44,13 +44,13 @@ export function VennDiagram({ leftValue, rightValue, overlap }: VennDiagramProps
             cx={leftCenter + padding}
             cy={maxRadius}
             r={leftRadius}
-            className="gphVenn__left"
+            className="gphVennDiagram__left"
           />
           <circle
             cx={rightCenter + padding}
             cy={maxRadius}
             r={rightRadius}
-            className="gphVenn__right"
+            className="gphVennDiagram__right"
           />
         </g>
       </svg>

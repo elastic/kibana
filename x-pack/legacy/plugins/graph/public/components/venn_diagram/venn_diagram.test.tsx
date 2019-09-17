@@ -22,13 +22,13 @@ describe('venn_diagram', () => {
         >
           <g>
             <circle
-              className="gphVenn__left"
+              className="gphVennDiagram__left"
               cx={5.284377114585398}
               cy={4.370193722368317}
               r={3.0901936161855166}
             />
             <circle
-              className="gphVenn__right"
+              className="gphVennDiagram__right"
               cx={10.91639766870507}
               cy={4.370193722368317}
               r={4.370193722368317}
@@ -51,13 +51,13 @@ describe('venn_diagram', () => {
         >
           <g>
             <circle
-              className="gphVenn__left"
+              className="gphVennDiagram__left"
               cx={167.10667697398674}
               cy={138.1976597885342}
               r={97.720502380584}
             />
             <circle
-              className="gphVenn__right"
+              className="gphVennDiagram__right"
               cx={345.20680477219986}
               cy={138.1976597885342}
               r={138.1976597885342}
