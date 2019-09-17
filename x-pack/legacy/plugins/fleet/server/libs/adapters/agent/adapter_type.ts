@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 const RuntimeAgentType = t.union([
   t.literal('PERMANENT'),
@@ -126,35 +126,32 @@ export enum SortOptions {
 
 export interface AgentAdapter {
   create(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     agent: NewAgent,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<Agent>;
 
-  delete(request: FrameworkRequest, agent: Agent): Promise<void>;
+  delete(user: FrameworkUser, agent: Agent): Promise<void>;
 
-  getById(request: FrameworkRequest, id: string): Promise<Agent | null>;
+  getById(user: FrameworkUser, id: string): Promise<Agent | null>;
 
-  getBySharedId(request: FrameworkRequest, sharedId: string): Promise<Agent | null>;
+  getBySharedId(user: FrameworkUser, sharedId: string): Promise<Agent | null>;
 
-  update(request: FrameworkRequest, id: string, newData: Partial<Agent>): Promise<void>;
+  update(user: FrameworkUser, id: string, newData: Partial<Agent>): Promise<void>;
 
   findByMetadata(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     metadata: { local?: any; userProvided?: any }
   ): Promise<Agent[]>;
 
   list(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     sortOptions?: SortOptions,
     page?: number,
     perPage?: number
   ): Promise<{ agents: Agent[]; total: number }>;
 
-  findEphemeralByPolicySharedId(
-    request: FrameworkRequest,
-    policySharedId: string
-  ): Promise<Agent | null>;
+  findEphemeralByPolicySharedId(user: FrameworkUser, policySharedId: string): Promise<Agent | null>;
 
-  getByEphemeralAccessToken(request: FrameworkRequest, token: any): Promise<Agent | null>;
+  getByEphemeralAccessToken(user: FrameworkUser, token: any): Promise<Agent | null>;
 }

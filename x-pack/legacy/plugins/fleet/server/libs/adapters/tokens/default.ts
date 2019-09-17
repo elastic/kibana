@@ -9,7 +9,7 @@ import { SavedObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
 import { EncryptedSavedObjects } from '../encrypted_saved_objects/default';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 const SAVED_OBJECT_TYPE = 'tokens';
 
@@ -27,7 +27,7 @@ export class TokenAdapter implements TokenAdapterType {
   ) {}
 
   public async create(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     {
       type,
       token,
@@ -44,7 +44,10 @@ export class TokenAdapter implements TokenAdapterType {
       policy: { id: string; sharedId: string };
     }
   ): Promise<Token> {
-    const so = await this.soAdapter.create(request, SAVED_OBJECT_TYPE, {
+    if (user.kind !== 'authenticated') {
+      throw new Error('Only authenticated can update tokens');
+    }
+    const so = await this.soAdapter.create(user, SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       type,
       token,
@@ -61,8 +64,8 @@ export class TokenAdapter implements TokenAdapterType {
     };
   }
 
-  public async getByTokenHash(request: FrameworkRequest, tokenHash: string): Promise<Token | null> {
-    const res = await this.soAdapter.find(request, {
+  public async getByTokenHash(user: FrameworkUser, tokenHash: string): Promise<Token | null> {
+    const res = await this.soAdapter.find(user, {
       type: SAVED_OBJECT_TYPE,
       searchFields: ['tokenHash'],
       search: tokenHash,
@@ -73,8 +76,8 @@ export class TokenAdapter implements TokenAdapterType {
     return token ? await this._getDecrypted(token.id) : null;
   }
 
-  public async getByPolicyId(request: FrameworkRequest, policyId: string): Promise<Token | null> {
-    const res = await this.soAdapter.find(request, {
+  public async getByPolicyId(user: FrameworkUser, policyId: string): Promise<Token | null> {
+    const res = await this.soAdapter.find(user, {
       type: SAVED_OBJECT_TYPE,
       searchFields: ['policy_id'],
       search: policyId,
@@ -85,20 +88,19 @@ export class TokenAdapter implements TokenAdapterType {
     return token ? await this._getDecrypted(token.id) : null;
   }
 
-  public async update(
-    request: FrameworkRequest,
-    id: string,
-    newData: Partial<Token>
-  ): Promise<void> {
-    const { error } = await this.soAdapter.update(request, SAVED_OBJECT_TYPE, id, newData);
+  public async update(user: FrameworkUser, id: string, newData: Partial<Token>): Promise<void> {
+    if (user.kind !== 'authenticated') {
+      throw new Error('Only authenticated can update tokens');
+    }
+    const { error } = await this.soAdapter.update(user, SAVED_OBJECT_TYPE, id, newData);
 
     if (error) {
       throw new Error(error.message);
     }
   }
 
-  public async delete(request: FrameworkRequest, id: string): Promise<void> {
-    await this.soAdapter.delete(request, SAVED_OBJECT_TYPE, id);
+  public async delete(user: FrameworkUser, id: string): Promise<void> {
+    await this.soAdapter.delete(user, SAVED_OBJECT_TYPE, id);
   }
 
   private async _getDecrypted(tokenId: string) {

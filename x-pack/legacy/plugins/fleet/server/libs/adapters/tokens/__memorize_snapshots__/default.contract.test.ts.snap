@@ -17583,3 +17583,2779 @@ exports['Token Adapter delete allow to update a token - find:{"type":"tokens","p
     "saved_objects": []
   }
 }
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at TokenAdapter.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:47:37)\\n    at Object.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:83:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:107:28)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:undefined:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as update] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:153:23)\\n    at update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:145:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as update] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:139:21)\\n    at TokenAdapter.update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:89:44)\\n    at Object.update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:122:21)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:137:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:137:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:153:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:137:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:137:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:160:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByPolicyId] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:77:38)\\n    at Object.getByPolicyId (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:192:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:167:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:200:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:208:28)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:undefined:{} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as delete] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:79:23)\\n    at _slapshot.default.memorize (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:75:16)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as delete] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:69:21)\\n    at TokenAdapter.delete (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:97:11)\\n    at Object.it (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:221:13)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at TokenAdapter.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:47:37)\\n    at Object.create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:84:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:108:28)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:undefined:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as update] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:153:23)\\n    at update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:145:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as update] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:139:21)\\n    at TokenAdapter.update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:89:44)\\n    at Object.update (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:123:21)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:138:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:138:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:154:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:138:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:138:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:161:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByPolicyId] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:77:38)\\n    at Object.getByPolicyId (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:193:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:168:13)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at TokenAdapter.find [as getByTokenHash] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:65:38)\\n    at Object.getByTokenHash (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:201:35)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:49:23)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:40:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as create] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:34:21)\\n    at create (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:60)\\n    at Array.map (<anonymous>)\\n    at map (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:26:37)\\n    at Object.loadFixtures (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:209:28)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:undefined:{} (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as delete] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:79:23)\\n    at _slapshot.default.memorize (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:75:16)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as delete] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:69:21)\\n    at TokenAdapter.delete (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.ts:97:11)\\n    at Object.it (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:222:13)\\n    at Object.asyncJestTest (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:102:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Not supported\",\"name\":\"Error\",\"stack\":\"Error: Not supported\\n    at SODatabaseAdapter.getClient (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:34:11)\\n    at SODatabaseAdapter.getClient [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/default.ts:91:23)\\n    at find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:91:32)\\n    at Object.memorize (/Users/nicolas/Workspace/kibana/node_modules/@mattapperson/slapshot/lib/memorize.js:57:33)\\n    at MemorizeSODatabaseAdapter.memorize [as find] (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/saved_objets_database/memorize_adapter.ts:85:21)\\n    at Object.find (/Users/nicolas/Workspace/kibana/x-pack/legacy/plugins/fleet/server/libs/adapters/tokens/default.contract.test.ts:31:61)\\n    at Object.asyncJestLifecycle (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:53:37)\\n    at resolve (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:43:12)\\n    at new Promise (<anonymous>)\\n    at mapper (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:26:19)\\n    at promise.then (/Users/nicolas/Workspace/kibana/node_modules/jest-jasmine2/build/queueRunner.js:73:41)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "357e2e2b-793b-4aa3-aeec-df9062bfc914",
+    "attributes": {
+      "created_at": "2019-09-16T21:58:47.266Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:47.311Z",
+    "version": "WzAsMV0="
+  }
+}
+
+exports['Token Adapter create allow to create a token - get:tokens:357e2e2b-793b-4aa3-aeec-df9062bfc914:{} (2)'] = {
+  "results": {
+    "id": "357e2e2b-793b-4aa3-aeec-df9062bfc914",
+    "type": "tokens",
+    "updated_at": "2019-09-16T21:58:47.311Z",
+    "version": "WzAsMV0=",
+    "attributes": {
+      "created_at": "2019-09-16T21:58:47.266Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "357e2e2b-793b-4aa3-aeec-df9062bfc914",
+        "attributes": {
+          "created_at": "2019-09-16T21:58:47.266Z",
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId",
+          "active": true
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:47.311Z",
+        "version": "WzAsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter create allow to create a token - delete:tokens:357e2e2b-793b-4aa3-aeec-df9062bfc914:{} (4)'] = {
+  "results": {}
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "03b07b18-c598-4ac3-b7ba-7f5f4e508e10",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:49.006Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:03b07b18-c598-4ac3-b7ba-7f5f4e508e10:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "results": {
+    "id": "03b07b18-c598-4ac3-b7ba-7f5f4e508e10",
+    "type": "tokens",
+    "updated_at": "2019-09-16T21:58:50.045Z",
+    "version": "WzMsMV0=",
+    "references": [],
+    "attributes": {
+      "active": false
+    }
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:03b07b18-c598-4ac3-b7ba-7f5f4e508e10:{} (3)'] = {
+  "results": {
+    "id": "03b07b18-c598-4ac3-b7ba-7f5f4e508e10",
+    "type": "tokens",
+    "updated_at": "2019-09-16T21:58:50.045Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "active": false,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "03b07b18-c598-4ac3-b7ba-7f5f4e508e10",
+        "attributes": {
+          "active": false,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:50.045Z",
+        "version": "WzMsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter update allow to update a token - delete:tokens:03b07b18-c598-4ac3-b7ba-7f5f4e508e10:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "76e17eb5-6659-4b71-84b3-f679a3af4040",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:52.082Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fd3ca533-ed53-46b8-860f-02e09f40c5e6",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:52.082Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fd3ca533-ed53-46b8-860f-02e09f40c5e6",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:52.082Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - getDecryptedAsInternalUser:tokens:fd3ca533-ed53-46b8-860f-02e09f40c5e6 (4)'] = {
+  "results": {
+    "id": "fd3ca533-ed53-46b8-860f-02e09f40c5e6",
+    "type": "tokens",
+    "updated_at": "2019-09-16T21:58:52.082Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "76e17eb5-6659-4b71-84b3-f679a3af4040",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:52.082Z",
+        "version": "WzUsMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "fd3ca533-ed53-46b8-860f-02e09f40c5e6",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:52.082Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:76e17eb5-6659-4b71-84b3-f679a3af4040:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:fd3ca533-ed53-46b8-860f-02e09f40c5e6:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "c822980d-be02-4942-bbd5-ec3766ed0f75",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:55.153Z",
+    "version": "WzEwLDFd"
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "df1352e1-9971-449e-b5f8-a0ec07edd4f7",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:55.152Z",
+    "version": "WzksMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "df1352e1-9971-449e-b5f8-a0ec07edd4f7",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:55.152Z",
+        "version": "WzksMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "c822980d-be02-4942-bbd5-ec3766ed0f75",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:55.153Z",
+        "version": "WzEwLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:df1352e1-9971-449e-b5f8-a0ec07edd4f7:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:c822980d-be02-4942-bbd5-ec3766ed0f75:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "0b8caffc-c810-4033-89af-817c0723c2de",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:58.238Z",
+    "version": "WzEzLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "088d8599-8726-42c8-9fe3-96dd27587472",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:58.238Z",
+    "version": "WzE0LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "0079e081-f128-4d80-b426-4a2bf94f2878",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:58:58.245Z",
+    "version": "WzE1LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "0079e081-f128-4d80-b426-4a2bf94f2878",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:58.245Z",
+        "version": "WzE1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - getDecryptedAsInternalUser:tokens:0079e081-f128-4d80-b426-4a2bf94f2878 (5)'] = {
+  "results": {
+    "id": "0079e081-f128-4d80-b426-4a2bf94f2878",
+    "type": "tokens",
+    "updated_at": "2019-09-16T21:58:58.245Z",
+    "version": "WzE1LDFd",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "token": "notencryptedtoken",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (6)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "0b8caffc-c810-4033-89af-817c0723c2de",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:58.238Z",
+        "version": "WzEzLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "088d8599-8726-42c8-9fe3-96dd27587472",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:58.238Z",
+        "version": "WzE0LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "0079e081-f128-4d80-b426-4a2bf94f2878",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:58:58.245Z",
+        "version": "WzE1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:0b8caffc-c810-4033-89af-817c0723c2de:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:088d8599-8726-42c8-9fe3-96dd27587472:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:0079e081-f128-4d80-b426-4a2bf94f2878:{} (9)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "70e8cdba-fd44-4e4e-a454-55db57009dcc",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:59:02.334Z",
+    "version": "WzE5LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "5aaec0c5-3341-448a-81f2-af007b522aa8",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:59:02.334Z",
+    "version": "WzIwLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "af69d637-7463-43d6-b02e-6216c78f1079",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:59:02.349Z",
+    "version": "WzIxLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "5aaec0c5-3341-448a-81f2-af007b522aa8",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:59:02.334Z",
+        "version": "WzIwLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "af69d637-7463-43d6-b02e-6216c78f1079",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:59:02.349Z",
+        "version": "WzIxLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "70e8cdba-fd44-4e4e-a454-55db57009dcc",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T21:59:02.334Z",
+        "version": "WzE5LDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:5aaec0c5-3341-448a-81f2-af007b522aa8:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:af69d637-7463-43d6-b02e-6216c78f1079:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:70e8cdba-fd44-4e4e-a454-55db57009dcc:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "1a12cdd5-a5ea-40d7-b542-6659f93534cc",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T21:59:06.543Z",
+    "version": "WzI1LDFd"
+  }
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:1a12cdd5-a5ea-40d7-b542-6659f93534cc:{} (2)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - get:tokens:1a12cdd5-a5ea-40d7-b542-6659f93534cc:{} (3)'] = {
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "f5d70ca8-9f35-437e-be6b-bbe7367174cc",
+    "attributes": {
+      "created_at": "2019-09-16T22:40:50.003Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:50.043Z",
+    "version": "WzAsMV0="
+  }
+}
+
+exports['Token Adapter create allow to create a token - get:tokens:f5d70ca8-9f35-437e-be6b-bbe7367174cc:{} (2)'] = {
+  "results": {
+    "id": "f5d70ca8-9f35-437e-be6b-bbe7367174cc",
+    "type": "tokens",
+    "updated_at": "2019-09-16T22:40:50.043Z",
+    "version": "WzAsMV0=",
+    "attributes": {
+      "created_at": "2019-09-16T22:40:50.003Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "f5d70ca8-9f35-437e-be6b-bbe7367174cc",
+        "attributes": {
+          "created_at": "2019-09-16T22:40:50.003Z",
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId",
+          "active": true
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:50.043Z",
+        "version": "WzAsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter create allow to create a token - delete:tokens:f5d70ca8-9f35-437e-be6b-bbe7367174cc:{} (4)'] = {
+  "results": {}
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "506396a6-2365-4c35-9e44-098ae89653fe",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:51.681Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:506396a6-2365-4c35-9e44-098ae89653fe:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "results": {
+    "id": "506396a6-2365-4c35-9e44-098ae89653fe",
+    "type": "tokens",
+    "updated_at": "2019-09-16T22:40:52.734Z",
+    "version": "WzMsMV0=",
+    "references": [],
+    "attributes": {
+      "active": false
+    }
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:506396a6-2365-4c35-9e44-098ae89653fe:{} (3)'] = {
+  "results": {
+    "id": "506396a6-2365-4c35-9e44-098ae89653fe",
+    "type": "tokens",
+    "updated_at": "2019-09-16T22:40:52.734Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "active": false,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "506396a6-2365-4c35-9e44-098ae89653fe",
+        "attributes": {
+          "active": false,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:52.734Z",
+        "version": "WzMsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter update allow to update a token - delete:tokens:506396a6-2365-4c35-9e44-098ae89653fe:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "4c640131-3f32-4c95-bfc5-b35bc991f3bc",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:54.779Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "96d41cc7-f9d1-49b7-9fcb-4813c23af05a",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:54.779Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "96d41cc7-f9d1-49b7-9fcb-4813c23af05a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:54.779Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - getDecryptedAsInternalUser:tokens:96d41cc7-f9d1-49b7-9fcb-4813c23af05a (4)'] = {
+  "results": {
+    "id": "96d41cc7-f9d1-49b7-9fcb-4813c23af05a",
+    "type": "tokens",
+    "updated_at": "2019-09-16T22:40:54.779Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "4c640131-3f32-4c95-bfc5-b35bc991f3bc",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:54.779Z",
+        "version": "WzUsMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "96d41cc7-f9d1-49b7-9fcb-4813c23af05a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:54.779Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:4c640131-3f32-4c95-bfc5-b35bc991f3bc:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:96d41cc7-f9d1-49b7-9fcb-4813c23af05a:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "5009fab6-7234-4e21-8c04-54610fa80087",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:57.855Z",
+    "version": "WzksMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "ad0e298e-d696-4c5e-b80e-ec5eb90b85f3",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:40:57.855Z",
+    "version": "WzEwLDFd"
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "5009fab6-7234-4e21-8c04-54610fa80087",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:57.855Z",
+        "version": "WzksMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "ad0e298e-d696-4c5e-b80e-ec5eb90b85f3",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:40:57.855Z",
+        "version": "WzEwLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:5009fab6-7234-4e21-8c04-54610fa80087:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:ad0e298e-d696-4c5e-b80e-ec5eb90b85f3:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "373fb318-4b93-4213-969d-2204cff2a29f",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:00.941Z",
+    "version": "WzEzLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "08a45c23-46c3-4c1c-95b0-dc0701867c2e",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:00.941Z",
+    "version": "WzE0LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "d20d06d2-5c63-450f-a4f0-5ba87d207283",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:00.948Z",
+    "version": "WzE1LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "d20d06d2-5c63-450f-a4f0-5ba87d207283",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:00.948Z",
+        "version": "WzE1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - getDecryptedAsInternalUser:tokens:d20d06d2-5c63-450f-a4f0-5ba87d207283 (5)'] = {
+  "results": {
+    "id": "d20d06d2-5c63-450f-a4f0-5ba87d207283",
+    "type": "tokens",
+    "updated_at": "2019-09-16T22:41:00.948Z",
+    "version": "WzE1LDFd",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "token": "notencryptedtoken",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (6)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "08a45c23-46c3-4c1c-95b0-dc0701867c2e",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:00.941Z",
+        "version": "WzE0LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "d20d06d2-5c63-450f-a4f0-5ba87d207283",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:00.948Z",
+        "version": "WzE1LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "373fb318-4b93-4213-969d-2204cff2a29f",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:00.941Z",
+        "version": "WzEzLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:08a45c23-46c3-4c1c-95b0-dc0701867c2e:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:d20d06d2-5c63-450f-a4f0-5ba87d207283:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:373fb318-4b93-4213-969d-2204cff2a29f:{} (9)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "8bb9ae73-79cb-43b1-b9a8-7d204a8811e3",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:05.028Z",
+    "version": "WzE5LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "2550159f-3ec2-42ff-813a-35bc5a6003b0",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:05.028Z",
+    "version": "WzIwLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "48c2efe6-d5ad-43c0-9fa7-2e89a5b41a28",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:05.034Z",
+    "version": "WzIxLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "8bb9ae73-79cb-43b1-b9a8-7d204a8811e3",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:05.028Z",
+        "version": "WzE5LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "2550159f-3ec2-42ff-813a-35bc5a6003b0",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:05.028Z",
+        "version": "WzIwLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "48c2efe6-d5ad-43c0-9fa7-2e89a5b41a28",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-16T22:41:05.034Z",
+        "version": "WzIxLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:8bb9ae73-79cb-43b1-b9a8-7d204a8811e3:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:2550159f-3ec2-42ff-813a-35bc5a6003b0:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:48c2efe6-d5ad-43c0-9fa7-2e89a5b41a28:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "140ae40e-9dab-47c6-8cac-bb1f8b4b0c77",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-16T22:41:09.117Z",
+    "version": "WzI1LDFd"
+  }
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:140ae40e-9dab-47c6-8cac-bb1f8b4b0c77:{} (2)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - get:tokens:140ae40e-9dab-47c6-8cac-bb1f8b4b0c77:{} (3)'] = {
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "f2132806-ad3a-43a2-a518-a426faf540a4",
+    "attributes": {
+      "created_at": "2019-09-17T00:41:12.762Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:12.866Z",
+    "version": "WzE0NCwxXQ=="
+  }
+}
+
+exports['Token Adapter create allow to create a token - get:tokens:f2132806-ad3a-43a2-a518-a426faf540a4:{} (2)'] = {
+  "results": {
+    "id": "f2132806-ad3a-43a2-a518-a426faf540a4",
+    "type": "tokens",
+    "updated_at": "2019-09-17T00:41:12.866Z",
+    "version": "WzE0NCwxXQ==",
+    "attributes": {
+      "created_at": "2019-09-17T00:41:12.762Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "f2132806-ad3a-43a2-a518-a426faf540a4",
+        "attributes": {
+          "created_at": "2019-09-17T00:41:12.762Z",
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId",
+          "active": true
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:12.866Z",
+        "version": "WzE0NCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter create allow to create a token - delete:tokens:f2132806-ad3a-43a2-a518-a426faf540a4:{} (4)'] = {
+  "results": {}
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "3cbc6eb6-0727-4dad-8f52-3bac584edef9",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:14.844Z",
+    "version": "WzE0NiwxXQ=="
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:3cbc6eb6-0727-4dad-8f52-3bac584edef9:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "results": {
+    "id": "3cbc6eb6-0727-4dad-8f52-3bac584edef9",
+    "type": "tokens",
+    "updated_at": "2019-09-17T00:41:15.883Z",
+    "version": "WzE0NywxXQ==",
+    "references": [],
+    "attributes": {
+      "active": false
+    }
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:3cbc6eb6-0727-4dad-8f52-3bac584edef9:{} (3)'] = {
+  "results": {
+    "id": "3cbc6eb6-0727-4dad-8f52-3bac584edef9",
+    "type": "tokens",
+    "updated_at": "2019-09-17T00:41:15.883Z",
+    "version": "WzE0NywxXQ==",
+    "attributes": {
+      "active": false,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "3cbc6eb6-0727-4dad-8f52-3bac584edef9",
+        "attributes": {
+          "active": false,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:15.883Z",
+        "version": "WzE0NywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter update allow to update a token - delete:tokens:3cbc6eb6-0727-4dad-8f52-3bac584edef9:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "42674774-bf86-465a-bd77-3530c7911c9f",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:17.901Z",
+    "version": "WzE0OSwxXQ=="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "0c27d522-cfdc-4276-9d1b-39b86f0e2671",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:17.901Z",
+    "version": "WzE1MCwxXQ=="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "0c27d522-cfdc-4276-9d1b-39b86f0e2671",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:17.901Z",
+        "version": "WzE1MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - getDecryptedAsInternalUser:tokens:0c27d522-cfdc-4276-9d1b-39b86f0e2671 (4)'] = {
+  "results": {
+    "id": "0c27d522-cfdc-4276-9d1b-39b86f0e2671",
+    "type": "tokens",
+    "updated_at": "2019-09-17T00:41:17.901Z",
+    "version": "WzE1MCwxXQ==",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "42674774-bf86-465a-bd77-3530c7911c9f",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:17.901Z",
+        "version": "WzE0OSwxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "0c27d522-cfdc-4276-9d1b-39b86f0e2671",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:17.901Z",
+        "version": "WzE1MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:42674774-bf86-465a-bd77-3530c7911c9f:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:0c27d522-cfdc-4276-9d1b-39b86f0e2671:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "1461122a-4e20-4e42-9f25-258289e7303a",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:20.946Z",
+    "version": "WzE1NCwxXQ=="
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "e1dbf826-ac88-41ad-b6ba-3bc777a9dbc1",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:20.946Z",
+    "version": "WzE1MywxXQ=="
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "1461122a-4e20-4e42-9f25-258289e7303a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:20.946Z",
+        "version": "WzE1NCwxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "e1dbf826-ac88-41ad-b6ba-3bc777a9dbc1",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:20.946Z",
+        "version": "WzE1MywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:1461122a-4e20-4e42-9f25-258289e7303a:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:e1dbf826-ac88-41ad-b6ba-3bc777a9dbc1:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "9a55bc99-dc9c-4150-bea2-fc75fd133263",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:24.190Z",
+    "version": "WzE1OCwxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "3911110b-ba6b-4e0d-a65a-580bfaac8c13",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:24.190Z",
+    "version": "WzE1NywxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "89eef1f0-7369-4761-bc6d-de8f9aba552a",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:24.195Z",
+    "version": "WzE1OSwxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "89eef1f0-7369-4761-bc6d-de8f9aba552a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:24.195Z",
+        "version": "WzE1OSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - getDecryptedAsInternalUser:tokens:89eef1f0-7369-4761-bc6d-de8f9aba552a (5)'] = {
+  "results": {
+    "id": "89eef1f0-7369-4761-bc6d-de8f9aba552a",
+    "type": "tokens",
+    "updated_at": "2019-09-17T00:41:24.195Z",
+    "version": "WzE1OSwxXQ==",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "token": "notencryptedtoken",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (6)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "9a55bc99-dc9c-4150-bea2-fc75fd133263",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:24.190Z",
+        "version": "WzE1OCwxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "3911110b-ba6b-4e0d-a65a-580bfaac8c13",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:24.190Z",
+        "version": "WzE1NywxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "89eef1f0-7369-4761-bc6d-de8f9aba552a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:24.195Z",
+        "version": "WzE1OSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:9a55bc99-dc9c-4150-bea2-fc75fd133263:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:3911110b-ba6b-4e0d-a65a-580bfaac8c13:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:89eef1f0-7369-4761-bc6d-de8f9aba552a:{} (9)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "a1f07594-76d2-4d94-b338-1f368721b2b6",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:28.342Z",
+    "version": "WzE2MywxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "5e31a4c5-334f-4d9e-8625-8c77285a4be4",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:28.341Z",
+    "version": "WzE2NCwxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "96b1bfdc-8591-451c-97e2-e9da04c697f0",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:28.348Z",
+    "version": "WzE2NSwxXQ=="
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "a1f07594-76d2-4d94-b338-1f368721b2b6",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:28.342Z",
+        "version": "WzE2MywxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "96b1bfdc-8591-451c-97e2-e9da04c697f0",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:28.348Z",
+        "version": "WzE2NSwxXQ=="
+      },
+      {
+        "type": "tokens",
+        "id": "5e31a4c5-334f-4d9e-8625-8c77285a4be4",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T00:41:28.341Z",
+        "version": "WzE2NCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:a1f07594-76d2-4d94-b338-1f368721b2b6:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:96b1bfdc-8591-451c-97e2-e9da04c697f0:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:5e31a4c5-334f-4d9e-8625-8c77285a4be4:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "826852ad-948b-40c7-a246-1873e92cc780",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T00:41:32.400Z",
+    "version": "WzE2OSwxXQ=="
+  }
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:826852ad-948b-40c7-a246-1873e92cc780:{} (2)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - get:tokens:826852ad-948b-40c7-a246-1873e92cc780:{} (3)'] = {
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "fbbceaf0-3877-4d0d-8339-f76381cf9115",
+    "attributes": {
+      "created_at": "2019-09-17T01:04:16.544Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:16.587Z",
+    "version": "WzAsMV0="
+  }
+}
+
+exports['Token Adapter create allow to create a token - get:tokens:fbbceaf0-3877-4d0d-8339-f76381cf9115:{} (2)'] = {
+  "results": {
+    "id": "fbbceaf0-3877-4d0d-8339-f76381cf9115",
+    "type": "tokens",
+    "updated_at": "2019-09-17T01:04:16.587Z",
+    "version": "WzAsMV0=",
+    "attributes": {
+      "created_at": "2019-09-17T01:04:16.544Z",
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId",
+      "active": true
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter create allow to create a token - find:{"type":"tokens","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "fbbceaf0-3877-4d0d-8339-f76381cf9115",
+        "attributes": {
+          "created_at": "2019-09-17T01:04:16.544Z",
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId",
+          "active": true
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:16.587Z",
+        "version": "WzAsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter create allow to create a token - delete:tokens:fbbceaf0-3877-4d0d-8339-f76381cf9115:{} (4)'] = {
+  "results": {}
+}
+
+exports['Token Adapter update allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "39ad8969-c467-4026-b0c3-c72bc73b4649",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:18.098Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:39ad8969-c467-4026-b0c3-c72bc73b4649:{"active":false,"token":"notencryptedtoken"}:{} (2)'] = {
+  "results": {
+    "id": "39ad8969-c467-4026-b0c3-c72bc73b4649",
+    "type": "tokens",
+    "updated_at": "2019-09-17T01:04:19.126Z",
+    "version": "WzMsMV0=",
+    "references": [],
+    "attributes": {
+      "active": false
+    }
+  }
+}
+
+exports['Token Adapter update allow to update a token - get:tokens:39ad8969-c467-4026-b0c3-c72bc73b4649:{} (3)'] = {
+  "results": {
+    "id": "39ad8969-c467-4026-b0c3-c72bc73b4649",
+    "type": "tokens",
+    "updated_at": "2019-09-17T01:04:19.126Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "active": false,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policyId",
+      "policy_shared_id": "sharedId"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter update allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "39ad8969-c467-4026-b0c3-c72bc73b4649",
+        "attributes": {
+          "active": false,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policyId",
+          "policy_shared_id": "sharedId"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:19.126Z",
+        "version": "WzMsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter update allow to update a token - delete:tokens:39ad8969-c467-4026-b0c3-c72bc73b4649:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "76cf9e21-b5a2-4c6e-9a0b-ec15a91fe996",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:21.220Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "1f84011d-8779-441b-b213-7018c8480634",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:21.220Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","searchFields":["tokenHash"],"search":"azerty"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "1f84011d-8779-441b-b213-7018c8480634",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:21.220Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - getDecryptedAsInternalUser:tokens:1f84011d-8779-441b-b213-7018c8480634 (4)'] = {
+  "results": {
+    "id": "1f84011d-8779-441b-b213-7018c8480634",
+    "type": "tokens",
+    "updated_at": "2019-09-17T01:04:21.220Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "76cf9e21-b5a2-4c6e-9a0b-ec15a91fe996",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:21.220Z",
+        "version": "WzUsMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "1f84011d-8779-441b-b213-7018c8480634",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:21.220Z",
+        "version": "WzYsMV0="
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:76cf9e21-b5a2-4c6e-9a0b-ec15a91fe996:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash allow to find a token - delete:tokens:1f84011d-8779-441b-b213-7018c8480634:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "b9a73930-901e-41f3-a3cf-debc06747919",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:24.360Z",
+    "version": "WzksMV0="
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "544c8c07-994f-4a1d-be5c-7f93f245e38a",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:24.360Z",
+    "version": "WzEwLDFd"
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"idonotexists"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "b9a73930-901e-41f3-a3cf-debc06747919",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:24.360Z",
+        "version": "WzksMV0="
+      },
+      {
+        "type": "tokens",
+        "id": "544c8c07-994f-4a1d-be5c-7f93f245e38a",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:24.360Z",
+        "version": "WzEwLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:b9a73930-901e-41f3-a3cf-debc06747919:{} (5)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByTokenHash return null if the token does not exists - delete:tokens:544c8c07-994f-4a1d-be5c-7f93f245e38a:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "c2a5566f-ed7c-440f-b974-b31eeb027538",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:27.445Z",
+    "version": "WzEzLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "67c2f459-b876-48e2-bcfa-805ff9d2cf1c",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:27.445Z",
+    "version": "WzE0LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "8a6d9416-dd74-4362-9637-01b529ec0da1",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:27.451Z",
+    "version": "WzE1LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","searchFields":["policy_id"],"search":"policy12"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "8a6d9416-dd74-4362-9637-01b529ec0da1",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:27.451Z",
+        "version": "WzE1LDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - getDecryptedAsInternalUser:tokens:8a6d9416-dd74-4362-9637-01b529ec0da1 (5)'] = {
+  "results": {
+    "id": "8a6d9416-dd74-4362-9637-01b529ec0da1",
+    "type": "tokens",
+    "updated_at": "2019-09-17T01:04:27.451Z",
+    "version": "WzE1LDFd",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "token": "notencryptedtoken",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": []
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - find:{"type":"tokens","perPage":1000} (6)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "67c2f459-b876-48e2-bcfa-805ff9d2cf1c",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:27.445Z",
+        "version": "WzE0LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "8a6d9416-dd74-4362-9637-01b529ec0da1",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:27.451Z",
+        "version": "WzE1LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "c2a5566f-ed7c-440f-b974-b31eeb027538",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:27.445Z",
+        "version": "WzEzLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:67c2f459-b876-48e2-bcfa-805ff9d2cf1c:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:8a6d9416-dd74-4362-9637-01b529ec0da1:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId allow to find a token - delete:tokens:c2a5566f-ed7c-440f-b974-b31eeb027538:{} (9)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "063266d4-08b1-4432-b976-7c9a0093f0dd",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty",
+      "policy_id": "policy1"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:31.518Z",
+    "version": "WzIwLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (3)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "3e729aed-22ae-4e36-8a80-c8226cc6afd8",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy123"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:31.518Z",
+    "version": "WzE5LDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - create:tokens (2)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "eee6cee0-26df-4537-bb22-6b945415b6c8",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "azerty",
+      "policy_id": "policy12"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:31.524Z",
+    "version": "WzIxLDFd"
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","searchFields":["tokenHash"],"search":"policy1234"} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - find:{"type":"tokens","perPage":1000} (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "tokens",
+        "id": "063266d4-08b1-4432-b976-7c9a0093f0dd",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "qwerty",
+          "policy_id": "policy1"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:31.518Z",
+        "version": "WzIwLDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "3e729aed-22ae-4e36-8a80-c8226cc6afd8",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy123"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:31.518Z",
+        "version": "WzE5LDFd"
+      },
+      {
+        "type": "tokens",
+        "id": "eee6cee0-26df-4537-bb22-6b945415b6c8",
+        "attributes": {
+          "active": true,
+          "type": "ACCESS_TOKEN",
+          "tokenHash": "azerty",
+          "policy_id": "policy12"
+        },
+        "references": [],
+        "updated_at": "2019-09-17T01:04:31.524Z",
+        "version": "WzIxLDFd"
+      }
+    ]
+  }
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:063266d4-08b1-4432-b976-7c9a0093f0dd:{} (6)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:3e729aed-22ae-4e36-8a80-c8226cc6afd8:{} (7)'] = {
+  "results": {}
+}
+
+exports['Token Adapter getByPolicyId return null if the token does not exists - delete:tokens:eee6cee0-26df-4537-bb22-6b945415b6c8:{} (8)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - create:tokens (1)'] = {
+  "results": {
+    "type": "tokens",
+    "id": "a6be5fe5-466a-4a0f-b784-1a4c9ade64f6",
+    "attributes": {
+      "active": true,
+      "type": "ACCESS_TOKEN",
+      "tokenHash": "qwerty"
+    },
+    "references": [],
+    "updated_at": "2019-09-17T01:04:35.571Z",
+    "version": "WzI1LDFd"
+  }
+}
+
+exports['Token Adapter delete allow to update a token - delete:tokens:a6be5fe5-466a-4a0f-b784-1a4c9ade64f6:{} (2)'] = {
+  "results": {}
+}
+
+exports['Token Adapter delete allow to update a token - get:tokens:a6be5fe5-466a-4a0f-b784-1a4c9ade64f6:{} (3)'] = {
+  "results": null
+}
+
+exports['Token Adapter delete allow to update a token - find:{"type":"tokens","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}

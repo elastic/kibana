@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 /**
  * Memory adapter for persisting tokens, for tests purposes only.
@@ -15,7 +15,7 @@ export class MemoryTokenAdapter implements TokenAdapterType {
   public tokens: { [k: string]: Token } = {};
   private tokenId = 1;
   public async create(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     {
       type,
       tokenHash,
@@ -48,25 +48,21 @@ export class MemoryTokenAdapter implements TokenAdapterType {
     return this.tokens[id];
   }
 
-  public async getByTokenHash(request: FrameworkRequest, tokenHash: string): Promise<Token | null> {
+  public async getByTokenHash(user: FrameworkUser, tokenHash: string): Promise<Token | null> {
     return Object.values(this.tokens).find(t => t.tokenHash === tokenHash) || null;
   }
 
-  public async update(
-    request: FrameworkRequest,
-    id: string,
-    newData: Partial<Token>
-  ): Promise<void> {
+  public async update(user: FrameworkUser, id: string, newData: Partial<Token>): Promise<void> {
     const token = this.tokens[id];
 
     Object.assign(token, newData);
   }
 
-  public async getByPolicyId(request: FrameworkRequest, policyId: string) {
+  public async getByPolicyId(user: FrameworkUser, policyId: string) {
     return Object.values(this.tokens).find(t => t.policy_id === policyId) || null;
   }
 
-  public async delete(request: FrameworkRequest, id: string): Promise<void> {
+  public async delete(user: FrameworkUser, id: string): Promise<void> {
     delete this.tokens[id];
   }
 }

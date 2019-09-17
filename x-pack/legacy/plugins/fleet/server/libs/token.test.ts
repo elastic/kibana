@@ -11,7 +11,7 @@ import { FrameworkLib } from './framework';
 import { MemoryTokenAdapter } from './adapters/tokens/memory';
 import { FrameworkAdapter } from './adapters/framework/default';
 import { TokenType, Token } from './adapters/tokens/adapter_types';
-import { FrameworkRequest } from './adapters/framework/adapter_types';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 
 jest.mock('./framework');
 
@@ -34,8 +34,8 @@ function hashJWTToken(token: string) {
     .digest('hex');
 }
 
-function getRequest() {
-  return {} as FrameworkRequest;
+function getUser() {
+  return {} as FrameworkUser;
 }
 
 describe('Token Lib', () => {
@@ -44,7 +44,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
-      tokenAdapter.create(getRequest(), {
+      tokenAdapter.create(getUser(), {
         type: TokenType.ENROLMENT_TOKEN,
         active: true,
         tokenHash,
@@ -53,7 +53,7 @@ describe('Token Lib', () => {
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const res = await tokens.verify(getRequest(), token);
+      const res = await tokens.verify(getUser(), token);
 
       expect(res).toMatchObject({
         valid: true,
@@ -64,7 +64,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
-      tokenAdapter.create(getRequest(), {
+      tokenAdapter.create(getUser(), {
         type: TokenType.ENROLMENT_TOKEN,
         active: false,
         token,
@@ -73,7 +73,7 @@ describe('Token Lib', () => {
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const res = await tokens.verify(getRequest(), token);
+      const res = await tokens.verify(getUser(), token);
 
       expect(res).toMatchObject({
         valid: false,
@@ -86,7 +86,7 @@ describe('Token Lib', () => {
       const token = generateJWTToken();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const res = await tokens.verify(getRequest(), token);
+      const res = await tokens.verify(getUser(), token);
 
       expect(res).toMatchObject({
         valid: false,
@@ -98,7 +98,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const res = await tokens.verify(getRequest(), 'iamnotavalidtoken');
+      const res = await tokens.verify(getUser(), 'iamnotavalidtoken');
 
       expect(res).toMatchObject({
         valid: false,
@@ -112,7 +112,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.generateEnrolmentToken(getRequest(), {
+      const token = await tokens.generateEnrolmentToken(getUser(), {
         id: 'policy_id',
         sharedId: 'policy_shared_id',
       });
@@ -124,13 +124,13 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.generateEnrolmentToken(getRequest(), {
+      const token = await tokens.generateEnrolmentToken(getUser(), {
         id: 'policy_id',
         sharedId: 'policy_shared_id',
       });
 
       const tokenHash = hashJWTToken(token);
-      const persistedToken = await tokenAdapter.getByTokenHash(getRequest(), tokenHash);
+      const persistedToken = await tokenAdapter.getByTokenHash(getUser(), tokenHash);
 
       expect(persistedToken).toMatchObject({
         tokenHash,
@@ -145,7 +145,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.getEnrollmentTokenForPolicy(getRequest(), 'policy:do-not-exists');
+      const token = await tokens.getEnrollmentTokenForPolicy(getUser(), 'policy:do-not-exists');
 
       expect(token).toBeNull();
     });
@@ -165,7 +165,7 @@ describe('Token Lib', () => {
 
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.getEnrollmentTokenForPolicy(getRequest(), 'policy:1');
+      const token = await tokens.getEnrollmentTokenForPolicy(getUser(), 'policy:1');
 
       expect(token).toBeDefined();
       expect((token as Token).id).toBe('token:1');
@@ -186,7 +186,7 @@ describe('Token Lib', () => {
 
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.getEnrollmentTokenForPolicy(getRequest(), 'policy:1', true);
+      const token = await tokens.getEnrollmentTokenForPolicy(getUser(), 'policy:1', true);
 
       expect(token).toBeDefined();
       expect((token as Token).id).toBe('tokens-1');

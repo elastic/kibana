@@ -27,7 +27,7 @@ export const createGetEnrollmentTokenRoute = (libs: FleetServerLib) => ({
   ): Promise<ReturnTypeGet<any>> => {
     const { policyId } = request.params;
     const token = await libs.tokens.getEnrollmentTokenForPolicy(
-      request,
+      request.user,
       policyId,
       Boolean(request.query)
     );

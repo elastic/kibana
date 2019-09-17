@@ -22,7 +22,10 @@ export function compose(server: any): FleetServerLib {
   const policyAdapter = new InMemoryPolicyAdapter();
 
   const framework = new FrameworkLib(frameworkAdapter);
-  const soDatabaseAdapter = new SODatabaseAdapter(server.savedObjects);
+  const soDatabaseAdapter = new SODatabaseAdapter(
+    server.savedObjects,
+    server.plugins.elasticsearch
+  );
   const encryptedObjectAdapter = new EncryptedSavedObjects(server.plugins.encrypted_saved_objects);
   const agentAdapter = new AgentAdapter(soDatabaseAdapter);
   const tokenAdapter = new TokenAdapter(soDatabaseAdapter, encryptedObjectAdapter);

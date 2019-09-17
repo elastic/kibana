@@ -53,7 +53,9 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
     const { actions, policy } = await libs.agents.checkin(
-      request,
+      {
+        kind: 'internal',
+      },
       request.params.agentId,
       events,
       request.payload.local_metadata
@@ -72,7 +74,7 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
 
 async function validateToken(request: CheckinRequest, libs: FleetServerLib) {
   const jsonToken = request.headers['kbn-fleet-access-token'];
-  const token = await libs.tokens.verify(request, jsonToken);
+  const token = await libs.tokens.verify(request.user, jsonToken);
   if (!token.valid || token.type !== TokenType.ACCESS_TOKEN) {
     throw Boom.unauthorized('Invalid token');
   }

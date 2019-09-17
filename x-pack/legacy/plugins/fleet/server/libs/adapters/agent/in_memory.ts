@@ -5,7 +5,7 @@
  */
 
 import { AgentAdapter, Agent, NewAgent } from './adapter_type';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 /**
  * In memory adapter, for testing purpose, all the created agents, are accessible under the public property agents
@@ -15,7 +15,7 @@ export class InMemoryAgentAdapter implements AgentAdapter {
   private id = 1;
 
   public async create(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     agent: NewAgent,
     options: { id?: string; overwrite?: boolean }
   ): Promise<Agent> {
@@ -33,39 +33,35 @@ export class InMemoryAgentAdapter implements AgentAdapter {
     return newAgent;
   }
 
-  public async delete(request: FrameworkRequest, agent: Agent): Promise<void> {
+  public async delete(user: FrameworkUser, agent: Agent): Promise<void> {
     delete this.agents[agent.id];
   }
 
-  public async getById(request: FrameworkRequest, id: string): Promise<Agent | null> {
+  public async getById(user: FrameworkUser, id: string): Promise<Agent | null> {
     return this.agents[id] || null;
   }
 
-  public async getBySharedId(request: FrameworkRequest, sharedId: string): Promise<Agent | null> {
+  public async getBySharedId(user: FrameworkUser, sharedId: string): Promise<Agent | null> {
     const agent = Object.values(this.agents).find(a => a.shared_id === sharedId);
 
     return agent || null;
   }
 
-  public async update(
-    request: FrameworkRequest,
-    id: string,
-    newData: Partial<Agent>
-  ): Promise<void> {
+  public async update(user: FrameworkUser, id: string, newData: Partial<Agent>): Promise<void> {
     if (this.agents[id]) {
       Object.assign(this.agents[id], newData);
     }
   }
 
   public async findByMetadata(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     metadata: { local?: any; userProvided?: any }
   ): Promise<Agent[]> {
     return [];
   }
 
   public async list(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     sortOptions: any,
     page: number = 1,
     perPage: number = 20
@@ -78,7 +74,7 @@ export class InMemoryAgentAdapter implements AgentAdapter {
   }
 
   public async findEphemeralByPolicySharedId(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     policySharedId: string
   ): Promise<Agent | null> {
     const agent = Object.values(this.agents).find(

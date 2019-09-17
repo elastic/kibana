@@ -13,27 +13,27 @@ import { SODatabaseAdapter } from '../saved_objets_database/default';
 import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
 import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
 import { Agent, SortOptions } from './adapter_type';
-import { httpServerMock } from '../../../../../../../../src/core/server/mocks';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 
 describe('Agent Adapter', () => {
   let adapter: AgentAdapter;
   let soAdapter: SODatabaseAdapterType;
   let servers: any;
 
-  function getRequest(): FrameworkRequest {
-    return (httpServerMock.createKibanaRequest({
-      headers: {
+  function getUser(): FrameworkUser {
+    return ({
+      kind: 'authenticated',
+      [internalAuthData]: {
         authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
       },
-    }) as unknown) as FrameworkRequest;
+    } as unknown) as FrameworkUser;
   }
 
   async function loadFixtures(agents: any[]): Promise<SavedObject[]> {
     const res: SavedObject[] = [];
     for (const agent of agents) {
       res.push(
-        await soAdapter.create(getRequest(), 'agents', {
+        await soAdapter.create(getUser(), 'agents', {
           ...agent,
           local_metadata: JSON.stringify(agent.local_metadata || {}),
           user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
@@ -45,7 +45,7 @@ describe('Agent Adapter', () => {
   }
 
   async function clearFixtures() {
-    const request = getRequest();
+    const request = getUser();
     const { saved_objects: savedObjects } = await soAdapter.find(request, {
       type: 'agents',
       perPage: 1000,
@@ -60,7 +60,10 @@ describe('Agent Adapter', () => {
       servers = await createKibanaServer({
         security: { enabled: false },
       });
-      const baseAdapter = new SODatabaseAdapter(servers.kbnServer.savedObjects);
+      const baseAdapter = new SODatabaseAdapter(
+        servers.kbnServer.savedObjects,
+        servers.kbnServer.plugins.elasticsearch
+      );
       soAdapter = new MemorizeSODatabaseAdapter(baseAdapter);
     });
 
@@ -80,7 +83,7 @@ describe('Agent Adapter', () => {
 
   describe('create', () => {
     it('should create a new agent', async () => {
-      const agent = await adapter.create(getRequest(), {
+      const agent = await adapter.create(getUser(), {
         shared_id: 'agent1',
         active: false,
         access_token: 'TOKEN_1',
@@ -113,7 +116,7 @@ describe('Agent Adapter', () => {
 
     it('should create a new agent with the specified id if specified', async () => {
       const agent = await adapter.create(
-        getRequest(),
+        getUser(),
         {
           shared_id: 'agent1',
           active: false,
@@ -139,7 +142,7 @@ describe('Agent Adapter', () => {
 
     it('should allow to create a new agent with the same id two time if override is true', async () => {
       const agent1 = await adapter.create(
-        getRequest(),
+        getUser(),
         {
           shared_id: 'agent1',
           active: false,
@@ -159,7 +162,7 @@ describe('Agent Adapter', () => {
         }
       );
       const agent2 = await adapter.create(
-        getRequest(),
+        getUser(),
         {
           shared_id: 'agent1',
           active: false,
@@ -207,11 +210,11 @@ describe('Agent Adapter', () => {
       agentId = agents[0].id;
     });
     it('should allow to update an agent', async () => {
-      await adapter.update(getRequest(), agentId, {
+      await adapter.update(getUser(), agentId, {
         active: true,
       });
 
-      const freshAgent = await adapter.getById(getRequest(), agentId);
+      const freshAgent = await adapter.getById(getUser(), agentId);
       expect(freshAgent).toBeDefined();
       expect(freshAgent).toMatchObject({
         shared_id: 'agent1',
@@ -243,9 +246,9 @@ describe('Agent Adapter', () => {
     });
 
     it('should delete an agent', async () => {
-      await adapter.delete(getRequest(), { id: agentId } as Agent);
+      await adapter.delete(getUser(), { id: agentId } as Agent);
 
-      const freshAgent = await adapter.getById(getRequest(), agentId);
+      const freshAgent = await adapter.getById(getUser(), agentId);
 
       expect(freshAgent).toBeNull();
     });
@@ -289,7 +292,7 @@ describe('Agent Adapter', () => {
     });
 
     it('should allow to find agent by policy shared id', async () => {
-      const agent = await adapter.findEphemeralByPolicySharedId(getRequest(), 'shared_policy_id_1');
+      const agent = await adapter.findEphemeralByPolicySharedId(getUser(), 'shared_policy_id_1');
       expect(agent).toBeDefined();
       expect((agent as Agent).shared_id).toBe('agent1');
     });
@@ -323,18 +326,18 @@ describe('Agent Adapter', () => {
     });
 
     it('should list all agents', async () => {
-      const res = await adapter.list(getRequest());
+      const res = await adapter.list(getUser());
       expect(res.total).toBe(20);
     });
 
     it('should support to sort by enrolled_at date ASC', async () => {
-      const res = await adapter.list(getRequest(), SortOptions.EnrolledAtASC, 1, 3);
+      const res = await adapter.list(getUser(), SortOptions.EnrolledAtASC, 1, 3);
 
       expect(res.agents.map(a => a.shared_id)).toEqual(['agent0', 'agent1', 'agent2']);
     });
 
     it('should support to sort by enrolled_at date DESC', async () => {
-      const res = await adapter.list(getRequest(), SortOptions.EnrolledAtDESC, 1, 3);
+      const res = await adapter.list(getUser(), SortOptions.EnrolledAtDESC, 1, 3);
 
       expect(res.agents.map(a => a.shared_id)).toEqual(['agent19', 'agent18', 'agent17']);
     });
@@ -379,7 +382,7 @@ describe('Agent Adapter', () => {
     });
 
     it('should allow to find agents by local metadata', async () => {
-      const agentsFound = await adapter.findByMetadata(getRequest(), {
+      const agentsFound = await adapter.findByMetadata(getUser(), {
         local: {
           host: 'elastic.co',
         },
@@ -390,7 +393,7 @@ describe('Agent Adapter', () => {
     });
 
     it('should allow to find agents by user provided metadata', async () => {
-      const agentsFound = await adapter.findByMetadata(getRequest(), {
+      const agentsFound = await adapter.findByMetadata(getUser(), {
         userProvided: {
           color: 'red',
         },

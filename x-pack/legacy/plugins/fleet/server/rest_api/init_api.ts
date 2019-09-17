@@ -11,11 +11,13 @@ import { createEnrollAgentsRoute } from './agents/enroll';
 import { createCheckinAgentsRoute } from './agents/checkin';
 import { createGetEnrollmentTokenRoute } from './tokens/get_enrollment';
 import { FleetServerLib } from '../libs/types';
+import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_adapter';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
-  server.route(createListAgentsRoute(libs));
-  server.route(createDeleteAgentsRoute(libs));
-  server.route(createEnrollAgentsRoute(libs));
-  server.route(createCheckinAgentsRoute(libs));
-  server.route(createGetEnrollmentTokenRoute(libs));
+  const frameworkAdapter = new HapiFrameworkAdapter(server);
+  frameworkAdapter.registerRoute(createListAgentsRoute(libs));
+  frameworkAdapter.registerRoute(createDeleteAgentsRoute(libs));
+  frameworkAdapter.registerRoute(createEnrollAgentsRoute(libs));
+  frameworkAdapter.registerRoute(createCheckinAgentsRoute(libs));
+  frameworkAdapter.registerRoute(createGetEnrollmentTokenRoute(libs));
 }

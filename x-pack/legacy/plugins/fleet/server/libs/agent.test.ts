@@ -12,14 +12,14 @@ import { Agent } from './adapters/agent/adapter_type';
 import { TokenAdapter } from './adapters/tokens/default';
 import { FrameworkLib } from './framework';
 import { PolicyAdapter } from './adapters/policy/default';
-import { FrameworkRequest } from './adapters/framework/adapter_types';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 
 jest.mock('./token');
 jest.mock('./policy');
 
 describe('Agent lib', () => {
-  function getRequest() {
-    return ({} as unknown) as FrameworkRequest;
+  function getUser() {
+    return ({} as unknown) as FrameworkUser;
   }
   describe('Enroll', () => {
     it('Should throw if the enrollment token is not valid', async () => {
@@ -31,7 +31,7 @@ describe('Agent lib', () => {
       let error: Error | null = null;
       try {
         await agentLib.enroll(
-          getRequest(),
+          getUser(),
           'not-a-valid-enrollment-token',
           'PERMANENT',
           undefined,
@@ -52,7 +52,7 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'PERMANENT',
         undefined,
@@ -74,7 +74,7 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent1 = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'PERMANENT',
         undefined,
@@ -85,7 +85,7 @@ describe('Agent lib', () => {
       agentAdapter.agents[agent1.id].active = false;
 
       const agent2 = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'PERMANENT',
         undefined,
@@ -104,18 +104,12 @@ describe('Agent lib', () => {
       const policy = new PolicyLib({} as PolicyAdapter);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.enroll(
-        getRequest(),
-        'valid-enrollment-token',
-        'PERMANENT',
-        undefined,
-        'agent-1'
-      );
+      await agentLib.enroll(getUser(), 'valid-enrollment-token', 'PERMANENT', undefined, 'agent-1');
       let error: Error | null = null;
 
       try {
         await agentLib.enroll(
-          getRequest(),
+          getUser(),
           'valid-enrollment-token',
           'PERMANENT',
           undefined,
@@ -136,7 +130,7 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
         undefined
@@ -157,7 +151,7 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
         undefined
@@ -176,13 +170,13 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       const agent1 = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
         undefined
       );
       const agent2 = await agentLib.enroll(
-        getRequest(),
+        getUser(),
         'valid-enrollment-token',
         'EPHEMERAL_INSTANCE',
         undefined
@@ -204,7 +198,7 @@ describe('Agent lib', () => {
       const policy = new PolicyLib({} as PolicyAdapter);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.delete(getRequest(), {
+      await agentLib.delete(getUser(), {
         id: 'agent:1',
         type: 'EPHEMERAL_INSTANCE',
       } as Agent);
@@ -219,7 +213,7 @@ describe('Agent lib', () => {
       const policy = new PolicyLib({} as PolicyAdapter);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.delete(getRequest(), {
+      await agentLib.delete(getUser(), {
         id: 'agent:1',
         type: 'PERMANENT',
       } as Agent);
@@ -240,7 +234,7 @@ describe('Agent lib', () => {
 
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      const res = await agentLib.list(getRequest());
+      const res = await agentLib.list(getUser());
 
       expect(res).toBeDefined();
       expect(res.total).toBe(2);
@@ -256,7 +250,7 @@ describe('Agent lib', () => {
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
       await expect(
-        agentLib.checkin(getRequest(), 'agent:1', [
+        agentLib.checkin(getUser(), 'agent:1', [
           {
             timestamp: '2019-09-05T15:41:26+0000',
             type: 'STATE',
@@ -291,7 +285,7 @@ describe('Agent lib', () => {
       } as unknown) as Agent;
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.checkin(getRequest(), 'agent:1', [
+      await agentLib.checkin(getUser(), 'agent:1', [
         {
           timestamp: '2019-09-05T15:41:26+0000',
           type: 'STATE',
@@ -302,7 +296,7 @@ describe('Agent lib', () => {
         },
       ]);
 
-      const refreshAgent = (await agentAdapter.getById(getRequest(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.events).toHaveLength(2);
       expect(refreshAgent.events[0]).toMatchObject({
         type: 'STATE',
@@ -334,9 +328,9 @@ describe('Agent lib', () => {
       } as unknown) as Agent;
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.checkin(getRequest(), 'agent:1', []);
+      await agentLib.checkin(getUser(), 'agent:1', []);
 
-      const refreshAgent = (await agentAdapter.getById(getRequest(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local1',
       });
@@ -357,7 +351,7 @@ describe('Agent lib', () => {
       } as unknown) as Agent;
       const agentLib = new AgentLib(agentAdapter, token, policyLib);
 
-      const { policy } = await agentLib.checkin(getRequest(), 'agent:1', []);
+      const { policy } = await agentLib.checkin(getUser(), 'agent:1', []);
 
       expect(policy).toMatchObject({
         id: 'policy:1',
@@ -379,9 +373,9 @@ describe('Agent lib', () => {
       const policy = new PolicyLib({} as PolicyAdapter);
       const agentLib = new AgentLib(agentAdapter, token, policy);
 
-      await agentLib.checkin(getRequest(), 'agent:1', [], { key: 'local2' });
+      await agentLib.checkin(getUser(), 'agent:1', [], { key: 'local2' });
 
-      const refreshAgent = (await agentAdapter.getById(getRequest(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.local_metadata).toMatchObject({
         key: 'local2',
       });
@@ -412,7 +406,7 @@ describe('Agent lib', () => {
       } as unknown) as Agent;
 
       const agentLib = new AgentLib(agentAdapter, token, policy);
-      const { actions } = await agentLib.checkin(getRequest(), 'agent:1', []);
+      const { actions } = await agentLib.checkin(getUser(), 'agent:1', []);
 
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
@@ -420,7 +414,7 @@ describe('Agent lib', () => {
         id: 'this-a-unique-id',
       });
 
-      const refreshAgent = (await agentAdapter.getById(getRequest(), 'agent:1')) as Agent;
+      const refreshAgent = (await agentAdapter.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.actions[0].sent_at).toBeDefined();
     });
   });

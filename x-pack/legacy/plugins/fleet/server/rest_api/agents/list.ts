@@ -24,7 +24,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   ): Promise<ReturnTypeList<any>> => {
     const page = parseInt(request.query.page, 10);
 
-    const { agents, total } = await libs.agents.list(request);
+    const { agents, total } = await libs.agents.list(request.user);
 
     return { list: agents, success: true, page, total };
   },

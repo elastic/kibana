@@ -16,16 +16,39 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsClient as SavedObjectsClientType,
   SavedObjectsService,
 } from 'src/core/server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 
 export class SODatabaseAdapter implements SODatabaseAdapterType {
-  constructor(private readonly savedObject: SavedObjectsService) {}
+  private readonly internalClient: SavedObjectsClientType;
+  constructor(
+    private readonly savedObject: SavedObjectsService,
+    elasticsearch: ElasticsearchPlugin
+  ) {
+    const { SavedObjectsClient, getSavedObjectsRepository } = savedObject;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
+    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-  private getClient(request: FrameworkRequest) {
-    return this.savedObject.getScopedSavedObjectsClient(request);
+    this.internalClient = new SavedObjectsClient(internalRepository);
+    this.savedObject = savedObject;
+  }
+
+  private getClient(user: FrameworkUser) {
+    if (user.kind === 'authenticated') {
+      return this.savedObject.getScopedSavedObjectsClient({
+        headers: user[internalAuthData],
+      });
+    }
+
+    if (user.kind === 'internal') {
+      return this.internalClient;
+    }
+
+    throw new Error('Not supported');
   }
   /**
    * Persists a SavedObject
@@ -35,12 +58,12 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async create<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     data: T,
     options?: SavedObjectsCreateOptions
   ) {
-    return await this.getClient(request).create(type, data, options);
+    return await this.getClient(user).create(type, data, options);
   }
 
   /**
@@ -50,11 +73,11 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async bulkCreate<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
-    return await this.getClient(request).bulkCreate(objects, options);
+    return await this.getClient(user).bulkCreate(objects, options);
   }
 
   /**
@@ -65,12 +88,12 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async delete(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ) {
-    return await this.getClient(request).delete(type, id, options);
+    return await this.getClient(user).delete(type, id, options);
   }
 
   /**
@@ -79,10 +102,10 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async find<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> {
-    return await this.getClient(request).find(options);
+    return await this.getClient(user).find(options);
   }
 
   /**
@@ -97,11 +120,11 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * ])
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    return await this.getClient(request).bulkGet(objects, options);
+    return await this.getClient(user).bulkGet(objects, options);
   }
 
   /**
@@ -112,13 +135,13 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async get<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T> | null> {
     try {
-      const savedObject = await this.getClient(request).get(type, id, options);
+      const savedObject = await this.getClient(user).get(type, id, options);
 
       return savedObject;
     } catch (err) {
@@ -138,12 +161,12 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
    * @param options
    */
   async update<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    return await this.getClient(request).update(type, id, attributes, options);
+    return await this.getClient(user).update(type, id, attributes, options);
   }
 }

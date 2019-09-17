@@ -20,13 +20,13 @@ import {
 } from 'src/core/server';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 import { SODatabaseAdapter } from './default';
-import { FrameworkRequest } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
   constructor(private soAdadpter?: SODatabaseAdapter) {}
 
   async create<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     data: T,
     options?: SavedObjectsCreateOptions
@@ -37,14 +37,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.create(request, type, data, options);
+        return this.soAdadpter.create(user, type, data, options);
       },
       { pure: false }
     );
   }
 
   async bulkCreate<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
@@ -54,14 +54,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.bulkCreate(request, objects, options);
+        return this.soAdadpter.bulkCreate(user, objects, options);
       },
       { pure: false }
     );
   }
 
   async delete(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -72,14 +72,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.delete(request, type, id, options);
+        return this.soAdadpter.delete(user, type, id, options);
       },
       { pure: false }
     );
   }
 
   async find<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> {
     return Slapshot.memorize(
@@ -88,14 +88,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.find(request, options);
+        return this.soAdadpter.find(user, options);
       },
       { pure: false }
     );
   }
 
   async bulkGet<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -105,14 +105,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.bulkGet(request, objects, options);
+        return this.soAdadpter.bulkGet(user, objects, options);
       },
       { pure: false }
     );
   }
 
   async get<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -123,14 +123,14 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.get(request, type, id, options);
+        return this.soAdadpter.get(user, type, id, options);
       },
       { pure: false }
     );
   }
 
   async update<T extends SavedObjectAttributes = any>(
-    request: FrameworkRequest,
+    user: FrameworkUser,
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -142,7 +142,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return this.soAdadpter.update(request, type, id, attributes, options);
+        return this.soAdadpter.update(user, type, id, attributes, options);
       },
       { pure: false }
     );
