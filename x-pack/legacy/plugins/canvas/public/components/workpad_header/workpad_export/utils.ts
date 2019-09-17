@@ -19,10 +19,15 @@ interface PageCount {
 
 type Arguments = [CanvasWorkpad, PageCount];
 
+interface PdfUrlData {
+  createPdfUri: string;
+  createPdfPayload: { jobParams: string };
+}
+
 export function getPdfUrl(
   { id, name: title, width, height }: CanvasWorkpad,
   { pageCount }: PageCount
-) {
+): PdfUrlData {
   const reportingEntry = chrome.addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
 
