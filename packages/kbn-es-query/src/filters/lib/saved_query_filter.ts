@@ -40,6 +40,15 @@ interface EsQueryConfig {
   queryStringOptions: { [key: string]: any };
   dateFormatTZ: string | null;
 }
+interface IndexPattern {
+  id: string;
+  title: string;
+  url: string;
+  active: boolean;
+  default: boolean;
+  tag?: string[];
+  sort: string;
+}
 
 interface SavedQueryAttributes {
   title: string;
@@ -56,6 +65,7 @@ interface SavedQueryTimeFilterConverted {
 export interface SavedQueryFilterParams {
   savedQuery: SavedQuery;
   esQueryConfig: EsQueryConfig;
+  indexPattern: IndexPattern;
 }
 
 export type SavedQueryFilterMeta = FilterMeta & {

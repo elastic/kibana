@@ -27,11 +27,11 @@ import { get } from 'lodash';
     const config = chrome.getUiSettingsClient();
     const esQueryConfigs = getEsQueryConfig(uiSettings);
     ```
-  indexPattern has to be passed in too
+  indexPattern has to be passed in too, looks like it has to be part of the params
 */
 
 
-export function buildSavedQueryFilter(params, indexPattern) {
+export function buildSavedQueryFilter(params) {
   const filter = {
     meta: {
       type: 'savedQuery',
@@ -44,6 +44,7 @@ export function buildSavedQueryFilter(params, indexPattern) {
   const query = get(params, 'savedQuery.attributes.query');
   const filters = get(params, 'savedQuery.attributes.filters', []);
   const esQueryConfig = get(params, 'esQueryConfig', { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null });
+  const indexPattern = get(params, 'indexPattern');
   const convertedQuery = buildEsQuery(indexPattern, query, filters, esQueryConfig);
   filter.query = { ...convertedQuery };
 

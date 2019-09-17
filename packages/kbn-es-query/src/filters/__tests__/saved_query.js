@@ -75,10 +75,10 @@ describe('Filter Manager', function () {
       };
       const testArgs = {
         params: {
+          indexPattern: indexPattern,
           savedQuery: savedQueryTestItem,
           esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
         },
-        indexPattern: indexPattern
       };
       expected = {
         meta: {
@@ -92,6 +92,7 @@ describe('Filter Manager', function () {
               queryStringOptions: {},
             },
             savedQuery: savedQueryTestItem,
+            indexPattern: indexPattern
           }
         },
         query: {
@@ -132,7 +133,7 @@ describe('Filter Manager', function () {
           }
         }
       };
-      const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
+      const actual = buildSavedQueryFilter(testArgs.params);
       expect(actual).to.eql(expected);
     });
     it('should return a query filter when passed a saved query containing only a query', () => {
@@ -149,10 +150,10 @@ describe('Filter Manager', function () {
       };
       const testArgs = {
         params: {
+          indexPattern: indexPattern,
           savedQuery: savedQueryTestItem,
           esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
         },
-        indexPattern: indexPattern
       };
       expected = {
         meta: {
@@ -166,6 +167,7 @@ describe('Filter Manager', function () {
               queryStringOptions: {},
             },
             savedQuery: savedQueryTestItem,
+            indexPattern: indexPattern,
           }
         },
         query: {
@@ -190,7 +192,7 @@ describe('Filter Manager', function () {
           }
         }
       };
-      const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
+      const actual = buildSavedQueryFilter(testArgs.params);
       expect(actual).to.eql(expected);
     });
     it('should return a query filter when passed a saved query not containing a query', () => {
@@ -224,10 +226,10 @@ describe('Filter Manager', function () {
       };
       const testArgs = {
         params: {
+          indexPattern: indexPattern,
           savedQuery: savedQueryTestItem,
           esQueryConfig: { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: null }
         },
-        indexPattern: indexPattern
       };
       expected = {
         meta: {
@@ -241,6 +243,7 @@ describe('Filter Manager', function () {
               queryStringOptions: {},
             },
             savedQuery: savedQueryTestItem,
+            indexPattern: indexPattern,
           }
         },
         query: {
@@ -263,7 +266,7 @@ describe('Filter Manager', function () {
           }
         }
       };
-      const actual = buildSavedQueryFilter(testArgs.params, testArgs.indexPattern);
+      const actual = buildSavedQueryFilter(testArgs.params);
       expect(actual).to.eql(expected);
     });
   });
