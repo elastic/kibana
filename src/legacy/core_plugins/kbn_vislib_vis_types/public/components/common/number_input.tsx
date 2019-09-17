@@ -52,6 +52,7 @@ function NumberInputOption<ParamName extends string>({
       <EuiFieldNumber
         data-test-subj={dataTestSubj}
         disabled={disabled}
+        compressed
         fullWidth
         isInvalid={isInvalid}
         step={step}

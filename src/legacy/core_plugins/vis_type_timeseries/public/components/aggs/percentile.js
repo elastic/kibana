@@ -78,6 +78,7 @@ export class PercentileAgg extends Component {
                 defaultMessage="Aggregation"
               />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <AggSelect
               id={htmlId('aggregation')}
               panelType={this.props.panel.type}
@@ -89,7 +90,12 @@ export class PercentileAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('field')}
-              label={<FormattedMessage id="visTypeTimeseries.percentile.fieldLabel" defaultMessage="Field" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.percentile.fieldLabel"
+                  defaultMessage="Field"
+                />
+              }
             >
               <FieldSelect
                 fields={fields}
