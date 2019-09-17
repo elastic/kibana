@@ -18,14 +18,6 @@ JOB:
   - kibana-ciGroup6-10
   - kibana-ciGroup6-11
   - kibana-ciGroup6-12
-  - firefoxSmoke-1
-  - firefoxSmoke-2
-  - firefoxSmoke-3
-  - firefoxSmoke-4
-  - firefoxSmoke-5
-  - firefoxSmoke-6
-  - firefoxSmoke-7
-  - firefoxSmoke-8
   # - kibana-visualRegression
 
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
