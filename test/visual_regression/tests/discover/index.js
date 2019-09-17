@@ -26,7 +26,8 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/45713
+  describe.skip('discover app', function () {
     this.tags('ciGroup6');
 
     before(function () {
