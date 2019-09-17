@@ -22,16 +22,18 @@ const { resolve } = require('path');
 // force cwd
 process.chdir(resolve(__dirname, '../../..'));
 
-if (!process.env.JOB_NAME) {
-  console.log('Unable to determine job name');
+// JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
+const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
+const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+if (!branch) {
+  console.log('Unable to determine originating branch from job name or other environment variables');
   process.exit(1);
 }
 
-// JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
-const [org, proj, branch] = process.env.JOB_NAME.split(/\+|\//);
-const masterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
-if (!(org === 'elastic' && proj === 'kibana' && masterOrVersion)) {
-  console.log(`Failure issues only created on master/version branch jobs [JOB_NAME=${process.env.JOB_NAME}] [${org}/${proj}/${branch}]`);
+const isPr = !!process.env.ghprbPullId;
+const isMasterOrVersion = branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
+if (!isMasterOrVersion || isPr) {
+  console.log('Failure issues only created on master/version branch jobs');
   process.exit(0);
 }
 

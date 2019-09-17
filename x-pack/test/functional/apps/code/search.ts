@@ -16,10 +16,11 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
   describe('Search', function() {
     this.tags('smoke');
-    const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
-    const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
-    const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
-    const languageFilterListSelector = 'codeSearchLanguageFilterList codeSearchLanguageFilterItem';
+    const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol > codeTypeaheadItem';
+    const fileTypeaheadListSelector = 'codeTypeaheadList-file > codeTypeaheadItem';
+    const searchResultListSelector = 'codeSearchResultList > codeSearchResultFileItem';
+    const languageFilterListSelector =
+      'codeSearchLanguageFilterList > codeSearchLanguageFilterItem';
 
     describe('Code Search', () => {
       before(async () => {

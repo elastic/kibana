@@ -39,3 +39,17 @@ advanced editor of the {dataframe-transforms} wizard. The advanced editor will
 remove the unsupported attribute once the configuration gets applied.
 
 // end::notable-breaking-changes[]
+
+[float]
+[[breaking_73_dashboard_import_export]]
+=== Dashboard import and export APIs
+
+[float]
+==== Dashboard import and export APIs error status codes
+*Details:* The dashboard import and export APIs will return more accurate HTTP
+status codes instead of returning a HTTP 400 status code for all failure
+scenarios. Specifically, authorization failures will now correctly return a
+HTTP 403 when the authenticated user lacks sufficient privileges.
+
+*Impact:* Review the error handling logic of any integrations with the
+dashboard import and export APIs.

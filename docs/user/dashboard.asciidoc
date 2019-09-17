@@ -1,0 +1,148 @@
+[[dashboard]]
+= Dashboard
+
+[partintro]
+--
+
+A {kib} _dashboard_ is a collection of visualizations, searches, and 
+maps, typically in real-time. Dashboards provide 
+at-a-glance insights into your data and enable you to drill down into details. 
+
+To start working with dashboards, click *Dashboard* in the side navigation. 
+With *Dashboard*, you can:
+
+* <<dashboard-create-new-dashboard, Create a dashboard>>
+* <<customizing-your-dashboard, Arrange dashboard elements>>
+* <<sharing-dashboards, Share a dashboard>>
+* <<import-dashboards, Import and export dashboards>>
+* <<viewing-detailed-information, Inspect and edit dashboard elements>>
+
+
+[role="screenshot"]
+image:images/Dashboard_example.png[Example dashboard]
+
+
+[float]
+[[dashboard-read-only-access]]
+=== [xpack]#Read only access#
+If you see
+the read-only icon in the application header,
+then you don't have sufficient privileges to create and save dashboards. The buttons to create and edit
+dashboards are not visible. For more information, see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/dashboard-read-only-badge.png[Example of Dashboard's read only access indicator in Kibana's header]
+
+[float]
+[[dashboard-getting-started]]
+=== Interact with dashboards
+
+When you open *Dashhboard*, you're presented an overview of your dashboards. 
+If you don't have any dashboards, you can add 
+<<add-sample-data, sample data sets>>,
+which include pre-built dashboards. 
+
+Once you open a dashboard, you can filter the data
+by entering a search query, changing the time filter, or clicking 
+in the visualizations, searches, and maps. If a dashboard element has a stored query, 
+both queries are applied.
+
+--
+
+[[dashboard-create-new-dashboard]]
+== Create a dashboard
+
+To create a dashboard, you must have data indexed into {es}, an index pattern 
+to retrieve the data from {es}, and 
+visualizations, saved searches, or maps. If these don't exist, you're prompted to 
+add them as you create the dashboard.
+
+For an end-to-end example, see <<tutorial-build-dashboard, Building your own dashboard>>.
+
+. Open *Dashboard.*
+. Click *Create new dashboard.*
+. Click *Add*.
+. Use *Add panels* to add elements to the dashboard.
++
+The visualizations, saved searches, and maps
+are stored in panels that you can move and resize. A
+menu in the upper right of the panel has options for customizing
+the panel. You can add elements from 
+multiple indices, and the same element can appear in multiple dashboards.
++
+[role="screenshot"]
+image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
+
+. When you're finished adding and arranging the panels,
+*Save* the dashboard.
+
+[float]
+[[customizing-your-dashboard]]
+=== Arrange dashboard elements
+
+In *Edit* mode, you can move, resize, customize, and delete panels to suit your needs. 
+
+[[moving-containers]]
+* To move a panel, click and hold the panel header and drag to the new location.
+
+[[resizing-containers]]
+* To resize a panel, click the resize control on the lower right and drag
+to the new dimensions.
+
+* To toggle the use of margins and panel titles, use the *Options* menu in the upper left.
+
+* To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
+dashboard does *not* delete the saved visualization or search.
+
+
+[float]
+[[sharing-dashboards]]
+=== Share a dashboard
+
+[[embedding-dashboards]]
+When you've finished your dashboard, you can share it with your teammates. 
+From the *Share* menu, you can:
+
+* Embed the code in a web page. Users must have Kibana access
+to view an embedded dashboard.
+* Share a direct link to a {kib} dashboard
+* Generate a PDF report
+* Generate a PNG report
+
+TIP: You can create a link to a dashboard by title by doing this: +
+`${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
+
+TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
+URLs are long and can be problematic for Internet Explorer and other
+tools. To create a short URL, you must have write access to {kib}.
+
+[float]
+[[import-dashboards]]
+=== Import and export dashboards
+
+To import and export dashboards, go to *Management > Saved Objects*. For details,
+see <<managing-saved-objects, Managing saved objects>>. 
+
+[float]
+[[viewing-detailed-information]]
+=== Inspect and edit elements
+
+Many dashboard elements allow you to drill down into the data and requests 
+behind the element. Open the menu in the upper right of the panel and select *Inspect*. 
+The views you see depend on the element that you inspect. 
+
+[role="screenshot"]
+image:images/Dashboard_inspect.png[Inspect in dashboard]
+
+To open an element for editing, put the dashboard in *Edit* mode, 
+and then select *Edit* from the panel menu. The changes you make appear in
+every dashboard that uses the element. 
+
+include::{kib-repo-dir}/management/dashboard_only_mode/index.asciidoc[]
+
+
+
+
+
+
+

@@ -25,7 +25,7 @@ export default function codeIntelligenceFunctionalTests({
 
   describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
           expect(await exists('codeSourceViewer')).to.be(true);
