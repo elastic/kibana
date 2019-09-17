@@ -45,6 +45,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { expressions, visualizations, __LEGACY }: TablePluginSetupDependencies
   ) {
+    __LEGACY.setup();
     expressions.registerFunction(createTableVisFn);
 
     visualizations.types.registerVisualization(createTableVisTypeDefinition);
