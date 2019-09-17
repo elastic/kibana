@@ -146,7 +146,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       rootDirectory,
       'target/junit',
       process.env.JOB || '.',
-      `TEST-${reportName}.xml`
+      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
     );
     const reportXML = builder.end({
       pretty: true,
