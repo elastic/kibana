@@ -189,8 +189,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
-      const element = await testSubjects.find(`${subTab}-subtab`);
-      await element.click();
+      const tab = await testSubjects.find(`${subTab}-subtab`);
+      const isSelected = await tab.getAttribute('aria-selected');
+      if (isSelected !== 'true') {
+        await tab.click();
+      }
     }
 
     /**
@@ -333,11 +336,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async createNewAgg(nth = 0) {
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const aggs = await testSubjects.findAll('aggSelector');
-      if (aggs.length < 2) {
-        throw new Error('there should be atleast 2 aggSelectors');
-      }
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async selectAggType(value: string, nth = 0) {
