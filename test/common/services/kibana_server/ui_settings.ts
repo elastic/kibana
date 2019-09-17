@@ -63,11 +63,9 @@ export class KibanaServerUiSettings {
     this.log.debug('replacing kibana config doc: %j', doc);
 
     await this.x.post('/api/kibana/settings', {
-      data: {
-        changes: {
-          ...this.defaults,
-          ...doc,
-        },
+      changes: {
+        ...this.defaults,
+        ...doc,
       },
     });
   }
@@ -78,9 +76,7 @@ export class KibanaServerUiSettings {
   async update(updates: Record<string, any>) {
     this.log.debug('applying update to kibana config: %j', updates);
     await this.x.post('/api/kibana/settings', {
-      data: {
-        changes: updates,
-      },
+      changes: updates,
     });
   }
 }
