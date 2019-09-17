@@ -34,7 +34,12 @@ The Kibana directory must be named `kibana`, and your plugin directory should be
     └── plugins
         ├── foo-plugin
         └── bar-plugin
------------
+--------
+
+[float]
+==== References in the code
+ - {repo}blob/{branch}/src/legacy/server/plugins/lib/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+ - <<development-uiexports>>: What type of exports are available?
 
 [float]
 ==== Elastic UI Framework
