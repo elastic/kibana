@@ -98,6 +98,20 @@ export const ComponentStrings = {
         defaultMessage: 'Asset thumbnail',
       }),
   },
+  ColorManager: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
+        defaultMessage: 'Add Color',
+      }),
+    getCodePlaceholder: () =>
+      i18n.translate('xpack.canvas.colorManager.codePlaceholder', {
+        defaultMessage: 'Color code',
+      }),
+    getRemoveAriaLabel: () =>
+      i18n.translate('xpack.canvas.colorManager.removeAriaLabel', {
+        defaultMessage: 'Remove Color',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
