@@ -23,7 +23,6 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
@@ -49,14 +48,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      if (browser.isFirefox) {
-        // https://github.com/elastic/kibana/issues/24058
-        await PageObjects.common.sleep(2000);
-      }
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 5000 });
+      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
