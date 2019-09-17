@@ -201,7 +201,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     id,
     index,
     narrowDateRange,
-    statKey,
+    statKey = 'item',
     to,
   }) => {
     const [isHover, setIsHover] = useState(false);
