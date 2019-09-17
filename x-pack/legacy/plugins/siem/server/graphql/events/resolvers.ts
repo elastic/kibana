@@ -8,15 +8,10 @@ import { GraphQLScalarType, Kind } from 'graphql';
 
 import { Events } from '../../lib/events';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
+import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 import { LastEventTimeRequestOptions } from '../../lib/events/types';
-
-type QueryEventsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.EventsResolver>,
-  QuerySourceResolver
->;
 
 type QueryTimelineResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.TimelineResolver>,
@@ -41,7 +36,6 @@ export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
   Source: {
-    Events: QueryEventsResolver;
     Timeline: QueryTimelineResolver;
     TimelineDetails: QueryTimelineDetailsResolver;
     LastEventTime: QueryLastEventTimeResolver;

@@ -9,12 +9,7 @@ import { removeKqlVariables, removeKqlVariablesUsingRegex, replacer } from './re
 describe('remove_kql_variables', () => {
   describe('replacer function', () => {
     test("should return empty string when passed `undefined` for 'parts'", () => {
-      let fakeParts; // test with 'undefined'
-      const replacedResult = replacer(' and user.name: "$user.name$"', fakeParts);
-      expect(replacedResult).toEqual('');
-    });
-    test("should return empty string when passed null for 'parts' parameter", () => {
-      const replacedResult = replacer(' and user.name: "$user.name$"', null);
+      const replacedResult = replacer(' and user.name: "$user.name$"');
       expect(replacedResult).toEqual('');
     });
   });
