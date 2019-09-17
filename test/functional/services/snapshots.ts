@@ -20,13 +20,16 @@
 import expect from '@kbn/expect';
 import { dirname, resolve } from 'path';
 import { writeFile, readFileSync } from 'fs';
-import { fromNode as fcb, promisify } from 'bluebird';
+import Bluebird, { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import del from 'del';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-const writeFileAsync = promisify(writeFile);
+type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
 
-export async function SnapshotsProvider({ getService }) {
+const writeFileAsync = promisify(writeFile) as WriteFileAsync;
+
+export async function SnapshotsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
 
@@ -35,7 +38,6 @@ export async function SnapshotsProvider({ getService }) {
   await del([SESSION_DIRECTORY]);
 
   class Snapshots {
-
     /**
      *
      * @param name {string} name of the file to use for comparison
@@ -43,7 +45,7 @@ export async function SnapshotsProvider({ getService }) {
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
      * @return {Promise.<number>} returns 0 if successful.
      */
-    async compareAgainstBaseline(name, value, updateBaselines) {
+    public async compareAgainstBaseline(name: string, value: object, updateBaselines?: boolean) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.json`);
       await this._take(sessionPath, value);
@@ -55,22 +57,22 @@ export async function SnapshotsProvider({ getService }) {
         return 0;
       } else {
         log.debug('comparing');
-        return this._compare(sessionPath, baselinePath);
+        return this.compare(sessionPath, baselinePath);
       }
     }
 
-    _compare(sessionPath, baselinePath) {
+    private compare(sessionPath: string, baselinePath: string) {
       const currentObject = readFileSync(sessionPath, { encoding: 'utf8' });
       const baselineObject = readFileSync(baselinePath, { encoding: 'utf8' });
       expect(currentObject).to.eql(baselineObject);
       return 0;
     }
 
-    async take(name) {
+    public async take(name: string) {
       return await this._take(resolve(SESSION_DIRECTORY, `${name}.json`));
     }
 
-    async _take(path, snapshot) {
+    private async _take(path: string, snapshot?: object) {
       try {
         await fcb(cb => mkdirp(dirname(path), cb));
         await fcb(cb => writeFile(path, JSON.stringify(snapshot), 'utf8', cb));
