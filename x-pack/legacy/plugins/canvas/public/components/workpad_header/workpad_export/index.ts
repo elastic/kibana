@@ -43,7 +43,7 @@ interface Props {
   enabled: boolean;
 }
 
-export const WorkpadExport = compose<ComponentProps, Props>(
+export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
   withProps(
     ({ workpad, pageCount, enabled }: Props): ComponentProps => ({

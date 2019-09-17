@@ -32,6 +32,16 @@ const ProviderBadgeStyled = styled(EuiBadge)`
       font-style: italic;
     }
   }
+  .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
+    flex-direction: row;
+  }
+  .euiBadge.euiBadge--iconLeft
+    &.euiBadge.euiBadge--iconRight
+    .euiBadge__content
+    .euiBadge__iconButton {
+    margin-right: 0;
+    margin-left: 4px;
+  }
 `;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';

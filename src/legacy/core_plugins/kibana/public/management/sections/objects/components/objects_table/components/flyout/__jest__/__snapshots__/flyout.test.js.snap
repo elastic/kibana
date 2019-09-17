@@ -129,11 +129,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -146,14 +143,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -469,11 +463,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -486,14 +477,11 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -609,6 +597,7 @@ exports[`Flyout should render import step 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -635,6 +624,7 @@ exports[`Flyout should render import step 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         labelType="label"
@@ -663,11 +653,8 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -680,14 +667,11 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Import"

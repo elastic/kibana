@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { Schemas } from '../../../vis/editors/default/schemas';
 
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import { SubMetricParamEditor } from '../../controls/sub_metric';
+import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
 
