@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getHighlightHtml } from '../../../../../../plugins/data/common/highlight/highlight_html';
+import { getHighlightHtml } from '../../../../../../plugins/data/common/field_formats';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
