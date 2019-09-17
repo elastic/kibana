@@ -215,7 +215,11 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     fill
                     color="secondary"
                     iconType="check"
-                    onClick={onSave.bind(null, stripEmptyFields(template.current) as Template)}
+                    onClick={onSave.bind(null, stripEmptyFields(
+                      template.current,
+                      ['string', 'object'],
+                      { recursive: false }
+                    ) as Template)}
                     data-test-subj="submitButton"
                     isLoading={isSaving}
                   >
