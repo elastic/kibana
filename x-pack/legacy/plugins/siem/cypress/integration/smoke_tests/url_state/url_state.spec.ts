@@ -210,7 +210,7 @@ describe('url state', () => {
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlHost);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
-    cy.get(NAVIGATION_HOSTS_ALL_HOSTS)
+    cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
       .first()
       .click({ force: true });
     waitForAllHostsWidget();
