@@ -9,6 +9,7 @@ exports[`renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label="Initials (2 max)"
@@ -30,6 +31,7 @@ exports[`renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}

@@ -79,13 +79,11 @@ const mapStateToProps = (state: AppState) => ({
   popoverState: isIntegrationsPopupOpen(state),
 });
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    togglePopoverIsVisible: (popoverState: PopoverState) => {
-      return dispatch(toggleIntegrationsPopover(popoverState));
-    },
-  };
-};
+const mapDispatchToProps = (dispatch: any) => ({
+  togglePopoverIsVisible: (popoverState: PopoverState) => {
+    return dispatch(toggleIntegrationsPopover(popoverState));
+  },
+});
 
 export const MonitorListActionsPopover = connect(
   mapStateToProps,

@@ -46,6 +46,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         </p>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error="Space names do not match."
           fullWidth={false}
           hasEmptyLabelSpace={false}

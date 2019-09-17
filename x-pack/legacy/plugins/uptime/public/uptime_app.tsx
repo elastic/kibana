@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
@@ -138,7 +138,7 @@ const Application = (props: UptimeAppProps) => {
 
   return (
     <I18nContext>
-      <Provider store={store}>
+      <ReduxProvider store={store}>
         <Router basename={routerBasename}>
           <Route
             path="/"
@@ -199,7 +199,7 @@ const Application = (props: UptimeAppProps) => {
             }}
           />
         </Router>
-      </Provider>
+      </ReduxProvider>
     </I18nContext>
   );
 };
