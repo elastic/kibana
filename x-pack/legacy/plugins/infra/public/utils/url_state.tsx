@@ -69,7 +69,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
   });
 
   private handleInitialize = (location: Location) => {
-    const { onInitialize, mapToUrlState, urlStateKey } = this.props;
+    const { onInitialize, mapToUrlState, urlStateKey, urlState } = this.props;
 
     if (!onInitialize || !mapToUrlState) {
       return;
@@ -81,14 +81,15 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     );
     const newUrlState = mapToUrlState(decodeRisonUrlState(newUrlStateString));
 
-    onInitialize(newUrlState);
-
     // When the newURLState is empty we can assume that the state will becoming
     // from the urlState initially. By setting populateWithIntialState to true
     // this will now serialize the initial urlState into the URL when the page is
     // loaded.
     if (!newUrlState && this.props.populateWithInitialState) {
-      this.replaceStateInLocation(this.props.urlState);
+      this.replaceStateInLocation(urlState);
+      onInitialize(urlState);
+    } else {
+      onInitialize(newUrlState);
     }
   };
 
