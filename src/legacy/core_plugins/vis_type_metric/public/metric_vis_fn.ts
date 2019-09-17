@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/../../kbn_vislib_vis_types/public/vislib/components/color/colormaps';
 import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
 
 type Context = KibanaDatatable;

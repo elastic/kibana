@@ -20,7 +20,7 @@
 
 import $ from 'jquery';
 import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
-import VislibProvider from '../../../ui/public/vislib';
+import VislibProvider from './vislib';
 
 const legendClassName = {
   top: 'visLib--legend-top',

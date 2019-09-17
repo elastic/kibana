@@ -9,4 +9,4 @@ In this directory you'll find various UI systems you can use to craft effective 
 
 ## ui/vislib
 
-* [VisLib](vislib/VISLIB.md)
+* [VisLib](../../core_plugins/kbn_vislib_vis_types/public/vislib/VISLIB.md)

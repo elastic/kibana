@@ -26,5 +26,5 @@
 
 // Can't import vis folder here because of cascading issues, it's imported in core_plugins/kibana
 // @import './vis/index';
-@import './vislib/index';
+@import '../../core_plugins/kbn_vislib_vis_types/public/vislib/index';
 @import './visualize/index';

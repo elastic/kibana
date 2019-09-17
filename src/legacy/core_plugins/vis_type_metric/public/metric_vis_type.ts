@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
 // @ts-ignore
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/../../kbn_vislib_vis_types/public/vislib/components/color/colormaps';
 // @ts-ignore
 import { MetricVisComponent } from './components/metric_vis_controller';
 
