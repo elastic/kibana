@@ -99,9 +99,9 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(searchResponse)],
     };
-
+    const data = getDataFromHits(merge(sourceData, hitsData));
     return {
-      data: getDataFromHits(merge(sourceData, hitsData)),
+      data,
       inspect,
     };
   }
@@ -231,15 +231,20 @@ const mergeTimelineFieldsWithHit = <T>(
   }
 };
 
+export const getFieldCategory = (field: string): string => {
+  const fieldCategory = field.split('.')[0];
+  if (!isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
+    return 'base';
+  }
+  return fieldCategory;
+};
+
 const getDataFromHits = (sources: EventSource, category?: string, path?: string): DetailItem[] =>
   Object.keys(sources).reduce<DetailItem[]>((accumulator, source) => {
     const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
-      let fieldCategory = field.split('.')[0];
-      if (!isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
-        fieldCategory = 'base';
-      }
+      const fieldCategory = getFieldCategory(field);
       return [
         ...accumulator,
         {

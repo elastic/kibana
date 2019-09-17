@@ -556,7 +556,6 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        // This will be turned on after bug fixes are mostly complete
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
