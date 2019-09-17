@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiToolTip,
   EuiButtonGroup,
-  EuiSpacer,
   EuiPopoverFooter,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -288,14 +287,21 @@ export function FieldItem({
             })}
           </>
         )}
+        {field.type === 'date' && (
+          <>
+            {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
+              defaultMessage: 'Time distribution',
+            })}
+          </>
+        )}
       </EuiPopoverTitle>
       <div>
         {state.isLoading && <EuiLoadingSpinner />}
 
         {state.histogram && (!state.topValues || showingHistogram) && (
           <Chart
-            className="lnsFieldItem__distributionChart"
             data-test-subj="lnsFieldListPanel-histogram"
+            size={{ height: 200, width: field.type === 'date' ? 300 - 32 : '100%' }}
           >
             <Settings
               rotation={field.type === 'date' ? 0 : 90}
