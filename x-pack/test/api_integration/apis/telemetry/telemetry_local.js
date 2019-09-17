@@ -94,7 +94,8 @@ export default function ({ getService }) {
       expect(stats.stack_stats.xpack.rollup).to.be.an('object');
     });
 
-    it('should pull local stats and validate fields', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/45884
+    it.skip('should pull local stats and validate fields', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
         max: '2018-07-23T22:13:00Z'
