@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       await es.indices.delete({ index: 'to-be*' });
 
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('live*,' + indexName, false, '@timestamp');
+      await PageObjects.settings.createIndexPattern('live*,' + indexName, '@timestamp', false);
 
       await PageObjects.common.navigateToApp('discover');
       const hits = await PageObjects.discover.getHitCount();
