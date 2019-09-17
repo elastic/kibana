@@ -1,9 +1,6 @@
 [role="xpack"]
 [[xpack-ml]]
-= {ml-cap}
-
-[partintro]
---
+== {ml-cap}
 
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
@@ -29,7 +26,7 @@ The *Data Visualizer* identifies the file format and field mappings. You can the
 optionally import that data into an {es} index.  
 
 If you have a trial or platinum license, you can 
-<<ml-jobs,create {anomaly-jobs}>> and manage jobs and {dfeeds} from the *Job 
+create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job 
 Management* pane: 
 
 [role="screenshot"]
@@ -67,10 +64,6 @@ web browser so that it does not block pop-up windows or create an exception for
 your {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
+https://www.elastic.co/what-is/elastic-stack-machine-learning and
 {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
-
---
-
-include::creating-jobs.asciidoc[]
-include::job-tips.asciidoc[]
 
