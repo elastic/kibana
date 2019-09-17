@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
 import { GraphWorkspaceSavedObject } from '../types';
 
-export interface GraphListingProps {
+export interface ListingProps {
   createItem: () => void;
   findItems: (query: string, limit: number) => Promise<GraphWorkspaceSavedObject[]>;
   deleteItems: (ids: string[]) => Promise<void>;
@@ -25,7 +25,7 @@ export interface GraphListingProps {
   initialFilter: string;
 }
 
-export function GraphListing(props: GraphListingProps) {
+export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
