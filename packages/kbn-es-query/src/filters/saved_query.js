@@ -34,7 +34,6 @@ import { get } from 'lodash';
 export function buildSavedQueryFilter(params, indexPattern) {
   const filter = {
     meta: {
-      index: indexPattern.id,
       type: 'savedQuery',
       key: params.savedQuery.id,
       value: params.savedQuery.attributes.title,

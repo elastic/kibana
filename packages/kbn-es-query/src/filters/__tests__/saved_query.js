@@ -82,7 +82,6 @@ describe('Filter Manager', function () {
       };
       expected = {
         meta: {
-          index: 'logstash-*',
           type: 'savedQuery',
           key: 'foo',
           value: 'foo',
@@ -157,7 +156,6 @@ describe('Filter Manager', function () {
       };
       expected = {
         meta: {
-          index: 'logstash-*',
           type: 'savedQuery',
           key: 'foo',
           value: 'foo',
@@ -233,7 +231,6 @@ describe('Filter Manager', function () {
       };
       expected = {
         meta: {
-          index: 'logstash-*',
           type: 'savedQuery',
           key: 'foo',
           value: 'foo',
