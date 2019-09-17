@@ -481,10 +481,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     /**
