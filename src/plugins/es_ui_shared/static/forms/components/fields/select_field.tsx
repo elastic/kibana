@@ -21,6 +21,7 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../helpers';
 
 interface Props {
   field: FieldHook;
@@ -30,9 +31,7 @@ interface Props {
 }
 
 export const SelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
-  const isInvalid = !field.isChangingValue && (field.form.isSubmitted && field.errors.length > 0);
-  const errorMessage =
-    !field.isChangingValue && field.errors.length ? (field.errors[0].message as string) : null;
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
@@ -51,7 +50,7 @@ export const SelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
           field.setValue(e.target.value);
         }}
         hasNoInitialSelection={true}
-        isInvalid={false}
+        isInvalid={isInvalid}
         data-test-subj="select"
         {...(euiFieldProps as { options: any; [key: string]: any })}
       />
