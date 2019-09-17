@@ -35,7 +35,7 @@ const indexPatternButtonDescription = i18n.translate(
 );
 
 export class IndexPatternCreationConfig {
-  public key = 'default';
+  public readonly key = 'default';
 
   protected type?: string;
   protected name: string;

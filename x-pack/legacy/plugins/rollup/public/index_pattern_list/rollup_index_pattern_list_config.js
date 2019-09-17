@@ -12,7 +12,7 @@ function isRollup(indexPattern) {
 }
 
 export class RollupIndexPatternListConfig extends IndexPatternListConfig {
-  static key = 'rollup';
+  key = 'rollup';
 
   getIndexPatternTags = indexPattern => {
     return isRollup(indexPattern)

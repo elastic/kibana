@@ -25,7 +25,7 @@ export interface IndexPatternTag {
 }
 
 export class IndexPatternListConfig {
-  public key = 'default';
+  public readonly key = 'default';
 
   public getIndexPatternTags(indexPattern: any, isDefault: boolean): IndexPatternTag[] {
     return isDefault

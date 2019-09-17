@@ -27,7 +27,11 @@ export class IndexPatternCreationManager {
   }
 
   public add(Config: typeof IndexPatternCreationConfig) {
-    this.configs.push(new Config({ httpClient: this.httpClient }));
+    const config = new Config({ httpClient: this.httpClient });
+    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
+      throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
+    }
+    this.configs.push(config);
   }
 
   public getType(key: string | undefined): IndexPatternCreationConfig | null {

@@ -27,7 +27,11 @@ export class IndexPatternListManager {
   }
 
   public add(Config: typeof IndexPatternListConfig) {
-    this.configs.push(new Config());
+    const config = new Config();
+    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
+      throw new Error(`${config.key} exists in IndexPatternListManager.`);
+    }
+    this.configs.push(config);
   }
 
   public getIndexPatternTags(indexPattern: any, isDefault: boolean) {
