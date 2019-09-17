@@ -322,7 +322,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickOptionalAddNewButton(isStandardIndexPattern) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
-      } else if (await testSubjects.isDisplayed('createStandardIndexPatternButton')) {
+      }
+      if (await testSubjects.isDisplayed('createStandardIndexPatternButton')) {
         if (isStandardIndexPattern) {
           await this.clickIndexPatternType('Standard');
         } else {
