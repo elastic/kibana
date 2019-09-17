@@ -17,23 +17,37 @@
  * under the License.
  */
 
-export class KibanaServerVersion {
-  constructor(kibanaStatus) {
-    this.kibanaStatus = kibanaStatus;
-    this._cachedVersionNumber;
-  }
+import Axios from 'axios';
+
+interface StatusResponse {
+  status: {
+    overall: {
+      state: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  version?: {
+    number?: number;
+    build_snapshot?: boolean;
+  };
+  [key: string]: unknown;
+}
+
+export class KibanaServerStatus {
+  private readonly x = Axios.create({
+    baseURL: this.kibanaServerUrl,
+  });
+
+  constructor(private readonly kibanaServerUrl: string) {}
 
   async get() {
-    if (this._cachedVersionNumber) {
-      return this._cachedVersionNumber;
-    }
+    const resp = await this.x.get<StatusResponse>('api/status');
+    return resp.data;
+  }
 
-    const status = await this.kibanaStatus.get();
-    if (status && status.version && status.version.number) {
-      this._cachedVersionNumber = status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
-      return this._cachedVersionNumber;
-    }
-
-    throw new Error(`Unable to fetch Kibana Server status, received ${JSON.stringify(status)}`);
+  async getOverallState() {
+    const status = await this.get();
+    return status.status.overall.state;
   }
 }

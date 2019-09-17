@@ -21,7 +21,6 @@ import { format as formatUrl } from 'url';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 import { EsArchiver } from '../../../src/es_archiver';
-// @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 
 export function EsArchiverProvider({ getService, hasService }: FtrProviderContext): EsArchiver {
@@ -43,12 +42,12 @@ export function EsArchiverProvider({ getService, hasService }: FtrProviderContex
   });
 
   if (hasService('kibanaServer')) {
-    KibanaServer.extendEsArchiver({
+    KibanaServer.extendEsArchiver(
       esArchiver,
-      kibanaServer: getService('kibanaServer'),
-      retry: getService('retry'),
-      defaults: config.get('uiSettings.defaults'),
-    });
+      getService('kibanaServer'),
+      getService('retry'),
+      config.get('uiSettings.defaults')
+    );
   }
 
   return esArchiver;

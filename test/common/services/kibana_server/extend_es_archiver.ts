@@ -17,10 +17,21 @@
  * under the License.
  */
 
-const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
+import { ProvidedType } from '@kbn/test/types/ftr';
+
+import { EsArchiver } from '../../../../src/es_archiver';
+import { KibanaServerProvider } from './kibana_server';
+import { RetryProvider } from '../retry';
+
+const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'] as const;
 const KIBANA_INDEX = '.kibana';
 
-export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) {
+export function extendEsArchiver(
+  esArchiver: EsArchiver,
+  kibanaServer: ProvidedType<typeof KibanaServerProvider>,
+  retry: ProvidedType<typeof RetryProvider>,
+  defaults: Record<string, any>
+) {
   // only extend the esArchiver if there are default uiSettings to restore
   if (!defaults) {
     return;
@@ -29,7 +40,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) 
   ES_ARCHIVER_LOAD_METHODS.forEach(method => {
     const originalMethod = esArchiver[method];
 
-    esArchiver[method] = async (...args) => {
+    esArchiver[method] = async (...args: any) => {
       // esArchiver methods return a stats object, with information about the indexes created
       const stats = await originalMethod.apply(esArchiver, args);
 

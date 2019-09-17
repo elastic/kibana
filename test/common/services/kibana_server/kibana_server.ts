@@ -19,23 +19,28 @@
 
 import { format as formatUrl } from 'url';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { KibanaServerStatus } from './status';
 import { KibanaServerUiSettings } from './ui_settings';
 import { KibanaServerVersion } from './version';
-import { KibanaServerSavedObjects }  from './saved_objects';
+import { KibanaServerSavedObjects } from './saved_objects';
 
-export function KibanaServerProvider({ getService }) {
+export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
 
-  return new class KibanaServer {
-    constructor() {
-      const url = formatUrl(config.get('servers.kibana'));
-      this.status = new KibanaServerStatus(url);
-      this.version = new KibanaServerVersion(this.status);
-      this.savedObjects = new KibanaServerSavedObjects(url, log);
-      this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'), lifecycle);
-    }
-  };
+  const url = formatUrl(config.get('servers.kibana'));
+
+  return new (class KibanaServer {
+    public readonly status = new KibanaServerStatus(url);
+    public readonly version = new KibanaServerVersion(this.status);
+    public readonly savedObjects = new KibanaServerSavedObjects(url, log);
+    public readonly uiSettings = new KibanaServerUiSettings(
+      url,
+      log,
+      config.get('uiSettings.defaults'),
+      lifecycle
+    );
+  })();
 }

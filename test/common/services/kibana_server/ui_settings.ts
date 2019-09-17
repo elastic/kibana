@@ -17,22 +17,25 @@
  * under the License.
  */
 
-import Wreck from '@hapi/wreck';
+import Axios from 'axios';
 import { get } from 'lodash';
+import { Lifecycle } from '@kbn/test/types/ftr';
+
+import { ToolingLog } from '@kbn/dev-utils';
 
 export class KibanaServerUiSettings {
-  constructor(url, log, defaults, lifecycle) {
-    this._log = log;
-    this._defaults = defaults;
-    this._wreck = Wreck.defaults({
-      headers: { 'kbn-xsrf': 'ftr/services/uiSettings' },
-      baseUrl: url,
-      json: true,
-      redirects: 3,
-    });
+  private readonly x = Axios.create({
+    baseURL: this.url,
+  });
 
-    if (this._defaults) {
-      lifecycle.on('beforeTests', async () => {
+  constructor(
+    private readonly url: string,
+    private readonly log: ToolingLog,
+    private readonly defaults: Record<string, any>,
+    private readonly lifecycle: Lifecycle
+  ) {
+    if (this.defaults) {
+      this.lifecycle.on('beforeTests', async () => {
         await this.update(defaults);
       });
     }
@@ -42,27 +45,27 @@ export class KibanaServerUiSettings {
    * Gets defaultIndex from the config doc.
    */
   async getDefaultIndex() {
-    const { payload } = await this._wreck.get('/api/kibana/settings');
-    const defaultIndex = get(payload, 'settings.defaultIndex.userValue');
-    this._log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
+    const { data } = await this.x.get('/api/kibana/settings');
+    const defaultIndex = get(data, 'settings.defaultIndex.userValue');
+    this.log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
     return defaultIndex;
   }
 
-  async replace(doc) {
-    const { payload } = await this._wreck.get('/api/kibana/settings');
+  async replace(doc: Record<string, any>) {
+    const { data } = await this.x.get('/api/kibana/settings');
 
-    for (const key of Object.keys(payload.settings)) {
-      if (!payload.settings[key].isOverridden) {
-        await this._wreck.delete(`/api/kibana/settings/${key}`);
+    for (const key of Object.keys(data.settings)) {
+      if (!data.settings[key].isOverridden) {
+        await this.x.delete(`/api/kibana/settings/${key}`);
       }
     }
 
-    this._log.debug('replacing kibana config doc: %j', doc);
+    this.log.debug('replacing kibana config doc: %j', doc);
 
-    await this._wreck.post('/api/kibana/settings', {
+    await this.x.post('/api/kibana/settings', {
       payload: {
         changes: {
-          ...this._defaults,
+          ...this.defaults,
           ...doc,
         },
       },
@@ -71,11 +74,10 @@ export class KibanaServerUiSettings {
 
   /**
    * Add fields to the config doc (like setting timezone and defaultIndex)
-   * @return {Promise} A promise that is resolved when elasticsearch has a response
    */
-  async update(updates) {
-    this._log.debug('applying update to kibana config: %j', updates);
-    await this._wreck.post('/api/kibana/settings', {
+  async update(updates: Record<string, any>) {
+    this.log.debug('applying update to kibana config: %j', updates);
+    await this.x.post('/api/kibana/settings', {
       payload: {
         changes: updates,
       },

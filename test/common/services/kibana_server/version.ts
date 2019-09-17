@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import { resolve as resolveUrl } from 'url';
+import { KibanaServerStatus } from './status';
 
-import Wreck from '@hapi/wreck';
+export class KibanaServerVersion {
+  private cachedVersionNumber?: string;
 
-const get = async url => {
-  const { payload } = await Wreck.get(url, { json: 'force' });
-  return payload;
-};
-
-export class KibanaServerStatus {
-  constructor(kibanaServerUrl) {
-    this.kibanaServerUrl = kibanaServerUrl;
-  }
+  constructor(private readonly kibanaStatus: KibanaServerStatus) {}
 
   async get() {
-    return await get(resolveUrl(this.kibanaServerUrl, './api/status'));
-  }
+    if (this.cachedVersionNumber) {
+      return this.cachedVersionNumber;
+    }
 
-  async getOverallState() {
-    const status = await this.get();
-    return status.status.overall.state;
+    const status = await this.kibanaStatus.get();
+    if (status && status.version && status.version.number) {
+      this.cachedVersionNumber =
+        status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
+      return this.cachedVersionNumber;
+    }
+
+    throw new Error(`Unable to fetch Kibana Server status, received ${JSON.stringify(status)}`);
   }
 }

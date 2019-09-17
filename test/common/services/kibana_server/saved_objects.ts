@@ -24,7 +24,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 const joinPath = (...components: Array<string | undefined>) =>
   `/${components
-    .filter(s => !!s)
+    .filter((s): s is string => !!s)
     .map(c => encodeURIComponent(c))
     .join('/')}`;
 
