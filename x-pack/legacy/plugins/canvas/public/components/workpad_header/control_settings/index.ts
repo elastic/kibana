@@ -9,11 +9,14 @@ import {
   setRefreshInterval,
   enableAutoplay,
   setAutoplayInterval,
+  // @ts-ignore untyped local
 } from '../../../state/actions/workpad';
+// @ts-ignore untyped local
 import { getRefreshInterval, getAutoplay } from '../../../state/selectors/workpad';
+import { State } from '../../../../types';
 import { ControlSettings as Component } from './control_settings';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state: State) => {
   const { enabled, interval } = getAutoplay(state);
 
   return {
