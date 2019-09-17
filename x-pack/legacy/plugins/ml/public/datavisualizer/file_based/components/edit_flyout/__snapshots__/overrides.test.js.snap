@@ -4,6 +4,7 @@ exports[`Overrides render overrides 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error="Value must be greater than 3 and less than or equal to 1000000"
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -27,6 +28,7 @@ exports[`Overrides render overrides 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -72,6 +74,7 @@ exports[`Overrides render overrides 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -323,6 +326,7 @@ exports[`Overrides render overrides 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={

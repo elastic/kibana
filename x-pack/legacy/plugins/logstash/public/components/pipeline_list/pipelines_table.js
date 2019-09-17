@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { PIPELINE_LIST } from './constants';
 
@@ -13,11 +14,9 @@ function getColumns(openPipeline, clonePipeline) {
   return [
     {
       field: 'id',
-      name: (
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.idColumnLabel"
-          defaultMessage="Id"
-        />
+      name: i18n.translate(
+        'xpack.logstash.pipelinesTable.idColumnLabel',
+        { defaultMessage: 'Id' }
       ),
       sortable: true,
       render: (id, { isCentrallyManaged }) => {
@@ -39,11 +38,9 @@ function getColumns(openPipeline, clonePipeline) {
     },
     {
       field: 'description',
-      name: (
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.descriptionColumnLabel"
-          defaultMessage="Description"
-        />
+      name: i18n.translate(
+        'xpack.logstash.pipelinesTable.descriptionColumnLabel',
+        { defaultMessage: 'Description' }
       ),
       render: description => <span data-test-subj="cellDescription">{description}</span>,
       sortable: true,
@@ -51,22 +48,18 @@ function getColumns(openPipeline, clonePipeline) {
     },
     {
       field: 'lastModifiedHumanized',
-      name: (
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.lastModifiedColumnLabel"
-          defaultMessage="Last Modified"
-        />
+      name: i18n.translate(
+        'xpack.logstash.pipelinesTable.lastModifiedColumnLabel',
+        { defaultMessage: 'Last modified' }
       ),
       render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
-      sortable: true,
+      sortable: ({ lastModified }) => lastModified.valueOf(),
     },
     {
       field: 'username',
-      name: (
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.modifiedByColumnLabel"
-          defaultMessage="Modified By"
-        />
+      name: i18n.translate(
+        'xpack.logstash.pipelinesTable.modifiedByColumnLabel',
+        { defaultMessage: 'Modified by' }
       ),
       render: username => <span data-test-subj="cellUsername">{username}</span>,
       sortable: true,

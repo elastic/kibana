@@ -33,7 +33,11 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
 import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
@@ -68,6 +72,7 @@ interface Props {
   isDirty: boolean;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
 }
 
 interface State {
@@ -214,6 +219,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
           persistedLog={this.persistedLog}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
+          http={this.props.http}
         />
       </EuiFlexItem>
     );
@@ -353,5 +359,4 @@ export class QueryBarTopRowUI extends Component<Props, State> {
   }
 }
 
-// @ts-ignore
 export const QueryBarTopRow = injectI18n(QueryBarTopRowUI);
