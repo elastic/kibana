@@ -17,23 +17,37 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import Url from 'url';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+// @ts-ignore not ts yet
 import { KibanaServerStatus } from './status';
+// @ts-ignore not ts yet
 import { KibanaServerUiSettings } from './ui_settings';
+// @ts-ignore not ts yet
 import { KibanaServerVersion } from './version';
+import { KibanaServerSavedObjects } from './saved_objects';
 
-export function KibanaServerProvider({ getService }) {
+export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
 
-  return new class KibanaServer {
-    constructor() {
-      const url = formatUrl(config.get('servers.kibana'));
-      this.status = new KibanaServerStatus(url);
-      this.version = new KibanaServerVersion(this.status);
-      this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'), lifecycle);
+  const url = Url.format(config.get('servers.kibana'));
+
+  return new (class KibanaServer {
+    public readonly status = new KibanaServerStatus(url);
+    public readonly version = new KibanaServerVersion(this.status);
+    public readonly savedObjects = new KibanaServerSavedObjects(url, log);
+    public readonly uiSettings = new KibanaServerUiSettings(
+      url,
+      log,
+      config.get('uiSettings.defaults'),
+      lifecycle
+    );
+
+    public resolveUrl(path = '/') {
+      return Url.resolve(url, path);
     }
-  };
+  })();
 }
