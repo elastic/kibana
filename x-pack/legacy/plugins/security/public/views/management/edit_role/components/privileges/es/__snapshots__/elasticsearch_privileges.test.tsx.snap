@@ -43,6 +43,7 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={true}
       hasEmptyLabelSpace={true}
       labelType="label"
@@ -109,6 +110,7 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
       hasEmptyLabelSpace={true}
       labelType="label"

@@ -57,10 +57,11 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar || !props.savedObjectsClient) return;
+    if (!props.showSearchBar || !props.savedObjectsClient || !props.http) return;
     return (
       <SearchBar
         savedObjectsClient={props.savedObjectsClient}
+        http={props.http}
         query={props.query}
         filters={props.filters}
         uiSettings={props.uiSettings}
