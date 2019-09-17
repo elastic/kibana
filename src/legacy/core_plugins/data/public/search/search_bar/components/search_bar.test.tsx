@@ -102,6 +102,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
       />
     );
 
@@ -119,6 +120,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -137,6 +139,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -157,6 +160,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -178,6 +182,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -199,6 +204,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -221,6 +227,7 @@ describe('SearchBar', () => {
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}

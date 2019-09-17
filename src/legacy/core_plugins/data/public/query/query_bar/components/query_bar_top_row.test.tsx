@@ -110,6 +110,7 @@ describe('QueryBarTopRowTopRow', () => {
         intl={null as any}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
       />
     );
 
@@ -133,6 +134,7 @@ describe('QueryBarTopRowTopRow', () => {
         intl={null as any}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
       />
     );
 
@@ -148,6 +150,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -167,6 +170,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -187,6 +191,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}
@@ -211,6 +216,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -234,6 +240,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -257,6 +264,7 @@ describe('QueryBarTopRowTopRow', () => {
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}

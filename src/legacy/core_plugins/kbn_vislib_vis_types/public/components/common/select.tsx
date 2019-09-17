@@ -55,6 +55,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
       labelAppend={labelAppend}
     >
       <EuiSelect
+        compressed
         disabled={disabled}
         options={[emptyValue, ...options]}
         value={value === undefined ? emptyValue.value : value}

@@ -37,6 +37,7 @@ import {
   SavedObjectsClientContract,
   Toast,
   CoreStart,
+  HttpServiceBase,
 } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
@@ -73,6 +74,7 @@ interface Props {
   toasts: CoreStart['notifications']['toasts'];
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
 }
 
 interface State {
@@ -219,6 +221,7 @@ export class QueryBarTopRowUI extends Component<Props, State> {
           persistedLog={this.persistedLog}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
+          http={this.props.http}
         />
       </EuiFlexItem>
     );
