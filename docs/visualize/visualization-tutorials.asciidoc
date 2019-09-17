@@ -24,7 +24,7 @@ Ready to create a visualization? Following these tutorials:
 === Controls tutorial
 experimental[]
 
-//Want some more Controls inspiration? Check out the link:https://www.elastic.co/blog/interactive-inputs-on-kibana-dashboards[Interactive Inputs on Kibana Dashboards] blog.
+Want some more Controls inspiration? Check out the link:https://www.elastic.co/blog/interactive-inputs-on-kibana-dashboards[Interactive Inputs on Kibana Dashboards] blog.
 
 [[data-table-tutorial]]
 === Data table tutorial
@@ -46,8 +46,6 @@ Mellori’s section.
 [[markdown-tutorial]]
 === Markdown tutorial
 
-//TODO add public demo navigation dashboard example (https://github.com/elastic/kibana/issues/9365)
-
 [[metric-tutorial]]
 === Metric tutorial
 
@@ -58,82 +56,6 @@ Mellori's section.
 
 [[tsvb-tutorial]]
 === TSVB tutorial
-
-To create a TSVB visualization, choose the data series you want to display, then choose how you want to display the data. The options available are dependent on the visualization.
-
-[float]
-[[tsvb-data-series-options]]
-==== Configure the data series
-
-To create a single metric, add multiple data series with multiple aggregations.
-
-. Select the visualization type.
-
-. Specify the data series labels and colors.
-
-.. Select *Data*.
-+ 
-If you are using the *Table* visualization, select *Columns*.
-
-.. In the *Label* field, enter a name for the data series, which is used on legends and titles.
-+
-For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
-
-.. If supported by the visualization, click the swatch and choose a color for the data series.
-
-.. To add another data series, click *+*, then repeat the steps to specify the labels and colors.
-
-. Specify the data series metrics.
-
-.. Select *Metrics*.
-
-.. From the dropdown lists, choose your options.
-
-.. To add another metric, click *+*.
-+
-When you add more than one metric, the last metric value is displayed, which is indicated by the eye icon. 
-
-. To specify the format and display options, select *Options*.
-
-. To specify how to group or split the data, choose an option from the *Group by* drop down list.
-+
-By default, the data series are grouped by everything.
-
-[float]
-[[tsvb-panel-options]]
-==== Configure the panel
-
-Change the data that you want to display and choose the style options for the panel.
-
-. Select *Panel options*.
-
-. Under *Data*, specify how much of the data that you want to display in the visualization. 
-
-. Under *Style*, specify how you want the visualization to look.
-
-[float]
-[[tsvb-add-annotations]]
-==== Add annotations
-
-If you are using the Time Series visualization, add annotation data sources.
-
-. Select *Annotations*.
-
-. Click *Add data source*, then specify the options.
-
-[float]
-[[tsvb-enter-markdown]]
-==== Enter Markdown text
-
-Edit the source for the Markdown visualization. 
-
-. Select *Markdown*.
-
-. In the editor, enter enter your Markdown text, then press Enter.
-
-. To insert the mustache template variable into the editor, click the variable name.
-+
-The http://mustache.github.io/mustache.5.html[mustache syntax] uses the Handlebar.js processor, which is an extended version of the Mustache template language.
 
 [[tag-cloud-tutorial]]
 === Tag cloud tutorial
