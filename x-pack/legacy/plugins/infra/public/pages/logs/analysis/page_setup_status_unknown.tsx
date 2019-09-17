@@ -22,7 +22,7 @@ export const AnalysisSetupStatusUnknownContent: React.FunctionComponent<Props> =
       <h2>
         <FormattedMessage
           id="xpack.infra.logs.analysisPage.setupStatusUnknown.title"
-          defaultMessage="We couldn't determine the status of your ML jobs"
+          defaultMessage="We couldn't determine the status of your ML jobs."
         />
       </h2>
     }
