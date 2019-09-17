@@ -317,7 +317,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const isLiveCluster = clusterUuid && liveClusterUuid === clusterUuid;
+  const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
