@@ -164,6 +164,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     <Fragment>
       <EuiPopover
         id="savedQueryPopover"
+        anchorClassName="euiFormControlLayout__prepend"
         button={savedQueryPopoverButton}
         isOpen={isOpen}
         closePopover={() => {

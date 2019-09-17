@@ -9,14 +9,13 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { useContext } from 'react';
 import { OnColumnRemoved } from '../../../events';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { ColumnHeader } from '../column_header';
 import { getSortDirection } from '../header/helpers';
 import * as i18n from '../translations';
-import { TimelineContext } from '../../../timeline_context';
+import { useTimelineContext } from '../../../timeline_context';
 
 const CLOSE_BUTTON_SIZE = 25; // px
 const SORT_INDICATOR_SIZE = 25; // px
@@ -68,7 +67,7 @@ export const CloseButton = pure<{
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, show, sort }) => {
-  const isLoading = useContext(TimelineContext);
+  const isLoading = useTimelineContext();
   return (
     <ActionsContainer
       alignItems="center"

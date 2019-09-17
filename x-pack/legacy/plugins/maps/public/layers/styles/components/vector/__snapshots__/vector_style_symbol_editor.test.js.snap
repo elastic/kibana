@@ -3,6 +3,7 @@
 exports[`Should render icon select when symbolized as Icon 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   label="Symbol type"
@@ -65,6 +66,7 @@ exports[`Should render icon select when symbolized as Icon 1`] = `
 exports[`Should render symbol select when symbolized as Circle 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   label="Symbol type"
