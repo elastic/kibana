@@ -120,6 +120,6 @@ export const metricSets = {
       name: 'node_cpu_metric'
     },
     'node_load_average',
-    'node_segment_count',
+    'node_segment_count'
   ]
 };
