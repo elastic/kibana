@@ -20,8 +20,11 @@
 import Url from 'url';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+// @ts-ignore not ts yet
 import { KibanaServerStatus } from './status';
+// @ts-ignore not ts yet
 import { KibanaServerUiSettings } from './ui_settings';
+// @ts-ignore not ts yet
 import { KibanaServerVersion } from './version';
 import { KibanaServerSavedObjects } from './saved_objects';
 

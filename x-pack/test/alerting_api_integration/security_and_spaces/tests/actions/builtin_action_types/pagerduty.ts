@@ -17,7 +17,6 @@ import {
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
@@ -25,9 +24,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      pagerdutySimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
-      );
+      const kibanaServer = getService('kibanaServer');
+      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
+      pagerdutySimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
+        ExternalServiceSimulator.PAGERDUTY
+      )}`;
     });
 
     after(() => esArchiver.unload('empty_kibana'));

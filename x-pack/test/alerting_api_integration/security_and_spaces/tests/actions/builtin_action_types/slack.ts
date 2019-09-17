@@ -17,7 +17,6 @@ import {
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
     let simulatedActionId = '';
@@ -25,9 +24,11 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      slackSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
-      );
+      const kibanaServer = getService('kibanaServer');
+      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
+      slackSimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
+        ExternalServiceSimulator.SLACK
+      )}`;
     });
 
     after(() => esArchiver.unload('empty_kibana'));
