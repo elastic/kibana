@@ -107,7 +107,7 @@ export default class JestJUnitReporter {
       rootDirectory,
       'target/junit',
       process.env.JOB || '.',
-      `TEST-${reportName}.xml`
+      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
     );
 
     const reportXML = root.end({
