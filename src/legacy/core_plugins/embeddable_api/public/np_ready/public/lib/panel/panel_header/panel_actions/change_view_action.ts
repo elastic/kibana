@@ -19,15 +19,20 @@
 import { i18n } from '@kbn/i18n';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../types';
-import { Action, ActionContext } from '../../../actions';
+import { Action } from '../../../actions';
 import { NotificationsStart } from '../../../../../../../../../../core/public';
 import { KibanaReactOverlays } from '../../../../../../../../../../plugins/kibana_react/public';
 import { openChangeViewFlyout } from '../../../panel/panel_header/panel_actions/add_panel/open_change_view_flyout';
+import { IEmbeddable } from '../../../embeddables';
 
 export const CHANGE_VIEW_ACTION = 'changeView';
 
 interface ExpandedPanelInput extends ContainerInput {
   expandedPanelId: string;
+}
+
+interface ActionContext {
+  embeddable: IEmbeddable;
 }
 
 function hasExpandedPanelInput(

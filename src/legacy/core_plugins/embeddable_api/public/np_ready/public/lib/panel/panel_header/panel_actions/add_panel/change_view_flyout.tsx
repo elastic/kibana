@@ -32,6 +32,7 @@ import {
 
 import { IContainer } from '../../../../containers';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
+import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../../../../embeddables';
 
 interface Props {
   onClose: () => void;
@@ -40,7 +41,7 @@ interface Props {
   getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
-  viewToRemove: IContainer;
+  viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
 export class ChangeViewFlyout extends React.Component<Props> {

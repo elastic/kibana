@@ -22,6 +22,7 @@ import { ChangeViewFlyout } from './change_view_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { NotificationsStart } from '../../../../../../../../../../../core/public';
 import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
+import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../../../../embeddables';
 
 export async function openChangeViewFlyout(options: {
   embeddable: IContainer;
@@ -30,7 +31,7 @@ export async function openChangeViewFlyout(options: {
   overlays: KibanaReactOverlays;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
-  viewToRemove: IContainer;
+  viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }) {
   const {
     embeddable,
