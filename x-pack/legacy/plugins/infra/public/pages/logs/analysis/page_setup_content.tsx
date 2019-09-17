@@ -113,10 +113,16 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                   <EuiText>
                     <FormattedMessage
                       id="xpack.infra.analysisSetup.errorText"
-                      defaultMessage="Please ensure your configured logs indices ({indexPattern}) exist. If your indices do exist, please try again."
+                      defaultMessage="Please ensure ALL configured logs indices ({indexPattern}) exist. If all these indices do exist, please try again."
                       values={{
                         indexPattern,
                       }}
+                    />
+                    <br />
+                    <br />
+                    <FormattedMessage
+                      id="xpack.infra.analysisSetup.steps.setupProcess.failureTextDisclaimer"
+                      defaultMessage="Note: 'kibana_sample_data_logs*' indices are never included in ML analysis."
                     />
                   </EuiText>
                 </EuiCallOut>
