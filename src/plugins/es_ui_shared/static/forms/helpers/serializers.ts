@@ -66,18 +66,15 @@ export const stripEmptyFields = (
   Object.entries(object).reduce(
     (acc, [key, value]) => {
       const type = typeof value;
-      const shouldStrip =
-        value !== null && !Array.isArray(value) && types.includes(type as 'string');
+      const shouldStrip = types.includes(type as 'string');
 
-      if (shouldStrip) {
-        if (type === 'string' && value.trim() === '') {
+      if (shouldStrip && type === 'string' && value.trim() === '') {
+        return acc;
+      } else if (type === 'object' && !Array.isArray(value) && value !== null) {
+        if (Object.keys(value).length === 0 && shouldStrip) {
           return acc;
-        } else if (type === 'object') {
-          if (Object.keys(value).length === 0) {
-            return acc;
-          } else if (options.recursive) {
-            value = stripEmptyFields({ ...value }, types, options);
-          }
+        } else if (options.recursive) {
+          value = stripEmptyFields({ ...value }, types, options);
         }
       }
 
