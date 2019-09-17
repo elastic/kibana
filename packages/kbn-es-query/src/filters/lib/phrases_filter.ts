@@ -21,6 +21,7 @@ import { Filter, FilterMeta } from './meta_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
+  field?: string;
 };
 
 export type PhrasesFilter = Filter & {

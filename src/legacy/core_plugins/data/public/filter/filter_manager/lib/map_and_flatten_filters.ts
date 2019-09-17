@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { compact, flatten } from 'lodash';
+import { Filter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
+import { IndexPatterns } from '../../../index_patterns';
 
-export function mapAndFlattenFilters(indexPatterns, filters) {
-  const flattened = _(filters)
-    .flatten()
-    .compact()
-    .map(item => mapFilter(indexPatterns, item)).value();
-  return Promise.all(flattened);
-}
+export const mapAndFlattenFilters = (indexPatterns: IndexPatterns, filters: Filter[]) => {
+  const promises = compact(flatten(filters)).map((item: Filter) => mapFilter(indexPatterns, item));
+
+  return Promise.all(promises);
+};

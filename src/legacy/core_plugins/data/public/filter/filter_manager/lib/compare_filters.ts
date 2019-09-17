@@ -27,7 +27,7 @@ import { defaults, isEqual, omit } from 'lodash';
  * @param {object} comparatorOptions Parameters to use for comparison
  * @returns {bool} Filters are the same
  */
-export function compareFilters(first: Filter, second: Filter, comparatorOptions: any = {}) {
+export const compareFilters = (first: Filter, second: Filter, comparatorOptions: any = {}) => {
   let comparators: any = {};
   const mapFilter = (filter: Filter) => {
     const cleaned: FilterMeta = omit(filter, excludedAttributes);
@@ -48,4 +48,4 @@ export function compareFilters(first: Filter, second: Filter, comparatorOptions:
   if (!comparators.state) excludedAttributes.push('$state');
 
   return isEqual(mapFilter(first), mapFilter(second));
-}
+};

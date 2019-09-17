@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { Filter } from '@kbn/es-query';
+import { reduceRight } from 'lodash';
+import { IndexPatterns } from '../../../index_patterns';
+
 import { mapMatchAll } from './map_match_all';
 import { mapPhrase } from './map_phrase';
 import { mapPhrases } from './map_phrases';
@@ -30,7 +33,7 @@ import { mapGeoPolygon } from './map_geo_polygon';
 import { mapDefault } from './map_default';
 import { generateMappingChain } from './generate_mapping_chain';
 
-export async function mapFilter(indexPatterns, filter) {
+export async function mapFilter(indexPatterns: IndexPatterns, filter: Filter) {
   /** Mappers **/
 
   // Each mapper is a simple promise function that test if the mapper can
@@ -60,15 +63,17 @@ export async function mapFilter(indexPatterns, filter) {
     mapDefault,
   ];
 
-  const noop = function () {
+  const noop = () => {
     throw new Error('No mappings have been found for filter.');
   };
 
   // Create a chain of responsibility by reducing all the
   // mappers down into one function.
-  const mapFn = _.reduceRight(mappers, function (memo, map) {
-    return generateMappingChain(map, memo);
-  }, noop);
+  const mapFn = reduceRight<Function, Function>(
+    mappers,
+    (memo, map) => generateMappingChain(map, memo),
+    noop
+  );
 
   const mapped = await mapFn(filter);
 
@@ -79,8 +84,8 @@ export async function mapFilter(indexPatterns, filter) {
   filter.meta.key = mapped.key;
   filter.meta.value = mapped.value;
   filter.meta.params = mapped.params;
-  filter.meta.disabled = !!(filter.meta.disabled);
-  filter.meta.negate = !!(filter.meta.negate);
+  filter.meta.disabled = Boolean(filter.meta.disabled);
+  filter.meta.negate = Boolean(filter.meta.negate);
   filter.meta.alias = filter.meta.alias || null;
 
   return filter;

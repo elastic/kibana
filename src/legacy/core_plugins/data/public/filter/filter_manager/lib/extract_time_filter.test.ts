@@ -34,7 +34,7 @@ describe('Filter Bar Directive', () => {
   describe('extractTimeFilter()', () => {
     const indexPatterns = mockIndexPatterns() as IndexPatterns;
 
-    it('should return the matching filter for the default time field', async () => {
+    test('should return the matching filter for the default time field', async () => {
       const filters: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: 'time' }, { gt: 1388559600000, lt: 1388646000000 }, 'logstash-*'),
@@ -45,7 +45,7 @@ describe('Filter Bar Directive', () => {
       expect(result).toEqual(filters[1]);
     });
 
-    it('should not return the non-matching filter for the default time field', async () => {
+    test('should not return the non-matching filter for the default time field', async () => {
       const filters: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*'),

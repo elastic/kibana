@@ -30,11 +30,11 @@ import { compareFilters } from './compare_filters';
  *
  * @returns {object} An array of filters that were not in existing
  */
-export function dedupFilters(
+export const dedupFilters = (
   existingFilters: Filter[],
   filters: Filter[],
   comparatorOptions: any = {}
-) {
+) => {
   if (!Array.isArray(filters)) {
     filters = [filters];
   }
@@ -46,4 +46,4 @@ export function dedupFilters(
         compareFilters(existingFilter, f, comparatorOptions)
       )
   );
-}
+};

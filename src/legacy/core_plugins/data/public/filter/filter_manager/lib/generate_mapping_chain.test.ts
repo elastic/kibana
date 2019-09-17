@@ -31,7 +31,7 @@ describe('Filter Bar Directive', () => {
   });
 
   describe('generateMappingChain()', () => {
-    it('should create a chaining function which calls the next function if the promise is rejected', async () => {
+    test('should create a chaining function which calls the next function if the promise is rejected', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
       mapping.rejects(filter);
@@ -44,7 +44,7 @@ describe('Filter Bar Directive', () => {
       sinon.assert.calledOnce(next);
     });
 
-    it('should create a chaining function which DOES NOT call the next function if the result is resolved', async () => {
+    test('should create a chaining function which DOES NOT call the next function if the result is resolved', async () => {
       const filter: Filter = buildEmptyFilter(true);
       mapping.resolves('good');
       next.resolves('bad');
@@ -55,7 +55,7 @@ describe('Filter Bar Directive', () => {
       expect(result).toBe('good');
     });
 
-    it('should resolve result for the mapping function', async () => {
+    test('should resolve result for the mapping function', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
       mapping.resolves({ key: 'test', value: 'example' });
@@ -67,7 +67,7 @@ describe('Filter Bar Directive', () => {
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    it('should call the mapping function with the argument to the chain', async () => {
+    test('should call the mapping function with the argument to the chain', async () => {
       // @ts-ignore
       const filter: Filter = { test: 'example' };
       mapping.resolves({ key: 'test', value: 'example' });
@@ -81,7 +81,7 @@ describe('Filter Bar Directive', () => {
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    it('should resolve result for the next function', async () => {
+    test('should resolve result for the next function', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
       mapping.rejects(filter);
@@ -95,7 +95,7 @@ describe('Filter Bar Directive', () => {
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    it('should reject with an error if no functions match', async done => {
+    test('should reject with an error if no functions match', async done => {
       const filter: Filter = buildEmptyFilter(true);
 
       mapping.rejects(filter);

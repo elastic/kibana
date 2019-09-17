@@ -22,7 +22,7 @@ import { find, keys, get } from 'lodash';
 
 const TYPE = 'custom';
 
-export async function mapDefault(filter: CustomFilter) {
+export const mapDefault = async (filter: CustomFilter) => {
   const metaProperty = /(^\$|meta)/;
   const key = find(keys(filter), item => !item.match(metaProperty));
 
@@ -34,4 +34,4 @@ export async function mapDefault(filter: CustomFilter) {
   }
 
   throw filter;
-}
+};

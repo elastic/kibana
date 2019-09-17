@@ -28,4 +28,5 @@ export type GeoBoundingBoxFilterMeta = FilterMeta & {
 
 export type GeoBoundingBoxFilter = Filter & {
   meta: GeoBoundingBoxFilterMeta;
+  geo_bounding_box?: any;
 };

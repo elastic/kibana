@@ -139,7 +139,7 @@ describe('Filter Bar Directive', () => {
       const filters = [null, { meta: { disabled: true } }] as Filter[];
       const newFilters = [] as Filter[];
 
-      expect(function() {
+      expect(() => {
         onlyDisabledFiltersChanged(newFilters, filters);
       }).not.toThrowError();
     });

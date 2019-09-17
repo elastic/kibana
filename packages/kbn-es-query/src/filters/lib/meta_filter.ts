@@ -35,6 +35,7 @@ export interface FilterMeta {
   alias: string | null;
   key?: string;
   value?: string;
+  params?: any;
 }
 
 export interface Filter {

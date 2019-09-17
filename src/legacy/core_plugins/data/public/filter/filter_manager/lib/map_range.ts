@@ -18,23 +18,21 @@
  */
 
 import { RangeFilter } from '@kbn/es-query';
-import { has, get } from 'lodash';
+import { get } from 'lodash';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
 const TYPE = 'range';
 
-function isScriptedRange(filter: RangeFilter) {
+const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
+const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
+const isScriptedRange = (filter: RangeFilter) => {
   const params = get(filter, ['script', 'script', 'params'], {});
 
-  return (
-    params && Object.keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt'].includes(key))
+  return Boolean(
+    Object.keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt'].includes(key))
   );
-}
-
-const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
-const getRangeByKey = (filter: RangeFilter, key: string) =>
-  get(filter, `filter.range.${key}`, null);
+};
 
 function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   const isScriptedRangeFilter = isScriptedRange(filter);
@@ -43,34 +41,35 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
 
-  let left = has(params, 'gte') ? params.gte : params.gt;
-  if (left == null) left = -Infinity;
+  const left = params.gte || params.gt || -Infinity;
+  const right = params.lte || params.lt || Infinity;
 
-  let right = has(params, 'lte') ? params.lte : params.lt;
-  if (right == null) right = Infinity;
+  let value = `${left} to ${right}`;
 
   // Sometimes a filter will end up with an invalid index param. This could happen for a lot of reasons,
   // for example a user might manually edit the url or the index pattern's ID might change due to
   // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
   // on displaying the raw value if the index is invalid.
-  let value = `${left} to ${right}`;
   if (key && indexPattern && indexPattern.fields.byName[key]) {
     const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+
     value = `${convert(left)} to ${convert(right)}`;
   }
 
   return { type: TYPE, key, value, params };
 }
 
-export function mapRange(indexPatterns: IndexPatterns) {
-  return async function(filter: RangeFilter) {
+export const mapRange = (indexPatterns: IndexPatterns) => {
+  return async (filter: RangeFilter) => {
     const isScriptedRangeFilter = isScriptedRange(filter);
+
     if (!filter.range && !isScriptedRangeFilter) {
       throw filter;
     }
 
     try {
       const indexPattern = await indexPatterns.get(filter.meta.index || '');
+
       return getParams(filter, indexPattern);
     } catch (error) {
       if (error instanceof SavedObjectNotFound) {
@@ -79,4 +78,4 @@ export function mapRange(indexPatterns: IndexPatterns) {
       throw error;
     }
   };
-}
+};

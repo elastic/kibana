@@ -20,7 +20,7 @@ import { QueryStringFilter } from '@kbn/es-query';
 
 const TYPE = 'query_string';
 
-export const mapQueryString = (filter: QueryStringFilter) => {
+export const mapQueryString = async (filter: QueryStringFilter) => {
   if (filter.query && filter.query.query_string) {
     return {
       type: TYPE,

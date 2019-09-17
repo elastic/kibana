@@ -21,7 +21,7 @@ import { uniqFilters } from './uniq_filters';
 
 describe('Filter Bar Directive', () => {
   describe('niqFilter', () => {
-    it('should filter out dups', () => {
+    test('should filter out dups', () => {
       const before: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index'),
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index'),
@@ -31,7 +31,7 @@ describe('Filter Bar Directive', () => {
       expect(results).toHaveLength(1);
     });
 
-    it('should filter out duplicates, ignoring meta attributes', () => {
+    test('should filter out duplicates, ignoring meta attributes', () => {
       const before: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index1'),
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index2'),
@@ -41,7 +41,7 @@ describe('Filter Bar Directive', () => {
       expect(results).toHaveLength(1);
     });
 
-    it('should filter out duplicates, ignoring $state attributes', () => {
+    test('should filter out duplicates, ignoring $state attributes', () => {
       const before: Filter[] = [
         {
           $state: { store: FilterStateStore.APP_STATE },
