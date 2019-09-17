@@ -113,6 +113,7 @@ export const EventsTbody = styled.div.attrs({
   role: 'rowgroup',
 })<{ minWidth: number }>`
   min-width: ${({ minWidth }) => minWidth + 'px'};
+  overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
 
