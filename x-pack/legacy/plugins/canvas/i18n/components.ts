@@ -129,6 +129,104 @@ export const ComponentStrings = {
         defaultMessage: 'Remove Color',
       }),
   },
+  CustomElementModal: {
+    getNameInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.nameInputLabel', {
+        defaultMessage: 'Name',
+      }),
+    getDescriptionInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.descriptionInputLabel', {
+        defaultMessage: 'Description',
+      }),
+    getImageInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageInputLabel', {
+        defaultMessage: 'Thumbnail image',
+      }),
+    getImageFilePickerPlaceholder: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageFilePickerPlaceholder', {
+        defaultMessage: 'Select or drag and drop an image',
+      }),
+    getImageInputDescription: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageInputDescription', {
+        defaultMessage:
+          'Take a screenshot of your element and upload it here. This can also be done after saving.',
+      }),
+    getCharactersRemainingDescription: (numberOfRemainingCharacter: number) =>
+      i18n.translate('xpack.canvas.customElementModal.remainingCharactersDescription', {
+        defaultMessage: '{numberOfRemainingCharacter} characters remaining',
+        values: {
+          numberOfRemainingCharacter,
+        },
+      }),
+    getElementPreviewTitle: () =>
+      i18n.translate('xpack.canvas.customElementModal.elementPreviewTitle', {
+        defaultMessage: 'Element preview',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+  },
+  ElementConfig: {
+    getTitle: () =>
+      i18n.translate('xpack.canvas.elementConfig.title', {
+        defaultMessage: 'Elements',
+        description:
+          '"Elements" refers to the individual text, images, or visualizations that you can add to a Canvas workpad',
+      }),
+    getTotalLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.totalLabel', {
+        defaultMessage: 'Total',
+        description: 'The label for the total number of elements in a workpad',
+      }),
+    getLoadedLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.loadedLabel', {
+        defaultMessage: 'Loaded',
+        description: 'The label for the number of elements in a workpad that have loaded',
+      }),
+    getFailedLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.failedLabel', {
+        defaultMessage: 'Failed',
+        description:
+          'The label for the total number of elements in a workpad that have thrown an error or failed to load',
+      }),
+    getProgressLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.progressLabel', {
+        defaultMessage: 'Progress',
+        description: 'The label for the percentage of elements that have finished loading',
+      }),
+  },
+  ElementSettings: {
+    getDataTabLabel: () =>
+      i18n.translate('xpack.canvas.elementSettings.dataTabLabel', {
+        defaultMessage: 'Data',
+        description:
+          'This tab contains the settings for the data (i.e. Elasticsearch query) used as ' +
+          'the source for a Canvas element',
+      }),
+    getDisplayTabLabel: () =>
+      i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
+        defaultMessage: 'Display',
+        description: 'This tab contains the settings for how data is displayed in a Canvas element',
+      }),
+  },
+  GroupSettings: {
+    getUngroupDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.ungroupDescription', {
+        defaultMessage: 'Ungroup ({uKey}) to edit individual element settings.',
+        values: {
+          uKey: 'U',
+        },
+      }),
+    getSaveGroupDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
+        defaultMessage: 'Save this group as a new element to re-use it throughout your workpad.',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
@@ -163,6 +261,224 @@ export const ComponentStrings = {
     getFlyoutCloseButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
         defaultMessage: 'Closes keyboard shortcuts reference',
+      }),
+  },
+  MultiElementSettings: {
+    getMultipleElementsDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.multipleElementsDescription', {
+        defaultMessage: 'Multiple elements are currently selected.',
+      }),
+    getMultipleElementsActionsDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.multipleElementsActionsDescription', {
+        defaultMessage:
+          'Deselect these elements to edit their individual settings, press ({gKey}) to group them, or save this selection as a new ' +
+          'element to re-use it throughout your workpad.',
+        values: {
+          gKey: 'G',
+        },
+      }),
+  },
+  PageConfig: {
+    getBackgroundColorDescription: () =>
+      i18n.translate('xpack.canvas.pageConfig.backgroundColorDescription', {
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.backgroundColorLabel', {
+        defaultMessage: 'Background Color',
+      }),
+    getNoTransitionDropDownOptionLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel', {
+        defaultMessage: 'None',
+        description:
+          'This is the option the user should choose if they do not want any page transition (i.e. fade in, fade out, etc) to ' +
+          'be applied to the current page.',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.pageConfig.title', {
+        defaultMessage: 'Page',
+      }),
+    getTransitionLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
+        defaultMessage: 'Transition',
+        description:
+          'This refers to the transition effect, such as fade in or rotate,  applied to a page in presentation mode.',
+      }),
+    getTransitionPreviewLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitionPreviewLabel', {
+        defaultMessage: 'Preview',
+        description: 'This is the label for a preview of the transition effect selected.',
+      }),
+  },
+  SidebarContent: {
+    getGroupedElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.groupedElementSidebarTitle', {
+        defaultMessage: 'Grouped element',
+        description:
+          'The title displayed when a grouped element is selected. "elements" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad. These elements can be grouped into a larger "grouped element" ' +
+          'that contains multiple individual elements.',
+      }),
+    getMultiElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.multiElementSidebarTitle', {
+        defaultMessage: 'Multiple elements',
+        description:
+          'The title displayed when multiple elements are selected. "elements" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad.',
+      }),
+    getSingleElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.singleElementSidebarTitle', {
+        defaultMessage: 'Selected element',
+        description:
+          'The title displayed when a single element are selected. "element" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad.',
+      }),
+  },
+  SidebarHeader: {
+    getBringForwardAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bringForwardArialLabel', {
+        defaultMessage: 'Move element up one layer',
+      }),
+    getBringToFrontAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bringToFrontArialLabel', {
+        defaultMessage: 'Move element to top layer',
+      }),
+    getSendBackwardAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.sendBackwardArialLabel', {
+        defaultMessage: 'Move element down one layer',
+      }),
+    getSendToBackAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.sendToBackArialLabel', {
+        defaultMessage: 'Move element to bottom layer',
+      }),
+    getContextMenuTitle: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.contextMenuAriaLabel', {
+        defaultMessage: 'Element options',
+      }),
+    getOrderMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.orderMenuItemLabel', {
+        defaultMessage: 'Order',
+        description: 'Refers to the order of the elements displayed on the page from front to back',
+      }),
+    getAlignmentMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.alignmentMenuItemLabel', {
+        defaultMessage: 'Alignment',
+        description:
+          'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
+          'alignment options of the selected elements',
+      }),
+    getLeftAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.leftAlignMenuItemLabel', {
+        defaultMessage: 'Left',
+      }),
+    getCenterAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.centerAlignMenuItemLabel', {
+        defaultMessage: 'Center',
+        description: 'This refers to alignment centered horizontally.',
+      }),
+    getRightAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.rightAlignMenuItemLabel', {
+        defaultMessage: 'Right',
+      }),
+    getTopAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.topAlignMenuItemLabel', {
+        defaultMessage: 'Top',
+      }),
+    getMiddleAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.middleAlignMenuItemLabel', {
+        defaultMessage: 'Middle',
+        description: 'This refers to alignment centered vertically.',
+      }),
+    getBottomAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bottomAlignMenuItemLabel', {
+        defaultMessage: 'Bottom',
+      }),
+    getDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.distributionMenutItemLabel', {
+        defaultMessage: 'Distribution',
+        description:
+          'This refers to the options to evenly spacing the selected elements horizontall or vertically.',
+      }),
+    getHorizontalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.horizontalDistributionMenutItemLabel', {
+        defaultMessage: 'Horizontal',
+      }),
+    getVerticalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.verticalDistributionMenutItemLabel', {
+        defaultMessage: 'Vertical',
+      }),
+    getUngroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.ungroupMenuItemLabel', {
+        defaultMessage: 'Ungroup',
+        description: 'This refers to ungrouping a grouped element',
+      }),
+    getGroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.groupMenuItemLabel', {
+        defaultMessage: 'Group',
+        description: 'This refers to grouping multiple selected elements.',
+      }),
+    getSaveElementMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.savedElementMenuItemLabel', {
+        defaultMessage: 'Save as new element',
+      }),
+    getCreateElementModalTitle: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.createElementModalTitle', {
+        defaultMessage: 'Create new element',
+      }),
+  },
+  WorkpadConfig: {
+    getApplyStylesheetButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.applyStylesheetButtonLabel', {
+        defaultMessage: `Apply stylesheet`,
+        description:
+          '"stylesheet" refers to the collection of CSS style rules entered by the user.',
+      }),
+    getFlipDimensionTooltip: () =>
+      i18n.translate('xpack.canvas.workpadConfig.swapDimensionsTooltip', {
+        defaultMessage: 'Swap the width and height',
+      }),
+    getFlipDimensionAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.swapDimensionsAriaLabel', {
+        defaultMessage: `Swap the page's width and height`,
+      }),
+    getGlobalCSSLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.globalCSSLabel', {
+        defaultMessage: `Global CSS overrides`,
+      }),
+    getGlobalCSSTooltip: () =>
+      i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
+        defaultMessage: `Apply styles to all pages in this workpad`,
+      }),
+    getPageHeightLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.heightLabel', {
+        defaultMessage: 'Height',
+      }),
+    getPageSizeBadgeAriaLabel: (sizeName: string) =>
+      i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeAriaLabel', {
+        defaultMessage: `Preset page size: {sizeName}`,
+        values: {
+          sizeName,
+        },
+      }),
+    getPageSizeBadgeOnClickAriaLabel: (sizeName: string) =>
+      i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeOnClickAriaLabel', {
+        defaultMessage: `Set page size to {sizeName}`,
+        values: {
+          sizeName,
+        },
+      }),
+    getPageWidthLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.widthLabel', {
+        defaultMessage: 'Width',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.workpadConfig.title', {
+        defaultMessage: 'Workpad',
+      }),
+    getUSLetterButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
+        defaultMessage: 'US Letter',
+        description: 'This is referring to the dimentions of U.S. standard letter paper.',
       }),
   },
   WorkpadCreate: {
