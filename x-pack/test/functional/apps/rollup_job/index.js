@@ -7,9 +7,8 @@
 export default function ({ loadTestFile }) {
 
   describe('rollup job', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup5');
 
-    // loadTestFile(require.resolve('./hybrid_index'));
     loadTestFile(require.resolve('./rollup_jobs'));
   });
 }

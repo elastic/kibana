@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
 
-  // const log = getService('log');
+  const log = getService('log');
   const es = getService('es');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
@@ -28,8 +28,9 @@ export default function ({ getService, getPageObjects }) {
         });
       }
     }
+
     before(async () => {
-      // make sure all dates have the same concept of 'now'
+      await log.debug('make sure all dates have the same concept of "now"');
       const now = new Date();
       const pastDates = [
         datemath.parse('now-1d', { forceNow: now }),
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('rollupJob');
 
     });
+
     it('create new rollup job', async () => {
       const indexPattern = 'to-be*';
       const interval = '1000ms';
@@ -49,25 +51,27 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('indexManagement');
 
-      // Wait a 10 seconds to ensure that the job has triggered.
+      await log.debug('Wait a 10 seconds to ensure that the job has triggered.');
       await PageObjects.common.sleep(10000);
       await PageObjects.indexManagement.toggleRollupIndices();
       await PageObjects.common.sleep(2000);
       const indices = await PageObjects.indexManagement.getIndexList();
 
-      //If the index exists then the rollup job has successfully been created and is waiting to or has triggered.
+      await log.debug('If the index exists then the rollup job has successfully' +
+        'been created and is waiting to or has triggered.');
       indices.filter(i => i.indexName === indexName);
       expect(indices.length).to.be.greaterThan(0);
 
     });
 
     it('create hybrid index pattern', async () => {
-      //Stop the rollup job created in the previous test.
+      await log.debug('Stop the rollup job created in the previous test.');
       await es.transport.request({
         path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
         method: 'POST',
       });
 
+      await log.debug('Add data for 1,2 and 3 days into the future.');
       const now = new Date();
       const futureDates = [
         datemath.parse('now', { forceNow: now }),
@@ -77,6 +81,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await loadDates(futureDates, 'live-data');
+      await log.debug('Delete old data that was rolled up.');
       await es.indices.delete({ index: 'to-be*' });
 
       await PageObjects.common.navigateToApp('settings');
@@ -84,11 +89,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('discover');
       const hits = await PageObjects.discover.getHitCount();
-
       expect(hits).to.be('7');
-
-
-
     });
 
     after(async () => {
