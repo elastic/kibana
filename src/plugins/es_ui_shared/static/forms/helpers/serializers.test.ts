@@ -21,7 +21,7 @@ import { stripEmptyFields } from './serializers';
 
 describe('Serializers', () => {
   describe('stripEmptyFields()', () => {
-    let object;
+    let object: { [key: string]: any };
 
     beforeEach(() => {
       object = {

@@ -116,7 +116,7 @@ export interface FieldsMap {
 export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<void>;
 
 export interface ValidationError<T = string> {
-  message: string | ((error: ValidationError) => string);
+  message: string;
   code?: T;
   validationType?: string;
   [key: string]: any;
