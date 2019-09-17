@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import $ from 'jquery';
 
-import { loadRemoteState } from '../load_remote_editor_state';
+import { loadRemoteState } from './load_remote_editor_state';
 
 describe('[Legacy Console] loading remote editor state', () => {
   const sandbox = sinon.createSandbox();
