@@ -102,7 +102,7 @@ interface to copy objects from one space to another.
 . (Optional) Delete objects in the export space that you no longer need.
 
 {kib} also has experimental <<dashboard-import-api-import, import>> and 
-<<dashboard-import-api-export, export>> dashboard APIs if you want
+<<dashboard-api-export, export>> dashboard APIs if you want
 a dashboard-centric way to automate this process.
 
 

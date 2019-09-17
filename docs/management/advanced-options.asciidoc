@@ -202,7 +202,7 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 `search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results. 
 Searching through frozen indices
-might increase the search time.
+might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
 
 [float]
 [[kibana-timelion-settings]]

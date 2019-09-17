@@ -9237,7 +9237,6 @@
     "xpack.siem.fieldBrowser.resetFieldsLink": "フィールドをリセット",
     "xpack.siem.fieldBrowser.viewCategoryTooltip": "すべての {categoryId} フィールドを表示します",
     "xpack.siem.fieldRenderers.moreLabel": "もっと",
-    "xpack.siem.fieldRenderers.moreOverflowLabel": "他…",
     "xpack.siem.flyout.button.timeline": "タイムライン",
     "xpack.siem.footer.autoRefreshActiveDescription": "自動更新アクション",
     "xpack.siem.footer.autoRefreshActiveTooltip": "自動更新が有効な間、タイムラインはクエリに一致する最新の {numberOfItems} 件のイベントを表示します。",

@@ -114,7 +114,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         head: async (request: any, params: any) => null,
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toEqual([]);
     });
@@ -131,7 +131,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         head: async (request: any, params: any) => null,
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -192,8 +192,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
-        '1234',
-        '5678',
+        'now-15m',
+        'now',
         JSON.stringify(searchFilter)
       );
 
@@ -248,8 +248,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
-        '1234',
-        '5678',
+        'now-15m',
+        'now',
         searchFilter
       );
 
@@ -270,8 +270,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
-        '1234',
-        '5678',
+        'now-15m',
+        'now',
         searchFilter
       );
 
@@ -294,8 +294,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
-        '1234',
-        '5678',
+        'now-15m',
+        'now',
         searchFilter
       );
 
