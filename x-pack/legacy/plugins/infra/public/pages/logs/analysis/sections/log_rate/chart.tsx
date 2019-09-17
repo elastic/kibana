@@ -55,13 +55,13 @@ export const ChartView = ({ data, timeRange }: Props) => {
 
   const [dateFormat] = useKibanaUiSetting('dateFormat');
 
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (tooltipData: TooltipValue) =>
+  const tooltipProps = useMemo(
+    () => ({
+      headerFormatter: (tooltipData: TooltipValue) =>
         moment(tooltipData.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
-      [dateFormat]
-    ),
-  };
+    }),
+    [dateFormat]
+  );
 
   const [isShowingModelBounds, setIsShowingModelBounds] = useState<boolean>(true);
   return (
