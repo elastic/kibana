@@ -140,6 +140,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -458,6 +459,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -776,6 +778,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1064,6 +1067,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1393,6 +1397,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1681,6 +1686,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"

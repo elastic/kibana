@@ -6,7 +6,6 @@
 
 export {
   getAnalysisType,
-  isAnalyticsIdValid,
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,

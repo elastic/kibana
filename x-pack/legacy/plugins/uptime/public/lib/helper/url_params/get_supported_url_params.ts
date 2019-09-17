@@ -13,6 +13,7 @@ export interface UptimeUrlParams {
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+  filters: string;
   // TODO: reintroduce for pagination and sorting
   // monitorListPageIndex: number;
   // monitorListPageSize: number;
@@ -20,6 +21,7 @@ export interface UptimeUrlParams {
   // monitorListSortField: string;
   search: string;
   selectedPingStatus: string;
+  statusFilter: string;
 }
 
 const {
@@ -27,6 +29,7 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  FILTERS,
   // TODO: reintroduce for pagination and sorting
   // MONITOR_LIST_PAGE_INDEX,
   // MONITOR_LIST_PAGE_SIZE,
@@ -34,6 +37,7 @@ const {
   // MONITOR_LIST_SORT_FIELD,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
+  STATUS_FILTER,
 } = CLIENT_DEFAULTS;
 
 /**
@@ -70,6 +74,7 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    filters,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex,
     // monitorListPageSize,
@@ -77,6 +82,7 @@ export const getSupportedUrlParams = (params: {
     // monitorListSortField,
     search,
     selectedPingStatus,
+    statusFilter,
   } = filteredParams;
 
   return {
@@ -84,6 +90,7 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    filters: filters || FILTERS,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
     // monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
@@ -92,5 +99,6 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
+    statusFilter: statusFilter || STATUS_FILTER,
   };
 };
