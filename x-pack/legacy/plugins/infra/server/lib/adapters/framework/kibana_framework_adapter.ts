@@ -7,12 +7,10 @@
 import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
-import { Request, ResponseToolkit } from 'hapi';
 import { runHttpQuery } from 'apollo-server-core';
-import Boom from 'boom';
-import * as GraphiQL from 'apollo-server-module-graphiql';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { first } from 'rxjs/operators';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -23,112 +21,129 @@ import {
   internalInfraFrameworkRequest,
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import {
+  InternalCoreSetup,
+  IRouter,
+  KibanaRequest,
+  RequestHandlerContext,
+  KibanaResponseFactory,
+} from '../../../../../../../../src/core/server';
+import { InfraConfig } from '../../../new_platform_config.schema';
 
 interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
 }
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
-  public version: string;
-  private server: Legacy.Server;
+  private router: IRouter;
+  private core: InternalCoreSetup;
+  private legacyServer: Legacy.Server; // NP_TODO: REMOVE ... temporary while shimming only
 
-  constructor(server: Legacy.Server) {
-    this.version = server.config().get('pkg.version');
-    this.server = server;
+  constructor(core: InternalCoreSetup, config: InfraConfig, legacyServer: Legacy.Server) {
+    this.router = core.http.createRouter('/api/infra');
+    this.core = core;
+    this.legacyServer = legacyServer; // NP_TODO: REMOVE ... temporary while shimming only
   }
 
-  public config(req: InfraFrameworkRequest<Legacy.Request>): KibanaConfig {
-    const internalRequest = req[internalInfraFrameworkRequest];
-    return internalRequest.server.config();
-  }
-
-  public exposeStaticDir(urlPath: string, dir: string): void {
-    this.server.route({
-      handler: {
-        directory: {
-          path: dir,
-        },
-      },
-      method: 'GET',
-      path: urlPath,
+  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema): void {
+    const body = schema.object({
+      operationName: schema.string(),
+      query: schema.string(),
+      variables: schema.object({
+        sourceId: schema.string(),
+      }),
     });
-  }
+    type Body = TypeOf<typeof body>;
 
-  public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.route({
-      options: {
-        tags: ['access:infra'],
+    const routeOptions = {
+      path: routePath,
+      validate: {
+        body,
       },
-      handler: async (request: Request, h: ResponseToolkit) => {
-        try {
-          const query =
-            request.method === 'post'
-              ? (request.payload as Record<string, any>)
-              : (request.query as Record<string, any>);
+    };
+    async function handler(
+      context: RequestHandlerContext,
+      request: KibanaRequest<unknown, unknown, Body>,
+      response: KibanaResponseFactory
+    ) {
+      try {
+        const query =
+          request.route.method === 'post'
+            ? (request.body as Record<string, any>)
+            : (request.query as Record<string, any>);
 
-          const gqlResponse = await runHttpQuery([request], {
-            method: request.method.toUpperCase(),
-            options: (req: Legacy.Request) => ({
-              context: { req: wrapRequest(req) },
-              schema,
-            }),
-            query,
-          });
-
-          return h.response(gqlResponse).type('application/json');
-        } catch (error) {
-          if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.boomify(error);
-
-            queryError.output.payload.message = error.message;
-
-            return queryError;
-          }
-
-          if (error.isGraphQLError === true) {
-            return h
-              .response(error.message)
-              .code(error.statusCode)
-              .type('application/json');
-          }
-
-          const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-          if (error.headers) {
-            Object.keys(error.headers).forEach(header => {
-              genericError.output.headers[header] = error.headers[header];
-            });
-          }
-
-          // Boom hides the error when status code is 500
-          genericError.output.payload.message = error.message;
-
-          throw genericError;
-        }
-      },
-      method: ['GET', 'POST'],
-      path: routePath || '/graphql',
-    });
-
-    this.server.route({
-      options: {
-        tags: ['access:infra'],
-      },
-      handler: async (request: Request, h: ResponseToolkit) => {
-        const graphiqlString = await GraphiQL.resolveGraphiQLString(
-          request.query,
-          (req: Legacy.Request) => ({
-            endpointURL: req ? `${req.getBasePath()}${routePath}` : routePath,
-            passHeader: `'kbn-version': '${this.version}'`,
+        const gqlResponse = await runHttpQuery([request], {
+          method: request.route.method.toUpperCase(),
+          options: (req: Legacy.Request) => ({
+            context: { req: wrapRequest(req) },
+            schema: gqlSchema,
           }),
-          request
-        );
+          query,
+        });
 
-        return h.response(graphiqlString).type('text/html');
-      },
-      method: 'GET',
-      path: routePath ? `${routePath}/graphiql` : '/graphiql',
-    });
+        return response.ok({
+          body: gqlResponse,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.badRequest({ body: error });
+        // NP_TODO handle errors! (see below for previously handled error cases)
+      }
+
+      //   if ('HttpQueryError' !== error.name) {
+      //     const queryError = Boom.boomify(error);
+
+      //     queryError.output.payload.message = error.message;
+
+      //     return queryError;
+      //   }
+
+      //   if (error.isGraphQLError === true) {
+      //     return h
+      //       .response(error.message)
+      //       .code(error.statusCode)
+      //       .type('application/json');
+      //   }
+
+      //   const genericError = new Boom(error.message, { statusCode: error.statusCode });
+
+      //   if (error.headers) {
+      //     Object.keys(error.headers).forEach(header => {
+      //       genericError.output.headers[header] = error.headers[header];
+      //     });
+      //   }
+
+      //   // Boom hides the error when status code is 500
+      //   genericError.output.payload.message = error.message;
+
+      //   throw genericError;
+      // }
+    }
+    this.router.post(routeOptions, handler);
+    this.router.get(routeOptions, handler);
+
+    // NP_TODO: Re-enable graphiql endpoint?
+    // this.server.route({
+    //   options: {
+    //     tags: ['access:infra'],
+    //   },
+    //   handler: async (request: Request, h: ResponseToolkit) => {
+    //     const graphiqlString = await GraphiQL.resolveGraphiQLString(
+    //       request.query,
+    //       (req: Legacy.Request) => ({
+    //         endpointURL: req ? `${req.getBasePath()}${routePath}` : routePath,
+    //         // passHeader: `'kbn-version': '${this.version}'`, // not sure this is necessary, removing for now
+    //       }),
+    //       request
+    //     );
+
+    //     return h.response(graphiqlString).type('text/html');
+    //   },
+    //   method: 'GET',
+    //   path: routePath ? `${routePath}/graphiql` : '/graphiql',
+    // });
   }
 
   public registerRoute<
@@ -138,7 +153,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const wrappedHandler = (request: any, h: Legacy.ResponseToolkit) =>
       route.handler(wrapRequest(request), h);
 
-    this.server.route({
+    this.legacyServer.route({
       handler: wrappedHandler,
       options: route.options,
       method: route.method,
@@ -147,19 +162,35 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public async callWithRequest(
-    req: InfraFrameworkRequest<Legacy.Request>,
+    wrapped: InfraFrameworkRequest<Legacy.Request>,
     endpoint: string,
     params: CallWithRequestParams,
     ...rest: Array<any>
   ) {
-    const internalRequest = req[internalInfraFrameworkRequest];
-    const { elasticsearch } = internalRequest.server.plugins;
-    const { callWithRequest } = elasticsearch.getCluster('data');
-    const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+    const request = wrapped[internalInfraFrameworkRequest];
+    const client = (await this.core.elasticsearch.dataClient$.pipe(first()).toPromise()).asScoped(
+      request
+    );
+
+    // NP_TODO: mocking out uiSettings b/c I have no idea how to shim it woot
+    const uiSettings = {
+      get: (value: string) =>
+        new Promise((resolve, reject) => {
+          if (value === 'search:includeFrozen') {
+            return resolve(false);
+          }
+          if (value === 'courier:maxConcurrentShardRequests') {
+            return resolve(3);
+          }
+          return reject(new Error(`unknown ui setting key ${value}`));
+        }),
+    };
+
+    const includeFrozen = (await uiSettings.get('search:includeFrozen')) as boolean; // NP_TODO when we get real uiSettings, remove casting as boolean!
     if (endpoint === 'msearch') {
-      const maxConcurrentShardRequests = await internalRequest
-        .getUiSettingsService()
-        .get('courier:maxConcurrentShardRequests');
+      const maxConcurrentShardRequests = (await uiSettings.get(
+        'courier:maxConcurrentShardRequests'
+      )) as number; // NP_TODO when we get real uiSettings, remove casting as number!
       if (maxConcurrentShardRequests > 0) {
         params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
       }
@@ -171,8 +202,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }
       : {};
 
-    const fields = await callWithRequest(
-      internalRequest,
+    const fields = await client.callAsCurrentUser(
       endpoint,
       {
         ...params,
@@ -186,7 +216,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public getIndexPatternsService(
     request: InfraFrameworkRequest<Legacy.Request>
   ): Legacy.IndexPatternsService {
-    return this.server.indexPatternsServiceFactory({
+    return this.legacyServer.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,

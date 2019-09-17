@@ -9,10 +9,11 @@ import JoiNamespace from 'joi';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import KbnServer from 'src/legacy/server/kbn_server';
-import { Observable } from 'rxjs';
+import { defer } from 'rxjs';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin } from './server/new_platform_index';
+import { UsageCollector } from './server/usage/usage_collector';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -73,32 +74,98 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(server: any) {
-      // convert hapi instance to KbnServer
-      // `kbnServer.server` is the same hapi instance
-      // `kbnServer.newPlatform` has important values
-      const kbnServer = (server as unknown) as KbnServer;
-      const { core } = kbnServer.newPlatform.setup;
+    init(legacyServer: any) {
+      const { newPlatform } = legacyServer as KbnServer;
+      const { core } = newPlatform.setup;
 
       const getConfig$ = <T>() =>
-        new Observable<T>(observer => {
-          server
-            .config()
-            .get('xpack.infra')
-            .then((value: T) => observer.next(value));
-        });
+        defer<T>(async () => await legacyServer.config().get('xpack.infra'));
 
-      const initContext = {
+      const initContext = ({
         config: {
           create: getConfig$,
           createIfExists: getConfig$,
         },
-      } as PluginInitializerContext;
+        getUiSettingsService: legacyServer.getUiSettingsService, // NP_TODO: Replace this with route handler context instead when ready, see: https://github.com/elastic/kibana/issues/44994
+      } as unknown) as PluginInitializerContext;
 
-      plugin(initContext).setup(core);
+      const infraPluginInstance = plugin(initContext, legacyServer);
+      infraPluginInstance.setup(core);
+
+      // NP_TODO: EVERYTHING BELOW HERE IS LEGACY, MIGHT NEED TO MOVE SOME OF IT TO NP, NOT SURE HOW
+
+      const libs = infraPluginInstance.getLibs();
+
+      // NP_TODO how do we replace this?
+      legacyServer.expose(
+        'defineInternalSourceConfiguration',
+        libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
+      );
+
+      // Register a function with server to manage the collection of usage stats
+      legacyServer.usage.collectorSet.register(UsageCollector.getUsageCollector(legacyServer));
+
+      const xpackMainPlugin = legacyServer.plugins.xpack_main;
+      xpackMainPlugin.registerFeature({
+        id: 'infrastructure',
+        name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
+          defaultMessage: 'Infrastructure',
+        }),
+        icon: 'infraApp',
+        navLinkId: 'infra:home',
+        app: ['infra', 'kibana'],
+        catalogue: ['infraops'],
+        privileges: {
+          all: {
+            api: ['infra'],
+            savedObject: {
+              all: ['infrastructure-ui-source'],
+              read: ['index-pattern'],
+            },
+            ui: ['show', 'configureSource', 'save'],
+          },
+          read: {
+            api: ['infra'],
+            savedObject: {
+              all: [],
+              read: ['infrastructure-ui-source', 'index-pattern'],
+            },
+            ui: ['show'],
+          },
+        },
+      });
+
+      xpackMainPlugin.registerFeature({
+        id: 'logs',
+        name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
+          defaultMessage: 'Logs',
+        }),
+        icon: 'loggingApp',
+        navLinkId: 'infra:logs',
+        app: ['infra', 'kibana'],
+        catalogue: ['infralogging'],
+        privileges: {
+          all: {
+            api: ['infra'],
+            savedObject: {
+              all: ['infrastructure-ui-source'],
+              read: [],
+            },
+            ui: ['show', 'configureSource', 'save'],
+          },
+          read: {
+            api: ['infra'],
+            savedObject: {
+              all: [],
+              read: ['infrastructure-ui-source'],
+            },
+            ui: ['show'],
+          },
+        },
+      });
 
       // NP_TODO: How do we move this to new platform?
-      server.addAppLinksToSampleDataset('logs', [
+      legacyServer.addAppLinksToSampleDataset('logs', [
         {
           path: `/app/${APP_ID}#/logs`,
           label: logsSampleDataLinkLabel,

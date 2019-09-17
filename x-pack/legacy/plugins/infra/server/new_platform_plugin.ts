@@ -5,8 +5,16 @@
  */
 import { InternalCoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { initServerWithKibana } from './kibana.index';
+import { Server } from 'hapi';
 import { InfraConfig } from './new_platform_config.schema';
+import { Legacy } from '../../../../../kibana';
+import { initInfraServer } from './infra_server';
+import { compose } from './lib/compose/kibana';
+import { InfraBackendLibs } from './lib/infra_types';
+
+export interface KbnServer extends Server {
+  usage: any;
+}
 
 const DEFAULT_CONFIG: InfraConfig = {
   enabled: true,
@@ -19,8 +27,11 @@ const DEFAULT_CONFIG: InfraConfig = {
 export class InfraServerPlugin {
   public config$: Observable<InfraConfig>;
   public config: InfraConfig = DEFAULT_CONFIG;
+  private legacyServer: Legacy.Server;
+  public libs: InfraBackendLibs | undefined;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext, legacyServer: Legacy.Server) {
+    this.legacyServer = legacyServer;
     this.config$ = context.config.create<InfraConfig>();
     this.config$.subscribe(configValue => {
       this.config = {
@@ -34,7 +45,19 @@ export class InfraServerPlugin {
     });
   }
 
+  getLibs() {
+    if (!this.libs) {
+      throw new Error('libs not set up yet');
+    }
+    return this.libs;
+  }
+
   setup(core: InternalCoreSetup) {
-    initServerWithKibana(core, this.config);
+    this.libs = compose(
+      core,
+      this.config,
+      this.legacyServer // NP_TODO: REMOVE ... temporary while shimming only
+    );
+    initInfraServer(this.libs);
   }
 }
