@@ -11,7 +11,11 @@ import { FilterRatioIndexPatternColumn } from './filter_ratio';
 import { filterRatioOperation } from '.';
 import { IndexPatternPrivateState } from '../../indexpattern';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { QueryBarInput } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
 import { createMockedIndexPattern } from '../../mocks';
 
@@ -109,6 +113,7 @@ describe('filter_ratio', () => {
             storage={storageMock}
             uiSettings={{} as UiSettingsClientContract}
             savedObjectsClient={{} as SavedObjectsClientContract}
+            http={{} as HttpServiceBase}
           />
         );
       }).not.toThrow();
@@ -125,6 +130,7 @@ describe('filter_ratio', () => {
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -144,6 +150,7 @@ describe('filter_ratio', () => {
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 
@@ -184,6 +191,7 @@ describe('filter_ratio', () => {
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
+          http={{} as HttpServiceBase}
         />
       );
 

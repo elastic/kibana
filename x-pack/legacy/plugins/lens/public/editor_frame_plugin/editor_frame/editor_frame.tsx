@@ -5,10 +5,9 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
-import {
-  ExpressionRenderer,
-  Query,
-} from '../../../../../../../src/legacy/core_plugins/data/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { Query } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -29,7 +28,7 @@ export interface EditorFrameProps {
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
-
+  core: CoreSetup | CoreStart;
   dateRange: {
     fromDate: string;
     toDate: string;
@@ -220,6 +219,7 @@ export function EditorFrame(props: EditorFrameProps) {
               : true
           }
           dispatch={dispatch}
+          core={props.core}
           query={props.query}
           dateRange={props.dateRange}
         />

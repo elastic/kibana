@@ -7,7 +7,6 @@
 import chromeMock from 'ui/chrome';
 import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { toastNotifications as notificationsMock } from 'ui/notify';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
@@ -17,12 +16,12 @@ import {
 import { Datasource, DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import { Storage } from 'ui/storage';
+import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
 // chrome, notify, storage are used by ./plugin
 jest.mock('ui/chrome');
-jest.mock('ui/notify');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
@@ -136,10 +135,10 @@ describe('IndexPattern Data Source suggestions', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
+      core: coreMock.createSetup(),
       chrome: chromeMock,
       storage: {} as Storage,
       interpreter: { functionsRegistry },
-      toastNotifications: notificationsMock,
       data: dataMock,
       savedObjectsClient: {} as SavedObjectsClientContract,
     });

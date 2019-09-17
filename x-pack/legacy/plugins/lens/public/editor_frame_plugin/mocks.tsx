@@ -5,16 +5,13 @@
  */
 
 import React from 'react';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import {
-  setup as dataSetup,
-  start as dataStart,
-} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+  ExpressionsSetup,
+  ExpressionsStart,
+} from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
-
-type DataSetup = typeof dataSetup;
-type DataStart = typeof dataStart;
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -85,12 +82,12 @@ export function createMockFramePublicAPI(): FrameMock {
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
-export type MockedSetupDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
-  data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataSetup['expressions']> };
+export type MockedSetupDependencies = Omit<EditorFrameSetupPlugins, 'expressions'> & {
+  expressions: jest.Mocked<ExpressionsSetup>;
 };
 
-export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'data'> & {
-  data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataStart['expressions']> };
+export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'expressions'> & {
+  expressions: jest.Mocked<ExpressionsStart>;
 };
 
 export function createExpressionRendererMock(): jest.Mock<
@@ -102,11 +99,10 @@ export function createExpressionRendererMock(): jest.Mock<
 
 export function createMockSetupDependencies() {
   return ({
-    data: {
-      expressions: {
-        registerFunction: jest.fn(),
-        registerRenderer: jest.fn(),
-      },
+    data: {},
+    expressions: {
+      registerFunction: jest.fn(),
+      registerRenderer: jest.fn(),
     },
     chrome: {
       getSavedObjectsClient: () => {},
@@ -117,12 +113,12 @@ export function createMockSetupDependencies() {
 export function createMockStartDependencies() {
   return ({
     data: {
-      expressions: {
-        ExpressionRenderer: jest.fn(() => null),
-      },
       indexPatterns: {
         indexPatterns: {},
       },
+    },
+    expressions: {
+      ExpressionRenderer: jest.fn(() => null),
     },
     embeddables: {
       registerEmbeddableFactory: jest.fn(),

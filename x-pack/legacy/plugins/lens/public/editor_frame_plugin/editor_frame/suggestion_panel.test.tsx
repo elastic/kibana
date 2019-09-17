@@ -14,11 +14,11 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import { act } from 'react-dom/test-utils';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('./suggestion_helpers');
 

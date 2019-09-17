@@ -23,7 +23,7 @@ import { EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/data/public/expressions/lib/_types';
+import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 

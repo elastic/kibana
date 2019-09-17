@@ -18,8 +18,7 @@
  */
 
 import { IndexPatternsService, IndexPatternsSetup } from '.';
-// @ts-ignore
-import { flattenHitWrapper } from './index_patterns/flatten_hit';
+import { flattenHitWrapper } from './index_patterns';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 

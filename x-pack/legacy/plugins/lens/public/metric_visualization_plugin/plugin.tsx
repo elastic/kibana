@@ -7,8 +7,8 @@
 import { CoreSetup } from 'src/core/public';
 import { FormatFactory, getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { metricVisualization } from './metric_visualization';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/data/public/expressions';
-import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
+import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
 
 export interface MetricVisualizationPluginSetupPlugins {
@@ -41,7 +41,7 @@ const plugin = new MetricVisualizationPlugin();
 
 export const metricVisualizationSetup = () =>
   plugin.setup(null, {
-    expressions: dataSetup.expressions,
+    expressions: expressionsSetup,
     fieldFormat: {
       formatFactory: getFormat,
     },
