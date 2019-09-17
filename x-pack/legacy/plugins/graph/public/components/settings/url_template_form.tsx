@@ -20,13 +20,9 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { UrlTemplate } from '../../types';
 import { LegacyIcon } from './legacy_icon';
-import { outlinkEncoders } from '../../services/outlink_encoders';
-import { urlTemplateIconChoices } from '../../services/style_choices';
-import {
-  isUrlTemplateValid,
-  isKibanaUrl,
-  replaceKibanaUrlParam,
-} from '../../services/url_template';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { urlTemplateIconChoices } from '../../helpers/style_choices';
+import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
