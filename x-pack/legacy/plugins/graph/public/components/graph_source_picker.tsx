@@ -9,7 +9,7 @@ import React from 'react';
 
 import { CoreStart } from 'src/core/public';
 import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/public';
-import { IndexPatternSavedObject } from '../types/app_state';
+import { IndexPatternSavedObject } from '../types';
 
 export interface GraphSourcePickerProps {
   currentIndexPattern?: IndexPatternSavedObject;

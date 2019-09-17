@@ -775,7 +775,9 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        kbnUrl.change('/workspace/', {});
+        $scope.$evalAsync(() => {
+          kbnUrl.change('/workspace/', {});
+        });
       });  },
     testId: 'graphNewButton',
   });

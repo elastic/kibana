@@ -7,7 +7,7 @@
 import { CoreStart } from 'src/core/public';
 import React from 'react';
 import { GraphSourceModal } from '../components/graph_source_modal';
-import { IndexPatternSavedObject } from '../types/app_state';
+import { IndexPatternSavedObject } from '../types';
 
 export function openIndexPatternModal(
   {

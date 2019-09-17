@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 
 import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternSavedObject } from '../types/app_state';
+import { IndexPatternSavedObject } from '../types';
 import { GraphSourcePicker } from './graph_source_picker';
 
 interface GraphSearchBarProps {
@@ -63,6 +63,7 @@ export function GraphSearchBar({
               <EuiPopover
                 id="graphSourcePicker"
                 anchorPosition="downLeft"
+                anchorClassName="gphSearchBar__datasourceButtonTooltip"
                 ownFocus
                 button={
                   <EuiToolTip
