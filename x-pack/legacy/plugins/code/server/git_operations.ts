@@ -610,6 +610,34 @@ export class GitOperations {
     return commit;
   }
 
+  public async log(
+    repoUri: string,
+    revision: string,
+    count: number,
+    path?: string
+  ): Promise<CommitInfo[]> {
+    const gitdir = this.repoDir(repoUri);
+    const git = simplegit(gitdir);
+    const options: any = {
+      n: count,
+      format: {
+        updated: '%ai',
+        message: '%B',
+        author: '%an',
+        committer: '%cn',
+        id: '%H',
+        parents: '%p',
+        treeId: '%T',
+      },
+      from: revision,
+    };
+    if (path) {
+      options.file = path;
+    }
+    const result = await git.log(options);
+    return (result.all as unknown) as CommitInfo[];
+  }
+
   public async getCommitInfo(repoUri: string, ref: string): Promise<CommitInfo | null> {
     const gitdir = this.repoDir(repoUri);
     // depth: avoid infinite loop
