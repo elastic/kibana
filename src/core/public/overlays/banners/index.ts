@@ -16,31 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { OverlayService, OverlayStart } from './overlay_service';
-import { overlayBannersServiceMock } from './banners/banners_service.mock';
 
-const createStartContractMock = () => {
-  const startContract: DeeplyMockedKeys<OverlayStart> = {
-    openFlyout: jest.fn(),
-    openModal: jest.fn(),
-    banners: overlayBannersServiceMock.createStartContract(),
-  };
-  startContract.openModal.mockReturnValue({
-    close: jest.fn(),
-    onClose: Promise.resolve(),
-  });
-  return startContract;
-};
-
-const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = {
-    start: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
-  return mocked;
-};
-
-export const overlayServiceMock = {
-  create: createMock,
-  createStartContract: createStartContractMock,
-};
+export {
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayBannersService,
+} from './banners_service';
