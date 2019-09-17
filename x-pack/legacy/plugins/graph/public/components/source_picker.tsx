@@ -11,7 +11,7 @@ import { CoreStart } from 'src/core/public';
 import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/public';
 import { IndexPatternSavedObject } from '../types';
 
-export interface GraphSourcePickerProps {
+export interface SourcePickerProps {
   currentIndexPattern?: IndexPatternSavedObject;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   savedObjects: CoreStart['savedObjects'];
@@ -20,12 +20,12 @@ export interface GraphSourcePickerProps {
 
 const fixedPageSize = 8;
 
-export function GraphSourcePicker({
+export function SourcePicker({
   savedObjects,
   uiSettings,
   currentIndexPattern,
   onIndexPatternSelected,
-}: GraphSourcePickerProps) {
+}: SourcePickerProps) {
   return (
     <SavedObjectFinder
       savedObjects={savedObjects}

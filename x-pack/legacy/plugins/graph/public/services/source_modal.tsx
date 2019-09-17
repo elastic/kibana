@@ -6,10 +6,10 @@
 
 import { CoreStart } from 'src/core/public';
 import React from 'react';
-import { GraphSourceModal } from '../components/graph_source_modal';
+import { SourceModal } from '../components/source_modal';
 import { IndexPatternSavedObject } from '../types';
 
-export function openIndexPatternModal(
+export function openSourceModal(
   {
     overlays,
     savedObjects,
@@ -22,7 +22,7 @@ export function openIndexPatternModal(
   onSelected: (indexPattern: IndexPatternSavedObject) => void
 ) {
   const modalRef = overlays.openModal(
-    <GraphSourceModal
+    <SourceModal
       uiSettings={uiSettings}
       savedObjects={savedObjects}
       onIndexPatternSelected={indexPattern => {

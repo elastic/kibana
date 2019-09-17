@@ -41,7 +41,7 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { GraphSearchBar } from './components/graph_search_bar';
+import { SearchBar } from './components/search_bar';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 
@@ -58,7 +58,7 @@ import {
   outlinkEncoders,
 } from './helpers/outlink_encoders';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { openIndexPatternModal } from './services/source';
+import { openSourceModal } from './services/source_modal';
 import { openSaveModal } from  './services/save_modal';
 import { appStateToSavedWorkspace, savedWorkspaceToAppState, lookupIndexPattern, mapFields } from './services/persistence';
 import { urlTemplateRegex } from  './helpers/url_template';
@@ -96,7 +96,7 @@ app.directive('graphListing', function (reactDirective) {
 });
 
 app.directive('graphSearchBar', function (reactDirective) {
-  return reactDirective(GraphSearchBar, [
+  return reactDirective(SearchBar, [
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
@@ -887,7 +887,7 @@ app.controller('graphuiPlugin', function (
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
     $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $scope.indices);
+    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $route.current.locals.indexPatterns);
     if(!selectedIndex) {
       toastNotifications.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
@@ -928,7 +928,7 @@ app.controller('graphuiPlugin', function (
   } else {
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
-      openIndexPatternModal(npStart.core, indexPattern => {
+      openSourceModal(npStart.core, indexPattern => {
         $scope.indexSelected(indexPattern);
       });
     });

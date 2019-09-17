@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphSearchBar } from './graph_search_bar';
+import { SearchBar } from './search_bar';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
@@ -12,11 +12,11 @@ import { IndexPatternSavedObject } from '../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 
-describe('graph_search_bar', () => {
+describe('search_bar', () => {
   it('should render search bar and submit queryies', () => {
     const querySubmit = jest.fn();
     const instance = shallowWithIntl(
-      <GraphSearchBar
+      <SearchBar
         isLoading={false}
         onIndexPatternSelected={() => {}}
         onQuerySubmit={querySubmit}
@@ -39,7 +39,7 @@ describe('graph_search_bar', () => {
   it('should render index pattern picker', () => {
     const indexPatternSelected = jest.fn();
     const instance = shallowWithIntl(
-      <GraphSearchBar
+      <SearchBar
         isLoading={false}
         onIndexPatternSelected={indexPatternSelected}
         onQuerySubmit={() => {}}
@@ -51,7 +51,7 @@ describe('graph_search_bar', () => {
 
     const newIndexpattern = {} as IndexPatternSavedObject;
 
-    // pick the GraphSourcePicker component out of the tree because
+    // pick the SourcePicker component out of the tree because
     // it's part of a popover and thus not covered by enzyme
     (instance
       .find(EuiFieldText)

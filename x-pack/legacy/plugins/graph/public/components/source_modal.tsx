@@ -8,9 +8,9 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { GraphSourcePicker, GraphSourcePickerProps } from './graph_source_picker';
+import { SourcePicker, SourcePickerProps } from './source_picker';
 
-export function GraphSourceModal(props: GraphSourcePickerProps) {
+export function SourceModal(props: SourcePickerProps) {
   return (
     <>
       <EuiModalHeader>
@@ -22,7 +22,7 @@ export function GraphSourceModal(props: GraphSourcePickerProps) {
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <GraphSourcePicker {...props} />
+        <SourcePicker {...props} />
       </EuiModalBody>
     </>
   );

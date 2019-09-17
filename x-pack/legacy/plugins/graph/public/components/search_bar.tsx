@@ -18,9 +18,9 @@ import React, { useState } from 'react';
 import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternSavedObject } from '../types';
-import { GraphSourcePicker } from './graph_source_picker';
+import { SourcePicker } from './source_picker';
 
-interface GraphSearchBarProps {
+interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   currentIndexPattern?: IndexPatternSavedObject;
@@ -30,14 +30,14 @@ interface GraphSearchBarProps {
   uiSettings: CoreStart['uiSettings'];
 }
 
-export function GraphSearchBar({
+export function SearchBar({
   currentIndexPattern,
   onQuerySubmit,
   isLoading,
   onIndexPatternSelected,
   initialQuery,
   ...sourcePickerProps
-}: GraphSearchBarProps) {
+}: SearchBarProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(initialQuery || '');
   return (
@@ -89,7 +89,7 @@ export function GraphSearchBar({
                 isOpen={open}
                 closePopover={() => setOpen(false)}
               >
-                <GraphSourcePicker
+                <SourcePicker
                   onIndexPatternSelected={pattern => {
                     onIndexPatternSelected(pattern);
                     setOpen(false);
