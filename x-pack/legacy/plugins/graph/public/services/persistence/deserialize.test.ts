@@ -8,7 +8,7 @@ import { GraphWorkspaceSavedObject } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
-import { outlinkEncoders } from '../outlink_encoders';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -97,7 +97,7 @@ describe('deserialize', () => {
           {
             description: 'Template',
             url: 'test-url',
-            encoderID: 'esq-rison-loose',
+            encoderID: 'kql-loose',
             iconClass: 'd',
           },
         ],
@@ -155,6 +155,7 @@ describe('deserialize', () => {
           "icon": Object {
             "class": "fa-folder-open-o",
             "code": "",
+            "label": "folder open",
             "patterns": Array [
               /category/i,
               /folder/i,
