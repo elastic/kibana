@@ -29,6 +29,7 @@ import { mapGeoBoundingBox } from './map_geo_bounding_box';
 import { mapGeoPolygon } from './map_geo_polygon';
 import { mapDefault } from './map_default';
 import { generateMappingChain } from './generate_mapping_chain';
+import { mapSavedQuery } from './map_saved_query';
 
 export async function mapFilter(indexPatterns, filter) {
   /** Mappers **/
@@ -57,6 +58,7 @@ export async function mapFilter(indexPatterns, filter) {
     mapQueryString,
     mapGeoBoundingBox(indexPatterns),
     mapGeoPolygon(indexPatterns),
+    mapSavedQuery,
     mapDefault,
   ];
 

@@ -83,6 +83,19 @@ describe('Filter Bar Directive', function () {
       });
     });
 
+    it('should map saved query filters', function (done) {
+      const before = { meta: { type: 'savedQuery', key: 'foo', value: 'foo', params: {} } };
+      mapFilter(mockIndexPatterns, before).then(function (after) {
+        expect(after).to.have.property('meta');
+        expect(after.meta).to.have.property('key', 'foo');
+        expect(after.meta).to.have.property('type', 'savedQuery');
+        expect(after.meta).to.have.property('value', 'foo');
+        expect(after.meta).to.have.property('disabled', false);
+        expect(after.meta).to.have.property('negate', false);
+        done();
+      });
+    });
+
     it('should finish with a catch', function (done) {
       const before = { meta: { index: 'logstash-*' } };
       mapFilter(mockIndexPatterns, before).catch(function (error) {
