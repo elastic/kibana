@@ -19,3 +19,13 @@ See <<monitoring-kibana>>.
 include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
 For more {kib} configuration settings, see <<settings>>.
+
+[role="exclude",id="ml-jobs"]
+== Creating {anomaly-jobs}
+
+This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jobs}].
+
+[role="exclude",id="job-tips"]
+== Machine learning job tips
+
+This page has moved. Please see {stack-ov}/job-tips.html[Machine learning job tips].
