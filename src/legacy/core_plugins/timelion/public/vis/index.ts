@@ -17,16 +17,15 @@
  * under the License.
  */
 
-// @ts-ignore
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
-import { LegacyDependenciesPluginSetup } from '../shim';
+import { TimelionSetupDependencies } from '../plugin';
 
-export function getTimelionVisualization(dependencies: LegacyDependenciesPluginSetup) {
+export function getTimelionVisualization(dependencies: TimelionSetupDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
