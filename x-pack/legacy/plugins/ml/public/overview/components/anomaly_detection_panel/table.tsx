@@ -169,7 +169,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             </h3>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginTop: 0, marginRight: 0 }}>
+        <EuiFlexItem grow={false} className="mlOverviewPanel__statsBar">
           <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
         </EuiFlexItem>
       </EuiFlexGroup>

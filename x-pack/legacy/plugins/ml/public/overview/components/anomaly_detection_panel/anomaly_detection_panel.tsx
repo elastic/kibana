@@ -162,7 +162,7 @@ export const AnomalyDetectionPanel: FC = () => {
   );
 
   return (
-    <EuiPanel style={{ paddingTop: 0 }} className="mlOverview__panel">
+    <EuiPanel className="mlOverviewPanel">
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isLoading && <EuiLoadingSpinner />}   
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
@@ -190,7 +190,7 @@ export const AnomalyDetectionPanel: FC = () => {
         <Fragment>
           <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
           <EuiSpacer size="m" />
-          <div style={{ float: 'right' }}>
+          <div className="mlOverviewPanel__buttons">
             <EuiButtonEmpty size="s" onClick={onRefresh}>
               {i18n.translate('xpack.ml.overview.anomalyDetection.refreshJobsButtonText', {
                 defaultMessage: 'Refresh',

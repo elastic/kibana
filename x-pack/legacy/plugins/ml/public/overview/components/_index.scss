@@ -1,1 +1,12 @@
-@import './analytics_panel/analytics_panel';
+.mlOverviewPanel {
+  padding-top: 0;
+}
+
+.mlOverviewPanel__buttons {
+  float: right;
+}
+
+.mlOverviewPanel__statsBar {
+  margin-top: 0;
+  margin-right: 0
+}

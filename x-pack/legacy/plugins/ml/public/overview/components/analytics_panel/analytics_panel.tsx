@@ -49,7 +49,7 @@ export const AnalyticsPanel: FC = () => {
   );
 
   return (
-    <EuiPanel style={{ paddingTop: 0 }} className="mlOverviewAnalyticsPanel">
+    <EuiPanel className="mlOverviewPanel">
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isInitialized === false && <EuiLoadingSpinner />}     
       {isInitialized === true && analytics.length === 0 && (
@@ -76,7 +76,7 @@ export const AnalyticsPanel: FC = () => {
         <Fragment>
           <AnalyticsTable items={analytics} />
           <EuiSpacer size="m" />
-          <div style={{ float: 'right' }}>
+          <div className="mlOverviewPanel__buttons">
             <EuiButtonEmpty size="s" onClick={onRefresh}>
               {i18n.translate('xpack.ml.overview.analyticsList.refreshJobsButtonText', {
                 defaultMessage: 'Refresh',
