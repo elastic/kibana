@@ -16,3 +16,14 @@ See <<monitoring-kibana>>.
 == Upgrade Assistant
 
 See <<upgrade-assistant>>.
+
+[role="exclude",id="ml-jobs"]
+== Creating {anomaly-jobs}
+
+This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jobs}].
+
+[role="exclude",id="job-tips"]
+== Machine learning job tips
+
+This page has moved. Please see {stack-ov}/job-tips.html[Machine learning job tips].
+
