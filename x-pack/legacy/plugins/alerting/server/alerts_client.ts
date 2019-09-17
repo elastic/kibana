@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
@@ -213,6 +214,34 @@ export class AlertsClient {
       }
     );
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+  }
+
+  public async updateApiKey({ id }: { id: string }) {
+    const {
+      references,
+      attributes: { enabled },
+    } = await this.savedObjectsClient.get('alert', id);
+
+    if (enabled === false) {
+      throw Boom.badRequest(`Can't update API key on a disabled alert`);
+    }
+
+    const apiKey = await this.createAPIKey();
+    const username = await this.getUserName();
+    await this.savedObjectsClient.update(
+      'alert',
+      id,
+      {
+        updatedBy: username,
+        apiKeyOwner: apiKey.created ? username : null,
+        apiKey: apiKey.created
+          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+          : null,
+      },
+      {
+        references,
+      }
+    );
   }
 
   public async enable({ id }: { id: string }) {
