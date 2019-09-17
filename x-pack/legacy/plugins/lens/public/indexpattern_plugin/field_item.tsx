@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiButtonGroup,
   EuiSpacer,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import {
   Chart,
@@ -319,39 +321,36 @@ export function FieldItem({
         {state.topValues && state.sampledValues && (!state.histogram || !showingHistogram) && (
           <div data-test-subj="lnsFieldListPanel-topValues">
             {state.topValues.buckets.map(topValue => (
-              <React.Fragment key={topValue.key}>
-                <EuiFlexGroup alignItems="stretch" key={topValue.key}>
+              <div className="lnsFieldItem__topValue" key={topValue.key}>
+                <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                   <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiToolTip content={formatter.convert(topValue.key)}>
-                      <EuiText size="s">{formatter.convert(topValue.key)}</EuiText>
+                    <EuiToolTip content={formatter.convert(topValue.key)} delay="long">
+                      <EuiText size="s" className="eui-textTruncate">
+                        {formatter.convert(topValue.key)}
+                      </EuiText>
                     </EuiToolTip>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} className="eui-textTruncate">
+                  <EuiFlexItem grow={false}>
                     <EuiText size="s" textAlign="left" color={euiTextColor}>
                       {((topValue.count / state.sampledValues!) * 100).toFixed(1)}%
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <div>
-                  <EuiFlexItem grow={1}>
-                    <EuiProgress
-                      value={topValue.count / state.sampledValues!}
-                      max={1}
-                      size="s"
-                      color={euiButtonColor}
-                    />
-                  </EuiFlexItem>
-                </div>
-
-                <EuiSpacer size="xs" />
-              </React.Fragment>
+                <EuiProgress
+                  className="lnsFieldItem__topValueProgress"
+                  value={topValue.count / state.sampledValues!}
+                  max={1}
+                  size="s"
+                  color={euiButtonColor}
+                />
+              </div>
             ))}
             {otherCount ? (
               <>
-                <EuiFlexGroup alignItems="stretch">
+                <EuiFlexGroup alignItems="stretch" gutterSize="xs">
                   <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiText size="s">
+                    <EuiText size="s" className="eui-textTruncate" color="subdued">
                       {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                         defaultMessage: 'Other',
                       })}
@@ -365,14 +364,13 @@ export function FieldItem({
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <div>
-                  <EuiProgress
-                    value={otherCount / state.sampledValues!}
-                    max={1}
-                    size="s"
-                    color="subdued"
-                  />
-                </div>
+                <EuiProgress
+                  className="lnsFieldItem__topValueProgress"
+                  value={otherCount / state.sampledValues!}
+                  max={1}
+                  size="s"
+                  color="subdued"
+                />
               </>
             ) : (
               <></>
@@ -381,27 +379,26 @@ export function FieldItem({
         )}
 
         {state.totalDocuments ? (
-          <div>
-            <EuiSpacer size="m" />
-            {state.sampledDocuments ? (
-              <EuiText size="s">
-                {i18n.translate('xpack.lens.indexPattern.percentageOfTotalDocsLabel', {
-                  defaultMessage: '{percentage}% of {docCount} documents',
-                  values: {
-                    docCount: state.totalDocuments,
-                    percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(1),
-                  },
-                })}
-              </EuiText>
-            ) : (
-              <EuiText size="s">
-                {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
-                  defaultMessage: '{docCount} documents',
-                  values: { docCount: state.totalDocuments },
-                })}
-              </EuiText>
-            )}
-          </div>
+          <EuiPopoverFooter>
+            <EuiText size="xs" textAlign="center">
+              {state.sampledDocuments && (
+                <>
+                  {i18n.translate('xpack.lens.indexPattern.percentageOfLabel', {
+                    defaultMessage: '{percentage}% of',
+                    values: {
+                      percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(
+                        1
+                      ),
+                    },
+                  })}
+                </>
+              )}{' '}
+              <strong>{state.totalDocuments}</strong>{' '}
+              {i18n.translate('xpack.lens.indexPattern.ofDocumentsLabel', {
+                defaultMessage: 'documents',
+              })}
+            </EuiText>
+          </EuiPopoverFooter>
         ) : (
           <></>
         )}

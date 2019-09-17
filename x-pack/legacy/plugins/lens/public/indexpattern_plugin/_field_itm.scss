@@ -1,0 +1,15 @@
+.lnsFieldItem__topValue {
+  margin-bottom: $euiSizeS;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.lnsFieldItem__topValueProgress {
+  background-color: $euiColorLightestShade;
+
+  &::-webkit-progress-bar {
+    background-color: $euiColorLightestShade;
+  }
+}
