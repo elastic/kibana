@@ -18,20 +18,25 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SavedQueryManagementComponentProvider({ getService }) {
+export function SavedQueryManagementComponentProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
 
   class SavedQueryManagementComponent {
-
-    async saveNewQuery(name, description, includeFilters, includeTimeFilter) {
+    public async saveNewQuery(
+      name: string,
+      description: string,
+      includeFilters: boolean,
+      includeTimeFilter: boolean
+    ) {
       await this.openSaveCurrentQueryModal();
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
-    async saveNewQueryWithNameError(name) {
+    public async saveNewQueryWithNameError(name?: string) {
       await this.openSaveCurrentQueryModal();
       if (name) {
         await testSubjects.setValue('saveQueryFormTitle', name);
@@ -42,40 +47,52 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       // an error.
       await testSubjects.click('savedQueryFormSaveButton');
 
-      const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled('savedQueryFormSaveButton');
+      const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled(
+        'savedQueryFormSaveButton'
+      );
 
       try {
         expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
-      }
-      finally {
+      } finally {
         await testSubjects.click('savedQueryFormCancelButton');
       }
     }
 
-    async saveCurrentlyLoadedAsNewQuery(name, description, includeFilters, includeTimeFilter) {
+    public async saveCurrentlyLoadedAsNewQuery(
+      name: string,
+      description: string,
+      includeFilters: boolean,
+      includeTimeFilter: boolean
+    ) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click('saved-query-management-save-as-new-button');
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
-    async updateCurrentlyLoadedQuery(description, includeFilters, includeTimeFilter) {
+    public async updateCurrentlyLoadedQuery(
+      description: string,
+      includeFilters: boolean,
+      includeTimeFilter: boolean
+    ) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click('saved-query-management-save-changes-button');
       await this.submitSaveQueryForm(null, description, includeFilters, includeTimeFilter);
     }
 
-    async loadSavedQuery(title) {
+    public async loadSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~load-saved-query-${title}-button`);
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();
-        const selectedSavedQueryText = await testSubjects.getVisibleText('~saved-query-list-item-selected');
+        const selectedSavedQueryText = await testSubjects.getVisibleText(
+          '~saved-query-list-item-selected'
+        );
         expect(selectedSavedQueryText).to.eql(title);
       });
       await this.closeSavedQueryManagementComponent();
     }
 
-    async deleteSavedQuery(title) {
+    public async deleteSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~delete-saved-query-${title}-button`);
       await testSubjects.click('confirmModalConfirmButton');
@@ -89,18 +106,27 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       expect(queryString).to.be.empty();
     }
 
-    async submitSaveQueryForm(title, description, includeFilters, includeTimeFilter) {
+    async submitSaveQueryForm(
+      title: string | null,
+      description: string,
+      includeFilters: boolean,
+      includeTimeFilter: boolean
+    ) {
       if (title) {
         await testSubjects.setValue('saveQueryFormTitle', title);
       }
       await testSubjects.setValue('saveQueryFormDescription', description);
 
-      const currentIncludeFiltersValue = (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) === 'true';
+      const currentIncludeFiltersValue =
+        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) ===
+        'true';
       if (currentIncludeFiltersValue !== includeFilters) {
         await testSubjects.click('saveQueryFormIncludeFiltersOption');
       }
 
-      const currentIncludeTimeFilterValue = (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) === 'true';
+      const currentIncludeTimeFilterValue =
+        (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) ===
+        'true';
       if (currentIncludeTimeFilterValue !== includeTimeFilter) {
         await testSubjects.click('saveQueryFormIncludeTimeFilterOption');
       }
@@ -108,12 +134,12 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await testSubjects.click('savedQueryFormSaveButton');
     }
 
-    async savedQueryExistOrFail(title) {
+    async savedQueryExistOrFail(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);
     }
 
-    async savedQueryMissingOrFail(title) {
+    async savedQueryMissingOrFail(title: string) {
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();
         await testSubjects.missingOrFail(`~load-saved-query-${title}-button`);
@@ -154,7 +180,7 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await testSubjects.missingOrFail('saved-query-management-save-changes-button');
     }
 
-    async deleteSavedQueryMissingOrFail(title) {
+    async deleteSavedQueryMissingOrFail(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.missingOrFail(`delete-saved-query-${title}-button`);
     }
