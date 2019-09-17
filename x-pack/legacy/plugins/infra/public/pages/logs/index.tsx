@@ -30,6 +30,8 @@ import {
 } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 
+const LOG_ANALYSIS_ON = false;
+
 interface LogsPageProps extends RouteComponentProps {
   intl: InjectedIntl;
   uiCapabilities: UICapabilities;
@@ -141,7 +143,7 @@ export const LogsPage = injectUICapabilities(
                 <AppNavigation>
                   <RoutedTabs
                     tabs={
-                      logAnalysisCapabilities.hasLogAnalysisCapabilites
+                      logAnalysisCapabilities.hasLogAnalysisCapabilites && LOG_ANALYSIS_ON
                         ? [streamTab, analysisTab, settingsTab]
                         : [streamTab, settingsTab]
                     }
