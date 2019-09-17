@@ -26,7 +26,7 @@ import { IExpressionLoader, ExpressionLoader } from './lib/loader';
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
-  className: 'string';
+  className: string;
   expression: string | ExpressionAST;
   /**
    * If an element is specified, but the response of the expression run can't be rendered
