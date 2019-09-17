@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { AppContextProvider } from './context';
+import { EditorContextProvider } from './containers/editor/context';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 
@@ -43,7 +44,9 @@ export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChe
       <AppContextProvider
         value={{ ...deps, services: { storage, history, settings }, ResizeChecker }}
       >
-        <Main />
+        <EditorContextProvider settings={settings.toJSON()}>
+          <Main />
+        </EditorContextProvider>
       </AppContextProvider>
     </I18nContext>
   );

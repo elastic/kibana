@@ -32,23 +32,7 @@ export interface DevToolsSettings {
 }
 
 export class Settings {
-  private input: any | null = null;
-  private output: any | null = null;
-
   constructor(private readonly storage: Storage) {}
-
-  /**
-   * TODO: Slight hackiness going on here - late registration of dependencies should be refactored
-   */
-  registerInput(input: any) {
-    this.input = input;
-  }
-  /**
-   * TODO: Slight hackiness going on here - late registration of dependencies should be refactored
-   */
-  registerOutput(output: any) {
-    this.output = output;
-  }
 
   getFontSize() {
     return this.storage.get('font_size', 14);
@@ -56,7 +40,6 @@ export class Settings {
 
   setFontSize(size: any) {
     this.storage.set('font_size', size);
-    this.applyCurrentSettings();
     return true;
   }
 
@@ -66,7 +49,6 @@ export class Settings {
 
   setWrapMode(mode: any) {
     this.storage.set('wrap_mode', mode);
-    this.applyCurrentSettings();
     return true;
   }
 
@@ -98,21 +80,10 @@ export class Settings {
 
   setPolling(polling: any) {
     this.storage.set('console_polling', polling);
-    this.applyCurrentSettings();
     return true;
   }
 
-  applyCurrentSettings(editor?: any) {
-    if (typeof editor === 'undefined') {
-      if (this.input) this.applyCurrentSettings(this.input);
-      if (this.output) this.applyCurrentSettings(this.output);
-    } else if (editor) {
-      editor.getSession().setUseWrapMode(this.getWrapMode());
-      editor.$el.css('font-size', this.getFontSize() + 'px');
-    }
-  }
-
-  getCurrentSettings(): DevToolsSettings {
+  toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
       wrapMode: this.getWrapMode(),
@@ -122,14 +93,12 @@ export class Settings {
     };
   }
 
-  updateSettings({ fontSize, wrapMode, tripleQuotes, autocomplete, polling }: any) {
+  updateSettings({ fontSize, wrapMode, tripleQuotes, autocomplete, polling }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
     this.setTripleQuotes(tripleQuotes);
     this.setAutocomplete(autocomplete);
     this.setPolling(polling);
-    this.input.focus();
-    return this.getCurrentSettings();
   }
 }
 
