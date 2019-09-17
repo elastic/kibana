@@ -1243,6 +1243,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <div>
+      <eui-spacer
+        size="m"
+      />
       <eui-call-out
         color="warning"
         iconType="alert"

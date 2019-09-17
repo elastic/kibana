@@ -4,67 +4,68 @@ exports[`renders without crashing 1`] = `
 <form
   onSubmit={[Function]}
 >
-  <EuiFlexItem
-    grow={false}
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Initials (2 max)"
+    labelType="label"
   >
-    <EuiFormRow
-      describedByIds={Array []}
+    <EuiFieldText
+      compressed={false}
+      disabled={false}
       fullWidth={false}
-      hasEmptyLabelSpace={false}
-      label="Initials (2 max)"
-      labelType="label"
-    >
-      <EuiFieldText
-        compressed={false}
-        disabled={false}
-        fullWidth={false}
-        inputRef={[Function]}
-        isLoading={false}
-        name="spaceInitials"
-        onChange={[Function]}
-        value=""
-      />
-    </EuiFormRow>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={true}
+      inputRef={[Function]}
+      isLoading={false}
+      name="spaceInitials"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Color"
+    labelType="label"
   >
-    <EuiFormRow
-      describedByIds={Array []}
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
+    <EuiColorPicker
+      color="#BFA180"
       isInvalid={false}
-      label="Color"
-      labelType="label"
-    >
-      <EuiColorPicker
-        color="#BFA180"
-        isInvalid={false}
-        onChange={[Function]}
-      />
-    </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      label="Custom image"
-      labelType="label"
-    >
-      <EuiFilePicker
-        accept={
-          Array [
-            "image/svg+xml",
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-          ]
-        }
-        compressed={false}
-        display="default"
-        initialPromptText="Select image file"
-        onChange={[Function]}
-      />
-    </EuiFormRow>
-  </EuiFlexItem>
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Custom image"
+    labelType="label"
+  >
+    <EuiFilePicker
+      accept={
+        Array [
+          "image/svg+xml",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+        ]
+      }
+      compressed={false}
+      display="default"
+      initialPromptText="Select image file"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
 </form>
 `;
