@@ -90,6 +90,7 @@ export function SaveModal({
           )}
           {savePolicy === 'config' && hasData && (
             <>
+              <EuiSpacer />
               <EuiCallOut data-test-subj="graphNoDataSavedMsg">
                 <p>
                   {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyText', {

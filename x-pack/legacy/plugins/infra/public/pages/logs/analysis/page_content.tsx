@@ -5,15 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect } from 'react';
-import chrome from 'ui/chrome';
+import React, { useContext } from 'react';
 
 import { LoadingPage } from '../../../components/loading_page';
-import {
-  LogAnalysisCapabilities,
-  LogAnalysisJobs,
-  useLogAnalysisCleanup,
-} from '../../../containers/logs/log_analysis';
+import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
@@ -23,27 +18,11 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const spaceId = chrome.getInjected('activeSpace').space.id;
-
-  const {
-    isSetupRequired,
-    isLoadingSetupStatus,
-    setupMlModule,
-    isSettingUpMlModule,
-    didSetupFail,
-    hasCompletedSetup,
-  } = useContext(LogAnalysisJobs.Context);
-
-  const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
-  useEffect(() => {
-    if (didSetupFail) {
-      cleanupMLResources();
-    }
-  }, [didSetupFail, cleanupMLResources]);
+  const { setup, retry, setupStatus, viewResults } = useContext(LogAnalysisJobs.Context);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
-  } else if (isLoadingSetupStatus) {
+  } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -51,17 +30,22 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (isSetupRequired) {
+  } else if (setupStatus === 'skipped' || setupStatus === 'hiddenAfterSuccess') {
     return (
-      <AnalysisSetupContent
-        didSetupFail={didSetupFail}
-        isSettingUp={isSettingUpMlModule}
-        setupMlModule={setupMlModule}
-        isCleaningUpAFailedSetup={isCleaningUp}
-        indexPattern={source ? source.configuration.logAlias : ''}
+      <AnalysisResultsContent
+        sourceId={sourceId}
+        isFirstUse={setupStatus === 'hiddenAfterSuccess'}
       />
     );
   } else {
-    return <AnalysisResultsContent sourceId={sourceId} isFirstUse={hasCompletedSetup} />;
+    return (
+      <AnalysisSetupContent
+        setup={setup}
+        retry={retry}
+        setupStatus={setupStatus}
+        indexPattern={source ? source.configuration.logAlias : ''}
+        viewResults={viewResults}
+      />
+    );
   }
 };
