@@ -101,7 +101,6 @@ def getPostBuildWorker(name, closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "IS_PIPELINE_JOB=1",
     ]) {
       closure()
     }
@@ -164,6 +163,7 @@ def jobRunner(label, closure) {
 
     withEnv([
       "CI=true",
+      "IS_PIPELINE_JOB=1",
       "HOME=${env.JENKINS_HOME}",
       "PR_SOURCE_BRANCH=${env.ghprbSourceBranch}",
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
