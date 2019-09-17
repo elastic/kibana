@@ -45,8 +45,8 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n8.8 MB',
           dataSizePrimaries: 'Primaries\n4.4 MB',
           documentCount: 'Documents\n628',
-          totalShards: 'Total Shards\n10',
-          unassignedShards: 'Unassigned Shards\n0',
+          totalShards: 'Total shards\n10',
+          unassignedShards: 'Unassigned shards\n0',
           health: 'Health: green',
         });
       });
@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n4.8 KB',
           dataSizePrimaries: 'Primaries\n4.8 KB',
           documentCount: 'Documents\n1',
-          totalShards: 'Total Shards\n1',
-          unassignedShards: 'Unassigned Shards\n0',
+          totalShards: 'Total shards\n1',
+          unassignedShards: 'Unassigned shards\n0',
           health: 'Health: green',
         });
       });
@@ -71,8 +71,8 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n1.2 MB',
           dataSizePrimaries: 'Primaries\n657.6 KB',
           documentCount: 'Documents\n10',
-          totalShards: 'Total Shards\n10',
-          unassignedShards: 'Unassigned Shards\n1',
+          totalShards: 'Total shards\n10',
+          unassignedShards: 'Unassigned shards\n1',
           health: 'Health: yellow',
         });
       });
