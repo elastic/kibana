@@ -7,21 +7,18 @@
 import React from 'react';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import { Chrome } from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/query/query_bar', () => ({
   QueryBarTopRow: jest.fn(() => null),
 }));
 
 jest.mock('ui/new_platform');
-jest.mock('ui/notify');
-jest.mock('ui/chrome');
 jest.mock('../persistence');
 jest.mock('src/core/public');
 
@@ -34,60 +31,61 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   };
 }
 
-function makeDefaultArgs(): jest.Mocked<{
-  editorFrame: EditorFrameInstance;
-  chrome: Chrome;
-  store: Storage;
-  docId?: string;
-  docStorage: SavedObjectStore;
-  redirectTo: (id?: string) => void;
-  savedObjectsClient: SavedObjectsClientContract;
-}> {
-  return ({
-    editorFrame: createMockFrame(),
-    chrome: {
-      addBasePath: (s: string) => `/testbasepath/${s}`,
-      breadcrumbs: { set: jest.fn() },
-      getUiSettingsClient() {
-        return {
-          get: jest.fn(type => {
-            if (type === 'timepicker:timeDefaults') {
-              return { from: 'now-7d', to: 'now' };
-            } else if (type === 'search:queryLanguage') {
-              return 'kuery';
-            } else {
-              return [];
-            }
-          }),
-        };
-      },
-    },
-    store: {
-      get: jest.fn(),
-    },
-    docStorage: {
-      load: jest.fn(),
-      save: jest.fn(),
-    },
-    QueryBarTopRow: jest.fn(() => <div />),
-    redirectTo: jest.fn(id => {}),
-    savedObjectsClient: jest.fn(),
-  } as unknown) as jest.Mocked<{
+describe('Lens App', () => {
+  let frame: jest.Mocked<EditorFrameInstance>;
+  let core: ReturnType<typeof coreMock['createStart']>;
+
+  function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
-    chrome: Chrome;
+    core: typeof core;
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
     savedObjectsClient: SavedObjectsClientContract;
-  }>;
-}
-
-describe('Lens App', () => {
-  let frame: jest.Mocked<EditorFrameInstance>;
+  }> {
+    return ({
+      editorFrame: createMockFrame(),
+      core,
+      store: {
+        get: jest.fn(),
+      },
+      docStorage: {
+        load: jest.fn(),
+        save: jest.fn(),
+      },
+      QueryBarTopRow: jest.fn(() => <div />),
+      redirectTo: jest.fn(id => {}),
+      savedObjectsClient: jest.fn(),
+    } as unknown) as jest.Mocked<{
+      editorFrame: EditorFrameInstance;
+      core: typeof core;
+      store: Storage;
+      docId?: string;
+      docStorage: SavedObjectStore;
+      redirectTo: (id?: string) => void;
+      savedObjectsClient: SavedObjectsClientContract;
+    }>;
+  }
 
   beforeEach(() => {
     frame = createMockFrame();
+    core = coreMock.createStart();
+
+    core.uiSettings.get.mockImplementation(
+      jest.fn(type => {
+        if (type === 'timepicker:timeDefaults') {
+          return { from: 'now-7d', to: 'now' };
+        } else if (type === 'search:queryLanguage') {
+          return 'kuery';
+        } else {
+          return [];
+        }
+      })
+    );
+
+    (core.http.basePath.get as jest.Mock).mockReturnValue(`/testbasepath`);
+    (core.http.basePath.prepend as jest.Mock).mockImplementation(s => `/testbasepath${s}`);
   });
 
   it('renders the editor frame', () => {
@@ -121,28 +119,15 @@ describe('Lens App', () => {
   });
 
   it('sets breadcrumbs when the document title changes', async () => {
-    const mockSet = jest.fn();
     const defaultArgs = makeDefaultArgs();
-    const args = {
-      ...defaultArgs,
-      chrome: ({
-        ...defaultArgs.chrome,
-        addBasePath: jest.fn(s => `/testbasepath${s}`),
-        breadcrumbs: {
-          ...defaultArgs.chrome.breadcrumbs,
-          set: mockSet,
-        },
-      } as unknown) as Chrome,
-    };
+    const instance = mount(<App {...defaultArgs} />);
 
-    const instance = mount(<App {...args} />);
-
-    expect(mockSet).toHaveBeenCalledWith([
+    expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
       { text: 'Create' },
     ]);
 
-    (args.docStorage.load as jest.Mock).mockResolvedValue({
+    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
       id: '1234',
       title: 'Daaaaaaadaumching!',
       state: {
@@ -154,7 +139,7 @@ describe('Lens App', () => {
     instance.setProps({ docId: '1234' });
     await waitForPromises();
 
-    expect(mockSet).toHaveBeenCalledWith([
+    expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
       { text: 'Daaaaaaadaumching!' },
     ]);
@@ -240,7 +225,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(toastNotifications.addDanger).toHaveBeenCalled();
+      expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
       expect(args.redirectTo).toHaveBeenCalled();
     });
 
@@ -334,7 +319,7 @@ describe('Lens App', () => {
 
         await waitForPromises();
 
-        expect(toastNotifications.addDanger).toHaveBeenCalled();
+        expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
         expect(args.redirectTo).not.toHaveBeenCalled();
         await waitForPromises();
 
@@ -446,6 +431,6 @@ describe('Lens App', () => {
 
     instance.update();
 
-    expect(toastNotifications.addDanger).toHaveBeenCalled();
+    expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 });

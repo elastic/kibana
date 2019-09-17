@@ -95,8 +95,8 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22')
           .set(COMMON_HEADERS)
           .send({
-            earliest: TEST_START_TIME,
-            latest: TEST_END_TIME,
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
             size: 500,
             fields: fieldsWithData.concat(fieldsNotInDocuments, fieldsNotInPattern),
