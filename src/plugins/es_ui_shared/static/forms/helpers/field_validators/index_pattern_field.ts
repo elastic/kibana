@@ -31,7 +31,7 @@ export const indexPatternField = (i18n: any) => (
     return;
   }
 
-  // Validate that is does not contain spaces
+  // Validate it does not contain spaces
   const { doesContain } = containsChars(' ')(value);
 
   if (doesContain) {
