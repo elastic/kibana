@@ -33,7 +33,6 @@ interface Props {
 interface State {
   initialsHasFocus: boolean;
   pendingInitials?: string | null;
-  imageUrl?: string | null;
 }
 
 class CustomizeSpaceAvatarUI extends Component<Props, State> {
@@ -43,12 +42,10 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     super(props);
     this.state = {
       initialsHasFocus: false,
-      imageUrl: props.space.imageUrl,
     };
   }
 
   private storeImageChanges(imageUrl: string) {
-    this.setState({ imageUrl });
     this.props.onChange({
       ...this.props.space,
       imageUrl,
@@ -152,7 +149,6 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
   }
 
   private removeImageUrl() {
-    this.setState({ imageUrl: '' });
     this.props.onChange({
       ...this.props.space,
       imageUrl: '',
