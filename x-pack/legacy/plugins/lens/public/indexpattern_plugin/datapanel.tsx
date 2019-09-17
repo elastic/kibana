@@ -70,7 +70,11 @@ export function IndexPatternDataPanel({
   // HACK: This bit of code is the trigger that loads emptiness data for index pattern fields
   // any time the date range filter changes or the actively used index pattern changes. This
   // really belongs in a proper state management layer.
-  const indexPatternIds = _.uniq(Object.values(state.layers).map(l => l.indexPatternId));
+  const indexPatternIds = _.uniq(
+    Object.values(state.layers)
+      .map(l => l.indexPatternId)
+      .concat(state.currentIndexPatternId)
+  );
   useEffect(() => {
     actions.syncEmptyFields(indexPatternIds);
   }, [dateRange, indexPatternIds.join(',')]);
