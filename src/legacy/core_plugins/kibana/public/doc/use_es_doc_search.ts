@@ -26,6 +26,7 @@ export enum ElasticRequestState {
   NotFound,
   Found,
   Error,
+  NotFoundIndexPattern,
 }
 
 /**
@@ -55,16 +56,21 @@ export function useEsDocSearch({
   esClient,
   id,
   index,
-  indexPattern,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null] {
+  indexPatternId,
+  indexPatternService,
+}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
 
   async function requestData() {
     try {
+      const indexPatternEntity = await indexPatternService.get(indexPatternId);
+      setIndexPattern(indexPatternEntity);
+
       const { hits } = await esClient.search({
         index,
-        body: buildSearchBody(id, indexPattern),
+        body: buildSearchBody(id, indexPatternEntity),
       });
 
       if (hits && hits.hits && hits.hits[0]) {
@@ -74,7 +80,9 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.NotFound);
       }
     } catch (err) {
-      if (err.status === 404) {
+      if (err.savedObjectId) {
+        setStatus(ElasticRequestState.NotFoundIndexPattern);
+      } else if (err.status === 404) {
         setStatus(ElasticRequestState.NotFound);
       } else {
         setStatus(ElasticRequestState.Error);
@@ -86,5 +94,5 @@ export function useEsDocSearch({
     requestData();
   }, []);
 
-  return [status, hit];
+  return [status, hit, indexPattern];
 }

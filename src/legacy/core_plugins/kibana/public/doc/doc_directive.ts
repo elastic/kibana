@@ -27,7 +27,8 @@ uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective:
     [
       ['id', { watchDepth: 'value' }],
       ['index', { watchDepth: 'value' }],
-      ['indexPattern', { watchDepth: 'reference' }],
+      ['indexPatternId', { watchDepth: 'reference' }],
+      ['indexPatternService', { watchDepth: 'reference' }],
       ['esClient', { watchDepth: 'reference' }],
     ],
     { restrict: 'E' }

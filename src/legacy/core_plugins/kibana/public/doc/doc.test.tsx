@@ -39,17 +39,21 @@ export const waitForPromises = () => new Promise(resolve => setTimeout(resolve, 
 /**
  * this works but logs ugly error messages until we're using React 16.9
  * should be adapted when we upgrade
- * @param search
- * @param update
  */
-async function mountDoc(search: () => void, update = false) {
+async function mountDoc(search: () => void, update = false, indexPatternGetter: any = null) {
+  const indexPattern = {
+    getComputedFields: () => [],
+  };
+  const indexPatternService = {
+    get: indexPatternGetter ? indexPatternGetter : jest.fn(() => Promise.resolve(indexPattern)),
+  } as any;
+
   const props = {
     id: '1',
     index: 'index1',
     esClient: { search } as any,
-    indexPattern: {
-      getComputedFields: () => [],
-    } as any,
+    indexPatternId: 'xyz',
+    indexPatternService,
   } as DocProps;
   let comp!: ReactWrapper;
   act(() => {
@@ -67,6 +71,12 @@ describe('Test of <Doc /> of Discover', () => {
   it('renders loading msg', async () => {
     const comp = await mountDoc(jest.fn());
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
+  });
+
+  it('renders IndexPattern notFound msg', async () => {
+    const indexPatternGetter = jest.fn(() => Promise.reject({ savedObjectId: '007' }));
+    const comp = await mountDoc(jest.fn(), true, indexPatternGetter);
+    expect(findTestSubject(comp, 'doc-msg-notFoundIndexPattern').length).toBe(1);
   });
 
   it('renders notFound msg', async () => {

@@ -19,7 +19,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPatterns } from 'ui/index_patterns';
 import { metadata } from 'ui/metadata';
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
 import { DocViewer } from '../doc_viewer/doc_viewer';
@@ -45,9 +45,14 @@ export interface DocProps {
    */
   index: string;
   /**
-   * IndexPattern used for adding additional fields (stored_fields, script_fields, docvalue_fields)
+   * IndexPattern ID used to get IndexPattern entity
+   * that's used for adding additional fields (stored_fields, script_fields, docvalue_fields)
    */
-  indexPattern: IndexPattern;
+  indexPatternId: string;
+  /**
+   * IndexPatternService to get a given index pattern by ID
+   */
+  indexPatternService: IndexPatterns;
   /**
    * Client of ElasticSearch to use for the query
    */
@@ -57,10 +62,29 @@ export interface DocProps {
 }
 
 export function Doc(props: DocProps) {
-  const [reqState, hit] = useEsDocSearch(props);
+  const [reqState, hit, indexPattern] = useEsDocSearch(props);
 
   return (
     <EuiPageContent>
+      {reqState === ElasticRequestState.NotFoundIndexPattern && (
+        <EuiCallOut
+          color="danger"
+          data-test-subj={`doc-msg-notFoundIndexPattern`}
+          iconType="alert"
+          title={
+            <FormattedMessage
+              id="kbn.doc.failedToLocateIndexPattern"
+              defaultMessage="Could not find index pattern"
+            />
+          }
+        >
+          <FormattedMessage
+            id="kbn.doc.failedToLocateIndexPatternDescription"
+            defaultMessage="No index pattern matching ID {indexPatternId} could be found."
+            values={{ indexPatternId: props.indexPatternId }}
+          />
+        </EuiCallOut>
+      )}
       {reqState === ElasticRequestState.NotFound && (
         <EuiCallOut
           color="danger"
@@ -116,9 +140,9 @@ export function Doc(props: DocProps) {
         </EuiCallOut>
       )}
 
-      {reqState === ElasticRequestState.Found && hit !== null && (
+      {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
         <div data-test-subj="doc-hit">
-          <DocViewer hit={hit} indexPattern={props.indexPattern} />
+          <DocViewer hit={hit} indexPattern={indexPattern} />
         </div>
       )}
     </EuiPageContent>
