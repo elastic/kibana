@@ -439,7 +439,7 @@ export const metrics = {
       defaultMessage: 'Total I/O'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoDescription', {
-      defaultMessage: 'Total I/O'
+      defaultMessage: 'Total I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)'
     })
   }),
   node_total_read_io: new RequestRateMetric({
@@ -467,7 +467,7 @@ export const metrics = {
       defaultMessage: 'Total Write I/O'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.totalIoWriteDescription', {
-      defaultMessage: 'Total Read I/O'
+      defaultMessage: 'Total Write I/O'
     })
   }),
   index_request_rate_primary: new ElasticsearchMetric({
