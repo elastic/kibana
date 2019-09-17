@@ -19,18 +19,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
+// @ts-ignore
+import { visFactory } from 'ui/vis/vis_factory';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { createTableVisResponseHandler } from './table_vis_request_handler';
+import { tableVisResponseHandler } from './table_vis_request_handler';
 
-import { TableVisualizationDependencies } from './plugin';
 import tableVisTemplate from './table_vis.html';
 
-export const createTableVisTypeDefinition = (dependencies: TableVisualizationDependencies) => {
-  const responseHandler = createTableVisResponseHandler();
-
-  return dependencies.createAngularVisualization({
+export const createTableVisTypeDefinition = () => {
+  return visFactory.createBaseVisualization({
     type: 'table',
     name: 'table',
     title: i18n.translate('visTypeTable.tableVisTitle', {
@@ -93,7 +92,7 @@ export const createTableVisTypeDefinition = (dependencies: TableVisualizationDep
         },
       ]),
     },
-    responseHandler,
+    responseHandler: tableVisResponseHandler,
     hierarchicalData: (vis: Vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     },
