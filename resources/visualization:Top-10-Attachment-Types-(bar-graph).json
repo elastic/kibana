@@ -1,0 +1,24 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"title\":\"Top 10 Attachment Types (bar graph)\",\"type\":\"histogram\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"scale\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\",\"setYExtents\":false,\"defaultYExtents\":false},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Sum of AttachSize\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\"}],\"legendPosition\":\"right\",\"dimensions\":{\"x\":null,\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"sum\"}],\"series\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"schema\":\"metric\",\"params\":{\"field\":\"AttachSize\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"AttachSize\",\"order\":\"desc\",\"size\":10,\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"TimeUpdated\",\"useNormalizedEsInterval\":true,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}}}]}", 
+      "description": "", 
+      "title": "Top 10 Attachment Types (bar graph)", 
+      "uiStateJSON": "{}", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"Attach:true\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2019-09-10T15:48:45.439Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+      }
+   ]
+}

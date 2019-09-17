@@ -1,0 +1,24 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"field\":\"PacketsDelta\"},\"schema\":\"metric\",\"type\":\"sum\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"Application.keyword\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":10},\"schema\":\"segment\",\"type\":\"terms\"}],\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"labels\":{\"last_level\":true,\"show\":false,\"truncate\":100,\"values\":true},\"legendPosition\":\"right\",\"shareYAxis\":true,\"type\":\"pie\"},\"title\":\"Top Applications By Packet Count\",\"type\":\"pie\"}", 
+      "description": "", 
+      "title": "Top Applications By Packet Count", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2019-09-06T16:52:47.177Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }
+   ]
+}

@@ -1,0 +1,71 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Top-10-Attachment-Types-(bar-graph)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Top-10-Attachment-Names"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Top-10-Senders-By-Count"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Top-10-Receivers-By-Count"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Top-10-Attachment-Types-By-Count"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_5", 
+         "id": "Sessions-Over-Time"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_6", 
+         "id": "Attachment-Table"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "File Reconstruction Dashboard", 
+      "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":26,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"x\":26,\"y\":0,\"w\":11,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"x\":37,\"y\":0,\"w\":11,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"x\":37,\"y\":15,\"w\":11,\"h\":15,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"gridData\":{\"x\":26,\"y\":15,\"w\":11,\"h\":15,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"gridData\":{\"x\":0,\"y\":15,\"w\":26,\"h\":15,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"columns\":[\"Attach\",\"Captured\",\"SenderEmail\",\"ReceiverEmail\",\"Filename\",\"AttachSize\",\"AttachType\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"gridData\":{\"x\":0,\"y\":30,\"w\":48,\"h\":24,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 3, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":\"Pcap Captured\",\"disabled\":false,\"key\":\"Captured\",\"negate\":false,\"params\":{\"query\":true},\"type\":\"phrase\",\"value\":\"true\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Captured\":{\"query\":true,\"type\":\"phrase\"}}}},{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":\"Has Attachment\",\"disabled\":false,\"key\":\"Attach\",\"negate\":false,\"params\":{\"query\":true},\"type\":\"phrase\",\"value\":\"true\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index\"},\"query\":{\"match\":{\"Attach\":{\"query\":true,\"type\":\"phrase\"}}}},{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":\"Pcap Available on Disk\",\"disabled\":false,\"key\":\"TimeStartRaw\",\"negate\":false,\"params\":{\"gte\":\"1568614275\"},\"type\":\"range\",\"value\":\"1,567,536,977 to +\u221e\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index\"},\"range\":{\"TimeStartRaw\":{\"gte\":\"1568614275\"}}}],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"time_zone\":\"America/Denver\"}}}}"
+      }
+   }, 
+   "updated_at": "2019-09-16T21:42:31.908Z"
+}

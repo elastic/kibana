@@ -30,8 +30,7 @@ WorkingDirectory=/usr/local/kibana-7.2.0-linux-x64
 
 ExecStart=/usr/local/kibana-7.2.0-linux-x64/bin/kibana
 
-#ExecStartPost=/usr/bin/python /usr/local/kibana-7.2.0-linux-x64/scripts/setDefaultIndex.py
-#ExecStartPost=/usr/bin/python /usr/local/kibana-7.2.0-linux-x64/scripts/loadAssets.py
+ExecStartPost=/usr/bin/python /usr/local/kibana-7.2.0-linux-x64/scripts/loadAssets.py
 
 TimeoutStopSec=30
 
