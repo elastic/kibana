@@ -19,19 +19,29 @@
 
 import Axios from 'axios';
 
+interface Status {
+  id: string;
+  state: string;
+  icon: string;
+  message: string;
+  uiColor: string;
+  since: string;
+}
+
 interface StatusResponse {
+  name: string;
+  uuid: string;
+  version: {
+    number: number;
+    build_hash: string;
+    build_number: number;
+    build_snapshot: boolean;
+  };
   status: {
-    overall: {
-      state: string;
-      [key: string]: unknown;
-    };
-    [key: string]: unknown;
+    overall: Status;
+    statuses: Status[];
   };
-  version?: {
-    number?: number;
-    build_snapshot?: boolean;
-  };
-  [key: string]: unknown;
+  metrics: unknown;
 }
 
 export class KibanaServerStatus {
