@@ -73,6 +73,7 @@ export const useAnomaliesTableData = ({
 
   useEffect(() => {
     let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setLoading(true);
 
     async function fetchAnomaliesTableData(
@@ -98,7 +99,8 @@ export const useAnomaliesTableData = ({
             },
             {
               'kbn-version': kbnVersion,
-            }
+            },
+            abortCtrl.signal
           );
           if (isSubscribed) {
             setTableData(data);
@@ -123,6 +125,7 @@ export const useAnomaliesTableData = ({
     fetchAnomaliesTableData(influencers, criteriaFields, startDate, endDate);
     return () => {
       isSubscribed = false;
+      abortCtrl.abort();
     };
   }, [
     influencersOrCriteriaToString(influencers),

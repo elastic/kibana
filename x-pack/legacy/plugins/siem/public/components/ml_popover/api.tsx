@@ -31,7 +31,10 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  *
  * @param headers
  */
-export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
+export const groupsData = async (
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
+): Promise<Group[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
     method: 'GET',
@@ -42,6 +45,7 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
       'kbn-xsrf': kbnVersion,
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
   return await response.json();
@@ -179,7 +183,8 @@ export const stopDatafeeds = async (
  */
 export const jobsSummary = async (
   jobIds: string[],
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
 ): Promise<Job[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
@@ -192,6 +197,7 @@ export const jobsSummary = async (
       'kbn-system-api': 'true',
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
   return await response.json();
@@ -203,7 +209,8 @@ export const jobsSummary = async (
  * @param headers
  */
 export const getIndexPatterns = async (
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
 ): Promise<IndexPatternSavedObject[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(
@@ -217,6 +224,7 @@ export const getIndexPatterns = async (
         'kbn-system-api': 'true',
         ...headers,
       },
+      signal,
     }
   );
   await throwIfNotOk(response);

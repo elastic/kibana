@@ -34,14 +34,18 @@ export const useSiemJobs = (refetchData: boolean): Return => {
 
   useEffect(() => {
     let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setLoading(true);
 
     async function fetchSiemJobIdsFromGroupsData() {
       if (userPermissions) {
         try {
-          const data = await groupsData({
-            'kbn-version': kbnVersion,
-          });
+          const data = await groupsData(
+            {
+              'kbn-version': kbnVersion,
+            },
+            abortCtrl.signal
+          );
 
           const siemJobIds = getSiemJobIdsFromGroupsData(data);
           if (isSubscribed) {
@@ -60,7 +64,8 @@ export const useSiemJobs = (refetchData: boolean): Return => {
 
     fetchSiemJobIdsFromGroupsData();
     return () => {
-      isSubscribed = true;
+      isSubscribed = false;
+      abortCtrl.abort();
     };
   }, [refetchData, userPermissions]);
 
