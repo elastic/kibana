@@ -248,49 +248,59 @@ export function FieldItem({
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
-      panelClassName="lnsFieldListPanel__fieldPopover"
+      panelClassName="lnsFieldItem__fieldPopoverPanel"
     >
-      <div>
-        {state.isLoading && <EuiLoadingSpinner />}
-
+      <EuiPopoverTitle>
         {state.histogram &&
           state.histogram.buckets.length &&
           state.topValues &&
           state.topValues.buckets.length && (
-            <>
-              <EuiButtonGroup
-                buttonSize="s"
-                legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
-                  defaultMessage: 'Toggle either the',
-                })}
-                options={[
-                  {
-                    label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-                      defaultMessage: 'Top Values',
-                    }),
-                    id: 'topValues',
-                  },
-                  {
-                    label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
-                      defaultMessage: 'Histogram',
-                    }),
-                    id: 'histogram',
-                  },
-                ]}
-                onChange={optionId => {
-                  setShowingHistogram(optionId === 'histogram');
-                }}
-                idSelected={showingHistogram ? 'histogram' : 'topValues'}
-              />
-              <EuiSpacer />
-            </>
+            <EuiButtonGroup
+              buttonSize="s"
+              isFullWidth
+              legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
+                defaultMessage: 'Toggle either the',
+              })}
+              options={[
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+                    defaultMessage: 'Top Values',
+                  }),
+                  id: 'topValues',
+                },
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldDistributionLabel', {
+                    defaultMessage: 'Distribution',
+                  }),
+                  id: 'histogram',
+                },
+              ]}
+              onChange={optionId => {
+                setShowingHistogram(optionId === 'histogram');
+              }}
+              idSelected={showingHistogram ? 'histogram' : 'topValues'}
+            />
           )}
+        {state.topValues && state.sampledValues && !state.histogram && !showingHistogram && (
+          <>
+            {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+              defaultMessage: 'Top Values',
+            })}
+          </>
+        )}
+      </EuiPopoverTitle>
+      <div>
+        {state.isLoading && <EuiLoadingSpinner />}
 
         {state.histogram && (!state.topValues || showingHistogram) && (
-          <Chart className="lnsDistributionChart" data-test-subj="lnsFieldListPanel-histogram">
+          <Chart
+            className="lnsFieldItem__distributionChart"
+            data-test-subj="lnsFieldListPanel-histogram"
+          >
             <Settings
               rotation={field.type === 'date' ? 0 : 90}
               tooltip={{ type: TooltipType.None }}
+              theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
             />
 
             <Axis
