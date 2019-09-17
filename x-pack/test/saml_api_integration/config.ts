@@ -52,6 +52,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         '--server.xsrf.whitelist=["/api/security/saml/callback"]',
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
+        '--xpack.security.authc.saml.maxRedirectURLSize=100b',
       ],
     },
   };
