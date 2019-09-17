@@ -27,7 +27,7 @@ export function scheduleTask(server, taskManager) {
           taskType: TELEMETRY_TASK_TYPE,
           state: { stats: {}, runs: 0 },
         });
-      } catch (e) {
+      } catch(e) {
         server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
       }
     })();
