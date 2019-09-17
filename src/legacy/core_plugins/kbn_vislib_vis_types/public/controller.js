@@ -55,7 +55,7 @@ export class vislibVisController {
       if (!this.vislib) {
         const $injector = await chrome.dangerouslyGetActiveInjector();
         const Private = $injector.get('Private');
-        this.vislib = Private(VislibVisProvider);
+        this.Vislib = Private(VislibVisProvider);
         this.$compile = $injector.get('$compile');
         this.$rootScope = $injector.get('$rootScope');
       }
@@ -64,7 +64,7 @@ export class vislibVisController {
         return resolve();
       }
 
-      this.vis.vislibVis = new this.vislib.Vis(this.chartEl, visParams);
+      this.vis.vislibVis = new this.Vislib(this.chartEl, visParams);
       this.vis.vislibVis.on('brush', this.vis.API.events.brush);
       this.vis.vislibVis.on('click', this.vis.API.events.filter);
       this.vis.vislibVis.on('renderComplete', resolve);
