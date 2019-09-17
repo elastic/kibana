@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Axios from 'axios';
+import { Loader } from './loader';
 
 interface Status {
   id: string;
@@ -45,15 +45,16 @@ interface StatusResponse {
 }
 
 export class KibanaServerStatus {
-  private readonly x = Axios.create({
+  private readonly loader = new Loader({
     baseURL: this.kibanaServerUrl,
   });
 
   constructor(private readonly kibanaServerUrl: string) {}
 
   async get() {
-    const resp = await this.x.get<StatusResponse>('api/status');
-    return resp.data;
+    return await this.loader.req<StatusResponse>('get status', {
+      url: 'api/status',
+    });
   }
 
   async getOverallState() {

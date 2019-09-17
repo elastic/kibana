@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import Axios from 'axios';
+import Url from 'url';
+
 import { get } from 'lodash';
 import { Lifecycle } from '@kbn/test/types/ftr';
-
 import { ToolingLog } from '@kbn/dev-utils';
 
+import { Loader } from './loader';
+
 export class KibanaServerUiSettings {
-  private readonly x = Axios.create({
-    baseURL: this.url,
+  private readonly loader = new Loader({
+    baseURL: Url.resolve(this.url, '/api/kibana/settings/'),
   });
 
   constructor(
@@ -45,27 +47,31 @@ export class KibanaServerUiSettings {
    * Gets defaultIndex from the config doc.
    */
   async getDefaultIndex() {
-    const { data } = await this.x.get('/api/kibana/settings');
+    const data = await this.loader.req('get default index', {});
     const defaultIndex = get(data, 'settings.defaultIndex.userValue');
     this.log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
     return defaultIndex;
   }
 
   async replace(doc: Record<string, any>) {
-    const { data } = await this.x.get('/api/kibana/settings');
+    const data = await this.loader.req<Record<string, any>>('replace ui settings', {});
 
     for (const key of Object.keys(data.settings)) {
       if (!data.settings[key].isOverridden) {
-        await this.x.delete(`/api/kibana/settings/${key}`);
+        await this.loader.req(`delete ${key}`, {
+          url: key,
+          method: 'DELETE',
+        });
       }
     }
 
     this.log.debug('replacing kibana config doc: %j', doc);
-
-    await this.x.post('/api/kibana/settings', {
-      changes: {
-        ...this.defaults,
-        ...doc,
+    await this.loader.req('replace kibana config doc', {
+      data: {
+        changes: {
+          ...this.defaults,
+          ...doc,
+        },
       },
     });
   }
@@ -75,8 +81,10 @@ export class KibanaServerUiSettings {
    */
   async update(updates: Record<string, any>) {
     this.log.debug('applying update to kibana config: %j', updates);
-    await this.x.post('/api/kibana/settings', {
-      changes: updates,
+    await this.loader.req('apply update to kibana config', {
+      data: {
+        changes: updates,
+      },
     });
   }
 }
