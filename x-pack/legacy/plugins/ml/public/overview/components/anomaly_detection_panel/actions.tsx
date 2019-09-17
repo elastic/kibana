@@ -30,7 +30,6 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
         iconType="tableOfContents"
         aria-label={openJobsInAnomalyExplorerText}
         className="results-button"
-        // isDisabled={jobActionsDisabled === true}
         data-test-subj={`openOverviewJobsInAnomalyExplorer`}
       />
     </EuiToolTip>

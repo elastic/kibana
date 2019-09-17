@@ -11,7 +11,7 @@ interface Stats {
   total: StatsBarStat;
   failed: StatsBarStat;
 }
-interface JobStatsBarStats extends Stats {
+export interface JobStatsBarStats extends Stats {
   activeNodes: StatsBarStat;
   open: StatsBarStat;
   closed: StatsBarStat;

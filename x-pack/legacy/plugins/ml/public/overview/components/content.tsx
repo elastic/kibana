@@ -14,10 +14,10 @@ import { AnalyticsPanel } from './analytics_panel/';
 export const OverviewContent: FC = () => (
   <EuiFlexItem grow={3}>
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <AnomalyDetectionPanel />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <AnalyticsPanel />
       </EuiFlexItem>
     </EuiFlexGroup>

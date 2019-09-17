@@ -16,7 +16,7 @@ const feedbackLink = 'https://www.elastic.co/community/';
 
 export const OverviewSideBar: FC = () => (
   <EuiFlexItem grow={1}>
-    <EuiText>
+    <EuiText className="mlOverview__sidebar">
       <h2>
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionTitle"
@@ -26,8 +26,9 @@ export const OverviewSideBar: FC = () => (
       <p>
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionText"
-          defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or
-          {createJob}. For information about upcoming features and tutorials be sure to check out our solutions page."
+          defaultMessage="Welcome to Machine Learning.
+          Get started by reviewing our {docs} or {createJob}.
+          For information about upcoming features and tutorials be sure to check out our solutions page."
           values={{
             docs: (
               <EuiLink href={docsLink} target="blank">

@@ -5,56 +5,140 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { AnomalyDetectionTable } from './table';
-// import { metaData } from 'ui/metadata';
 import { ml } from '../../../services/ml_api_service';
+import { mlResultsService } from '../../../services/results_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+
+export interface Groups {
+  [key: string]: Group;
+}
 
 export interface Group {
   id: string;
   jobIds: string[];
   docs_processed: number;
+  earliest_timestamp: number;
   latest_timestamp: number;
   max_anomaly_score: number | null;
 }
 
+export interface Job {
+  [key: string]: any;
+}
+
+export type Jobs = Job[];
+
+interface MaxScoresByGroup {
+  [key: string]: {
+    maxScore: number;
+    index?: number;
+  };
+}
+
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 
-// jobsSummary to get: stats bar info, jobs in group, latest timestamp, docs_processed
+function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
+  const anomalyScores: MaxScoresByGroup = {};
+  groups.forEach(group => {
+    anomalyScores[group.id] = { maxScore: 0 };
+  });
+
+  return anomalyScores;
+}
+
 export const AnomalyDetectionPanel: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [groupsList, setGroupsList] = useState<Group[]>([]);
-  const [jobsList, setJobsList] = useState({});
+  const [groups, setGroups] = useState<Groups>({});
+  const [groupsCount, setGroupsCount] = useState<number>(0);
+  const [jobsList, setJobsList] = useState<Jobs>([]);
   const [statsBarData, setStatsBarData] = useState<any>(undefined);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
   const loadJobs = async () => {
+    setIsLoading(true);
+
     try {
-      const jobsResult = await ml.jobs.jobsSummary([]);
-      const jobsSummaryList =
-        jobsResult instanceof Array &&
-        jobsResult.map((job: any) => {
-          job.latestTimestampSortValue = job.latestTimestampMs || 0;
-          return job;
-        });
-      const groups = getGroupsFromJobs(jobsSummaryList);
+      const jobsResult: Jobs | any = await ml.jobs.jobsSummary([]);
+      const jobsSummaryList = jobsResult.map((job: any) => {
+        job.latestTimestampSortValue = job.latestTimestampMs || 0;
+        return job;
+      });
+      const jobsGroups = getGroupsFromJobs(jobsSummaryList);
       const jobsWithTimerange = getJobsWithTimerange(jobsSummaryList);
       const stats = getStatsBarData(jobsSummaryList);
       setIsLoading(false);
       setErrorMessage(undefined);
       setStatsBarData(stats);
-      setGroupsList(groups);
+      setGroupsCount(Object.values(jobsGroups).length);
+      setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
+      loadMaxAnomalyScores(jobsGroups);
     } catch (e) {
-      setErrorMessage(e);
+      setErrorMessage(JSON.stringify(e));
       setIsLoading(false);
     }
   };
 
+  const loadMaxAnomalyScores = async (groupsObject: Groups) => {
+    const groupsList: Group[] = Object.values(groupsObject);
+    const scores = getDefaultAnomalyScores(groupsList);
+
+    try {
+      const promises: any[] = [];
+      groupsList.forEach((group, i) => {
+        if (group.jobIds.length > 0) {
+          scores[group.id].index = i;
+          promises.push(
+            mlResultsService.getOverallBucketScores(
+              group.jobIds,
+              1,
+              group.earliest_timestamp,
+              group.latest_timestamp
+            )
+          );
+        }
+      });
+
+      const results = await Promise.all(promises);
+      const tempGroups = Object.assign({}, { ...groupsObject });
+      // Check results for each group's promise index and update state
+      Object.keys(scores).forEach(groupId => {
+        const resultsIndex = scores[groupId] && scores[groupId].index;
+        const promiseResult: { success: boolean; results: { [key: string]: number } } =
+          resultsIndex !== undefined && results[resultsIndex];
+        if (promiseResult.success === true && promiseResult.results !== undefined) {
+          const maxScore = Math.max(...Object.values(promiseResult.results));
+          scores[groupId] = { maxScore };
+          tempGroups[groupId].max_anomaly_score = maxScore;
+        }
+      });
+
+      setGroups(tempGroups);
+    } catch (e) {
+      toastNotifications.addDanger(
+        i18n.translate(
+          'xpack.ml.overview.analytics.errorWithFetchingAnomalyScoreNotificationErrorMessage',
+          {
+            defaultMessage: 'An error occurred fetching anomaly scores: {error}',
+            values: { error: JSON.stringify(e) },
+          }
+        )
+      );
+    }
+  };
+
   useEffect(() => {
-    setIsLoading(true);
     loadJobs();
   }, []);
 
@@ -73,10 +157,10 @@ export const AnomalyDetectionPanel: FC = () => {
   );
 
   return (
-    <EuiPanel>
+    <EuiPanel style={{ paddingTop: 0 }} className="mlOverview__panel">
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isLoading && <EuiLoadingSpinner />}   
-      {isLoading === false && typeof errorMessage === 'undefined' && groupsList.length === 0 && (
+      {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
           title={<h2>Create your first anomaly detection job</h2>}
@@ -97,10 +181,17 @@ export const AnomalyDetectionPanel: FC = () => {
           }
         />
       )}
-      {isLoading === false && typeof errorMessage === 'undefined' && groupsList.length > 0 && (
-        <AnomalyDetectionTable items={groupsList} jobsList={jobsList} statsBarData={statsBarData} />
+      {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 && (
+        <Fragment>
+          <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
+          <EuiSpacer size="m" />
+          <EuiButton size="s" href="#/jobs?">
+            {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
+              defaultMessage: 'Manage jobs',
+            })}
+          </EuiButton>
+        </Fragment>
       )}
-        
     </EuiPanel>
   );
 };

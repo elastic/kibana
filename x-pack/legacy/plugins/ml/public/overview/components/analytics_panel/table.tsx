@@ -124,7 +124,11 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
             </h3>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          style={{ marginTop: 0, marginRight: 0 }}
+          className="mlOverview__statsBar"
+        >
           <AnalyticsStatsBar analyticsList={items} />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   MlInMemoryTable,
@@ -16,16 +16,13 @@ import {
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
-import { Group } from './anomaly_detection_panel';
-import { StatsBar } from '../../../components/stats_bar';
-
-// interface AnomalyDetectionListColumns {
-//   id: string;
-//   max_anomaly_score: number;
-//   num_jobs: number;
-//   latest_timestamp: number;
-//   docs_processed: number;
-// }
+import { Groups, Group, Jobs } from './anomaly_detection_panel';
+// @ts-ignore
+import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
+// @ts-ignore
+import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
+// @ts-ignore
+import { toLocaleString } from '../../../util/string_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -37,11 +34,13 @@ export enum AnomalyDetectionListColumns {
 }
 
 interface Props {
-  items: Group[];
-  statsBarData: any; // TODO: pull in from statsbar types
-  jobsList: any;
+  items: Groups;
+  statsBarData: JobStatsBarStats;
+  jobsList: Jobs;
 }
+
 export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData }) => {
+  const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -55,16 +54,23 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       name: i18n.translate('xpack.ml.overview.anomalyDetectionList.id', {
         defaultMessage: 'Group ID',
       }),
+      render: (id: Group['id']) => <JobSelectorBadge id={id} isGroup={id !== 'ungrouped'} />,
       sortable: true,
       truncateText: true,
       width: '20%',
     },
     {
-      field: AnomalyDetectionListColumns.maxAnomalyScore,
       name: i18n.translate('xpack.ml.overview.anomalyDetectionList.maxScore', {
-        defaultMessage: 'Max score',
+        defaultMessage: 'Max anomaly score',
       }),
       sortable: true,
+      render: (group: Group) => {
+        if (group.max_anomaly_score === null) {
+          return <EuiLoadingSpinner />;
+        } else {
+          return group.max_anomaly_score;
+        }
+      },
       truncateText: true,
       width: '150px',
     },
@@ -94,6 +100,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       name: i18n.translate('xpack.ml.overview.anomalyDetectionList.docsProcessed', {
         defaultMessage: 'Docs processed',
       }),
+      render: (docs: number) => toLocaleString(docs),
       textOnly: true,
       sortable: true,
       width: '20%',
@@ -123,7 +130,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const pagination = {
     initialPageIndex: pageIndex,
     initialPageSize: pageSize,
-    totalItemCount: items.length,
+    totalItemCount: groupsList.length,
     pageSizeOptions: [10, 20, 50],
     hidePerPageOptions: false,
   };
@@ -147,7 +154,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             </h3>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ marginTop: 0, marginRight: 0 }}>
           <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -159,7 +166,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         hasActions={false}
         isExpandable={false}
         isSelectable={false}
-        items={items}
+        items={groupsList}
         itemId={AnomalyDetectionListColumns.id}
         onTableChange={onTableChange}
         pagination={pagination}

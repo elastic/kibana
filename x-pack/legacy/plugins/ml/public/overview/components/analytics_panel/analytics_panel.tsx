@@ -5,7 +5,14 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
@@ -22,12 +29,6 @@ export const AnalyticsPanel: FC = () => {
     getAnalytics(true);
   }, []);
 
-  // TODO: add refresh button
-  // const onRefresh = () => {
-  //   setIsInitialized(false);
-  //   getAnalytics(true);
-  // };
-
   const errorDisplay = (
     <Fragment>
       <EuiCallOut
@@ -43,7 +44,7 @@ export const AnalyticsPanel: FC = () => {
   );
 
   return (
-    <EuiPanel className="mlOverviewAnalyticsPanel">
+    <EuiPanel style={{ paddingTop: 0 }} className="mlOverviewAnalyticsPanel">
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isInitialized === false && <EuiLoadingSpinner />}     
       {isInitialized === true && analytics.length === 0 && (
@@ -66,7 +67,17 @@ export const AnalyticsPanel: FC = () => {
           }
         />
       )}
-      {isInitialized === true && analytics.length > 0 && <AnalyticsTable items={analytics} />}
+      {isInitialized === true && analytics.length > 0 && (
+        <Fragment>
+          <AnalyticsTable items={analytics} />
+          <EuiSpacer size="m" />
+          <EuiButton size="s" href="#/jobs?">
+            {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
+              defaultMessage: 'Manage jobs',
+            })}
+          </EuiButton>
+        </Fragment>
+      )}
     </EuiPanel>
   );
 };

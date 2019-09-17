@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
-import { Group } from './anomaly_detection_panel';
+import { Group, Groups, Jobs, Job } from './anomaly_detection_panel';
 
-export function getGroupsFromJobs(jobs: any): Group[] {
+export function getGroupsFromJobs(jobs: Jobs): Groups {
   const groups: any = {
-    no_group: {
+    ungrouped: {
       id: 'ungrouped',
       jobIds: [],
       docs_processed: 0,
@@ -28,32 +28,42 @@ export function getGroupsFromJobs(jobs: any): Group[] {
             id: g,
             jobIds: [job.id],
             docs_processed: job.processed_record_count,
-            latest_timestamp: 0,
+            earliest_timestamp: job.earliestTimestampMs,
+            latest_timestamp: job.latestTimestampMs,
             max_anomaly_score: null,
           };
         } else {
           groups[g].jobIds.push(job.id);
           groups[g].docs_processed += job.processed_record_count;
           // if incoming job latest timestamp is greater than the last saved one, replace it
-          if (job.latestTimestampMs > groups[g].latest_timestamp) {
+          if (groups[g].latest_timestamp === undefined) {
             groups[g].latest_timestamp = job.latestTimestampMs;
+          } else if (job.latestTimestampMs > groups[g].latest_timestamp) {
+            groups[g].latest_timestamp = job.latestTimestampMs;
+          }
+          // if existing group's earliest timestamp is not defined, set it to current job's
+          // otherwise compare to current job's and replace if current job's earliest is less
+          if (groups[g].earliest_timestamp === undefined) {
+            groups[g].earliest_timestamp = job.earliestTimestampMs;
+          } else if (job.earliestTimestampMs < groups[g].earliest_timestamp) {
+            groups[g].earliest_timestamp = job.earliestTimestampMs;
           }
         }
       });
     } else {
-      groups.no_group.jobIds.push(job.id);
-      groups.no_group.docs_processed += job.processed_record_count;
+      groups.ungrouped.jobIds.push(job.id);
+      groups.ungrouped.docs_processed += job.processed_record_count;
       // if incoming job latest timestamp is greater than the last saved one, replace it
-      if (job.latestTimestampMs > groups.no_group.latest_timestamp) {
-        groups.no_group.latest_timestamp = job.latestTimestampMs;
+      if (job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
+        groups.ungrouped.latest_timestamp = job.latestTimestampMs;
       }
     }
   });
 
-  return Object.values(groups);
+  return groups;
 }
 
-export function getStatsBarData(jobsList) {
+export function getStatsBarData(jobsList: any) {
   const jobStats = {
     activeNodes: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
@@ -104,10 +114,10 @@ export function getStatsBarData(jobsList) {
   }
 
   // object to keep track of nodes being used by jobs
-  const mlNodes = {};
+  const mlNodes: any = {};
   let failedJobs = 0;
 
-  jobsList.forEach(job => {
+  jobsList.forEach((job: Job) => {
     if (job.jobState === JOB_STATE.OPENED) {
       jobStats.open.value++;
     } else if (job.jobState === JOB_STATE.CLOSED) {
