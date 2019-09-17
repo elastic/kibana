@@ -5,11 +5,12 @@
  */
 
 import { TokenVerificationResponse, TokenType } from '../adapters/tokens/adapter_types';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 export class TokenLib {
   private accessTokenId = 1;
   constructor() {}
-  public async verify(token: any): Promise<TokenVerificationResponse> {
+  public async verify(user: FrameworkUser, token: any): Promise<TokenVerificationResponse> {
     switch (token) {
       case 'valid-enrollment-token': {
         return {
@@ -24,7 +25,7 @@ export class TokenLib {
     }
   }
 
-  public async generateAccessToken(token: any): Promise<string> {
+  public async generateAccessToken(user: FrameworkUser, token: any): Promise<string> {
     return `mock-access-token-${this.accessTokenId++}`;
   }
 }

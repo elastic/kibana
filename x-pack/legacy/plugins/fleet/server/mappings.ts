@@ -77,6 +77,9 @@ export const mappings = {
       type: {
         type: 'keyword',
       },
+      token: {
+        type: 'binary',
+      },
       tokenHash: {
         type: 'keyword',
       },

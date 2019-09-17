@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 /**
  * Memory adapter for persisting tokens, for tests purposes only.
@@ -13,25 +14,31 @@ import { TokenType, Token, TokenAdapter as TokenAdapterType } from './adapter_ty
 export class MemoryTokenAdapter implements TokenAdapterType {
   public tokens: { [k: string]: Token } = {};
   private tokenId = 1;
-  public async create({
-    type,
-    tokenHash,
-    active,
-    policy,
-    expire_at,
-  }: {
-    type: TokenType;
-    tokenHash: string;
-    active: boolean;
-    policy: { id: string; sharedId: string };
-    expire_at?: string;
-  }): Promise<Token> {
+  public async create(
+    user: FrameworkUser,
+    {
+      type,
+      tokenHash,
+      token,
+      active,
+      policy,
+      expire_at,
+    }: {
+      type: TokenType;
+      token: string;
+      tokenHash: string;
+      active: boolean;
+      policy: { id: string; sharedId: string };
+      expire_at?: string;
+    }
+  ): Promise<Token> {
     const id = `tokens-${this.tokenId++}`;
     this.tokens[id] = {
       id,
       active,
       created_at: moment().toISOString(),
       type,
+      token,
       tokenHash,
       expire_at,
       policy_id: policy.id,
@@ -41,17 +48,21 @@ export class MemoryTokenAdapter implements TokenAdapterType {
     return this.tokens[id];
   }
 
-  public async getByTokenHash(tokenHash: string): Promise<Token | null> {
+  public async getByTokenHash(user: FrameworkUser, tokenHash: string): Promise<Token | null> {
     return Object.values(this.tokens).find(t => t.tokenHash === tokenHash) || null;
   }
 
-  public async update(id: string, newData: Partial<Token>): Promise<void> {
+  public async update(user: FrameworkUser, id: string, newData: Partial<Token>): Promise<void> {
     const token = this.tokens[id];
 
     Object.assign(token, newData);
   }
 
-  public async delete(id: string): Promise<void> {
+  public async getByPolicyId(user: FrameworkUser, policyId: string) {
+    return Object.values(this.tokens).find(t => t.policy_id === policyId) || null;
+  }
+
+  public async delete(user: FrameworkUser, id: string): Promise<void> {
     delete this.tokens[id];
   }
 }

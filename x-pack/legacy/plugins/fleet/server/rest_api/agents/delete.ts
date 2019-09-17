@@ -14,22 +14,21 @@ import { FleetServerLib } from '../../libs/types';
 
 export const createDeleteAgentsRoute = (libs: FleetServerLib) => ({
   method: 'DELETE',
-  config: {
-    auth: false,
-  },
+  config: {},
   path: '/api/fleet/agents/{id}',
   handler: async (
     request: FrameworkRequest<{ params: { id: string } }>,
     h: FrameworkResponseToolkit
   ): Promise<ReturnTypeDelete | BaseReturnType | FrameworkResponseObject> => {
     const { id } = request.params;
-
-    const agent = await libs.agents.getById(id);
+    const agent = await libs.agents.getById(request.user, id);
     if (!agent) {
       return h
         .response({ error: { message: 'Agent not found', code: 404 }, success: false })
         .code(404);
     }
+
+    await libs.agents.delete(request.user, agent);
 
     return { success: true, action: 'deleted' };
   },
