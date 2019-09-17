@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useKibanaContext } from '../../../../../contexts/kibana';
+import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';

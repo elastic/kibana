@@ -13,7 +13,7 @@ import { toastNotifications } from 'ui/notify';
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { useKibanaContext } from '../../../../../../../ml/public/contexts/kibana';
-import { isValidIndexName } from '../../../../../../../ml/public/common/util/es_utils';
+import { isValidIndexName } from '../../../../../../../ml/common/util/es_utils';
 
 import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 

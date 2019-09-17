@@ -8,7 +8,7 @@ import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 
-import { ml } from '../../../../../services/ml_api_service';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   SOURCE_INDEX_STATUS,
@@ -16,7 +16,7 @@ import {
   UseSourceIndexDataReturnType,
 } from './use_source_index_data';
 
-jest.mock('../../../../../services/ml_api_service');
+jest.mock('../../../../../../../ml/public/services/ml_api_service');
 
 type Callback = () => void;
 interface TestHookProps {

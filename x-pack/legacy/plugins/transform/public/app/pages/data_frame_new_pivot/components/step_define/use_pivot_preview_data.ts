@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { ml } from '../../../../../services/ml_api_service';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 
 import { Dictionary } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';

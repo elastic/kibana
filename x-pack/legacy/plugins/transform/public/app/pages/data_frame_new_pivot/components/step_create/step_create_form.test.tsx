@@ -12,7 +12,7 @@ import { kibanaContextValueMock } from '../../../../../../../ml/public/contexts/
 
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
+jest.mock('../../../../../../../ml/public/contexts/ui/use_ui_chrome_context');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {

@@ -33,13 +33,13 @@ import {
   MlInMemoryTableBasic,
   SortingPropType,
   SORT_DIRECTION,
-} from '../../../../../components/ml_in_memory_table';
+} from '../../../../../../../ml/public/components/ml_in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { Dictionary } from '../../../../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 
-import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
+import { useCurrentIndexPattern } from '../../../../../../../ml/public/contexts/kibana';
 
 import {
   toggleSelectedField,

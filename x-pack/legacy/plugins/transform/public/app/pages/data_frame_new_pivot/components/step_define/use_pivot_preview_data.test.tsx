@@ -7,7 +7,7 @@
 import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ml } from '../../../../../services/ml_api_service';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   PIVOT_PREVIEW_STATUS,
@@ -17,7 +17,7 @@ import {
 
 import { IndexPattern } from 'ui/index_patterns';
 
-jest.mock('../../../../../services/ml_api_service');
+jest.mock('../../../../../../../ml/public/services/ml_api_service');
 
 type Callback = () => void;
 interface TestHookProps {

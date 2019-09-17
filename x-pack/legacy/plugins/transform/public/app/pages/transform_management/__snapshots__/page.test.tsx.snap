@@ -2,9 +2,6 @@
 
 exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
 <Fragment>
-  <NavigationMenu
-    tabId="data_frames"
-  />
   <TransformStatsBar
     transformsList={Array []}
   />

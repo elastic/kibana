@@ -10,8 +10,8 @@ import { SearchResponse } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { ml } from '../../../../../services/ml_api_service';
-import { getNestedProperty } from '../../../../../util/object_utils';
+import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { getNestedProperty } from '../../../../../../../ml/public/util/object_utils';
 
 import {
   getDefaultSelectableFields,
