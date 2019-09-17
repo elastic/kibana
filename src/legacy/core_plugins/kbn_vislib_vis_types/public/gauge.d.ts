@@ -19,6 +19,7 @@
 
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { Alignments, GaugeTypes } from './utils/collections';
+import { ColorsRange } from './types';
 
 export interface GaugeVisParams {
   readonly type: 'gauge';
@@ -31,7 +32,7 @@ export interface GaugeVisParams {
     readonly orientation: 'vertical';
     readonly type: 'meter';
     alignment: Alignments;
-    colorsRange: Array<{ from?: number; to?: number }>;
+    colorsRange: ColorsRange;
     colorSchema: ColorSchemas;
     extendRange: boolean;
     invertColors: boolean;

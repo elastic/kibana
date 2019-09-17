@@ -28,6 +28,8 @@ import {
   ThresholdLineStyles,
 } from './utils/collections';
 
+export type ColorsRange = Array<{ from?: number; to?: number }>;
+
 export interface CommonVislibParams {
   addTooltip: boolean;
   legendPosition: Positions;

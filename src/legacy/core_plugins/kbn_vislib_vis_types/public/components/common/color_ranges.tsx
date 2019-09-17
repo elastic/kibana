@@ -22,11 +22,12 @@ import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
+import { ColorsRange } from '../../types';
 
 interface ColorRangesProps {
   dataTestSubj?: string;
-  colorsRange: Array<{ from?: number; to?: number }>;
-  setValue(paramName: string, value: ColorRangesProps['colorsRange']): void;
+  colorsRange: ColorsRange;
+  setValue(paramName: string, value: ColorsRange): void;
   setValidity?(isValid: boolean): void;
   setTouched?(isTouched: boolean): void;
 }

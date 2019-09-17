@@ -32,7 +32,6 @@ interface NumberInputOptionProps<ParamName extends string> {
   value?: number | '';
   'data-test-subj'?: string;
   setValue: (paramName: ParamName, value: number | '') => void;
-  setTouched?(): void;
 }
 
 function NumberInputOption<ParamName extends string>({
@@ -46,7 +45,6 @@ function NumberInputOption<ParamName extends string>({
   step,
   value = '',
   setValue,
-  setTouched,
   'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
   return (
@@ -63,7 +61,6 @@ function NumberInputOption<ParamName extends string>({
         onChange={ev =>
           setValue(paramName, isNaN(ev.target.valueAsNumber) ? '' : ev.target.valueAsNumber)
         }
-        onBlur={setTouched}
       />
     </EuiFormRow>
   );

@@ -30,18 +30,16 @@ import {
   NumberInputOption,
   SelectOption,
   SwitchOption,
-  TextInputOption,
 } from '../../common';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
-
-const VERTICAL_ROTATION = 270;
+import { LabelsPanel } from './labels_panel';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
-  const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
-  const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
+  const isColorsNumberInvalid =
+    !stateParams.setColorRange && (stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>
@@ -55,28 +53,6 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         },
       ]),
     [valueAxis, setValue]
-  );
-
-  const setValueAxisLabels = useCallback(
-    <T extends keyof ValueAxis['labels']>(paramName: T, value: ValueAxis['labels'][T]) =>
-      setValue('valueAxes', [
-        {
-          ...valueAxis,
-          labels: {
-            ...valueAxis.labels,
-            [paramName]: value,
-          },
-        },
-      ]),
-    [valueAxis, setValue]
-  );
-
-  const setParamToched = useCallback(() => setTouched(true), [setTouched]);
-
-  const setRotateLabels = useCallback(
-    (paramName: 'rotate', value: boolean) =>
-      setValueAxisLabels(paramName, value ? VERTICAL_ROTATION : 0),
-    [setValueAxisLabels]
   );
 
   useEffect(() => {
@@ -174,7 +150,6 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
               paramName="colorsNumber"
               value={stateParams.colorsNumber}
               setValue={setValue}
-              setTouched={setParamToched}
             />
           </>
         )}
@@ -201,49 +176,11 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
             />
           </>
         )}
-
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.showLabelsTitle', {
-            defaultMessage: 'Show labels',
-          })}
-          paramName="show"
-          value={valueAxis.labels.show}
-          setValue={setValueAxisLabels}
-        />
-
-        <SwitchOption
-          disabled={!valueAxis.labels.show}
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.rotateLabel', {
-            defaultMessage: 'Rotate',
-          })}
-          paramName="rotate"
-          value={rotateLabels}
-          setValue={setRotateLabels}
-        />
-
-        <SwitchOption
-          disabled={!valueAxis.labels.show}
-          label={i18n.translate(
-            'kbnVislibVisTypes.controls.heatmapOptions.overwriteAutomaticColorLabel',
-            {
-              defaultMessage: 'Overwrite automatic color',
-            }
-          )}
-          paramName="overwriteColor"
-          value={valueAxis.labels.overwriteColor}
-          setValue={setValueAxisLabels}
-        />
-
-        <TextInputOption
-          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorLabel', {
-            defaultMessage: 'Color',
-          })}
-          paramName="color"
-          value={valueAxis.labels.color}
-          setValue={setValueAxisLabels}
-        />
       </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <LabelsPanel valueAxis={valueAxis} setValue={setValue} />
     </>
   );
 }
