@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import { HttpServiceBase } from 'kibana/public';
 import { IndexPatternCreationConfig } from './config';
 
 export class IndexPatternCreationManager {
   private configs: IndexPatternCreationConfig[];
 
-  constructor(private readonly httpClient: object) {
+  constructor(private readonly httpClient: HttpServiceBase) {
     this.configs = [];
   }
 

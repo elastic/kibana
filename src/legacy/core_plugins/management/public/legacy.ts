@@ -36,22 +36,12 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import chrome from 'ui/chrome';
 
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-async function getHttpClient() {
-  const injector = await chrome.dangerouslyGetActiveInjector();
-  return injector.get('$http');
-}
-
-export const setup = pluginInstance.setup(npSetup.core, {
-  __LEGACY: {
-    getHttpClient,
-  },
-});
+export const setup = pluginInstance.setup(npSetup.core, {});
 export const start = pluginInstance.start(npStart.core, {});
 
 export {

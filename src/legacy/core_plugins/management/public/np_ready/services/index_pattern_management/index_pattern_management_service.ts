@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { HttpServiceBase } from 'kibana/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 
 interface SetupDependencies {
-  getHttpClient: any;
+  httpClient: HttpServiceBase;
 }
 
 /**
@@ -30,8 +31,8 @@ interface SetupDependencies {
  * @internal
  */
 export class IndexPatternManagementService {
-  public setup({ getHttpClient }: SetupDependencies) {
-    const creation = new IndexPatternCreationManager(getHttpClient());
+  public setup({ httpClient }: SetupDependencies) {
+    const creation = new IndexPatternCreationManager(httpClient);
     const list = new IndexPatternListManager();
 
     creation.add(IndexPatternCreationConfig);

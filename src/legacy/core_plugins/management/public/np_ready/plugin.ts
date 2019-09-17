@@ -23,11 +23,8 @@ import {
   SavedObjectsManagementServiceSetup,
 } from './services/saved_objects_management';
 
-interface ManagementPluginSetupDependencies {
-  __LEGACY: {
-    getHttpClient: any;
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ManagementPluginSetupDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ManagementPluginStartDependencies {}
@@ -53,9 +50,9 @@ export class ManagementPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { __LEGACY }: ManagementPluginSetupDependencies) {
+  public setup(core: CoreSetup, deps: ManagementPluginSetupDependencies) {
     return {
-      indexPattern: this.indexPattern.setup({ getHttpClient: __LEGACY.getHttpClient }),
+      indexPattern: this.indexPattern.setup({ httpClient: core.http }),
       savedObjects: this.savedObjects.setup(),
     };
   }
