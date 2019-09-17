@@ -256,19 +256,8 @@ app.controller('graphuiPlugin', function (
   $scope.title = 'Graph';
   $scope.spymode = 'request';
 
-  $scope.iconChoices = iconChoices;
-  $scope.drillDownIconChoices = urlTemplateIconChoices;
-  $scope.colors = colorChoices;
-  $scope.iconChoicesByClass = iconChoicesByClass;
-
-  $scope.outlinkEncoders = outlinkEncoders;
-
-  $scope.fields = [];
-  $scope.canEditDrillDownUrls = chrome.getInjected('canEditDrillDownUrls');
-
-  $scope.graphSavePolicy = chrome.getInjected('graphSavePolicy');
-  $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
-  $scope.searchTerm = '';
+  const graphSavePolicy = chrome.getInjected('graphSavePolicy');
+  const allSavingDisabled = graphSavePolicy === 'none';
 
   $scope.reduxDispatch = (action) => {
     store.dispatch(action);
@@ -313,13 +302,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.loading = false;
 
-  //So scope properties can be used consistently with ng-model
-  $scope.grr = $scope;
-
-  $scope.toggleDrillDownIcon = function (urlTemplate, icon) {
-    urlTemplate.icon === icon ? urlTemplate.icon = null : urlTemplate.icon = icon;
-  };
-
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
@@ -363,27 +345,6 @@ app.controller('graphuiPlugin', function (
     canWipeWorkspace(function () {
       $scope.indexSelected(proposedIndex);
     });
-  };
-
-  $scope.indexSelected = function (selectedIndex) {
-    $scope.clearWorkspace();
-    $scope.allFields = [];
-    $scope.selectedFields = [];
-    $scope.basicModeSelectedSingleField = null;
-    $scope.selectedField = null;
-    $scope.selectedFieldConfig = null;
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
-
-    return $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id)
-      .then(handleSuccess)
-      .then(function (indexPattern) {
-        store.dispatch(loadFields(mapFields(indexPattern)));
-        $scope.filteredFields = $scope.allFields;
-        if ($scope.allFields.length > 0) {
-          $scope.selectedField = $scope.allFields[0];
-        }
-      }, handleError);
   };
 
 
@@ -478,24 +439,6 @@ app.controller('graphuiPlugin', function (
     return $scope.selectedSelectedVertex === node;
   };
 
-  $scope.saveUrlTemplate = function (index, urlTemplate) {
-    const newTemplatesList = [...$scope.urlTemplates];
-    if (index !== -1) {
-      newTemplatesList[index] = urlTemplate;
-    } else {
-      newTemplatesList.push(urlTemplate);
-    }
-
-    $scope.urlTemplates = newTemplatesList;
-  };
-
-  $scope.removeUrlTemplate = function (urlTemplate) {
-    const newTemplatesList = [...$scope.urlTemplates];
-    const i = newTemplatesList.indexOf(urlTemplate);
-    newTemplatesList.splice(i, 1);
-    $scope.urlTemplates = newTemplatesList;
-  };
-
   $scope.openUrlTemplate = function (template) {
     const url = template.url;
     const newUrl = url.replace(urlTemplateRegex, template.encoder.encode($scope.workspace));
@@ -554,43 +497,6 @@ app.controller('graphuiPlugin', function (
     };
     $scope.workspace = gws.createWorkspace(options);
     $scope.detail = null;
-
-    // filter out default url templates because they will get re-added
-    $scope.urlTemplates = $scope.urlTemplates.filter(template => !template.isDefault);
-
-    if ($scope.urlTemplates.length === 0) {
-      // url templates specified by users can include the `{{gquery}}` tag and
-      // will have the elasticsearch query for the graph nodes injected there
-      const tag = '{{gquery}}';
-
-      const kUrl = new KibanaParsedUrl({
-        appId: 'kibana',
-        basePath: chrome.getBasePath(),
-        appPath: '/discover'
-      });
-
-      kUrl.addQueryParameter('_a', rison.encode({
-        columns: ['_source'],
-        index: $scope.selectedIndex.id,
-        interval: 'auto',
-        query: { language: 'kuery', query: tag },
-        sort: ['_score', 'desc']
-      }));
-
-      const discoverUrl = kUrl.getRootRelativePath()
-        // replace the URI encoded version of the tag with the unescaped version
-        // so it can be found with String.replace, regexp, etc.
-        .replace(encodeURIComponent(tag), tag);
-
-      $scope.urlTemplates.push({
-        url: discoverUrl,
-        description: i18n.translate('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
-          defaultMessage: 'Raw documents',
-        }),
-        encoder: $scope.outlinkEncoders[0],
-        isDefault: true
-      });
-    }
   }
 
   $scope.setDetail = function (data) {
@@ -727,7 +633,7 @@ app.controller('graphuiPlugin', function (
         defaultMessage: 'Save workspace',
       }),
       tooltip: () => {
-        if ($scope.allSavingDisabled) {
+        if (allSavingDisabled) {
           return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
             defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
           });
@@ -738,11 +644,11 @@ app.controller('graphuiPlugin', function (
         }
       },
       disableButton: function () {
-        return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
+        return allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
         openSaveModal({
-          savePolicy: $scope.graphSavePolicy,
+          savePolicy: graphSavePolicy,
           hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
           workspace: $scope.savedWorkspace,
           saveWorkspace: $scope.saveWorkspace,
@@ -799,7 +705,7 @@ app.controller('graphuiPlugin', function (
         removeUrlTemplate: $scope.removeUrlTemplate,
         saveUrlTemplate: $scope.saveUrlTemplate,
         allFields: [...$scope.allFields],
-        canEditDrillDownUrls: $scope.canEditDrillDownUrls
+        canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls')
       }), $scope.$digest.bind($scope));
       currentSettingsFlyout = npStart.core.overlays.openFlyout(<Settings observable={settingsObservable} />, {
         size: 'm',
@@ -837,6 +743,14 @@ app.controller('graphuiPlugin', function (
       );
       return;
     }
+    $scope.reduxDispatch({
+      type: 'x-pack/graph/datasource/SET_DATASOURCE',
+      payload: {
+        type: 'indexpattern',
+        id: selectedIndex.id,
+        title: selectedIndex.attributes.title
+      },
+    });
     $scope.selectedIndex = selectedIndex;
     $scope.proposedIndex = selectedIndex;
     $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
@@ -855,7 +769,6 @@ app.controller('graphuiPlugin', function (
       $scope.workspace.runLayout();
       // Allow URLs to include a user-defined text query
       if ($route.current.params.query) {
-        $scope.initialQuery = $route.current.params.query;
         $scope.submit($route.current.params.query);
       }
     });
@@ -863,13 +776,20 @@ app.controller('graphuiPlugin', function (
     $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
       $scope.savedWorkspace = newWorkspace;
       openSourceModal(npStart.core, indexPattern => {
-        $scope.indexSelected(indexPattern);
+        $scope.reduxDispatch({
+          type: 'x-pack/graph/datasource/SET_DATASOURCE',
+          payload: {
+            type: 'indexpattern',
+            id: indexPattern.id,
+            title: indexPattern.attributes.title
+          },
+        });
       });
     });
   }
 
   $scope.saveWorkspace = function (saveOptions, userHasConfirmedSaveWorkspaceData) {
-    if ($scope.allSavingDisabled) {
+    if (allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
       toastNotifications.addWarning(
@@ -878,8 +798,8 @@ app.controller('graphuiPlugin', function (
       return;
     }
     initWorkspaceIfRequired();
-    const canSaveData = $scope.graphSavePolicy === 'configAndData' ||
-      ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
+    const canSaveData = graphSavePolicy === 'configAndData' ||
+      (graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
 
     appStateToSavedWorkspace(
       $scope.savedWorkspace,
@@ -919,8 +839,4 @@ app.controller('graphuiPlugin', function (
     }, fatalError);
 
   };
-
-
-
 });
-//End controller

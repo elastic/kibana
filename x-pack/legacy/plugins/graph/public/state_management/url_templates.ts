@@ -13,8 +13,8 @@ import { GraphState } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';
 import { setDatasource, IndexpatternDatasource } from './datasource';
-import { outlinkEncoders } from '../services/outlink_encoders';
-import { urlTemplatePlaceholder } from '../services/url_template';
+import { outlinkEncoders } from '../helpers/outlink_encoders';
+import { urlTemplatePlaceholder } from '../helpers/url_template';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 

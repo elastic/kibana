@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { takeLatest, put, call } from 'redux-saga/effects';
 import { GraphState } from './store';
 import { reset } from './global';
+import { loadFields } from './fields';
+import { mapFields } from '../services/persistence';
+import { IndexPatternProvider } from '../types';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -34,3 +38,23 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
   .build();
 
 export const datasourceSelector = (state: GraphState) => state.datasource;
+
+export const datasourceSaga = (indexPatternProvider: IndexPatternProvider) =>
+  function*() {
+    function* fetchIndexPattern(action: Action<DatasourceState>) {
+      if (action.payload.type === 'none') {
+        return;
+      }
+
+      try {
+        const indexPattern = yield call(indexPatternProvider.get, action.payload.id);
+        yield put(loadFields(mapFields(indexPattern)));
+      } catch (e) {
+        // in case of errors, reset the datasource and show notification
+        yield put(setDatasource({ type: 'none' }));
+        // TOOD show notification
+      }
+    }
+
+    yield takeLatest(setDatasource.type, fetchIndexPattern);
+  };

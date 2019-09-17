@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers, createStore, Store, AnyAction, Dispatch } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { fieldsReducer, FieldsState } from './fields';
 import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
 import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
-import { DatasourceState, datasourceReducer } from './datasource';
+import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
+import { IndexPatternProvider } from '../types';
 
 export interface GraphState {
   fields: FieldsState;
@@ -19,16 +21,24 @@ export interface GraphState {
 
 export interface GraphStoreDependencies {
   basePath: string;
+  indexPatternProvider: IndexPatternProvider;
 }
 
-export const createGraphStore = ({ basePath }: GraphStoreDependencies) => {
+export const createGraphStore = ({ basePath, indexPatternProvider }: GraphStoreDependencies) => {
+  const sagaMiddleware = createSagaMiddleware();
+
+  // hook in sagas
+  sagaMiddleware.run(datasourceSaga(indexPatternProvider));
+
+  // hook in reducers
   const rootReducer = combineReducers({
     fields: fieldsReducer,
     urlTemplates: urlTemplatesReducer(basePath),
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
   });
-  return createStore(rootReducer);
+
+  return createStore(rootReducer, applyMiddleware(sagaMiddleware));
 };
 
 export type GraphStore = Store<GraphState, AnyAction>;
