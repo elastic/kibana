@@ -19,7 +19,7 @@ export interface OnSaveGraphProps extends OnSaveProps {
   dataConsent: boolean;
 }
 
-export function GraphSaveModal({
+export function SaveModal({
   onSave,
   onClose,
   title,
