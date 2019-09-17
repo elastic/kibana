@@ -34,14 +34,19 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
 
   useEffect(() => {
     let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setLoading(true);
 
     async function fetchSiemJobsFromJobsSummary() {
       if (userPermissions) {
         try {
-          const data: Job[] = await jobsSummary(jobIds, {
-            'kbn-version': kbnVersion,
-          });
+          const data: Job[] = await jobsSummary(
+            jobIds,
+            {
+              'kbn-version': kbnVersion,
+            },
+            abortCtrl.signal
+          );
 
           // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
           const siemJobs = getSiemJobsFromJobsSummary(data);
@@ -62,6 +67,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
     fetchSiemJobsFromJobsSummary();
     return () => {
       isSubscribed = false;
+      abortCtrl.abort();
     };
   }, [refreshToggle, userPermissions]);
 

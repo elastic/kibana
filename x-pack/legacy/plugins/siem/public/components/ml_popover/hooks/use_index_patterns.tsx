@@ -27,13 +27,17 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
 
   useEffect(() => {
     let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setIsLoading(true);
 
     async function fetchIndexPatterns() {
       try {
-        const data = await getIndexPatterns({
-          'kbn-version': kbnVersion,
-        });
+        const data = await getIndexPatterns(
+          {
+            'kbn-version': kbnVersion,
+          },
+          abortCtrl.signal
+        );
 
         if (isSubscribed) {
           setIndexPatterns(data);
@@ -50,6 +54,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
     fetchIndexPatterns();
     return () => {
       isSubscribed = false;
+      abortCtrl.abort();
     };
   }, [refreshToggle]);
 

@@ -27,10 +27,14 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
 
   useEffect(() => {
     let isSubscribed = true;
+    const abortCtrl = new AbortController();
 
     async function fetchMlCapabilities() {
       try {
-        const mlCapabilities = await getMlCapabilities({ 'kbn-version': kbnVersion });
+        const mlCapabilities = await getMlCapabilities(
+          { 'kbn-version': kbnVersion },
+          abortCtrl.signal
+        );
         if (isSubscribed) {
           setCapabilities(mlCapabilities);
         }
@@ -48,6 +52,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
     fetchMlCapabilities();
     return () => {
       isSubscribed = false;
+      abortCtrl.abort();
     };
   }, []);
 
