@@ -13,7 +13,11 @@ import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
+import { ComponentStrings, ErrorStrings } from '../../../i18n';
 import { WorkpadLoader as Component } from './workpad_loader';
+
+const { WorkpadLoader: strings } = ComponentStrings;
+const { WorkpadLoader: errors } = ErrorStrings;
 
 const mapStateToProps = state => ({
   workpadId: getWorkpad(state).id,
@@ -35,7 +39,7 @@ export const WorkpadLoader = compose(
           await workpadService.create(workpad);
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
-          notify.error(err, { title: `Couldn't upload workpad` });
+          notify.error(err, { title: errors.getUploadFailureErrorMessage() });
         }
         return;
       }
@@ -49,7 +53,7 @@ export const WorkpadLoader = compose(
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
       } catch (err) {
-        notify.error(err, { title: `Couldn't find workpads` });
+        notify.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
 
@@ -60,12 +64,12 @@ export const WorkpadLoader = compose(
     cloneWorkpad: props => async workpadId => {
       try {
         const workpad = await workpadService.get(workpadId);
-        workpad.name += ' - Copy';
+        workpad.name += ` - ${strings.getClonedWorkpadNameSuffixLabel()}`;
         workpad.id = getId('workpad');
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
-        notify.error(err, { title: `Couldn't clone workpad` });
+        notify.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
 
@@ -111,7 +115,7 @@ export const WorkpadLoader = compose(
         };
 
         if (errors.length > 0) {
-          notify.error("Couldn't delete all workpads");
+          notify.error(errors.getDeleteFailureErrorMessage());
         }
 
         setWorkpads(workpadState);
