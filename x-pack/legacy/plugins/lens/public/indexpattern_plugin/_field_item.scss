@@ -1,0 +1,22 @@
+.lnsFieldItem {
+  @include euiFontSizeS;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeXS;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:hover {
+    @include euiBottomShadowMedium;
+    z-index: 2;
+    cursor: grab;
+  }
+}
+
+.lnsFieldItem--missing {
+  background: $euiColorLightestShade;
+}
+
+.lnsFieldItem__name {
+  margin-left: $euiSizeXS;
+}
