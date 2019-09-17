@@ -432,8 +432,8 @@ export const metrics = {
     field: 'node_stats.fs.io_stats.total.operations',
     title: nodeIoRateTitle,
     format: LARGE_FLOAT,
-    units: '',
-    type: 'index',
+    units: 'ops',
+    type: 'node',
     derivative: true,
     label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoLabel', {
       defaultMessage: 'Total I/O'
@@ -446,8 +446,8 @@ export const metrics = {
     field: 'node_stats.fs.io_stats.total.read_operations',
     title: nodeIoRateTitle,
     format: LARGE_FLOAT,
-    units: '',
-    type: 'index',
+    units: 'ops',
+    type: 'node',
     derivative: true,
     label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoReadLabel', {
       defaultMessage: 'Total Read I/O'
@@ -460,8 +460,8 @@ export const metrics = {
     field: 'node_stats.fs.io_stats.total.write_operations',
     title: nodeIoRateTitle,
     format: LARGE_FLOAT,
-    units: '',
-    type: 'index',
+    units: 'ops',
+    type: 'node',
     derivative: true,
     label: i18n.translate('xpack.monitoring.metrics.esNode.totalIoWriteLabel', {
       defaultMessage: 'Total Write I/O'
