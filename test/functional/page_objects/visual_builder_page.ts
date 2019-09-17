@@ -23,6 +23,7 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
@@ -334,9 +335,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async createNewAgg(nth = 0) {
+      const prevAggs = await testSubjects.findAll('aggSelector');
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await retry.waitFor('new agg is added', async () => {
+        const currentAggs = await testSubjects.findAll('aggSelector');
+        return currentAggs > prevAggs;
+      });
     }
 
     public async selectAggType(value: string, nth = 0) {
