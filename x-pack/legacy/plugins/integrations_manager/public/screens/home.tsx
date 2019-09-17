@@ -7,11 +7,13 @@ import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   // @ts-ignore (elastic/eui#1557) & (elastic/eui#1262) EuiImage is not exported yet
   EuiImage,
   EuiPage,
   EuiPageBody,
   EuiPageWidthProps,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -42,10 +44,8 @@ function HomeLayout(props: LayoutProps) {
   const { list, restrictWidth } = props;
   if (!list) return null;
 
-  const { theme } = useCore();
-  const FullWidthHeader = styled(EuiPage)`
-    border-bottom: ${theme.eui.euiBorderThin};
-    padding-bottom: ${theme.eui.paddingSizes.s};
+  const FullBleedPage = styled(EuiPage)`
+    padding: 0;
   `;
 
   const availableTitle = 'Available Integrations';
@@ -54,26 +54,29 @@ function HomeLayout(props: LayoutProps) {
 
   return (
     <Fragment>
-      <FullWidthHeader>
+      <FullBleedPage>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Header />
         </EuiPageBody>
-      </FullWidthHeader>
-      <EuiPage>
+      </FullBleedPage>
+      <EuiHorizontalRule margin="none" />
+      <FullBleedPage>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Fragment>
+            <EuiSpacer size="l" />
             <IntegrationListGrid title={installedTitle} list={installedIntegrations} />
+            <EuiHorizontalRule margin="l" />
             <IntegrationListGrid title={availableTitle} list={list} />
           </Fragment>
         </EuiPageBody>
-      </EuiPage>
+      </FullBleedPage>
     </Fragment>
   );
 }
 
 function Header() {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={1}>
         <HeroCopy />
       </EuiFlexItem>
@@ -91,7 +94,7 @@ function HeroCopy() {
   `;
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem>
         <EuiTitle size="l">
           <h1>Add Your Data</h1>
@@ -104,13 +107,16 @@ function HeroCopy() {
 
 function HeroImage() {
   const { toAssets } = useLinks();
+  const FlexGroup = styled(EuiFlexGroup)`
+    margin-bottom: -6px; // puts image directly on EuiHorizontalRule
+  `;
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
+    <FlexGroup gutterSize="none" justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
         url={toAssets('illustration_kibana_getting_started@2x.png')}
       />
-    </EuiFlexGroup>
+    </FlexGroup>
   );
 }

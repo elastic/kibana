@@ -18,7 +18,7 @@ export function IntegrationListGrid({ title, list }: ListProps) {
 
   return (
     <Fragment>
-      <EuiSpacer />
+      <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiText>
@@ -33,7 +33,7 @@ export function IntegrationListGrid({ title, list }: ListProps) {
           </EuiFlexGrid>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="xl" />
     </Fragment>
   );
 }
