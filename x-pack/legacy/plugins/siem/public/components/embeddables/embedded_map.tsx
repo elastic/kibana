@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
@@ -54,49 +53,59 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
-    const setupEmbeddable = async () => {
-      // Configure Embeddables API
-      try {
-        setupEmbeddablesAPI(applyFilterQueryFromKueryExpression);
-      } catch (e) {
-        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
-        setIsLoading(false);
-        setIsError(true);
-        return false;
-      }
-
-      // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-      const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
-        siemDefaultIndices.includes(ip.attributes.title)
-      );
-      if (matchingIndexPatterns.length === 0) {
-        setIsLoading(false);
-        setIsIndexError(true);
-        return;
-      }
-
-      // Create & set Embeddable
-      try {
-        const embeddableObject = await createEmbeddable(
-          getIndexPatternTitleIdMapping(matchingIndexPatterns),
-          queryExpression,
-          startDate,
-          endDate,
-          setQuery
-        );
-        setEmbeddable(embeddableObject);
-      } catch (e) {
-        displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, e.message, dispatchToaster);
-        setIsError(true);
-      }
-      setIsLoading(false);
-    };
-
     // Initial Load useEffect
     useEffect(() => {
+      let isSubscribed = true;
+      async function setupEmbeddable() {
+        // Configure Embeddables API
+        try {
+          setupEmbeddablesAPI(applyFilterQueryFromKueryExpression);
+        } catch (e) {
+          displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+          setIsLoading(false);
+          setIsError(true);
+          return false;
+        }
+
+        // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
+        const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
+          siemDefaultIndices.includes(ip.attributes.title)
+        );
+        if (matchingIndexPatterns.length === 0 && isSubscribed) {
+          setIsLoading(false);
+          setIsIndexError(true);
+          return;
+        }
+
+        // Create & set Embeddable
+        try {
+          const embeddableObject = await createEmbeddable(
+            getIndexPatternTitleIdMapping(matchingIndexPatterns),
+            queryExpression,
+            startDate,
+            endDate,
+            setQuery
+          );
+          if (isSubscribed) {
+            setEmbeddable(embeddableObject);
+          }
+        } catch (e) {
+          if (isSubscribed) {
+            displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, e.message, dispatchToaster);
+            setIsError(true);
+          }
+        }
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
+      }
+
       if (!loadingKibanaIndexPatterns) {
         setupEmbeddable();
       }
+      return () => {
+        isSubscribed = false;
+      };
     }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
     // queryExpression updated useEffect

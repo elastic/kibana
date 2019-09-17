@@ -14,5 +14,15 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
       await testSubjects.clickWhenNotDisabled('mlJobTypeLinkSingleMetricJob');
       await testSubjects.existOrFail('mlPageJobWizard');
     },
+
+    async selectMultiMetricJob() {
+      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkMultiMetricJob');
+      await testSubjects.existOrFail('mlPageJobWizard');
+    },
+
+    async selectPopulationJob() {
+      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkPopulationJob');
+      await testSubjects.existOrFail('mlPageJobWizard');
+    },
   };
 }

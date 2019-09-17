@@ -33,6 +33,7 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { ES_TYPES } from '../../../common/es_types';
@@ -106,6 +107,7 @@ const StandardDeviationAggUi = props => {
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -117,7 +119,12 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={<FormattedMessage id="visTypeTimeseries.stdDeviation.fieldLabel" defaultMessage="Field" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.stdDeviation.fieldLabel"
+                defaultMessage="Field"
+              />
+            }
           >
             <FieldSelect
               fields={fields}
@@ -132,7 +139,12 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('sigma')}
-            label={<FormattedMessage id="visTypeTimeseries.stdDeviation.sigmaLabel" defaultMessage="Sigma" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.stdDeviation.sigmaLabel"
+                defaultMessage="Sigma"
+              />
+            }
           >
             <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
           </EuiFormRow>
@@ -140,7 +152,12 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('mode')}
-            label={<FormattedMessage id="visTypeTimeseries.stdDeviation.modeLabel" defaultMessage="Mode" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.stdDeviation.modeLabel"
+                defaultMessage="Mode"
+              />
+            }
           >
             <EuiComboBox
               options={modeOptions}
