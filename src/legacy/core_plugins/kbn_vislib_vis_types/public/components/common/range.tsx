@@ -64,6 +64,7 @@ function RangeOption<ParamName extends string>({
   return (
     <EuiFormRow label={label} fullWidth={true} isInvalid={!isValidState} error={error} compressed>
       <EuiRange
+        compressed
         fullWidth
         showValue
         max={max}
