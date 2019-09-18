@@ -126,6 +126,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
 
 // Lookup single configuration
 export const agentConfigurationSearchRoute = createRoute(core => ({
+  method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
     body: t.type({

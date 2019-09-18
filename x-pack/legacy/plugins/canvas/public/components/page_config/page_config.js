@@ -30,7 +30,7 @@ export const PageConfig = ({
         switching between pages (for example, when moving from the first page to the second
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
-        <div>
+        <Fragment>
           <EuiFormRow label="Transition" compressed>
             <EuiSelect
               value={transition ? transition.name : ''}
@@ -55,7 +55,7 @@ export const PageConfig = ({
           ) : (
             ''
           )}
-        </div>
+        </Fragment>
       ) : (
         ''
       )}

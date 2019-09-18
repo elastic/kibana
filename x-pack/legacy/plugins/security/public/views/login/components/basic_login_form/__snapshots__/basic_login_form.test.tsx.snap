@@ -8,6 +8,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -36,6 +37,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
