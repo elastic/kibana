@@ -4,11 +4,9 @@
 <titleabbrev>Delete object</titleabbrev>
 ++++
 
-Remove a {kib} saved object. 
+experimental[] Remove a {kib} saved object. 
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 [[saved-objects-api-delete-request]]
 ==== Request
