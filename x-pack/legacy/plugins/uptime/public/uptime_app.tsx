@@ -15,7 +15,7 @@ import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'rea
 import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
-import { MonitorPage, OverviewPage } from './pages';
+import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
@@ -181,6 +181,7 @@ const Application = (props: UptimeAppProps) => {
                               />
                             )}
                           />
+                          <Route component={NotFoundPage} />
                         </Switch>
                       </div>
                     </EuiPage>
