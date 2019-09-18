@@ -92,7 +92,7 @@ export class TooltipControl extends React.Component {
   }
 
   _updatePopoverPosition = () => {
-    if (!this.props.tooltipState || this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+    if (!this.props.tooltipState) {
       return;
     }
 
