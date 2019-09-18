@@ -613,6 +613,7 @@ class ObjectsTableUI extends Component {
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
             <EuiSwitch
               name="includeReferencesDeep"
               label={(

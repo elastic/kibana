@@ -1,0 +1,12 @@
+[[extend]]
+= Extend your use case
+
+[partintro]
+--
+//TBD
+
+* <<xpack-ml>>
+
+--
+
+include::ml/index.asciidoc[]
