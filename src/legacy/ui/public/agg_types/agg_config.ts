@@ -26,14 +26,13 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from 'ui/agg_types';
-import { AggGroupNames } from './editors/default/agg_groups';
-import { AggType, FieldParamType } from '../agg_types';
+import { AggType, FieldParamType, BucketAggType } from '.';
+import { AggGroupNames } from '../vis/editors/default/agg_groups';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
-import { writeParams } from '../agg_types/agg_params';
+import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
-import { Schema } from './editors/default/schemas';
+import { Schema } from '../vis/editors/default/schemas';
 
 export interface AggConfigOptions {
   id: string;
