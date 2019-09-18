@@ -568,7 +568,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
+
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');
