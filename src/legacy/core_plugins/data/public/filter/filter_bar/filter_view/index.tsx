@@ -98,6 +98,8 @@ export function getFilterDisplayText(filter: Filter) {
       return `${prefix}${filter.meta.value}`;
     case 'range':
       return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
+    case 'savedQuery':
+      return `${prefix}#${filter.meta.value}`;
     default:
       return `${prefix}${JSON.stringify(filter.query)}`;
   }
