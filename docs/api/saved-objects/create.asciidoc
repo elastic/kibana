@@ -4,9 +4,7 @@
 <titleabbrev>Create object</titleabbrev>
 ++++
 
-Create a {kib} saved object.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create a {kib} saved object.
 
 [[saved-objects-api-create-request]]
 ==== Request
