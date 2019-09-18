@@ -341,7 +341,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await retry.waitFor('new agg is added', async () => {
         const currentAggs = await testSubjects.findAll('aggSelector');
-        return currentAggs > prevAggs;
+        return currentAggs.length > prevAggs.length;
       });
     }
 
