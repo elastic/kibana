@@ -6,42 +6,26 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     Array [
       Object {
         "field": "id",
-        "name": <FormattedMessage
-          defaultMessage="Id"
-          id="xpack.logstash.pipelinesTable.idColumnLabel"
-          values={Object {}}
-        />,
+        "name": "Id",
         "render": [Function],
         "sortable": true,
       },
       Object {
         "field": "description",
-        "name": <FormattedMessage
-          defaultMessage="Description"
-          id="xpack.logstash.pipelinesTable.descriptionColumnLabel"
-          values={Object {}}
-        />,
+        "name": "Description",
         "render": [Function],
         "sortable": true,
         "truncateText": true,
       },
       Object {
         "field": "lastModifiedHumanized",
-        "name": <FormattedMessage
-          defaultMessage="Last Modified"
-          id="xpack.logstash.pipelinesTable.lastModifiedColumnLabel"
-          values={Object {}}
-        />,
+        "name": "Last modified",
         "render": [Function],
-        "sortable": true,
+        "sortable": [Function],
       },
       Object {
         "field": "username",
-        "name": <FormattedMessage
-          defaultMessage="Modified By"
-          id="xpack.logstash.pipelinesTable.modifiedByColumnLabel"
-          values={Object {}}
-        />,
+        "name": "Modified by",
         "render": [Function],
         "sortable": true,
       },
@@ -112,14 +96,10 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       ],
       "toolsLeft": null,
       "toolsRight": <EuiButton
-        color="primary"
         data-test-subj="btnAdd"
         fill={true}
-        iconSide="left"
         isDisabled={false}
         onClick={[MockFunction]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Create pipeline"

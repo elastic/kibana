@@ -135,6 +135,7 @@ export class GeometryFilterForm extends Component {
         compressed
       >
         <EuiSelect
+          compressed
           options={options}
           value={this.state.relation}
           onChange={this._onRelationChange}
@@ -170,6 +171,7 @@ export class GeometryFilterForm extends Component {
           compressed
         >
           <EuiFieldText
+            compressed
             value={this.state.geometryLabel}
             onChange={this._onGeometryLabelChange}
           />
@@ -207,4 +209,3 @@ export class GeometryFilterForm extends Component {
     );
   }
 }
-

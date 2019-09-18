@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 set -e
-trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+
+if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+else
+  source src/dev/ci_setup/setup_env.sh
+fi
 
 node scripts/build --debug --oss;
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-oss-*-linux-x86_64.tar.gz')"
