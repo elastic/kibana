@@ -47,6 +47,7 @@ import {
   keyCodes,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { isDefaultValue } from '../../lib';
 
@@ -144,9 +145,12 @@ export class Field extends PureComponent {
           JSON.parse(newUnsavedValue);
         } catch (e) {
           isInvalid = true;
-          error = i18n.translate('kbn.management.settings.field.codeEditorSyntaxErrorMessage', {
-            defaultMessage: 'Invalid JSON syntax',
-          });
+          error = (
+            <FormattedMessage
+              id="kbn.management.settings.field.codeEditorSyntaxErrorMessage"
+              defaultMessage="Invalid JSON syntax"
+            />
+          );
         }
         break;
       default:
@@ -397,11 +401,14 @@ export class Field extends PureComponent {
         return (
           <EuiSwitch
             label={
-              !!unsavedValue
-                ? i18n.translate('kbn.management.settings.field.onLabel', { defaultMessage: 'On' })
-                : i18n.translate('kbn.management.settings.field.offLabel', {
-                  defaultMessage: 'Off',
-                })
+              !!unsavedValue ? (
+                <FormattedMessage id="kbn.management.settings.field.onLabel" defaultMessage="On" />
+              ) : (
+                <FormattedMessage
+                  id="kbn.management.settings.field.offLabel"
+                  defaultMessage="Off"
+                />
+              )
             }
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
@@ -507,10 +514,10 @@ export class Field extends PureComponent {
     if (setting.isOverridden) {
       return (
         <EuiText size="xs">
-          {i18n.translate('kbn.management.settings.field.helpText', {
-            defaultMessage:
-              'This setting is overridden by the Kibana server and can not be changed.',
-          })}
+          <FormattedMessage
+            id="kbn.management.settings.field.helpText"
+            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          />
         </EuiText>
       );
     }
@@ -542,9 +549,12 @@ export class Field extends PureComponent {
             aria-label={i18n.translate('kbn.management.settings.field.customSettingAriaLabel', {
               defaultMessage: 'Custom setting',
             })}
-            content={i18n.translate('kbn.management.settings.field.customSettingTooltip', {
-              defaultMessage: 'Custom setting',
-            })}
+            content={
+              <FormattedMessage
+                id="kbn.management.settings.field.customSettingTooltip"
+                defaultMessage="Custom setting"
+              />
+            }
           />
         ) : (
           ''
@@ -589,9 +599,10 @@ export class Field extends PureComponent {
         <EuiText size="xs">
           {type === 'json' ? (
             <Fragment>
-              {i18n.translate('kbn.management.settings.field.defaultValueTypeJsonText', {
-                defaultMessage: 'Default: {value}',
-                values: {
+              <FormattedMessage
+                id="kbn.management.settings.field.defaultValueTypeJsonText"
+                defaultMessage="Default: {value}"
+                values={{
                   value: (
                     <EuiCodeBlock
                       language="json"
@@ -601,19 +612,20 @@ export class Field extends PureComponent {
                       {this.getDisplayedDefaultValue(type, defVal)}
                     </EuiCodeBlock>
                   ),
-                },
-              })}
+                }}
+              />
             </Fragment>
           ) : (
             <Fragment>
-              {i18n.translate('kbn.management.settings.field.defaultValueText', {
-                defaultMessage: 'Default: {value}',
-                values: {
+              <FormattedMessage
+                id="kbn.management.settings.field.defaultValueText"
+                defaultMessage="Default: {value}"
+                values={{
                   value: (
                     <EuiCode>{this.getDisplayedDefaultValue(type, defVal, optionLabels)}</EuiCode>
                   ),
-                },
-              })}
+                }}
+              />
             </Fragment>
           )}
         </EuiText>
@@ -638,9 +650,10 @@ export class Field extends PureComponent {
           onClick={this.resetField}
           data-test-subj={`advancedSetting-resetField-${name}`}
         >
-          {i18n.translate('kbn.management.settings.field.resetToDefaultLinkText', {
-            defaultMessage: 'Reset to default',
-          })}
+          <FormattedMessage
+            id="kbn.management.settings.field.resetToDefaultLinkText"
+            defaultMessage="Reset to default"
+          />
         </EuiLink>
         &nbsp;&nbsp;&nbsp;
       </span>
@@ -665,9 +678,10 @@ export class Field extends PureComponent {
           onClick={this.changeImage}
           data-test-subj={`advancedSetting-changeImage-${name}`}
         >
-          {i18n.translate('kbn.management.settings.field.changeImageLinkText', {
-            defaultMessage: 'Change image',
-          })}
+          <FormattedMessage
+            id="kbn.management.settings.field.changeImageLinkText"
+            defaultMessage="Change image"
+          />
         </EuiLink>
       </span>
     );
@@ -698,9 +712,10 @@ export class Field extends PureComponent {
               disabled={isDisabled || isInvalid}
               data-test-subj={`advancedSetting-saveEditField-${name}`}
             >
-              {i18n.translate('kbn.management.settings.field.saveButtonLabel', {
-                defaultMessage: 'Save',
-              })}
+              <FormattedMessage
+                id="kbn.management.settings.field.saveButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -718,9 +733,10 @@ export class Field extends PureComponent {
               disabled={isDisabled}
               data-test-subj={`advancedSetting-cancelEditField-${name}`}
             >
-              {i18n.translate('kbn.management.settings.field.cancelEditingButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
+              <FormattedMessage
+                id="kbn.management.settings.field.cancelEditingButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

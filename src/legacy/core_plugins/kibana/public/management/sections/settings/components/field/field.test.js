@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field } from './field';
@@ -27,7 +27,7 @@ jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: () => {},
     add: jest.fn(),
-  },
+  }
 }));
 
 import { toastNotifications } from 'ui/notify';
@@ -75,7 +75,7 @@ const settings = {
         length: 1000,
         displayName: '1 kB',
         description: 'Description for 1 kB',
-      },
+      }
     },
   },
   json: {
@@ -129,7 +129,7 @@ const settings = {
       apple: 'Apple',
       orange: 'Orange',
       // Deliberately left out `banana` to test if it also works with missing labels
-    },
+    }
   },
   string: {
     name: 'string:test:setting',
@@ -183,16 +183,21 @@ describe('Field', () => {
 
     describe(`for ${type} setting`, () => {
       it('should render default value if there is no user value set', async () => {
-        const component = shallow(
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+        const component = shallowWithI18nProvider(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
         );
 
         expect(component).toMatchSnapshot();
       });
 
       it('should render as read only with help text if overridden', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithI18nProvider(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               value: userValues[type],
@@ -208,16 +213,21 @@ describe('Field', () => {
       });
 
       it('should render as read only if saving is disabled', async () => {
-        const component = shallow(
-          <Field setting={setting} save={save} clear={clear} enableSaving={false} />
+        const component = shallowWithI18nProvider(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={false}
+          />
         );
 
         expect(component).toMatchSnapshot();
       });
 
       it('should render user value if there is user value is set', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithI18nProvider(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               value: userValues[type],
@@ -232,8 +242,8 @@ describe('Field', () => {
       });
 
       it('should render custom setting icon if it is custom', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithI18nProvider(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               isCustom: true,
@@ -248,10 +258,10 @@ describe('Field', () => {
       });
     });
 
-    if (type === 'select') {
+    if(type === 'select') {
       it('should use options for rendering values', () => {
-        const component = mount(
-          <Field
+        const component = mountWithIntl(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               isCustom: true,
@@ -267,8 +277,8 @@ describe('Field', () => {
       });
 
       it('should use optionLabels for rendering labels', () => {
-        const component = mount(
-          <Field
+        const component = mountWithIntl(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               isCustom: true,
@@ -284,78 +294,72 @@ describe('Field', () => {
       });
     }
 
-    if (type === 'image') {
+    if(type === 'image') {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
         );
 
         const userValue = userValues[type];
-        component.instance().getImageAsBase64 = file => Promise.resolve(file);
+        component.instance().getImageAsBase64 = (file) => Promise.resolve(file);
 
         it('should be able to change value from no value and cancel', async () => {
           await component.instance().onImageChange([userValue]);
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            component.instance().state.unsavedValue === component.instance().state.savedValue
-          ).toBe(true);
+          component.update();
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
+          expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
         });
 
         it('should be able to change value and save', async () => {
           await component.instance().onImageChange([userValue]);
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
+          component.update();
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: userValue });
-          await component.setProps({
-            setting: {
-              ...component.instance().props.setting,
-              value: userValue,
-            },
-          });
+          await component.setProps({ setting: {
+            ...component.instance().props.setting,
+            value: userValue,
+          } });
 
           await component.instance().cancelChangeImage();
           component.update();
         });
 
         it('should be able to change value from existing value and save', async () => {
-          findTestSubject(component, `advancedSetting-changeImage-${setting.name}`).simulate(
-            'click'
-          );
+          findTestSubject(component, `advancedSetting-changeImage-${setting.name}`).simulate('click');
 
           const newUserValue = `${userValue}=`;
           await component.instance().onImageChange([newUserValue]);
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
+          component.update();
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: newUserValue });
-          await component.setProps({
-            setting: {
-              ...component.instance().props.setting,
-              value: newUserValue,
-            },
-          });
+          await component.setProps({ setting: {
+            ...component.instance().props.setting,
+            value: newUserValue,
+          } });
           component.update();
         });
 
         it('should be able to reset to default value', async () => {
-          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate(
-            'click'
-          );
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(clear).toBeCalled();
         });
       });
-    } else if (type === 'markdown' || type === 'json') {
+    } else if(type === 'markdown' || type === 'json') {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
         );
 
         const userValue = userValues[type];
@@ -363,51 +367,46 @@ describe('Field', () => {
 
         it('should be able to change value and cancel', async () => {
           component.instance().onCodeEditorChange(fieldUserValue);
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            component.instance().state.unsavedValue === component.instance().state.savedValue
-          ).toBe(true);
+          component.update();
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
+          expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
         });
 
         it('should be able to change value and save', async () => {
           component.instance().onCodeEditorChange(fieldUserValue);
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
+          component.update();
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: fieldUserValue });
-          await component.setProps({
-            setting: {
-              ...component.instance().props.setting,
-              value: userValue,
-            },
-          });
+          await component.setProps({ setting: {
+            ...component.instance().props.setting,
+            value: userValue,
+          } });
           component.update();
         });
 
-        if (type === 'json') {
+        if(type === 'json') {
           it('should be able to clear value and have empty object populate', async () => {
             component.instance().onCodeEditorChange('');
-            const updated = component.update();
-            expect(updated.instance().state.unsavedValue).toEqual('{}');
+            component.update();
+            expect(component.instance().state.unsavedValue).toEqual('{}');
           });
         }
 
         it('should be able to reset to default value', async () => {
-          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate(
-            'click'
-          );
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(clear).toBeCalled();
         });
       });
     } else {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+          />
         );
 
         const userValue = userValues[type];
@@ -425,36 +424,26 @@ describe('Field', () => {
 
         it('should be able to change value and cancel', async () => {
           component.instance().onFieldChange({ target: { value: fieldUserValue } });
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-            'click'
-          );
-          expect(
-            component.instance().state.unsavedValue === component.instance().state.savedValue
-          ).toBe(true);
+          component.update();
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
+          expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
         });
 
         it('should be able to change value and save', async () => {
           component.instance().onFieldChange({ target: { value: fieldUserValue } });
-          const updated = component.update();
-          findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-            'click'
-          );
+          component.update();
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: fieldUserValue });
-          await component.setProps({
-            setting: {
-              ...component.instance().props.setting,
-              value: userValue,
-            },
-          });
+          await component.setProps({ setting: {
+            ...component.instance().props.setting,
+            value: userValue,
+          } });
           component.update();
         });
 
         it('should be able to reset to default value', async () => {
-          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate(
-            'click'
-          );
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(clear).toBeCalled();
         });
       });
@@ -466,16 +455,22 @@ describe('Field', () => {
       ...settings.string,
       requiresPageReload: true,
     };
-    const component = mount(<Field setting={setting} save={save} clear={clear} />);
-    component.instance().onFieldChange({ target: { value: 'a new value' } });
-    const updated = component.update();
-    findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
+    const wrapper = mountWithIntl(
+      <Field.WrappedComponent
+        setting={setting}
+        save={save}
+        clear={clear}
+      />
+    );
+    wrapper.instance().onFieldChange({ target: { value: 'a new value' } });
+    wrapper.update();
+    findTestSubject(wrapper, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
     expect(save).toHaveBeenCalled();
     await save();
     expect(toastNotifications.add).toHaveBeenCalledWith(
       expect.objectContaining({
         title: expect.stringContaining('Please reload the page'),
-      })
+      }),
     );
   });
 });
