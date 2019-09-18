@@ -28,10 +28,7 @@ import { compareFilters } from './lib/compare_filters';
 import { changeTimeFilter } from './lib/change_time_filter';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { uniqFilters } from './lib/uniq_filters';
-
-// @ts-ignore
 import { extractTimeFilter } from './lib/extract_time_filter';
-// @ts-ignore
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 
 import { PartitionedFilters } from './partitioned_filters';
