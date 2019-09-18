@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, Spaces } from '../../scenarios';
+import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -16,11 +16,6 @@ export default function findActionTests({ getService }: FtrProviderContext) {
 
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const OtherSpace = Spaces.find(space => space.id === 'other');
-
-    if (!OtherSpace) {
-      throw new Error('Space "other" not defined in scenarios');
-    }
 
     afterEach(() => objectRemover.removeAll());
 
@@ -107,7 +102,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
-                OtherSpace.id
+                'other'
               )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
             )
             .auth(user.username, user.password);

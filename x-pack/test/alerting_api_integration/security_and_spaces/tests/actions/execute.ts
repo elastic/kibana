@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, Spaces } from '../../scenarios';
+import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -20,11 +20,6 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const OtherSpace = Spaces.find(space => space.id === 'other');
-
-    if (!OtherSpace) {
-      throw new Error('Space "other" not defined in scenarios');
-    }
 
     before(async () => {
       await es.indices.delete({ index: esTestIndexName, ignore: [404] });
@@ -178,7 +173,7 @@ export default function({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-4:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(OtherSpace.id)}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix('other')}/api/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({

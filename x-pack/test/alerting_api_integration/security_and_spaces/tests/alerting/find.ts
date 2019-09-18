@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { UserAtSpaceScenarios, Spaces } from '../../scenarios';
+import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -17,11 +17,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const OtherSpace = Spaces.find(space => space.id === 'other');
-
-    if (!OtherSpace) {
-      throw new Error('Space "other" not defined in scenarios');
-    }
 
     afterEach(() => objectRemover.removeAll());
 
@@ -88,9 +83,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                OtherSpace.id
-              )}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix('other')}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
