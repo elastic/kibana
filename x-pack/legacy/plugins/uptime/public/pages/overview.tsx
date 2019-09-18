@@ -41,22 +41,10 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
+  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
-  const params = getUrlParams();
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    // TODO: reintegrate pagination in future release
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // TODO: reintegrate sorting in future release
-    // monitorListSortDirection,
-    // monitorListSortField,
-    search,
-  } = params;
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, search } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -93,7 +81,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
     updateUrl({ search: queryText || '' });
-    refreshApp();
   };
 
   const linkParameters = stringifyUrlParams(params);
@@ -124,8 +111,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
+              absoluteStartDate={absoluteDateRangeStart}
+              absoluteEndDate={absoluteDateRangeEnd}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
@@ -135,8 +122,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
+          absoluteStartDate={absoluteDateRangeStart}
+          absoluteEndDate={absoluteDateRangeEnd}
           dangerColor={colors.danger}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}

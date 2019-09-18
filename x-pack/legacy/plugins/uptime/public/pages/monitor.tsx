@@ -47,7 +47,7 @@ export const MonitorPage = ({
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const params = getUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
   useEffect(() => {
