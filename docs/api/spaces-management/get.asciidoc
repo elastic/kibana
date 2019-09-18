@@ -32,6 +32,7 @@ The API returns the following:
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------
