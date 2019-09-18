@@ -28,6 +28,7 @@ import { get, isEqual } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import {
+  CoreStart,
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
@@ -52,6 +53,7 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
+  toasts: CoreStart['notifications']['toasts'];
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns?: IndexPattern[];
@@ -374,6 +376,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBarTopRow
+          toasts={this.props.toasts}
           http={this.props.http}
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
