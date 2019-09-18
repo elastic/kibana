@@ -20,6 +20,7 @@ import Boom from 'boom';
 import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';
+import { isBinaryFileSync } from 'isbinaryfile';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { Commit, FileTree, FileTreeItemType, RepositoryUri } from '../model';
@@ -29,7 +30,6 @@ import {
   GitPrime,
   TreeEntry,
   CommitDescription,
-  TreeDescription,
   TagDescription,
   GitObjectDescription,
   BlobDescription,
@@ -111,16 +111,23 @@ export class GitOperations {
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
     const gitdir = this.repoDir(uri);
     const commit: CommitInfo = await this.getCommitOr404(uri, revision);
-    const file = await GitPrime.readObject({
-      gitdir,
-      oid: commit.id,
-      filepath: path,
-      format: 'content',
-    });
-    if (file && file.type === 'blob') {
-      return file.object as BlobDescription;
+    const git = simplegit(gitdir);
+    try {
+      const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}:${path}`]);
+      return {
+        content(): Buffer {
+          return buffer;
+        },
+        rawsize(): number {
+          return buffer.length;
+        },
+        isBinary(): boolean {
+          return isBinaryFileSync(buffer);
+        },
+      } as BlobDescription;
+    } catch (e) {
+      throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
     }
-    throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
   }
 
   public async getCommit(uri: RepositoryUri, revision: string): Promise<NodeGitCommit> {
@@ -217,20 +224,20 @@ export class GitOperations {
     return ls.iterator();
   }
 
-  private static async readTree(gitdir: string, oid: string): Promise<Tree> {
-    const { type, object } = await GitPrime.readObject({ gitdir, oid });
-    if (type === 'commit') {
-      return await this.readTree(gitdir, (object as CommitDescription).tree);
-    } else if (type === 'tree') {
-      const tree = object as TreeDescription;
-      return {
-        entries: tree.entries,
-        gitdir,
-        oid,
-      } as Tree;
-    } else {
-      throw new Error(`${oid} is not a tree`);
-    }
+  private static async readTree(gitdir: string, oid: string, path: string = '.'): Promise<Tree> {
+    const git = simplegit(gitdir);
+    const lsTree = new LsTreeSummary(git, oid, path, {});
+    const entries = await lsTree.allFiles();
+    return {
+      entries: entries.map(f => ({
+        mode: f.mode,
+        type: f.type,
+        oid: f.id,
+        path: f.path,
+      })),
+      gitdir,
+      oid,
+    } as Tree;
   }
 
   static mode2type(mode: string): FileTreeItemType {
@@ -342,25 +349,32 @@ export class GitOperations {
       }
       return root;
     } else {
-      const obj = await GitPrime.readObject({ gitdir, oid: commit.id, filepath: path });
-      const result: FileTree = {
-        name: path.split('/').pop() || '',
-        path,
-        type: type2item(obj.type!),
-        sha1: obj.oid,
-      };
-      if (result.type === FileTreeItemType.Directory) {
-        await this.fillChildren(
-          result,
-          {
-            gitdir,
-            entries: (obj.object as TreeDescription).entries,
-            oid: obj.oid,
-          },
-          { skip, limit, flatten }
-        );
+      if (path) {
+        const file = (await GitOperations.readTree(gitdir, commit.id, path)).entries[0];
+        const result: FileTree = {
+          name: path.split('/').pop() || '',
+          path,
+          type: type2item(file.type!),
+          sha1: file.oid,
+        };
+        if (file.type === 'tree') {
+          await this.fillChildren(result, await GitOperations.readTree(gitdir, file.oid), {
+            skip,
+            limit,
+            flatten,
+          });
+        }
+        return result;
+      } else {
+        const root: FileTree = {
+          name: '',
+          path: '',
+          type: FileTreeItemType.Directory,
+        };
+        const tree = await GitOperations.readTree(gitdir, commit.id, '.');
+        await this.fillChildren(root, tree, { skip, limit, flatten });
+        return root;
       }
-      return result;
     }
   }
 
@@ -650,7 +664,7 @@ export class GitOperations {
         if (oid.length < 40) {
           oid = await GitPrime.expandOid({ gitdir, oid });
         }
-        obj = await GitPrime.readObject({ gitdir, oid, format: 'parsed' });
+        obj = await GitPrime.readObject({ gitdir, oid });
       } catch (e) {
         // expandOid or readObject failed
       }
@@ -669,7 +683,7 @@ export class GitOperations {
         }
       }
       if (oid) {
-        obj = await GitPrime.readObject({ gitdir, oid, format: 'parsed' });
+        obj = await GitPrime.readObject({ gitdir, oid });
       }
     }
     if (obj) {
