@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButton,
-  EuiPopover,
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
