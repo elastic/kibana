@@ -275,6 +275,7 @@ describe('#start()', () => {
       application: expect.any(Object),
       chrome: expect.any(Object),
       injectedMetadata: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
