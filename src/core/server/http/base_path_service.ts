@@ -22,13 +22,15 @@ import { modifyUrl } from '../../utils';
 
 export class BasePath {
   private readonly basePathCache = new WeakMap<LegacyRequest, string>();
+  public readonly serverBasePath: string;
 
-  constructor(private readonly serverBasePath?: string) {}
+  constructor(serverBasePath?: string) {
+    this.serverBasePath = serverBasePath || '';
+  }
 
   public get = (request: KibanaRequest | LegacyRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
-    const serverBasePath = this.serverBasePath || '';
-    return `${serverBasePath}${requestScopePath}`;
+    return `${this.serverBasePath}${requestScopePath}`;
   };
 
   // should work only for KibanaRequest as soon as spaces migrate to NP
@@ -44,7 +46,7 @@ export class BasePath {
   };
 
   public prepend = (path: string): string => {
-    if (!this.serverBasePath) return path;
+    if (this.serverBasePath === '') return path;
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.serverBasePath}${parts.pathname}`;
@@ -53,7 +55,7 @@ export class BasePath {
   };
 
   public remove = (path: string): string => {
-    if (!this.serverBasePath) {
+    if (this.serverBasePath === '') {
       return path;
     }
 
