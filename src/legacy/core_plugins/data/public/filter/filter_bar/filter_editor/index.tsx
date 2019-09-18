@@ -186,12 +186,8 @@ class FilterEditorUI extends Component<Props, State> {
             </EuiFlexGroup>
 
             {this.renderIndexPatternInput()}
-            {/* this.is where we render the different editors, REFACTOR! */}
-            {this.state.isCustomEditorOpen
-              ? this.renderCustomEditor()
-              : this.state.isSavedQueryEditorOpen
-              ? this.renderSavedQueryEditor()
-              : this.renderRegularEditor()}
+
+            {this.renderEditor()}
 
             <EuiSpacer size="m" />
 
@@ -256,6 +252,15 @@ class FilterEditorUI extends Component<Props, State> {
         </div>
       </div>
     );
+  }
+  private renderEditor() {
+    if (this.state.isCustomEditorOpen) {
+      return this.renderCustomEditor();
+    } else if (this.state.isSavedQueryEditorOpen) {
+      return this.renderSavedQueryEditor();
+    } else {
+      return this.renderRegularEditor();
+    }
   }
 
   private renderIndexPatternInput() {
@@ -424,16 +429,25 @@ class FilterEditorUI extends Component<Props, State> {
         );
     }
   }
-
+  private renderSavedQueryList() {
+    return (
+      <ul>
+        <li key={1}>Saved Query 1</li>
+        <li key={2}>Saved Query 2</li>
+        <li key={3}>Saved Query 3</li>
+        <li key={4}>Saved Query 4</li>
+      </ul>
+    );
+  }
   private renderSavedQueryEditor() {
     return (
-      <EuiFormRow
-        label={i18n.translate('data.filter.filterEditor.savedQueryLabel', {
-          defaultMessage: 'Saved query',
-        })}
-      >
-        <div>Saved Queries List</div>
-      </EuiFormRow>
+      <div>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderSavedQueryList()}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
+      </div>
     );
   }
 
