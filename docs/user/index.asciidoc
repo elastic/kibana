@@ -28,8 +28,6 @@ include::{kib-repo-dir}/apm/index.asciidoc[]
 
 include::{kib-repo-dir}/uptime/index.asciidoc[]
 
-include::graph/index.asciidoc[]
-
 include::dev-tools.asciidoc[]
 
 include::monitoring/index.asciidoc[]
