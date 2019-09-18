@@ -23,6 +23,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { vislibVisController } from './controller';
+import './controls/heatmap_options';
 
 export default function HeatmapVisType() {
 

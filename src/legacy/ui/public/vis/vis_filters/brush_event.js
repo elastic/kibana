@@ -39,6 +39,8 @@ export function onBrushEvent(event) {
 
   const min = event.range[0];
   const max = event.range[event.range.length - 1];
+  if (min === max) return [];
+
   let range;
 
   if (isDate) {
