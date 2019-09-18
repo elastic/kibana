@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
@@ -69,10 +69,6 @@ export const useLogAnalysisJobs = ({
     [indexPattern, spaceId, sourceId]
   );
 
-  useEffect(() => {
-    fetchJobStatus();
-  }, []);
-
   const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [
     fetchJobStatusRequest.state,
   ]);
@@ -96,6 +92,7 @@ export const useLogAnalysisJobs = ({
   );
 
   return {
+    fetchJobStatus,
     setupMlModuleRequest,
     jobStatus: statusState.jobStatus,
     isLoadingSetupStatus,

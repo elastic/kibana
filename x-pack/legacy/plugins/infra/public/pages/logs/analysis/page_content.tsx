@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import { LoadingPage } from '../../../components/loading_page';
 import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
@@ -22,6 +22,10 @@ export const AnalysisPageContent = () => {
   const { setup, retry, setupStatus, viewResults, fetchJobStatus } = useContext(
     LogAnalysisJobs.Context
   );
+
+  useEffect(() => {
+    fetchJobStatus();
+  }, []);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
