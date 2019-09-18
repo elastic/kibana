@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '../../../../../../plugins/data/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 import { Query } from '../../../../../../plugins/data/public';
 import { ExpressionAST } from '../../../../../../plugins/expressions/common';
@@ -68,13 +68,13 @@ export interface IInterpreterRenderHandlers {
   event: (event: event) => void;
 }
 
-export interface IInterpreterRenderFunction {
+export interface IInterpreterRenderFunction<T = unknown> {
   name: string;
   displayName: string;
   help: string;
   validate: () => void;
   reuseDomNode: boolean;
-  render: (domNode: Element, data: unknown, handlers: IInterpreterRenderHandlers) => void;
+  render: (domNode: Element, data: T, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
 }
 
 export interface IInterpreter {
