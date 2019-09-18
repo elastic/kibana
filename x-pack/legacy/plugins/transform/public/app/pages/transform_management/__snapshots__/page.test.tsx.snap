@@ -6,7 +6,7 @@ exports[`Transform: Job List <Page /> Minimal initialization 1`] = `
     transformsList={Array []}
   />
   <EuiPage
-    data-test-subj="mlPageTransform"
+    data-test-subj="transformPageTransform"
     restrictWidth={false}
   >
     <EuiPageBody

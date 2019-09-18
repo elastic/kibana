@@ -92,5 +92,5 @@ interface Props {
 export const TransformStatsBar: FC<Props> = ({ transformsList }) => {
   const transformStats: TransformStatsBarStats = createTranformStats(transformsList);
 
-  return <StatsBar stats={transformStats} dataTestSub={'mlTransformStatsBar'} />;
+  return <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />;
 };

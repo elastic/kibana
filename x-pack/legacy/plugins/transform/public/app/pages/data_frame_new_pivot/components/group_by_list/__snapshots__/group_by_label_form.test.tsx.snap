@@ -7,7 +7,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -16,7 +16,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
@@ -27,7 +27,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     </EuiTextColor>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -43,7 +43,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
       closePopover={[Function]}
       display="inlineBlock"
       hasArrow={true}
-      id="mlIntervalFormPopover"
+      id="transformIntervalFormPopover"
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="m"
@@ -65,7 +65,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon
@@ -85,7 +85,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -94,7 +94,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
@@ -105,7 +105,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
     </EuiTextColor>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -121,7 +121,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
       closePopover={[Function]}
       display="inlineBlock"
       hasArrow={true}
-      id="mlIntervalFormPopover"
+      id="transformIntervalFormPopover"
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="m"
@@ -143,7 +143,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon
@@ -163,7 +163,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -172,7 +172,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -188,7 +188,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
       closePopover={[Function]}
       display="inlineBlock"
       hasArrow={true}
-      id="mlIntervalFormPopover"
+      id="transformIntervalFormPopover"
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="m"
@@ -209,7 +209,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon

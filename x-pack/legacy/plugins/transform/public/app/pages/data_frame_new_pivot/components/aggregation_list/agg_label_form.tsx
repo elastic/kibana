@@ -38,12 +38,12 @@ export const AggLabelForm: React.SFC<Props> = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem className="mlAggregationLabel--text">
+      <EuiFlexItem className="transform__AggregationLabel--text">
         <span className="eui-textTruncate">{item.aggName}</span>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiPopover
-          id="mlFormPopover"
+          id="transformFormPopover"
           ownFocus
           button={
             <EuiButtonIcon
@@ -66,7 +66,7 @@ export const AggLabelForm: React.SFC<Props> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',

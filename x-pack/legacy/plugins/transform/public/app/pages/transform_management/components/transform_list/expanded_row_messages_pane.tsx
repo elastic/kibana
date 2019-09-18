@@ -56,9 +56,12 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
       } catch (error) {
         setIsLoading(false);
         setErrorMessage(
-          i18n.translate('xpack.ml.dfTransformList.transformDetails.messagesPane.errorMessage', {
-            defaultMessage: 'Messages could not be loaded',
-          })
+          i18n.translate(
+            'xpack.transform.transformList.transformDetails.messagesPane.errorMessage',
+            {
+              defaultMessage: 'Messages could not be loaded',
+            }
+          )
         );
       }
     };
@@ -73,22 +76,31 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
       width: `${theme.euiSizeXL}px`,
     },
     {
-      name: i18n.translate('xpack.ml.dfTransformList.transformDetails.messagesPane.timeLabel', {
-        defaultMessage: 'Time',
-      }),
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.messagesPane.timeLabel',
+        {
+          defaultMessage: 'Time',
+        }
+      ),
       render: (message: any) => formatDate(message.timestamp, TIME_FORMAT),
     },
     {
       field: 'node_name',
-      name: i18n.translate('xpack.ml.dfTransformList.transformDetails.messagesPane.nodeLabel', {
-        defaultMessage: 'Node',
-      }),
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.messagesPane.nodeLabel',
+        {
+          defaultMessage: 'Node',
+        }
+      ),
     },
     {
       field: 'message',
-      name: i18n.translate('xpack.ml.dfTransformList.transformDetails.messagesPane.messageLabel', {
-        defaultMessage: 'Message',
-      }),
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.messagesPane.messageLabel',
+        {
+          defaultMessage: 'Message',
+        }
+      ),
       width: '50%',
     },
   ];
@@ -133,7 +145,7 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
     <Fragment>
       <EuiSpacer size="s" />
       <EuiBasicTable
-        className="mlTransformTable__messagesPaneTable"
+        className="transform__TransformTable__messagesPaneTable"
         items={pageOfMessages}
         columns={columns}
         compressed={true}

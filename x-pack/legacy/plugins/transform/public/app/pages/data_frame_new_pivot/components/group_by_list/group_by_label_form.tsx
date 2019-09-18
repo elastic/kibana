@@ -52,19 +52,22 @@ export const GroupByLabelForm: React.SFC<Props> = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem className="mlGroupByLabel--text">
+      <EuiFlexItem className="transform__GroupByLabel--text">
         <span className="eui-textTruncate">{item.aggName}</span>
       </EuiFlexItem>
       {interval !== undefined && (
-        <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
+        <EuiFlexItem
+          grow={false}
+          className="transform__GroupByLabel--text transform__GroupByLabel--interval"
+        >
           <EuiTextColor color="subdued" className="eui-textTruncate">
             {interval}
           </EuiTextColor>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiPopover
-          id="mlIntervalFormPopover"
+          id="transformIntervalFormPopover"
           ownFocus
           button={
             <EuiButtonIcon
@@ -87,7 +90,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.transform.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',

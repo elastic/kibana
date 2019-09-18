@@ -7,7 +7,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlAggregationLabel--text"
+    className="transform__AggregationLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -16,7 +16,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -32,7 +32,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
       closePopover={[Function]}
       display="inlineBlock"
       hasArrow={true}
-      id="mlFormPopover"
+      id="transformFormPopover"
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="m"
@@ -53,7 +53,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--button"
+    className="transform__GroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon

@@ -18,7 +18,7 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   isLoading,
 }) => (
   <EuiButtonEmpty
-    data-test-subj="mlRefreshTransformListButton"
+    data-test-subj="transformRefreshTransformListButton"
     onClick={onClick}
     isLoading={isLoading}
   >

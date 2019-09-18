@@ -52,7 +52,7 @@ export const getTaskStateBadge = (
   if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
-        <EuiBadge className="mlTaskStateBadge" color={color}>
+        <EuiBadge className="transform__TaskStateBadge" color={color}>
           {state}
         </EuiBadge>
       </EuiToolTip>
@@ -60,7 +60,7 @@ export const getTaskStateBadge = (
   }
 
   return (
-    <EuiBadge className="mlTaskStateBadge" color={color}>
+    <EuiBadge className="transform__TaskStateBadge" color={color}>
       {state}
     </EuiBadge>
   );

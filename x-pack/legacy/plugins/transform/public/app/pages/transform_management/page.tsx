@@ -58,7 +58,7 @@ export const Page: FC = () => {
   return (
     <Fragment>
       <TransformStatsBar transformsList={transforms} />
-      <EuiPage data-test-subj="mlPageTransform">
+      <EuiPage data-test-subj="transformPageTransform">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>

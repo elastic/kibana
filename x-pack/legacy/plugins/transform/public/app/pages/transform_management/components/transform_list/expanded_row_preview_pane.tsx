@@ -153,7 +153,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
       } catch (error) {
         setIsLoading(false);
         setErrorMessage(
-          i18n.translate('xpack.ml.dfTransformList.stepDetails.previewPane.errorMessage', {
+          i18n.translate('xpack.transform.transformList.stepDetails.previewPane.errorMessage', {
             defaultMessage: 'Preview could not be loaded',
           })
         );

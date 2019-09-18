@@ -22,9 +22,9 @@ import { MlInMemoryTableBasic } from '../../../../../../../ml/public/components/
 export const ProgressBar = ({ isLoading = false }) => {
   return (
     <Fragment>
-      {isLoading && <EuiProgress className="mlTransformProgressBar" size="xs" color="primary" />}
+      {isLoading && <EuiProgress className="transform__ProgressBar" size="xs" color="primary" />}
       {!isLoading && (
-        <EuiProgress className="mlTransformProgressBar" value={0} max={100} size="xs" />
+        <EuiProgress className="transform__ProgressBar" value={0} max={100} size="xs" />
       )}
     </Fragment>
   );

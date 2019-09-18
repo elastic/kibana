@@ -16,7 +16,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
         </EuiButtonEmpty>,
       ]
     }
-    data-test-subj="mlNoTransformsFound"
+    data-test-subj="transformNoTransformsFound"
     iconColor="subdued"
     title={
       <h2>

@@ -219,7 +219,7 @@ export const TransformList: SFC<Props> = ({
               })}
             </EuiButtonEmpty>,
           ]}
-          data-test-subj="mlNoTransformsFound"
+          data-test-subj="transformNoTransformsFound"
         />
       </Fragment>
     );
@@ -245,13 +245,13 @@ export const TransformList: SFC<Props> = ({
   };
 
   const bulkActionMenuItems = [
-    <div key="startAction" className="mlTransformBulkActionItem">
+    <div key="startAction" className="transform__BulkActionItem">
       <StartAction items={transformSelection} />
     </div>,
-    <div key="stopAction" className="mlTransformBulkActionItem">
+    <div key="stopAction" className="transform__BulkActionItem">
       <StopAction items={transformSelection} />
     </div>,
-    <div key="deleteAction" className="mlTransformBulkActionItem">
+    <div key="deleteAction" className="transform__BulkActionItem">
       <DeleteAction items={transformSelection} />
     </div>,
   ];
@@ -297,7 +297,7 @@ export const TransformList: SFC<Props> = ({
           })}
         </h3>
       </EuiTitle>,
-      <div key="bulkActionsBorder" className="mlTransformBulkActionsBorder" />,
+      <div key="bulkActionsBorder" className="transform__BulkActionsBorder" />,
       bulkActionIcon,
     ];
   };
@@ -329,7 +329,7 @@ export const TransformList: SFC<Props> = ({
           value: val,
           name: val,
           view: (
-            <EuiBadge className="mlTaskModeBadge" color="hollow">
+            <EuiBadge className="transform__TaskModeBadge" color="hollow">
               {val}
             </EuiBadge>
           ),
@@ -360,7 +360,7 @@ export const TransformList: SFC<Props> = ({
       <ProgressBar isLoading={isLoading || transformsLoading} />
       <TransformTable
         allowNeutralSort={false}
-        className="mlTransformTable"
+        className="transform__TransformTable"
         columns={columns}
         error={searchError}
         hasActions={false}

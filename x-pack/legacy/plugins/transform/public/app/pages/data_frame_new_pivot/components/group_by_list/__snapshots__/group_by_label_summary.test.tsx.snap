@@ -7,7 +7,7 @@ exports[`Transform: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -16,7 +16,7 @@ exports[`Transform: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
@@ -36,7 +36,7 @@ exports[`Transform: <GroupByLabelSummary /> Histogram aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"
@@ -45,7 +45,7 @@ exports[`Transform: <GroupByLabelSummary /> Histogram aggregation 1`] = `
     </span>
   </EuiFlexItem>
   <EuiFlexItem
-    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
@@ -65,7 +65,7 @@ exports[`Transform: <GroupByLabelSummary /> Terms aggregation 1`] = `
   responsive={false}
 >
   <EuiFlexItem
-    className="mlGroupByLabel--text"
+    className="transform__GroupByLabel--text"
   >
     <span
       className="eui-textTruncate"

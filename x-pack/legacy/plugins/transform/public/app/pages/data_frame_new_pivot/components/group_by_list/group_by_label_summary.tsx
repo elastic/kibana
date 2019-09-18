@@ -26,11 +26,14 @@ export const GroupByLabelSummary: React.SFC<Props> = ({ item, optionsDataId }) =
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem className="mlGroupByLabel--text">
+      <EuiFlexItem className="transform__GroupByLabel--text">
         <span className="eui-textTruncate">{optionsDataId}</span>
       </EuiFlexItem>
       {interval !== undefined && (
-        <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
+        <EuiFlexItem
+          grow={false}
+          className="transform__GroupByLabel--text transform__GroupByLabel--interval"
+        >
           <EuiTextColor color="subdued" className="eui-textTruncate">
             {interval}
           </EuiTextColor>

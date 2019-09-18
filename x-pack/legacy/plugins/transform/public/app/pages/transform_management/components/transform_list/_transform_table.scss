@@ -1,4 +1,4 @@
-.mlTransformTable {
+.transform__TransformTable {
   // Using an override as a last resort because we cannot set custom classes on
   // nested upstream components. The opening animation limits the height
   // of the expanded row to 1000px which turned out to be not predictable.
@@ -17,14 +17,14 @@
     animation: none !important;
   }
 }
-.mlTransformBulkActionItem {
+.transform__BulkActionItem {
   display: block;
   padding: $euiSizeS;
   width: 100%;
   text-align: left;
 }
 
-.mlTransformBulkActionsBorder {
+.transform__BulkActionsBorder {
     height: 20px;
     border-right: $euiBorderThin;
     width: 1px;
@@ -35,14 +35,14 @@
     margin-top: -5px;
 }
 
-.mlTransformProgressBar {
+.transform__ProgressBar {
   margin-bottom: $euiSizeM;
 }
 
-.mlTaskStateBadge, .mlTaskModeBadge {
+.transform__TaskStateBadge, .transform__TaskModeBadge {
   max-width: 100px;
 }
 
-.mlTransformTable__messagesPaneTable .euiTableCellContent__text {
+.transform__TransformTable__messagesPaneTable .euiTableCellContent__text {
   text-align: left;
 }
