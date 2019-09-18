@@ -198,7 +198,7 @@ Array [
           },
         ],
       },
-      "index": "heartbeat-8*",
+      "index": "heartbeat*",
     },
   ],
   Array [
@@ -556,7 +556,7 @@ Array [
           },
         ],
       },
-      "index": "heartbeat-8*",
+      "index": "heartbeat*",
     },
   ],
   Array [
@@ -613,7 +613,7 @@ Array [
         },
         "size": 0,
       },
-      "index": "heartbeat-8*",
+      "index": "heartbeat*",
     },
   ],
 ]
