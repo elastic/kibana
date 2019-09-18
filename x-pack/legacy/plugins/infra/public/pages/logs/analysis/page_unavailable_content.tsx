@@ -8,14 +8,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 export const AnalysisUnavailableContent: React.FunctionComponent<{}> = () => (
-  <EuiEmptyPrompt
+  <EmptyPrompt
     title={
       <h2>
         <FormattedMessage
           id="xpack.infra.logs.analysisPage.unavailable.mLDisabledTitle"
-          defaultMessage="The Analysis feature requires Machine Learning."
+          defaultMessage="The Analysis feature requires Machine Learning"
         />
       </h2>
     }
@@ -46,3 +47,7 @@ export const AnalysisUnavailableContent: React.FunctionComponent<{}> = () => (
     }
   />
 );
+
+const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+  align-self: center;
+`;
