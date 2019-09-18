@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 
@@ -11,7 +11,7 @@ import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { Pin } from '../../../pin';
 import { NotesButton } from '../../properties/helpers';
-import { EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
+import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 
@@ -74,7 +74,7 @@ export const Actions = React.memo<Props>(
 
       <EventsTd>
         <EventsTdContent textAlign="center">
-          {loading && <EuiLoadingSpinner />}
+          {loading && <EventsLoading />}
 
           {!loading && (
             <EuiButtonIcon

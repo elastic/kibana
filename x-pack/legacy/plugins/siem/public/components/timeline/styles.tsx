@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
@@ -89,6 +90,10 @@ export const EventsTh = styled.div.attrs({
     css`
       flex: 0 0 ${colWidth};
     `}
+
+  .siemEventsTable__thGroupData &:hover {
+    background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
+  }
 `;
 EventsTh.displayName = 'EventsTh';
 
@@ -291,3 +296,8 @@ export const EventsHeadingHandle = styled.div.attrs({
   `}
 `;
 EventsHeadingHandle.displayName = 'EventsHeadingHandle';
+
+export const EventsLoading = styled(EuiLoadingSpinner)`
+  margin: ${({ theme }) => theme.eui.euiSizeXS};
+  vertical-align: top;
+`;

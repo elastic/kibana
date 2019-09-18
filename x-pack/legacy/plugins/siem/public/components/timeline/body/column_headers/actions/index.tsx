@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 
 import { OnColumnRemoved } from '../../../events';
-import { EventsHeadingExtra } from '../../../styles';
+import { EventsHeadingExtra, EventsLoading } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { ColumnHeader } from '../column_header';
@@ -48,7 +48,7 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
     <>
       {sort.columnId === header.id && isLoading ? (
         <EventsHeadingExtra className="siemEventsHeading__extra--loading">
-          <EuiLoadingSpinner />
+          <EventsLoading />
         </EventsHeadingExtra>
       ) : (
         <EventsHeadingExtra className="siemEventsHeading__extra--close">
