@@ -62,7 +62,7 @@ export const DurationChart = ({
   loading,
 }: DurationChartProps) => {
   const [getUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
+  const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average-');
 
@@ -99,18 +99,12 @@ export const DurationChart = ({
         </EuiTitle>
         <ChartWrapper height="400px" loading={loading}>
           <Chart>
-            <Settings
-              xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
-              showLegend={true}
-              legendPosition={Position.Bottom}
-            />
+            <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
             <Axis
               id={getAxisId('bottom')}
               position={Position.Bottom}
               showOverlappingTicks={true}
-              tickFormat={timeFormatter(
-                getChartDateLabel(absoluteDateRangeStart, absoluteDateRangeEnd)
-              )}
+              tickFormat={timeFormatter(getChartDateLabel(min, max))}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
                 defaultMessage: 'Timestamp',
               })}

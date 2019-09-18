@@ -48,7 +48,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
   const upSeriesSpecId = getSpecId('Up');
   const downSeriesSpecId = getSpecId('Down');
   const [getUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
+  const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
     defaultMessage: 'Up count',
@@ -72,17 +72,12 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings
-            xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
-            showLegend={false}
-          />
+          <Settings xDomain={{ min, max }} showLegend={false} />
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={timeFormatter(
-              getChartDateLabel(absoluteDateRangeStart, absoluteDateRangeEnd)
-            )}
+            tickFormat={timeFormatter(getChartDateLabel(min, max))}
             title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
               defaultMessage: 'Timestamp',
               description: 'The heading of the x-axis of a chart of timeseries data.',
