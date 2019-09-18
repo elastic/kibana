@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Shard should show for assigned primary shards 1`] = `
-<div
+<EuiFlexItem
   className="shard primary started master"
   data-shard-classification="shard primary started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -14,15 +15,16 @@ exports[`Shard should show for assigned primary shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
 
 exports[`Shard should show for assigned replica shards 1`] = `
-<div
+<EuiFlexItem
   className="shard replica started master"
   data-shard-classification="shard replica started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -31,15 +33,16 @@ exports[`Shard should show for assigned replica shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
 
 exports[`Shard should show for initializing shards 1`] = `
-<div
+<EuiFlexItem
   className="shard primary initializing master"
   data-shard-classification="shard primary initializing master 0"
   data-shard-tooltip="Initializing"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -48,15 +51,16 @@ exports[`Shard should show for initializing shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
 
 exports[`Shard should show for relocating shards 1`] = `
-<div
+<EuiFlexItem
   className="shard primary relocating master"
   data-shard-classification="shard primary relocating master 0"
   data-shard-tooltip="Relocating"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -65,15 +69,16 @@ exports[`Shard should show for relocating shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
 
 exports[`Shard should show unassigned primary shards 1`] = `
-<div
+<EuiFlexItem
   className="shard primary unassigned emergency master"
   data-shard-classification="shard primary unassigned emergency master 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -82,15 +87,16 @@ exports[`Shard should show unassigned primary shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
 
 exports[`Shard should show unassigned replica shards 1`] = `
-<div
+<EuiFlexItem
   className="shard replica unassigned"
   data-shard-classification="shard replica unassigned 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"
+  grow={false}
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
@@ -99,5 +105,5 @@ exports[`Shard should show unassigned replica shards 1`] = `
   >
     0
   </EuiBadge>
-</div>
+</EuiFlexItem>
 `;
