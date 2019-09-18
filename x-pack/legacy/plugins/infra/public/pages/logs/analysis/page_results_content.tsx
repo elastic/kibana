@@ -19,20 +19,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
+  LogAnalysisJobs,
   StringTimeRange,
   useLogAnalysisResults,
   useLogAnalysisResultsUrlState,
 } from '../../../containers/logs/log_analysis';
+import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { FirstUseCallout } from './first_use';
 import { LogRateResults } from './sections/log_rate';
+
+const JOB_STATUS_POLLING_INTERVAL = 10000;
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -136,6 +140,12 @@ export const AnalysisResultsContent = ({
       }
     }
   }, [logEntryRate]);
+
+  const { fetchJobStatus, jobStatus } = useContext(LogAnalysisJobs.Context);
+
+  useInterval(() => {
+    fetchJobStatus();
+  }, JOB_STATUS_POLLING_INTERVAL);
 
   return (
     <>
