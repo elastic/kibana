@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { LineSeries, CurveType, getSpecId, ScaleType } from '@elastic/charts';
+import { LineSeries, CurveType, getSpecId } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -27,10 +27,10 @@ export const DurationLineSeriesList = ({ lines, meanColor }: Props) => (
         key={`locline-${name}`}
         name={name}
         xAccessor={0}
-        xScaleType={ScaleType.Time}
+        xScaleType="time"
         yAccessors={[1]}
         yScaleToDataExtent={false}
-        yScaleType={ScaleType.Linear}
+        yScaleType="linear"
       />
     ))}
   </>
