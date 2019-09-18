@@ -68,11 +68,11 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   private subscription?: Subscription;
   public state = {
-    chartsTheme: npStart.plugins.eui_chart_utils.getChartsThemeDefault(),
+    chartsTheme: npStart.plugins.eui_utils.getChartsThemeDefault(),
   };
 
   componentDidMount() {
-    this.subscription = npStart.plugins.eui_chart_utils
+    this.subscription = npStart.plugins.eui_utils
       .getChartsTheme$()
       .subscribe(chartsTheme => this.setState({ chartsTheme }));
   }

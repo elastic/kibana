@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiChartUtils } from './eui_chart_utils';
+import { EuiUtils } from './eui_utils';
 
-export const plugin = () => new EuiChartUtils();
-export type EuiChartUtilsStart = ReturnType<EuiChartUtils['start']>;
+export const plugin = () => new EuiUtils();
+export type EuiUtilsStart = ReturnType<EuiUtils['start']>;

@@ -92,7 +92,7 @@ const getTimeBuckets = (watch: any) => {
 
 export const WatchVisualization = () => {
   const { watch } = useContext(WatchContext);
-  const chartsTheme = npStart.plugins.eui_chart_utils.useChartsTheme();
+  const chartsTheme = npStart.plugins.eui_utils.useChartsTheme();
   const {
     index,
     timeField,

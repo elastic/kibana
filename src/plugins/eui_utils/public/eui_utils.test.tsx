@@ -21,18 +21,18 @@ import { BehaviorSubject } from 'rxjs';
 import { renderHook, act } from 'react-hooks-testing-library';
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { EuiChartUtils } from './eui_chart_utils';
+import { EuiUtils } from './eui_utils';
 import { coreMock } from '../../../core/public/mocks';
 import { take } from 'rxjs/operators';
 const startMock = coreMock.createStart();
 
-describe('EuiChartUtils', () => {
+describe('EuiUtils', () => {
   describe('getChartsTheme()', () => {
     it('returns the light theme when not in dark mode', async () => {
       startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(false));
 
       expect(
-        await new EuiChartUtils()
+        await new EuiUtils()
           .start(startMock)
           .getChartsTheme$()
           .pipe(take(1))
@@ -46,7 +46,7 @@ describe('EuiChartUtils', () => {
         startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(true));
 
         expect(
-          await new EuiChartUtils()
+          await new EuiUtils()
             .start(startMock)
             .getChartsTheme$()
             .pipe(take(1))
@@ -60,7 +60,7 @@ describe('EuiChartUtils', () => {
     it('updates when the uiSettings change', () => {
       const darkMode$ = new BehaviorSubject(false);
       startMock.uiSettings.get$.mockReturnValue(darkMode$);
-      const { useChartsTheme } = new EuiChartUtils().start(startMock);
+      const { useChartsTheme } = new EuiUtils().start(startMock);
 
       const { result } = renderHook(() => useChartsTheme());
       expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
