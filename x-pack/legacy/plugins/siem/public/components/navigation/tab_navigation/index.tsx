@@ -23,6 +23,10 @@ const TabContainer = styled.div`
       outline: 0;
       background: none;
     }
+
+    .euiTab.euiTab-isSelected {
+      cursor: pointer;
+    }
   }
 
   &.showBorder {
