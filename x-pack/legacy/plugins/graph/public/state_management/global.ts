@@ -8,3 +8,4 @@ import actionCreatorFactory from 'typescript-fsa';
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
 export const reset = actionCreator<void>('RESET');
+export const loadSavedWorkspace = actionCreator<SavedGraphWorkspace>('LOAD_WORKSPACE');

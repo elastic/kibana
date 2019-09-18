@@ -733,6 +733,11 @@ app.controller('graphuiPlugin', function (
 
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
+    // this should trigger everything below
+    $scope.reduxDispatch({
+      type: 'x-pack/graph/LOAD_WORKSPACE',
+      payload: $route.current.locals.savedWorkspace,
+    });
     $scope.savedWorkspace = $route.current.locals.savedWorkspace;
     const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $route.current.locals.indexPatterns);
     if(!selectedIndex) {

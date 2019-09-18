@@ -24,24 +24,29 @@ export interface IndexpatternDatasource {
   title: string;
 }
 
-export type DatasourceState = NoDatasource | IndexpatternDatasource;
+export type DatasourceState = { current: NoDatasource | IndexpatternDatasource, loading: boolean;  };
 
-export const setDatasource = actionCreator<DatasourceState>('SET_DATASOURCE');
+export const setDatasource = actionCreator<NoDatasource | IndexpatternDatasource>('SET_DATASOURCE_REQUEST');
+export const datasourceLoaded = actionCreator<void>('SET_DATASOURCE_SUCCESS');
 
 const initialDatasource: DatasourceState = {
-  type: 'none',
+  current: { type: 'none' },
+  loading: false
 };
 
 export const datasourceReducer = reducerWithInitialState<DatasourceState>(initialDatasource)
   .case(reset, () => initialDatasource)
-  .case(setDatasource, (_oldDatasource, newDatasource) => newDatasource)
+  .case(setDatasource, (_oldDatasource, newDatasource) => ({
+    current: newDatasource,
+    loading: newDatasource.type !== 'none'
+  }))
   .build();
 
 export const datasourceSelector = (state: GraphState) => state.datasource;
 
 export const datasourceSaga = (indexPatternProvider: IndexPatternProvider) =>
   function*() {
-    function* fetchIndexPattern(action: Action<DatasourceState>) {
+    function* fetchIndexPattern(action: Action<NoDatasource | IndexpatternDatasource>) {
       if (action.payload.type === 'none') {
         return;
       }
@@ -49,6 +54,7 @@ export const datasourceSaga = (indexPatternProvider: IndexPatternProvider) =>
       try {
         const indexPattern = yield call(indexPatternProvider.get, action.payload.id);
         yield put(loadFields(mapFields(indexPattern)));
+        yield put(datasourceLoaded());
       } catch (e) {
         // in case of errors, reset the datasource and show notification
         yield put(setDatasource({ type: 'none' }));
