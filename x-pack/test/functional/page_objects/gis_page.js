@@ -16,7 +16,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
-  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -470,24 +469,20 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async selectVectorSource() {
-      log.debug(`Select vector source`);
-      await testSubjects.click('vectorShapes');
+    async selectEMSBoundariesSource() {
+      log.debug(`Select EMS boundaries source`);
+      await testSubjects.click('emsBoundaries');
     }
 
     async selectGeoJsonUploadSource() {
-      log.debug(`Select upload geojson vector file`);
-      await testSubjects.click('uploadGeoJsonVectorFile');
+      log.debug(`Select upload geojson source`);
+      await testSubjects.click('uploadedGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
       log.debug(`Setting the path on the file input`);
-      if (browser.isW3CEnabled) {
-        const input = await find.byCssSelector('.euiFilePicker__input');
-        await input.type(path);
-      } else {
-        await find.setValue('.euiFilePicker__input', path);
-      }
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -539,7 +534,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openInspectorMapView() {
-      await inspector.openInspectorView('inspectorViewChooserMap');
+      await inspector.openInspectorView('~inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected
@@ -601,8 +596,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async lockTooltipAtPosition(xOffset, yOffset) {
       await retry.try(async () => {
         const mapContainerElement = await testSubjects.find('mapContainer');
-        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
-        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        await mapContainerElement.moveMouseTo({ xOffset, yOffset });
+        await mapContainerElement.clickMouseButton({ xOffset, yOffset });
         // Close button is only displayed with tooltip is locked
         const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
         if (!hasCloseButton) {

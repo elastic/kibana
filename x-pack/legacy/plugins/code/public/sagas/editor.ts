@@ -215,12 +215,12 @@ function* handleMainRouteChange(action: Action<Match>) {
       } else {
         yield put(closePanel(false));
       }
-    }
-
-    yield call(handleFile, repoUri, file, revision);
-    const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
-    if (commits === undefined) {
-      yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
+      yield call(handleFile, repoUri, file, revision);
+    } else {
+      const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
+      if (commits === undefined) {
+        yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
+      }
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);

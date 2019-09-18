@@ -29,7 +29,7 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import {
   EmbeddableInput,
@@ -117,6 +117,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.handleChanges();
     });
+  }
+
+  public getVisualizationDescription() {
+    return this.savedVisualization.description;
   }
 
   public getInspectorAdapters() {

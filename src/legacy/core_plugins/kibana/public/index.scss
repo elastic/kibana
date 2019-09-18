@@ -1,5 +1,11 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
+// Temporary shim to help with EuiFormRow spacing
+// Will move to EUI
+.euiFormRow + .euiButton {
+  margin-top: $euiSize;
+}
+
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
@@ -30,3 +36,10 @@
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
+
+// helper class that hides elements when rendered in percy
+@media only percy {
+  .hideInPercy {
+    visibility: hidden;
+  }
+}

@@ -12,8 +12,21 @@ import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
+import { GetSpacePurpose } from '../../../common/model/types';
 
 type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
+
+const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
+
+const PURPOSE_PRIVILEGE_MAP: Record<
+  GetSpacePurpose,
+  (authorization: AuthorizationService) => string
+> = {
+  any: authorization => authorization.actions.login,
+  copySavedObjectsIntoSpace: authorization =>
+    authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+};
+
 export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
@@ -40,8 +53,14 @@ export class SpacesClient {
     return true;
   }
 
-  public async getAll(): Promise<Space[]> {
+  public async getAll(purpose: GetSpacePurpose = 'any'): Promise<Space[]> {
+    if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {
+      throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
+    }
+
     if (this.useRbac()) {
+      const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
+
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -55,13 +74,13 @@ export class SpacesClient {
 
       const spaceIds = spaces.map((space: Space) => space.id);
       const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { username, spacePrivileges } = await checkPrivileges.atSpaces(
-        spaceIds,
-        this.authorization!.actions.login
-      );
+
+      const privilege = privilegeFactory(this.authorization!);
+
+      const { username, spacePrivileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
       const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][this.authorization!.actions.login];
+        return spacePrivileges[spaceId][privilege];
       });
 
       this.debugLogger(

@@ -30,6 +30,7 @@ export function findRoute(server: Hapi.Server) {
     method: 'GET',
     path: '/api/alert/_find',
     options: {
+      tags: ['access:alerting-read'],
       validate: {
         query: Joi.object()
           .keys({

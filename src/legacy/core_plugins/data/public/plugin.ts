@@ -18,7 +18,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
@@ -32,7 +31,6 @@ import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin
  */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
-  interpreter: any;
 }
 
 /**
@@ -41,7 +39,6 @@ export interface DataPluginSetupDependencies {
  * @public
  */
 export interface DataSetup {
-  expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
   query: QuerySetup;
@@ -59,40 +56,45 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDependencies> {
+export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependencies> {
   // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService = new ExpressionsService();
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
 
-  public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
+  private setupApi!: DataSetup;
+
+  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
+    const { uiSettings, http } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
     const indexPatternsService = this.indexPatterns.setup({
       uiSettings,
       savedObjectsClient,
+      http,
     });
-    return {
-      expressions: this.expressions.setup({
-        interpreter,
-      }),
+
+    this.setupApi = {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),
-      search: this.search.setup(),
+      search: this.search.setup(savedObjectsClient),
+    };
+
+    return this.setupApi;
+  }
+
+  public start(core: CoreStart) {
+    return {
+      ...this.setupApi!,
     };
   }
 
-  public start(core: CoreStart) {}
-
   public stop() {
-    this.expressions.stop();
     this.indexPatterns.stop();
     this.filter.stop();
     this.query.stop();

@@ -5,14 +5,33 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 import { useLogEntryRate } from './log_entry_rate';
 
-export const useLogAnalysisResults = ({ sourceId }: { sourceId: string }) => {
-  const { isLoading: isLoadingLogEntryRate, logEntryRate } = useLogEntryRate({ sourceId });
+export const useLogAnalysisResults = ({
+  sourceId,
+  startTime,
+  endTime,
+  bucketDuration = 15 * 60 * 1000,
+}: {
+  sourceId: string;
+  startTime: number;
+  endTime: number;
+  bucketDuration?: number;
+}) => {
+  const { isLoading: isLoadingLogEntryRate, logEntryRate, getLogEntryRate } = useLogEntryRate({
+    sourceId,
+    startTime,
+    endTime,
+    bucketDuration,
+  });
 
   const isLoading = useMemo(() => isLoadingLogEntryRate, [isLoadingLogEntryRate]);
+
+  useEffect(() => {
+    getLogEntryRate();
+  }, [sourceId, startTime, endTime, bucketDuration]);
 
   return {
     isLoading,

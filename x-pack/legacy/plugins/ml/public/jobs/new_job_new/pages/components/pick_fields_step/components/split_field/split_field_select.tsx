@@ -19,6 +19,8 @@ interface Props {
   changeHandler(f: SplitField): void;
   selectedField: SplitField;
   isClearable: boolean;
+  testSubject?: string;
+  placeholder?: string;
 }
 
 export const SplitFieldSelect: FC<Props> = ({
@@ -26,6 +28,8 @@ export const SplitFieldSelect: FC<Props> = ({
   changeHandler,
   selectedField,
   isClearable,
+  testSubject,
+  placeholder,
 }) => {
   const options: EuiComboBoxOptionProps[] = fields.map(
     f =>
@@ -56,6 +60,8 @@ export const SplitFieldSelect: FC<Props> = ({
       selectedOptions={selection}
       onChange={onChange}
       isClearable={isClearable}
+      placeholder={placeholder}
+      data-test-subj={testSubject}
     />
   );
 };

@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect } from 'react';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
-  FilterBar,
+  FilterGroup,
+  KueryBar,
   MonitorList,
+  OverviewPageParsingErrorCallout,
   Snapshot,
   SnapshotHistogram,
 } from '../components/functional';
@@ -21,6 +23,8 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
+import { getIndexPattern } from '../lib/adapters/index_pattern';
+import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 
 interface OverviewPageProps {
   basePath: string;
@@ -41,7 +45,7 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
+  const { absoluteStartDate, absoluteEndDate, colors, setHeadingText } = useContext(
     UptimeSettingsContext
   );
   const [getUrlParams, updateUrl] = useUrlParams();
@@ -49,6 +53,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   const {
     dateRangeStart,
     dateRangeEnd,
+    filters: urlFilters,
     // TODO: reintegrate pagination in future release
     // monitorListPageIndex,
     // monitorListPageSize,
@@ -56,9 +61,13 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     // monitorListSortDirection,
     // monitorListSortField,
     search,
+    statusFilter,
   } = params;
 
+  const [indexPattern, setIndexPattern] = useState<any>(undefined);
+
   useEffect(() => {
+    getIndexPattern(basePath, setIndexPattern);
     setBreadcrumbs(getOverviewPageBreadcrumbs());
     logOverviewPageLoad();
     if (setHeadingText) {
@@ -76,24 +85,36 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const filterQueryString = search || '';
   let error: any;
+  let kueryString: string = '';
+  try {
+    if (urlFilters !== '') {
+      const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
+      kueryString = stringifyKueries(filterMap);
+    }
+  } catch {
+    kueryString = '';
+  }
+
   let filters: any | undefined;
   try {
-    // toESQuery will throw errors
-    if (filterQueryString) {
-      filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+    if (filterQueryString || urlFilters) {
+      if (indexPattern) {
+        const staticIndexPattern = toStaticIndexPattern(indexPattern);
+        const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
+        const ast = fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        filters = JSON.stringify(elasticsearchQuery);
+      }
     }
   } catch (e) {
     error = e;
   }
+
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
     filters,
-  };
-
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
-    updateUrl({ search: queryText || '' });
-    refreshApp();
+    statusFilter,
   };
 
   const linkParameters = stringifyUrlParams(params);
@@ -111,12 +132,23 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
-        <FilterBar
-          currentQuery={filterQueryString}
-          error={error}
-          updateQuery={updateQuery}
-          variables={sharedProps}
-        />
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            <KueryBar />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FilterGroup
+              currentFilter={urlFilters}
+              onFilterUpdate={(filtersKuery: string) => {
+                if (urlFilters !== filtersKuery) {
+                  updateUrl({ filters: filtersKuery });
+                }
+              }}
+              variables={sharedProps}
+            />
+          </EuiFlexItem>
+          {error && <OverviewPageParsingErrorCallout error={error} />}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={4}>
@@ -129,6 +161,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
+              height="120px"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -137,6 +170,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}
           dangerColor={colors.danger}
+          hasActiveFilters={!!filters}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}

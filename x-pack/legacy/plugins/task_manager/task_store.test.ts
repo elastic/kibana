@@ -6,29 +6,26 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskDictionary, SanitizedTaskDefinition, TaskInstance, TaskStatus } from './task';
+import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
-const taskDefinitions: TaskDictionary<SanitizedTaskDefinition> = {
+const taskDefinitions: TaskDictionary<TaskDefinition> = {
   report: {
     type: 'report',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
     type: 'dernstraight',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
   yawn: {
     type: 'yawn',
     title: '',
-    numWorkers: 1,
     createTaskRunner: jest.fn(),
   },
 };
@@ -159,7 +156,7 @@ describe('TaskStore', () => {
 
   describe('fetch', () => {
     async function testFetch(opts?: FetchOpts, hits: any[] = []) {
-      const callCluster = sinon.spy(async () => ({ hits: { hits } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
         serializer,
@@ -328,7 +325,7 @@ describe('TaskStore', () => {
 
   describe('fetchAvailableTasks', () => {
     async function testFetchAvailableTasks({ opts = {}, hits = [] }: any = {}) {
-      const callCluster = sinon.spy(async () => ({ hits: { hits } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
@@ -350,7 +347,7 @@ describe('TaskStore', () => {
     }
 
     test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         index: 'tasky',
         serializer,
@@ -378,13 +375,11 @@ describe('TaskStore', () => {
             foo: {
               type: 'foo',
               title: '',
-              numWorkers: 1,
               createTaskRunner: jest.fn(),
             },
             bar: {
               type: 'bar',
               title: '',
-              numWorkers: 1,
               maxAttempts: customMaxAttempts,
               createTaskRunner: jest.fn(),
             },

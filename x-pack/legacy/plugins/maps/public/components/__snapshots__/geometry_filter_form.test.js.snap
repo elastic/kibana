@@ -1,0 +1,278 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should not render relation select when geo field is geo_point 1`] = `
+<EuiForm>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFormRow
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Filtered field"
+    labelType="label"
+  >
+    <EuiSuperSelect
+      className="mapGeometryFilter__geoFieldSuperSelect"
+      compressed={true}
+      fullWidth={true}
+      hasDividers={true}
+      isInvalid={false}
+      itemClassName="mapGeometryFilter__geoFieldItem"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <EuiText>
+              <EuiTextColor
+                color="subdued"
+              >
+                <small>
+                  My index
+                </small>
+              </EuiTextColor>
+              <br />
+              my geo field
+            </EuiText>,
+            "value": "My index/my geo field",
+          },
+        ]
+      }
+      valueOfSelected="My index/my geo field"
+    />
+  </EuiFormRow>
+  <EuiButton
+    isDisabled={false}
+    onClick={[Function]}
+    size="s"
+  >
+    Create filter
+  </EuiButton>
+</EuiForm>
+`;
+
+exports[`should not show "within" relation when filter geometry is not closed 1`] = `
+<EuiForm>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFormRow
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Filtered field"
+    labelType="label"
+  >
+    <EuiSuperSelect
+      className="mapGeometryFilter__geoFieldSuperSelect"
+      compressed={true}
+      fullWidth={true}
+      hasDividers={true}
+      isInvalid={false}
+      itemClassName="mapGeometryFilter__geoFieldItem"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <EuiText>
+              <EuiTextColor
+                color="subdued"
+              >
+                <small>
+                  My index
+                </small>
+              </EuiTextColor>
+              <br />
+              my geo field
+            </EuiText>,
+            "value": "My index/my geo field",
+          },
+        ]
+      }
+      valueOfSelected="My index/my geo field"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Spatial relation"
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={true}
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "intersects",
+            "value": "INTERSECTS",
+          },
+          Object {
+            "text": "disjoint",
+            "value": "DISJOINT",
+          },
+        ]
+      }
+      value="INTERSECTS"
+    />
+  </EuiFormRow>
+  <EuiButton
+    isDisabled={false}
+    onClick={[Function]}
+    size="s"
+  >
+    Create filter
+  </EuiButton>
+</EuiForm>
+`;
+
+exports[`should render relation select when geo field is geo_shape 1`] = `
+<EuiForm>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFormRow
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Filtered field"
+    labelType="label"
+  >
+    <EuiSuperSelect
+      className="mapGeometryFilter__geoFieldSuperSelect"
+      compressed={true}
+      fullWidth={true}
+      hasDividers={true}
+      isInvalid={false}
+      itemClassName="mapGeometryFilter__geoFieldItem"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <EuiText>
+              <EuiTextColor
+                color="subdued"
+              >
+                <small>
+                  My index
+                </small>
+              </EuiTextColor>
+              <br />
+              my geo field
+            </EuiText>,
+            "value": "My index/my geo field",
+          },
+        ]
+      }
+      valueOfSelected="My index/my geo field"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    compressed={true}
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Spatial relation"
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={true}
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "intersects",
+            "value": "INTERSECTS",
+          },
+          Object {
+            "text": "disjoint",
+            "value": "DISJOINT",
+          },
+          Object {
+            "text": "within",
+            "value": "WITHIN",
+          },
+        ]
+      }
+      value="INTERSECTS"
+    />
+  </EuiFormRow>
+  <EuiButton
+    isDisabled={false}
+    onClick={[Function]}
+    size="s"
+  >
+    Create filter
+  </EuiButton>
+</EuiForm>
+`;

@@ -5,7 +5,7 @@
  */
 
 import { memoize } from 'lodash';
-import { callApi } from './callApi';
+import { callApmApi } from './callApmApi';
 
 export interface ISavedObject {
   attributes: {
@@ -18,9 +18,8 @@ export interface ISavedObject {
 
 export const getAPMIndexPattern = memoize(async () => {
   try {
-    return await callApi<ISavedObject>({
-      method: 'GET',
-      pathname: `/api/apm/index_pattern`
+    return await callApmApi({
+      pathname: '/api/apm/index_pattern'
     });
   } catch (error) {
     return;

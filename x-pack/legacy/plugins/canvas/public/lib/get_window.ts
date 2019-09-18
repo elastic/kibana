@@ -5,8 +5,8 @@
  */
 
 // return window if it exists, otherwise just return an object literal
-const windowObj = {};
+const windowObj = { location: null };
 
-export const getWindow = (): Window | {} => {
+export const getWindow = (): Window | { location: Location | null } => {
   return typeof window === 'undefined' ? windowObj : window;
 };

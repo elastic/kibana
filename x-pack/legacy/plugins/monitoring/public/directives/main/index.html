@@ -1,5 +1,5 @@
 <div class="app-container">
-  <kbn-top-nav-v2
+  <kbn-top-nav
     name="monitoringMain.navName"
     config="topNavMenu"
     app-name="'monitoring'"
@@ -12,7 +12,7 @@
     on-refresh-change="monitoringMain.datePicker.onRefreshChange"
     on-query-submit="monitoringMain.datePicker.onTimeUpdate"
   >
-  </kbn-top-nav-v2>
+  </kbn-top-nav>
   <div>
     <div ng-if="monitoringMain.inElasticsearch" class="euiTabs" role="navigation">
       <a

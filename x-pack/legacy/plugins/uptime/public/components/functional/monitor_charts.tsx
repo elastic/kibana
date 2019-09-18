@@ -32,8 +32,15 @@ interface MonitorChartsProps {
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = (props: Props) => {
-  const { data, mean, range, monitorId, dateRangeStart, dateRangeEnd } = props;
+export const MonitorChartsComponent = ({
+  data,
+  mean,
+  range,
+  monitorId,
+  dateRangeStart,
+  dateRangeEnd,
+  loading,
+}: Props) => {
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
@@ -47,11 +54,12 @@ export const MonitorChartsComponent = (props: Props) => {
     return (
       <Fragment>
         <EuiFlexGroup>
-          <EuiFlexItem style={{ height: 400 }}>
+          <EuiFlexItem>
             <DurationChart
               locationDurationLines={locationDurationLines}
               meanColor={mean}
               rangeColor={range}
+              loading={loading}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -61,6 +69,7 @@ export const MonitorChartsComponent = (props: Props) => {
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+              height="400px"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

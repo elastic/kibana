@@ -1,50 +1,71 @@
 [[saved-objects-api-resolve-import-errors]]
-=== Resolve Import Errors
+=== Resolve import errors API
+++++
+<titleabbrev>Resolve import errors</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Resolve errors from the import API. 
 
-The resolve import errors API enables you to resolve errors given by the import API by either retrying certain saved objects, overwriting specific saved objects or changing references to different saved objects.
+To resolve errors, you can: 
 
-Note: You cannot access this endpoint via the Console in Kibana.
+* Retry certain saved objects
 
+* Overwrite specific saved objects
+
+* Change references to different saved objects
+
+[[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 
 `POST /api/saved_objects/_resolve_import_errors`
 
+[[saved-objects-api-resolve-import-errors-request-body]]
 ==== Request body
 
-The request body must be of type multipart/form-data.
+The request body must include the multipart/form-data type.
 
 `file`::
   The same file given to the import API.
 
 `retries`::
-  (array) A list of `type`, `id`, `replaceReferences` and `overwrite` objects to retry importing. The property `replaceReferences` is a list of `type`, `from` and `to` used to change the object's references.
+  (array) A list of `type`, `id`, `replaceReferences`, and `overwrite` objects to retry. The property `replaceReferences` is a list of `type`, `from`, and `to` used to change the object references.
 
+[[saved-objects-api-resolve-import-errors-response-body]]
 ==== Response body
 
-The response body will have a top level `success` property that indicates
-if resolving errors was successful or not as well as a `successCount` indicating how many records are successfully resolved.
-In the scenario resolving errors wasn't successful, a top level `errors` array will contain the objects that failed to be resolved.
+`success`:: 
+  Top-level property that indicates if the errors successfully resolved.
+  
+`successCount`:: 
+  Indicates the number of successfully resolved records.
 
+`errors`::
+  (array) Specifies the objects that failed to resolve.
+  
+[[saved-objects-api-resolve-import-errors-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+
+[[saved-objects-api-resolve-import-errors-example]]
 ==== Examples
 
-The following example retries importing a dashboard.
+Retry a dashboard import:
 
 [source,js]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -54,14 +75,14 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example resolves errors for a dashboard. This will cause the dashboard to overwrite the existing saved object.
+Resolve errors for a dashboard and overwrite the existing saved object:
 
 [source,js]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
@@ -69,8 +90,7 @@ The `file.ndjson` file would contain the following.
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -80,22 +100,21 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example resolves errors for a visualization by replacing the index pattern to another.
+Resolve errors for a visualization by replacing the index pattern with another:
 
 [source,js]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
 --------------------------------------------------
 
-The `file.ndjson` file would contain the following.
+The `file.ndjson` file contains the following:
 
 [source,js]
 --------------------------------------------------
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
 --------------------------------------------------
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

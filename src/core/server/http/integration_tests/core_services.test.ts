@@ -18,7 +18,6 @@
  */
 import Boom from 'boom';
 import { Request } from 'hapi';
-import { first } from 'rxjs/operators';
 import { clusterClientMock } from './core_service.test.mocks';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
@@ -250,9 +249,10 @@ describe('http service', () => {
       clusterClientMock.mockClear();
       await root.shutdown();
     });
+
     it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
       const authHeaders = { authorization: 'Basic: user:password' };
-      const { http, elasticsearch } = await root.setup();
+      const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
 
       await registerAuth((req, res, toolkit) =>
@@ -260,32 +260,30 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-        client.asScoped(req);
-        return res.ok({ header: 'ok' });
-      });
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
-      expect(clusterClientMock).toBeCalledTimes(1);
-      const [firstCall] = clusterClientMock.mock.calls;
-      const [, , headers] = firstCall;
-      expect(headers).toEqual(authHeaders);
+
+      // called twice by elasticsearch service in http route handler context provider
+      expect(clusterClientMock).toBeCalledTimes(2);
+
+      // admin client contains authHeaders for BWC with legacy platform.
+      const [adminClient, dataClient] = clusterClientMock.mock.calls;
+      const [, , adminClientHeaders] = adminClient;
+      expect(adminClientHeaders).toEqual(authHeaders);
+      const [, , dataClientHeaders] = dataClient;
+      expect(dataClientHeaders).toEqual(authHeaders);
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
       const authorizationHeader = 'Basic: username:password';
-      const { http, elasticsearch } = await root.setup();
+      const { http } = await root.setup();
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-        client.asScoped(req);
-        return res.ok({ header: 'ok' });
-      });
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
@@ -294,12 +292,14 @@ describe('http service', () => {
         .set('Authorization', authorizationHeader)
         .expect(200);
 
-      expect(clusterClientMock).toBeCalledTimes(1);
-      const [firstCall] = clusterClientMock.mock.calls;
-      const [, , headers] = firstCall;
-      expect(headers).toEqual({
-        authorization: authorizationHeader,
-      });
+      // called twice by elasticsearch service in http route handler context provider
+      expect(clusterClientMock).toBeCalledTimes(2);
+
+      const [adminClient, dataClient] = clusterClientMock.mock.calls;
+      const [, , adminClientHeaders] = adminClient;
+      expect(adminClientHeaders).toEqual({ authorization: authorizationHeader });
+      const [, , dataClientHeaders] = dataClient;
+      expect(dataClientHeaders).toEqual({ authorization: authorizationHeader });
     });
   });
 });

@@ -12,14 +12,14 @@
 
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './lib/logger';
+import { Logger } from './types';
 import { BeforeRunFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   validateRunResult,
   TaskStatus,
@@ -28,7 +28,6 @@ import {
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
-  numWorkers: number;
   isExpired: boolean;
   cancel: CancelFunction;
   claimOwnership: () => Promise<boolean>;
@@ -44,7 +43,7 @@ interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   beforeRun: BeforeRunFunction;
@@ -61,7 +60,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
   private store: Updatable;
   private beforeRun: BeforeRunFunction;
@@ -82,14 +81,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = opts.logger;
     this.store = opts.store;
     this.beforeRun = opts.beforeRun;
-  }
-
-  /**
-   * Gets how many workers are occupied by this task instance.
-   * Per Joi validation logic, this will return a number >= 1
-   */
-  public get numWorkers() {
-    return this.definition.numWorkers;
   }
 
   /**
@@ -205,14 +196,14 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
-      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
+      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || { state: {} };
@@ -267,9 +258,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.store.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
-        this.logger.warning(
-          `Task cleanup of ${this} failed in processing. Was remove called twice?`
-        );
+        this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
       } else {
         throw err;
       }

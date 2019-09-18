@@ -5,8 +5,7 @@
  */
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -17,6 +16,7 @@ import { OnUpdateColumns } from '../timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
+import { useTimelineWidthContext } from '../timeline/timeline_context';
 
 export type View = 'table-view' | 'json-view';
 
@@ -25,7 +25,6 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: DetailItem[];
   id: string;
-  isLoading: boolean;
   view: View;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
@@ -33,26 +32,26 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-const Details = styled.div`
+const Details = styled.div<{ width: number }>`
   user-select: none;
-  width: 100%;
+  width: ${({ width }) => `${width}px`};
 `;
 
 Details.displayName = 'Details';
 
-export const EventDetails = pure<Props>(
+export const EventDetails = React.memo<Props>(
   ({
     browserFields,
     columnHeaders,
     data,
     id,
-    isLoading,
     view,
     onUpdateColumns,
     onViewSelected,
     timelineId,
     toggleColumn,
   }) => {
+    const width = useTimelineWidthContext();
     const tabs: EuiTabbedContentTab[] = [
       {
         id: 'table-view',
@@ -63,7 +62,6 @@ export const EventDetails = pure<Props>(
             columnHeaders={columnHeaders}
             data={data}
             eventId={id}
-            isLoading={isLoading}
             onUpdateColumns={onUpdateColumns}
             timelineId={timelineId}
             toggleColumn={toggleColumn}
@@ -78,7 +76,7 @@ export const EventDetails = pure<Props>(
     ];
 
     return (
-      <Details data-test-subj="eventDetails">
+      <Details data-test-subj="eventDetails" width={width}>
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}

@@ -29,7 +29,7 @@ import {
 import { extractI18nCallMessages } from './i18n_call';
 import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
 import { extractIntlMessages, extractFormattedMessages } from './react';
-import { createFailError, isFailError } from '../../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 /**
  * Detect Intl.formatMessage() function call (React).

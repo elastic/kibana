@@ -14,16 +14,14 @@ import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
-import * as hooks from '../../../../../hooks/useCore';
-import { InternalCoreStart } from 'src/core/public';
+import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
-  );
+  .mockResolvedValue({ id: 'apm-index-pattern-id' } as any);
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => null);
@@ -34,9 +32,9 @@ beforeAll(() => {
         prepend: (path: string) => `/basepath${path}`
       }
     }
-  } as unknown) as InternalCoreStart;
+  } as unknown) as LegacyCoreStart;
 
-  jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+  jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 });
 
 afterAll(() => {

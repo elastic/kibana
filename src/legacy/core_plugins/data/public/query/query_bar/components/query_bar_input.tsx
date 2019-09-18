@@ -30,9 +30,12 @@ import {
 } from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
-import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'src/core/public';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+} from 'src/core/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
@@ -44,13 +47,15 @@ import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 interface Props {
   uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
   store: Storage;
   intl: InjectedIntl;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: any;
+  prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
@@ -111,6 +116,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as IndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
+      this.props.savedObjectsClient,
       stringPatterns,
       this.props.uiSettings
     )) as IndexPattern[];
@@ -202,10 +208,8 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private onQueryStringChange = (value: string) => {
-    const hasValue = Boolean(value.trim());
-
     this.setState({
-      isSuggestionsVisible: hasValue,
+      isSuggestionsVisible: true,
       index: null,
       suggestionLimit: 50,
     });
@@ -359,9 +363,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    kfetch({
-      pathname: '/api/kibana/kql_opt_in_telemetry',
-      method: 'POST',
+    this.props.http.post('/api/kibana/kql_opt_in_telemetry', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -453,6 +455,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'uiSettings',
+      'savedObjectsClient',
     ]);
 
     return (

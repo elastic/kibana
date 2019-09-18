@@ -30,7 +30,7 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiToolTip
       content={
         Array [
-          <EuiFlexGroup>
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="danger"
@@ -42,8 +42,8 @@ exports[`CondensedCheckList component renders checks 1`] = `
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
-          <EuiFlexGroup>
+          </ForwardRef>,
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="primary"
@@ -55,7 +55,7 @@ exports[`CondensedCheckList component renders checks 1`] = `
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
+          </ForwardRef>,
         ]
       }
       delay="regular"
@@ -90,7 +90,7 @@ exports[`CondensedCheckList component renders checks 1`] = `
     <EuiToolTip
       content={
         Array [
-          <EuiFlexGroup>
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="danger"
@@ -102,8 +102,8 @@ exports[`CondensedCheckList component renders checks 1`] = `
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
-          <EuiFlexGroup>
+          </ForwardRef>,
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="danger"
@@ -115,7 +115,7 @@ exports[`CondensedCheckList component renders checks 1`] = `
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
+          </ForwardRef>,
         ]
       }
       delay="regular"
@@ -163,7 +163,7 @@ exports[`CondensedCheckList component renders null in place of child status with
       content={
         Array [
           null,
-          <EuiFlexGroup>
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="primary"
@@ -175,7 +175,7 @@ exports[`CondensedCheckList component renders null in place of child status with
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
+          </ForwardRef>,
         ]
       }
       delay="regular"
@@ -210,7 +210,7 @@ exports[`CondensedCheckList component renders null in place of child status with
     <EuiToolTip
       content={
         Array [
-          <EuiFlexGroup>
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="danger"
@@ -222,8 +222,8 @@ exports[`CondensedCheckList component renders null in place of child status with
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
-          <EuiFlexGroup>
+          </ForwardRef>,
+          <ForwardRef>
             <EuiFlexItem>
               <EuiHealth
                 color="danger"
@@ -235,7 +235,7 @@ exports[`CondensedCheckList component renders null in place of child status with
             <EuiFlexItem>
               a few moments ago
             </EuiFlexItem>
-          </EuiFlexGroup>,
+          </ForwardRef>,
         ]
       }
       delay="regular"

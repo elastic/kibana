@@ -38,9 +38,10 @@ import {
   SearchScope,
   WorkerReservedProgress,
   Repository,
+  RepoState,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
+import { changeSearchScope, FetchFileResponse, RepoStatus } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import {
@@ -68,6 +69,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -96,6 +98,7 @@ class CodeContent extends React.PureComponent<Props, State> {
     if (!props.fileLoading) {
       return { fileLoading: props.fileLoading };
     }
+    return null;
   }
   state = {
     fileLoading: this.props.fileLoading,
@@ -135,26 +138,31 @@ class CodeContent extends React.PureComponent<Props, State> {
 
   public switchButton = (id: string) => {
     const { path, resource, org, repo, revision } = this.props.match.params;
+    const queryString = this.props.location.search;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (id) {
       case ButtonOption.Code:
         history.push(
-          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Folder:
         history.push(
-          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Blame:
         history.push(
-          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.History:
         history.push(
-          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
     }
@@ -325,6 +333,7 @@ class CodeContent extends React.PureComponent<Props, State> {
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          tags={this.props.tags}
           query={this.props.query}
           currentRepository={this.props.currentRepository}
         />
@@ -521,6 +530,7 @@ const mapStateToProps = (state: RootState) => ({
   fileTreeLoadingPaths: state.fileTree.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.revision.branches,
+  tags: state.revision.tags,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
   repoStatus: repoStatusSelector(state, repoUriSelector(state)),

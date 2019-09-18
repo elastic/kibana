@@ -17,7 +17,7 @@ export const startAnalytics = async (d: DataFrameAnalyticsListRow) => {
     await ml.dataFrameAnalytics.startDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.startAnalyticsSuccessMessage', {
-        defaultMessage: 'Data frame analytics {analyticsId} start request acknowledged.',
+        defaultMessage: 'Request to start data frame analytics {analyticsId} acknowledged.',
         values: { analyticsId: d.config.id },
       })
     );

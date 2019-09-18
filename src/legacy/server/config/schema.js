@@ -19,10 +19,7 @@
 
 import Joi from 'joi';
 import os from 'os';
-
-import {
-  fromRoot
-} from '../../utils';
+import { join } from 'path';
 import {
   getData
 } from '../path';
@@ -170,7 +167,7 @@ export default () => Joi.object({
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
-    bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
+    bundleDir: Joi.string().default(join(getData(), 'optimize')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(false),
     watchPort: Joi.number().default(5602),
@@ -238,7 +235,8 @@ export default () => Joi.object({
       })).default([])
     }).default(),
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
+    emsFontLibraryUrl: Joi.string().default('https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'),
     emsTileLayerId: Joi.object({
       bright: Joi.string().default('road_map'),
       desaturated: Joi.string().default('road_map_desaturated'),
@@ -247,7 +245,7 @@ export default () => Joi.object({
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
       dark: 'dark_map',
-    }),
+    })
   }).default(),
 
   i18n: Joi.object({

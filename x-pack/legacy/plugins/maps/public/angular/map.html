@@ -1,14 +1,16 @@
 <div id="maps-plugin"  ng-class="{mapFullScreen: isFullScreen}">
   <div id="maps-top-nav">
     <div>
-      <kbn-top-nav-v2
+      <kbn-top-nav
         ng-show="chrome.getVisible()"
         app-name="'maps'"
         config="topNavMenu"
         show-search-bar="chrome.getVisible()"
         show-filter-bar="chrome.getVisible()"
         show-date-picker="showDatePicker"
+        show-save-query="showSaveQuery"
         query="query"
+        saved-query="savedQuery"
         on-query-submit="updateQueryAndDispatch"
         filters="filters"
         on-filters-updated="updateFiltersAndDispatch"
@@ -18,8 +20,11 @@
         is-refresh-paused="refreshConfig.isPaused"
         refresh-interval="refreshConfig.interval"
         on-refresh-change="onRefreshChange"
+        on-saved="onQuerySaved"
+        on-saved-query-updated="onSavedQueryUpdated"
+        on-clear-saved-query="onClearSavedQuery"
       >
-      </kbn-top-nav-v2>
+      </kbn-top-nav>
     </div>
   </div>
 

@@ -7,9 +7,11 @@
 import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, coreMock } from 'src/core/server/mocks';
+import { SavedObjectsSchema, SavedObjectsService } from 'src/core/server';
+import { Readable } from 'stream';
+import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
 import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
@@ -17,7 +19,7 @@ import { ExternalRouteDeps } from '../external';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { InternalRouteDeps } from '../v1';
-import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { LegacyAPI } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -33,6 +35,7 @@ export interface TestOptions {
   payload?: any;
   preCheckLicenseImpl?: (req: any, h: any) => any;
   expectSpacesClientCall?: boolean;
+  expectPreCheckLicenseCall?: boolean;
 }
 
 export type TeardownFn = () => void;
@@ -40,6 +43,17 @@ export type TeardownFn = () => void;
 export interface RequestRunnerResult {
   server: any;
   mockSavedObjectsRepository: any;
+  mockSavedObjectsService: {
+    getScopedSavedObjectsClient: jest.Mock<SavedObjectsService['getScopedSavedObjectsClient']>;
+    importExport: {
+      getSortedObjectsForExport: jest.Mock<
+        SavedObjectsService['importExport']['getSortedObjectsForExport']
+      >;
+      importSavedObjects: jest.Mock<SavedObjectsService['importExport']['importSavedObjects']>;
+      resolveImportErrors: jest.Mock<SavedObjectsService['importExport']['resolveImportErrors']>;
+    };
+  };
+  headers: Record<string, unknown>;
   response: any;
 }
 
@@ -54,6 +68,10 @@ export const defaultPreCheckLicenseImpl = (request: any) => '';
 const baseConfig: TestConfig = {
   'server.basePath': '',
 };
+
+async function readStreamToCompletion(stream: Readable) {
+  return (createPromiseFromStreams([stream, createConcatStream([])]) as unknown) as any[];
+}
 
 export function createTestHandler(
   initApiFn: (deps: ExternalRouteDeps & InternalRouteDeps) => void
@@ -74,6 +92,7 @@ export function createTestHandler(
       testConfig = {},
       payload,
       preCheckLicenseImpl = defaultPreCheckLicenseImpl,
+      expectPreCheckLicenseCall = true,
       expectSpacesClientCall = true,
     } = options;
 
@@ -97,7 +116,7 @@ export function createTestHandler(
 
     server.decorate('server', 'config', jest.fn<any, any>(() => mockConfig));
 
-    const mockSavedObjectsRepository = {
+    const mockSavedObjectsClientContract = {
       get: jest.fn((type, id) => {
         const result = spaces.filter(s => s.id === id);
         if (!result.length) {
@@ -130,6 +149,44 @@ export function createTestHandler(
     };
 
     server.savedObjects = {
+      types: ['visualization', 'dashboard', 'index-pattern', 'globalType'],
+      schema: new SavedObjectsSchema({
+        space: {
+          isNamespaceAgnostic: true,
+          hidden: true,
+        },
+        globalType: {
+          isNamespaceAgnostic: true,
+        },
+      }),
+      getScopedSavedObjectsClient: jest.fn().mockResolvedValue(mockSavedObjectsClientContract),
+      importExport: {
+        getSortedObjectsForExport: jest.fn().mockResolvedValue(
+          new Readable({
+            objectMode: true,
+            read() {
+              if (Array.isArray(payload.objects)) {
+                payload.objects.forEach((o: any) => this.push(o));
+              }
+              this.push(null);
+            },
+          })
+        ),
+        importSavedObjects: jest.fn().mockImplementation(async (opts: Record<string, any>) => {
+          const objectsToImport: any[] = await readStreamToCompletion(opts.readStream);
+          return {
+            success: true,
+            successCount: objectsToImport.length,
+          };
+        }),
+        resolveImportErrors: jest.fn().mockImplementation(async (opts: Record<string, any>) => {
+          const objectsToImport: any[] = await readStreamToCompletion(opts.readStream);
+          return {
+            success: true,
+            successCount: objectsToImport.length,
+          };
+        }),
+      },
       SavedObjectsClient: {
         errors: {
           isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),
@@ -157,13 +214,22 @@ export function createTestHandler(
       fatal: jest.fn(),
     };
 
-    const service = new SpacesService(log, server.config().get('server.basePath'));
-    const spacesService = await service.setup({
-      http: httpServiceMock.createSetupContract(),
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    const coreSetupMock = coreMock.createSetup();
+
+    const legacyAPI = {
+      legacyConfig: {
+        serverBasePath: mockConfig.get('server.basePath'),
+        serverDefaultRoute: mockConfig.get('server.defaultRoute'),
+      },
       savedObjects: server.savedObjects,
+    } as LegacyAPI;
+
+    const service = new SpacesService(log, () => legacyAPI);
+    const spacesService = await service.setup({
+      http: coreSetupMock.http,
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-      spacesAuditLogger: {} as SpacesAuditLogger,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of({ maxSpaces: 1000 }),
     });
 
@@ -173,24 +239,21 @@ export function createTestHandler(
           null as any,
           () => null,
           null,
-          mockSavedObjectsRepository,
+          mockSavedObjectsClientContract,
           { maxSpaces: 1000 },
-          mockSavedObjectsRepository,
+          mockSavedObjectsClientContract,
           req
         )
       );
     });
 
     initApiFn({
-      http: ({
-        server,
-        route: server.route.bind(server),
-      } as unknown) as SpacesHttpServiceSetup,
+      getLegacyAPI: () => legacyAPI,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,
       log,
-      config: mockConfig as KibanaConfig,
+      legacyRouter: server.route.bind(server),
     });
 
     teardowns.push(() => server.stop());
@@ -207,7 +270,7 @@ export function createTestHandler(
         payload,
       });
 
-      if (preCheckLicenseImpl) {
+      if (preCheckLicenseImpl && expectPreCheckLicenseCall) {
         expect(pre).toHaveBeenCalled();
       } else {
         expect(pre).not.toHaveBeenCalled();
@@ -231,7 +294,8 @@ export function createTestHandler(
     return {
       server,
       headers,
-      mockSavedObjectsRepository,
+      mockSavedObjectsRepository: mockSavedObjectsClientContract,
+      mockSavedObjectsService: server.savedObjects,
       response: await testRun(),
     };
   };

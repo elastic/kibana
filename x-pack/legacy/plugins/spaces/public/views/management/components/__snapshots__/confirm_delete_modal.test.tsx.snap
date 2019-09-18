@@ -46,6 +46,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         </p>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error="Space names do not match."
           fullWidth={false}
           hasEmptyLabelSpace={false}
@@ -63,6 +64,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
             value=""
           />
         </EuiFormRow>
+        <EuiSpacer />
         <EuiCallOut
           color="warning"
           size="m"
@@ -89,12 +91,9 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="confirmModalCancelButton"
-        iconSide="left"
         isDisabled={false}
         onClick={[MockFunction]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -106,11 +105,8 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         color="danger"
         data-test-subj="confirmModalConfirmButton"
         fill={true}
-        iconSide="left"
         isLoading={false}
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage=" Delete space and all contents"

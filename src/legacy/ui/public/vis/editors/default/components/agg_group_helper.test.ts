@@ -17,37 +17,33 @@
  * under the License.
  */
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched } from './agg_group_helper';
 import { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
-  let group: AggConfig;
+  let group: AggConfig[];
 
   beforeEach(() => {
     group = [
       {
-        id: 1,
-        title: 'Test1',
+        id: '1',
         params: {
           field: {
             type: 'number',
           },
         },
-        group: 'metrics',
         schema: { name: 'metric', min: 1, mustBeFirst: true },
-      },
+      } as AggConfig,
       {
-        id: 2,
-        title: 'Test2',
+        id: '2',
         params: {
           field: {
             type: 'string',
           },
         },
-        group: 'metrics',
         schema: { name: 'metric', min: 2 },
-      },
+      } as AggConfig,
     ];
   });
   describe('isAggRemovable', () => {

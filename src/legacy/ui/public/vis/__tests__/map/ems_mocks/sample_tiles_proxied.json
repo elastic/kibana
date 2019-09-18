@@ -19,7 +19,7 @@
         {
           "locale": "en",
           "format": "vector",
-          "url": "/vector/osm.bright.json"
+          "url": "/tiles/vector/osm.bright.json"
         },
         {
           "locale": "en",

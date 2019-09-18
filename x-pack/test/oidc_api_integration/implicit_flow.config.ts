@@ -20,17 +20,20 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
 
     esTestCluster: {
       ...oidcAPITestsConfig.get('esTestCluster'),
-      serverArgs: oidcAPITestsConfig.get('esTestCluster.serverArgs').map((arg: string) => {
-        if (arg.startsWith('xpack.security.authc.realms.oidc.oidc1.rp.response_type')) {
-          return 'xpack.security.authc.realms.oidc.oidc1.rp.response_type=id_token token';
-        }
+      serverArgs: oidcAPITestsConfig
+        .get('esTestCluster.serverArgs')
+        .reduce((serverArgs: string[], arg: string) => {
+          // We should change `response_type` to `id_token token` and get rid of unnecessary `token_endpoint`.
+          if (arg.startsWith('xpack.security.authc.realms.oidc.oidc1.rp.response_type')) {
+            serverArgs.push(
+              'xpack.security.authc.realms.oidc.oidc1.rp.response_type=id_token token'
+            );
+          } else if (!arg.startsWith('xpack.security.authc.realms.oidc.oidc1.op.token_endpoint')) {
+            serverArgs.push(arg);
+          }
 
-        if (arg.startsWith('xpack.security.authc.realms.oidc.oidc1.op.token_endpoint')) {
-          return 'xpack.security.authc.realms.oidc.oidc1.op.token_endpoint=should_not_be_used';
-        }
-
-        return arg;
-      }),
+          return serverArgs;
+        }, []),
     },
   };
 }

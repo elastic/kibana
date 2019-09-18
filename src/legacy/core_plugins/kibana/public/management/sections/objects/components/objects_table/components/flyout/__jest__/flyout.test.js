@@ -24,19 +24,6 @@ import { Flyout } from '../flyout';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('../../../../../lib/import_file', () => ({
   importFile: jest.fn(),
 }));
@@ -418,8 +405,12 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwnField: () => 'MyIndexPattern*',
+            getOwnField: (field) => {
+              if(field === 'index') { return 'MyIndexPattern*';}
+              if(field === 'filter') { return [{ meta: { index: 'filterIndex' } }];}
+            },
           },
+          _serialize: () => { return { references: [{ id: 'MyIndexPattern*' }, { id: 'filterIndex' }] };},
         },
       },
     ];
@@ -477,7 +468,17 @@ describe('Flyout', () => {
                 type: 'index-pattern',
               },
             ],
-          },
+          }, {
+            'existingIndexPatternId': 'filterIndex',
+            'list': [
+              {
+                'id': 'filterIndex',
+                'title': 'MyIndexPattern*',
+                'type': 'index-pattern',
+              },
+            ],
+            'newIndexPatternId': undefined,
+          }
         ],
       });
     });

@@ -11,6 +11,7 @@ import {
   Document,
   IndexStats,
   IndexStatsKey,
+  IndexerType,
   LspIncIndexRequest,
   RepositoryUri,
 } from '../../model';
@@ -24,7 +25,7 @@ import { LspIndexer } from './lsp_indexer';
 import { DocumentIndexName, SymbolIndexName } from './schema';
 
 export class LspIncrementalIndexer extends LspIndexer {
-  protected type: string = 'lsp_inc';
+  public type = IndexerType.LSP_INC;
   private diff: Diff | undefined = undefined;
 
   constructor(

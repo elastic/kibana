@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target",
-    "outDir": "./target",
+    "declarationDir": "./target/types",
     "stripInternal": true,
     "declarationMap": true,
     "types": [

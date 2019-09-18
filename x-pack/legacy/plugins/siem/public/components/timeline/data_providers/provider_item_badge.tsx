@@ -59,7 +59,7 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
 
     return (
       <TimelineContext.Consumer>
-        {({ isLoading }) => (
+        {isLoading => (
           <ProviderItemActions
             andProviderId={andProviderId}
             browserFields={browserFields}

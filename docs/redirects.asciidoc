@@ -30,3 +30,23 @@ This page has moved. Please see the new section in the {uptime-guide}/uptime-sec
 
 This page has moved. Please see <<infra-configure-source>>.
 
+[role="exclude",id="logs-read-only-access"]
+== Configure source read-only access
+
+This page has moved. Please see <<xpack-logs-configuring>>.
+
+[role="exclude",id="creating-df-kib"]
+== Creating {transforms}
+
+This page is deleted. Please see
+{stack-ov}/ecommerce-dataframes.html[Transforming the eCommerce sample data].
+
+[role="exclude",id="ml-jobs"]
+== Creating {anomaly-jobs}
+
+This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jobs}].
+
+[role="exclude",id="job-tips"]
+== Machine learning job tips
+
+This page has moved. Please see {stack-ov}/job-tips.html[Machine learning job tips].

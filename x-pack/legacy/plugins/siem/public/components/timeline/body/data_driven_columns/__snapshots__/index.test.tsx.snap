@@ -104,6 +104,12 @@ exports[`Columns it renders the expected columns 1`] = `
           ],
         },
         Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
           "field": "user.name",
           "value": Array [
             "john.dee",
@@ -112,6 +118,7 @@ exports[`Columns it renders the expected columns 1`] = `
       ]
     }
     onColumnResized={[MockFunction]}
+    timelineId="test"
   />
 </Component>
 `;

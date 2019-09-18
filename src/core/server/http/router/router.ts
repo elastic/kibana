@@ -26,6 +26,7 @@ import { KibanaRequest } from './request';
 import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
+import { RequestHandlerContext } from '../../../server';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -148,7 +149,7 @@ export class Router implements IRouter {
   constructor(
     readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any> = fn => fn.bind(null, {})
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any>
   ) {
     const buildMethod = (method: RouteMethod) => <
       P extends ObjectType,
@@ -258,7 +259,7 @@ type RequestHandlerEnhanced<
  * @public
  */
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
-  context: {},
+  context: RequestHandlerContext,
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
 ) => KibanaResponse<any> | Promise<KibanaResponse<any>>;

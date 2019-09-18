@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsDiskioOps: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,8 +32,24 @@ export const awsDiskioOps: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.write.count',
-          id: 'max-diskio-writes',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-writes',
+          type: InfraMetricModelMetricType.sum,
+        },
+        {
+          id: 'csum-sum-diskio-writes',
+          field: 'sum-diskio-writes',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-diskio-writes',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-diskio-writes',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-diskio-writes',
+          field: 'deriv-csum-sum-diskio-writes',
+          type: InfraMetricModelMetricType.positive_only,
         },
       ],
       split_mode: 'everything',
@@ -41,14 +59,32 @@ export const awsDiskioOps: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.read.count',
-          id: 'max-diskio-reads',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-reads',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-avg-diskio-reads',
+          id: 'csum-sum-diskio-reads',
+          field: 'sum-diskio-reads',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-diskio-reads',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-diskio-reads',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-diskio-reads',
+          field: 'deriv-csum-sum-diskio-reads',
+          type: InfraMetricModelMetricType.positive_only,
+        },
+        {
+          id: 'inverted-posonly-deriv-csum-sum-diskio-reads',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-reads' }],
-          script: 'params.max * -1',
+          variables: [
+            { id: 'var-rate', name: 'rate', field: 'posonly-deriv-csum-sum-diskio-reads' },
+          ],
+          script: 'params.rate * -1',
         },
       ],
       split_mode: 'everything',

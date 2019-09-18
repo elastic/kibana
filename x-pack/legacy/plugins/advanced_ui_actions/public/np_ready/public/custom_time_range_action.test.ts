@@ -339,6 +339,7 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
   });
 
   async function check() {
+    // @ts-ignore
     await action.execute({ embeddable: child });
   }
   await expect(check()).rejects.toThrow(Error);

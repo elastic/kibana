@@ -28,6 +28,7 @@ exports[`Header should mark the input as invalid 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={
             Array [
               "Input is invalid",
@@ -93,15 +94,10 @@ exports[`Header should mark the input as invalid 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="createIndexPatternGoToStep2Button"
-        fill={false}
-        iconSide="left"
         iconType="arrowRight"
         isDisabled={true}
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Next step"
@@ -142,6 +138,7 @@ exports[`Header should render normally 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
@@ -203,15 +200,10 @@ exports[`Header should render normally 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="createIndexPatternGoToStep2Button"
-        fill={false}
-        iconSide="left"
         iconType="arrowRight"
         isDisabled={false}
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Next step"

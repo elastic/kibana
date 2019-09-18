@@ -28,6 +28,9 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   const getMessagesFactory = () => {
     let concurrentLoads = 0;
 
@@ -90,15 +93,54 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
     },
   ];
 
+  const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
+    const list = messages;
+    const listLength = list.length;
+    const pageStart = index * size;
+
+    return {
+      pageOfMessages: list.slice(pageStart, pageStart + size),
+      totalItemCount: listLength,
+    };
+  };
+
+  const onChange = ({
+    page = { index: 0, size: 10 },
+  }: {
+    page: { index: number; size: number };
+    sort: { field: string; direction: string };
+  }) => {
+    const { index, size } = page;
+
+    setPageIndex(index);
+    setPageSize(size);
+  };
+
+  const { pageOfMessages, totalItemCount } = getPageOfMessages({
+    index: pageIndex,
+    size: pageSize,
+  });
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount,
+    pageSizeOptions: [10, 20, 50],
+    hidePerPageOptions: false,
+  };
+
   return (
     <Fragment>
       <EuiSpacer size="s" />
       <EuiBasicTable
-        items={messages}
+        className="mlTransformTable__messagesPaneTable"
+        items={pageOfMessages}
         columns={columns}
         compressed={true}
         loading={isLoading}
         error={errorMessage}
+        pagination={pagination}
+        onChange={onChange}
       />
     </Fragment>
   );

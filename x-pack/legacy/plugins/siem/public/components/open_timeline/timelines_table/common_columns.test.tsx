@@ -21,6 +21,8 @@ import { TimelinesTable } from '.';
 import * as i18n from '../translations';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
 describe('#getCommonColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
@@ -344,23 +346,25 @@ describe('#getCommonColumns', () => {
   describe('Timeline Name column', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -373,23 +377,25 @@ describe('#getCommonColumns', () => {
 
     test('it renders the title when the timeline has a title and a saved object id', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -565,23 +571,25 @@ describe('#getCommonColumns', () => {
 
     test('it renders a hyperlink when the timeline has a saved object id', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -629,23 +637,25 @@ describe('#getCommonColumns', () => {
       const onOpenTimeline = jest.fn();
 
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={onOpenTimeline}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={onOpenTimeline}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -663,23 +673,25 @@ describe('#getCommonColumns', () => {
   describe('Description column', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -692,23 +704,25 @@ describe('#getCommonColumns', () => {
 
     test('it renders the description when the timeline has a description', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -723,23 +737,25 @@ describe('#getCommonColumns', () => {
       const missingDescription: OpenTimelineResult[] = [omit('description', { ...mockResults[0] })];
 
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingDescription}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingDescription.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={missingDescription}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={missingDescription.length}
+          />
+        </ThemeProvider>
       );
       expect(
         wrapper
@@ -755,23 +771,25 @@ describe('#getCommonColumns', () => {
       ];
 
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={justWhitespaceDescription}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={justWhitespaceDescription.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={justWhitespaceDescription}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={justWhitespaceDescription.length}
+          />
+        </ThemeProvider>
       );
       expect(
         wrapper
@@ -785,23 +803,25 @@ describe('#getCommonColumns', () => {
   describe('Last Modified column', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -814,23 +834,25 @@ describe('#getCommonColumns', () => {
 
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={{}}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={mockResults}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={mockResults.length}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -846,23 +868,25 @@ describe('#getCommonColumns', () => {
     const missingUpdated: OpenTimelineResult[] = [omit('updated', { ...mockResults[0] })];
 
     const wrapper = mountWithIntl(
-      <TimelinesTable
-        deleteTimelines={jest.fn()}
-        defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-        loading={false}
-        itemIdToExpandedNotesRowMap={{}}
-        onOpenTimeline={jest.fn()}
-        onSelectionChange={jest.fn()}
-        onTableChange={jest.fn()}
-        onToggleShowNotes={jest.fn()}
-        pageIndex={0}
-        pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-        searchResults={missingUpdated}
-        showExtendedColumnsAndActions={true}
-        sortDirection={DEFAULT_SORT_DIRECTION}
-        sortField={DEFAULT_SORT_FIELD}
-        totalSearchResultsCount={missingUpdated.length}
-      />
+      <ThemeProvider theme={theme}>
+        <TimelinesTable
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          loading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          searchResults={missingUpdated}
+          showExtendedColumnsAndActions={true}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          totalSearchResultsCount={missingUpdated.length}
+        />
+      </ThemeProvider>
     );
     expect(
       wrapper

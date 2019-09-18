@@ -66,11 +66,19 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 4,
+        doc_count: 9,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 2,
+            },
             {
               key: 'space',
               doc_count: 2,
@@ -80,25 +88,33 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 1,
             },
             {
-              key: 'dashboard',
+              key: 'index-pattern',
               doc_count: 1,
             },
           ],
         },
       },
       {
-        doc_count: 2,
+        doc_count: 7,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 2,
+            },
+            {
               key: 'config',
               doc_count: 1,
             },
             {
-              key: 'dashboard',
+              key: 'index-pattern',
               doc_count: 1,
             },
           ],

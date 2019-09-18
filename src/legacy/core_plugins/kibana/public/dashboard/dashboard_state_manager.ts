@@ -252,6 +252,15 @@ export class DashboardStateManager {
     return migrateLegacyQuery(this.appState.query);
   }
 
+  public getSavedQueryId() {
+    return this.appState.savedQuery;
+  }
+
+  public setSavedQueryId(id?: string) {
+    this.appState.savedQuery = id;
+    this.saveState();
+  }
+
   public getUseMargins() {
     // Existing dashboards that don't define this should default to false.
     return this.appState.options.useMargins === undefined

@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem } from '../../../../graphql/types';
@@ -19,6 +18,7 @@ import { ColumnHeader } from '../column_headers/column_header';
 import { StatefulEvent } from './stateful_event';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
+import { maxDelay } from '../../../../lib/helpers/scheduler';
 
 const EventsContainer = styled.div<{
   minWidth: number;
@@ -40,7 +40,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
-  isLoading: boolean;
+  isEventViewer?: boolean;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -50,66 +50,60 @@ interface Props {
   rowRenderers: RowRenderer[];
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
 }
 
-export const getNewNoteId = (): string => uuid.v4();
+export const Events = React.memo<Props>(
+  ({
+    actionsColumnWidth,
+    addNoteToEvent,
+    browserFields,
+    columnHeaders,
+    columnRenderers,
+    data,
+    eventIdToNoteIds,
+    getNotesByIds,
+    id,
+    isEventViewer = false,
+    minWidth,
+    onColumnResized,
+    onPinEvent,
+    onUpdateColumns,
+    onUnPinEvent,
+    pinnedEventIds,
+    rowRenderers,
+    toggleColumn,
+    updateNote,
+  }) => (
+    <EventsContainer data-test-subj="events" minWidth={minWidth}>
+      <EuiFlexGroup data-test-subj="events-flex-group" direction="column" gutterSize="none">
+        {data.map((event, i) => (
+          <EuiFlexItem data-test-subj="event-flex-item" key={event._id}>
+            <StatefulEvent
+              actionsColumnWidth={actionsColumnWidth}
+              addNoteToEvent={addNoteToEvent}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              columnRenderers={columnRenderers}
+              event={event}
+              eventIdToNoteIds={eventIdToNoteIds}
+              getNotesByIds={getNotesByIds}
+              isEventViewer={isEventViewer}
+              onColumnResized={onColumnResized}
+              onPinEvent={onPinEvent}
+              onUpdateColumns={onUpdateColumns}
+              onUnPinEvent={onUnPinEvent}
+              pinnedEventIds={pinnedEventIds}
+              rowRenderers={rowRenderers}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+              updateNote={updateNote}
+              maxDelay={maxDelay(i)}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EventsContainer>
+  )
+);
 
-export class Events extends React.PureComponent<Props> {
-  public render() {
-    const {
-      actionsColumnWidth,
-      addNoteToEvent,
-      browserFields,
-      columnHeaders,
-      columnRenderers,
-      data,
-      eventIdToNoteIds,
-      getNotesByIds,
-      id,
-      isLoading,
-      minWidth,
-      onColumnResized,
-      onPinEvent,
-      onUpdateColumns,
-      onUnPinEvent,
-      pinnedEventIds,
-      rowRenderers,
-      toggleColumn,
-      updateNote,
-      width,
-    } = this.props;
-
-    return (
-      <EventsContainer data-test-subj="events" minWidth={minWidth}>
-        <EuiFlexGroup data-test-subj="events-flex-group" direction="column" gutterSize="none">
-          {data.map(event => (
-            <EuiFlexItem data-test-subj="event-flex-item" key={event._id}>
-              <StatefulEvent
-                actionsColumnWidth={actionsColumnWidth}
-                addNoteToEvent={addNoteToEvent}
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                columnRenderers={columnRenderers}
-                event={event}
-                eventIdToNoteIds={eventIdToNoteIds}
-                getNotesByIds={getNotesByIds}
-                isLoading={isLoading}
-                onColumnResized={onColumnResized}
-                onPinEvent={onPinEvent}
-                onUpdateColumns={onUpdateColumns}
-                onUnPinEvent={onUnPinEvent}
-                pinnedEventIds={pinnedEventIds}
-                rowRenderers={rowRenderers}
-                timelineId={id}
-                toggleColumn={toggleColumn}
-                updateNote={updateNote}
-                width={width}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EventsContainer>
-    );
-  }
-}
+Events.displayName = 'Events';

@@ -20,11 +20,25 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { PointSeriesOptions } from './editors/point_series';
-import { getLegendPositions, LegendPositions } from './utils/legend_positions';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import {
+  Positions,
+  ChartTypes,
+  ChartModes,
+  AxisTypes,
+  ScaleTypes,
+  AxisModes,
+  Rotates,
+  ThresholdLineStyles,
+  InterpolationModes,
+  getConfigCollections,
+} from './utils/collections';
+import { palettes } from '@elastic/eui/lib/services';
+import { getAreaOptionTabs, getCountLabel } from './utils/common_config';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const countLabel = getCountLabel();
 
   return VisFactory.createVislibVisualization({
     name: 'line',
@@ -40,12 +54,12 @@ export default function PointSeriesVisType(Private) {
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
-            type: 'category',
-            position: 'bottom',
+            type: AxisTypes.CATEGORY,
+            position: Positions.BOTTOM,
             show: true,
             style: {},
             scale: {
-              type: 'linear'
+              type: ScaleTypes.LINEAR,
             },
             labels: {
               show: true,
@@ -59,87 +73,62 @@ export default function PointSeriesVisType(Private) {
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
-            type: 'value',
-            position: 'left',
+            type: AxisTypes.VALUE,
+            position: Positions.LEFT,
             show: true,
             style: {},
             scale: {
-              type: 'linear',
-              mode: 'normal'
+              type: ScaleTypes.LINEAR,
+              mode: AxisModes.NORMAL,
             },
             labels: {
               show: true,
-              rotate: 0,
+              rotate: Rotates.HORIZONTAL,
               filter: false,
               truncate: 100
             },
             title: {
-              text: 'Count'
+              text: countLabel,
             }
           }
         ],
         seriesParams: [
           {
-            show: 'true',
-            type: 'line',
-            mode: 'normal',
+            show: true,
+            type: ChartTypes.LINE,
+            mode: ChartModes.NORMAL,
             data: {
-              label: 'Count',
+              label: countLabel,
               id: '1'
             },
             valueAxis: 'ValueAxis-1',
             drawLinesBetweenPoints: true,
+            lineWidth: 2,
+            interpolate: InterpolationModes.LINEAR,
             showCircles: true
           }
         ],
         addTooltip: true,
         addLegend: true,
-        legendPosition: LegendPositions.RIGHT,
+        legendPosition: Positions.RIGHT,
         times: [],
         addTimeMarker: false,
         labels: {},
+        thresholdLine: {
+          show: false,
+          value: 10,
+          width: 1,
+          style: ThresholdLineStyles.FULL,
+          color: palettes.euiPaletteColorBlind.colors[9]
+        }
       },
     },
     editorConfig: {
-      collections: {
-        legendPositions: getLegendPositions(),
-        positions: ['top', 'left', 'right', 'bottom'],
-        chartTypes: [{
-          value: 'line',
-          text: 'line'
-        }, {
-          value: 'area',
-          text: 'area'
-        }, {
-          value: 'histogram',
-          text: 'bar'
-        }],
-        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-        scaleTypes: ['linear', 'log', 'square root'],
-        chartModes: ['normal', 'stacked'],
-        interpolationModes: [{
-          value: 'linear',
-          text: 'straight',
-        }, {
-          value: 'cardinal',
-          text: 'smoothed',
-        }, {
-          value: 'step-after',
-          text: 'stepped',
-        }],
-      },
-      optionTabs: [
-        {
-          name: 'advanced',
-          title: 'Metrics & Axes',
-          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
-          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
-        },
-        { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
-      ],
+      collections: getConfigCollections(),
+      optionTabs: getAreaOptionTabs(),
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
           min: 1,
@@ -149,7 +138,7 @@ export default function PointSeriesVisType(Private) {
           ]
         },
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'radius',
           title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
           min: 0,
@@ -157,7 +146,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'segment',
           title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
@@ -165,7 +154,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split series' }),
           min: 0,
@@ -173,7 +162,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'split',
           title: i18n.translate('kbnVislibVisTypes.line.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,
