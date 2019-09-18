@@ -4219,6 +4219,7 @@
     "xpack.code.repoFileStatus.langserverType.noneMessage": "当前文件不受任何语言服务器支持。",
     "xpack.code.repoFileStatus.langserverType.genericMessage": "当前文件仅由常规语言服务器支持。",
     "xpack.code.repoFileStatus.langserverType.dedicatedMessage": "当前文件由专用语言服务器支持。",
+    "xpack.code.repoFileStatus.langServerLaunchFailed": "语言服务器启动失败。",
     "xpack.code.searchBar.addRepoPlaceholder": "搜索以添加存储库",
     "xpack.code.searchBar.addToScopeDescription": "将索引的存储库添加到搜索范围",
     "xpack.code.searchBar.applyAndCloseButtonLabel": "应用并关闭",
