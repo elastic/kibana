@@ -36,6 +36,7 @@
     "xpack.server": "legacy/server",
     "xpack.snapshotRestore": "legacy/plugins/snapshot_restore",
     "xpack.spaces": "legacy/plugins/spaces",
+    "xpack.transform": "legacy/plugins/transform",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
     "xpack.watcher": "legacy/plugins/watcher"
