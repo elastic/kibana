@@ -5,7 +5,7 @@
  */
 
 import { Axis, Chart, getAxisId, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiPanel, EuiTitle, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,6 +14,7 @@ import { LocationDurationLine } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ChartWrapper } from './chart_wrapper';
 import { DurationLineSeriesList } from './duration_line_series_list';
+import { DurationChartEmptyState } from './duration_chart_empty_state';
 
 interface DurationChartProps {
   /**
@@ -48,9 +49,10 @@ export const DurationChart = ({
   loading,
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
+  const hasLines = locationDurationLines.length > 0;
 
   return (
-    <React.Fragment>
+    <>
       <EuiPanel paddingSize="m">
         <EuiTitle size="xs">
           <h4>
@@ -71,7 +73,6 @@ export const DurationChart = ({
             <Axis
               id={getAxisId('bottom')}
               position={Position.Bottom}
-              showOverlappingTicks={true}
               tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
                 defaultMessage: 'Timestamp',
@@ -86,35 +87,13 @@ export const DurationChart = ({
                 defaultMessage: 'Duration ms',
               })}
             />
-            {locationDurationLines.length > 0 && (
+            {hasLines && (
               <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
             )}
-            {locationDurationLines.length === 0 && (
-              <EuiEmptyPrompt
-                title={
-                  <EuiTitle>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.uptime.durationChart.emptyPrompt.title"
-                        defaultMessage="No duration data available"
-                      />
-                    </h5>
-                  </EuiTitle>
-                }
-                body={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.uptime.durationChart.emptyPrompt.description"
-                      defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
-                      values={{ emphasizedText: <strong>up</strong> }}
-                    />
-                  </p>
-                }
-              />
-            )}
+            {!hasLines && <DurationChartEmptyState />}
           </Chart>
         </ChartWrapper>
       </EuiPanel>
-    </React.Fragment>
+    </>
   );
 };
