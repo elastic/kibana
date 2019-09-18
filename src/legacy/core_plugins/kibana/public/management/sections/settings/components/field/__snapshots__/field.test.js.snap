@@ -93,17 +93,7 @@ exports[`Field for array setting should render as read only with help text if ov
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        default_value
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -135,11 +125,7 @@ exports[`Field for array setting should render as read only with help text if ov
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -195,13 +181,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -337,17 +317,7 @@ exports[`Field for array setting should render user value if there is user value
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        default_value
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -385,11 +355,7 @@ exports[`Field for array setting should render user value if there is user value
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -471,13 +437,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={true}
-          label={
-            <FormattedMessage
-              defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
-              values={Object {}}
-            />
-          }
+          label="On"
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -516,17 +476,7 @@ exports[`Field for boolean setting should render as read only with help text if 
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        true
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -558,11 +508,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -574,13 +520,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={true}
-          label={
-            <FormattedMessage
-              defaultMessage="Off"
-              id="kbn.management.settings.field.offLabel"
-              values={Object {}}
-            />
-          }
+          label="Off"
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -622,13 +562,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -656,13 +590,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label={
-            <FormattedMessage
-              defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
-              values={Object {}}
-            />
-          }
+          label="On"
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -727,13 +655,7 @@ exports[`Field for boolean setting should render default value if there is no us
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label={
-            <FormattedMessage
-              defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
-              values={Object {}}
-            />
-          }
+          label="On"
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -772,17 +694,7 @@ exports[`Field for boolean setting should render user value if there is user val
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        true
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -820,11 +732,7 @@ exports[`Field for boolean setting should render user value if there is user val
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -839,13 +747,7 @@ exports[`Field for boolean setting should render user value if there is user val
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
-          label={
-            <FormattedMessage
-              defaultMessage="Off"
-              id="kbn.management.settings.field.offLabel"
-              values={Object {}}
-            />
-          }
+          label="Off"
           onChange={[Function]}
           onKeyDown={[Function]}
         />
@@ -950,17 +852,7 @@ exports[`Field for image setting should render as read only with help text if ov
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -992,11 +884,7 @@ exports[`Field for image setting should render as read only with help text if ov
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -1047,13 +935,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -1187,17 +1069,7 @@ exports[`Field for image setting should render user value if there is user value
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -1235,11 +1107,7 @@ exports[`Field for image setting should render user value if there is user value
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -1251,11 +1119,7 @@ exports[`Field for image setting should render user value if there is user value
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Change image"
-                  id="kbn.management.settings.field.changeImageLinkText"
-                  values={Object {}}
-                />
+                Change image
               </EuiLink>
             </span>
           </span>
@@ -1305,21 +1169,7 @@ exports[`Field for json setting should render as read only if saving is disabled
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
-                  values={
-                    Object {
-                      "value": <EuiCodeBlock
-                        language="json"
-                        overflowHeight={null}
-                        paddingSize="s"
-                      >
-                        {}
-                      </EuiCodeBlock>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -1415,21 +1265,7 @@ exports[`Field for json setting should render as read only with help text if ove
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
-                  values={
-                    Object {
-                      "value": <EuiCodeBlock
-                        language="json"
-                        overflowHeight={null}
-                        paddingSize="s"
-                      >
-                        {}
-                      </EuiCodeBlock>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -1461,11 +1297,7 @@ exports[`Field for json setting should render as read only with help text if ove
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -1538,13 +1370,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -1630,21 +1456,7 @@ exports[`Field for json setting should render default value if there is no user 
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
-                  values={
-                    Object {
-                      "value": <EuiCodeBlock
-                        language="json"
-                        overflowHeight={null}
-                        paddingSize="s"
-                      >
-                        {}
-                      </EuiCodeBlock>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -1682,11 +1494,7 @@ exports[`Field for json setting should render default value if there is no user 
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -1759,21 +1567,7 @@ exports[`Field for json setting should render user value if there is user value 
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
-                  values={
-                    Object {
-                      "value": <EuiCodeBlock
-                        language="json"
-                        overflowHeight={null}
-                        paddingSize="s"
-                      >
-                        {}
-                      </EuiCodeBlock>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -1811,11 +1605,7 @@ exports[`Field for json setting should render user value if there is user value 
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -1972,17 +1762,7 @@ exports[`Field for markdown setting should render as read only with help text if
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -2014,11 +1794,7 @@ exports[`Field for markdown setting should render as read only with help text if
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -2091,13 +1867,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -2267,17 +2037,7 @@ exports[`Field for markdown setting should render user value if there is user va
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -2315,11 +2075,7 @@ exports[`Field for markdown setting should render user value if there is user va
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -2459,17 +2215,7 @@ exports[`Field for number setting should render as read only with help text if o
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        5
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -2501,11 +2247,7 @@ exports[`Field for number setting should render as read only with help text if o
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -2561,13 +2303,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -2703,17 +2439,7 @@ exports[`Field for number setting should render user value if there is user valu
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        5
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -2751,11 +2477,7 @@ exports[`Field for number setting should render user value if there is user valu
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -2895,17 +2617,7 @@ exports[`Field for select setting should render as read only with help text if o
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        Orange
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -2937,11 +2649,7 @@ exports[`Field for select setting should render as read only with help text if o
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -3014,13 +2722,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -3190,17 +2892,7 @@ exports[`Field for select setting should render user value if there is user valu
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        Orange
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -3238,11 +2930,7 @@ exports[`Field for select setting should render user value if there is user valu
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
@@ -3382,17 +3070,7 @@ exports[`Field for string setting should render as read only with help text if o
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -3424,11 +3102,7 @@ exports[`Field for string setting should render as read only with help text if o
           <EuiText
             size="xs"
           >
-            <FormattedMessage
-              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
-              values={Object {}}
-            />
+            This setting is overridden by the Kibana server and can not be changed.
           </EuiText>
         }
         isInvalid={false}
@@ -3484,13 +3158,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content={
-              <FormattedMessage
-                defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
-                values={Object {}}
-              />
-            }
+            content="Custom setting"
             type="asterisk"
           />
         </h3>
@@ -3626,17 +3294,7 @@ exports[`Field for string setting should render user value if there is user valu
               size="xs"
             >
               <React.Fragment>
-                <FormattedMessage
-                  defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
-                  values={
-                    Object {
-                      "value": <EuiCode>
-                        null
-                      </EuiCode>,
-                    }
-                  }
-                />
+                Default: [object Object]
               </React.Fragment>
             </EuiText>
           </React.Fragment>
@@ -3674,11 +3332,7 @@ exports[`Field for string setting should render user value if there is user valu
                 onClick={[Function]}
                 type="button"
               >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
+                Reset to default
               </EuiLink>
                  
             </span>
