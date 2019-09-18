@@ -57,7 +57,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickAction, productName 
       tooltip = (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.monitoring.setupMode.tooltip.mightExist', {
+          content={i18n.translate('xpack.monitoring.setupMode.tooltip.noUsageDetected', {
             defaultMessage: `We did not detect any usage.`,
           })}
         >

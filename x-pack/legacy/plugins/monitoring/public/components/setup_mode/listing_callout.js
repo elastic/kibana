@@ -137,7 +137,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           iconType="flag"
         >
           <p>
-            {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
+            {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
               defaultMessage: `These {product} {identifier} are monitored through internal collection. Migrate to monitor with Metricbeat.`,
               values: {
                 product: formatProductName(productName),

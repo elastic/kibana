@@ -122,7 +122,7 @@ export function NoData(props) {
                 isLoading={isLoading}
               >
                 <FormattedMessage
-                  id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                  id="xpack.monitoring.noData.collectionInterval.turnOnMonitoringButtonLabel"
                   defaultMessage="Set up monitoring with Metricbeat"
                 />
               </EuiButton>
