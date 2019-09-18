@@ -152,7 +152,6 @@
   margin: 0 $euiSize;
   border-radius: $euiSizeXS;
   cursor: pointer;
-  width: calc(100% - $euiSizeXL);
 
   &:hover {
     background: $euiFocusBackgroundColor;

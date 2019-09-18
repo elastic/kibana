@@ -12,4 +12,5 @@ export interface Space {
   initials?: string;
   disabledFeatures: string[];
   _reserved?: boolean;
+  imageUrl?: string;
 }

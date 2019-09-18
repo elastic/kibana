@@ -7,7 +7,7 @@
 
 Overwrites specific saved objects that were returned as errors from the <<spaces-api-copy-saved-objects, Copy Saved Objects to Space API>>.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
 ////
 Use the appropriate heading levels for your book.
