@@ -141,3 +141,19 @@ function checks-reporter-with-killswitch() {
 export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
+
+ES_DIR="$PARENT_DIR/elasticsearch"
+ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
+
+if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
+  ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
+  export ES_BUILD_JAVA
+
+  if [ -z "$ES_BUILD_JAVA" ]; then
+    echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"
+    exit 1
+  fi
+
+  echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
+  export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
+fi
