@@ -52,6 +52,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -61,11 +64,10 @@ import {
   fetchExportByType,
   findObjects,
 } from '../../lib';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
-class ObjectsTableUI extends Component {
+export class ObjectsTable extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
     indexPatterns: PropTypes.object.isRequired,
@@ -174,7 +176,6 @@ class ObjectsTableUI extends Component {
   };
 
   debouncedFetch = debounce(async () => {
-    const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
@@ -200,10 +201,10 @@ class ObjectsTableUI extends Component {
         });
       }
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
-          defaultMessage: 'Unable find saved objects',
-        }),
+        title: i18n.translate(
+          'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable find saved objects' }
+        ),
         text: `${error}`,
       });
       return;
@@ -279,7 +280,6 @@ class ObjectsTableUI extends Component {
   };
 
   onExport = async includeReferencesDeep => {
-    const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
 
@@ -288,8 +288,7 @@ class ObjectsTableUI extends Component {
       blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
     } catch (e) {
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.export.dangerNotification',
+        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -298,15 +297,13 @@ class ObjectsTableUI extends Component {
 
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
-      title: intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.export.successNotification',
+      title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
         defaultMessage: 'Your file is downloading in the background',
       }),
     });
   };
 
   onExportAll = async () => {
-    const { intl } = this.props;
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
@@ -320,8 +317,7 @@ class ObjectsTableUI extends Component {
       blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
     } catch (e) {
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.exportAll.dangerNotification',
+        title: i18n.translate('kbn.management.objects.objectsTable.exportAll.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -330,8 +326,7 @@ class ObjectsTableUI extends Component {
 
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
-      title: intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.exportAll.successNotification',
+      title: i18n.translate('kbn.management.objects.objectsTable.exportAll.successNotification', {
         defaultMessage: 'Your file is downloading in the background',
       }),
     });
@@ -440,7 +435,6 @@ class ObjectsTableUI extends Component {
 
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
-    const { intl } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
       return null;
@@ -503,11 +497,10 @@ class ObjectsTableUI extends Component {
             columns={[
               {
                 field: 'type',
-                name: intl.formatMessage({
-                  id:
-                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
-                  defaultMessage: 'Type',
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
+                  { defaultMessage: 'Type' }
+                ),
                 width: '50px',
                 render: (type, object) => (
                   <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
@@ -517,19 +510,17 @@ class ObjectsTableUI extends Component {
               },
               {
                 field: 'id',
-                name: intl.formatMessage({
-                  id:
-                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                  defaultMessage: 'Id',
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
+                  { defaultMessage: 'Id' }
+                ),
               },
               {
                 field: 'meta.title',
-                name: intl.formatMessage({
-                  id:
-                    'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
-                  defaultMessage: 'Title',
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  { defaultMessage: 'Title' }
+                ),
               },
             ]}
             pagination={true}
@@ -705,5 +696,3 @@ class ObjectsTableUI extends Component {
     );
   }
 }
-
-export const ObjectsTable = injectI18n(ObjectsTableUI);

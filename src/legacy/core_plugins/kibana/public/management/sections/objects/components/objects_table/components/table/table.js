@@ -38,9 +38,9 @@ import {
 } from '@elastic/eui';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-class TableUI extends PureComponent {
+export class Table extends PureComponent {
   static propTypes = {
     selectedSavedObjects: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
@@ -136,7 +136,6 @@ class TableUI extends PureComponent {
       onTableChange,
       goInspectObject,
       onShowRelationships,
-      intl,
     } = this.props;
 
     const pagination = {
@@ -150,8 +149,7 @@ class TableUI extends PureComponent {
       {
         type: 'field_value_selection',
         field: 'type',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.typeFilterName',
+        name: i18n.translate('kbn.management.objects.objectsTable.table.typeFilterName', {
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
@@ -170,16 +168,15 @@ class TableUI extends PureComponent {
     const columns = [
       {
         field: 'type',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.columnTypeName',
+        name: i18n.translate('kbn.management.objects.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
         width: '50px',
         align: 'center',
-        description: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.columnTypeDescription',
-          defaultMessage: 'Type of the saved object',
-        }),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.table.columnTypeDescription',
+          { defaultMessage: 'Type of the saved object' }
+        ),
         sortable: false,
         render: (type, object) => {
           return (
@@ -195,14 +192,13 @@ class TableUI extends PureComponent {
       },
       {
         field: 'meta.title',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.columnTitleName',
+        name: i18n.translate('kbn.management.objects.objectsTable.table.columnTitleName', {
           defaultMessage: 'Title',
         }),
-        description: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.columnTitleDescription',
-          defaultMessage: 'Title of the saved object',
-        }),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.table.columnTitleDescription',
+          { defaultMessage: 'Title of the saved object' }
+        ),
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
@@ -217,37 +213,36 @@ class TableUI extends PureComponent {
         },
       },
       {
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.table.columnActionsName',
+        name: i18n.translate('kbn.management.objects.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
-              defaultMessage: 'Inspect',
-            }),
-            description: intl.formatMessage({
-              id:
-                'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
-              defaultMessage: 'Inspect this saved object',
-            }),
+            name: i18n.translate(
+              'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
+              { defaultMessage: 'Inspect' }
+            ),
+            description: i18n.translate(
+              'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
+              { defaultMessage: 'Inspect this saved object' }
+            ),
             type: 'icon',
             icon: 'inspect',
             onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
           },
           {
-            name: intl.formatMessage({
-              id:
-                'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName',
-              defaultMessage: 'Relationships',
-            }),
-            description: intl.formatMessage({
-              id:
-                'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription',
-              defaultMessage: 'View the relationships this saved object has to other saved objects',
-            }),
+            name: i18n.translate(
+              'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName',
+              { defaultMessage: 'Relationships' }
+            ),
+            description: i18n.translate(
+              'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription',
+              {
+                defaultMessage:
+                  'View the relationships this saved object has to other saved objects',
+              }
+            ),
             type: 'icon',
             icon: 'kqlSelector',
             onClick: object => onShowRelationships(object),
@@ -276,10 +271,10 @@ class TableUI extends PureComponent {
 
     let queryParseError;
     if (!this.state.isSearchTextValid) {
-      const parseErrorMsg = intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage',
-        defaultMessage: 'Unable to parse query',
-      });
+      const parseErrorMsg = i18n.translate(
+        'kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage',
+        { defaultMessage: 'Unable to parse query' }
+      );
       queryParseError = (
         <EuiFormErrorText>{`${parseErrorMsg}. ${this.state.parseErrorMessage}`}</EuiFormErrorText>
       );
@@ -383,5 +378,3 @@ class TableUI extends PureComponent {
     );
   }
 }
-
-export const Table = injectI18n(TableUI);

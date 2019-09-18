@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field } from './field';
@@ -183,7 +183,7 @@ describe('Field', () => {
 
     describe(`for ${type} setting`, () => {
       it('should render default value if there is no user value set', async () => {
-        const component = shallowWithIntl(
+        const component = shallowWithI18nProvider(
           <Field.WrappedComponent
             setting={setting}
             save={save}
@@ -196,7 +196,7 @@ describe('Field', () => {
       });
 
       it('should render as read only with help text if overridden', async () => {
-        const component = shallowWithIntl(
+        const component = shallowWithI18nProvider(
           <Field.WrappedComponent
             setting={{
               ...setting,
@@ -213,7 +213,7 @@ describe('Field', () => {
       });
 
       it('should render as read only if saving is disabled', async () => {
-        const component = shallowWithIntl(
+        const component = shallowWithI18nProvider(
           <Field.WrappedComponent
             setting={setting}
             save={save}
@@ -226,7 +226,7 @@ describe('Field', () => {
       });
 
       it('should render user value if there is user value is set', async () => {
-        const component = shallowWithIntl(
+        const component = shallowWithI18nProvider(
           <Field.WrappedComponent
             setting={{
               ...setting,
@@ -242,7 +242,7 @@ describe('Field', () => {
       });
 
       it('should render custom setting icon if it is custom', async () => {
-        const component = shallowWithIntl(
+        const component = shallowWithI18nProvider(
           <Field.WrappedComponent
             setting={{
               ...setting,

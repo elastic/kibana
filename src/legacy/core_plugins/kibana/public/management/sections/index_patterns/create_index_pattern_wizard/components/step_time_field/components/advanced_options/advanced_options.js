@@ -21,14 +21,14 @@ import React from 'react';
 
 import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const AdvancedOptionsComponent = ({
+export const AdvancedOptions = ({
   isVisible,
   indexPatternId,
   toggleAdvancedOptions,
   onChangeIndexPatternId,
-  intl,
 }) => (
   <div>
     <EuiButtonEmpty
@@ -70,15 +70,15 @@ export const AdvancedOptionsComponent = ({
             data-test-subj="createIndexPatternIdInput"
             value={indexPatternId}
             onChange={onChangeIndexPatternId}
-            placeholder={intl.formatMessage({
-              id: 'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
-              defaultMessage: 'custom-index-pattern-id',
-            })}
+            placeholder={i18n.translate(
+              'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
+              {
+                defaultMessage: 'custom-index-pattern-id',
+              }
+            )}
           />
         </EuiFormRow>
       </EuiForm>
     ) : null}
   </div>
 );
-
-export const AdvancedOptions = injectI18n(AdvancedOptionsComponent);

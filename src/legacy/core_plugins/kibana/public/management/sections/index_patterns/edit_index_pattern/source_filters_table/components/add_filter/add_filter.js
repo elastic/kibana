@@ -22,9 +22,10 @@ import PropTypes from 'prop-types';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class AddFilterComponent extends Component {
+export class AddFilter extends Component {
   static propTypes = {
     onAddFilter: PropTypes.func.isRequired,
   };
@@ -43,9 +44,7 @@ export class AddFilterComponent extends Component {
 
   render() {
     const { filter } = this.state;
-    const { intl } = this.props;
-    const placeholder = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.sourcePlaceholder',
+    const placeholder = i18n.translate('kbn.management.editIndexPattern.sourcePlaceholder', {
       defaultMessage:
         'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')',
     });
@@ -72,5 +71,3 @@ export class AddFilterComponent extends Component {
     );
   }
 }
-
-export const AddFilter = injectI18n(AddFilterComponent);

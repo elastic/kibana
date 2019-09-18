@@ -32,16 +32,16 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const TimeFieldComponent = ({
+export const TimeField = ({
   isVisible,
   fetchTimeFields,
   timeFieldOptions,
   isLoading,
   selectedTimeField,
   onTimeFieldChanged,
-  intl,
 }) => (
   <EuiForm>
     {isVisible ? (
@@ -93,10 +93,12 @@ export const TimeFieldComponent = ({
             data-test-subj="createIndexPatternTimeFieldSelect"
             options={[
               {
-                text: intl.formatMessage({
-                  id: 'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
-                  defaultMessage: 'Loading…',
-                }),
+                text: i18n.translate(
+                  'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
+                  {
+                    defaultMessage: 'Loading…',
+                  }
+                ),
                 value: '',
               },
             ]}
@@ -126,5 +128,3 @@ export const TimeFieldComponent = ({
     )}
   </EuiForm>
 );
-
-export const TimeField = injectI18n(TimeFieldComponent);

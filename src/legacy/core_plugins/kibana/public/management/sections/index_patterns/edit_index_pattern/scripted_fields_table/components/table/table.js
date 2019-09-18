@@ -22,9 +22,9 @@ import PropTypes from 'prop-types';
 
 import { EuiInMemoryTable } from '@elastic/eui';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export class TableComponent extends PureComponent {
+export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -44,60 +44,56 @@ export class TableComponent extends PureComponent {
   };
 
   render() {
-    const { items, editField, deleteField, intl } = this.props;
+    const { items, editField, deleteField } = this.props;
 
     const columns = [
       {
         field: 'displayName',
-        name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.nameHeader',
+        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.nameHeader', {
           defaultMessage: 'Name',
         }),
-        description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.nameDescription',
-          defaultMessage: 'Name of the field',
-        }),
+        description: i18n.translate(
+          'kbn.management.editIndexPattern.scripted.table.nameDescription',
+          { defaultMessage: 'Name of the field' }
+        ),
         dataType: 'string',
         sortable: true,
         width: '38%',
       },
       {
         field: 'lang',
-        name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.langHeader',
+        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.langHeader', {
           defaultMessage: 'Lang',
         }),
-        description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.langDescription',
-          defaultMessage: 'Language used for the field',
-        }),
+        description: i18n.translate(
+          'kbn.management.editIndexPattern.scripted.table.langDescription',
+          { defaultMessage: 'Language used for the field' }
+        ),
         dataType: 'string',
         sortable: true,
         'data-test-subj': 'scriptedFieldLang',
       },
       {
         field: 'script',
-        name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.scriptHeader',
+        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.scriptHeader', {
           defaultMessage: 'Script',
         }),
-        description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.scriptDescription',
-          defaultMessage: 'Script for the field',
-        }),
+        description: i18n.translate(
+          'kbn.management.editIndexPattern.scripted.table.scriptDescription',
+          { defaultMessage: 'Script for the field' }
+        ),
         dataType: 'string',
         sortable: true,
       },
       {
         field: 'name',
-        name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.formatHeader',
+        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.formatHeader', {
           defaultMessage: 'Format',
         }),
-        description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.table.formatDescription',
-          defaultMessage: 'Format used for the field',
-        }),
+        description: i18n.translate(
+          'kbn.management.editIndexPattern.scripted.table.formatDescription',
+          { defaultMessage: 'Format used for the field' }
+        ),
         render: this.renderFormatCell,
         sortable: false,
       },
@@ -105,26 +101,24 @@ export class TableComponent extends PureComponent {
         name: '',
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.scripted.table.editHeader',
+            name: i18n.translate('kbn.management.editIndexPattern.scripted.table.editHeader', {
               defaultMessage: 'Edit',
             }),
-            description: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.scripted.table.editDescription',
-              defaultMessage: 'Edit this field',
-            }),
+            description: i18n.translate(
+              'kbn.management.editIndexPattern.scripted.table.editDescription',
+              { defaultMessage: 'Edit this field' }
+            ),
             icon: 'pencil',
             onClick: editField,
           },
           {
-            name: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.scripted.table.deleteHeader',
+            name: i18n.translate('kbn.management.editIndexPattern.scripted.table.deleteHeader', {
               defaultMessage: 'Delete',
             }),
-            description: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.scripted.table.deleteDescription',
-              defaultMessage: 'Delete this field',
-            }),
+            description: i18n.translate(
+              'kbn.management.editIndexPattern.scripted.table.deleteDescription',
+              { defaultMessage: 'Delete this field' }
+            ),
             icon: 'trash',
             color: 'danger',
             onClick: deleteField,
@@ -144,5 +138,3 @@ export class TableComponent extends PureComponent {
     );
   }
 }
-
-export const Table = injectI18n(TableComponent);

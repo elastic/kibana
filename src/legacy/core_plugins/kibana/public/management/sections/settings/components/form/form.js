@@ -29,12 +29,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getCategoryName } from '../../lib';
 import { Field } from '../field';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-class FormUI extends PureComponent {
+export class Form extends PureComponent {
   static propTypes = {
     settings: PropTypes.object.isRequired,
     categories: PropTypes.array.isRequired,
@@ -155,5 +155,3 @@ class FormUI extends PureComponent {
     );
   }
 }
-
-export const Form = injectI18n(FormUI);

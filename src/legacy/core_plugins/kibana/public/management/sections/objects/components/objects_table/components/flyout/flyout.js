@@ -45,6 +45,9 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   importFile,
   importLegacyFile,
@@ -60,9 +63,8 @@ import {
   saveObjects,
 } from '../../../../lib/resolve_saved_objects';
 import { POSSIBLE_TYPES } from '../../objects_table';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-class FlyoutUI extends Component {
+export class Flyout extends Component {
   static propTypes = {
     close: PropTypes.func.isRequired,
     done: PropTypes.func.isRequired,
@@ -124,7 +126,6 @@ class FlyoutUI extends Component {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
@@ -135,8 +136,7 @@ class FlyoutUI extends Component {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
+        error: i18n.translate('kbn.management.objects.objectsTable.flyout.importFileErrorMessage', {
           defaultMessage: 'The file could not be processed.',
         }),
       });
@@ -185,8 +185,6 @@ class FlyoutUI extends Component {
    * Function goes through the failedImports and tries to resolve the issues.
    */
   resolveImportErrors = async () => {
-    const { intl } = this.props;
-
     this.setState({
       error: undefined,
       status: 'loading',
@@ -202,16 +200,16 @@ class FlyoutUI extends Component {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
+          { defaultMessage: 'The file could not be processed.' }
+        ),
       });
     }
   };
 
   legacyImport = async () => {
-    const { services, indexPatterns, intl, confirmModalPromise } = this.props;
+    const { services, indexPatterns, confirmModalPromise } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
@@ -225,10 +223,10 @@ class FlyoutUI extends Component {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
+          { defaultMessage: 'The file could not be processed.' }
+        ),
       });
       return;
     }
@@ -236,10 +234,10 @@ class FlyoutUI extends Component {
     if (!Array.isArray(contents)) {
       this.setState({
         status: 'error',
-        error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
-          defaultMessage: 'Saved objects file format is invalid and cannot be imported.',
-        }),
+        error: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
+          { defaultMessage: 'Saved objects file format is invalid and cannot be imported.' }
+        ),
       });
       return;
     }
@@ -335,7 +333,7 @@ class FlyoutUI extends Component {
       failedImports,
     } = this.state;
 
-    const { services, indexPatterns, intl } = this.props;
+    const { services, indexPatterns } = this.props;
 
     this.setState({
       error: undefined,
@@ -351,11 +349,10 @@ class FlyoutUI extends Component {
 
         // Do not Promise.all these calls as the order matters
         this.setState({
-          loadingMessage: intl.formatMessage({
-            id:
-              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
-            defaultMessage: 'Resolving conflicts…',
-          }),
+          loadingMessage: i18n.translate(
+            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
+            { defaultMessage: 'Resolving conflicts…' }
+          ),
         });
         if (resolutions.length) {
           importCount += await resolveIndexPatternConflicts(
@@ -365,22 +362,20 @@ class FlyoutUI extends Component {
           );
         }
         this.setState({
-          loadingMessage: intl.formatMessage({
-            id:
-              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
-            defaultMessage: 'Saving conflicts…',
-          }),
+          loadingMessage: i18n.translate(
+            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
+            { defaultMessage: 'Saving conflicts…' }
+          ),
         });
         importCount += await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches,
           isOverwriteAllChecked
         );
         this.setState({
-          loadingMessage: intl.formatMessage({
-            id:
-              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
-            defaultMessage: 'Ensure saved searches are linked properly…',
-          }),
+          loadingMessage: i18n.translate(
+            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
+            { defaultMessage: 'Ensure saved searches are linked properly…' }
+          ),
         });
         importCount += await resolveSavedSearches(
           conflictedSearchDocs,
@@ -389,11 +384,10 @@ class FlyoutUI extends Component {
           isOverwriteAllChecked
         );
         this.setState({
-          loadingMessage: intl.formatMessage({
-            id:
-              'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
-            defaultMessage: 'Retrying failed objects…',
-          }),
+          loadingMessage: i18n.translate(
+            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
+            { defaultMessage: 'Retrying failed objects…' }
+          ),
         });
         importCount += await saveObjects(
           failedImports.map(({ obj }) => obj),
@@ -437,7 +431,6 @@ class FlyoutUI extends Component {
 
   renderUnmatchedReferences() {
     const { unmatchedReferences } = this.state;
-    const { intl } = this.props;
 
     if (!unmatchedReferences) {
       return null;
@@ -446,42 +439,40 @@ class FlyoutUI extends Component {
     const columns = [
       {
         field: 'existingIndexPatternId',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdName',
-          defaultMessage: 'ID',
-        }),
-        description: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdDescription',
-          defaultMessage: 'ID of the index pattern',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdName',
+          { defaultMessage: 'ID' }
+        ),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdDescription',
+          { defaultMessage: 'ID of the index pattern' }
+        ),
         sortable: true,
       },
       {
         field: 'list',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountName',
-          defaultMessage: 'Count',
-        }),
-        description: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
-          defaultMessage: 'How many affected objects',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountName',
+          { defaultMessage: 'Count' }
+        ),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
+          { defaultMessage: 'How many affected objects' }
+        ),
         render: list => {
           return <Fragment>{list.length}</Fragment>;
         },
       },
       {
         field: 'list',
-        name: intl.formatMessage({
-          id:
-            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
-          defaultMessage: 'Sample of affected objects',
-        }),
-        description: intl.formatMessage({
-          id:
-            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
-          defaultMessage: 'Sample of affected objects',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
+          { defaultMessage: 'Sample of affected objects' }
+        ),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
+          { defaultMessage: 'Sample of affected objects' }
+        ),
         render: list => {
           return (
             <ul style={{ listStyle: 'none' }}>
@@ -494,11 +485,10 @@ class FlyoutUI extends Component {
       },
       {
         field: 'existingIndexPatternId',
-        name: intl.formatMessage({
-          id:
-            'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
-          defaultMessage: 'New index pattern',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
+          { defaultMessage: 'New index pattern' }
+        ),
         render: id => {
           const options = this.state.indexPatterns.map(indexPattern => ({
             text: indexPattern.title,
@@ -557,7 +547,6 @@ class FlyoutUI extends Component {
   }
 
   renderBody() {
-    const { intl } = this.props;
     const {
       status,
       loadingMessage,
@@ -612,29 +601,28 @@ class FlyoutUI extends Component {
               .map(({ error, obj }) => {
                 if (error.type === 'missing_references') {
                   return error.references.map(reference => {
-                    return intl.formatMessage(
+                    return i18n.translate(
+                      'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
                       {
-                        id:
-                          'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
                         defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
-                      },
-                      {
-                        id: obj.id,
-                        type: obj.type,
-                        refId: reference.id,
-                        refType: reference.type,
+                        values: {
+                          id: obj.id,
+                          type: obj.type,
+                          refId: reference.id,
+                          refType: reference.type,
+                        },
                       }
                     );
                   });
                 } else if (error.type === 'unsupported_type') {
-                  return intl.formatMessage(
+                  return i18n.translate(
+                    'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
                     {
-                      id: 'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
                       defaultMessage: '{type} [id={id}] unsupported type',
-                    },
-                    {
-                      id: obj.id,
-                      type: obj.type,
+                      values: {
+                        id: obj.id,
+                        type: obj.type,
+                      },
                     }
                   );
                 }
@@ -883,28 +871,28 @@ class FlyoutUI extends Component {
   }
 
   render() {
-    const { close, intl } = this.props;
+    const { close } = this.props;
 
     let confirmOverwriteModal;
     if (this.state.conflictingRecord) {
       confirmOverwriteModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={intl.formatMessage(
+            title={i18n.translate(
+              'kbn.management.objects.objectsTable.flyout.confirmOverwriteTitle',
               {
-                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteTitle',
                 defaultMessage: 'Overwrite {type}?',
-              },
-              { type: this.state.conflictingRecord.type }
+                values: { type: this.state.conflictingRecord.type },
+              }
             )}
-            cancelButtonText={intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
-              defaultMessage: 'Cancel',
-            })}
-            confirmButtonText={intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
-              defaultMessage: 'Overwrite',
-            })}
+            cancelButtonText={i18n.translate(
+              'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
+              { defaultMessage: 'Cancel' }
+            )}
+            confirmButtonText={i18n.translate(
+              'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
+              { defaultMessage: 'Overwrite' }
+            )}
             buttonColor="danger"
             onCancel={this.overwriteSkipped.bind(this)}
             onConfirm={this.overwriteConfirmed.bind(this)}
@@ -951,5 +939,3 @@ class FlyoutUI extends Component {
     );
   }
 }
-
-export const Flyout = injectI18n(FlyoutUI);

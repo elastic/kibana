@@ -35,12 +35,13 @@ import { Header } from './components/header';
 
 import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export class StepIndexPatternComponent extends Component {
+export class StepIndexPattern extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
@@ -224,7 +225,7 @@ export class StepIndexPatternComponent extends Component {
   }
 
   renderHeader({ exactMatchedIndices: indices }) {
-    const { goToNextStep, indexPatternCreationType, intl } = this.props;
+    const { goToNextStep, indexPatternCreationType } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -243,13 +244,13 @@ export class StepIndexPatternComponent extends Component {
       // This is an error scenario but do not report an error
       containsErrors = true;
     } else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
-      const errorMessage = intl.formatMessage(
+      const errorMessage = i18n.translate(
+        'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
         {
-          id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
           defaultMessage:
             'A {indexPatternName} cannot contain spaces or the characters: {characterList}',
-        },
-        { characterList, indexPatternName }
+          values: { characterList, indexPatternName },
+        }
       );
 
       errors.push(errorMessage);
@@ -301,5 +302,3 @@ export class StepIndexPatternComponent extends Component {
     );
   }
 }
-
-export const StepIndexPattern = injectI18n(StepIndexPatternComponent);
