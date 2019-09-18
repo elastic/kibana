@@ -42,7 +42,7 @@ export default function exploreRepositoryFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
         await repoUnload(
           'github.com/elastic/TypeScript-Node-Starter',
@@ -167,7 +167,7 @@ export default function exploreRepositoryFunctionalTests({
         log.info('src folder closed');
       });
 
-      it('highlight only one symbol', async () => {
+      it.skip('highlight only one symbol', async () => {
         await retry.try(async () => {
           expect(await exists('codeFileTreeNode-Directory-src')).ok();
         });
@@ -242,7 +242,7 @@ export default function exploreRepositoryFunctionalTests({
         });
       });
 
-      it('Navigate source file via structure tree', async () => {
+      it.skip('Navigate source file via structure tree', async () => {
         log.debug('Navigate source file via structure tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {

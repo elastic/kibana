@@ -45,7 +45,7 @@ export default function exploreRepositoryFunctionalTests({
     });
 
     after(async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await repoUnload(
         'github.com/elastic/code-examples_flatten-directory',
         config.get('kbnTestServer.installDir') || REPO_ROOT
