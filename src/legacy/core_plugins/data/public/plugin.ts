@@ -66,12 +66,13 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
   private setupApi!: DataSetup;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
+    const { uiSettings, http } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
     const indexPatternsService = this.indexPatterns.setup({
       uiSettings,
       savedObjectsClient,
+      http,
     });
 
     this.setupApi = {

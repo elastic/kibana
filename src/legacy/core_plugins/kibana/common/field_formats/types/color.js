@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { asPrettyString } from '../../../../../../plugins/data/common/utils/as_pretty_string';
+import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
 import { DEFAULT_COLOR } from './color_default';
 
 const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
