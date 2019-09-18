@@ -18,9 +18,11 @@ export async function getCategories() {
   return Registry.fetchCategories();
 }
 
-export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
+export async function getIntegrations(
+  options: { savedObjectsClient: SavedObjectsClientContract } & Registry.SearchParams
+) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList().then(items =>
+  const registryItems = await Registry.fetchList({ category: options.category }).then(items =>
     items.map(item => Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }))
   );
   const searchObjects = registryItems.map(({ name, version }) => ({

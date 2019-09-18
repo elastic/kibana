@@ -44,8 +44,9 @@ export interface ServiceRequirements {
 // from /categories
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
+export type CategoryId = string;
 export interface CategorySummaryItem {
-  id: string;
+  id: CategoryId;
   title: string;
   count: number;
 }

@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import {
   AssetsGroupedByServiceByType,
   AssetParts,
+  CategoryId,
   CategorySummaryList,
   RegistryList,
   RegistryPackage,
@@ -19,9 +21,17 @@ import { streamToBuffer } from './streams';
 export { ArchiveEntry } from './extract';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
+export interface SearchParams {
+  category?: CategoryId;
+}
 
-export async function fetchList(): Promise<RegistryList> {
-  return fetchUrl(`${REGISTRY}/search`).then(JSON.parse);
+export async function fetchList(params?: SearchParams): Promise<RegistryList> {
+  const url = new URL(`${REGISTRY}/search`);
+  if (params && params.category) {
+    url.searchParams.set('category', params.category);
+  }
+
+  return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {

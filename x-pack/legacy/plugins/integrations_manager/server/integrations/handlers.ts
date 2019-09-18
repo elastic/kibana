@@ -44,7 +44,10 @@ export async function handleGetCategories(req: Request, extra: Extra) {
 
 export async function handleGetList(req: Request, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const integrationList = await getIntegrations({ savedObjectsClient });
+  const integrationList = await getIntegrations({
+    savedObjectsClient,
+    category: req.query.category,
+  });
 
   return integrationList;
 }

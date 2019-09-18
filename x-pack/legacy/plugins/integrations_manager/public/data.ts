@@ -11,6 +11,7 @@ import {
   getInstallPath,
   getListPath,
   getRemovePath,
+  ListParams,
 } from '../common/routes';
 import {
   CategorySummaryList,
@@ -32,9 +33,10 @@ export async function getCategories(): Promise<CategorySummaryList> {
   return list;
 }
 
-export async function getIntegrations(): Promise<IntegrationList> {
+export async function getIntegrations(params?: ListParams): Promise<IntegrationList> {
   const path = getListPath();
-  const list: IntegrationList = await _fetch(path);
+  const options = params ? { query: { ...params } } : undefined;
+  const list: IntegrationList = await _fetch(path, options);
 
   return list;
 }
