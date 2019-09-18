@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import DateMath from '@elastic/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -68,17 +69,10 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-export function FieldItem({
-  core,
-  field,
-  indexPattern,
-  highlight,
-  exists,
-  query,
-  dateRange,
-}: FieldItemProps) {
+export function FieldItem(props: FieldItemProps) {
+  const { core, field, indexPattern, highlight, exists, query, dateRange } = props;
+
   const [infoIsOpen, setOpen] = useState(false);
-  const [showingHistogram, setShowingHistogram] = useState(true);
 
   const [state, setState] = useState<State>({
     isLoading: false,
@@ -99,21 +93,6 @@ export function FieldItem({
         <span>{wrappableName.substr(highlightIndex + wrappableHighlight.length)}</span>
       </span>
     );
-
-  let formatter: { convert: (data: unknown) => string };
-  if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
-    if (FormatType) {
-      formatter = new FormatType(
-        indexPattern.fieldFormatMap[field.name].params,
-        core.uiSettings.get.bind(core.uiSettings)
-      );
-    } else {
-      formatter = { convert: (data: unknown) => JSON.stringify(data) };
-    }
-  } else {
-    formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
-  }
 
   function fetchData() {
     if (
@@ -148,50 +127,11 @@ export function FieldItem({
           histogram: results.histogram,
           topValues: results.topValues,
         }));
-
-        if (
-          results.histogram &&
-          results.histogram.buckets.length &&
-          results.topValues &&
-          results.topValues.buckets.length
-        ) {
-          const count = results.sampledValues || results.sampledDocuments || results.totalDocuments;
-          const totalValuesCount =
-            results.topValues &&
-            results.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-          const otherCount = count && totalValuesCount ? count - totalValuesCount : 0;
-          // Default to histogram when top values are less than 10% of total
-          setShowingHistogram(otherCount / totalValuesCount > 0.9);
-        } else {
-          setShowingHistogram(!!results.histogram);
-        }
       })
       .catch(() => {
         setState(s => ({ ...s, isLoading: false }));
       });
   }
-
-  const specId = getSpecId(
-    i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
-      defaultMessage: 'Count',
-    })
-  );
-  const expectedColor = getColorForDataType(field.type);
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId,
-  };
-  const seriesColors = new Map([[colors, expectedColor]]);
-
-  const bucketedValuesCount =
-    state.topValues && state.topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount =
-    state.sampledValues && bucketedValuesCount ? state.sampledValues - bucketedValuesCount : 0;
-
-  const euiButtonColor =
-    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
-  const euiTextColor =
-    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'default';
 
   function togglePopover() {
     setOpen(!infoIsOpen);
@@ -249,167 +189,143 @@ export function FieldItem({
       anchorPosition="rightUp"
       panelClassName="lnsFieldItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle>
-        {state.histogram &&
-          state.histogram.buckets.length &&
-          state.topValues &&
-          state.topValues.buckets.length && (
-            <EuiButtonGroup
-              buttonSize="s"
-              isFullWidth
-              legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
-                defaultMessage: 'Toggle either the',
-              })}
-              options={[
-                {
-                  label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-                    defaultMessage: 'Top Values',
-                  }),
-                  id: 'topValues',
-                },
-                {
-                  label: i18n.translate('xpack.lens.indexPattern.fieldDistributionLabel', {
-                    defaultMessage: 'Distribution',
-                  }),
-                  id: 'histogram',
-                },
-              ]}
-              onChange={optionId => {
-                setShowingHistogram(optionId === 'histogram');
-              }}
-              idSelected={showingHistogram ? 'histogram' : 'topValues'}
-            />
-          )}
-        {state.topValues && state.sampledValues && !state.histogram && !showingHistogram && (
-          <>
-            {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+      <FieldItemPopoverContents {...state} {...props} />
+    </EuiPopover>
+  );
+}
+
+function FieldItemPopoverContents(props: State & FieldItemProps) {
+  const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
+
+  if (props.isLoading) {
+    return <EuiLoadingSpinner />;
+  } else if (
+    (!props.histogram || props.histogram.buckets.length === 0) &&
+    (!props.topValues || props.topValues.buckets.length === 0)
+  ) {
+    return (
+      <EuiText size="s">
+        {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+          defaultMessage: 'No data to display',
+        })}
+      </EuiText>
+    );
+  }
+
+  let histogramDefault = !!props.histogram;
+
+  const totalValuesCount =
+    topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
+  const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
+
+  if (
+    totalValuesCount &&
+    histogram &&
+    histogram.buckets.length &&
+    topValues &&
+    topValues.buckets.length
+  ) {
+    // Default to histogram when top values are less than 10% of total
+    histogramDefault = otherCount / totalValuesCount > 0.9;
+  }
+
+  const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
+
+  let formatter: { convert: (data: unknown) => string };
+  if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    if (FormatType) {
+      formatter = new FormatType(
+        indexPattern.fieldFormatMap[field.name].params,
+        core.uiSettings.get.bind(core.uiSettings)
+      );
+    } else {
+      formatter = { convert: (data: unknown) => JSON.stringify(data) };
+    }
+  } else {
+    formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
+  }
+
+  const euiButtonColor =
+    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
+  const euiTextColor =
+    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'default';
+
+  const fromDate = DateMath.parse(dateRange.fromDate);
+  const toDate = DateMath.parse(dateRange.toDate);
+
+  let title = <></>;
+
+  if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
+    title = (
+      <EuiButtonGroup
+        buttonSize="s"
+        isFullWidth
+        legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
+          defaultMessage: 'Toggle either the',
+        })}
+        options={[
+          {
+            label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
               defaultMessage: 'Top Values',
-            })}
-          </>
-        )}
-        {field.type === 'date' && (
-          <>
-            {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
-              defaultMessage: 'Time distribution',
-            })}
-          </>
-        )}
-      </EuiPopoverTitle>
-      <div>
-        {state.isLoading && <EuiLoadingSpinner />}
+            }),
+            id: 'topValues',
+          },
+          {
+            label: i18n.translate('xpack.lens.indexPattern.fieldDistributionLabel', {
+              defaultMessage: 'Distribution',
+            }),
+            id: 'histogram',
+          },
+        ]}
+        onChange={optionId => {
+          setShowingHistogram(optionId === 'histogram');
+        }}
+        idSelected={showingHistogram ? 'histogram' : 'topValues'}
+      />
+    );
+  } else if (field.type === 'date') {
+    title = (
+      <>
+        {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
+          defaultMessage: 'Time distribution',
+        })}
+      </>
+    );
+  } else if (topValues && topValues.buckets.length) {
+    title = (
+      <>
+        {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+          defaultMessage: 'Top Values',
+        })}
+      </>
+    );
+  }
 
-        {state.histogram && (!state.topValues || showingHistogram) && (
-          <Chart
-            data-test-subj="lnsFieldListPanel-histogram"
-            size={{ height: 200, width: field.type === 'date' ? 300 - 32 : '100%' }}
-          >
-            <Settings
-              rotation={field.type === 'date' ? 0 : 90}
-              tooltip={{ type: TooltipType.None }}
-              theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
-            />
+  function wrapInPopover(el: React.ReactElement) {
+    return (
+      <>
+        {title ? <EuiPopoverTitle>{title}</EuiPopoverTitle> : <></>}
+        {el}
 
-            <Axis
-              id={getAxisId('key')}
-              position={field.type === 'date' ? Position.Bottom : Position.Left}
-              tickFormat={
-                field.type === 'date'
-                  ? niceTimeFormatter([
-                      state.histogram.buckets[0].key as number,
-                      state.histogram.buckets[state.histogram.buckets.length - 1].key as number,
-                    ])
-                  : d => formatter.convert(d)
-              }
-            />
-
-            <BarSeries
-              data={state.histogram.buckets}
-              id={specId}
-              xAccessor={'key'}
-              yAccessors={['count']}
-              xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
-              customSeriesColors={seriesColors}
-            />
-          </Chart>
-        )}
-
-        {state.topValues && state.sampledValues && (!state.histogram || !showingHistogram) && (
-          <div data-test-subj="lnsFieldListPanel-topValues">
-            {state.topValues.buckets.map(topValue => (
-              <div className="lnsFieldItem__topValue" key={topValue.key}>
-                <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
-                  <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiToolTip content={formatter.convert(topValue.key)} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
-                        {formatter.convert(topValue.key)}
-                      </EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" textAlign="left" color={euiTextColor}>
-                      {((topValue.count / state.sampledValues!) * 100).toFixed(1)}%
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiProgress
-                  className="lnsFieldItem__topValueProgress"
-                  value={topValue.count / state.sampledValues!}
-                  max={1}
-                  size="s"
-                  color={euiButtonColor}
-                />
-              </div>
-            ))}
-            {otherCount ? (
-              <>
-                <EuiFlexGroup alignItems="stretch" gutterSize="xs">
-                  <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiText size="s" className="eui-textTruncate" color="subdued">
-                      {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
-                        defaultMessage: 'Other',
-                      })}
-                    </EuiText>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false} className="eui-textTruncate">
-                    <EuiText size="s" color="subdued">
-                      {((otherCount / state.sampledValues!) * 100).toFixed(1)}%
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiProgress
-                  className="lnsFieldItem__topValueProgress"
-                  value={otherCount / state.sampledValues!}
-                  max={1}
-                  size="s"
-                  color="subdued"
-                />
-              </>
-            ) : (
-              <></>
-            )}
-          </div>
-        )}
-
-        {state.totalDocuments ? (
+        {props.totalDocuments ? (
           <EuiPopoverFooter>
             <EuiText size="xs" textAlign="center">
-              {state.sampledDocuments && (
+              {props.sampledDocuments && (
                 <>
                   {i18n.translate('xpack.lens.indexPattern.percentageOfLabel', {
                     defaultMessage: '{percentage}% of',
                     values: {
-                      percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(
-                        1
-                      ),
+                      percentage: Math.round((props.sampledDocuments / props.totalDocuments) * 100),
                     },
                   })}
                 </>
               )}{' '}
-              <strong>{state.totalDocuments}</strong>{' '}
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance('number', ['integer'])
+                  .convert(props.totalDocuments)}
+              </strong>{' '}
               {i18n.translate('xpack.lens.indexPattern.ofDocumentsLabel', {
                 defaultMessage: 'documents',
               })}
@@ -418,7 +334,149 @@ export function FieldItem({
         ) : (
           <></>
         )}
+      </>
+    );
+  }
+
+  if (histogram && histogram.buckets.length) {
+    const specId = getSpecId(
+      i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
+        defaultMessage: 'Count',
+      })
+    );
+    const expectedColor = getColorForDataType(field.type);
+    const colors: DataSeriesColorsValues = {
+      colorValues: [],
+      specId,
+    };
+
+    const seriesColors = new Map([[colors, expectedColor]]);
+
+    if (field.type === 'date') {
+      return wrapInPopover(
+        <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
+          <Settings
+            tooltip={{ type: TooltipType.None }}
+            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+            xDomain={
+              fromDate && toDate
+                ? {
+                    min: fromDate.valueOf(),
+                    max: toDate.valueOf(),
+                    minInterval: Math.round((toDate.valueOf() - fromDate.valueOf()) / 10),
+                  }
+                : undefined
+            }
+          />
+
+          <Axis
+            id={getAxisId('key')}
+            position={Position.Bottom}
+            tickFormat={
+              fromDate && toDate
+                ? niceTimeFormatter([fromDate.valueOf(), toDate.valueOf()])
+                : undefined
+            }
+            showOverlappingTicks={true}
+          />
+
+          <BarSeries
+            data={histogram.buckets}
+            id={specId}
+            xAccessor={'key'}
+            yAccessors={['count']}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            customSeriesColors={seriesColors}
+            timeZone="local"
+          />
+        </Chart>
+      );
+    } else if (showingHistogram || !topValues || !topValues.buckets.length) {
+      return wrapInPopover(
+        <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
+          <Settings
+            rotation={90}
+            tooltip={{ type: TooltipType.None }}
+            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+          />
+
+          <Axis id={getAxisId('key')} position={Position.Left} showOverlappingTicks={true} />
+
+          <BarSeries
+            data={histogram.buckets}
+            id={specId}
+            xAccessor={'key'}
+            yAccessors={['count']}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            customSeriesColors={seriesColors}
+          />
+        </Chart>
+      );
+    }
+  }
+
+  if (props.topValues && props.topValues.buckets.length) {
+    return wrapInPopover(
+      <div data-test-subj="lnsFieldListPanel-topValues">
+        {props.topValues.buckets.map(topValue => (
+          <div className="lnsFieldItem__topValue" key={topValue.key}>
+            <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
+              <EuiFlexItem grow={true} className="eui-textTruncate">
+                <EuiToolTip content={formatter.convert(topValue.key)} delay="long">
+                  <EuiText size="s" className="eui-textTruncate">
+                    {formatter.convert(topValue.key)}
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" textAlign="left" color={euiTextColor}>
+                  {Math.round((topValue.count / props.sampledValues!) * 100)}%
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiProgress
+              className="lnsFieldItem__topValueProgress"
+              value={topValue.count / props.sampledValues!}
+              max={1}
+              size="s"
+              color={euiButtonColor}
+            />
+          </div>
+        ))}
+        {otherCount ? (
+          <>
+            <EuiFlexGroup alignItems="stretch" gutterSize="xs">
+              <EuiFlexItem grow={true} className="eui-textTruncate">
+                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                  {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
+                    defaultMessage: 'Other',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                <EuiText size="s" color="subdued">
+                  {Math.round((otherCount / props.sampledValues!) * 100)}%
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiProgress
+              className="lnsFieldItem__topValueProgress"
+              value={otherCount / props.sampledValues!}
+              max={1}
+              size="s"
+              color="subdued"
+            />
+          </>
+        ) : (
+          <></>
+        )}
       </div>
-    </EuiPopover>
-  );
+    );
+  }
+  return <></>;
 }
