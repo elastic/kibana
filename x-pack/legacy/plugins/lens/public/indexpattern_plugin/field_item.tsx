@@ -401,7 +401,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
           />
 
-          <Axis id={getAxisId('key')} position={Position.Left} showOverlappingTicks={true} />
+          <Axis
+            id={getAxisId('key')}
+            position={Position.Left}
+            showOverlappingTicks={true}
+            tickFormat={d => formatter.convert(d)}
+          />
 
           <BarSeries
             data={histogram.buckets}
