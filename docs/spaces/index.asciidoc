@@ -93,17 +93,17 @@ image::spaces/images/spaces-roles.png["Controlling features visiblity"]
 [[spaces-moving-objects]]
 === Move saved objects between spaces
 
-You have two options:
+You can <<managing-saved-objects-copy-to-space, copy objects>> from one space to another
+in **Management > Saved objects**.
 
-. Copy via the Saved Objects Management <<managing-saved-objects-copy-to-space, Copy to space UI>>
-. Use {kib}'s <<managing-saved-objects-export-objects, import/export>> 
-interface to copy objects from one space to another.
+Alternately, you can move objects using {kib}'s <<managing-saved-objects-export-objects, import and export>>
+interface.
 
-.. Navigate to the space that contains your saved objects.
-.. Export your saved objects via the import/export interface.
-.. Navigate to the space where you want to import the objects.
-.. Import your saved objects via the import/export interface.
-.. (Optional) Delete objects in the export space that you no longer need.
+. Navigate to the space that contains your saved objects.
+. Export your saved objects.
+. Navigate to the space where you want to import the objects.
+. Import your saved objects.
+. (Optional) Delete objects in the export space that you no longer need.
 
 {kib} also has beta <<saved-objects-api-import, import>> and 
 <<saved-objects-api-export, export>> APIs if you want to automate this process.
