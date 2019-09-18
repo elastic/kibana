@@ -19,13 +19,13 @@ import {
   Workspace,
   SerializedField,
 } from '../../types';
-import { outlinkEncoders } from '../outlink_encoders';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import {
   urlTemplateIconChoicesByClass,
   getSuitableIcon,
   colorChoices,
   iconChoicesByClass,
-} from '../style_choices';
+} from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
