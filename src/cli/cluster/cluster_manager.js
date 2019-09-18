@@ -188,7 +188,7 @@ export default class ClusterManager {
       cwd: fromRoot('.'),
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
-        /\.test\.js$/,
+        /\.test\.(js|ts)$/,
         ...extraIgnores,
         'plugins/java_languageserver'
       ],
