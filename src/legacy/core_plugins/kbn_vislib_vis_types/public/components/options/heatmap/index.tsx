@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,8 +39,8 @@ import { LabelsPanel } from './labels_panel';
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
-  const isColorsNumberInvalid =
-    !stateParams.setColorRange && (stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10);
+  const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
+  const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>
@@ -57,8 +57,8 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   );
 
   useEffect(() => {
-    setValidity(!isColorsNumberInvalid);
-  }, [isColorsNumberInvalid, setValidity]);
+    setValidity(stateParams.setColorRange ? isColorRangesValid : !isColorsNumberInvalid);
+  }, [stateParams.setColorRange, isColorRangesValid, isColorsNumberInvalid, setValidity]);
 
   return (
     <>
@@ -173,7 +173,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
               colorsRange={stateParams.colorsRange}
               setValue={setValue}
               setTouched={setTouched}
-              setValidity={setValidity}
+              setValidity={setIsColorRangesValid}
             />
           </>
         )}
