@@ -60,7 +60,13 @@ export function getGroupsFromJobs(jobs: Jobs): Groups {
     }
   });
 
-  return groups;
+  if (groups.ungrouped.jobIds.length === 0) {
+    delete groups.ungrouped;
+  }
+
+  const count = Object.values(groups).length;
+
+  return { groups, count };
 }
 
 export function getStatsBarData(jobsList: any) {

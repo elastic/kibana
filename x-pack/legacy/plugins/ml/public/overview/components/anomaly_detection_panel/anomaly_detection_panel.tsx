@@ -75,13 +75,13 @@ export const AnomalyDetectionPanel: FC = () => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
         return job;
       });
-      const jobsGroups = getGroupsFromJobs(jobsSummaryList);
+      const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
       const jobsWithTimerange = getJobsWithTimerange(jobsSummaryList);
       const stats = getStatsBarData(jobsSummaryList);
       setIsLoading(false);
       setErrorMessage(undefined);
       setStatsBarData(stats);
-      setGroupsCount(Object.values(jobsGroups).length);
+      setGroupsCount(count);
       setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
       loadMaxAnomalyScores(jobsGroups);
