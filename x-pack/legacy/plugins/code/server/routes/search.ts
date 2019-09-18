@@ -166,13 +166,12 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
 
       try {
         const integRequest: ResolveSnippetsIntegrationRequest = {
-          repoUri: repoUri as string,
+          repoUris: typeof repoUri === 'string' ? [repoUri] : (repoUri as string[]),
           revision: revision ? (revision as string) : undefined,
           filePath: filePath as string,
           lineNumStart: lineNum ? parseInt(lineNum as string, 10) : 0,
           lineNumEnd: lineNumEnd ? parseInt(lineNumEnd as string, 10) : undefined,
         };
-
         const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
         const res = await integClient.resolveSnippets(integRequest);
         return res;

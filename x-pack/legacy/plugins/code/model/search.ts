@@ -110,7 +110,7 @@ export interface SymbolSearchRequest extends SearchRequest {
 }
 
 export interface CodeIntegrationRequest {
-  repoUri: RepositoryUri;
+  repoUris: RepositoryUri[];
   revision?: string;
 }
 
@@ -134,7 +134,7 @@ export interface RepositorySearchResult extends SearchResult {
 }
 
 export interface SymbolSearchResult extends SearchResult {
-  // TODO: we migit need an additional data structure for symbol search result.
+  // TODO: we might need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
 }
 
@@ -189,6 +189,7 @@ export interface CommitSearchResult extends DocumentSearchResult {
 
 export interface IntegrationsSearchResult extends SearchResult {
   results?: SearchResultItem[];
+  fallback: boolean;
 }
 
 export interface SourceLocation {

@@ -24,9 +24,10 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
   public async resolveSnippets(
     req: ResolveSnippetsIntegrationRequest
   ): Promise<IntegrationsSearchResult> {
-    const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
-    const index = DocumentSearchIndexWithScope([repoUri]);
+    const { repoUris, filePath, lineNumStart, lineNumEnd } = req;
+    const index = DocumentSearchIndexWithScope(repoUris);
 
+    let fallback = false;
     let rawRes = await this.client.search({
       index,
       body: {
@@ -55,11 +56,10 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
               },
               script: {
                 source:
-                  "decayNumericGauss(params.origin, params.scale, params.offset, params.decay, doc['path.keyword'][0].split('/').length())",
+                  "decayNumericGauss(params.origin, params.scale, params.offset, params.decay, doc['path.keyword'].value.length())",
                 params: {
-                  // TODO: by the spliting the filepath by `/`.
-                  origin: filePath.split('/').length,
-                  scale: 20, // TODO: tune param
+                  origin: filePath.length,
+                  scale: 20,
                   offset: 0,
                   decay: 0.8,
                 },
@@ -68,13 +68,14 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
           },
         },
       });
+      fallback = true;
     }
 
     const total = rawRes.hits.total.value;
     const hits: any[] = rawRes.hits.hits;
     const results: SearchResultItem[] = hits.map(hit => {
       const doc: Document = hit._source;
-      const { path, language } = doc;
+      const { repoUri, path, language } = doc;
 
       const sourceContent = this.getSnippetContent(doc, lineNumStart, lineNumEnd);
       const item: SearchResultItem = {
@@ -89,6 +90,7 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
 
     return {
       results,
+      fallback,
       took: rawRes.took,
       total,
     };
