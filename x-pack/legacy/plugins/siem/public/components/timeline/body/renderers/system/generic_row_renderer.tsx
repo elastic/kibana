@@ -31,7 +31,7 @@ export const createGenericSystemRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericDetails
@@ -42,7 +42,7 @@ export const createGenericSystemRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -64,7 +64,7 @@ export const createGenericFileRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericFileDetails
@@ -75,7 +75,7 @@ export const createGenericFileRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 

@@ -36,13 +36,3 @@ export const TokensFlexItem = styled(EuiFlexItem)`
 `;
 
 TokensFlexItem.displayName = 'TokensFlexItem';
-
-export const Row = styled.div`
-  // width: 100%;
-  // overflow: hidden;
-  // &:hover {
-  //   background-color: ${props => props.theme.eui.euiTableHoverColor};
-  // }
-`;
-
-Row.displayName = 'Row';

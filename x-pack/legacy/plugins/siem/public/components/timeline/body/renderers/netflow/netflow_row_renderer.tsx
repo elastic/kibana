@@ -85,7 +85,7 @@ export const netflowRowRenderer: RowRenderer = {
     );
   },
   renderRow: ({ data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <Details>
@@ -145,6 +145,6 @@ export const netflowRowRenderer: RowRenderer = {
           />
         </Details>
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 };

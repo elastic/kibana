@@ -128,7 +128,7 @@ EventsTbody.displayName = 'EventsTbody';
 
 export const EventsTrGroup = styled.div.attrs({
   className: 'siemEventsTable__trGroup',
-})`
+})<{ className?: string }>`
   ${({ theme }) => css`
     & + & {
       border-top: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
@@ -152,14 +152,36 @@ EventsTrData.displayName = 'EventsTrData';
 export const EventsTrNotes = styled.div.attrs({
   className: 'siemEventsTable__trNotes',
 })`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    // Michael: To be implemented in future style changes.
+    // padding-left: ${theme.eui.paddingSizes.xl};
+  `}
 `;
 EventsTrNotes.displayName = 'EventsTrNotes';
+
+export const EventsTrSummary = styled.div.attrs({
+  className: 'siemEventsTable__trSummary',
+})`
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    // Michael: To be implemented in future style changes.
+    // padding-left: ${theme.eui.paddingSizes.xl};
+  `}
+`;
+EventsTrSummary.displayName = 'EventsTrSummary';
 
 export const EventsTrAttributes = styled.div.attrs({
   className: 'siemEventsTable__trAttributes',
 })`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.xl};
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    // Michael: To be implemented in future style changes.
+    // padding-left: ${theme.eui.paddingSizes.xl};
+  `}
 `;
 EventsTrAttributes.displayName = 'EventsTrAttributes';
 

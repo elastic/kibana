@@ -32,7 +32,7 @@ export const createGenericAuditRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <AuditdGenericDetails
@@ -43,7 +43,7 @@ export const createGenericAuditRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -67,7 +67,7 @@ export const createGenericFileRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <AuditdGenericFileDetails
@@ -79,7 +79,7 @@ export const createGenericFileRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 

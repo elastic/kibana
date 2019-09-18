@@ -18,12 +18,12 @@ export const suricataRowRenderer: RowRenderer = {
   },
   renderRow: ({ browserFields, data, children, timelineId }) => {
     return (
-      <Row className="euiTableRow">
+      <>
         {children}
         <RowRendererContainer>
           <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
         </RowRendererContainer>
-      </Row>
+      </>
     );
   },
 };
