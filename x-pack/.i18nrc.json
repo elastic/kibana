@@ -18,6 +18,7 @@
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "legacy/plugins/infra",
     "xpack.kueryAutocomplete": "legacy/plugins/kuery_autocomplete",
+    "xpack.lens": "legacy/plugins/lens",
     "xpack.licensing": "plugins/licensing",
     "xpack.licenseMgmt": "legacy/plugins/license_management",
     "xpack.maps": "legacy/plugins/maps",
