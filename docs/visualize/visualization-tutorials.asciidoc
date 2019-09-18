@@ -17,8 +17,75 @@ Ready to create a visualization? Following these tutorials:
 * <<tag-cloud-tutorial, Tag cloud>>
 * <<timelion-tutorials, Timelion>>
 
+[float]
 [[area-chart-tutorial]]
 === Area chart tutorial
+
+Create an area chart that shows the sum flight distance in the last 7 days.
+
+[float]
+[[area-chart-before-you-beging]]
+==== Before you begin
+
+For this tutorial, you'll need to add the <<add-sample-data, Sample flight data>>.
+
+[float]
+[[create-the-area-chart]]
+==== Create the area chart
+
+To create the area chart visualization, use the visualization builder.
+
+. In the side navigation, click *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, click *Area*.
+
+. On the *New Area/Choose a source* window, select *[Flights] Flight Log*.
+
+. From the time filter, select *Last 7 days*.
+
+[float]
+[[area-chart-metric-aggregation]]
+=== Choose the aggregations
+
+Specify the options for the metric and bucket aggregations. 
+
+. In the *Metrics* area, expand the *Y-axis* options.
+
+. From the *Aggregation* dropdown, select *Average*.
+
+. From the *Field* dropdown, select *DistanceMiles*.
+
+. Add a *Custom label*. For example, `Distance (Miles)`.
+
+. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+. From the *Aggregation* dropdown, select *Date Histogram*.
+
+. From the *Field* dropdown, select *@timestamp*.
+
+. Add a *Custom label*. For example, `Date and time`.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-area-chart-tutorial.png[Area chart with flight sample data]
+
+[float]
+[[area-chart-lines]]
+=== Make the area chart easier to read
+
+To make the area chart easier to read, add background lines.  
+
+. Select *Panel Settings*.
+
+. To make the area chart easier to read, select *Show x-axis lines*.
+
+. From the *Y-axis lines* dropdown, select *LeftAxis-1*.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-area-chart-tutorial02.png[Area chart with flight sample data]
 
 [[controls-tutorial]]
 === Controls tutorial
