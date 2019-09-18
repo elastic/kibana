@@ -30,6 +30,8 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import { FieldFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +39,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
-import { reverse } from 'dns';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
@@ -75,8 +76,9 @@ interface State {
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
-  isNewFilter: boolean;
   isSavedQueryEditorOpen: boolean;
+  isRegularEditorOpen: boolean;
+  isNewFilter: boolean;
 }
 
 class FilterEditorUI extends Component<Props, State> {
@@ -90,8 +92,10 @@ class FilterEditorUI extends Component<Props, State> {
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
+      // I can't have all three operate independently, I can only have one open at a time.
       isCustomEditorOpen: this.isUnknownFilterType(),
       isSavedQueryEditorOpen: this.isSavedQueryFilterType(),
+      isRegularEditorOpen: this.isRegularFilterType(),
       isNewFilter: !props.filter.meta.type,
     };
   }
@@ -120,9 +124,8 @@ class FilterEditorUI extends Component<Props, State> {
 
         <div className="globalFilterItem__editorForm">
           <EuiForm>
-            <EuiFlexGroup alignItems="baseline" responsive={false}>
-              <EuiFlexItem>
-                {/* This will be a tabs switching between Create and Use saved query */}
+            <EuiTabs display="condensed">
+              <EuiTab onClick={this.toggleRegularEditor}>
                 {this.state.isNewFilter ? (
                   <FormattedMessage
                     id="data.filter.filterEditor.tabCreateFilterPopupTitle"
@@ -134,45 +137,61 @@ class FilterEditorUI extends Component<Props, State> {
                     defaultMessage="Edit"
                   />
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty size="xs" onClick={this.toggleSavedQueryEditor}>
-                  {this.state.isNewFilter ? (
-                    <FormattedMessage
-                      id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
-                      defaultMessage="Use saved query"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
-                      defaultMessage="Change saved query"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </EuiTab>
+              <EuiTab onClick={this.toggleSavedQueryEditor}>
+                {this.state.isNewFilter ? (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
+                    defaultMessage="Use saved query"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
+                    defaultMessage="Change saved query"
+                  />
+                )}
+              </EuiTab>
+            </EuiTabs>
             <EuiFlexGroup direction={'rowReverse'}>
               <EuiFlexItem grow={false}>
-                {/* just the top right of the form */}
-                <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
-                  {this.state.isCustomEditorOpen ? (
-                    <FormattedMessage
-                      id="data.filter.filterEditor.editFilterValuesButtonLabel"
-                      defaultMessage="Edit filter values"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="data.filter.filterEditor.editQueryDslButtonLabel"
-                      defaultMessage="Edit as Query DSL"
-                    />
-                  )}
-                </EuiButtonEmpty>
+                {/* only render this is the saved Query editor is not open */}
+                {!this.state.isSavedQueryEditorOpen && (
+                  <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
+                    {this.state.isCustomEditorOpen ? (
+                      this.state.isNewFilter ? (
+                        <FormattedMessage
+                          id="data.filter.filterEditor.editFilterValuesButtonLabel"
+                          defaultMessage="Create filter values"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="data.filter.filterEditor.editFilterValuesButtonLabel"
+                          defaultMessage="Edit filter values"
+                        />
+                      )
+                    ) : this.state.isNewFilter ? (
+                      <FormattedMessage
+                        id="data.filter.filterEditor.editQueryDslButtonLabel"
+                        defaultMessage="Create as Query DSL"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="data.filter.filterEditor.editQueryDslButtonLabel"
+                        defaultMessage="Edit as Query DSL"
+                      />
+                    )}
+                  </EuiButtonEmpty>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
 
             {this.renderIndexPatternInput()}
-
-            {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
+            {/* this.is where we render the different editors, REFACTOR! */}
+            {this.state.isCustomEditorOpen
+              ? this.renderCustomEditor()
+              : this.state.isSavedQueryEditorOpen
+              ? this.renderSavedQueryEditor()
+              : this.renderRegularEditor()}
 
             <EuiSpacer size="m" />
 
@@ -406,12 +425,40 @@ class FilterEditorUI extends Component<Props, State> {
     }
   }
 
+  private renderSavedQueryEditor() {
+    return (
+      <EuiFormRow
+        label={i18n.translate('data.filter.filterEditor.savedQueryLabel', {
+          defaultMessage: 'Saved query',
+        })}
+      >
+        <div>Saved Queries List</div>
+      </EuiFormRow>
+    );
+  }
+
   private toggleCustomEditor = () => {
     const isCustomEditorOpen = !this.state.isCustomEditorOpen;
     this.setState({ isCustomEditorOpen });
   };
 
+  private toggleRegularEditor = () => {
+    // close the saved query editor if it is open
+    if (this.state.isSavedQueryEditorOpen) {
+      this.toggleSavedQueryEditor();
+    }
+    const isRegularEditorOpen = !this.state.isRegularEditorOpen;
+    this.setState({ isRegularEditorOpen });
+  };
+
   private toggleSavedQueryEditor = () => {
+    // close the custom query editor if it is open
+    if (this.state.isCustomEditorOpen) {
+      this.toggleCustomEditor();
+    }
+    if (this.state.isRegularEditorOpen) {
+      this.toggleRegularEditor();
+    }
     const isSavedQueryEditorOpen = !this.state.isSavedQueryEditorOpen;
     this.setState({ isSavedQueryEditorOpen });
   };
@@ -424,6 +471,11 @@ class FilterEditorUI extends Component<Props, State> {
   private isSavedQueryFilterType = () => {
     const { type } = this.props.filter.meta;
     return !!type && ['savedQuery'].includes(type);
+  };
+
+  private isRegularFilterType = () => {
+    const { type } = this.props.filter.meta;
+    return !!type && ['phrase', 'phrases', 'range', 'exists'].includes(type);
   };
 
   private getIndexPatternFromFilter() {
