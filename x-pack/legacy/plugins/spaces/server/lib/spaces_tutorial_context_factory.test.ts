@@ -10,22 +10,10 @@ import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_fa
 import { SpacesService } from '../new_platform/spaces_service';
 import { SavedObjectsService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
-import { elasticsearchServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
 import { createOptionalPlugin } from '../../../../server/lib/optional_plugin';
-
-const server = {
-  config: () => {
-    return {
-      get: (key: string) => {
-        if (key === 'server.basePath') {
-          return '/foo';
-        }
-        throw new Error('unexpected key ' + key);
-      },
-    };
-  },
-};
+import { LegacyAPI } from '../new_platform/plugin';
 
 const log = {
   log: jest.fn(),
@@ -37,7 +25,14 @@ const log = {
   fatal: jest.fn(),
 };
 
-const service = new SpacesService(log, server.config().get('server.basePath'));
+const legacyAPI: LegacyAPI = {
+  legacyConfig: {
+    serverBasePath: '/foo',
+  },
+  savedObjects: {} as SavedObjectsService,
+} as LegacyAPI;
+
+const service = new SpacesService(log, () => legacyAPI);
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
@@ -59,11 +54,10 @@ describe('createSpacesTutorialContextFactory', () => {
 
   it('should create context with the current space id for the default space', async () => {
     const spacesService = await service.setup({
-      http: httpServiceMock.createSetupContract(),
+      http: coreMock.createSetup().http,
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      savedObjects: {} as SavedObjectsService,
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-      spacesAuditLogger: {} as SpacesAuditLogger,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of({ maxSpaces: 1000 }),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
