@@ -128,7 +128,7 @@ const SuggestionPreview = ({
 // will be fixed in suggestion performance PR
 export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 200);
 
-function InnerSuggestionPanel({
+export function InnerSuggestionPanel({
   activeDatasourceId,
   datasourceMap,
   datasourceStates,
@@ -258,13 +258,15 @@ function InnerSuggestionPanel({
       </EuiFlexGroup>
 
       <div className="lnsSuggestionsPanel__suggestions">
-        {currentStateExpression && (
+        {currentVisualizationId && (
           <SuggestionPreview
             preview={{
               expression: currentStateExpression
                 ? prependKibanaContext(currentStateExpression, expressionContext)
                 : undefined,
-              icon: 'empty',
+              icon:
+                visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
+                  .icon || 'empty',
               title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
                 defaultMessage: 'Current',
               }),

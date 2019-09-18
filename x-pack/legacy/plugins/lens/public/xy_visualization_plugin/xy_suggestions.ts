@@ -213,10 +213,10 @@ function getSuggestionsForLayer(
       seriesType: toggleStackSeriesType(seriesType),
       title: seriesType.endsWith('stacked')
         ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
-            defaultMessage: 'Unstack',
+            defaultMessage: 'Unstacked',
           })
         : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
-            defaultMessage: 'Stack',
+            defaultMessage: 'Stacked',
           }),
     })
   );

@@ -338,7 +338,7 @@ describe('xy_suggestions', () => {
         },
       ],
     });
-    expect(suggestion.title).toEqual('Stack');
+    expect(suggestion.title).toEqual('Stacked');
   });
 
   test('keeps column to dimension mappings on extended tables', () => {
