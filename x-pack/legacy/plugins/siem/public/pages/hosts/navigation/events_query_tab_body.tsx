@@ -5,7 +5,7 @@
  */
 
 import { StatefulEventsViewer } from '../../../components/events_viewer';
-import { HostsComponentsQueryProps } from './type';
+import { HostsComponentsQueryProps } from './types';
 
 export const EventsQueryTabBody = ({
   endDate,

@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { HostsQuery } from '../../../containers/hosts';
-import { HostsComponentsQueryProps } from './type';
+import { HostsComponentsQueryProps } from './types';
 import { HostsTable } from '../../../components/page/hosts';
 import { manageQuery } from '../../../components/page/manage_query';
 

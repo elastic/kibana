@@ -32,7 +32,7 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { HostOverview } from '../../../components/page/hosts/host_overview';
 import { KpiHostsComponent } from '../../../components/page/hosts';
 
-import { HostDetailsComponentProps } from './type';
+import { HostDetailsComponentProps } from './types';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
 import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';

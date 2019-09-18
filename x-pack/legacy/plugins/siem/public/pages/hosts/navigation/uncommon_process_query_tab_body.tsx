@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { UncommonProcessesQuery } from '../../../containers/uncommon_processes';
-import { HostsComponentsQueryProps } from './type';
+import { HostsComponentsQueryProps } from './types';
 import { UncommonProcessTable } from '../../../components/page/hosts';
 import { manageQuery } from '../../../components/page/manage_query';
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { AnomaliesQueryTabBodyProps } from './type';
+import { AnomaliesQueryTabBodyProps } from './types';
 import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
 
 export const AnomaliesQueryTabBody = ({

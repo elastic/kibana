@@ -15,7 +15,7 @@ import {
   AnonamaliesChildren,
   CommonChildren,
   KeyHostsNavTabWithoutMlPermission,
-} from '../navigation';
+} from '../navigation/types';
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;

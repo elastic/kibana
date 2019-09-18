@@ -9,7 +9,7 @@ import React from 'react';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
-import { HostsComponentsQueryProps } from './type';
+import { HostsComponentsQueryProps } from './types';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 

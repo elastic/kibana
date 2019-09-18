@@ -12,7 +12,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsComponentProps } from './hosts';
-import { CommonChildren, AnonamaliesChildren } from './navigation';
+import { CommonChildren, AnonamaliesChildren } from './navigation/types';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { Anomaly } from '../../components/ml/types';

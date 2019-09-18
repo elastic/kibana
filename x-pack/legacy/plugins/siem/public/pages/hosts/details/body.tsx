@@ -13,7 +13,7 @@ import { scoreIntervalToDateTime } from '../../../components/ml/score/score_inte
 import { Anomaly } from '../../../components/ml/types';
 import { getHostDetailsEventsKqlQueryExpression } from './helpers';
 
-import { HostDetailsBodyComponentProps } from './type';
+import { HostDetailsBodyComponentProps } from './types';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
 
 const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(

@@ -7,7 +7,7 @@
 import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/hosts/model';
-import { HostsNavTab } from './navigation';
+import { HostsNavTab } from './navigation/types';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 
