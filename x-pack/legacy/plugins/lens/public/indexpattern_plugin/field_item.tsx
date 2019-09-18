@@ -15,7 +15,8 @@ import {
   EuiText,
   EuiToolTip,
   EuiButtonGroup,
-  EuiSpacer,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import {
   Chart,
@@ -246,49 +247,66 @@ export function FieldItem({
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
-      panelClassName="lnsFieldListPanel__fieldPopover"
+      panelClassName="lnsFieldItem__fieldPopoverPanel"
     >
-      <div>
-        {state.isLoading && <EuiLoadingSpinner />}
-
+      <EuiPopoverTitle>
         {state.histogram &&
           state.histogram.buckets.length &&
           state.topValues &&
           state.topValues.buckets.length && (
-            <>
-              <EuiButtonGroup
-                buttonSize="s"
-                legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
-                  defaultMessage: 'Toggle either the',
-                })}
-                options={[
-                  {
-                    label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-                      defaultMessage: 'Top Values',
-                    }),
-                    id: 'topValues',
-                  },
-                  {
-                    label: i18n.translate('xpack.lens.indexPattern.fieldHistogramLabel', {
-                      defaultMessage: 'Histogram',
-                    }),
-                    id: 'histogram',
-                  },
-                ]}
-                onChange={optionId => {
-                  setShowingHistogram(optionId === 'histogram');
-                }}
-                idSelected={showingHistogram ? 'histogram' : 'topValues'}
-              />
-              <EuiSpacer />
-            </>
+            <EuiButtonGroup
+              buttonSize="s"
+              isFullWidth
+              legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
+                defaultMessage: 'Toggle either the',
+              })}
+              options={[
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+                    defaultMessage: 'Top Values',
+                  }),
+                  id: 'topValues',
+                },
+                {
+                  label: i18n.translate('xpack.lens.indexPattern.fieldDistributionLabel', {
+                    defaultMessage: 'Distribution',
+                  }),
+                  id: 'histogram',
+                },
+              ]}
+              onChange={optionId => {
+                setShowingHistogram(optionId === 'histogram');
+              }}
+              idSelected={showingHistogram ? 'histogram' : 'topValues'}
+            />
           )}
+        {state.topValues && state.sampledValues && !state.histogram && !showingHistogram && (
+          <>
+            {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+              defaultMessage: 'Top Values',
+            })}
+          </>
+        )}
+        {field.type === 'date' && (
+          <>
+            {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
+              defaultMessage: 'Time distribution',
+            })}
+          </>
+        )}
+      </EuiPopoverTitle>
+      <div>
+        {state.isLoading && <EuiLoadingSpinner />}
 
         {state.histogram && (!state.topValues || showingHistogram) && (
-          <Chart className="lnsDistributionChart" data-test-subj="lnsFieldListPanel-histogram">
+          <Chart
+            data-test-subj="lnsFieldListPanel-histogram"
+            size={{ height: 200, width: field.type === 'date' ? 300 - 32 : '100%' }}
+          >
             <Settings
               rotation={field.type === 'date' ? 0 : 90}
               tooltip={{ type: TooltipType.None }}
+              theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
             />
 
             <Axis
@@ -319,39 +337,36 @@ export function FieldItem({
         {state.topValues && state.sampledValues && (!state.histogram || !showingHistogram) && (
           <div data-test-subj="lnsFieldListPanel-topValues">
             {state.topValues.buckets.map(topValue => (
-              <React.Fragment key={topValue.key}>
-                <EuiFlexGroup alignItems="stretch" key={topValue.key}>
+              <div className="lnsFieldItem__topValue" key={topValue.key}>
+                <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                   <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiToolTip content={formatter.convert(topValue.key)}>
-                      <EuiText size="s">{formatter.convert(topValue.key)}</EuiText>
+                    <EuiToolTip content={formatter.convert(topValue.key)} delay="long">
+                      <EuiText size="s" className="eui-textTruncate">
+                        {formatter.convert(topValue.key)}
+                      </EuiText>
                     </EuiToolTip>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} className="eui-textTruncate">
+                  <EuiFlexItem grow={false}>
                     <EuiText size="s" textAlign="left" color={euiTextColor}>
                       {((topValue.count / state.sampledValues!) * 100).toFixed(1)}%
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <div>
-                  <EuiFlexItem grow={1}>
-                    <EuiProgress
-                      value={topValue.count / state.sampledValues!}
-                      max={1}
-                      size="s"
-                      color={euiButtonColor}
-                    />
-                  </EuiFlexItem>
-                </div>
-
-                <EuiSpacer size="xs" />
-              </React.Fragment>
+                <EuiProgress
+                  className="lnsFieldItem__topValueProgress"
+                  value={topValue.count / state.sampledValues!}
+                  max={1}
+                  size="s"
+                  color={euiButtonColor}
+                />
+              </div>
             ))}
             {otherCount ? (
               <>
-                <EuiFlexGroup alignItems="stretch">
+                <EuiFlexGroup alignItems="stretch" gutterSize="xs">
                   <EuiFlexItem grow={true} className="eui-textTruncate">
-                    <EuiText size="s">
+                    <EuiText size="s" className="eui-textTruncate" color="subdued">
                       {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                         defaultMessage: 'Other',
                       })}
@@ -365,14 +380,13 @@ export function FieldItem({
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <div>
-                  <EuiProgress
-                    value={otherCount / state.sampledValues!}
-                    max={1}
-                    size="s"
-                    color="subdued"
-                  />
-                </div>
+                <EuiProgress
+                  className="lnsFieldItem__topValueProgress"
+                  value={otherCount / state.sampledValues!}
+                  max={1}
+                  size="s"
+                  color="subdued"
+                />
               </>
             ) : (
               <></>
@@ -381,27 +395,26 @@ export function FieldItem({
         )}
 
         {state.totalDocuments ? (
-          <div>
-            <EuiSpacer size="m" />
-            {state.sampledDocuments ? (
-              <EuiText size="s">
-                {i18n.translate('xpack.lens.indexPattern.percentageOfTotalDocsLabel', {
-                  defaultMessage: '{percentage}% of {docCount} documents',
-                  values: {
-                    docCount: state.totalDocuments,
-                    percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(1),
-                  },
-                })}
-              </EuiText>
-            ) : (
-              <EuiText size="s">
-                {i18n.translate('xpack.lens.indexPattern.totalDocsLabel', {
-                  defaultMessage: '{docCount} documents',
-                  values: { docCount: state.totalDocuments },
-                })}
-              </EuiText>
-            )}
-          </div>
+          <EuiPopoverFooter>
+            <EuiText size="xs" textAlign="center">
+              {state.sampledDocuments && (
+                <>
+                  {i18n.translate('xpack.lens.indexPattern.percentageOfLabel', {
+                    defaultMessage: '{percentage}% of',
+                    values: {
+                      percentage: ((state.sampledDocuments / state.totalDocuments) * 100).toFixed(
+                        1
+                      ),
+                    },
+                  })}
+                </>
+              )}{' '}
+              <strong>{state.totalDocuments}</strong>{' '}
+              {i18n.translate('xpack.lens.indexPattern.ofDocumentsLabel', {
+                defaultMessage: 'documents',
+              })}
+            </EuiText>
+          </EuiPopoverFooter>
         ) : (
           <></>
         )}

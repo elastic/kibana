@@ -1,3 +1,4 @@
+@import './field_itm';
 @import './dimension_panel/index';
 
 
@@ -73,13 +74,4 @@
 .lnsFieldListPanel__fieldInfo {
   padding: $euiSizeS;
   font-weight: $euiFontWeightMedium;
-}
-
-.lnsDistributionChart {
-  min-height: 300px;
-}
-
-.lnsFieldListPanel__fieldPopover {
-  min-width: 300px;
-  max-width: 300px;
 }
