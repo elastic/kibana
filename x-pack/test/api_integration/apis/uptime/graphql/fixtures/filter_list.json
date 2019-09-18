@@ -25,7 +25,6 @@
     "locations": [
       "mpls"
     ],
-    "locations": [],
     "ports": [
       5678
     ],
