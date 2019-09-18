@@ -418,4 +418,48 @@ describe('Agent lib', () => {
       expect(refreshAgent.actions[0].sent_at).toBeDefined();
     });
   });
+
+  describe('addAction', () => {
+    it('should throw if the agent do not exists', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      const policy = new PolicyLib({} as PolicyAdapter);
+      const agentLib = new AgentLib(agentAdapter, token, policy);
+
+      await expect(
+        agentLib.addAction(getUser(), 'agent:1', {
+          type: 'PAUSE',
+        })
+      ).rejects.toThrowError(/Agent not found/);
+    });
+
+    it('should add the action', async () => {
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = {
+        id: 'agent:1',
+        actions: [],
+        active: true,
+        events: [],
+        type: 'PERMANENT',
+        policy_shared_id: 'config1',
+        policy_id: 'config1',
+      };
+      const spy = jest.spyOn(agentAdapter, 'update');
+
+      const policy = new PolicyLib({} as PolicyAdapter);
+      const agentLib = new AgentLib(agentAdapter, token, policy);
+
+      const action = await agentLib.addAction(getUser(), 'agent:1', {
+        type: 'PAUSE',
+      });
+
+      expect(action.id).toBeDefined();
+      expect(action.created_at).toBeDefined();
+      expect(action.type).toBe('PAUSE');
+      expect(spy).toHaveBeenCalled();
+
+      spy.mockRestore();
+    });
+  });
 });

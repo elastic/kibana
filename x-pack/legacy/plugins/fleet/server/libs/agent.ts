@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import uuid from 'uuid/v4';
 import {
   AgentAdapter,
   Agent,
@@ -13,6 +14,7 @@ import {
   AgentType,
   AgentEvent,
   AgentAction,
+  AgentActionType,
 } from './adapters/agent/adapter_type';
 import { TokenLib } from './token';
 import { PolicyLib } from './policy';
@@ -145,6 +147,30 @@ export class AgentLib {
     await this.agentAdater.update(user, agent.id, updateData);
 
     return { actions, policy };
+  }
+
+  public async addAction(
+    user: FrameworkUser,
+    agentId: string,
+    actionData: { type: AgentActionType }
+  ) {
+    const agent = await this.agentAdater.getById(user, agentId);
+
+    if (!agent || !agent.active) {
+      throw Boom.notFound('Agent not found or inactive');
+    }
+
+    const action: AgentAction = {
+      ...actionData,
+      id: uuid(),
+      created_at: new Date().toISOString(),
+    };
+
+    await this.agentAdater.update(user, agent.id, {
+      actions: [action].concat(agent.actions),
+    });
+
+    return action;
   }
 
   /**
