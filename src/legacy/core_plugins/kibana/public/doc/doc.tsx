@@ -74,16 +74,11 @@ export function Doc(props: DocProps) {
           title={
             <FormattedMessage
               id="kbn.doc.failedToLocateIndexPattern"
-              defaultMessage="Could not find index pattern"
+              defaultMessage="No index pattern matches ID {indexPatternId}"
+              values={{ indexPatternId: props.indexPatternId }}
             />
           }
-        >
-          <FormattedMessage
-            id="kbn.doc.failedToLocateIndexPatternDescription"
-            defaultMessage="No index pattern matching ID {indexPatternId} could be found."
-            values={{ indexPatternId: props.indexPatternId }}
-          />
-        </EuiCallOut>
+        />
       )}
       {reqState === ElasticRequestState.NotFound && (
         <EuiCallOut
