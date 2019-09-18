@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { groupBy } from 'lodash';
+import { AggConfig } from '../../vis/agg_config';
 
-const getColumn = (agg, i) => {
+export interface AggColumn {
+  aggConfig: AggConfig;
+  id: string;
+  name: string;
+}
+
+const getColumn = (agg: AggConfig, i: number): AggColumn => {
   return {
     aggConfig: agg,
     id: `col-${i}-${agg.id}`,
-    name: agg.makeLabel()
+    name: agg.makeLabel(),
   };
 };
 
@@ -33,18 +40,17 @@ const getColumn = (agg, i) => {
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
  */
-export function tabifyGetColumns(aggs, minimalColumns) {
-
+export function tabifyGetColumns(aggs: AggConfig[], minimalColumns: boolean) {
   // pick the columns
   if (minimalColumns) {
     return aggs.map((agg, i) => getColumn(agg, i));
   }
 
   // supposed to be bucket,...metrics,bucket,...metrics
-  const columns = [];
+  const columns: AggColumn[] = [];
 
   // separate the metrics
-  const grouped = _.groupBy(aggs, function (agg) {
+  const grouped = groupBy(aggs, agg => {
     return agg.type.type;
   });
 
@@ -55,9 +61,9 @@ export function tabifyGetColumns(aggs, minimalColumns) {
 
   let columnIndex = 0;
   // return the buckets, and after each place all of the metrics
-  grouped.buckets.forEach(function (agg) {
+  grouped.buckets.forEach(agg => {
     columns.push(getColumn(agg, columnIndex++));
-    grouped.metrics.forEach(function (metric) {
+    grouped.metrics.forEach(metric => {
       columns.push(getColumn(metric, columnIndex++));
     });
   });

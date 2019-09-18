@@ -26,6 +26,7 @@ import { createTableVisResponseHandler } from './table_vis_request_handler';
 
 import { TableVisualizationDependencies } from './plugin';
 import tableVisTemplate from './table_vis.html';
+import { TableOptions } from './components/table_vis_options';
 
 export const createTableVisTypeDefinition = (dependencies: TableVisualizationDependencies) => {
   const responseHandler = createTableVisResponseHandler();
@@ -56,7 +57,7 @@ export const createTableVisTypeDefinition = (dependencies: TableVisualizationDep
       template: tableVisTemplate,
     },
     editorConfig: {
-      optionsTemplate: '<table-vis-params></table-vis-params>',
+      optionsTemplate: TableOptions,
       schemas: new Schemas([
         {
           group: 'metrics',
