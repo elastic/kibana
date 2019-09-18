@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-
 import { Ping } from '../../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { monitorStatusBarQuery } from '../../../queries';

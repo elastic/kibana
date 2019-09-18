@@ -43,7 +43,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
           grow={false}
           size="s"
           aria-label={i18n.translate(
-            'xpack.uptime.monitorStatusBar.sslCertificateExpiry,ariaLabel',
+            'xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel',
             {
               defaultMessage: 'SSL certificate expires',
             }
