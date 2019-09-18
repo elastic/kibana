@@ -7,7 +7,29 @@
 import createContainer from 'constate-latest';
 import { useMemo } from 'react';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callDeleteJobs, callStopDatafeed } from './api/ml_cleanup';
+import { callDeleteJobs, callStopDatafeed, callGetJobDeletionTasks } from './api/ml_cleanup';
+import { getAllModuleJobIds } from '../../../../common/log_analysis';
+
+const timeout = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+const waitUntilJobsAreDeleted = async (spaceId: string, sourceId: string) => {
+  while (true) {
+    const response = await callGetJobDeletionTasks();
+    const jobIdsBeingDeleted = response.jobIds;
+    const moduleJobIds = getAllModuleJobIds(spaceId, sourceId);
+    const needToWait = jobIdsBeingDeleted.some(jobId => moduleJobIds.includes(jobId));
+    if (needToWait) {
+      await timeout(1000);
+    } else {
+      return true;
+    }
+  }
+};
+
+const deleteJobs = async (spaceId: string, sourceId: string) => {
+  await callDeleteJobs(spaceId, sourceId);
+  return await waitUntilJobsAreDeleted(spaceId, sourceId);
+};
 
 export const useLogAnalysisCleanup = ({
   sourceId,
@@ -25,12 +47,13 @@ export const useLogAnalysisCleanup = ({
         } catch (err) {
           // Datefeed has been deleted / doesn't exist, proceed with deleting jobs anyway
           if (err && err.res && err.res.status === 404) {
-            return await callDeleteJobs(spaceId, sourceId);
+            return await deleteJobs(spaceId, sourceId);
           } else {
             throw err;
           }
         }
-        return await callDeleteJobs(spaceId, sourceId);
+
+        return await deleteJobs(spaceId, sourceId);
       },
     },
     [spaceId, sourceId]
