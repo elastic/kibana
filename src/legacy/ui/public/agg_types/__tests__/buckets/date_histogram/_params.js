@@ -26,7 +26,7 @@ import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import chrome from '../../../../chrome';
 import { aggTypes } from '../../..';
-import { AggConfig } from '../../../../vis/agg_config';
+import { AggConfig } from '../../../agg_config';
 import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
