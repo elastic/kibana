@@ -51,15 +51,18 @@ function RangeOption<ParamName extends string>({
   });
 
   const onChangeHandler = (
-    event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>,
+    event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>,
     isValid: boolean
   ) => {
-    const { target } = event as React.ChangeEvent<HTMLInputElement>;
-    setStateValue(target.valueAsNumber);
+    const {
+      currentTarget: { valueAsNumber },
+    } = event as React.ChangeEvent<HTMLInputElement>; // since we don't show ticks on EuiRange, the currentTarget will definitely be HTMLInputElement type, so we can cast the event directly.
+
+    setStateValue(valueAsNumber);
     setIsValidState(isValid);
 
     if (isValid) {
-      setValue(paramName, target.valueAsNumber);
+      setValue(paramName, valueAsNumber);
     }
   };
   return (
