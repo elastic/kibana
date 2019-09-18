@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.4.0>>
 * <<release-notes-7.3.2>>
 * <<release-notes-7.3.1>>
 * <<release-notes-7.3.0>>
@@ -26,6 +27,324 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.4.0]]
+== {kib} 7.4.0
+
+[float]
+[[breaking-7.4.0]]
+=== Breaking Changes
+See also <<breaking-changes-7.4, breaking changes in 7.4>>.
+
+Platform::
+* Use search instead of msearch when batching is disabled in courier {pull}43923[#43923]
+
+[float]
+[[bug-7.4.0]]
+=== Bug fixes
+APM::
+* Avoid APM failing to start when ml is disabled {pull}42815[#42815]
+* Fix missing RUM url {pull}42940[#42940]
+* Correctly pass service language for syntax highlighting {pull}43771[#43771]
+* Make sure histogram is responsive when resizing window {pull}43759[#43759]
+* Don't hide all legends if user has hidden one {pull}43667[#43667]
+* Fill in vertical gaps in breakdown metrics data {pull}43663[#43663]
+* Display all errors in child transactions/spans in trace overview {pull}44274[#44274]
+* Fix indefinite loading state in agent settings for unauthorized user roles {pull}44970[#44970]
+Canvas::
+* Adds support for uppercase cluster names in esdocs and other datasource bug fixes {pull}44311[#44311]
+Code::
+* Adding more coverage for syntax highlighting {pull}41393[#41393]
+* Fix mocha, jest test file path {pull}40574[#40574]
+* Append go env variable 'GOCACHE'  to go lsp spawn command. {pull}44864[#44864]
+* Fix the env $PATH when the go lsp spawned in windows {pull}45011[#45011]
+* Update git repository update frequency {pull}41541[#41541]
+* Remove the disableIndexScheduler flag {pull}42179[#42179]
+* Do not persist git update error {pull}42629[#42629]
+* Enforce progress update at the end of the index job {pull}43381[#43381]
+* Exclude from getting write privilege when choosing all {pull}43700[#43700]
+* Adjust the orders of delete steps to avoid long lang server initialization stage {pull}43893[#43893]
+* Fixed the issue that the repository can not be deleted in some cases. {pull}42841[#42841]
+* Test colorize before load a file {pull}41645[#41645]
+* Handle status when repo is not exists {pull}41643[#41643]
+* Bump nodegit version {pull}42332[#42332]
+* Fixed lang server install status {pull}43164[#43164]
+* Fix workspace dir case-sensitive problem {pull}43571[#43571]
+* Fix a launching embed ctag-langserver problem {pull}43561[#43561]
+* Fix git for large repos {pull}43669[#43669]
+* Don't show &quot;NO DEFINITION&quot; if multiple definitions found {pull}43964[#43964]
+* Remove 'server is initializing error' {pull}44074[#44074]
+* Try fix this test {pull}43692[#43692]
+* Try fix ts-lang shutdown unit test {pull}37618[#37618]
+Dashboard::
+* No reload on changes to disabled filters in dashboard {pull}41144[#41144]
+* Update assumption that panelIndex may be missing {pull}44793[#44793]
+Design::
+* Update heading hierarchy for instructions {pull}41970[#41970]
+Discover::
+* Fix TypeError at Discover's context view {pull}43661[#43661]
+Filters::
+* Fix truncation of long filter bar items {pull}43874[#43874]
+* Keep disabled state on filter edit {pull}42346[#42346]
+* Put filters back in the filter context where they belong {pull}42095[#42095]
+Graph::
+* Replace all occurences of placeholder in drilldown URL template {pull}41673[#41673]
+Infrastructure::
+* Replace EUI Charts with Elastic Charts on node detail page {pull}41262[#41262]
+* Use {kib} date format for chart headers {pull}41715[#41715]
+* Change contextual menu position on infrastructure view {pull}41810[#41810]
+* Cleanup loading states for node detail page. {pull}43311[#43311]
+Logs UI::
+* Fix rendering of complex field column values {pull}44906[#44906]
+* Announce name of column on remove column button {pull}41695[#41695]
+* Sentence case copy changes {pull}43215[#43215]
+Machine Learning::
+* Allow zero delay for transforms wizard {pull}45115[#45115]
+* Fix jobs list loading when auto refresh is off {pull}42076[#42076]
+* Allow index patterns containing commas in recogniser modules {pull}43686[#43686]
+* File data viz limiting uploaded doc chunk size {pull}44768[#44768]
+* Fixing job management expanded rows in dark mode {pull}45159[#45159]
+* Adjusting module jobs model memory limit {pull}45502[#45502]
+* Ensure Anomaly Explorer chart label badge can be seen {pull}44259[#44259]
+* Fix {kib} management stats bar style {pull}44658[#44658]
+* Ensure preview table displays scripted fields and timestamps are formatted correctly. {pull}44701[#44701]
+* Enable data visualizer link on job types page for non-time index {pull}44667[#44667]
+* Fixes messages in data frame action request notifications {pull}44872[#44872]
+* Fixes JSON pane. {pull}42816[#42816]
+* Fix IE11 issue, update types. {pull}43743[#43743]
+* Fixes table sorting. {pull}43859[#43859]
+Management::
+* Fix rendering `undefined` from job status map {pull}41438[#41438]
+* Added doc_values to list of completion items for mapping {pull}42581[#42581]
+* Fix date_nanos formatting for formats without fractional seconds {pull}43114[#43114]
+Maps::
+* Reverse the attribution order so left-to-right order matches top-to-bottom {pull}44415[#44415]
+* Set complete on index pattern creation {pull}44423[#44423]
+* Unknown provider regionMapsConfigProvider {pull}42821[#42821]
+* Only color legend icon with dynamic color when dynamic config is complete {pull}41607[#41607]
+* Populate _id in tooltip {pull}41684[#41684]
+* Only show top hits checkbox if index has date fields {pull}43056[#43056]
+* Reposition tooltip when tooltip size changes {pull}43152[#43152]
+* Exclude index pattern from draw tools and shape filtering when layer ignores global filter {pull}43380[#43380]
+* Increase tooltip max width so create filter button not clipped {pull}43602[#43602]
+* Add i18n wrappers around missed text {pull}43635[#43635]
+* Only display fields contained in _source for Documents source term join left field options {pull}44386[#44386]
+* Fix side panel scrolling in safari {pull}44700[#44700]
+* Name space dynamic property style names to avoid collisions {pull}44676[#44676]
+* Unmount map embeddable component on destroy {pull}45183[#45183]
+* Set mapbox Popup maxWidth {pull}45253[#45253]
+Monitoring::
+* Ensure we pass down all the parameters for fetching logs {pull}43869[#43869]
+* Issue 25323: Fixed error catch and route handling v2 {pull}44800[#44800]
+* Respect xpack.monitoring.show_license_expiration {pull}45537[#45537]
+Operations::
+* Configurable global socket timeouts {pull}31603[#31603]
+* Only provide obsoleteIndexTemplatePattern to the default index migrator to avoid race conditions {pull}42016[#42016]
+Platform::
+* Modify I18nProvider so that it does not generate new React components {pull}43556[#43556]
+* Use pipes for communication with chrome to avoid networking snafus {pull}42097[#42097]
+* Fix rawChecksums in chromium build and rename for clarity {pull}44665[#44665]
+* Fix duplicate fetch in Visualize {pull}41204[#41204]
+* Ensure visualizations in percentage mode respect the advanced settings percent format {pull}39044[#39044]
+* Resolve filter index references when importing saved objects {pull}42974[#42974]
+Queries::
+* Saved query requires title {pull}45029[#45029]
+* Save query form validation on blur {pull}43726[#43726]
+Reporting::
+* Fix Relative Date format in CSV export {pull}40544[#40544]
+* Fix TypeError with pending job info {pull}43924[#43924]
+SIEM::
+* Toggle Column / Code Coverage and Cypress {pull}42766[#42766]
+* Show all popover items / Timeline flyout button rendering {pull}45745[#45745]
+* Upgrade elastic charts library - v12.0.2 {pull}45853[#45853]
+* Adds performance enhancements such by removing wasted renderers and adding incremental DOM rendering {pull}43157[#43157]
+* Fixes the Suricata row renderer not being activated {pull}44728[#44728]
+* Changes ML conditional links to use tabs, fixes a small bug with null filterQuery {pull}45218[#45218]
+* Fixes index substring incorrectly matching configured indices and failing to install ML job {pull}43409[#43409]
+* Fix timeline/kql search disparity {pull}42843[#42843]
+* Formats the bytes columns in timeline {pull}43147[#43147]
+* Capitalizes SIEM in {kib} Advanced Settings {pull}44886[#44886]
+* Removes expensive global CSS calculations of resize handle {pull}43898[#43898]
+Security::
+* Spaces - allow for hex color codes that include uppercase characters {pull}43470[#43470]
+* Prevent space identifier url example from overflowing panel {pull}44871[#44871]
+Uptime::
+* Encode Monitor Id React Router params to validate {pull}43113[#43113]
+* Context Menu Improved for integrations links in monitors list {pull}43068[#43068]
+* Update monitor list configs for mobile view {pull}43218[#43218]
+Visualizations::
+* No longer registering Timelion feature if it's disabled {pull}42193[#42193]
+* Fix Timelion color error when filtering data {pull}23876[#23876]
+* Fix truncated formatting on tooltip {pull}41769[#41769]
+
+[float]
+[[enhancement-7.4.0]]
+=== Enhancements
+APM::
+* Surface http errors to users {pull}42160[#42160]
+* Transaction duration chart always shows duration in `ms` {pull}42375[#42375]
+* Use rounded bucket sizes for transaction distribution {pull}42830[#42830]
+* Show loading state on waterfall and avoid re-fetching distribution chart when changing bucket {pull}44093[#44093]
+* Make number of x ticks responsive to the plot width {pull}44870[#44870]
+* Persist table parameters to URL {pull}39912[#39912]
+* Local UI filters {pull}41588[#41588]
+* Use transaction indices to create ML job {pull}43750[#43750]
+* Update query input when url changes {pull}43773[#43773]
+* Only show &quot;Clear filters&quot; button when values are not empty {pull}43967[#43967]
+Canvas::
+* Format argument for the metric element {pull}42007[#42007]
+* Query default index when index is unspecified {pull}41515[#41515]
+* Added formatnumber and formatdate UIs to sidebar {pull}43059[#43059]
+* Add Monaco to the Canvas Expression Editor {pull}41790[#41790]
+Code::
+* Localization support for Code {pull}41751[#41751]
+* Downgrade the log level of error message from subprocess {pull}42925[#42925]
+* Remove the redundant content in the reference title. {pull}40481[#40481]
+* Enable go langserver under non-detach mode. {pull}42352[#42352]
+* Enable go langserver under production mode {pull}42678[#42678]
+* Add option to turn the go dependency download on/off. {pull}43096[#43096]
+* Remove the outdated deps download control approach {pull}43940[#43940]
+* Make delete job be able to wait on the cancellations of other jobs {pull}41417[#41417]
+* Initial server side refactor to shim the new platform server API {pull}41192[#41192]
+* Initial browser side refactor to shim the new platform browser API {pull}41722[#41722]
+* Disk watermark check for clone and update {pull}42174[#42174]
+* Disk watermark supports percentage and absolute modes {pull}42987[#42987]
+* Cancel clone/update job in the middle if disk space over the watermark {pull}42890[#42890]
+* Initial commit Indexer {pull}39599[#39599]
+* Add commit history search API {pull}43930[#43930]
+* Add a resolveSnippets API to resolve APM stacktrace item to source code {pull}43822[#43822]
+* Support case insensitive repository uri in files Apis and LSP requests {pull}41665[#41665]
+* Refactored the queue to process tasks belong to local node only. {pull}42708[#42708]
+* Refactored the queue to process tasks belong to local node only. {pull}42601[#42601]
+* Implement filtree api by using isogit {pull}41558[#41558]
+* Distributed Code abstraction {pull}41374[#41374]
+* Be able to fallback to generic lang server if dedicated lang s… {pull}42317[#42317]
+* Make ctag lang server embed {pull}43170[#43170]
+* Show multiple definition results in panel {pull}43249[#43249]
+Dashboard::
+* Reset dirty saved query on reload {pull}43927[#43927]
+Design::
+* Add {kib} App specific URL to the help menu (#34739) {pull}42580[#42580]
+Discover::
+* Add advanced setting to turn off search on Discover's initial page load {pull}42036[#42036]
+* Allow sorting on multiple columns in Discover {pull}41918[#41918]
+* Add icon for geo_shape fields in Discover {pull}42087[#42087]
+Infrastructure::
+* Add UI to customize Metrics Explorer chart style {pull}41022[#41022]
+* Add cloud metrics and cloud/host info to metadata endpoint {pull}41836[#41836]
+* Add APM to Metadata Endpoint {pull}42197[#42197]
+* Add AWS metrics to node detail page {pull}42153[#42153]
+* Clarify confusing message about time period {pull}44168[#44168]
+Logs UI::
+* Allow for jumping to the previous and next highlight {pull}40010[#40010]
+* Show highlighted log entries in the minimap {pull}40745[#40745]
+* Add a time cursor to the log minimap {pull}39538[#39538]
+* Make column configurations reorderable {pull}41035[#41035]
+* Add link from the sample web logs to the Logs UI {pull}42635[#42635]
+* Allow dragging of the log minimap to change visible logs {pull}40092[#40092]
+Machine Learning::
+* Cards as links {pull}45254[#45254]
+* Adding datafeed timing stats to Job Management list {pull}40993[#40993]
+* Relaxing index pattern restriction on module setup {pull}42619[#42619]
+* Adding job overrides to the module setup endpoint {pull}42946[#42946]
+* Search bar on list page {pull}41415[#41415]
+* KQL bar for querying source data in creation wizard {pull}41779[#41779]
+* Creation wizard editor for source config {pull}41937[#41937]
+* {kib} management jobs list {pull}42570[#42570]
+* Adds DF Transform Analytics list to {kib} management {pull}43151[#43151]
+* Ensure proper title, tagline, and link to documentation {pull}43418[#43418]
+* DataFrame bulk actions {pull}43331[#43331]
+* Data Frames Summary Stats Bar {pull}43986[#43986]
+* Transform UI updates {pull}44175[#44175]
+* Converts index based data visualizer to React {pull}42685[#42685]
+* Enables cell range selection. {pull}44066[#44066]
+* Analytics jobs list. {pull}42598[#42598]
+* Analytics job creation. {pull}43102[#43102]
+* Outlier detection results page {pull}43578[#43578]
+* Advanced editor. {pull}43989[#43989]
+Management::
+* Index Templates UI list view {pull}39922[#39922]
+* Index Templates UI details view {pull}41602[#41602]
+* Index templates form wizard {pull}42457[#42457]
+* Show endpoint in JSON preview of index lifecycle policy editor. {pull}42791[#42791]
+* Add API endpoint to Rollup Job JSON summary. {pull}42789[#42789]
+* Add request flyout to Remote Clusters. {pull}42900[#42900]
+* Show requests for creating a follower index and creating/updating an auto-follow pattern in CCR. {pull}42924[#42924]
+* Option to start rollup job right after it gets created {pull}41573[#41573]
+* Clone an existing rollup job {pull}41891[#41891]
+* Metrics multiple selection {pull}42927[#42927]
+* Add SLM policies list and detail views {pull}41302[#41302]
+* Sorts the indexPatternDateFields which are listed in the date field dropdown on Date Histogram Step  {pull}41853[#41853]
+* Delete and execute SLM policies {pull}41934[#41934]
+* SLM create and edit policies {pull}43390[#43390]
+* Form validation errors announce themself {pull}39656[#39656]
+* Switch default decimal places to 1 {pull}43785[#43785]
+* Add custom formatting for Date Nanos Format {pull}42445[#42445]
+Maps::
+* Change border color to be darker version of fill color {pull}43211[#43211]
+* Add attribution handling for TMS (config &amp; UI-entry) and WMS {pull}44147[#44147]
+* Make default EMS tile layer auto select light or dark tiles based on isDark mode advanced setting {pull}40892[#40892]
+* Add filter bar to maps application {pull}42756[#42756]
+* Filter by shape {pull}43141[#43141]
+* Custom color ramp {pull}41603[#41603]
+* Add indicator when layer is filtered by search bar {pull}43283[#43283]
+* Add cancel draw button and draw instructions {pull}43593[#43593]
+* Pew pew source {pull}41504[#41504]
+* Load Maki icons from spritesheet {pull}42499[#42499]
+* Enable borders for icon symbols {pull}43066[#43066]
+* Provide indication in LayerTOC when results are incomplete {pull}41271[#41271]
+* Use EMS vector tiles {pull}42846[#42846]
+Monitoring::
+* Update APM metric titles {pull}44091[#44091]
+Platform::
+* Feature/default enable csv dashboard {pull}44048[#44048]
+* Chore/bump chromium webgl+kerberos {pull}42751[#42751]
+* Cancel visualize fetches when navigating away or re-fetching {pull}42035[#42035]
+* Ability to enable and disable alerts {pull}40543[#40543]
+* Per panel time range {pull}43153[#43153]
+* Promote many `debug` log events to `info`  {pull}43241[#43241]
+* Instantiate a logger top level, and use it throughout the job {pull}43636[#43636]
+* Add capture.maxAttempts setting {pull}44011[#44011]
+Queries::
+* Implement saved queries and filters {pull}39140[#39140]
+Reporting::
+* Rewrite telemetry collection to use a single query {pull}34327[#34327]
+* Truncate base64 urls in logs {pull}41304[#41304]
+* Sanitize 409 error log message {pull}42495[#42495]
+SIEM::
+* Customizable columns, row renderers, and expandable events in the `Events` widget {pull}44324[#44324]
+* Adds events and Timeline Style / ID Updates {pull}44965[#44965]
+* Applies highlighting to the Timeline data providers drop area and flyout button {pull}45173[#45173]
+* Sets page titles to the current page you are on  {pull}42157[#42157]
+* Update date picker after brush selection on charts {pull}42440[#42440]
+* Upgrades react-redux and utilize React.memo for performance gains  {pull}43029[#43029]
+* Changes network to use ECS fields {pull}44392[#44392]
+* Adds a configuraton option for the default SIEM date time range {pull}44540[#44540]
+* Fixes the columns to not show duplicate information when on detail pages.   {pull}45031[#45031]
+* Adds process_started ECS fields to Uncommon Process Table {pull}45664[#45664]
+* Adds Connections (Pewpew) Map to Network Page {pull}43965[#43965]
+* Adds telemetry for ML functionality {pull}43926[#43926]
+* Adds new jobs for SIEM ML Integration {pull}44301[#44301]
+* Moves installation of jobs from initial page load to opening of Anomaly Detection UI {pull}45536[#45536]
+* Adding new jobs to siem module {pull}43783[#43783]
+* Changes table widget loading to elastic user interface's loading content {pull}41596[#41596]
+* Changes hosts and network tables from load more to paginated {pull}41532[#41532]
+* Uses autonomous_system as new ECS field {pull}43925[#43925]
+* Makes ip details heading draggable {pull}45179[#45179]
+* Split into Source and Destination  {pull}43719[#43719]
+* Inject/apply KQL changed in refresh button {pull}45065[#45065]
+* Improves the timeline performance by optimizing the width, removing wasted renderers, and adding a visibility sensor  {pull}43560[#43560]
+Security::
+* Telemetry for csp configuration {pull}43223[#43223]
+* Copy Saved Objects to Spaces UI {pull}39002[#39002]
+* Allow for custom cluster privileges {pull}43817[#43817]
+Uptime::
+* Improve `useUrlParams` hook for Uptime app {pull}41545[#41545]
+Visualizations::
+* Introducing Timerange Data Mode for TSVB Metric Style Visualizations {pull}37185[#37185]
+* Allow other apps to list their custom visualizations in the Visualize app {pull}43386[#43386]
+* Threshold line on bar/line/area charts {pull}42632[#42632]
+* Adds capability to show percentages for data table columns {pull}39572[#39572]
+
 
 [[release-notes-7.3.2]]
 == {kib} 7.3.2
