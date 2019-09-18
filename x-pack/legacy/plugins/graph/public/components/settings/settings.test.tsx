@@ -8,13 +8,13 @@ import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { GraphSettings, GraphSettingsProps } from './graph_settings';
+import { Settings, SettingsProps } from './settings';
 import { act } from 'react-testing-library';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
 
-describe('graph_settings', () => {
-  const props: jest.Mocked<GraphSettingsProps> = {
+describe('settings', () => {
+  const props: jest.Mocked<SettingsProps> = {
     advancedSettings: {
       maxValuesPerDoc: 5,
       minDocCount: 10,
@@ -105,12 +105,12 @@ describe('graph_settings', () => {
     canEditDrillDownUrls: true,
   };
 
-  let subject: Rx.BehaviorSubject<jest.Mocked<GraphSettingsProps>>;
+  let subject: Rx.BehaviorSubject<jest.Mocked<SettingsProps>>;
   let instance: ReactWrapper;
 
   beforeEach(() => {
     subject = new Rx.BehaviorSubject(props);
-    instance = mountWithIntl(<GraphSettings observable={subject.asObservable()} />);
+    instance = mountWithIntl(<Settings observable={subject.asObservable()} />);
   });
 
   function toTab(tab: string) {
