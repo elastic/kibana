@@ -100,11 +100,10 @@ export class MonitorGroupIterator {
   ): Promise<{ hasMore: boolean; gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.current();
-    // Trim the buffer to free space if we've accumulated a lot of stuff
-    if (current && this.bufferPos > 1000) {
-      this.buffer = [current];
-      this.bufferPos = 0;
-    }
+
+    // Trim the buffer to free space before fetching more
+    this.buffer = [current];
+    this.bufferPos = 0;
 
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     // If we've hit the end of the stream searchAfter will be empty
