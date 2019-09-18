@@ -9,6 +9,9 @@
  * tasks at once in a given Kibana instance.
  */
 
+import { from } from 'rxjs';
+import { mergeAll, map, filter, tap } from 'rxjs/operators';
+import { takeWithBackpressure, TAKE_RESULT } from './lib/take_with_backpressure';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
@@ -73,23 +76,30 @@ export class TaskPool {
   }
 
   private async attemptToRun(tasks: TaskRunner[]) {
-    for (const task of tasks) {
-      if (this.availableWorkers > 0) {
-        if (await task.claimOwnership()) {
-          this.running.add(task);
-          task
-            .run()
-            .catch(err => {
-              this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
-            })
-            .then(() => this.running.delete(task));
-        }
-      } else {
-        return false;
-      }
-    }
-
-    return true;
+    return new Promise((resolve, reject) => {
+      from(tasks)
+        .pipe(
+          takeWithBackpressure(task => task.claimOwnership(), this.availableWorkers),
+          mergeAll(),
+          tap(ifTaskManagerHasRanOutOfWorkerCapacity(() => resolve(false))),
+          tap(ifClaimingOwnershipThrewAnError(() => reject(false))),
+          filter(taskManagerHasClaimedOwnership),
+          map(([_, task]) => task)
+        )
+        .subscribe(
+          task => {
+            this.running.add(task);
+            task
+              .run()
+              .catch((err: Error) => {
+                this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
+              })
+              .then(() => this.running.delete(task));
+          },
+          ex => reject(ex),
+          () => resolve(true)
+        );
+    });
   }
 
   private cancelExpiredTasks() {
@@ -110,4 +120,24 @@ export class TaskPool {
       this.logger.error(`Failed to cancel task ${task}: ${err}`);
     }
   }
+}
+
+function ifTaskManagerHasRanOutOfWorkerCapacity(callback: () => void) {
+  return function([result]: [TAKE_RESULT, TaskRunner]) {
+    if (result === TAKE_RESULT.RAN_OUT_OF_CAPACITY) {
+      callback();
+    }
+  };
+}
+
+function ifClaimingOwnershipThrewAnError(callback: () => void) {
+  return function([result]: [TAKE_RESULT, TaskRunner]) {
+    if (result === TAKE_RESULT.TAKE_FAILURE) {
+      callback();
+    }
+  };
+}
+
+function taskManagerHasClaimedOwnership([result, _]: [TAKE_RESULT, TaskRunner]) {
+  return result === TAKE_RESULT.TAKEN;
 }
