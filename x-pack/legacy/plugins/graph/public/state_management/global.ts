@@ -6,17 +6,29 @@
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
-import { takeLatest, call, put } from 'redux-saga/effects';
-import { GraphWorkspaceSavedObject } from '../types';
+import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
+import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import {
   GraphStoreDependencies,
   setDatasource,
   loadFields,
   updateSettings,
   loadTemplates,
+  GraphState,
+  templatesSelector,
+  settingsSelector,
+  datasourceSelector,
+  selectedFieldsSelector,
+  IndexpatternDatasource,
 } from '.';
-import { lookupIndexPattern, savedWorkspaceToAppState } from '../services/persistence';
-import { updateMetaData } from './meta_data';
+import {
+  lookupIndexPattern,
+  savedWorkspaceToAppState,
+  appStateToSavedWorkspace,
+} from '../services/persistence';
+import { updateMetaData, metaDataSelector } from './meta_data';
+import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
+import { getEditPath } from '../services/url';
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
 export const reset = actionCreator<void>('RESET');
@@ -63,10 +75,13 @@ export const loadingSaga = ({
       );
 
       // put everything in the store
-      yield put(updateMetaData({
-        title: action.payload.title,
-        description: action.payload.description
-      }));
+      yield put(
+        updateMetaData({
+          title: action.payload.title,
+          description: action.payload.description,
+          savedObjectId: action.payload.id,
+        })
+      );
       yield put(
         setDatasource({
           type: 'indexpattern',
@@ -90,64 +105,89 @@ export const loadingSaga = ({
  *
  * It will serialize everything and save it using the saved objects client
  */
-export const savingSaga = ({
-  createWorkspace,
-  getWorkspace,
-  indexPatterns,
-  notifications,
-  indexPatternProvider,
-}: Pick<
-  GraphStoreDependencies,
-  'createWorkspace' | 'getWorkspace' | 'indexPatterns' | 'notifications' | 'indexPatternProvider'
->) =>
+export const savingSaga = (deps: GraphStoreDependencies) =>
   function*() {
-    function* persistWorkspace(action: Action<GraphWorkspaceSavedObject>) {
-        openSaveModal({
-          savePolicy: graphSavePolicy,
-          hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
-          workspace: $scope.savedWorkspace,
-          saveWorkspace: function (saveOptions, userHasConfirmedSaveWorkspaceData) {
-    const canSaveData = graphSavePolicy === 'configAndData' ||
-      (graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
-
-    appStateToSavedWorkspace(
-      $scope.savedWorkspace,
-      {
-        workspace: $scope.workspace,
-        urlTemplates: $scope.urlTemplates,
-        advancedSettings: $scope.exploreControls,
-        selectedIndex: $scope.selectedIndex,
-        selectedFields: $scope.selectedFields
-      },
-      canSaveData
-    );
-
-    return $scope.savedWorkspace.save(saveOptions).then(function (id) {
-      if (id) {
-        const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
-          defaultMessage: 'Saved "{workspaceTitle}"',
-          values: { workspaceTitle: $scope.savedWorkspace.title },
-        });
-        let text;
-        if (!canSaveData && $scope.workspace.nodes.length > 0) {
-          text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
-            defaultMessage: 'The configuration was saved, but the data was not saved',
-          });
-        }
-
-        toastNotifications.addSuccess({
-          title,
-          text,
-          'data-test-subj': 'saveGraphSuccess',
-        });
-        if ($scope.savedWorkspace.id !== $route.current.params.id) {
-          kbnUrl.change(getEditPath($scope.savedWorkspace));
-        }
+    function* persistWorkspace() {
+      const savedWorkspace = deps.getSavedWorkspace();
+      const state: GraphState = yield select();
+      const workspace = deps.getWorkspace();
+      const selectedDatasource = datasourceSelector(state).current;
+      if (!workspace || selectedDatasource.type === 'none') {
+        return;
       }
-      return { id };
-    }, fatalError);
-        });
+
+      const savedObjectId = yield cps(
+        showModal,
+        deps,
+        workspace,
+        savedWorkspace,
+        state,
+        selectedDatasource
+      );
+      if (savedObjectId) {
+        yield put(updateMetaData({ savedObjectId }));
+      }
     }
 
     yield takeLatest(saveWorkspace.match, persistWorkspace);
   };
+
+function showModal(
+  deps: GraphStoreDependencies,
+  workspace: Workspace,
+  savedWorkspace: GraphWorkspaceSavedObject,
+  state: GraphState,
+  selectedDatasource: IndexpatternDatasource,
+  savingCallback: (error: unknown, id?: string) => void
+) {
+  const saveWorkspace: SaveWorkspaceHandler = async (
+    saveOptions,
+    userHasConfirmedSaveWorkspaceData
+  ) => {
+    const canSaveData =
+      deps.savePolicy === 'configAndData' ||
+      (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
+    appStateToSavedWorkspace(
+      savedWorkspace,
+      {
+        workspace,
+        urlTemplates: templatesSelector(state),
+        advancedSettings: settingsSelector(state),
+        selectedIndex: selectedDatasource,
+        selectedFields: selectedFieldsSelector(state),
+      },
+      canSaveData
+    );
+    const id = await savedWorkspace.save(saveOptions);
+    if (id) {
+      const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
+        defaultMessage: 'Saved "{workspaceTitle}"',
+        values: { workspaceTitle: savedWorkspace.title },
+      });
+      let text;
+      if (!canSaveData && workspace.nodes.length > 0) {
+        text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
+          defaultMessage: 'The configuration was saved, but the data was not saved',
+        });
+      }
+      deps.notifications.toasts.addSuccess({
+        title,
+        text,
+        'data-test-subj': 'saveGraphSuccess',
+      });
+      if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
+        deps.changeUrl(getEditPath(savedWorkspace));
+      }
+    }
+    savingCallback(null, id);
+    return { id };
+  };
+
+  openSaveModal({
+    savePolicy: deps.savePolicy,
+    hasData: workspace.nodes.length > 0 || workspace.blacklistedNodes.length > 0,
+    workspace: savedWorkspace,
+    showSaveModal: deps.showSaveModal,
+    saveWorkspace,
+  });
+}

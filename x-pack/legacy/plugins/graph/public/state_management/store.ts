@@ -11,7 +11,7 @@ import { fieldsReducer, FieldsState } from './fields';
 import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
 import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
 import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
-import { IndexPatternProvider, Workspace, IndexPatternSavedObject } from '../types';
+import { IndexPatternProvider, Workspace, IndexPatternSavedObject, GraphSavePolicy, GraphWorkspaceSavedObject } from '../types';
 import { loadingSaga } from './global';
 import { syncNodeStyleSaga, syncFieldsSaga } from './workspace';
 import { metaDataReducer, MetaDataState } from './meta_data';
@@ -30,7 +30,11 @@ export interface GraphStoreDependencies {
   indexPatterns: IndexPatternSavedObject[];
   createWorkspace: (index: string) => void;
   getWorkspace: () => Workspace | null;
+  getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
+  showSaveModal: (el: React.ReactNode) => void;
+  savePolicy: GraphSavePolicy;
+  changeUrl: (newUrl: string) => void;
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {

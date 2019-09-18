@@ -158,8 +158,8 @@ uiRoutes
     template: appTemplate,
     badge: getReadonlyBadge,
     resolve: {
-      savedWorkspace: function (savedGraphWorkspaces, courier, $route) {
-        return $route.current.params.id && savedGraphWorkspaces.get($route.current.params.id)
+      savedWorkspace: function (savedGraphWorkspaces, $route) {
+        return $route.current.params.id ? savedGraphWorkspaces.get($route.current.params.id)
           .catch(
             function () {
               toastNotifications.addDanger(
@@ -168,7 +168,7 @@ uiRoutes
                 })
               );
             }
-          );
+          ) : 
 
       },
       //Copied from example found in wizard.js ( Kibana TODO - can't
@@ -456,7 +456,6 @@ app.controller('graphuiPlugin', function (
     window.open(newUrl, '_blank');
   };
 
-
   $scope.setDetail = function (data) {
     $scope.detail = data;
   };
@@ -510,10 +509,6 @@ app.controller('graphuiPlugin', function (
       $scope.$apply();
     }
   };
-
-  //initialize all the state
-  $scope.resetWorkspace();
-
 
   const blockScroll = function () {
     d3.event.preventDefault();
@@ -605,12 +600,9 @@ app.controller('graphuiPlugin', function (
         return allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        openSaveModal({
-          savePolicy: graphSavePolicy,
-          hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
-          workspace: $scope.savedWorkspace,
-          saveWorkspace: $scope.saveWorkspace,
-          showSaveModal
+        $scope.reduxDispatch({
+          type: 'x-pack/graph/SAVE_WORKSPACE',
+          payload: $route.current.locals.savedWorkspace,
         });
       },
       testId: 'graphSaveButton',
@@ -707,47 +699,4 @@ app.controller('graphuiPlugin', function (
       });
     });
   }
-
-  $scope.saveWorkspace = function (saveOptions, userHasConfirmedSaveWorkspaceData) {
-    const canSaveData = graphSavePolicy === 'configAndData' ||
-      (graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
-
-    appStateToSavedWorkspace(
-      $scope.savedWorkspace,
-      {
-        workspace: $scope.workspace,
-        urlTemplates: $scope.urlTemplates,
-        advancedSettings: $scope.exploreControls,
-        selectedIndex: $scope.selectedIndex,
-        selectedFields: $scope.selectedFields
-      },
-      canSaveData
-    );
-
-    return $scope.savedWorkspace.save(saveOptions).then(function (id) {
-      if (id) {
-        const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
-          defaultMessage: 'Saved "{workspaceTitle}"',
-          values: { workspaceTitle: $scope.savedWorkspace.title },
-        });
-        let text;
-        if (!canSaveData && $scope.workspace.nodes.length > 0) {
-          text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
-            defaultMessage: 'The configuration was saved, but the data was not saved',
-          });
-        }
-
-        toastNotifications.addSuccess({
-          title,
-          text,
-          'data-test-subj': 'saveGraphSuccess',
-        });
-        if ($scope.savedWorkspace.id !== $route.current.params.id) {
-          kbnUrl.change(getEditPath($scope.savedWorkspace));
-        }
-      }
-      return { id };
-    }, fatalError);
-
-  };
 });

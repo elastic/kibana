@@ -44,13 +44,4 @@ export interface IndexPatternProvider {
   get(id: string): Promise<IndexPattern>;
 }
 
-export interface AppState {
-  urlTemplates: UrlTemplate[];
-  advancedSettings: AdvancedSettings;
-  workspace: Workspace;
-  allFields: WorkspaceField[];
-  selectedFields: WorkspaceField[];
-  selectedIndex: IndexPatternSavedObject;
-}
-
 export type InferActionType<X> = X extends ActionCreator<infer T> ? T : never;

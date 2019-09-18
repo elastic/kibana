@@ -30,4 +30,4 @@ export const advancedSettingsReducer = reducerWithInitialState(initialSettings)
   .case(updateSettings, (_oldSettings, newSettings) => newSettings)
   .build();
 
-export const settingsSelector = (state: GraphState) => state.urlTemplates;
+export const settingsSelector = (state: GraphState) => state.advancedSettings;
