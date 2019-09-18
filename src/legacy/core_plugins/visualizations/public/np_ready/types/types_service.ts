@@ -50,7 +50,7 @@ export class TypesService {
     const visTypes = Private(VisTypesRegistryProvider);
     return {
       get: (visualization: string) => {
-        return visTypes.get(visualization);
+        return visTypes.byName[visualization];
       },
     };
   }
