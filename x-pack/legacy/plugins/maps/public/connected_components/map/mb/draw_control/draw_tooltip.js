@@ -51,7 +51,7 @@ export class DrawTooltip extends Component {
         defaultMessage: 'Click to add vertex. Double click to finish.'
       });
 
-    const tooltipAnchor = <div/>;
+    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
 
     return (
       <EuiPopover
@@ -61,7 +61,10 @@ export class DrawTooltip extends Component {
         isOpen={this.state.isOpen}
         closePopover={noop}
         ref={this._popoverRef}
-        style={{ transform: `translate(${this.state.x}px, ${this.state.y}px)` }}
+        style={{
+          pointerEvents: 'none',
+          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
+        }}
       >
         <EuiText color="subdued" size="xs">
           {instructions}

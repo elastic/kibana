@@ -261,17 +261,21 @@ export class TooltipControl extends React.Component {
       return null;
     }
 
-    const tooltipAnchor = <div/>;
+    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
 
     return (
       <EuiPopover
         id="mapTooltip"
         button={tooltipAnchor}
+        anchorPosition="upCenter"
         isOpen
         closePopover={noop}
         ref={this._popoverRef}
-        style={{ zIndex: 1, transform: `translate(${this.state.x}px, ${this.state.y}px)` }}
+        style={{
+          pointerEvents: 'none',
+          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
+        }}
       >
         <EuiText size="xs">
           <FeatureTooltip
