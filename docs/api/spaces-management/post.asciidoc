@@ -6,7 +6,7 @@
 
 Creates a {kib} space.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
 [[spaces-api-post-request]]
 ==== Request
