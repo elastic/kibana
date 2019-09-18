@@ -4,9 +4,7 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-Create a set of {kib} saved objects from a file created by the export API.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create a set of {kib} saved objects from a file created by the export API.
 
 [[saved-objects-api-import-request]]
 ==== Request
