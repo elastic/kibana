@@ -289,10 +289,14 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
+function clearSubscriptions() {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
   }
+}
+
+function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
+  clearSubscriptions();
 
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
   const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
@@ -346,4 +350,5 @@ export default {
   expandAliases,
   clear,
   retrieveAutoCompleteInfo,
+  clearSubscriptions
 };
