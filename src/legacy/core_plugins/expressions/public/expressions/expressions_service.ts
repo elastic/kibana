@@ -24,6 +24,7 @@ import { setInspector, setInterpreter } from './services';
 import { execute } from './lib/execute';
 import { loader } from './lib/loader';
 import { render } from './lib/render';
+import { IInterpreter } from './lib/_types';
 import { createRenderer } from './expression_renderer';
 
 import { Start as IInspector } from '../../../../../plugins/inspector/public';
@@ -40,7 +41,9 @@ export class ExpressionsService {
     // eslint-disable-next-line
     const { getInterpreter } = require('../../../interpreter/public/interpreter');
     getInterpreter()
-      .then(setInterpreter)
+      .then(({ interpreter }: { interpreter: IInterpreter }) => {
+        setInterpreter(interpreter);
+      })
       .catch((e: Error) => {
         throw new Error('interpreter is not initialized');
       });

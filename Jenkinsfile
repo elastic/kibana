@@ -81,6 +81,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runbldJunit()
+        }
+
+        catchError {
           publishJunit()
         }
 
@@ -105,7 +109,6 @@ def getPostBuildWorker(name, closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "IS_PIPELINE_JOB=1",
     ]) {
       closure()
     }
@@ -143,7 +146,7 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable') {
             try {
-              runbld '.ci/run.sh'
+              runbld('.ci/run.sh', true)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
@@ -168,6 +171,7 @@ def jobRunner(label, closure) {
 
     withEnv([
       "CI=true",
+      "IS_PIPELINE_JOB=1",
       "HOME=${env.JENKINS_HOME}",
       "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
@@ -253,8 +257,14 @@ def sendKibanaMail() {
   }
 }
 
-def runbld(script) {
-  sh '#!/usr/local/bin/runbld\n' + script
+def runbld(script, enableJunitProcessing = false) {
+  def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
+
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${extraConfig} ${script}"
+}
+
+def runbldJunit() {
+  sh "/usr/local/bin/runbld -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh"
 }
 
 def bash(script) {

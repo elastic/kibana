@@ -119,7 +119,6 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   return (
     <>
       <SelectOption
-        id={`valueAxisPosition${index}`}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel', {
           defaultMessage: 'Position',
         })}
