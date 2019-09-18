@@ -39,7 +39,9 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
-  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/45983
+  // FLAKY: https://github.com/elastic/kibana/issues/45884
+  describe.skip('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await new Promise(r => setTimeout(r, 1000));
@@ -94,8 +96,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.xpack.rollup).to.be.an('object');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/45884
-    it.skip('should pull local stats and validate fields', async () => {
+    it('should pull local stats and validate fields', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
         max: '2018-07-23T22:13:00Z'
