@@ -25,6 +25,7 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
+import { LogAnalysisJobStatusIndicator } from '../../../components/logging/log_analysis_job_status_controls';
 import {
   LogAnalysisJobs,
   StringTimeRange,
@@ -159,30 +160,29 @@ export const AnalysisResultsContent = ({
         <>
           <EuiPage>
             <EuiPanel paddingSize="l">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={7}>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      {anomaliesDetected !== null ? (
-                        <span>
-                          <FormattedMessage
-                            id="xpack.infra.logs.analysis.anomaliesDetectedText"
-                            defaultMessage="Detected {formattedNumber} {number, plural, one {anomaly} other {anomalies}}"
-                            values={{
-                              formattedNumber: (
-                                <EuiBadge color={anomaliesDetected === 0 ? 'default' : 'warning'}>
-                                  {anomaliesDetected}
-                                </EuiBadge>
-                              ),
-                              number: anomaliesDetected,
-                            }}
-                          />
-                        </span>
-                      ) : null}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <LogAnalysisJobStatusIndicator jobStatus={jobStatus} />
                 </EuiFlexItem>
                 <EuiFlexItem>
+                  {anomaliesDetected !== null ? (
+                    <span>
+                      <FormattedMessage
+                        id="xpack.infra.logs.analysis.anomaliesDetectedText"
+                        defaultMessage="Detected {formattedNumber} {number, plural, one {anomaly} other {anomalies}}"
+                        values={{
+                          formattedNumber: (
+                            <EuiBadge color={anomaliesDetected === 0 ? 'default' : 'warning'}>
+                              {anomaliesDetected}
+                            </EuiBadge>
+                          ),
+                          number: anomaliesDetected,
+                        }}
+                      />
+                    </span>
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiSuperDatePicker
                     start={selectedTimeRange.startTime}
                     end={selectedTimeRange.endTime}
