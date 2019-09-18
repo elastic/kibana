@@ -104,6 +104,7 @@ describe('MonitorList component', () => {
         data={{ monitorStates: result }}
         loading={false}
         successColor="primary"
+        hasActiveFilters={false}
       />
     );
 
@@ -119,6 +120,7 @@ describe('MonitorList component', () => {
         data={{}}
         loading={false}
         successColor="primary"
+        hasActiveFilters={false}
       />
     );
     expect(component).toMatchSnapshot();

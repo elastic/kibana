@@ -17,7 +17,8 @@ export interface UMMonitorStatesAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination?: CursorPagination,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }

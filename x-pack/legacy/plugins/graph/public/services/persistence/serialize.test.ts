@@ -12,7 +12,7 @@ import {
   WorkspaceEdge,
   AppState,
 } from '../../types';
-import { outlinkEncoders } from '../outlink_encoders';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
 
 describe('serialize', () => {
   let appState: AppState;

@@ -6,9 +6,11 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "filters": "",
   "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
+  "statusFilter": "",
 }
 `;
 
@@ -18,9 +20,11 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "filters": "",
   "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
+  "statusFilter": "",
 }
 `;
 
@@ -30,9 +34,11 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "bar",
   "dateRangeStart": "foo",
+  "filters": "",
   "pagination": undefined,
   "search": "monitor.status: down",
   "selectedPingStatus": "up",
+  "statusFilter": "",
 }
 `;
 
@@ -42,9 +48,11 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "filters": "",
   "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
+  "statusFilter": "",
 }
 `;
 
@@ -54,8 +62,10 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-18d",
+  "filters": "",
   "pagination": undefined,
   "search": "",
   "selectedPingStatus": "down",
+  "statusFilter": "",
 }
 `;

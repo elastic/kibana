@@ -25,7 +25,7 @@
     "locations": [
       "mpls"
     ],
-    "names": null,
+    "locations": [],
     "ports": [
       5678
     ],

@@ -184,6 +184,7 @@ export const monitorStatesSchema = gql`
       dateRangeEnd: String!
       pagination: String
       filters: String
+      statusFilter: String
     ): MonitorSummaryResult
 
     "Fetches details about the uptime index."

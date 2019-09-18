@@ -8,7 +8,6 @@ import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
 import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
-import { getFilteredQueryAndStatusFilter } from '../../helper';
 import { fetchPage } from './search';
 
 export interface QueryContext {
@@ -33,23 +32,19 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination = CONTEXT_DEFAULTS.CURSOR_PAGINATION,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string
   ): Promise<GetMonitorStatesResult> {
     const size = 10;
 
-    const { query: filterClause, statusFilter } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
-
     const queryContext: QueryContext = {
       database: this.database,
+
       request,
       dateRangeStart,
       dateRangeEnd,
       pagination,
-      filterClause,
+      filterClause: filters,
       size,
       statusFilter,
     };

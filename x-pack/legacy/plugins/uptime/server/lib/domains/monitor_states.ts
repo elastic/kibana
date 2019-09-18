@@ -25,14 +25,16 @@ export class UMMonitorStatesDomain {
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination?: CursorPagination,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<GetMonitorStatesResult> {
     return this.adapter.getMonitorStates(
       request,
       dateRangeStart,
       dateRangeEnd,
       pagination,
-      filters
+      filters,
+      statusFilter
     );
   }
 }

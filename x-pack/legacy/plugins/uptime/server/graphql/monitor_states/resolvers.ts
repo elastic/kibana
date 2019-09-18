@@ -40,7 +40,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         resolver,
-        { dateRangeStart, dateRangeEnd, filters, pagination },
+        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
         { req }
       ): Promise<MonitorSummaryResult> {
         const decodedPagination = pagination
@@ -56,7 +56,8 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
             dateRangeStart,
             dateRangeEnd,
             decodedPagination,
-            filters
+            filters,
+            statusFilter
           ),
         ]);
         return {

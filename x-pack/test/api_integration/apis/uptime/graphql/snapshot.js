@@ -38,6 +38,7 @@ export default function ({ getService }) {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
+          statusFilter: 'down',
         },
       };
       const {
@@ -58,6 +59,7 @@ export default function ({ getService }) {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2025-01-28T19:00:16.078Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`,
+          statusFilter: 'up',
         },
       };
       const {

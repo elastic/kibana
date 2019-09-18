@@ -53,7 +53,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const queryClause = queryContext.filterClause.filter || { match_all: {} };
+  const queryClause = queryContext.filterClause || { match_all: {} };
 
   // This clause is an optimization for the case where we only want to show 'up' monitors.
   // We know we can exclude any down matches because an 'up' monitor may not have any 'down' matches.

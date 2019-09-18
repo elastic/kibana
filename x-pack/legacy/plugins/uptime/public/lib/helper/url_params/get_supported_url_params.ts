@@ -14,8 +14,10 @@ export interface UptimeUrlParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination?: string;
+  filters: string;
   search: string;
   selectedPingStatus: string;
+  statusFilter: string;
 }
 
 const {
@@ -25,6 +27,8 @@ const {
   DATE_RANGE_END,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
+  FILTERS,
+  STATUS_FILTER,
 } = CLIENT_DEFAULTS;
 
 /**
@@ -61,8 +65,10 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    filters,
     search,
     selectedPingStatus,
+    statusFilter,
     pagination,
   } = filteredParams;
 
@@ -71,9 +77,11 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    filters: filters || FILTERS,
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
+    statusFilter: statusFilter || STATUS_FILTER,
     pagination,
   };
 };
