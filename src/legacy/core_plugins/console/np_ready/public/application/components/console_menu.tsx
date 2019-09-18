@@ -41,7 +41,7 @@ interface State {
   isPopoverOpen: boolean;
   curlCode: string;
   toasts: Toast[];
-  toastId: string;
+  toastId: number;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -52,7 +52,7 @@ export class ConsoleMenu extends Component<Props, State> {
       curlCode: '',
       isPopoverOpen: false,
       toasts: [],
-      toastId: '1',
+      toastId: 1,
     };
   }
 
@@ -106,7 +106,7 @@ export class ConsoleMenu extends Component<Props, State> {
 
   addCopyToast = () => {
     const toast: Toast = {
-      id: this.state.toastId,
+      id: String(this.state.toastId),
       title: i18n.translate('console.consoleMenu.copyRequestAsCurlMessage', {
         defaultMessage: 'Request copied as cURL',
       }),
