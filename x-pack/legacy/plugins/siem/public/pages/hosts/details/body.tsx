@@ -11,7 +11,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../c
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
-import { getHostDetailsEventsKqlQueryExpression } from '../helpers';
+import { getHostDetailsEventsKqlQueryExpression } from './helpers';
 
 import { HostDetailsBodyComponentProps } from './type';
 import { getFilterQuery, type, makeMapStateToProps } from './utils';
