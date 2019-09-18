@@ -17,7 +17,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,9 +25,9 @@ import {
   getChartDateLabel,
 } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/graphql/types';
-import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
 import { ChartWrapper } from './chart_wrapper';
+import { useUrlParams } from '../../../hooks';
 
 interface DurationChartProps {
   /**
@@ -59,10 +59,10 @@ interface DurationChartProps {
 export const DurationChart = ({
   locationDurationLines,
   meanColor,
-  rangeColor,
   loading,
 }: DurationChartProps) => {
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average-');
 
@@ -100,7 +100,7 @@ export const DurationChart = ({
         <ChartWrapper height="400px" loading={loading}>
           <Chart>
             <Settings
-              xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+              xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
               showLegend={true}
               legendPosition={Position.Bottom}
             />
@@ -108,7 +108,9 @@ export const DurationChart = ({
               id={getAxisId('bottom')}
               position={Position.Bottom}
               showOverlappingTicks={true}
-              tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+              tickFormat={timeFormatter(
+                getChartDateLabel(absoluteDateRangeStart, absoluteDateRangeEnd)
+              )}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
                 defaultMessage: 'Timestamp',
               })}

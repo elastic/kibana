@@ -16,13 +16,13 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
-import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
+import { useUrlParams } from '../../../hooks';
 
 interface ChecksChartProps {
   /**
@@ -47,7 +47,8 @@ interface ChecksChartProps {
 export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
   const upSeriesSpecId = getSpecId('Up');
   const downSeriesSpecId = getSpecId('Down');
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
   const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
     defaultMessage: 'Up count',
@@ -71,12 +72,17 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Settings
+            xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
+            showLegend={false}
+          />
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+            tickFormat={timeFormatter(
+              getChartDateLabel(absoluteDateRangeStart, absoluteDateRangeEnd)
+            )}
             title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
               defaultMessage: 'Timestamp',
               description: 'The heading of the x-axis of a chart of timeseries data.',

@@ -45,12 +45,12 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
+  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
   const {
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
     dateRangeStart,
     dateRangeEnd,
     filters: urlFilters,
@@ -156,8 +156,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
-              absoluteStartDate={absoluteStartDate}
-              absoluteEndDate={absoluteEndDate}
+              absoluteStartDate={absoluteDateRangeStart}
+              absoluteEndDate={absoluteDateRangeEnd}
               successColor={colors.success}
               dangerColor={colors.danger}
               variables={sharedProps}
@@ -167,8 +167,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
+          absoluteStartDate={absoluteDateRangeStart}
+          absoluteEndDate={absoluteDateRangeEnd}
           dangerColor={colors.danger}
           hasActiveFilters={!!filters}
           implementsCustomErrorState={true}
