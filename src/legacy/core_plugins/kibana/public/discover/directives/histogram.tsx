@@ -49,7 +49,6 @@ import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
 
 export interface DiscoverHistogramProps {
@@ -69,7 +68,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   private subscription?: Subscription;
   public state = {
-    chartsTheme: EUI_CHARTS_THEME_LIGHT.theme,
+    chartsTheme: npStart.plugins.eui_chart_utils.getChartsThemeDefault(),
   };
 
   componentDidMount() {

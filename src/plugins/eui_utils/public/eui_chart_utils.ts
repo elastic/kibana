@@ -21,17 +21,32 @@ import { CoreStart, CoreSetup } from 'src/core/public';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { map } from 'rxjs/operators';
 
+import { useObservable } from '../../kibana_react/public';
+
 export class EuiChartUtils {
   public setup(core: CoreSetup) {}
   public start(core: CoreStart) {
+    const getChartsThemeDefault = () => EUI_CHARTS_THEME_LIGHT.theme;
+
+    const getChartsTheme$ = () => {
+      return core.uiSettings
+        .get$('theme:darkMode')
+        .pipe(
+          map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
+        );
+    };
+
+    const useChartsTheme = () => useObservable(getChartsTheme$(), getChartsThemeDefault());
+
     return {
-      getChartsTheme$() {
-        return core.uiSettings
-          .get$('theme:darkMode')
-          .pipe(
-            map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
-          );
-      },
+      /** The default theme */
+      getChartsThemeDefault,
+
+      /** An observable of the current charts theme */
+      getChartsTheme$,
+
+      /** A React hook for consuming the charts theme */
+      useChartsTheme,
     };
   }
 }

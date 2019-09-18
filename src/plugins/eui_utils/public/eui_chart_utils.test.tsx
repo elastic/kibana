@@ -18,7 +18,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { renderHook, act } from 'react-hooks-testing-library';
 
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { EuiChartUtils } from './eui_chart_utils';
 import { coreMock } from '../../../core/public/mocks';
 import { take } from 'rxjs/operators';
@@ -30,12 +32,12 @@ describe('EuiChartUtils', () => {
       startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(false));
 
       expect(
-        (await new EuiChartUtils()
+        await new EuiChartUtils()
           .start(startMock)
           .getChartsTheme$()
           .pipe(take(1))
-          .toPromise()).lineSeriesStyle!.point!.fill
-      ).toEqual('rgba(255, 255, 255, 1)');
+          .toPromise()
+      ).toEqual(EUI_CHARTS_THEME_LIGHT.theme);
     });
 
     describe('in dark mode', () => {
@@ -44,13 +46,29 @@ describe('EuiChartUtils', () => {
         startMock.uiSettings.get$.mockReturnValue(new BehaviorSubject(true));
 
         expect(
-          (await new EuiChartUtils()
+          await new EuiChartUtils()
             .start(startMock)
             .getChartsTheme$()
             .pipe(take(1))
-            .toPromise()).lineSeriesStyle!.point!.fill
-        ).toEqual('rgba(29, 30, 36, 1)');
+            .toPromise()
+        ).toEqual(EUI_CHARTS_THEME_DARK.theme);
       });
+    });
+  });
+
+  describe('useChartsTheme()', () => {
+    it('updates when the uiSettings change', () => {
+      const darkMode$ = new BehaviorSubject(false);
+      startMock.uiSettings.get$.mockReturnValue(darkMode$);
+      const { useChartsTheme } = new EuiChartUtils().start(startMock);
+
+      const { result } = renderHook(() => useChartsTheme());
+      expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
+
+      act(() => darkMode$.next(true));
+      expect(result.current).toBe(EUI_CHARTS_THEME_DARK.theme);
+      act(() => darkMode$.next(false));
+      expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
     });
   });
 });
