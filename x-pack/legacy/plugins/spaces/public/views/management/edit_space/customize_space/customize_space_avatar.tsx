@@ -4,9 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiColorPicker, EuiFieldText, EuiSpacer, EuiFormRow, isValidHex } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
+import {
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
+  EuiFilePicker,
+  EuiButton,
+  EuiSpacer,
+  isValidHex,
+} from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
+import { encode, imageTypes } from '../../../../../common/lib/dataurl';
+
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
 import { Space } from '../../../../../common/model/space';
 import { getSpaceColor, getSpaceInitials } from '../../../../../common/space_attributes';
@@ -32,6 +45,63 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     };
   }
 
+  private storeImageChanges(imageUrl: string) {
+    this.props.onChange({
+      ...this.props.space,
+      imageUrl,
+    });
+  }
+
+  //
+  // images below 64x64 pixels are left untouched
+  // images above that threshold are resized
+  //
+
+  private handleImageUpload = (imgUrl: string) => {
+    const thisInstance = this;
+    const image = new Image();
+    image.addEventListener(
+      'load',
+      function() {
+        const MAX_IMAGE_SIZE = 64;
+        const imgDimx = image.width;
+        const imgDimy = image.height;
+        if (imgDimx <= MAX_IMAGE_SIZE && imgDimy <= MAX_IMAGE_SIZE) {
+          thisInstance.storeImageChanges(imgUrl);
+        } else {
+          const imageCanvas = document.createElement('canvas');
+          const canvasContext = imageCanvas.getContext('2d');
+          if (imgDimx >= imgDimy) {
+            imageCanvas.width = MAX_IMAGE_SIZE;
+            imageCanvas.height = Math.floor((imgDimy * MAX_IMAGE_SIZE) / imgDimx);
+            if (canvasContext) {
+              canvasContext.drawImage(image, 0, 0, imageCanvas.width, imageCanvas.height);
+              const resizedImageUrl = imageCanvas.toDataURL();
+              thisInstance.storeImageChanges(resizedImageUrl);
+            }
+          } else {
+            imageCanvas.height = MAX_IMAGE_SIZE;
+            imageCanvas.width = Math.floor((imgDimx * MAX_IMAGE_SIZE) / imgDimy);
+            if (canvasContext) {
+              canvasContext.drawImage(image, 0, 0, imageCanvas.width, imageCanvas.height);
+              const resizedImageUrl = imageCanvas.toDataURL();
+              thisInstance.storeImageChanges(resizedImageUrl);
+            }
+          }
+        }
+      },
+      false
+    );
+    image.src = imgUrl;
+  };
+
+  private onFileUpload = (files: File[]) => {
+    const [file] = files;
+    if (imageTypes.indexOf(file.type) > -1) {
+      encode(file).then((dataurl: string) => this.handleImageUpload(dataurl));
+    }
+  };
+
   public render() {
     const { space, intl } = this.props;
 
@@ -55,6 +125,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
             // without defaulting to the derived initials provided by `getSpaceInitials`
             value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
             onChange={this.onInitialsChange}
+            disabled={this.props.space.imageUrl && this.props.space.imageUrl !== '' ? true : false}
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
@@ -71,8 +142,53 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
             isInvalid={isInvalidSpaceColor}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
+        {this.filePickerOrImage()}
       </form>
     );
+  }
+
+  private removeImageUrl() {
+    this.props.onChange({
+      ...this.props.space,
+      imageUrl: '',
+    });
+  }
+
+  public filePickerOrImage() {
+    const { intl } = this.props;
+
+    if (!this.props.space.imageUrl) {
+      return (
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.management.customizeSpaceAvatar.imageUrl',
+            defaultMessage: 'Custom image',
+          })}
+        >
+          <EuiFilePicker
+            display="default"
+            initialPromptText={intl.formatMessage({
+              id: 'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
+              defaultMessage: 'Select image file',
+            })}
+            onChange={this.onFileUpload}
+            accept={imageTypes}
+          />
+        </EuiFormRow>
+      );
+    } else {
+      return (
+        <EuiFlexItem grow={true}>
+          <EuiButton onClick={() => this.removeImageUrl()} color="danger" iconType="trash">
+            {intl.formatMessage({
+              id: 'xpack.spaces.management.customizeSpaceAvatar.removeImage',
+              defaultMessage: 'Remove custom image',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
   }
 
   public initialsInputRef = (ref: HTMLInputElement) => {

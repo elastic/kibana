@@ -14,6 +14,7 @@ exports[`renders without crashing 1`] = `
   >
     <EuiFieldText
       compressed={false}
+      disabled={false}
       fullWidth={false}
       inputRef={[Function]}
       isLoading={false}
@@ -37,6 +38,32 @@ exports[`renders without crashing 1`] = `
     <EuiColorPicker
       color="#BFA180"
       isInvalid={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Custom image"
+    labelType="label"
+  >
+    <EuiFilePicker
+      accept={
+        Array [
+          "image/svg+xml",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+        ]
+      }
+      compressed={false}
+      display="default"
+      initialPromptText="Select image file"
       onChange={[Function]}
     />
   </EuiFormRow>
