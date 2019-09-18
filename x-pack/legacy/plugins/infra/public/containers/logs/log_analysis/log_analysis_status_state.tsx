@@ -92,7 +92,7 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
     case 'fetchingJobStatuses': {
       return {
         ...state,
-        setupStatus: 'initializing',
+        setupStatus: state.setupStatus === 'unknown' ? 'initializing' : state.setupStatus,
       };
     }
     case 'fetchedJobStatuses': {
