@@ -5,11 +5,11 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Context } from '../../context/mock';
+import { Context } from '../../../../context/mock';
 
-import { AutoplaySettings } from '../footer/settings/autoplay_settings.container';
-import { Settings } from '../footer/settings/settings.container';
-import { ToolbarSettings } from '../footer/settings/toolbar_settings.container';
+import { AutoplaySettings } from '../autoplay_settings.container';
+import { Settings } from '../settings.container';
+import { ToolbarSettings } from '../toolbar_settings.container';
 
 storiesOf('runtime/Settings', module)
   .add('Settings', () => (

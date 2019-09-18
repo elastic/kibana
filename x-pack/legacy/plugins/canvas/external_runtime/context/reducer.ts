@@ -15,12 +15,6 @@ export const reducer = (
   action: ExternalEmbedAction
 ): ExternalEmbedState => {
   switch (action.type) {
-    case ExternalEmbedActions.SET_WORKPAD: {
-      return {
-        ...state,
-        workpad: action.payload.workpad,
-      };
-    }
     case ExternalEmbedActions.SET_PAGE: {
       const { stage } = state;
       return {
@@ -54,22 +48,6 @@ export const reducer = (
           autoplay: {
             ...autoplay,
             isEnabled,
-          },
-        },
-      };
-    }
-    case ExternalEmbedActions.SET_AUTOPLAY_ANIMATE: {
-      const { settings } = state;
-      const { autoplay } = settings;
-      const { isAnimated } = action.payload;
-
-      return {
-        ...state,
-        settings: {
-          ...settings,
-          autoplay: {
-            ...autoplay,
-            isAnimated,
           },
         },
       };

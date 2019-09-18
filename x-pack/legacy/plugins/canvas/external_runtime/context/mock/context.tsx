@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, RefObject } from 'react';
 import {
   initialExternalEmbedState,
   ExternalEmbedStateProvider,
   useExternalEmbedState,
 } from '../index';
-import { renderers as renderFunctions } from './renderers';
+import { renderFunctions } from '../../supported_renderers';
 import { ExternalEmbedState } from '../../types';
-import json from '../../test/hello.json';
 import { RendererSpec } from '../../../types';
+import { snapshots, SnapshotNames } from '../../test';
 
-const Container = ({ children, height, width, style }: Props) => {
+jest.mock('../../supported_renderers');
+
+const Container = ({
+  children,
+  height,
+  width,
+  style,
+}: Pick<Props, 'children' | 'height' | 'width' | 'style'>) => {
   const [{ refs }] = useExternalEmbedState();
   return (
     <div
@@ -30,12 +37,23 @@ const Container = ({ children, height, width, style }: Props) => {
 
 interface Props {
   children: any;
+  source?: SnapshotNames;
   height?: number;
   width?: number;
   isScrubberVisible?: boolean;
   style?: CSSProperties;
+  stageRef?: RefObject<HTMLDivElement>;
 }
-export const Context = ({ children, height, width, isScrubberVisible, style }: Props) => {
+
+export const Context = ({
+  children,
+  height,
+  width,
+  isScrubberVisible,
+  style,
+  stageRef,
+  source = 'hello',
+}: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
   renderFunctions.forEach(rendererFn => {
@@ -57,9 +75,9 @@ export const Context = ({ children, height, width, isScrubberVisible, style }: P
       width: 600,
     },
     renderers,
-    workpad: json,
+    workpad: snapshots[source],
     refs: {
-      stage: React.createRef(),
+      stage: stageRef || React.createRef(),
     },
   };
 

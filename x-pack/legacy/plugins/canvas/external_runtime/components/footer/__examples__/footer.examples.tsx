@@ -5,13 +5,13 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Context } from '../../context/mock';
+import { Context } from '../../../context/mock';
 
-import { Footer } from '../footer/footer.container';
-import { Title } from '../footer/title.container';
-import { PageControls } from '../footer/page_controls.container';
-import { PagePreview } from '../footer/page_preview.container';
-import { Scrubber } from '../footer/scrubber.container';
+import { Footer } from '../footer.container';
+import { Title } from '../title.container';
+import { PageControls } from '../page_controls.container';
+import { PagePreview } from '../page_preview.container';
+import { Scrubber } from '../scrubber.container';
 
 storiesOf('runtime/Footer', module)
   .add('Footer', () => (

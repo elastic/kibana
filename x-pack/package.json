@@ -141,6 +141,7 @@
     "hapi": "^17.5.3",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
+    "jest-environment-jsdom-fourteen": "^0.1.0",
     "jest-styled-components": "^6.2.2",
     "jsdom": "^12.0.0",
     "madge": "3.4.4",
