@@ -48,7 +48,7 @@ export const groupsData = async (
     signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };
 
 /**
@@ -200,7 +200,7 @@ export const jobsSummary = async (
     signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };
 
 /**
