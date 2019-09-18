@@ -18,7 +18,8 @@ describe('SeverityCell', () => {
     };
     const { container } = render(<SeverityCell {...props} />);
     expect(container.textContent).toBe('75');
-    expect(container.getElementsByTagName('svg').item(0).style.fill).toBe('#fe5050');
+    const svgEl = container.getElementsByTagName('svg').item(0);
+    expect(svgEl && svgEl.style.fill).toBe('#fe5050');
   });
 
   test('should render a multi-bucket marker with low severity score', () => {
@@ -28,11 +29,7 @@ describe('SeverityCell', () => {
     };
     const { container } = render(<SeverityCell {...props} />);
     expect(container.textContent).toBe('< 1');
-    expect(
-      container
-        .getElementsByTagName('svg')
-        .item(0)
-        .getAttribute('fill')
-    ).toBe('#d2e9f7');
+    const svgEl = container.getElementsByTagName('svg').item(0);
+    expect(svgEl && svgEl.getAttribute('fill')).toBe('#d2e9f7');
   });
 });
