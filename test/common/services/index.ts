@@ -19,7 +19,6 @@
 
 import { EsProvider } from './es';
 import { EsArchiverProvider } from './es_archiver';
-// @ts-ignore not TS yet
 import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
 
