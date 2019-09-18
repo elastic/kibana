@@ -245,8 +245,6 @@ export class TooltipControl extends React.Component {
     return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
-  _reevaluateTooltipPosition = () => {}
-
   _loadFeatureProperties = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
@@ -297,7 +295,6 @@ export class TooltipControl extends React.Component {
             isLocked={isLocked}
             addFilters={this.props.addFilters}
             geoFields={this.props.geoFields}
-            reevaluateTooltipPosition={this._reevaluateTooltipPosition}
           />
         </EuiText>
       </EuiPopover>
