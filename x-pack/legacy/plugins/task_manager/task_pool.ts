@@ -75,7 +75,7 @@ export class TaskPool {
     }
   }
 
-  private async attemptToRun(tasks: TaskRunner[]) {
+  private async attemptToRun(tasks: TaskRunner[]): Promise<boolean> {
     return new Promise((resolve, reject) => {
       from(tasks)
         .pipe(
