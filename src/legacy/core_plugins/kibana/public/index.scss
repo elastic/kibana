@@ -1,5 +1,11 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
+// Temporary shim to help with EuiFormRow spacing
+// Will move to EUI
+.euiFormRow + .euiButton {
+  margin-top: $euiSize;
+}
+
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
