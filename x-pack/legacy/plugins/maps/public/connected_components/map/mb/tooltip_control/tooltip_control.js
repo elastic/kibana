@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import {
   FEATURE_ID_PROPERTY_NAME,
+  LAT_INDEX,
   LON_INDEX,
 } from '../../../../../common/constants';
 import { FeatureTooltip } from '../../feature_tooltip';
@@ -95,10 +96,18 @@ export class TooltipControl extends React.Component {
       return;
     }
 
+    const lat = this.props.tooltipState.location[LAT_INDEX];
+    const lon = this.props.tooltipState.location[LON_INDEX];
+    const bounds = this.props.mbMap.getBounds();
+    if (lat > bounds.getNorth()
+      || lat < bounds.getSouth()
+      || lon < bounds.getWest()
+      || lon > bounds.getEast()) {
+      this.props.clearTooltipState();
+      return;
+    }
+
     const nextPoint = this.props.mbMap.project(this.props.tooltipState.location);
-
-    // TODO close tooltip if moved outside of map bounds
-
     this.setState({
       x: nextPoint.x,
       y: nextPoint.y
