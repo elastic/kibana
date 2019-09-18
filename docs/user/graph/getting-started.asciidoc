@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-getting-started]]
-== Getting Started
+=== Getting started
 
 Graph is automatically enabled in {es} and {kib}.
 
