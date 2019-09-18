@@ -20,18 +20,22 @@ import {
 
 interface Props {
   close(): void;
-  save(view: { [p: string]: string }): void;
+  save(view: { type: string; data: { [p: string]: string } }): void;
 }
 
-export const WaffleCreateViewModal = ({ close, save }: Props) => {
+export const SavedViewCreateModal = ({ close, save }: Props) => {
   const [viewName, setViewName] = useState('');
   const textChange = useCallback(e => {
     setViewName(e.target.value);
   }, []);
 
   const saveView = useCallback(() => {
-    save({ name: viewName });
-  }, []);
+    save({
+      type: 'SAVED_VIEW',
+      data: { name: viewName },
+    });
+    close();
+  }, [viewName]);
 
   return (
     <EuiOverlayMask>

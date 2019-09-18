@@ -10,17 +10,21 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectsBatchResponse } from 'src/core/public';
 import { SavedObjectAttributes } from 'src/core/server';
 
-export const useBulkGetSavedObject = (type: string) => {
+export const useFindSavedObject = (type: string) => {
   const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectAttributes> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const bulkGet = useCallback(
-    (ids: string[]) => {
+  const find = useCallback(
+    (query?: string) => {
       setLoading(true);
       const fetchData = async () => {
         try {
-          const d = await npStart.core.savedObjects.client.bulkGet(ids.map(i => ({ type, id: i })));
+          const d = await npStart.core.savedObjects.client.find({
+            type,
+            search: query,
+            searchFields: ['data.name'],
+          });
           setLoading(false);
           setData(d);
         } catch (e) {
@@ -37,6 +41,6 @@ export const useBulkGetSavedObject = (type: string) => {
     data,
     loading,
     error,
-    bulkGet,
+    find,
   };
 };

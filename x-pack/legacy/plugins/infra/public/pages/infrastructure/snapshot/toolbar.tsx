@@ -19,7 +19,8 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
-import { WaffleSavedViewsControl } from '../../../components/waffle/waffle_saved_views_control';
+import { SavedViewsToolbarControls } from '../../../components/waffle/saved_views_toolbar_items';
+import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 
 export const SnapshotToolbar = injectI18n(({ intl }) => (
   <Toolbar>
@@ -112,7 +113,33 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <WaffleSavedViewsControl />
+                  <WithWaffleViewState indexPattern={createDerivedIndexPattern('metrics')}>
+                    {({
+                      changeView,
+                      changeBoundsOverride,
+                      changeAutoBounds,
+                      jumpToTime,
+                      startAutoReload,
+                      stopAutoReload,
+                      viewState,
+                      applyFilterQuery,
+                    }) => (
+                      <SavedViewsToolbarControls
+                        viewState={viewState}
+                        changeMetric={changeMetric}
+                        changeGroupBy={changeGroupBy}
+                        changeNodeType={changeNodeType}
+                        changeView={changeView}
+                        changeCustomOptions={changeCustomOptions}
+                        changeBoundsOverride={changeBoundsOverride}
+                        changeAutoBounds={changeAutoBounds}
+                        jumpToTime={jumpToTime}
+                        startAutoReload={startAutoReload}
+                        stopAutoReload={stopAutoReload}
+                        applyFilterQuery={applyFilterQuery}
+                      />
+                    )}
+                  </WithWaffleViewState>
                 </EuiFlexItem>
               </React.Fragment>
             )}
