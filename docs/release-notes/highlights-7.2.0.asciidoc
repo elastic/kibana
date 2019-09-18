@@ -162,22 +162,22 @@ image::release-notes/images/7.2-localization.jpg[Kibana in Japanese]
 
 
 [float]
-=== Data frames
+=== {dataframes-cap}
 
 beta[] Machine Learning now enables you to transform your data with
-{stack-ov}/ml-dataframes.html[data frames]. A new wizard guides you through the
-process of creating a data frame: selecting the source data, the fields you want
-to group by, and the aggregations for pivoting the data. There is also a preview
-of the transform for reviewing the configuration. 
+{stack-ov}/ml-dataframes.html[{dataframes}]. A new wizard guides you through the
+process of creating a {dataframe}: selecting the source data, the fields you
+want to group by, and the aggregations for pivoting the data. There is also a
+preview of the {transform} for reviewing the configuration. 
 
 [role="screenshot"]
-image::release-notes/images/7.2-data-frames.png[Data frames]
+image::release-notes/images/7.2-data-frames.png[{dataframes-cap}]
 
-Data frames jobs are managed on a new list page, displaying the details and 
-status of each job, and controls for starting, stopping, or deleting jobs.
+{transforms-cap} are managed on a new list page, displaying the details and 
+status of each {tranform}, and controls for starting, stopping, or deleting {transforms}.
 
 [role="screenshot"]
-image::release-notes/images/7.2-data-frames-list-view.png[Data frames]
+image::release-notes/images/7.2-data-frames-list-view.png[{dataframes-cap}]
 
 [float]
 === Search for influencers in Anomaly Explorer
