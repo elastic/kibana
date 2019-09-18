@@ -66,6 +66,24 @@ const mockSearchResults = [
       },
     },
   },
+  // 3. The third response is a valid DocumentSearchResult with 0 doc
+  {
+    took: 1,
+    hits: {
+      total: {
+        value: 0,
+      },
+      hits: [],
+    },
+    aggregations: {
+      repoUri: {
+        buckets: [],
+      },
+      language: {
+        buckets: [],
+      },
+    },
+  },
 ];
 
 // Setup the mock EsClient.
@@ -92,13 +110,14 @@ beforeEach(() => {
 test('Document search', async () => {
   // 1. The first response should have 1 result.
   const responseWithResult = await integSearchClient.resolveSnippets({
-    repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
+    repoUris: ['github.com/Microsoft/TypeScript-Node-Starter'],
     filePath: 'src/types/express-flash.d.ts',
     lineNumStart: 3,
     lineNumEnd: 7,
   });
   expect(responseWithResult).toEqual(
     expect.objectContaining({
+      fallback: false,
       took: 1,
       total: 1,
       results: [
@@ -130,11 +149,12 @@ test('Document search', async () => {
 
   // 2. The first response should have 0 results.
   const responseWithEmptyResult = await integSearchClient.resolveSnippets({
-    repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
+    repoUris: ['github.com/Microsoft/TypeScript-Node-Starter'],
     filePath: 'src/types/foo-bar',
     lineNumStart: 3,
     lineNumEnd: 7,
   });
   expect(responseWithEmptyResult.results!.length).toEqual(0);
   expect(responseWithEmptyResult.total).toEqual(0);
+  expect(responseWithEmptyResult.fallback).toBeTruthy();
 });
