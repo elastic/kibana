@@ -102,7 +102,8 @@ app.directive('graphSearchBar', function (reactDirective) {
     ['onIndexPatternSelected', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }]
+    ['uiSettings', { watchDepth: 'reference' }],
+    ['overlays', { watchDepth: 'reference' }]
   ]);
 });
 
