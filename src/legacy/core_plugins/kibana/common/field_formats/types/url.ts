@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getHighlightHtml } from '../../../../../../plugins/data/common/field_formats';
+import { getHighlightHtml, FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -26,13 +26,13 @@ const whitelistUrlSchemes = ['http://', 'https://'];
 const URL_TYPES = [
   { kind: 'a', text: 'Link' },
   { kind: 'img', text: 'Image' },
-  { kind: 'audio', text: 'Audio' }
+  { kind: 'audio', text: 'Audio' },
 ];
 const DEFAULT_URL_TYPE = 'a';
 
-export function createUrlFormat(FieldFormat) {
-  class UrlFormat extends FieldFormat {
-    constructor(params) {
+export function createUrlFormat(BaseFieldFormat: typeof FieldFormat) {
+  class UrlFormat extends BaseFieldFormat {
+    constructor(params: any) {
       super(params);
       this._compileTemplate = _.memoize(this._compileTemplate);
     }
@@ -41,38 +41,38 @@ export function createUrlFormat(FieldFormat) {
       return {
         type: DEFAULT_URL_TYPE,
         urlTemplate: null,
-        labelTemplate: null
+        labelTemplate: null,
       };
     }
 
-    _formatLabel(value, url) {
+    _formatLabel(value: any, url: any) {
       const template = this.param('labelTemplate');
       if (url == null) url = this._formatUrl(value);
       if (!template) return url;
 
       return this._compileTemplate(template)({
-        value: value,
-        url: url
+        value,
+        url,
       });
     }
 
-    _formatUrl(value) {
+    _formatUrl(value: any) {
       const template = this.param('urlTemplate');
       if (!template) return value;
 
       return this._compileTemplate(template)({
         value: encodeURIComponent(value),
-        rawValue: value
+        rawValue: value,
       });
     }
 
-    _compileTemplate(template) {
-      const parts = template.split(templateMatchRE).map(function (part, i) {
+    _compileTemplate(template: string) {
+      const parts = template.split(templateMatchRE).map(function(part: string, i: number) {
         // trim all the odd bits, the variable names
-        return (i % 2) ? part.trim() : part;
+        return i % 2 ? part.trim() : part;
       });
 
-      return function (locals) {
+      return function(locals: Record<any, any>) {
         // replace all the odd bits with their local var
         let output = '';
         let i = -1;
@@ -101,17 +101,17 @@ export function createUrlFormat(FieldFormat) {
       'string',
       'murmur3',
       'unknown',
-      'conflict'
+      'conflict',
     ];
     static urlTypes = URL_TYPES;
   }
 
   UrlFormat.prototype._convert = {
-    text: function (value) {
+    text(value: any) {
       return this._formatLabel(value);
     },
 
-    html: function (rawValue, field, hit, parsedUrl) {
+    html(rawValue, field, hit, parsedUrl) {
       const url = _.escape(this._formatUrl(rawValue));
       const label = _.escape(this._formatLabel(rawValue, url));
 
@@ -123,9 +123,7 @@ export function createUrlFormat(FieldFormat) {
           // If the URL hasn't been formatted to become a meaningful label then the best we can do
           // is tell screen readers where the image comes from.
           const imageLabel =
-            label === url
-              ? `A dynamically-specified image located at ${url}`
-              : label;
+            label === url ? `A dynamically-specified image located at ${url}` : label;
 
           return `<img src="${url}" alt="${imageLabel}">`;
         default:
@@ -175,7 +173,7 @@ export function createUrlFormat(FieldFormat) {
 
           return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
       }
-    }
+    },
   };
 
   return UrlFormat;
