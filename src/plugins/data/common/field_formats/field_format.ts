@@ -43,7 +43,7 @@ export abstract class FieldFormat {
    * @property {string} - Field Format Type
    * @private
    */
-  static fieldType: string;
+  static fieldType: string | string[];
 
   /**
    * @property {FieldFormatConvert}
