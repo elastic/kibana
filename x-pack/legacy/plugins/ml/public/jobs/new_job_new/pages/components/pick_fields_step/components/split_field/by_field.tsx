@@ -58,6 +58,7 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
       changeHandler={setByField}
       selectedField={byField}
       isClearable={true}
+      testSubject="byFieldSelect"
       placeholder={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.populationField.placeholder',
         {
