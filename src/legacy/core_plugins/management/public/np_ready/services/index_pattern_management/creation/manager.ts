@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpServiceBase } from '../../../../../../../../core/public';
 import { IndexPatternCreationConfig } from './config';
 
 export class IndexPatternCreationManager {
