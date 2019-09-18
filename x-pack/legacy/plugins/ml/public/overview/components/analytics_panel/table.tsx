@@ -12,6 +12,7 @@ import {
   SortDirection,
   SORT_DIRECTION,
   OnTableChangeArg,
+  ColumnType,
 } from '../../../components/ml_in_memory_table';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import {
@@ -20,9 +21,9 @@ import {
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import {
   getTaskStateBadge,
-  PROGRESS_COLUMN,
+  progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/columns';
-import { ANALYTICS_VIEW_ACTION } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
+import { AnalyticsViewAction } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { AnalyticsStatsBar } from './analytics_stats_bar';
 
@@ -37,7 +38,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // id, type, status, progress, created time, view icon
-  const columns: any[] = [
+  const columns: ColumnType[] = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
@@ -63,7 +64,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       },
       width: '100px',
     },
-    PROGRESS_COLUMN,
+    progressColumn,
     {
       field: DataFrameAnalyticsListColumn.configCreateTime,
       name: i18n.translate('xpack.ml.overview.analyticsList.reatedTimeColumnName', {
@@ -79,7 +80,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       name: i18n.translate('xpack.ml.overview.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      actions: [ANALYTICS_VIEW_ACTION],
+      actions: [AnalyticsViewAction],
       width: '100px',
     },
   ];

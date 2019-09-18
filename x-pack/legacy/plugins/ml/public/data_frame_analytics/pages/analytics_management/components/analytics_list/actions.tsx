@@ -21,7 +21,7 @@ import { stopAnalytics } from '../../services/analytics_service';
 import { StartAction } from './action_start';
 import { DeleteAction } from './action_delete';
 
-export const ANALYTICS_VIEW_ACTION = {
+export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
     return (
@@ -47,7 +47,7 @@ export const getActions = () => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
-    ANALYTICS_VIEW_ACTION,
+    AnalyticsViewAction,
     {
       render: (item: DataFrameAnalyticsListRow) => {
         if (!isDataFrameAnalyticsRunning(item.stats)) {

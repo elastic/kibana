@@ -12,7 +12,7 @@ import {
   DATA_FRAME_TASK_STATE,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
-function createAnalyticsStats(analyticsList: any[]) {
+function getAnalyticsStats(analyticsList: any[]) {
   const analyticsStats = {
     total: {
       label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
@@ -81,7 +81,7 @@ interface Props {
 }
 
 export const AnalyticsStatsBar: FC<Props> = ({ analyticsList }) => {
-  const analyticsStats: AnalyticStatsBarStats = createAnalyticsStats(analyticsList);
+  const analyticsStats: AnalyticStatsBarStats = getAnalyticsStats(analyticsList);
 
   return <StatsBar stats={analyticsStats} dataTestSub={'mlOverviewAnalyticsStatsBar'} />;
 };

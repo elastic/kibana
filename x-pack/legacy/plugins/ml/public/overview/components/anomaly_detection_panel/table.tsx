@@ -19,12 +19,13 @@ import {
   SortDirection,
   SORT_DIRECTION,
   OnTableChangeArg,
+  ColumnType,
 } from '../../../components/ml_in_memory_table';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
-import { Groups, Group, Jobs } from './anomaly_detection_panel';
-// @ts-ignore
+import { GroupsDictionary, Group } from './anomaly_detection_panel';
+import { MlSummaryJobs } from '../../../../common/types/jobs';
 import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
@@ -42,9 +43,9 @@ export enum AnomalyDetectionListColumns {
 }
 
 interface Props {
-  items: Groups;
+  items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
-  jobsList: Jobs;
+  jobsList: MlSummaryJobs;
 }
 
 export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData }) => {
@@ -56,7 +57,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
-  const columns: any[] = [
+  const columns: ColumnType[] = [
     {
       field: AnomalyDetectionListColumns.id,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableId', {

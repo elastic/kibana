@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-// TODO: panels can be smaller when empty
+
 export const AnalyticsPanel: FC = () => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
@@ -43,7 +43,11 @@ export const AnalyticsPanel: FC = () => {
         color="danger"
         iconType="alert"
       >
-        <pre>{JSON.stringify(errorMessage)}</pre>
+        <pre>
+          {errorMessage && errorMessage.message !== undefined
+            ? errorMessage.message
+            : JSON.stringify(errorMessage)}
+        </pre>
       </EuiCallOut>
     </Fragment>
   );
@@ -55,19 +59,27 @@ export const AnalyticsPanel: FC = () => {
       {isInitialized === true && analytics.length === 0 && (
         <EuiEmptyPrompt
           iconType="createAdvancedJob"
-          title={<h2>Create your first analytics job</h2>}
+          title={
+            <h2>
+              {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
+                defaultMessage: 'Create your first analytics job.',
+              })}
+            </h2>
+          }
           body={
             <Fragment>
               <p>
-                Data frame analytics enable you to perform different analyses of your data and
-                annotate it with the results. As part of its output, data frame analytics appends
-                the results of the analysis to the source data.
+                {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
+                  defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. As part of its output, data frame analytics appends the results of the analysis to the source data.`,
+                })}
               </p>
             </Fragment>
           }
           actions={
             <EuiButton href="#/data_frame_analytics?" color="primary" fill>
-              Create job
+              {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
+                defaultMessage: 'Create job.',
+              })}
             </EuiButton>
           }
         />

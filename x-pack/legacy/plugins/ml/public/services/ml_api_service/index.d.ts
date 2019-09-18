@@ -12,6 +12,7 @@ import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../data_frame/pages/transform_management/components/transform_list/common';
+import { MlSummaryJobs } from '../../../common/types/jobs';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -88,7 +89,7 @@ declare interface Ml {
   getVisualizerOverallStats(obj: object): Promise<any>;
 
   jobs: {
-    jobsSummary(jobIds: string[]): Promise<object>;
+    jobsSummary(jobIds: string[]): Promise<MlSummaryJobs>;
     jobs(jobIds: string[]): Promise<object>;
     groups(): Promise<object>;
     updateGroups(updatedJobs: string[]): Promise<object>;

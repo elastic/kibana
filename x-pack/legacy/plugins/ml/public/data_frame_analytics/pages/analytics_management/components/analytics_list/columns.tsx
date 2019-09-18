@@ -58,7 +58,7 @@ export const getTaskStateBadge = (
   );
 };
 
-export const PROGRESS_COLUMN = {
+export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
   }),
@@ -217,7 +217,7 @@ export const getColumns = (
       width: '100px',
     },
     */
-    PROGRESS_COLUMN,
+    progressColumn,
   ];
 
   if (isManagementTable === true) {

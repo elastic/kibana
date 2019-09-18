@@ -20,10 +20,10 @@ import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { mlResultsService } from '../../../services/results_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+import { Dictionary } from '../../../../common/types/common';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../common/types/jobs';
 
-export interface Groups {
-  [key: string]: Group;
-}
+export type GroupsDictionary = Dictionary<Group>;
 
 export interface Group {
   id: string;
@@ -34,18 +34,10 @@ export interface Group {
   max_anomaly_score: number | null;
 }
 
-export interface Job {
-  [key: string]: any;
-}
-
-export type Jobs = Job[];
-
-interface MaxScoresByGroup {
-  [key: string]: {
-    maxScore: number;
-    index?: number;
-  };
-}
+type MaxScoresByGroup = Dictionary<{
+  maxScore: number;
+  index?: number;
+}>;
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 
@@ -60,9 +52,9 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 
 export const AnomalyDetectionPanel: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [groups, setGroups] = useState<Groups>({});
+  const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
-  const [jobsList, setJobsList] = useState<Jobs>([]);
+  const [jobsList, setJobsList] = useState<MlSummaryJobs>([]);
   const [statsBarData, setStatsBarData] = useState<any>(undefined);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
@@ -70,8 +62,8 @@ export const AnomalyDetectionPanel: FC = () => {
     setIsLoading(true);
 
     try {
-      const jobsResult: Jobs | any = await ml.jobs.jobsSummary([]);
-      const jobsSummaryList = jobsResult.map((job: any) => {
+      const jobsResult: MlSummaryJobs = await ml.jobs.jobsSummary([]);
+      const jobsSummaryList = jobsResult.map((job: MlSummaryJob) => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
         return job;
       });
@@ -86,33 +78,30 @@ export const AnomalyDetectionPanel: FC = () => {
       setJobsList(jobsWithTimerange);
       loadMaxAnomalyScores(jobsGroups);
     } catch (e) {
-      setErrorMessage(JSON.stringify(e));
+      setErrorMessage(e.message !== undefined ? e.message : JSON.stringify(e));
       setIsLoading(false);
     }
   };
 
-  const loadMaxAnomalyScores = async (groupsObject: Groups) => {
+  const loadMaxAnomalyScores = async (groupsObject: GroupsDictionary) => {
     const groupsList: Group[] = Object.values(groupsObject);
     const scores = getDefaultAnomalyScores(groupsList);
 
     try {
-      const promises: any[] = [];
-      groupsList.forEach((group, i) => {
-        if (group.jobIds.length > 0) {
+      const promises = groupsList
+        .filter(group => group.jobIds.length > 0)
+        .map((group, i) => {
           scores[group.id].index = i;
-          promises.push(
-            mlResultsService.getOverallBucketScores(
-              group.jobIds,
-              1,
-              group.earliest_timestamp,
-              group.latest_timestamp
-            )
+          return mlResultsService.getOverallBucketScores(
+            group.jobIds,
+            1,
+            group.earliest_timestamp,
+            group.latest_timestamp
           );
-        }
-      });
+        });
 
       const results = await Promise.all(promises);
-      const tempGroups = Object.assign({}, { ...groupsObject });
+      const tempGroups = { ...groupsObject };
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
@@ -132,7 +121,7 @@ export const AnomalyDetectionPanel: FC = () => {
           'xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage',
           {
             defaultMessage: 'An error occurred fetching anomaly scores: {error}',
-            values: { error: JSON.stringify(e) },
+            values: { error: e.message !== undefined ? e.message : JSON.stringify(e) },
           }
         )
       );
@@ -156,7 +145,7 @@ export const AnomalyDetectionPanel: FC = () => {
         color="danger"
         iconType="alert"
       >
-        <pre>{JSON.stringify(errorMessage)}</pre>
+        <pre>{errorMessage}</pre>
       </EuiCallOut>
     </Fragment>
   );
@@ -168,20 +157,27 @@ export const AnomalyDetectionPanel: FC = () => {
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
-          title={<h2>Create your first anomaly detection job</h2>}
+          title={
+            <h2>
+              {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
+                defaultMessage: 'Create your first anomaly detection job.',
+              })}
+            </h2>
+          }
           body={
             <Fragment>
               <p>
-                Machine learning makes it easy to detect anomalies in time series data stored in
-                Elasticsearch. Track one metric from a single machine or hundreds of metrics across
-                thousands of machines. Start automatically spotting the anomalies hiding in your
-                data and resolve issues faster.              
+                {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
+                  defaultMessage: `Machine learning makes it easy to detect anomalies in time series data stored in Elasticsearch. Track one metric from a single machine or hundreds of metrics across thousands of machines. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
+                })}
               </p>
             </Fragment>
           }
           actions={
             <EuiButton color="primary" href={createJobLink} fill>
-              Create job
+              {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
+                defaultMessage: 'Create job.',
+              })}
             </EuiButton>
           }
         />

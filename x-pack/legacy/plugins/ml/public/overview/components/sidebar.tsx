@@ -60,7 +60,7 @@ export const OverviewSideBar: FC = () => (
               <EuiLink href={feedbackLink} target="blank">
                 <FormattedMessage
                   id="xpack.ml.overview.feedbackSectionLink"
-                  defaultMessage="submit feedback online"
+                  defaultMessage="feedback online"
                 />
               </EuiLink>
             ),

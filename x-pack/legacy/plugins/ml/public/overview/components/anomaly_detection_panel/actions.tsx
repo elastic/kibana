@@ -9,9 +9,10 @@ import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore no module file
 import { getLink } from '../../../jobs/jobs_list/components/job_actions/results';
+import { MlSummaryJobs } from '../../../../common/types/jobs';
 
 interface Props {
-  jobsList: any;
+  jobsList: MlSummaryJobs;
 }
 
 export const ExplorerLink: FC<Props> = ({ jobsList }) => {

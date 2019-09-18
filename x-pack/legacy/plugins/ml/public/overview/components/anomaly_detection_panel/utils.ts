@@ -6,9 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
-import { Group, Groups, Jobs, Job } from './anomaly_detection_panel';
+import { Group, GroupsDictionary } from './anomaly_detection_panel';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../common/types/jobs';
 
-export function getGroupsFromJobs(jobs: Jobs): Groups {
+export function getGroupsFromJobs(
+  jobs: MlSummaryJobs
+): { groups: GroupsDictionary; count: number } {
   const groups: any = {
     ungrouped: {
       id: 'ungrouped',
@@ -19,7 +22,7 @@ export function getGroupsFromJobs(jobs: Jobs): Groups {
     },
   };
 
-  jobs.forEach((job: any) => {
+  jobs.forEach((job: MlSummaryJob) => {
     // Organize job by group
     if (job.groups.length > 0) {
       job.groups.forEach((g: any) => {
@@ -43,9 +46,12 @@ export function getGroupsFromJobs(jobs: Jobs): Groups {
           }
           // if existing group's earliest timestamp is not defined, set it to current job's
           // otherwise compare to current job's and replace if current job's earliest is less
-          if (groups[g].earliest_timestamp === undefined) {
+          if (groups[g].earliest_timestamp === undefined && job.earliestTimestampMs !== undefined) {
             groups[g].earliest_timestamp = job.earliestTimestampMs;
-          } else if (job.earliestTimestampMs < groups[g].earliest_timestamp) {
+          } else if (
+            job.earliestTimestampMs !== undefined &&
+            job.earliestTimestampMs < groups[g].earliest_timestamp
+          ) {
             groups[g].earliest_timestamp = job.earliestTimestampMs;
           }
         }
@@ -56,6 +62,18 @@ export function getGroupsFromJobs(jobs: Jobs): Groups {
       // if incoming job latest timestamp is greater than the last saved one, replace it
       if (job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
         groups.ungrouped.latest_timestamp = job.latestTimestampMs;
+      }
+
+      if (
+        groups.ungrouped.earliest_timestamp === undefined &&
+        job.earliestTimestampMs !== undefined
+      ) {
+        groups.ungrouped.earliest_timestamp = job.earliestTimestampMs;
+      } else if (
+        job.earliestTimestampMs !== undefined &&
+        job.earliestTimestampMs < groups.ungrouped.earliest_timestamp
+      ) {
+        groups.ungrouped.earliest_timestamp = job.earliestTimestampMs;
       }
     }
   });
@@ -123,7 +141,7 @@ export function getStatsBarData(jobsList: any) {
   const mlNodes: any = {};
   let failedJobs = 0;
 
-  jobsList.forEach((job: Job) => {
+  jobsList.forEach((job: MlSummaryJob) => {
     if (job.jobState === JOB_STATE.OPENED) {
       jobStats.open.value++;
     } else if (job.jobState === JOB_STATE.CLOSED) {
@@ -143,7 +161,7 @@ export function getStatsBarData(jobsList: any) {
 
   jobStats.total.value = jobsList.length;
 
-  // // Only show failed jobs if it is non-zero
+  // Only show failed jobs if it is non-zero
   if (failedJobs) {
     jobStats.failed.value = failedJobs;
     jobStats.failed.show = true;

@@ -30,6 +30,7 @@ export interface FieldDataColumnType {
   truncateText?: boolean;
   render?: RenderFunc;
   footer?: string | ReactElement | FooterFunc;
+  textOnly?: boolean;
 }
 
 export interface ComputedColumnType {
