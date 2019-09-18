@@ -41,10 +41,10 @@ import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VennDiagram } from './components/venn_diagram';
 import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 
-import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
@@ -87,6 +87,10 @@ app.directive('focusOn', function () {
       elem[0].focus();
     });
   };
+});
+
+app.directive('vennDiagram', function (reactDirective) {
+  return reactDirective(VennDiagram);
 });
 
 app.directive('graphListing', function (reactDirective) {
@@ -665,9 +669,8 @@ app.controller('graphuiPlugin', function (
         'term2': ti.term2,
         'v1': ti.v1,
         'v2': ti.v2,
-        'overlap': ti.overlap,
-        width: 100,
-        height: 60 });
+        'overlap': ti.overlap
+      });
 
     }
     $scope.detail = { mergeCandidates };
