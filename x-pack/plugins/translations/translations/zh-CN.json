@@ -4338,6 +4338,7 @@
     "xpack.code.repoFileStatus.langserverType.dedicatedMessage": "当前文件由专用语言服务器支持。",
     "xpack.code.searchBar.addRepoPlaceholder": "查找并添加仓库",
     "xpack.code.searchBar.addToScopeDescription": "添加已索引代码仓库到搜索范围",
+    "xpack.code.repoFileStatus.langServerLaunchFailed": "语言服务器启动失败。",
     "xpack.code.searchBar.applyAndCloseButtonLabel": "应用并关闭",
     "xpack.code.searchBar.fileGroupTitle": "文件",
     "xpack.code.searchBar.repositorylGroupTitle": "仓库",

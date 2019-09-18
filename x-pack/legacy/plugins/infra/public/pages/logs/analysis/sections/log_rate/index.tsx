@@ -24,10 +24,12 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 export const LogRateResults = ({
   isLoading,
   results,
+  setTimeRange,
   timeRange,
 }: {
   isLoading: boolean;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
@@ -83,7 +85,7 @@ export const LogRateResults = ({
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           {viewMode === 'chart' ? (
-            <ChartView data={results} timeRange={timeRange} />
+            <ChartView data={results} setTimeRange={setTimeRange} timeRange={timeRange} />
           ) : (
             <TableView data={results} />
           )}
