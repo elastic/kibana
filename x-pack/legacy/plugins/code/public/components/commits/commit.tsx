@@ -11,8 +11,14 @@ import { CommitLink } from '../diff_page/commit_link';
 
 const COMMIT_ID_LENGTH = 8;
 
-export const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) => {
-  const { date, commit } = props;
+interface Props {
+  commit: CommitInfo;
+  date: string;
+  repoUri: string;
+}
+
+export const Commit = (props: Props) => {
+  const { date, commit, repoUri } = props;
   const { message, committer, id } = commit;
   const commitId = id
     .split('')
@@ -32,7 +38,7 @@ export const Commit = (props: { commit: CommitInfo; date: string; repoUri: strin
         </EuiText>
       </div>
       <div className="code-commit-id">
-        <CommitLink repoUri={props.repoUri} commit={commitId} />
+        <CommitLink repoUri={repoUri} commit={commitId} />
       </div>
     </EuiPanel>
   );

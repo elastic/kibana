@@ -10,7 +10,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
 import { Commit } from './commit';
 
-export const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: string }) => {
+interface Props {
+  commits: CommitInfo[];
+  date: string;
+  repoUri: string;
+}
+
+export const CommitGroup = (props: Props) => {
   const commitList = props.commits.map(commit => (
     <Commit commit={commit} key={commit.id} date={props.date} repoUri={props.repoUri} />
   ));
