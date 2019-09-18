@@ -24,11 +24,6 @@ import $ from 'jquery';
 import { uiModules } from '../../modules';
 import template from './kbn_chrome.html';
 
-import {
-  GlobalBannerList,
-  banners,
-} from '../../notify';
-
 import { I18nContext } from '../../i18n';
 import { npStart } from '../../new_platform';
 import { chromeHeaderNavControlsRegistry, NavControlSide } from '../../registry/chrome_header_nav_controls';
@@ -79,10 +74,7 @@ export function kbnChromeProvider(chrome, internals) {
           // Banners
           ReactDOM.render(
             <I18nContext>
-              <GlobalBannerList
-                banners={banners.list}
-                subscribe={banners.onChange}
-              />
+              {npStart.core.overlays.banners.getComponent()}
             </I18nContext>,
             document.getElementById('globalBannerList')
           );

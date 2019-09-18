@@ -61,7 +61,7 @@ import {
   ToastInput,
   ToastsApi,
 } from './notifications';
-import { OverlayRef, OverlayStart } from './overlays';
+import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
@@ -104,6 +104,14 @@ export {
   HttpHandler,
   HttpBody,
 } from './http';
+
+export {
+  OverlayStart,
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayRef,
+} from './overlays';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -199,8 +207,6 @@ export {
   LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
-  OverlayRef,
-  OverlayStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
