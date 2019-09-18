@@ -214,30 +214,24 @@ export const EventsHeading = styled.div.attrs({
 `;
 EventsHeading.displayName = 'EventsHeading';
 
-export const EventsHeadingTitle = styled.button.attrs({
-  className: 'siemEventsHeading__title',
+export const EventsHeadingTitleButton = styled.button.attrs({
+  className: 'siemEventsHeading__title siemEventsHeading__title--aggregatable',
   type: 'button',
-})<{ disabled?: boolean }>`
+})`
   ${({ theme }) => css`
     align-items: center;
     display: flex;
     font-weight: inherit;
     min-width: 0;
 
-    &:not(:disabled) {
-      &:hover,
-      &:focus {
-        color: ${theme.eui.euiColorPrimary};
-        text-decoration: underline;
-      }
-
-      &:hover {
-        cursor: pointer;
-      }
+    &:hover,
+    &:focus {
+      color: ${theme.eui.euiColorPrimary};
+      text-decoration: underline;
     }
 
-    &:disabled:hover {
-      cursor: inherit;
+    &:hover {
+      cursor: pointer;
     }
 
     & > * + * {
@@ -245,7 +239,14 @@ export const EventsHeadingTitle = styled.button.attrs({
     }
   `}
 `;
-EventsHeadingTitle.displayName = 'EventsHeadingTitle';
+EventsHeadingTitleButton.displayName = 'EventsHeadingTitleButton';
+
+export const EventsHeadingTitleSpan = styled.span.attrs({
+  className: 'siemEventsHeading__title siemEventsHeading__title--notAggregatable',
+})`
+  min-width: 0;
+`;
+EventsHeadingTitleSpan.displayName = 'EventsHeadingTitleSpan';
 
 export const EventsHeadingExtra = styled.div.attrs({
   className: 'siemEventsHeading__extra',

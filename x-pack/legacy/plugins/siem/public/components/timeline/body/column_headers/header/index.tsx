@@ -11,7 +11,12 @@ import React from 'react';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import { TruncatableText } from '../../../../truncatable_text';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
-import { EventsHeading, EventsHeadingHandle, EventsHeadingTitle } from '../../../styles';
+import {
+  EventsHeading,
+  EventsHeadingHandle,
+  EventsHeadingTitleButton,
+  EventsHeadingTitleSpan,
+} from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
@@ -35,24 +40,34 @@ const HeaderComp = React.memo<HeaderCompProps>(
 
     return (
       <EventsHeading data-test-subj="header" isLoading={isLoading}>
-        <EventsHeadingTitle
-          disabled={!header.aggregatable}
-          onClick={header.aggregatable && !isResizing && !isLoading ? onClick : noop}
-        >
-          <TruncatableText data-test-subj={`header-text-${header.id}`}>
-            <EuiToolTip
-              data-test-subj="header-tooltip"
-              content={<HeaderToolTipContent header={header} />}
-            >
-              <>{header.id}</>
-            </EuiToolTip>
-          </TruncatableText>
+        {header.aggregatable ? (
+          <EventsHeadingTitleButton onClick={!isResizing && !isLoading ? onClick : noop}>
+            <TruncatableText data-test-subj={`header-text-${header.id}`}>
+              <EuiToolTip
+                data-test-subj="header-tooltip"
+                content={<HeaderToolTipContent header={header} />}
+              >
+                <>{header.id}</>
+              </EuiToolTip>
+            </TruncatableText>
 
-          <SortIndicator
-            data-test-subj="header-sort-indicator"
-            sortDirection={getSortDirection({ header, sort })}
-          />
-        </EventsHeadingTitle>
+            <SortIndicator
+              data-test-subj="header-sort-indicator"
+              sortDirection={getSortDirection({ header, sort })}
+            />
+          </EventsHeadingTitleButton>
+        ) : (
+          <EventsHeadingTitleSpan>
+            <TruncatableText data-test-subj={`header-text-${header.id}`}>
+              <EuiToolTip
+                data-test-subj="header-tooltip"
+                content={<HeaderToolTipContent header={header} />}
+              >
+                <>{header.id}</>
+              </EuiToolTip>
+            </TruncatableText>
+          </EventsHeadingTitleSpan>
+        )}
 
         {children}
       </EventsHeading>
