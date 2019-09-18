@@ -674,7 +674,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions).toHaveLength(0);
       });
 
-      it('appends a terms column after the last existing bucket column on string field', () => {
+      it('prepends a terms column on string field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
           field: { name: 'dest', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
@@ -686,7 +686,7 @@ describe('IndexPattern Data Source suggestions', () => {
             layers: {
               previousLayer: initialState.layers.previousLayer,
               currentLayer: expect.objectContaining({
-                columnOrder: ['col1', 'newId', 'col2'],
+                columnOrder: ['newId', 'col1', 'col2'],
                 columns: {
                   ...initialState.layers.currentLayer.columns,
                   newId: expect.objectContaining({
