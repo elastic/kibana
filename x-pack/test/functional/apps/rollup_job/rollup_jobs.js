@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
   const log = getService('log');
   const es = getService('es');
+  // const savedObjects = getService('kibanaServer').savedObjects;
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
   describe('rollup jobs', function () {
@@ -84,6 +85,7 @@ export default function ({ getService, getPageObjects }) {
       await log.debug('Delete old data that was rolled up.');
       await es.indices.delete({ index: 'to-be*' });
 
+      await PageObjects.common.sleep(10000);
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('live*,' + indexName, '@timestamp', false);
 
@@ -101,6 +103,7 @@ export default function ({ getService, getPageObjects }) {
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'live*' });
       await es.indices.delete({ index: 'live*,rollup-to-be*' });
+      // await savedObjects.delete('/api/saved_objects/index-pattern/live*,rollup-to-be*');
     });
   });
 }
