@@ -426,8 +426,10 @@ export function getUiSettingDefaults() {
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
-          'Batch multiple concurrent searches in a single request. This may improve overall load' +
-          'times, but it also means that no single search request will be returned until the last has completed.',
+          `Determines whether to send multiple concurrent search requests (such as from a dashboard from multiple
+          panels) as a single _msearch request, or multiple _search requests. Note that cancellation of queries (for
+          example, when a user navigates away from the page before the search has returned) is only supported when
+          using the _search Elasticsearch endpoint.`,
       }),
       category: ['search'],
     },
