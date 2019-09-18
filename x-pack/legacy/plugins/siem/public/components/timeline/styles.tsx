@@ -91,6 +91,10 @@ export const EventsTh = styled.div.attrs({
       flex: 0 0 ${colWidth};
     `}
 
+  .siemEventsTable__thGroupActions &:first-child:last-child {
+    flex: 1;
+  }
+
   .siemEventsTable__thGroupData &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
@@ -189,6 +193,10 @@ export const EventsTd = styled.div.attrs({
     css`
       flex: 0 0 ${colWidth};
     `}
+
+  .siemEventsTable__tdGroupActions &:first-child:last-child {
+    flex: 1;
+  }
 `;
 EventsTd.displayName = 'EventsTd';
 
