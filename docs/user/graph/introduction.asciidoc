@@ -1,5 +1,5 @@
 [[graph-introduction]]
-== Introduction
+=== Introduction
 
 _Graph_ provides a way to discover how items in an {es} index are related. You can
 explore the connections between indexed terms and see which connections are the most meaningful.
@@ -18,7 +18,7 @@ You can use Graph with your existing {es} indices--simply start exploring!
 
 [[how-graph-works]]
 [float]
-=== How Graph Works
+==== How Graph works
 Graph provides an alternative way to extract and summarize information about the documents and terms in your {es} index. A _graph_ is really just a network of related items. In our case, this means a network of related terms in the index.
 
 In the Graph API, the terms you want to include in the graph are called _vertices_.
@@ -55,7 +55,7 @@ prevent Graph queries from adversely affecting the cluster.
 
 [[exploring-connections]]
 [float]
-=== Visualizing Connections with Graph
+==== Visualizing connections with Graph
 
 The Graph plugin for {kib} lets you interactively explore connections within your data. This
 is a great way to get acquainted with what the Graph API has to offer.
@@ -89,13 +89,13 @@ NOTE: By default, when you submit a search query Graph searches all available fi
 
 
 [float]
-== Where to Go Next
+=== Where to go next
 
 <<graph-getting-started, Getting Started>> :: Install the Graph plugin and Kibana app to start
 exploring relationships in your data.
 
 [float]
-== Have Comments, Questions, or Feedback?
+=== Have comments, questions, or feedback?
 
 Head over to our {forum}[Graph Discussion Forum] to share your experience, questions, and
 suggestions.

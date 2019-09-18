@@ -4,9 +4,7 @@
 <titleabbrev>Update object</titleabbrev>
 ++++
 
-Update the attributes for an existing {kib} saved object.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.
+experimental[] Update the attributes for an existing {kib} saved object.
 
 [[saved-objects-api-update-request]]
 ==== Request

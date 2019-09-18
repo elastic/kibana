@@ -55,9 +55,17 @@ export class UMPingsDomain {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    monitorId?: string | null
+    monitorId?: string | null,
+    statusFilter?: string | null
   ): Promise<HistogramDataPoint[]> {
-    return this.adapter.getPingHistogram(request, dateRangeStart, dateRangeEnd, filters, monitorId);
+    return this.adapter.getPingHistogram(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      monitorId,
+      statusFilter
+    );
   }
 
   public async getDocCount(request: any): Promise<DocCount> {

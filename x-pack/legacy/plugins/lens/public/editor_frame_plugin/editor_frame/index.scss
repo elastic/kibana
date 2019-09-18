@@ -1,0 +1,137 @@
+$lnsPanelMinWidth: $euiSize * 18;
+
+.lnsPage {
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.lnsHeader {
+  padding: $euiSize;
+  padding-bottom: 0;
+}
+
+.lnsPageMainContent {
+  display: flex;
+  overflow: auto;
+  flex-grow: 1;
+}
+
+.lnsSidebar {
+  margin: 0;
+  flex: 1 0 18%;
+  min-width: $lnsPanelMinWidth + $euiSize;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.lnsSidebar__header {
+  padding: $euiSizeS 0;
+
+  > * {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.lnsChartSwitch__summaryIcon {
+  margin-right: $euiSizeS;
+  transform: translateY(-2px);
+}
+
+.lnsSidebar--right {
+  @include euiScrollBar;
+  min-width: $lnsPanelMinWidth + $euiSize;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: $euiSize;
+  padding-right: $euiSize;
+  max-height: 100%;
+}
+
+.lnsSidebarContainer {
+  flex: 1 0 100%;
+  overflow: hidden;
+}
+
+.lnsDatasourceSwitch {
+  position: absolute;
+  right: $euiSize + $euiSizeXS;
+  top: $euiSize + $euiSizeXS;
+}
+
+.lnsPageBody {
+  @include euiScrollBar;
+  min-width: $lnsPanelMinWidth + $euiSizeXL;
+  overflow: hidden;
+  // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
+  // This also means needing to add same amount of margin to page content and suggestion items
+  padding: $euiSize $euiSize 0;
+
+  &:first-child {
+    padding-left: $euiSize;
+  }
+
+  .lnsPageContent {
+    @include euiScrollBar;
+    overflow: hidden;
+    padding: 0;
+    margin-bottom: $euiSize;
+    display: flex;
+    flex-direction: column;
+
+    .lnsPageContentHeader {
+      padding: $euiSizeS;
+      border-bottom: $euiBorderThin;
+      margin-bottom: 0;
+    }
+
+    .lnsPageContentBody {
+      @include euiScrollBar;
+      flex-grow: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      overflow: auto;
+
+      > * {
+        flex: 1 1 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+      }
+    }
+  }
+}
+
+.lnsExpressionOutput {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow-x: hidden;
+  padding: $euiSize;
+}
+
+.lnsExpressionOutput > * {
+  flex: 1;
+}
+
+.lnsTitleInput {
+  width: 100%;
+  min-width: 100%;
+  border: 0;
+  font: inherit;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.2em;
+}
+
+
+@import './suggestion_panel.scss';

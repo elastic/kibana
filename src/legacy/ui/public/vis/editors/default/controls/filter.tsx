@@ -18,14 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, QueryBarInput } from 'plugins/data';
 import { AggConfig } from '../../..';
@@ -67,30 +60,26 @@ function FilterRow({
   });
 
   const FilterControl = (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem>
-        <EuiButtonIcon
-          iconType="tag"
-          aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
-            defaultMessage: 'Toggle filter label',
-          })}
-          aria-expanded={showCustomLabel}
-          aria-controls={`visEditorFilterLabel${arrayIndex}`}
-          onClick={() => setShowCustomLabel(!showCustomLabel)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          disabled={disableRemove}
-          aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
-            defaultMessage: 'Remove this filter',
-          })}
-          onClick={() => onRemoveFilter(id)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div>
+      <EuiButtonIcon
+        iconType="tag"
+        aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
+          defaultMessage: 'Toggle filter label',
+        })}
+        aria-expanded={showCustomLabel}
+        aria-controls={`visEditorFilterLabel${arrayIndex}`}
+        onClick={() => setShowCustomLabel(!showCustomLabel)}
+      />
+      <EuiButtonIcon
+        iconType="trash"
+        color="danger"
+        disabled={disableRemove}
+        aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
+          defaultMessage: 'Remove this filter',
+        })}
+        onClick={() => onRemoveFilter(id)}
+      />
+    </div>
   );
 
   return (
@@ -99,7 +88,6 @@ function FilterRow({
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
-        compressed
       >
         <QueryBarInput
           query={value}
@@ -137,9 +125,11 @@ function FilterRow({
             })}
             onChange={ev => onChangeValue(id, value, ev.target.value)}
             fullWidth={true}
+            compressed
           />
         </EuiFormRow>
       ) : null}
+      <EuiSpacer />
     </EuiForm>
   );
 }

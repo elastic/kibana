@@ -20,14 +20,13 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldType } from '../fields';

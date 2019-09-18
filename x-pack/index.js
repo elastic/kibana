@@ -45,6 +45,7 @@ import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { integrationsManager } from './legacy/plugins/integrations_manager';
 import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
+import { lens } from './legacy/plugins/lens';
 
 module.exports = function (kibana) {
   return [
@@ -84,6 +85,7 @@ module.exports = function (kibana) {
     ossTelemetry(kibana),
     fileUpload(kibana),
     encryptedSavedObjects(kibana),
+    lens(kibana),
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),

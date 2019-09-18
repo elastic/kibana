@@ -902,10 +902,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^11.1.1":
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-11.1.1.tgz#32e1b18ec7ede9e3d62c3375284ad31d778017e2"
-  integrity sha512-zay5cQ39XzoKe0cabL/GCI2W1bjqatT20K/u7ZdHFa+GpazUd1/zjOpsLsKlq31Rr5yWXbc2M2iC4ZUp8n8crg==
+"@elastic/charts@^12.0.2":
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-12.0.2.tgz#576fafccd9e9f6ca751b6e846be3a5c954e8865b"
+  integrity sha512-BxdJVXUkYE11X+n5QWfu6ntDCm6wbkvLRNWrJG30pgGv9QEDhEbraQ8ql9Vx1454EuEjgXP6xOM0X+3rCO4Nqw==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
@@ -983,10 +983,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.8.1":
-  version "13.8.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.8.1.tgz#17bc50c634145a242be9fd4cdc78b857eadf60f3"
-  integrity sha512-4GbNpN3SIOFYviE2cfqIMCUmMf2KNSwEdMHP7cMwwa4u/W708NKOLB52Ipn0raWnWHAuIu9k5v9CrbaZfd1gdA==
+"@elastic/eui@14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.0.0.tgz#4af6e687aec7b981a87dc4da15699f0d92ad17de"
+  integrity sha512-kU3WNPysOYZkgsrQOO1RmLgQmJWYmjVHw4w4HoliwLka2N9AtEYtNu+rFprkDwO7Pvd1lxb/mRPGdJ6NZtZdvA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -7631,10 +7631,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^76.0.0:
-  version "76.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-76.0.0.tgz#cbf618c5b370799ff6e15b23de07e80f67f89025"
-  integrity sha512-jGyqs0N+lMo9iaNQxGKNPiLJWb2L9s2rwbRr1jJeQ37n6JQ1+5YMGviv/Fx5Z08vBWYbAvrKEzFsuYf8ppl+lw==
+chromedriver@^77.0.0:
+  version "77.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-77.0.0.tgz#bd916cc87a0ccb7a6e4fb4b43cb2368bc54db6a0"
+  integrity sha512-mZa1IVx4HD8rDaItWbnS470mmypgiWsDiu98r0NkiT4uLm3qrANl4vOU6no6vtWtLQiW5kt1POcIbjeNpsLbXA==
   dependencies:
     del "^4.1.1"
     extract-zip "^1.6.7"
