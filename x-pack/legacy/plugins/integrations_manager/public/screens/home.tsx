@@ -41,6 +41,7 @@ export function Home() {
   }, [selectedCategory]);
 
   if (!list) return null;
+  const installedIntegrations = list.filter(({ status }) => status === 'installed');
 
   const maxContentWidth = 1200;
   return (
@@ -51,8 +52,8 @@ export function Home() {
         <EuiPageBody restrictWidth={maxContentWidth}>
           <Fragment>
             <EuiSpacer size="l" />
-            <InstalledListGrid list={list} />
-            <EuiHorizontalRule margin="l" />
+            <InstalledListGrid list={installedIntegrations} />
+            {installedIntegrations.length ? <EuiHorizontalRule margin="l" /> : null}
             <AvailableListGrid
               list={list}
               onCategoryChange={category => {
@@ -165,9 +166,6 @@ interface InstalledListGridProps {
 
 function InstalledListGrid({ list }: InstalledListGridProps) {
   const installedTitle = 'Your Integrations';
-  const installedIntegrations = list.filter(({ status }) => status === 'installed');
 
-  return (
-    <IntegrationListGrid title={installedTitle} list={installedIntegrations} controls={<div />} />
-  );
+  return <IntegrationListGrid title={installedTitle} list={list} controls={<div />} />;
 }
