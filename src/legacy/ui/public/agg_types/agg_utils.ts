@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../vis/agg_config';
+import { AggConfig } from './agg_config';
 
 function safeMakeLabel(agg: AggConfig) {
   try {
