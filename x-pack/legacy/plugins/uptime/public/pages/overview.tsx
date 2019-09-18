@@ -47,23 +47,8 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
-  const params = getUrlParams();
-  const {
-    absoluteDateRangeStart,
-    absoluteDateRangeEnd,
-    dateRangeStart,
-    dateRangeEnd,
-    filters: urlFilters,
-    // TODO: reintegrate pagination in future release
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // TODO: reintegrate sorting in future release
-    // monitorListSortDirection,
-    // monitorListSortField,
-    search,
-    statusFilter,
-  } = params;
-
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, filters: urlFilters, search, statusFilter } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
 
   useEffect(() => {
