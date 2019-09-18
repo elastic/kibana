@@ -405,6 +405,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             />
           </EuiFormRow>
 
+          <EuiSpacer size="m" />
+
           <EuiText size="s">
             <EuiLink
               onClick={() => {

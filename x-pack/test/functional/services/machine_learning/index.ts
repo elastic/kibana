@@ -14,6 +14,8 @@ export { MachineLearningJobSourceSelectionProvider } from './job_source_selectio
 export { MachineLearningJobTableProvider } from './job_table';
 export { MachineLearningJobTypeSelectionProvider } from './job_type_selection';
 export { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
+export { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
+export { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
 export { MachineLearningNavigationProvider } from './navigation';
 export { MachineLearningSettingsProvider } from './settings';
 export { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';

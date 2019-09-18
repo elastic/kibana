@@ -98,9 +98,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
       />
     );
 
@@ -114,9 +116,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showDatePicker={false}
       />
     );
@@ -131,9 +135,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         filters={[]}
         onFiltersUpdated={noop}
         showDatePicker={false}
@@ -150,9 +156,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
@@ -170,9 +178,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -190,9 +200,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
@@ -211,9 +223,11 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
+        http={startMock.http}
         screenTitle={'test screen'}
         store={createMockStorage()}
         onQuerySubmit={noop}
