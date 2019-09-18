@@ -5,29 +5,16 @@
  */
 
 import { useReducer } from 'react';
-import { getDatafeedId, getJobId, JobType } from '../../../../common/log_analysis';
+
+import {
+  getDatafeedId,
+  getJobId,
+  JobStatus,
+  JobType,
+  SetupStatus,
+} from '../../../../common/log_analysis';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
-
-// combines and abstracts job and datafeed status
-type JobStatus =
-  | 'unknown'
-  | 'missing'
-  | 'initializing'
-  | 'stopped'
-  | 'started'
-  | 'finished'
-  | 'failed';
-
-export type SetupStatus =
-  | 'initializing' // acquiring job statuses to determine setup status
-  | 'unknown' // job status could not be acquired (failed request etc)
-  | 'required' // jobs are missing
-  | 'pending' // In the process of setting up the module for the first time or retrying, waiting for response
-  | 'succeeded' // setup succeeded, notifying user
-  | 'failed' // setup failed, notifying user
-  | 'hiddenAfterSuccess' // hide the setup screen and we show the results for the first time
-  | 'skipped'; // setup hidden because the module is in a correct state already
 
 interface StatusReducerState {
   jobStatus: Record<JobType, JobStatus>;

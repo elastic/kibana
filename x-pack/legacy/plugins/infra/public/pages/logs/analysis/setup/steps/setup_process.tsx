@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiLoadingSpinner,
   EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+
+import { SetupStatus } from '../../../../../../common/log_analysis';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
-import { SetupStatus } from '../../../../../containers/logs/log_analysis';
 
 interface Props {
   viewResults: () => void;
