@@ -27,7 +27,7 @@ export function scheduleTask(server, taskManager) {
           taskType: TELEMETRY_TASK_TYPE,
           state: { stats: {}, runs: 0 },
         });
-      } catch (e) {
+      } catch(e) {
         server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
       }
     })();
@@ -47,22 +47,28 @@ export function registerMapsTelemetryTask(server) {
 }
 
 export function telemetryTaskRunner(server) {
+
   return ({ taskInstance }) => {
     const { state } = taskInstance;
     const prevState = state;
 
-    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+    const callCluster = server.plugins.elasticsearch.getCluster('admin')
+      .callWithInternalUser;
 
     let mapsTelemetryTask;
 
     return {
       async run({ taskCanceled = false } = {}) {
         try {
-          mapsTelemetryTask = makeCancelable(getMapsTelemetry(server, callCluster), taskCanceled);
+          mapsTelemetryTask = makeCancelable(
+            getMapsTelemetry(server, callCluster),
+            taskCanceled
+          );
         } catch (err) {
           server.log(['warning'], `Error loading maps telemetry: ${err}`);
         } finally {
-          return mapsTelemetryTask.promise
+          return mapsTelemetryTask
+            .promise
             .then((mapsTelemetry = {}) => {
               return {
                 state: {
@@ -72,9 +78,8 @@ export function telemetryTaskRunner(server) {
                 runAt: getNextMidnight(),
               };
             })
-            .catch(errMsg =>
-              server.log(['warning'], `Error executing maps telemetry task: ${errMsg}`)
-            );
+            .catch(errMsg => server.log(['warning'],
+              `Error executing maps telemetry task: ${errMsg}`));
         }
       },
       async cancel() {
@@ -83,7 +88,7 @@ export function telemetryTaskRunner(server) {
         } else {
           server.log(['warning'], `Can not cancel "mapsTelemetryTask", it has not been defined`);
         }
-      },
+      }
     };
   };
 }
@@ -92,8 +97,8 @@ function makeCancelable(promise, isCanceled) {
   const logMsg = 'Maps telemetry task has been cancelled';
   const wrappedPromise = new Promise((resolve, reject) => {
     promise
-      .then(val => (isCanceled ? reject(logMsg) : resolve(val)))
-      .catch(err => (isCanceled ? reject(logMsg) : reject(err.message)));
+      .then(val => isCanceled ? reject(logMsg) : resolve(val))
+      .catch(err => isCanceled ? reject(logMsg) : reject(err.message));
   });
 
   return {

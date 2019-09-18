@@ -48,6 +48,7 @@ export const CustomFieldPanel = injectI18n(
               compressed
             >
               <EuiComboBox
+                // compressed
                 placeholder={intl.formatMessage({
                   id: 'xpack.infra.waffle.customGroupByDropdownPlacehoder',
                   defaultMessage: 'Select one',
