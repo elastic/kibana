@@ -31,12 +31,7 @@ import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import {
-  FrameworkAdapter,
-  FrameworkRequest,
-  RequestOptionsPaginated,
-  RequestBasicOptions,
-} from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
@@ -51,7 +46,6 @@ import {
   EventsActionGroupData,
 } from './types';
 import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
@@ -154,13 +148,16 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
     return {
       inspect,
-      // eventsOverTime: getTotalEventsOverTime(eventsOverTimeBucket),
       eventsOverTime: getEventsOverTimeByActionName(eventsOverTimeBucket),
       totalCount,
     };
   }
 }
 
+/**
+ * Not in use at the moment,
+ * reserved this parser for next feature of switchign between total events and grouped events
+ */
 export const getTotalEventsOverTime = (
   data: EventsActionGroupData[]
 ): MatrixOverTimeHistogramData[] => {

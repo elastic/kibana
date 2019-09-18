@@ -72,11 +72,11 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   customHeight: 324,
 });
 
-const Panel = styled(EuiPanel)<{ isloading: number }>`
+const Panel = styled(EuiPanel)<{ loading: number }>`
   position: relative;
 
-  ${({ isloading }) =>
-    isloading &&
+  ${({ loading }) =>
+    loading &&
     `
     overflow: hidden;`}
 `;
@@ -116,7 +116,7 @@ export const MatrixOverTimeHistogram = ({
   return (
     <Panel
       data-test-subj={`${dataKey}Panel`}
-      isloading={loading ? 1 : 0}
+      loading={loading ? 1 : 0}
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >

@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EventsData,
-  LastEventTimeData,
-  TimelineData,
-  TimelineDetailsData,
-} from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated, RequestBasicOptions } from '../framework';
+import { LastEventTimeData, TimelineData, TimelineDetailsData } from '../../graphql/types';
+import { FrameworkRequest, RequestBasicOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import {
   EventsAdapter,

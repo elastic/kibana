@@ -7,7 +7,6 @@
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';
 import { FlowTarget } from '../../graphql/types';
-import { UpdateDateRange } from '../charts/common';
 
 export interface Influencer {
   influencer_field_name: string;
