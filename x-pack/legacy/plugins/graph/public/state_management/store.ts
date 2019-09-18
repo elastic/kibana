@@ -14,12 +14,14 @@ import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource
 import { IndexPatternProvider, Workspace, IndexPatternSavedObject } from '../types';
 import { loadingSaga } from './global';
 import { syncNodeStyleSaga, syncFieldsSaga } from './workspace';
+import { metaDataReducer, MetaDataState } from './meta_data';
 
 export interface GraphState {
   fields: FieldsState;
   urlTemplates: UrlTemplatesState;
   advancedSettings: AdvancedSettingsState;
   datasource: DatasourceState;
+  metaData: MetaDataState;
 }
 
 export interface GraphStoreDependencies {
@@ -46,6 +48,7 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
     urlTemplates: urlTemplatesReducer(deps.basePath),
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
+    metaData: metaDataReducer,
   });
 
   return createStore(rootReducer, applyMiddleware(sagaMiddleware));

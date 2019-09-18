@@ -251,7 +251,83 @@ app.controller('graphuiPlugin', function (
     });
   }
 
-  const store = createGraphStore();
+  // Replacement function for graphClientWorkspace's comms so
+  // that it works with Kibana.
+  function callNodeProxy(indexName, query, responseHandler) {
+    const request = {
+      index: indexName,
+      query: query
+    };
+    $scope.loading = true;
+    return $http.post('../api/graph/graphExplore', request)
+      .then(function (resp) {
+        if (resp.data.resp.timed_out) {
+          toastNotifications.addWarning(
+            i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
+              defaultMessage: 'Exploration timed out',
+            })
+          );
+        }
+        responseHandler(resp.data.resp);
+      })
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
+  }
+
+
+  //Helper function for the graphClientWorkspace to perform a query
+  const callSearchNodeProxy = function (indexName, query, responseHandler) {
+    const request = {
+      index: indexName,
+      body: query
+    };
+    $scope.loading = true;
+    $http.post('../api/graph/searchProxy', request)
+      .then(function (resp) {
+        responseHandler(resp.data.resp);
+      })
+      .catch(handleHttpError)
+      .finally(() => {
+        $scope.loading = false;
+      });
+  };
+
+  const store = createGraphStore({
+    basePath: chrome.getBasePath(),
+    indexPatternProvider: $route.current.locals.GetIndexPatternProvider,
+    indexPatterns: $route.current.locals.indexPatterns,
+    createWorkspace: (indexPattern) => {
+      const options = {
+        indexName: indexPattern,
+        vertex_fields: [],
+        // Here we have the opportunity to look up labels for nodes...
+        nodeLabeller: function () {
+          //   console.log(newNodes);
+        },
+        changeHandler: function () {
+          //Allows DOM to update with graph layout changes.
+          $scope.$apply();
+        },
+        graphExploreProxy: callNodeProxy,
+        searchProxy: callSearchNodeProxy,
+        exploreControls: {
+          useSignificance: true,
+          sampleSize: 2000,
+          timeoutMillis: 5000,
+          sampleDiversityField: null,
+          maxValuesPerDoc: 1,
+          minDocCount: 3
+        }
+      };
+      $scope.workspace = gws.createWorkspace(options);
+    },
+    getWorkspace: () => {
+      return $scope.workspace;
+    },
+    notifications: npStart.core.notifications
+  });
 
   $scope.title = 'Graph';
   $scope.spymode = 'request';
@@ -261,28 +337,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.reduxDispatch = (action) => {
     store.dispatch(action);
-
-    // patch updated icons and fields on the nodes in the workspace state
-    // this workaround is necessary because the nodes are still managed by
-    // angular - once they are moved over to redux, this can be handled in
-    // the reducer
-    if (action.type === 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES' &&
-        action.payload.fieldProperties.color && $scope.workspace) {
-      $scope.workspace.nodes.forEach(function (node) {
-        if (node.data.field === action.payload.fieldName) {
-          node.color = action.payload.fieldProperties.color;
-        }
-      });
-    }
-
-    if (action.type === 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES' &&
-        action.payload.fieldProperties.icon && $scope.workspace) {
-      $scope.workspace.nodes.forEach(function (node) {
-        if (node.data.field === action.payload.fieldName) {
-          node.icon = action.payload.fieldProperties.icon;
-        }
-      });
-    }
   };
 
   const updateScope = () => {
@@ -356,51 +410,8 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  // Replacement function for graphClientWorkspace's comms so
-  // that it works with Kibana.
-  function callNodeProxy(indexName, query, responseHandler) {
-    const request = {
-      index: indexName,
-      query: query
-    };
-    $scope.loading = true;
-    return $http.post('../api/graph/graphExplore', request)
-      .then(function (resp) {
-        if (resp.data.resp.timed_out) {
-          toastNotifications.addWarning(
-            i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
-              defaultMessage: 'Exploration timed out',
-            })
-          );
-        }
-        responseHandler(resp.data.resp);
-      })
-      .catch(handleHttpError)
-      .finally(() => {
-        $scope.loading = false;
-      });
-  }
-
-
-  //Helper function for the graphClientWorkspace to perform a query
-  const callSearchNodeProxy = function (indexName, query, responseHandler) {
-    const request = {
-      index: indexName,
-      body: query
-    };
-    $scope.loading = true;
-    $http.post('../api/graph/searchProxy', request)
-      .then(function (resp) {
-        responseHandler(resp.data.resp);
-      })
-      .catch(handleHttpError)
-      .finally(() => {
-        $scope.loading = false;
-      });
-  };
 
   $scope.submit = function (searchTerm) {
-    initWorkspaceIfRequired();
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
       try {
@@ -445,59 +456,6 @@ app.controller('graphuiPlugin', function (
     window.open(newUrl, '_blank');
   };
 
-
-  //============================
-
-  $scope.resetWorkspace = function () {
-    $scope.clearWorkspace();
-    $scope.selectedIndex = null;
-    $scope.proposedIndex = null;
-    $scope.detail = null;
-    $scope.selectedSelectedVertex = null;
-    $scope.selectedField = null;
-    $scope.description = null;
-    $scope.allFields = [];
-    $scope.urlTemplates = [];
-
-    $scope.fieldNamesFilterString = null;
-    $scope.filteredFields = [];
-
-    $scope.selectedFields = [];
-    $scope.liveResponseFields = [];
-
-    $scope.exploreControls = {
-      useSignificance: true,
-      sampleSize: 2000,
-      timeoutMillis: 5000,
-      sampleDiversityField: null,
-      maxValuesPerDoc: 1,
-      minDocCount: 3
-    };
-  };
-
-
-  function initWorkspaceIfRequired() {
-    if ($scope.workspace) {
-      return;
-    }
-    const options = {
-      indexName: $scope.selectedIndex.attributes.title,
-      vertex_fields: $scope.selectedFields,
-      // Here we have the opportunity to look up labels for nodes...
-      nodeLabeller: function () {
-        //   console.log(newNodes);
-      },
-      changeHandler: function () {
-        //Allows DOM to update with graph layout changes.
-        $scope.$apply();
-      },
-      graphExploreProxy: callNodeProxy,
-      searchProxy: callSearchNodeProxy,
-      exploreControls: $scope.exploreControls
-    };
-    $scope.workspace = gws.createWorkspace(options);
-    $scope.detail = null;
-  }
 
   $scope.setDetail = function (data) {
     $scope.detail = data;
@@ -733,76 +691,24 @@ app.controller('graphuiPlugin', function (
 
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {
-    // this should trigger everything below
     $scope.reduxDispatch({
       type: 'x-pack/graph/LOAD_WORKSPACE',
       payload: $route.current.locals.savedWorkspace,
     });
-    $scope.savedWorkspace = $route.current.locals.savedWorkspace;
-    const selectedIndex = lookupIndexPattern($scope.savedWorkspace, $route.current.locals.indexPatterns);
-    if(!selectedIndex) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern not found',
-        })
-      );
-      return;
-    }
-    $scope.reduxDispatch({
-      type: 'x-pack/graph/datasource/SET_DATASOURCE',
-      payload: {
-        type: 'indexpattern',
-        id: selectedIndex.id,
-        title: selectedIndex.attributes.title
-      },
-    });
-    $scope.selectedIndex = selectedIndex;
-    $scope.proposedIndex = selectedIndex;
-    $route.current.locals.GetIndexPatternProvider.get(selectedIndex.id).then(indexPattern => {
-      initWorkspaceIfRequired();
-      const {
-        urlTemplates,
-        advancedSettings,
-        allFields,
-      } = savedWorkspaceToAppState($scope.savedWorkspace, indexPattern, $scope.workspace);
-
-      // wire up stuff to angular
-      store.dispatch(loadFields(allFields));
-      $scope.exploreControls = advancedSettings;
-      $scope.workspace.options.exploreControls = advancedSettings;
-      $scope.urlTemplates = urlTemplates;
-      $scope.workspace.runLayout();
-      // Allow URLs to include a user-defined text query
-      if ($route.current.params.query) {
-        $scope.submit($route.current.params.query);
-      }
-    });
   } else {
-    $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
-      $scope.savedWorkspace = newWorkspace;
-      openSourceModal(npStart.core, indexPattern => {
-        $scope.reduxDispatch({
-          type: 'x-pack/graph/datasource/SET_DATASOURCE',
-          payload: {
-            type: 'indexpattern',
-            id: indexPattern.id,
-            title: indexPattern.attributes.title
-          },
-        });
+    openSourceModal(npStart.core, indexPattern => {
+      $scope.reduxDispatch({
+        type: 'x-pack/graph/datasource/SET_DATASOURCE',
+        payload: {
+          type: 'indexpattern',
+          id: indexPattern.id,
+          title: indexPattern.attributes.title
+        },
       });
     });
   }
 
   $scope.saveWorkspace = function (saveOptions, userHasConfirmedSaveWorkspaceData) {
-    if (allSavingDisabled) {
-      // It should not be possible to navigate to this function if allSavingDisabled is set
-      // but adding check here as a safeguard.
-      toastNotifications.addWarning(
-        i18n.translate('xpack.graph.saveWorkspace.disabledWarning', { defaultMessage: 'Saving is disabled' })
-      );
-      return;
-    }
-    initWorkspaceIfRequired();
     const canSaveData = graphSavePolicy === 'configAndData' ||
       (graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
 
