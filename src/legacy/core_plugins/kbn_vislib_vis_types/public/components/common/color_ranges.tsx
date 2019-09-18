@@ -21,19 +21,18 @@ import React, { useCallback } from 'react';
 import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
-import { ColorsRange } from '../../types';
+import { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
 
 interface ColorRangesProps {
-  dataTestSubj?: string;
-  colorsRange: ColorsRange;
-  setValue(paramName: string, value: ColorsRange): void;
+  'data-test-subj'?: string;
+  colorsRange: RangeValues[];
+  setValue(paramName: string, value: RangeValues[]): void;
   setValidity?(isValid: boolean): void;
   setTouched?(isTouched: boolean): void;
 }
 
 function ColorRanges({
-  dataTestSubj,
+  'data-test-subj': dataTestSubj,
   colorsRange,
   setValue,
   setValidity,
@@ -58,14 +57,13 @@ function ColorRanges({
     [colorsRange]
   );
 
-  const setColorRanges = useCallback(
-    (value: ColorRangesProps['colorsRange']) => setValue('colorsRange', value),
-    [setValue]
-  );
+  const setColorRanges = useCallback((value: RangeValues[]) => setValue('colorsRange', value), [
+    setValue,
+  ]);
 
   return (
     <RangesParamEditor
-      dataTestSubj={dataTestSubj}
+      data-test-subj={dataTestSubj}
       error={i18n.translate('kbnVislibVisTypes.controls.colorRanges.errorText', {
         defaultMessage: 'Each range should be greater than previous.',
       })}

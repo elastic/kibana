@@ -31,6 +31,7 @@ import {
   SelectOption,
   SwitchOption,
 } from '../../common';
+import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
 import { LabelsPanel } from './labels_panel';
@@ -102,7 +103,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
           invertColors={stateParams.invertColors}
           uiState={uiState}
-          setValue={setValue}
+          setValue={setValue as SetColorSchemaOptionsValue}
         />
         <EuiSpacer size="s" />
 
@@ -168,7 +169,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           <>
             <EuiSpacer size="s" />
             <ColorRanges
-              dataTestSubj="heatmapColorRange"
+              data-test-subj="heatmapColorRange"
               colorsRange={stateParams.colorsRange}
               setValue={setValue}
               setTouched={setTouched}

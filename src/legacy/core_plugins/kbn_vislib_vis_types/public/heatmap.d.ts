@@ -18,14 +18,16 @@
  */
 
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { ColorsRange, CommonVislibParams, ValueAxis } from './types';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
+import { Positions } from './utils/collections';
 
-export interface HeatmapVisParams extends CommonVislibParams {
+export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
+  type: 'heatmap';
+  addLegend: boolean;
   enableHover: boolean;
-  colorSchema: ColorSchemas;
   colorsNumber: number | '';
-  colorsRange: ColorsRange;
-  invertColors: boolean;
+  colorsRange: RangeValues[];
   valueAxes: ValueAxis[];
   setColorRange: boolean;
   percentageMode: boolean;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import {
   Positions,
   ChartModes,
@@ -28,11 +29,14 @@ import {
   ThresholdLineStyles,
 } from './utils/collections';
 
-export type ColorsRange = Array<{ from?: number; to?: number }>;
-
 export interface CommonVislibParams {
   addTooltip: boolean;
   legendPosition: Positions;
+}
+
+export interface ColorSchemaVislibParams {
+  colorSchema: ColorSchemas;
+  invertColors: boolean;
 }
 
 interface Labels {

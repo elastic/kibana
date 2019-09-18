@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
+import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { GaugeOptionsInternalProps } from '.';
 
 function RangesPanel({
@@ -47,7 +48,7 @@ function RangesPanel({
       <EuiSpacer size="s" />
 
       <ColorRanges
-        dataTestSubj="gaugeColorRange"
+        data-test-subj="gaugeColorRange"
         colorsRange={stateParams.gauge.colorsRange}
         setValue={setGaugeValue}
         setTouched={setTouched}
@@ -84,7 +85,7 @@ function RangesPanel({
         colorSchemas={vis.type.editorConfig.collections.colorSchemas}
         invertColors={stateParams.gauge.invertColors}
         uiState={uiState}
-        setValue={setGaugeValue}
+        setValue={setGaugeValue as SetColorSchemaOptionsValue}
       />
 
       <SwitchOption

@@ -23,20 +23,21 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { ColorSchema } from 'ui/vislib/components/color/colormaps';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
+import { ColorSchemaVislibParams } from '../../types';
 
-interface ColorSchemaOptionsProps {
+export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaVislibParams>(
+  paramName: T,
+  value: ColorSchemaVislibParams[T]
+) => void;
+
+interface ColorSchemaOptionsProps extends ColorSchemaVislibParams {
   disabled?: boolean;
-  colorSchema: ColorSchemas;
-  colorSchemas: Array<{
-    value: ColorSchemas;
-    text: string;
-  }>;
-  invertColors: boolean;
+  colorSchemas: ColorSchema[];
   uiState: VisOptionsProps['uiState'];
-  setValue(...props: any): void;
+  setValue: SetColorSchemaOptionsValue;
 }
 
 function ColorSchemaOptions({
