@@ -18,6 +18,11 @@ import { TabNavigationProps } from './types';
 const TabContainer = styled.div`
   .euiLink {
     color: inherit !important;
+
+    &:focus {
+      outline: 0;
+      background: none;
+    }
   }
 
   &.showBorder {
