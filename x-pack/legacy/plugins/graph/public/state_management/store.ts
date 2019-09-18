@@ -12,7 +12,7 @@ import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
 import { AdvancedSettingsState, advancedSettingsReducer } from './advanced_settings';
 import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
 import { IndexPatternProvider, Workspace, IndexPatternSavedObject, GraphSavePolicy, GraphWorkspaceSavedObject } from '../types';
-import { loadingSaga } from './global';
+import { loadingSaga, savingSaga } from './persistence';
 import { syncNodeStyleSaga, syncFieldsSaga } from './workspace';
 import { metaDataReducer, MetaDataState } from './meta_data';
 
@@ -40,12 +40,6 @@ export interface GraphStoreDependencies {
 export const createGraphStore = (deps: GraphStoreDependencies) => {
   const sagaMiddleware = createSagaMiddleware();
 
-  // hook in sagas
-  sagaMiddleware.run(datasourceSaga(deps));
-  sagaMiddleware.run(loadingSaga(deps));
-  sagaMiddleware.run(syncFieldsSaga(deps));
-  sagaMiddleware.run(syncNodeStyleSaga(deps));
-
   // hook in reducers
   const rootReducer = combineReducers({
     fields: fieldsReducer,
@@ -55,7 +49,16 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
     metaData: metaDataReducer,
   });
 
-  return createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+
+  // hook in sagas
+  sagaMiddleware.run(datasourceSaga(deps));
+  sagaMiddleware.run(loadingSaga(deps));
+  sagaMiddleware.run(savingSaga(deps));
+  sagaMiddleware.run(syncFieldsSaga(deps));
+  sagaMiddleware.run(syncNodeStyleSaga(deps));
+
+  return store;
 };
 
 export type GraphStore = Store<GraphState, AnyAction>;

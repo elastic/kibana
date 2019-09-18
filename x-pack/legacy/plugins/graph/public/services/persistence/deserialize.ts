@@ -6,7 +6,6 @@
 
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
-  AppState,
   SerializedNode,
   UrlTemplate,
   SerializedUrlTemplate,
@@ -188,10 +187,11 @@ export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: IndexPattern,
   workspaceInstance: Workspace
-): Pick<
-  AppState,
-  'urlTemplates' | 'advancedSettings' | 'allFields' | 'selectedFields'
-> {
+): {
+  urlTemplates: UrlTemplate[];
+  advancedSettings: AdvancedSettings;
+  allFields: WorkspaceField[];
+} {
   const persistedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
   // ================== url templates =============================
@@ -221,7 +221,6 @@ export function savedWorkspaceToAppState(
     );
   }
 
-
   workspaceInstance.options.exploreControls = advancedSettings;
 
   // ================== nodes and edges =============================
@@ -237,6 +236,5 @@ export function savedWorkspaceToAppState(
     urlTemplates,
     advancedSettings,
     allFields,
-    selectedFields,
   };
 }

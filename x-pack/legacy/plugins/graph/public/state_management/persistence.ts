@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import actionCreatorFactory, { Action } from 'typescript-fsa';
+import { i18n } from '@kbn/i18n';
+import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
+import { GraphWorkspaceSavedObject, Workspace } from '../types';
+import { GraphStoreDependencies, GraphState } from '.';
+import { setDatasource, datasourceSelector, IndexpatternDatasource } from './datasource';
+import { loadFields, selectedFieldsSelector } from './fields';
+import { updateSettings, settingsSelector } from './advanced_settings';
+import { loadTemplates, templatesSelector } from './url_templates';
+import {
+  lookupIndexPattern,
+  savedWorkspaceToAppState,
+  appStateToSavedWorkspace,
+} from '../services/persistence';
+import { updateMetaData, metaDataSelector } from './meta_data';
+import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
+import { getEditPath } from '../services/url';
+const actionCreator = actionCreatorFactory('x-pack/graph');
+
+export const loadSavedWorkspace = actionCreator<GraphWorkspaceSavedObject>('LOAD_WORKSPACE');
+export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
+
+/**
+ * Saga handling loading of a saved workspace.
+ *
+ * It will load the index pattern associated with the saved object and deserialize all properties
+ * into the store. Existing state will be overwritten.
+ */
+export const loadingSaga = ({
+  createWorkspace,
+  getWorkspace,
+  indexPatterns,
+  notifications,
+  indexPatternProvider,
+}: Pick<
+  GraphStoreDependencies,
+  'createWorkspace' | 'getWorkspace' | 'indexPatterns' | 'notifications' | 'indexPatternProvider'
+>) =>
+  function*() {
+    function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
+      const selectedIndex = lookupIndexPattern(action.payload, indexPatterns);
+      if (!selectedIndex) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+            defaultMessage: 'Index pattern not found',
+          })
+        );
+        return;
+      }
+
+      const indexPattern = yield call(indexPatternProvider.get, selectedIndex.id);
+
+      createWorkspace(selectedIndex.attributes.title);
+
+      const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
+        action.payload,
+        indexPattern,
+        // workspace won't be null because it's created in the same call stack
+        getWorkspace()!
+      );
+
+      // put everything in the store
+      yield put(
+        updateMetaData({
+          title: action.payload.title,
+          description: action.payload.description,
+          savedObjectId: action.payload.id,
+        })
+      );
+      yield put(
+        setDatasource({
+          type: 'indexpattern',
+          id: selectedIndex.id,
+          title: selectedIndex.attributes.title,
+        })
+      );
+      yield put(loadFields(allFields));
+      yield put(updateSettings(advancedSettings));
+      yield put(loadTemplates(urlTemplates));
+
+      // workspace won't be null because it's created in the same call stack
+      getWorkspace()!.runLayout();
+    }
+
+    yield takeLatest(loadSavedWorkspace.match, deserializeWorkspace);
+  };
+
+/**
+ * Saga handling saving of current state.
+ *
+ * It will serialize everything and save it using the saved objects client
+ */
+export const savingSaga = (deps: GraphStoreDependencies) =>
+  function*() {
+    function* persistWorkspace() {
+      const savedWorkspace = deps.getSavedWorkspace();
+      const state: GraphState = yield select();
+      const workspace = deps.getWorkspace();
+      const selectedDatasource = datasourceSelector(state).current;
+      if (!workspace || selectedDatasource.type === 'none') {
+        return;
+      }
+
+      const savedObjectId = yield cps(
+        showModal,
+        deps,
+        workspace,
+        savedWorkspace,
+        state,
+        selectedDatasource
+      );
+      if (savedObjectId) {
+        yield put(updateMetaData({ savedObjectId }));
+      }
+    }
+
+    yield takeLatest(saveWorkspace.match, persistWorkspace);
+  };
+
+function showModal(
+  deps: GraphStoreDependencies,
+  workspace: Workspace,
+  savedWorkspace: GraphWorkspaceSavedObject,
+  state: GraphState,
+  selectedDatasource: IndexpatternDatasource,
+  savingCallback: (error: unknown, id?: string) => void
+) {
+  const saveWorkspace: SaveWorkspaceHandler = async (
+    saveOptions,
+    userHasConfirmedSaveWorkspaceData
+  ) => {
+    const canSaveData =
+      deps.savePolicy === 'configAndData' ||
+      (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
+    appStateToSavedWorkspace(
+      savedWorkspace,
+      {
+        workspace,
+        urlTemplates: templatesSelector(state),
+        advancedSettings: settingsSelector(state),
+        selectedIndex: selectedDatasource,
+        selectedFields: selectedFieldsSelector(state),
+      },
+      canSaveData
+    );
+    const id = await savedWorkspace.save(saveOptions);
+    if (id) {
+      const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
+        defaultMessage: 'Saved "{workspaceTitle}"',
+        values: { workspaceTitle: savedWorkspace.title },
+      });
+      let text;
+      if (!canSaveData && workspace.nodes.length > 0) {
+        text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
+          defaultMessage: 'The configuration was saved, but the data was not saved',
+        });
+      }
+      deps.notifications.toasts.addSuccess({
+        title,
+        text,
+        'data-test-subj': 'saveGraphSuccess',
+      });
+      if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
+        deps.changeUrl(getEditPath(savedWorkspace));
+      }
+    }
+    savingCallback(null, id);
+    return { id };
+  };
+
+  openSaveModal({
+    savePolicy: deps.savePolicy,
+    hasData: workspace.nodes.length > 0 || workspace.blacklistedNodes.length > 0,
+    workspace: savedWorkspace,
+    showSaveModal: deps.showSaveModal,
+    saveWorkspace,
+  });
+}

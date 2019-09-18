@@ -168,8 +168,7 @@ uiRoutes
                 })
               );
             }
-          ) : 
-
+          ) : savedGraphWorkspaces.get();
       },
       //Copied from example found in wizard.js ( Kibana TODO - can't
       indexPatterns: function (Private) {
@@ -326,14 +325,22 @@ app.controller('graphuiPlugin', function (
     getWorkspace: () => {
       return $scope.workspace;
     },
-    notifications: npStart.core.notifications
+    getSavedWorkspace: () => {
+      return $route.current.locals.savedWorkspace;
+    },
+    notifications: npStart.core.notifications,
+    showSaveModal,
+    savePolicy: chrome.getInjected('graphSavePolicy'),
+    changeUrl: (newUrl) => {
+      $scope.$evalAsync(() => {
+        kbnUrl.change(newUrl, {});
+      });
+    }
   });
 
-  $scope.title = 'Graph';
   $scope.spymode = 'request';
 
-  const graphSavePolicy = chrome.getInjected('graphSavePolicy');
-  const allSavingDisabled = graphSavePolicy === 'none';
+  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
 
   $scope.reduxDispatch = (action) => {
     store.dispatch(action);
@@ -682,7 +689,7 @@ app.controller('graphuiPlugin', function (
   };
 
   // Deal with situation of request to open saved workspace
-  if ($route.current.locals.savedWorkspace) {
+  if ($route.current.locals.savedWorkspace.id) {
     $scope.reduxDispatch({
       type: 'x-pack/graph/LOAD_WORKSPACE',
       payload: $route.current.locals.savedWorkspace,

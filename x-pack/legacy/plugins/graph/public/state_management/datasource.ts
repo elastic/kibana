@@ -12,7 +12,6 @@ import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
-import { IndexPatternProvider } from '../types';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -40,6 +39,10 @@ export const setDatasource = actionCreator<NoDatasource | IndexpatternDatasource
  * fields configuration
  */
 export const requestDatasource = actionCreator<IndexpatternDatasource>('SET_DATASOURCE_REQUEST');
+
+/**
+ * Datasource loading finished successfully.
+ */
 export const datasourceLoaded = actionCreator<void>('SET_DATASOURCE_SUCCESS');
 
 const initialDatasource: DatasourceState = {
