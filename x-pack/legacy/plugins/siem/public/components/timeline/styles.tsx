@@ -10,9 +10,9 @@ import styled, { css } from 'styled-components';
 export const EventsTable = styled.div.attrs({
   className: 'siemEventsTable',
   role: 'table',
-})<{ height: number }>`
-  ${({ height, theme }) => css`
-    height: ${height + 'px'};
+})<{ tableHeight: number }>`
+  ${({ tableHeight, theme }) => css`
+    height: ${tableHeight + 'px'};
     overflow: auto;
     scrollbar-width: thin;
 
@@ -78,16 +78,16 @@ EventsThGroupData.displayName = 'EventsThGroupData';
 export const EventsTh = styled.div.attrs({
   className: 'siemEventsTable__th',
   role: 'columnheader',
-})<{ isDragging?: boolean; position?: string; width?: string }>`
+})<{ isDragging?: boolean; position?: string; colWidth?: string }>`
   align-items: center;
   display: flex;
   min-width: 0;
   position: ${({ position }) => position};
 
-  ${({ width }) =>
-    width &&
+  ${({ colWidth }) =>
+    colWidth &&
     css`
-      flex: 0 0 ${width};
+      flex: 0 0 ${colWidth};
     `}
 `;
 EventsTh.displayName = 'EventsTh';
@@ -174,15 +174,15 @@ EventsTdGroupData.displayName = 'EventsTdGroupData';
 export const EventsTd = styled.div.attrs({
   className: 'siemEventsTable__td',
   role: 'cell',
-})<{ width?: string }>`
+})<{ colWidth?: string }>`
   align-items: center;
   display: flex;
   min-width: 0;
 
-  ${({ width }) =>
-    width &&
+  ${({ colWidth }) =>
+    colWidth &&
     css`
-      flex: 0 0 ${width};
+      flex: 0 0 ${colWidth};
     `}
 `;
 EventsTd.displayName = 'EventsTd';

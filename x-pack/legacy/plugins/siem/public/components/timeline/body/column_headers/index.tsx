@@ -134,11 +134,11 @@ export const ColumnHeaders = React.memo<Props>(
                         <EventsTh
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          colWidth={header.width + 'px'}
                           data-test-subj="draggable-header"
                           innerRef={provided.innerRef}
                           isDragging={snapshot.isDragging}
                           position="relative"
-                          width={header.width + 'px'}
                         >
                           <EventsThContent>
                             <Header

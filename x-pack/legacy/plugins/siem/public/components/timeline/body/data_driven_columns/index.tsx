@@ -29,7 +29,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
     return (
       <EventsTdGroupData data-test-subj="data-driven-columns">
         {columnHeaders.map((header, index) => (
-          <EventsTd key={header.id} width={`${header.width}px`}>
+          <EventsTd colWidth={`${header.width}px`} key={header.id}>
             <EventsTdContent data-test-subj="cell-container">
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,
