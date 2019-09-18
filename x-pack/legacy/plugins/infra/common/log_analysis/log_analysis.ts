@@ -12,10 +12,22 @@ export const jobTypeRT = rt.keyof({
 
 export type JobType = rt.TypeOf<typeof jobTypeRT>;
 
-export const jobStatusRT = rt.keyof({
-  created: null,
-  missing: null,
-  running: null,
-});
+// combines and abstracts job and datafeed status
+export type JobStatus =
+  | 'unknown'
+  | 'missing'
+  | 'initializing'
+  | 'stopped'
+  | 'started'
+  | 'finished'
+  | 'failed';
 
-export type JobStatus = rt.TypeOf<typeof jobStatusRT>;
+export type SetupStatus =
+  | 'initializing' // acquiring job statuses to determine setup status
+  | 'unknown' // job status could not be acquired (failed request etc)
+  | 'required' // jobs are missing
+  | 'pending' // In the process of setting up the module for the first time or retrying, waiting for response
+  | 'succeeded' // setup succeeded, notifying user
+  | 'failed' // setup failed, notifying user
+  | 'hiddenAfterSuccess' // hide the setup screen and we show the results for the first time
+  | 'skipped'; // setup hidden because the module is in a correct state already

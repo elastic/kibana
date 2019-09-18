@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup/steps';
-import { SetupStatus } from '../../../containers/logs/log_analysis';
 
 interface AnalysisSetupContentProps {
   setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
