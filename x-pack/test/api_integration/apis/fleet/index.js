@@ -10,6 +10,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./list_agent'));
     loadTestFile(require.resolve('./enroll_agent'));
     loadTestFile(require.resolve('./agent_checkin'));
+    loadTestFile(require.resolve('./agent_actions'));
     loadTestFile(require.resolve('./get_enrollment_token'));
   });
 }

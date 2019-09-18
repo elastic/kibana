@@ -34,16 +34,27 @@ export const RuntimeAgentEvent = t.interface(
   'AgentEvent'
 );
 
+const RuntimeAgentActionType = t.union([
+  t.literal('DATA_DUMP'),
+  t.literal('RESUME'),
+  t.literal('PAUSE'),
+  t.literal('UNENROLL'),
+]);
+
+export type AgentActionType = t.TypeOf<typeof RuntimeAgentActionType>;
+
+export const RuntimeAgentActionData = t.interface(
+  {
+    type: RuntimeAgentActionType,
+  },
+  'AgentActionData'
+);
+
 export const RuntimeAgentAction = t.intersection([
+  RuntimeAgentActionData,
   t.interface(
     {
       id: t.string,
-      type: t.union([
-        t.literal('DATA_DUMP'),
-        t.literal('RESUME'),
-        t.literal('PAUSE'),
-        t.literal('UNENROLL'),
-      ]),
       created_at: t.string,
     },
     'AgentAction'
