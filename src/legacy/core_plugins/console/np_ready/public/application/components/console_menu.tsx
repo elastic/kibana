@@ -21,6 +21,7 @@ import React, { Component } from 'react';
 
 import {
   EuiGlobalToastList,
+  EuiGlobalToastListToast as Toast,
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
@@ -39,8 +40,8 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
   curlCode: string;
-  toasts: [];
-  toastId: number;
+  toasts: Toast[];
+  toastId: string;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -51,7 +52,7 @@ export class ConsoleMenu extends Component<Props, State> {
       curlCode: '',
       isPopoverOpen: false,
       toasts: [],
-      toastId: 1,
+      toastId: '1',
     };
   }
 
@@ -103,38 +104,23 @@ export class ConsoleMenu extends Component<Props, State> {
     this.props.autoIndent(event);
   };
 
-  getCopyToast = () => {
-    const copyToast = [
-      {
-        title: i18n.translate('console.copyRequestAsCurl', {
-          defaultMessage: 'Request copied as cURL',
-        }),
-        color: 'success',
-      },
-    ];
-
-    const actualToastId = this.state.toastId;
-    this.setState({ toastId: this.state.toastId + 1 });
-
-    return {
-      id: actualToastId,
-      ...copyToast[0],
-    };
-  };
-
   addCopyToast = () => {
-    const toast = this.getCopyToast();
+    const toast: Toast = {
+      id: this.state.toastId,
+      title: i18n.translate('console.consoleMenu.copyRequestAsCurlMessage', {
+        defaultMessage: 'Request copied as cURL',
+      }),
+      color: 'success',
+    };
 
     this.setState({
-      // @ts-ignore
+      toastId: this.state.toastId + 1,
       toasts: this.state.toasts.concat(toast),
     });
   };
 
-  removeCopyToast = (removedToast: any) => {
-    // @ts-ignore
+  removeCopyToast = (removedToast: Toast) => {
     const newToastsArray = this.state.toasts.filter(tst => tst.id !== removedToast.id);
-    // @ts-ignore
     this.setState({ toasts: newToastsArray });
   };
 
