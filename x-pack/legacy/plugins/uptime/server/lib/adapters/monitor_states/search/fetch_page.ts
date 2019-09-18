@@ -12,40 +12,9 @@ import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../commo
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 
-export interface MonitorGroupsPage {
-  monitorGroups: MonitorGroups[];
-  nextPagePagination: CursorPagination | null;
-  prevPagePagination: CursorPagination | null;
-}
-
-export interface MonitorGroups {
-  id: string;
-  groups: MonitorLocCheckGroup[];
-}
-
-export interface MonitorLocCheckGroup {
-  monitorId: string;
-  location: string | null;
-  checkGroup: string;
-  status: 'up' | 'down';
-}
-
-export interface EnrichedPage {
-  items: MonitorSummary[];
-  nextPagePagination: CursorPagination | null;
-  prevPagePagination: CursorPagination | null;
-}
-
-export type MonitorGroupsFetcher = (
-  queryContext: QueryContext,
-  size: number
-) => Promise<MonitorGroupsPage>;
-
-export type MonitorEnricher = (
-  queryContext: QueryContext,
-  checkGroups: string[]
-) => Promise<MonitorSummary[]>;
-
+// Gets a single page of results per the settings in the provided queryContext. These results are very minimal,
+// just monitor IDs and check groups. This takes an optional `MonitorGroupEnricher` that post-processes the minimal
+// data, decorating it appropriately. The function also takes a fetcher, which does all the actual fetching.
 export const fetchPage = async (
   queryContext: QueryContext,
   monitorGroupFetcher: MonitorGroupsFetcher = fetchPageMonitorGroups,
@@ -67,6 +36,8 @@ export const fetchPage = async (
   };
 };
 
+// Fetches the most recent monitor groups for the given page,
+// in the manner demanded by the `queryContext` and return at most `size` results.
 const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   queryContext: QueryContext,
   size: number
@@ -105,6 +76,8 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
 };
 
 // Returns true if the order returned by the ES query matches the requested sort order.
+// This useful to determine if the results need to be reversed from their ES results order.
+// I.E. when navigating backwards using prevPagePagination (CursorDirection.Before) yet using a SortOrder.ASC.
 const searchSortAligned = (pagination: CursorPagination): boolean => {
   if (pagination.cursorDirection === CursorDirection.AFTER) {
     return pagination.sortOrder === SortOrder.ASC;
@@ -112,3 +85,44 @@ const searchSortAligned = (pagination: CursorPagination): boolean => {
     return pagination.sortOrder === SortOrder.DESC;
   }
 };
+
+// Minimal interface representing the most recent set of groups accompanying a MonitorId in a given context.
+export interface MonitorGroups {
+  id: string;
+  groups: MonitorLocCheckGroup[];
+}
+
+// Representation of the data returned when aggregating summary check groups.
+export interface MonitorLocCheckGroup {
+  monitorId: string;
+  location: string | null;
+  checkGroup: string;
+  status: 'up' | 'down';
+}
+
+// Represents a page that has not yet been enriched.
+export interface MonitorGroupsPage {
+  monitorGroups: MonitorGroups[];
+  nextPagePagination: CursorPagination | null;
+  prevPagePagination: CursorPagination | null;
+}
+
+// Representation of a full page of results with pagination data for constructing next/prev links.
+export interface EnrichedPage {
+  items: MonitorSummary[];
+  nextPagePagination: CursorPagination | null;
+  prevPagePagination: CursorPagination | null;
+}
+
+// A function that does the work of matching the minimal set of data for this query, returning just matching fields
+// that are efficient to access while performing the query.
+export type MonitorGroupsFetcher = (
+  queryContext: QueryContext,
+  size: number
+) => Promise<MonitorGroupsPage>;
+
+// A function that takes a set of check groups and returns richer MonitorSummary objects.
+export type MonitorEnricher = (
+  queryContext: QueryContext,
+  checkGroups: string[]
+) => Promise<MonitorSummary[]>;

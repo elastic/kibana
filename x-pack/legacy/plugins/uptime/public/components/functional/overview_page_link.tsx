@@ -19,7 +19,6 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   const [, updateUrlParams] = useUrlParams();
   return (
     <EuiLink
-      // this needs to be base-64, because it could contain a URL
       onClick={() => {
         updateUrlParams({ pagination });
       }}

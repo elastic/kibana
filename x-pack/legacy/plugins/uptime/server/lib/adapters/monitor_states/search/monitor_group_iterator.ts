@@ -26,6 +26,10 @@ export interface ChunkResult {
   searchAfter: any;
 }
 
+// This is the heart of this query in some sense. Since we're pulling 'chunks' using the raw queries that may be full of
+// matches, or may simple be empty results that tell us a to keep looking for more, this class exists to simplify things.
+// The idea is that you can call next() on it and receive the next matching result, even if internally we need to fetch
+// multiple chunks to find that result.
 export class MonitorGroupIterator {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
@@ -48,8 +52,72 @@ export class MonitorGroupIterator {
     this.chunkFetcher = chunkFetcher;
   }
 
-  clone() {
-    return new MonitorGroupIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
+  // Fetch the next matching result.
+  async next(): Promise<MonitorGroups | null> {
+    await this.bufferNext(CHUNK_SIZE);
+
+    const found = this.buffer[this.bufferPos + 1];
+    if (found) {
+      this.bufferPos++;
+      return found;
+    }
+    return null;
+  }
+
+  // Look ahead to see if there are additional results.
+  async peek(): Promise<MonitorGroups | null> {
+    await this.bufferNext(CHUNK_SIZE);
+    return this.buffer[this.bufferPos + 1] || null;
+  }
+
+  // Returns the last item fetched with next(). null if no items fetched with
+  // next or if next has not yet been invoked.
+  current(): MonitorGroups | null {
+    return this.buffer[this.bufferPos] || null;
+  }
+
+  // Attempts to buffer at most `size` number of additional results, stopping when at least one additional
+  // result is buffered or there are no more matching items to be found.
+  async bufferNext(size: number = CHUNK_SIZE): Promise<void> {
+    // The next element is already buffered.
+    if (this.buffer[this.bufferPos + 1]) {
+      return;
+    }
+
+    while (true) {
+      const result = await this.attemptBufferMore(CHUNK_SIZE);
+      if (result.gotHit || !result.hasMore) {
+        return;
+      }
+    }
+  }
+
+  //  Attempts to buffer more results fetching a single chunk.
+  // If trim is set to true, which is the default, it will delete all items in the buffer prior to the current item.
+  // to free up space.
+  async attemptBufferMore(
+    size: number = CHUNK_SIZE
+  ): Promise<{ hasMore: boolean; gotHit: boolean }> {
+    // Trim the buffer to just the current element since we'll be fetching more
+    const current = this.current();
+    // Trim the buffer to free space if we've accumulated a lot of stuff
+    if (current && this.bufferPos > 1000) {
+      this.buffer = [current];
+      this.bufferPos = 0;
+    }
+
+    const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
+    // If we've hit the end of the stream searchAfter will be empty
+
+    results.monitorGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
+    if (results.searchAfter) {
+      this.searchAfter = results.searchAfter;
+    }
+
+    return {
+      gotHit: results.monitorGroups.length > 0,
+      hasMore: !!results.searchAfter,
+    };
   }
 
   // Get a CursorPaginator object that will resume after the current() value.
@@ -68,12 +136,13 @@ export class MonitorGroupIterator {
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
+  // Get a CursorPaginator object that will resume before the current() value.
   async paginationBeforeCurrent(): Promise<CursorPagination | null> {
     const reverseFetcher = await this.reverse();
     return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
   }
 
-  // Returns a copy of this fetcher that goes backwards from the current positon
+  // Returns a copy of this fetcher that goes backwards from the current position
   reverse(): MonitorGroupIterator | null {
     const reverseContext = Object.assign({}, this.queryContext);
     const current = this.current();
@@ -92,64 +161,8 @@ export class MonitorGroupIterator {
       : null;
   }
 
-  // Returns the last item fetched with next(). null if no items fetched with
-  // next or if next has not yet been invoked.
-  current(): MonitorGroups | null {
-    return this.buffer[this.bufferPos] || null;
-  }
-
-  async next(): Promise<MonitorGroups | null> {
-    await this.bufferNext(CHUNK_SIZE, false);
-
-    const found = this.buffer[this.bufferPos + 1];
-    if (found) {
-      this.bufferPos++;
-      return found;
-    }
-    return null;
-  }
-
-  async peek(): Promise<MonitorGroups | null> {
-    await this.bufferNext(CHUNK_SIZE, false);
-    return this.buffer[this.bufferPos + 1] || null;
-  }
-
-  async bufferNext(size: number = CHUNK_SIZE, trim: boolean = true): Promise<void> {
-    // The next element is already buffered.
-    if (this.buffer[this.bufferPos + 1]) {
-      return;
-    }
-
-    while (true) {
-      const result = await this.attemptBufferMore(CHUNK_SIZE, trim);
-      if (result.gotHit || !result.hasMore) {
-        return;
-      }
-    }
-  }
-
-  async attemptBufferMore(
-    size: number = CHUNK_SIZE,
-    trim: boolean = true
-  ): Promise<{ hasMore: boolean; gotHit: boolean }> {
-    // Trim the buffer to just the current element since we'll be fetching more
-    const current = this.current();
-    if (current && trim) {
-      this.buffer = [current];
-      this.bufferPos = 0;
-    }
-
-    const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
-    // If we've hit the end of the stream searchAfter will be empty
-
-    results.monitorGroups.forEach((mig: MonitorGroups) => this.buffer.push(mig));
-    if (results.searchAfter) {
-      this.searchAfter = results.searchAfter;
-    }
-
-    return {
-      gotHit: results.monitorGroups.length > 0,
-      hasMore: !!results.searchAfter,
-    };
+  // Returns a copy of this with a shallow copied buffer. Note that the queryContext is still shared!
+  clone() {
+    return new MonitorGroupIterator(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
 }

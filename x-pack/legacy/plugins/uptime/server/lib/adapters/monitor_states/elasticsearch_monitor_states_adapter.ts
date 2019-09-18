@@ -27,6 +27,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     this.database = database;
   }
 
+  // Gets a page of monitor states.
   public async getMonitorStates(
     request: any,
     dateRangeStart: string,

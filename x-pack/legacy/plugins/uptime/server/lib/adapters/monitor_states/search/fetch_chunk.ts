@@ -9,6 +9,10 @@ import { findPotentialMatches } from './find_potential_matches';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { ChunkFetcher, ChunkResult } from './monitor_group_iterator';
 
+// Fetches a single 'chunk' of data with a single query, then uses a secondary query to filter out erroneous matches.
+// Note that all returned data may be erroneous. If `searchAfter` is returned the caller should invoke this function
+// repeatedly with the new searchAfter value as there may be more matching data in a future chunk. If `searchAfter`
+// is falsey there is no more data to fetch.
 export const fetchChunk: ChunkFetcher = async (
   queryContext: QueryContext,
   searchAfter: any,

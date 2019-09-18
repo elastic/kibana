@@ -9,6 +9,9 @@ import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 
+// This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
+// Note that these check groups may not be the most recent groups for the matching monitor ID! We'll filter those
+// out in the next phase.
 export const findPotentialMatches = async (
   queryContext: QueryContext,
   searchAfter: any,

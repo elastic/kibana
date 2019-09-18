@@ -9,6 +9,8 @@ import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
+// This is the second phase of the query, it determines whether the provided check groups are the latest complete
+// check groups for their asociated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
   monitorIds: string[],
