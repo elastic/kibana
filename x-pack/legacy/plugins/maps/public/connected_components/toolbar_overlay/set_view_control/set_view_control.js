@@ -80,6 +80,7 @@ export class SetViewControl extends Component {
           compressed
         >
           <EuiFieldNumber
+            compressed
             value={value}
             onChange={onChange}
             isInvalid={isInvalid}

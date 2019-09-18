@@ -11,6 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
+import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
@@ -20,6 +21,7 @@ import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } 
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { getTitle } from './lib/helper/get_title';
+import { store } from './state';
 
 export interface UptimeAppColors {
   danger: string;
@@ -136,66 +138,68 @@ const Application = (props: UptimeAppProps) => {
 
   return (
     <I18nContext>
-      <Router basename={routerBasename}>
-        <Route
-          path="/"
-          render={(rootRouteProps: RouteComponentProps) => {
-            return (
-              <ApolloProvider client={client}>
-                <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
-                  <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
-                    <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                      <div>
-                        <EuiFlexGroup
-                          alignItems="center"
-                          justifyContent="spaceBetween"
-                          gutterSize="s"
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiTitle>
-                              <h1>{headingText}</h1>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="s" />
-                        <Switch>
-                          <Route
-                            exact
-                            path="/"
-                            render={routerProps => (
-                              <OverviewPage
-                                basePath={basePath}
-                                logOverviewPageLoad={logOverviewPageLoad}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
-                          />
-                          <Route
-                            path="/monitor/:monitorId/:location?"
-                            render={routerProps => (
-                              <MonitorPage
-                                logMonitorPageLoad={logMonitorPageLoad}
-                                query={client.query}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
-                          />
-                          <Route component={NotFoundPage} />
-                        </Switch>
-                      </div>
-                    </EuiPage>
-                  </UptimeSettingsContext.Provider>
-                </UptimeRefreshContext.Provider>
-              </ApolloProvider>
-            );
-          }}
-        />
-      </Router>
+      <ReduxProvider store={store}>
+        <Router basename={routerBasename}>
+          <Route
+            path="/"
+            render={(rootRouteProps: RouteComponentProps) => {
+              return (
+                <ApolloProvider client={client}>
+                  <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
+                    <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
+                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <div>
+                          <EuiFlexGroup
+                            alignItems="center"
+                            justifyContent="spaceBetween"
+                            gutterSize="s"
+                          >
+                            <EuiFlexItem grow={false}>
+                              <EuiTitle>
+                                <h1>{headingText}</h1>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="s" />
+                          <Switch>
+                            <Route
+                              exact
+                              path="/"
+                              render={routerProps => (
+                                <OverviewPage
+                                  basePath={basePath}
+                                  logOverviewPageLoad={logOverviewPageLoad}
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  {...routerProps}
+                                />
+                              )}
+                            />
+                            <Route
+                              path="/monitor/:monitorId/:location?"
+                              render={routerProps => (
+                                <MonitorPage
+                                  logMonitorPageLoad={logMonitorPageLoad}
+                                  query={client.query}
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  {...routerProps}
+                                />
+                              )}
+                            />
+                            <Route component={NotFoundPage} />
+                          </Switch>
+                        </div>
+                      </EuiPage>
+                    </UptimeSettingsContext.Provider>
+                  </UptimeRefreshContext.Provider>
+                </ApolloProvider>
+              );
+            }}
+          />
+        </Router>
+      </ReduxProvider>
     </I18nContext>
   );
 };

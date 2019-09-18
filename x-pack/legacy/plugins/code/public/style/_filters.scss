@@ -1,8 +1,15 @@
-.codeFilter__group {
-  padding: 0 1rem;
-  margin-top: $euiSizeS;
+.codeFilter__groups {
+  padding: $euiSize;
 }
 
-.codeFilter__title {
-  height: 2.25rem;
+.codeFilter__group {
+  margin-bottom: $euiSizeS;
+}
+
+.codeFilter__group-icon {
+  width: $codeSideBarIndent;
+}
+
+.codeFilter__item {
+  margin-left: $codeSideBarIndent;
 }

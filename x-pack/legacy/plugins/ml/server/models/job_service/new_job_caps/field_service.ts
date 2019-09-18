@@ -30,6 +30,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.IP,
 ];
 
 export function fieldServiceProvider(
