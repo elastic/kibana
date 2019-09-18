@@ -76,6 +76,7 @@ interface State {
   queryDsl: string;
   isCustomEditorOpen: boolean;
   isNewFilter: boolean;
+  isSavedQueryEditorOpen: boolean;
 }
 
 class FilterEditorUI extends Component<Props, State> {
@@ -90,6 +91,7 @@ class FilterEditorUI extends Component<Props, State> {
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
+      isSavedQueryEditorOpen: this.isSavedQueryFilterType(),
       isNewFilter: !props.filter.meta.type,
     };
   }
@@ -134,17 +136,19 @@ class FilterEditorUI extends Component<Props, State> {
                 )}
               </EuiFlexItem>
               <EuiFlexItem>
-                {this.state.isNewFilter ? (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
-                    defaultMessage="Use saved query"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
-                    defaultMessage="Change saved query"
-                  />
-                )}
+                <EuiButtonEmpty size="xs" onClick={this.toggleSavedQueryEditor}>
+                  {this.state.isNewFilter ? (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.tabUseSavedQueryFilterPopupTitle"
+                      defaultMessage="Use saved query"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.tabChangeSavedQueryFilterPopupTitle"
+                      defaultMessage="Change saved query"
+                    />
+                  )}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup direction={'rowReverse'}>
@@ -407,10 +411,20 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ isCustomEditorOpen });
   };
 
+  private toggleSavedQueryEditor = () => {
+    const isSavedQueryEditorOpen = !this.state.isSavedQueryEditorOpen;
+    this.setState({ isSavedQueryEditorOpen });
+  };
+
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
-    return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
+    return !!type && !['phrase', 'phrases', 'range', 'exists', 'savedQuery'].includes(type);
   }
+
+  private isSavedQueryFilterType = () => {
+    const { type } = this.props.filter.meta;
+    return !!type && ['savedQuery'].includes(type);
+  };
 
   private getIndexPatternFromFilter() {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
