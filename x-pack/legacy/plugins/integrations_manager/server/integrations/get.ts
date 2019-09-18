@@ -10,6 +10,8 @@ import { InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
+export { SearchParams } from '../registry';
+
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
