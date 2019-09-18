@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EventsData,
-  LastEventTimeData,
-  TimelineData,
-  TimelineDetailsData,
-} from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { LastEventTimeData, TimelineData, TimelineDetailsData } from '../../graphql/types';
+import { FrameworkRequest } from '../framework';
 export * from './elasticsearch_adapter';
 import {
   EventsAdapter,
@@ -21,13 +16,6 @@ import {
 
 export class Events {
   constructor(private readonly adapter: EventsAdapter) {}
-
-  public async getEvents(
-    req: FrameworkRequest,
-    options: RequestOptionsPaginated
-  ): Promise<EventsData> {
-    return await this.adapter.getEvents(req, options);
-  }
 
   public async getTimelineData(
     req: FrameworkRequest,
