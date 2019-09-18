@@ -39,16 +39,6 @@ export function PointSeriesPageProvider({ getService }) {
       return await testSubjects.setValue(`valueAxisTitle${index}`, title);
     }
 
-    async getValueAxesCount() {
-      const axes = await find.allByCssSelector('.visEditorSidebar__section:contains("Value Axes") > .visEditorSidebar__section');
-      return axes.length;
-    }
-
-    async getSeriesCount() {
-      const series = await find.allByCssSelector('.visEditorSidebar__section:contains("Series") > .visEditorSidebar__section');
-      return series.length;
-    }
-
     async getRightValueAxes() {
       const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
       return axes.length;
@@ -80,34 +70,6 @@ export function PointSeriesPageProvider({ getService }) {
     async setGridValueAxis(axis) {
       log.debug(`setGridValueAxis(${axis})`);
       return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
-    }
-
-    async toggleCollapsibleTitle(title) {
-      const sidebarTitles = await find.allByCssSelector('.visEditorSidebar__collapsibleTitle .visEditorSidebar__collapsibleTitleText');
-      log.debug('found sidebar titles ' + sidebarTitles.length);
-
-      return Promise.all(sidebarTitles.map(async (titleDiv) => {
-        const titleString = await titleDiv.getVisibleText();
-        log.debug('sidebar title ' + titleString);
-
-        if (titleString === title) {
-          log.debug('clicking sidebar title ' + titleString);
-          return titleDiv.click();
-        }
-      }));
-    }
-
-    async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]');
-      await find.setValue('input[ng-model="numberListCntr.getList()[$index]"]', newValue);
-    }
-
-    async setValueAxisPosition(axis, position) {
-      await find.clickByCssSelector(`select#valueAxisPosition${axis} option[value="${position}"]`);
-    }
-
-    async setCategoryAxisPosition(newValue) {
-      await find.clickByCssSelector(`select#categoryAxisPosition option[value="${newValue}"]`);
     }
 
     async setSeriesAxis(series, axis) {

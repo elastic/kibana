@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
 import { TimeRange } from 'src/plugins/data/public';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 
 export enum AGGS_ACTION_KEYS {
   TOUCHED = 'aggsTouched',

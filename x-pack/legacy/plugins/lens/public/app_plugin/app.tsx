@@ -229,6 +229,7 @@ export function App({
             dateRangeTo={
               state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
             }
+            toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}
             savedObjectsClient={savedObjectsClient}
             http={core.http}
