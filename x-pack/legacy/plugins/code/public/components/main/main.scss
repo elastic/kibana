@@ -99,9 +99,6 @@
 }
 
 .euiPanel.code-timeline__commit--root {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   &:not(:first-child) {
     border-top: none;
   }

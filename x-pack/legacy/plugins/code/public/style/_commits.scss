@@ -6,7 +6,11 @@
 
 .commit__actions {
   flex-shrink: 0;
-  margin-left: $euiSizeL;
+  margin-left: $euiSizeXL;
+}
+
+.commit__metadata {
+  margin-bottom: $euiSizeXS;
 }
 
 .commit__diff-link {

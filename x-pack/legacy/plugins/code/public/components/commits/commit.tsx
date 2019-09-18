@@ -8,12 +8,15 @@ import React from 'react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFlexGroup,
   EuiPanel,
   EuiText,
   EuiTextColor,
   EuiCopy,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
 import { MAIN_ROOT } from '../routes';
 import { PathTypes } from '../../common/types';
@@ -65,6 +68,8 @@ interface Props {
 export const Commit = (props: Props) => {
   const { date, commit, repoUri } = props;
   const { message, committer, id } = commit;
+  const [title, ...rawDescription] = message.split('\n');
+  const description = rawDescription.join('\n').trim();
   const commitId = id
     .split('')
     .slice(0, COMMIT_ID_LENGTH)
@@ -72,17 +77,26 @@ export const Commit = (props: Props) => {
 
   return (
     <EuiPanel className="code-timeline__commit--root">
-      <div className="eui-textTruncate">
-        <EuiText size="s">
-          <p className="eui-textTruncate">{message}</p>
-        </EuiText>
-        <EuiText size="xs">
-          <EuiTextColor color="subdued">
-            {committer} · {date}
-          </EuiTextColor>
-        </EuiText>
-      </div>
-      <CommitActions repoUri={repoUri} commitId={commitId} />
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+        <div className="eui-textTruncate">
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
+          <EuiText size="xs" className="commit__metadata">
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.code.commits.committedOnBy"
+                defaultMessage="Committed on {date} by {committer}"
+                values={{ committer, date }}
+              />
+            </EuiTextColor>
+          </EuiText>
+          <EuiText size="m">
+            <p className="eui-textTruncate">{description}</p>
+          </EuiText>
+        </div>
+        <CommitActions repoUri={repoUri} commitId={commitId} />
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

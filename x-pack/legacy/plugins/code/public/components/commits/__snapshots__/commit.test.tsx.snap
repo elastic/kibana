@@ -26,178 +26,207 @@ This is the description",
     <div
       className="euiPanel euiPanel--paddingMedium code-timeline__commit--root"
     >
-      <div
-        className="eui-textTruncate"
-      >
-        <EuiText
-          size="s"
-        >
-          <div
-            className="euiText euiText--small"
-          >
-            <p
-              className="eui-textTruncate"
-            >
-              This is my commit message
-
-This is the description
-            </p>
-          </div>
-        </EuiText>
-        <EuiText
-          size="xs"
-        >
-          <div
-            className="euiText euiText--extraSmall"
-          >
-            <EuiTextColor
-              color="subdued"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                committer
-                 · 
-                10/10/2020
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiText>
-      </div>
-      <CommitActions
-        commitId="4ba67b8"
-        repoUri="github.com/elastic/code"
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
       >
         <div
-          className="commit__actions"
+          className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiCopy
-            afterMessage="Copied"
-            textToCopy="4ba67b8"
+          <div
+            className="eui-textTruncate"
           >
-            <EuiToolTip
-              delay="regular"
-              onMouseOut={[Function]}
-              position="top"
+            <EuiTitle
+              size="xs"
             >
-              <span
-                className="euiToolTipAnchor"
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+              <h4
+                className="euiTitle euiTitle--xsmall"
               >
-                <EuiButtonIcon
-                  aria-label="Copy the full commit ID"
-                  iconType="copyClipboard"
-                  onBlur={[Function]}
-                  onClick={[Function]}
-                  onFocus={[Function]}
+                This is my commit message
+              </h4>
+            </EuiTitle>
+            <EuiText
+              className="commit__metadata"
+              size="xs"
+            >
+              <div
+                className="euiText euiText--extraSmall commit__metadata"
+              >
+                <EuiTextColor
+                  color="subdued"
                 >
-                  <button
-                    aria-label="Copy the full commit ID"
-                    className="euiButtonIcon euiButtonIcon--primary"
-                    onBlur={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    type="button"
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiIcon
-                      aria-hidden="true"
-                      className="euiButtonIcon__icon"
-                      size="m"
-                      type="copyClipboard"
+                    <FormattedMessage
+                      defaultMessage="Committed on {date} by {committer}"
+                      id="xpack.code.commits.committedOnBy"
+                      values={
+                        Object {
+                          "committer": "committer",
+                          "date": "10/10/2020",
+                        }
+                      }
                     >
-                      <EuiIconEmpty
+                      <span>
+                        Committed on 10/10/2020 by committer
+                      </span>
+                    </FormattedMessage>
+                  </span>
+                </EuiTextColor>
+              </div>
+            </EuiText>
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <p
+                  className="eui-textTruncate"
+                >
+                  This is the description
+                </p>
+              </div>
+            </EuiText>
+          </div>
+          <CommitActions
+            commitId="4ba67b8"
+            repoUri="github.com/elastic/code"
+          >
+            <div
+              className="commit__actions"
+            >
+              <EuiCopy
+                afterMessage="Copied"
+                textToCopy="4ba67b8"
+              >
+                <EuiToolTip
+                  delay="regular"
+                  onMouseOut={[Function]}
+                  position="top"
+                >
+                  <span
+                    className="euiToolTipAnchor"
+                    onMouseOut={[Function]}
+                    onMouseOver={[Function]}
+                  >
+                    <EuiButtonIcon
+                      aria-label="Copy the full commit ID"
+                      iconType="copyClipboard"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                    >
+                      <button
+                        aria-label="Copy the full commit ID"
+                        className="euiButtonIcon euiButtonIcon--primary"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          size="m"
+                          type="copyClipboard"
+                        >
+                          <EuiIconEmpty
+                            aria-hidden="true"
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            style={null}
+                          >
+                            <svg
+                              aria-hidden="true"
+                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                              focusable="false"
+                              height={16}
+                              style={null}
+                              viewBox="0 0 16 16"
+                              width={16}
+                              xmlns="http://www.w3.org/2000/svg"
+                            />
+                          </EuiIconEmpty>
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
+                  </span>
+                </EuiToolTip>
+              </EuiCopy>
+              <EuiButtonEmpty
+                aria-label="View the project at this commit"
+                className="commit__diff-link"
+                href="#/github.com/elastic/code/tree/4ba67b8"
+              >
+                <a
+                  aria-label="View the project at this commit"
+                  className="euiButtonEmpty euiButtonEmpty--primary commit__diff-link"
+                  href="#/github.com/elastic/code/tree/4ba67b8"
+                  rel="noreferrer"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      <EuiText
+                        size="s"
+                      >
+                        <div
+                          className="euiText euiText--small"
+                        >
+                          4ba67b8
+                        </div>
+                      </EuiText>
+                    </span>
+                  </span>
+                </a>
+              </EuiButtonEmpty>
+              <EuiButtonIcon
+                aria-label="View the project at this commit"
+                href="#/github.com/elastic/code/tree/4ba67b8"
+                iconType="editorCodeBlock"
+              >
+                <a
+                  aria-label="View the project at this commit"
+                  className="euiButtonIcon euiButtonIcon--primary"
+                  href="#/github.com/elastic/code/tree/4ba67b8"
+                  rel="noreferrer"
+                >
+                  <EuiIcon
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    size="m"
+                    type="editorCodeBlock"
+                  >
+                    <EuiIconEmpty
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      style={null}
+                    >
+                      <svg
                         aria-hidden="true"
                         className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                         focusable="false"
+                        height={16}
                         style={null}
-                      >
-                        <svg
-                          aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
-                    </EuiIcon>
-                  </button>
-                </EuiButtonIcon>
-              </span>
-            </EuiToolTip>
-          </EuiCopy>
-          <EuiButtonEmpty
-            aria-label="View the project at this commit"
-            className="commit__diff-link"
-            href="#/github.com/elastic/code/tree/4ba67b8"
-          >
-            <a
-              aria-label="View the project at this commit"
-              className="euiButtonEmpty euiButtonEmpty--primary commit__diff-link"
-              href="#/github.com/elastic/code/tree/4ba67b8"
-              rel="noreferrer"
-            >
-              <span
-                className="euiButtonEmpty__content"
-              >
-                <span
-                  className="euiButtonEmpty__text"
-                >
-                  <EuiText
-                    size="s"
-                  >
-                    <div
-                      className="euiText euiText--small"
-                    >
-                      4ba67b8
-                    </div>
-                  </EuiText>
-                </span>
-              </span>
-            </a>
-          </EuiButtonEmpty>
-          <EuiButtonIcon
-            aria-label="View the project at this commit"
-            href="#/github.com/elastic/code/tree/4ba67b8"
-            iconType="editorCodeBlock"
-          >
-            <a
-              aria-label="View the project at this commit"
-              className="euiButtonIcon euiButtonIcon--primary"
-              href="#/github.com/elastic/code/tree/4ba67b8"
-              rel="noreferrer"
-            >
-              <EuiIcon
-                aria-hidden="true"
-                className="euiButtonIcon__icon"
-                size="m"
-                type="editorCodeBlock"
-              >
-                <EuiIconEmpty
-                  aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  style={null}
-                >
-                  <svg
-                    aria-hidden="true"
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  />
-                </EuiIconEmpty>
-              </EuiIcon>
-            </a>
-          </EuiButtonIcon>
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </EuiIconEmpty>
+                  </EuiIcon>
+                </a>
+              </EuiButtonIcon>
+            </div>
+          </CommitActions>
         </div>
-      </CommitActions>
+      </EuiFlexGroup>
     </div>
   </EuiPanel>
 </Commit>

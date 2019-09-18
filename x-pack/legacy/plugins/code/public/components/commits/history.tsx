@@ -41,7 +41,7 @@ const PageButtons = (props: { loading?: boolean; disabled: boolean; onClick: () 
 );
 
 const commitDateFormatMap: { [key: string]: string } = {
-  en: 'MMMM Do, YYYY',
+  en: 'MMM Do, YYYY',
   'zh-cn': 'YYYY年MoDo',
 };
 
