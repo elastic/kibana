@@ -5,11 +5,56 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiPanel,
+  EuiText,
+  EuiTextColor,
+  EuiCopy,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CommitInfo } from '../../../model/commit';
-import { CommitLink } from '../diff_page/commit_link';
+import { MAIN_ROOT } from '../routes';
+import { PathTypes } from '../../common/types';
 
 const COMMIT_ID_LENGTH = 8;
+
+interface ActionProps {
+  repoUri: string;
+  commitId: string;
+}
+
+const copyLabel = i18n.translate('xpack.code.commits.copyCommitSha', {
+  defaultMessage: 'Copy the full commit ID',
+});
+const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLink', {
+  defaultMessage: 'View the project at this commit',
+});
+
+const CommitActions = ({ commitId, repoUri }: ActionProps) => {
+  const revisionUri =
+    '#' +
+    MAIN_ROOT.replace(/:pathType\(.*\)/, PathTypes.tree)
+      .replace(':resource/:org/:repo', repoUri)
+      .replace(':revision', commitId);
+
+  return (
+    <div className="commit__actions">
+      <EuiCopy textToCopy={commitId}>
+        {copy => <EuiButtonIcon aria-label={copyLabel} onClick={copy} iconType="copyClipboard" />}
+      </EuiCopy>
+      <EuiButtonEmpty
+        className="commit__diff-link"
+        href={revisionUri}
+        aria-label={revisionLinkLabel}
+      >
+        <EuiText size="s">{commitId}</EuiText>
+      </EuiButtonEmpty>
+      <EuiButtonIcon href={revisionUri} aria-label={revisionLinkLabel} iconType="editorCodeBlock" />
+    </div>
+  );
+};
 
 interface Props {
   commit: CommitInfo;
@@ -37,9 +82,7 @@ export const Commit = (props: Props) => {
           </EuiTextColor>
         </EuiText>
       </div>
-      <div className="code-commit-id">
-        <CommitLink repoUri={repoUri} commit={commitId} />
-      </div>
+      <CommitActions repoUri={repoUri} commitId={commitId} />
     </EuiPanel>
   );
 };
