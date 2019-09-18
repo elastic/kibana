@@ -39,7 +39,12 @@ function SwitchParamEditor({
 }: SwitchParamEditorProps) {
   return (
     <div className="visEditorSidebar__aggParamFormRow">
-      <EuiToolTip content={displayToolTip} delay="long" position="right">
+      <EuiToolTip
+        content={displayToolTip}
+        delay="long"
+        position="right"
+        anchorClassName="eui-displayBlock"
+      >
         <EuiSwitch
           label={displayLabel}
           checked={value}

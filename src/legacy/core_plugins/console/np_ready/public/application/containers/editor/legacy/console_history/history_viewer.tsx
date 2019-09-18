@@ -21,14 +21,15 @@ import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
-import { Settings } from '../../../../../services';
+import { DevToolsSettings } from '../../../../../services';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 // @ts-ignore
 import SenseEditor from '../../../../../../../public/quarantined/src/sense_editor/editor';
+import { applyCurrentSettings } from '../console_editor/apply_editor_settings';
 
 interface Props {
-  settings: Settings;
+  settings: DevToolsSettings;
   req: any | null;
   ResizeChecker: any;
 }
@@ -43,9 +44,12 @@ export function HistoryViewer({ settings, ResizeChecker, req }: Props) {
     viewer.renderer.setShowPrintMargin(false);
     viewer.$blockScrolling = Infinity;
     const unsubscribe = subscribeResizeChecker(ResizeChecker, divRef.current!, viewer);
-    settings.applyCurrentSettings(viewer);
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    applyCurrentSettings(viewerRef.current!, settings);
+  }, [settings]);
 
   if (viewerRef.current) {
     const { current: viewer } = viewerRef;

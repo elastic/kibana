@@ -100,6 +100,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -109,6 +110,7 @@ describe('QueryBarTopRowTopRow', () => {
         intl={null as any}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
       />
     );
 
@@ -121,6 +123,7 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -131,6 +134,7 @@ describe('QueryBarTopRowTopRow', () => {
         intl={null as any}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
       />
     );
 
@@ -142,9 +146,11 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -160,9 +166,11 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -179,9 +187,11 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}
@@ -201,10 +211,12 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -223,10 +235,12 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -246,9 +260,11 @@ describe('QueryBarTopRowTopRow', () => {
       <QueryBarTopRow.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
+        http={startMock.http}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}

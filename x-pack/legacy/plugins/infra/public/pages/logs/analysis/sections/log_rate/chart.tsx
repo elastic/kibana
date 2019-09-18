@@ -30,15 +30,11 @@ const lineSeriesColour = 'rgb(49, 133, 252)';
 
 interface Props {
   data: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
 }
 
-export const ChartView = ({ data, timeRange }: Props) => {
-  const showModelBoundsLabel = i18n.translate(
-    'xpack.infra.logs.analysis.logRateSectionModelBoundsCheckboxLabel',
-    { defaultMessage: 'Show model bounds' }
-  );
-
+export const ChartView = ({ data, setTimeRange, timeRange }: Props) => {
   const { areaSeries, lineSeries, anomalySeries } = useLogEntryRateGraphData({ data });
 
   const dateFormatter = useMemo(
@@ -55,15 +51,26 @@ export const ChartView = ({ data, timeRange }: Props) => {
 
   const [dateFormat] = useKibanaUiSetting('dateFormat');
 
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (tooltipData: TooltipValue) =>
+  const tooltipProps = useMemo(
+    () => ({
+      headerFormatter: (tooltipData: TooltipValue) =>
         moment(tooltipData.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
-      [dateFormat]
-    ),
-  };
+    }),
+    [dateFormat]
+  );
 
   const [isShowingModelBounds, setIsShowingModelBounds] = useState<boolean>(true);
+
+  const handleBrushEnd = useCallback(
+    (startTime: number, endTime: number) => {
+      setTimeRange({
+        endTime,
+        startTime,
+      });
+    },
+    [setTimeRange]
+  );
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -172,6 +179,7 @@ export const ChartView = ({ data, timeRange }: Props) => {
             customSeriesColors={!isDarkMode() ? getColorsMap('red', anomalySpecId) : undefined}
           />
           <Settings
+            onBrushEnd={handleBrushEnd}
             tooltip={tooltipProps}
             theme={getChartTheme()}
             xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
@@ -181,3 +189,8 @@ export const ChartView = ({ data, timeRange }: Props) => {
     </>
   );
 };
+
+const showModelBoundsLabel = i18n.translate(
+  'xpack.infra.logs.analysis.logRateSectionModelBoundsCheckboxLabel',
+  { defaultMessage: 'Show model bounds' }
+);

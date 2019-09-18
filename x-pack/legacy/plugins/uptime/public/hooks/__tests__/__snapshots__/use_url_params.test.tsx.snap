@@ -5,7 +5,7 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
   hook={[Function]}
 >
   <div>
-    {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-19d","dateRangeEnd":"now-1m","search":"","selectedPingStatus":"down"}
+    {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-19d","dateRangeEnd":"now-1m","filters":"","search":"","selectedPingStatus":"down","statusFilter":""}
   </div>
   <button
     id="setUrlParams"
