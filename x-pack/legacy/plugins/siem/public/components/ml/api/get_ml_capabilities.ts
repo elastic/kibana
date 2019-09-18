@@ -25,7 +25,8 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  signal: AbortSignal
 ): Promise<MlCapabilities> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
@@ -37,6 +38,7 @@ export const getMlCapabilities = async (
       'kbn-xsrf': kbnVersion,
       ...headers,
     },
+    signal,
   });
   await throwIfNotOk(response);
   return await response.json();

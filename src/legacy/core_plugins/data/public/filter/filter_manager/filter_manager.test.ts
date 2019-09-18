@@ -64,7 +64,10 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as IndexPatterns, setupMock.uiSettings);
+    filterManager = new FilterManager(
+      (indexPatterns as unknown) as IndexPatterns,
+      setupMock.uiSettings
+    );
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.
