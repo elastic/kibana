@@ -31,7 +31,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { Schemas } from '../visualize/loader/pipeline_helpers/build_pipeline';
 import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
-import { AggGroupNames } from './editors/default/agg_groups';
+import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { IndexPattern } from '../../../core_plugins/data/public';
 
 function removeParentAggs(obj: any) {
