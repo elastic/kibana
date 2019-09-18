@@ -13,6 +13,6 @@ const NUM_MICROSECONDS_IN_MILLISECOND = 1000;
 export const convertMicrosecondsToMilliseconds = (
   microseconds: number | null | undefined
 ): number | null => {
-  if (microseconds === null || microseconds === undefined) return null;
+  if (!microseconds && microseconds !== 0) return null;
   return Math.floor(microseconds / NUM_MICROSECONDS_IN_MILLISECOND);
 };

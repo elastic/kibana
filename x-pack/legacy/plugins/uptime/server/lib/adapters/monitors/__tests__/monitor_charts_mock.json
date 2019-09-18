@@ -7,736 +7,138 @@
     "skipped": 0,
     "failed": 0
   },
-  "hits": {
-    "total": {
-      "value": 116,
-      "relation": "eq"
-    },
-    "max_score": null,
-    "hits": []
-  },
   "aggregations": {
     "timeseries": {
       "buckets": [
         {
-          "key_as_string": "2019-09-13T21:52:48.000Z",
           "key": 1568411568000,
           "doc_count": 4,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 2,
-                "duration": {
-                  "count": 2,
-                  "min": 4234642,
-                  "max": 5082876,
-                  "avg": 4658759,
-                  "sum": 9317518
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 2
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-west-4",
-                "doc_count": 2,
-                "duration": {
-                  "count": 2,
-                  "min": 7590077,
-                  "max": 9766722,
-                  "avg": 8678399.5,
-                  "sum": 17356799
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 2
-                    }
-                  ]
-                }
-              }
+              { "key": "us-east-2", "duration": { "avg": 4658759 } },
+              { "key": "us-west-4", "duration": { "avg": 8678399.5 } }
             ]
           }
         },
+        { "key": 1568411604000, "doc_count": 0, "location": { "buckets": [] } },
         {
-          "key_as_string": "2019-09-13T21:53:24.000Z",
-          "key": 1568411604000,
-          "doc_count": 0,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": []
-          }
-        },
-        {
-          "key_as_string": "2019-09-13T21:54:00.000Z",
           "key": 1568411640000,
           "doc_count": 8,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 41055,
-                  "max": 774368,
-                  "avg": 481780,
-                  "sum": 1927120
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 244682,
-                  "max": 1295646,
-                  "avg": 685056.5,
-                  "sum": 2740226
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
+              { "key": "us-east-2", "duration": { "avg": 481780 } },
+              { "key": "us-west-4", "duration": { "avg": 685056.5 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T21:56:24.000Z",
           "key": 1568411784000,
           "doc_count": 8,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 67270,
-                  "max": 949580,
-                  "avg": 469206.5,
-                  "sum": 1876826
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 100937,
-                  "max": 536286,
-                  "avg": 261406.5,
-                  "sum": 1045626
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
+              { "key": "us-east-2", "duration": { "avg": 469206.5 } },
+              { "key": "us-west-4", "duration": { "avg": 261406.5 } }
             ]
           }
         },
+        { "key": 1568411820000, "doc_count": 0, "location": { "buckets": [] } },
+        { "key": 1568411856000, "doc_count": 0, "location": { "buckets": [] } },
+        { "key": 1568411892000, "doc_count": 0, "location": { "buckets": [] } },
         {
-          "key_as_string": "2019-09-13T21:57:00.000Z",
-          "key": 1568411820000,
-          "doc_count": 0,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": []
-          }
-        },
-        {
-          "key_as_string": "2019-09-13T21:57:36.000Z",
-          "key": 1568411856000,
-          "doc_count": 0,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": []
-          }
-        },
-        {
-          "key_as_string": "2019-09-13T21:58:12.000Z",
-          "key": 1568411892000,
-          "doc_count": 0,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": []
-          }
-        },
-        {
-          "key_as_string": "2019-09-13T21:58:48.000Z",
           "key": 1568411928000,
           "doc_count": 4,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 974768,
-                  "max": 3182554,
-                  "avg": 1999309.6666667,
-                  "sum": 5997929
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-east-2",
-                "doc_count": 1,
-                "duration": {
-                  "count": 1,
-                  "min": 645563,
-                  "max": 645563,
-                  "avg": 645563,
-                  "sum": 645563
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 1
-                    }
-                  ]
-                }
-              }
+              { "key": "us-west-4", "duration": { "avg": 1999309.6666667 } },
+              { "key": "us-east-2", "duration": { "avg": 645563 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T21:59:24.000Z",
           "key": 1568411964000,
           "doc_count": 7,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 2059996,
-                  "max": 3301463,
-                  "avg": 2499799.25,
-                  "sum": 9999197
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-east-2",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 451624,
-                  "max": 2364962,
-                  "avg": 1513896.6666667,
-                  "sum": 4541690
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              }
+              { "key": "us-west-4", "duration": { "avg": 2499799.25 } },
+              { "key": "us-east-2", "duration": { "avg": 1513896.6666667 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:00:36.000Z",
           "key": 1568412036000,
           "doc_count": 5,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 853687,
-                  "max": 2913064,
-                  "avg": 1876155.3333333,
-                  "sum": 5628466
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-east-2",
-                "doc_count": 2,
-                "duration": {
-                  "count": 2,
-                  "min": 1405180,
-                  "max": 1617638,
-                  "avg": 1511409,
-                  "sum": 3022818
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 2
-                    }
-                  ]
-                }
-              }
+              { "key": "us-west-4", "duration": { "avg": 1876155.3333333 } },
+              { "key": "us-east-2", "duration": { "avg": 1511409 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:01:12.000Z",
           "key": 1568412072000,
           "doc_count": 4,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 1263411,
-                  "max": 1703080,
-                  "avg": 1490845.75,
-                  "sum": 5963383
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1490845.75 } }] }
         },
         {
-          "key_as_string": "2019-09-13T22:01:48.000Z",
           "key": 1568412108000,
           "doc_count": 3,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 987340,
-                  "max": 3075756,
-                  "avg": 2365962.6666667,
-                  "sum": 7097888
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              }
-            ]
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 2365962.6666667 } }]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:02:24.000Z",
           "key": 1568412144000,
           "doc_count": 4,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 1133106,
-                  "max": 2475448,
-                  "avg": 1788901.25,
-                  "sum": 7155605
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1788901.25 } }] }
         },
         {
-          "key_as_string": "2019-09-13T22:03:00.000Z",
           "key": 1568412180000,
           "doc_count": 4,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 813643,
-                  "max": 2591944,
-                  "avg": 1773177.5,
-                  "sum": 7092710
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1773177.5 } }] }
         },
         {
-          "key_as_string": "2019-09-13T22:03:36.000Z",
           "key": 1568412216000,
           "doc_count": 3,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 2771346,
-                  "max": 3460321,
-                  "avg": 3086220.3333333,
-                  "sum": 9258661
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              }
-            ]
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 3086220.3333333 } }]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:04:12.000Z",
           "key": 1568412252000,
           "doc_count": 1,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 1,
-                "duration": {
-                  "count": 1,
-                  "min": 1020528,
-                  "max": 1020528,
-                  "avg": 1020528,
-                  "sum": 1020528
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 1
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1020528 } }] }
         },
         {
-          "key_as_string": "2019-09-13T22:04:48.000Z",
           "key": 1568412288000,
           "doc_count": 3,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-west-4",
-                "doc_count": 3,
-                "duration": {
-                  "count": 3,
-                  "min": 501710,
-                  "max": 3005616,
-                  "avg": 1643963.3333333,
-                  "sum": 4931890
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 3
-                    }
-                  ]
-                }
-              }
-            ]
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 1643963.3333333 } }]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:05:24.000Z",
           "key": 1568412324000,
           "doc_count": 8,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 47711,
-                  "max": 3007672,
-                  "avg": 1804116,
-                  "sum": 7216464
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 186467,
-                  "max": 3008398,
-                  "avg": 1799630,
-                  "sum": 7198520
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
+              { "key": "us-east-2", "duration": { "avg": 1804116 } },
+              { "key": "us-west-4", "duration": { "avg": 1799630 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:07:12.000Z",
           "key": 1568412432000,
           "doc_count": 8,
           "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
             "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 1290710,
-                  "max": 2784640,
-                  "avg": 1972483.25,
-                  "sum": 7889933
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              },
-              {
-                "key": "us-west-4",
-                "doc_count": 4,
-                "duration": {
-                  "count": 4,
-                  "min": 344397,
-                  "max": 2691825,
-                  "avg": 1543307.5,
-                  "sum": 6173230
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 4
-                    }
-                  ]
-                }
-              }
+              { "key": "us-east-2", "duration": { "avg": 1972483.25 } },
+              { "key": "us-west-4", "duration": { "avg": 1543307.5 } }
             ]
           }
         },
         {
-          "key_as_string": "2019-09-13T22:07:48.000Z",
           "key": 1568412468000,
           "doc_count": 1,
-          "location": {
-            "doc_count_error_upper_bound": 0,
-            "sum_other_doc_count": 0,
-            "buckets": [
-              {
-                "key": "us-east-2",
-                "doc_count": 1,
-                "duration": {
-                  "count": 1,
-                  "min": 1020490,
-                  "max": 1020490,
-                  "avg": 1020490,
-                  "sum": 1020490
-                },
-                "status": {
-                  "doc_count_error_upper_bound": 0,
-                  "sum_other_doc_count": 0,
-                  "buckets": [
-                    {
-                      "key": "up",
-                      "doc_count": 1
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "location": { "buckets": [{ "key": "us-east-2", "duration": { "avg": 1020490 } }] }
         }
       ]
     }
