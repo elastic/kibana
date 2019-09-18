@@ -8,10 +8,10 @@ import { registerRoutes } from './server/routes/api/register_routes';
 import { Core, Plugins } from './shim';
 
 export class Plugin {
-  public start(core: Core, plugins: Plugins): void {
+  public start(core: Core, plugins: Plugins, isSlmEnabled: boolean): void {
     const router = core.http.createRouter(API_BASE_PATH);
 
     // Register routes
-    registerRoutes(router, plugins);
+    registerRoutes(router, plugins, isSlmEnabled);
   }
 }

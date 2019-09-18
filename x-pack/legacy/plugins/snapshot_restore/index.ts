@@ -19,14 +19,31 @@ export function snapshotRestore(kibana: any) {
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/app/index.scss'),
       managementSections: ['plugins/snapshot_restore'],
+      injectDefaultVars(server: Legacy.Server) {
+        const config = server.config();
+        return {
+          slmUiEnabled: config.get('xpack.snapshot_restore.slm_ui.enabled'),
+        };
+      },
+    },
+    config(Joi: any) {
+      return Joi.object({
+        slm_ui: Joi.object({
+          enabled: Joi.boolean().default(true),
+        }).default(),
+
+        enabled: Joi.boolean().default(true),
+      }).default();
     },
     init(server: Legacy.Server) {
       const { core, plugins } = createShim(server, PLUGIN.ID);
       const { i18n } = core;
       const snapshotRestorePlugin = new SnapshotRestorePlugin();
+      const config = server.config();
+      const isSlmEnabled = config.get('xpack.snapshot_restore.slm_ui.enabled') as boolean;
 
       // Start plugin
-      snapshotRestorePlugin.start(core, plugins);
+      snapshotRestorePlugin.start(core, plugins, isSlmEnabled);
 
       // Register license checker
       plugins.license.registerLicenseChecker(

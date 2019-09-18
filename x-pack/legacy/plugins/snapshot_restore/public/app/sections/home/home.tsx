@@ -7,6 +7,8 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
+import chrome from 'ui/chrome';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -46,6 +48,8 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     },
   } = useAppDependencies();
 
+  const slmUiEnabled = chrome.getInjected('slmUiEnabled');
+
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
@@ -69,15 +73,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'policies',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.policiesTabTitle"
-          defaultMessage="Policies"
-        />
-      ),
-    },
-    {
       id: 'restore_status',
       name: (
         <FormattedMessage
@@ -87,6 +82,18 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
   ];
+
+  if (slmUiEnabled) {
+    tabs.splice(2, 0, {
+      id: 'policies',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`${BASE_PATH}/${newSection}`);
